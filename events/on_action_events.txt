@@ -1465,15 +1465,20 @@ country_event = {
 			is_primitive = no
 			NOR = {
 				is_country_type = tiyanki
+				is_country_type = tiyanki_garrison
 				is_country_type = neutral_faction
 				is_country_type = faction
 				is_country_type = pirate
 				#is_country_type = nomad #triggered in a special case event
 				is_country_type = amoeba
+				is_country_type = amoeba_borderless
+				is_country_type = amoeba_garrison
 				is_country_type = crystal
 				is_country_type = drone
 				is_country_type = cloud
 				is_country_type = enclave
+				has_country_flag = crystal_country
+				has_country_flag = drone_country
 				has_relation_flag = { flag = AbandonedRefugees who = root }
 			}
 		}
@@ -3612,13 +3617,18 @@ country_event = {
 			is_primitive = no
 			NOR = {
 				is_country_type = tiyanki
+				is_country_type = tiyanki_garrison
 				is_country_type = neutral_faction
 				is_country_type = faction
 				is_country_type = pirate
 				is_country_type = amoeba
+				is_country_type = amoeba_borderless
+				is_country_type = amoeba_garrison
 				is_country_type = crystal
 				is_country_type = drone
 				is_country_type = cloud
+				has_country_flag = crystal_country
+				has_country_flag = drone_country
 				has_relation_flag = { flag = AbandonedRefugees who = root }
 			}
 		}
@@ -5214,9 +5224,15 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		FROM = { is_country_type = amoeba }
+		FROM = {
+			OR = {
+				is_country_type = amoeba
+				is_country_type = amoeba_borderless
+				is_country_type = amoeba_garrison
+			}
+		}
 		is_country_type = default
-	#	is_ai = no
+#		is_ai = no
 		NOT = { has_country_flag = amoeba_encountered }
 	}
 
@@ -5256,7 +5272,12 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		FROM = { is_country_type = crystal }
+		FROM = {
+			OR = {
+				is_country_type = crystal
+				has_country_flag = crystal_country
+			}
+		}
 		is_country_type = default
 	#	is_ai = no
 		NOT = { has_country_flag = crystal_encountered }
@@ -5298,7 +5319,12 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		FROM = { is_country_type = drone }
+		FROM = {
+			OR = {
+				is_country_type = drone
+				has_country_flag = drone_country
+			}
+		}
 		is_country_type = default
 	#	is_ai = no
 		NOT = { has_country_flag = drone_encountered }
@@ -5382,7 +5408,12 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		FROM = { is_country_type = tiyanki }
+		FROM = {
+			OR = {
+				is_country_type = tiyanki
+				is_country_type = tiyanki_garrison
+			}
+		}
 		is_country_type = default
 	#	is_ai = no
 		NOT = { has_country_flag = tiyanki_encountered }
@@ -6919,7 +6950,7 @@ event = {
 		log = "action.64"
         every_playable_country = {
             limit = {
-                num_species > 1
+                num_unique_species > 1
                 any_owned_species = {
                     has_citizenship_type = {
 						type = citizenship_assimilation
@@ -6927,7 +6958,260 @@ event = {
                     }
                 }
             }
-    		log = "action.64.epc"
+			log = "action.64.epc"
+
+			if = { # ascended synths
+				limit = {
+					NOT = { has_country_flag = synthetic_empire }
+				}
+				every_owned_species = {
+					limit = {
+						has_citizenship_type = {
+							type = citizenship_assimilation
+							country = prev
+						}
+					}
+					if = { # assimilator empire or cyborg empire
+						limit = {
+							prev = {
+								OR = {
+									has_country_flag = flesh_weakened
+									AND = {
+										has_authority = auth_machine_intelligence
+										has_civic = civic_machine_assimilator
+									}
+								}
+							}
+						}
+						if = {
+							limit = { NOT = { has_trait = trait_cybernetic } }
+							if = {
+								limit = {
+									has_trait = trait_hive_mind
+									has_trait = trait_self_modified
+								}
+								modify_species = {
+									species = this
+									add_trait = trait_cybernetic
+									add_traits_at_start_of_list = yes
+									remove_trait = trait_hive_mind
+									remove_trait = trait_self_modified
+									change_scoped_species = no
+
+									effect = {
+										set_timed_species_flag = {
+											flag = assimilation_species_of_species@prev
+											days = 30
+										}
+										set_timed_species_flag = {
+											flag = assimilation_species_of_empire@prevprev
+											days = 30
+										}
+									}
+								}
+							}
+							else_if = {
+								limit = {
+									has_trait = trait_hive_mind
+								}
+								modify_species = {
+									species = this
+									add_trait = trait_cybernetic
+									add_traits_at_start_of_list = yes
+									remove_trait = trait_hive_mind
+									change_scoped_species = no
+
+									effect = {
+										set_timed_species_flag = {
+											flag = assimilation_species_of_species@prev
+											days = 30
+										}
+										set_timed_species_flag = {
+											flag = assimilation_species_of_empire@prevprev
+											days = 30
+										}
+									}
+								}
+							}
+							else_if = {
+								limit = {
+									has_trait = trait_self_modified
+								}
+								modify_species = {
+									species = this
+									add_trait = trait_cybernetic
+									add_traits_at_start_of_list = yes
+									remove_trait = trait_self_modified
+									change_scoped_species = no
+
+									effect = {
+										set_timed_species_flag = {
+											flag = assimilation_species_of_species@prev
+											days = 30
+										}
+										set_timed_species_flag = {
+											flag = assimilation_species_of_empire@prevprev
+											days = 30
+										}
+									}
+								}
+							}
+							else = {
+								modify_species = {
+									species = this
+									add_trait = trait_cybernetic
+									add_traits_at_start_of_list = yes
+									change_scoped_species = no
+
+									effect = {
+										set_timed_species_flag = {
+											flag = assimilation_species_of_species@prev
+											days = 30
+										}
+										set_timed_species_flag = {
+											flag = assimilation_species_of_empire@prevprev
+											days = 30
+										}
+									}
+								}
+							}
+						}
+					}
+					else_if = { # hive mind
+						limit = {
+							prev = {
+								has_authority = auth_hive_mind
+								NOT = { has_civic = civic_hive_devouring_swarm }
+							}
+						}
+						if = {
+							limit = {
+								has_trait = trait_self_modified
+							}
+							modify_species = {
+								species = this
+								add_trait = trait_hive_mind
+								remove_trait = trait_self_modified
+								change_scoped_species = no
+
+								effect = {
+									set_timed_species_flag = {
+										flag = assimilation_species_of_species@prev
+										days = 30
+									}
+									set_timed_species_flag = {
+										flag = assimilation_species_of_empire@prevprev
+										days = 30
+									}
+								}
+							}
+						}
+						else = {
+							modify_species = {
+								species = this
+								add_trait = trait_hive_mind
+								change_scoped_species = no
+
+								effect = {
+									set_timed_species_flag = {
+										flag = assimilation_species_of_species@prev
+										days = 30
+									}
+									set_timed_species_flag = {
+										flag = assimilation_species_of_empire@prevprev
+										days = 30
+									}
+								}
+							}
+						}
+					}
+					else_if = {
+						limit = {
+							prev = {
+								NOR = {
+									has_ethic = ethic_gestalt_consciousness
+									has_country_flag = synthetic_empire
+									has_country_flag = flesh_weakened
+								}
+							}
+							has_trait = trait_hive_mind
+						}
+						modify_species = {
+							species = this
+							remove_trait = trait_hive_mind
+							change_scoped_species = no
+
+							effect = {
+								set_timed_species_flag = {
+									flag = assimilation_species_of_species@prev
+									days = 30
+								}
+								set_timed_species_flag = {
+									flag = assimilation_species_of_empire@prevprev
+									days = 30
+								}
+							}
+						}
+					}
+					else_if = { #### Psionic Assimilation ADD OTHER RANDOM OPTIONS TOO
+						limit = {
+							prev = {
+								has_ascension_perk = ap_transcendence
+							}
+						}
+						if = {
+							limit = {
+								NOR = {
+									has_trait = trait_psionic
+									has_trait = trait_latent_psionic
+								}
+							}
+							modify_species = {
+								species = this
+								add_trait = trait_psionic
+								add_traits_at_start_of_list = yes
+								change_scoped_species = no
+
+								effect = {
+									set_timed_species_flag = {
+										flag = assimilation_species_of_species@prev
+										days = 30
+									}
+									set_timed_species_flag = {
+										flag = assimilation_species_of_empire@prevprev
+										days = 30
+									}
+								}
+							}
+						}
+						else_if = {
+							limit = {
+								NOT = { has_trait = trait_psionic}
+								has_trait = trait_latent_psionic
+							}
+							modify_species = {
+								species = this
+								remove_trait = trait_latent_psionic
+								add_trait = trait_psionic
+								add_traits_at_start_of_list = yes
+								change_scoped_species = no
+
+								effect = {
+									set_timed_species_flag = {
+										flag = assimilation_species_of_species@prev
+										days = 30
+									}
+									set_timed_species_flag = {
+										flag = assimilation_species_of_empire@prevprev
+										days = 30
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
             every_owned_planet = {
                 planet_event = { id = action.65 }
             }
@@ -6936,14 +7220,13 @@ event = {
 }
 
 # Assimilate Pops
-# Ariphaos todo: Make cybernetics exclusive with psionics?
 planet_event = {
 	id = action.65
 	hide_window = yes
 	is_triggered_only = yes
 
 	trigger = {
-		any_owned_pop = {
+		any_owned_species = {
 			has_citizenship_type = {
 				type = citizenship_assimilation
 				country = root.owner
@@ -6954,497 +7237,77 @@ planet_event = {
 	immediate = {
 		random_list = {
 			1 = { # 3 pops
+				set_variable = {
+					which = assimilation_counter
+					value = 3
+				}
 				while = {
 					count = 3
 					limit = {
-						any_owned_pop = {
+						any_owned_species = {
 							has_citizenship_type = {
 								type = citizenship_assimilation
 								country = root.owner
 							}
 						}
-					}
-					random_owned_pop = {
-						limit = {
-							has_citizenship_type = {
-								type = citizenship_assimilation
-								country = root.owner
-							}
-						}
-
-						if = { # assimilator empire
-							limit = {
-								root.owner = {
-									has_authority = auth_machine_intelligence
-									has_civic = civic_machine_assimilator
-								}
-							}
-							if = {
-								limit = { NOT = { has_trait = trait_cybernetic } }
-								modify_species = {
-									species = this
-									add_trait = trait_cybernetic
-									add_traits_at_start_of_list = yes
-									change_scoped_species = yes # change only this pop's species
-								}
-								remove_hive_minded = yes # scripted effect
-								remove_culture_shock = yes
-								remove_self_modified = yes # scripted effect
-								root.owner = { generate_cyborg_treats = yes } # scripted effect
-							}
-						}
-						else_if = { # hive mind
-							limit = {
-								root.owner = {
-									has_authority = auth_hive_mind
-									NOT = { has_civic = civic_hive_devouring_swarm }
-								}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_hive_mind
-								add_traits_at_start_of_list = yes
-								#change_scoped_species = no
-							}
-							remove_culture_shock = yes
-							remove_self_modified = yes # scripted effect
-						}
-						else_if = { # ascended synths
-							limit = {
-								root.owner = {
-									has_country_flag = synthetic_empire
-								}
-							}
-							kill_pop = yes
-							root = {
-								create_pop = {
-									species = root.owner
-									ethos = root.owner
-								}
-							}
-						}
-						else_if = { # cyborg empire
-							limit = {
-								root.owner = {
-									has_country_flag = flesh_weakened
-								}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_cybernetic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-							remove_hive_minded = yes
-							remove_culture_shock = yes
-							remove_self_modified = yes # scripted effect
-						}
-						else_if = {
-							limit = {
-								root.owner = {
-									NOR = {
-										has_ethic = ethic_gestalt_consciousness
-										has_country_flag = synthetic_empire
-										has_country_flag = flesh_weakened
-									}
-								}
-								has_trait = trait_hive_mind
-							}
-							modify_species = {
-								species = this
-								remove_trait = trait_hive_mind
-								change_scoped_species = yes
-								# change only this pop's species
-							}
-						}
-						else_if = { #### Psionic Assimilation ADD OTHER RANDOM OPTIONS TOO
-							limit = {
-								root.owner = {
-									has_ascension_perk = ap_transcendence
-								}
-								NOR = {
-									has_trait = trait_psionic
-									has_trait = trait_latent_psionic
-								}
-								#has_living_standard = {
-								#	country = root
-								#	type = psionic_assimilation
-								#}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_psionic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-						}
-						else_if = {
-							limit = {
-								root.owner = {
-									has_ascension_perk = ap_transcendence
-								}
-								NOT = { has_trait = trait_psionic}
-								has_trait = trait_latent_psionic
-							}
-							modify_species = {
-								species = this
-								remove_trait = trait_latent_psionic
-								add_trait = trait_psionic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-						}
-
-						if = { # set citizenship
-							limit = { root.owner = { has_authority = auth_machine_intelligence } }
-							set_citizenship_type = {
-								type = citizenship_full_machine
-								country = root.owner
-							}
-						}
-						else = {
-							set_citizenship_type = {
-								type = citizenship_full
-								country = root.owner
-							}
-						}
-
-						if = { # set citizenship
-							limit = { root.owner = { has_ethic = ethic_gestalt_consciousness } }
-							set_living_standard = {
-								type = living_standard_hive_mind
-								country = root.owner
-							}
+						check_variable = {
+							which = assimilation_counter
+							value > 0
 						}
 					}
+					assimilation_effect = yes
 				}
 			}
 
 			1 = { # 6 pops
+				set_variable = {
+					which = assimilation_counter
+					value = 6
+				}
 				while = {
 					count = 6
 					limit = {
-						any_owned_pop = {
+						any_owned_species = {
 							has_citizenship_type = {
 								type = citizenship_assimilation
 								country = root.owner
 							}
 						}
-					}
-					random_owned_pop = {
-						limit = {
-							has_citizenship_type = {
-								type = citizenship_assimilation
-								country = root.owner
-							}
-						}
-
-						if = { # assimilator empire
-							limit = {
-								root.owner = {
-									has_authority = auth_machine_intelligence
-									has_civic = civic_machine_assimilator
-								}
-							}
-							if = {
-								limit = { NOT = { has_trait = trait_cybernetic } }
-								modify_species = {
-									species = this
-									add_trait = trait_cybernetic
-									add_traits_at_start_of_list = yes
-									change_scoped_species = yes # change only this pop's species
-								}
-								remove_hive_minded = yes # scripted effect
-								remove_culture_shock = yes
-								remove_self_modified = yes # scripted effect
-								root.owner = { generate_cyborg_treats = yes } # scripted effect
-							}
-						}
-						else_if = { # hive mind
-							limit = {
-								root.owner = {
-									has_authority = auth_hive_mind
-									NOT = { has_civic = civic_hive_devouring_swarm }
-								}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_hive_mind
-								add_traits_at_start_of_list = yes
-								#change_scoped_species = no
-							}
-							remove_culture_shock = yes
-							remove_self_modified = yes # scripted effect
-						}
-						else_if = { # ascended synths
-							limit = {
-								root.owner = {
-									has_country_flag = synthetic_empire
-								}
-							}
-							kill_pop = yes
-							root = {
-								create_pop = {
-									species = root.owner
-									ethos = root.owner
-								}
-							}
-						}
-						else_if = { # cyborg empire
-							limit = {
-								root.owner = {
-									has_country_flag = flesh_weakened
-								}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_cybernetic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-							remove_hive_minded = yes
-							remove_culture_shock = yes
-							remove_self_modified = yes # scripted effect
-						}
-						else_if = {
-							limit = {
-								root.owner = {
-									NOR = {
-										has_ethic = ethic_gestalt_consciousness
-										has_country_flag = synthetic_empire
-										has_country_flag = flesh_weakened
-									}
-								}
-								has_trait = trait_hive_mind
-							}
-							modify_species = {
-								species = this
-								remove_trait = trait_hive_mind
-								change_scoped_species = yes
-								# change only this pop's species
-							}
-						}
-						else_if = { #### Psionic Assimilation ADD OTHER RANDOM OPTIONS TOO
-							limit = {
-								root.owner = {
-									has_ascension_perk = ap_transcendence
-								}
-								NOR = {
-									has_trait = trait_psionic
-									has_trait = trait_latent_psionic
-								}
-								#has_living_standard = {
-								#	country = root
-								#	type = psionic_assimilation
-								#}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_psionic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-						}
-						else_if = {
-							limit = {
-								NOT = { has_trait = trait_psionic}
-								has_trait = trait_latent_psionic
-							}
-							modify_species = {
-								species = this
-								remove_trait = trait_latent_psionic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-						}
-
-						if = { # set citizenship
-							limit = { root.owner = { has_authority = auth_machine_intelligence } }
-							set_citizenship_type = {
-								type = citizenship_full_machine
-								country = root.owner
-							}
-						}
-						else = {
-							set_citizenship_type = {
-								type = citizenship_full
-								country = root.owner
-							}
-						}
-
-						if = { # set citizenship
-							limit = { root.owner = { has_ethic = ethic_gestalt_consciousness } }
-							set_living_standard = {
-								type = living_standard_hive_mind
-								country = root.owner
-							}
+						check_variable = {
+							which = assimilation_counter
+							value > 0
 						}
 					}
+					assimilation_effect = yes
 				}
 			}
 
 			1 = { # 12 pops
+				set_variable = {
+					which = assimilation_counter
+					value = 12
+				}
 				while = {
 					count = 12
 					limit = {
-						any_owned_pop = {
+						any_owned_species = {
 							has_citizenship_type = {
 								type = citizenship_assimilation
 								country = root.owner
 							}
 						}
-					}
-					random_owned_pop = {
-						limit = {
-							has_citizenship_type = {
-								type = citizenship_assimilation
-								country = root.owner
-							}
-						}
-
-						if = { # assimilator empire
-							limit = {
-								root.owner = {
-									has_authority = auth_machine_intelligence
-									has_civic = civic_machine_assimilator
-								}
-							}
-							if = {
-								limit = { NOT = { has_trait = trait_cybernetic } }
-								modify_species = {
-									species = this
-									add_trait = trait_cybernetic
-									add_traits_at_start_of_list = yes
-									change_scoped_species = yes # change only this pop's species
-								}
-								remove_hive_minded = yes # scripted effect
-								remove_culture_shock = yes
-								remove_self_modified = yes # scripted effect
-								root.owner = { generate_cyborg_treats = yes } # scripted effect
-							}
-						}
-						else_if = { # hive mind
-							limit = {
-								root.owner = {
-									has_authority = auth_hive_mind
-									NOT = { has_civic = civic_hive_devouring_swarm }
-								}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_hive_mind
-								add_traits_at_start_of_list = yes
-								#change_scoped_species = no
-							}
-							remove_culture_shock = yes
-							remove_self_modified = yes # scripted effect
-						}
-						else_if = { # ascended synths
-							limit = {
-								root.owner = {
-									has_country_flag = synthetic_empire
-								}
-							}
-							kill_pop = yes
-							root = {
-								create_pop = {
-									species = root.owner
-									ethos = root.owner
-								}
-							}
-						}
-						else_if = { # cyborg empire
-							limit = {
-								root.owner = {
-									has_country_flag = flesh_weakened
-								}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_cybernetic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-							remove_hive_minded = yes
-							remove_culture_shock = yes
-							remove_self_modified = yes # scripted effect
-						}
-						else_if = {
-							limit = {
-								root.owner = {
-									NOR = {
-										has_ethic = ethic_gestalt_consciousness
-										has_country_flag = synthetic_empire
-										has_country_flag = flesh_weakened
-									}
-								}
-								has_trait = trait_hive_mind
-							}
-							modify_species = {
-								species = this
-								remove_trait = trait_hive_mind
-								change_scoped_species = yes
-								# change only this pop's species
-							}
-						}
-						else_if = { #### Psionic Assimilation ADD OTHER RANDOM OPTIONS TOO
-							limit = {
-								root.owner = {
-									has_ascension_perk = ap_transcendence
-								}
-								NOR = {
-									has_trait = trait_psionic
-									has_trait = trait_latent_psionic
-								}
-								#has_living_standard = {
-								#	country = root
-								#	type = psionic_assimilation
-								#}
-							}
-							modify_species = {
-								species = this
-								add_trait = trait_psionic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-						}
-						else_if = {
-							limit = {
-								NOT = { has_trait = trait_psionic}
-								has_trait = trait_latent_psionic
-							}
-							modify_species = {
-								species = this
-								remove_trait = trait_latent_psionic
-								add_traits_at_start_of_list = yes
-								change_scoped_species = yes
-							}
-						}
-
-						if = { # set citizenship
-							limit = { root.owner = { has_authority = auth_machine_intelligence } }
-							set_citizenship_type = {
-								type = citizenship_full_machine
-								country = root.owner
-							}
-						}
-						else = {
-							set_citizenship_type = {
-								type = citizenship_full
-								country = root.owner
-							}
-						}
-
-						if = { # set citizenship
-							limit = { root.owner = { has_ethic = ethic_gestalt_consciousness } }
-							set_living_standard = {
-								type = living_standard_hive_mind
-								country = root.owner
-							}
+						check_variable = {
+							which = assimilation_counter
+							value > 0
 						}
 					}
+					assimilation_effect = yes
 				}
 			}
+		}
+		set_variable = {
+			which = assimilation_counter
+			value = 0
 		}
 	}
 }
@@ -8144,7 +8007,7 @@ event = {
 						is_planet_class = pc_ringworld_habitable
 					}
 				}
-				change_pc = pc_infested 
+				change_pc = pc_infested
 			}
 		}
 	}
@@ -8650,7 +8513,7 @@ country_event = {
 				}
 				modifier = {
 					mult = 0.5
-					NOT = { 
+					NOT = {
 						any_owned_planet = {
 							OR = {
 								has_modifier = market_nominee_level_1
@@ -8775,6 +8638,8 @@ country_event = {
 			days = -1
 		}
 		set_market_leader = yes # Update who owns the market station
+
+		set_timed_global_flag = { flag = resolution_galactic_market_relocated_recently days = 18000 }
 
 		event_target:market_founder_planet.solar_system.star = {
 			create_ambient_object = {
@@ -9419,7 +9284,9 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		from = { set_country_flag = whatever_it_is_im_against_it_left_federation }
+		from = {
+			set_country_flag = whatever_it_is_im_against_it_left_federation
+		}
 	}
 }
 
@@ -9456,7 +9323,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		federation = { 
+		federation = {
 			any_member = {
 				is_overlord = yes
 				any_subject = {
@@ -9494,7 +9361,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		federation = { 
+		federation = {
 			any_member = {
 				is_overlord = yes
 				any_subject = { is_in_federation_with = prev }
@@ -9551,6 +9418,94 @@ country_event = {
 				NOT = { is_in_federation_with = root }
 			}
 			end_all_treaties_with = root
+		}
+	}
+}
+
+
+# Random pulse (set up the delay) - on_five_year_pulse_country
+country_event = {
+	id = action.220
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		country_event = { id = action.221 random = 360 }
+	}
+}
+
+# Random pulse part 2 (fire the events) - on_five_year_pulse_country
+country_event = {
+	id = action.221
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_list = {
+			900 = { } #no event
+			125 = { country_event = { id = federations2.50 } } # Federation hegemony challenge
+			125 = { country_event = { id = federations2.100 } } # Federation military challenge
+			75 = { country_event = { id = envoy_events.1 } } # Insulting envoy software event
+			100 = { country_event = { id = envoy_events.3 } } # A Contribution to Galactic Comedy
+			50 = { country_event = { id = envoy_events.4 } } # Respected Envoy to Galactic Community
+			75 = { country_event = { id = envoy_events.5 } } # Irritating Envoy Must Die
+			75 = { country_event = { id = envoy_events.7 } } # Xenophobe Envoy Elopes
+			20 = { country_event = { id = envoy_events.15 } } # Galactic Community Wildlife
+		}
+	}
+}
+
+
+# on_colony_5_year_pulse
+planet_event = {
+	id = action.222
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = { #save the AI from doomsday if it manages to colonise
+			limit = {
+				exists = owner
+				owner = {
+					has_origin = origin_doomsday
+					is_ai = yes
+					any_owned_planet = {
+						has_planet_flag = doomed_planet_origin
+					}
+				}
+				NOT = { has_planet_flag = doomed_planet_origin }
+			}
+			owner = {
+				random_owned_planet = {
+					limit = {
+						has_planet_flag = doomed_planet_origin
+						num_pops > 3
+					}
+					while = {
+						count = 3
+						random_owned_pop = {
+							limit = {
+								OR = {
+									prev = { has_modifier = doomsday_5 }
+									root = {
+										habitability = {
+											who = prev.species
+											value > 0.3
+										}
+									}
+								}
+							}
+							resettle_pop = {
+								pop = this
+								planet = root
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }

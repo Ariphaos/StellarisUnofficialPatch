@@ -90,10 +90,10 @@ country_event = {
 				is_country_type = awakened_fallen_empire
 				has_country_flag = sleepers_awake_first_sleeper 
 			}
-			save_event_target_as = FirstSleeper
-			save_global_event_target_as = FirstSleeper 	# Test-fix for AUG-22871
+			save_global_event_target_as = FirstSleeper
 			set_timed_country_flag = { flag = ai_no_wars days = 5400 }
 		}	
+		save_global_event_target_as = SecondSleeper
 		set_timed_country_flag = { flag = ai_no_wars days = 5400 }
 		set_timed_country_flag = { flag = war_in_heaven_timer days = 730 }
 		set_timed_country_flag = { flag = war_in_heaven_timer_2 days = 3650 }
@@ -188,13 +188,7 @@ country_event = {
 	immediate = {
 		add_awakened_fallen_empire_fleet_small = yes
 		remove_country_flag = ai_no_wars
-		random_country = {
-			limit = { 
-				is_country_type = awakened_fallen_empire
-				has_country_flag = sleepers_awake_first_sleeper 
-			}
-			save_event_target_as = FirstSleeper
-			save_global_event_target_as = FirstSleeper 	# Test-fix for AUG-22871
+		event_target:FirstSleeper = {
 			remove_country_flag = ai_no_wars
 			add_awakened_fallen_empire_fleet_small = yes
 		}
@@ -777,11 +771,27 @@ country_event = {
 		}
 		set_global_flag = war_in_heaven_first_awakened_down
 	
+		if = {
+			limit = {
+				NOT = {
+					any_country = {
+						any_war = {
+							using_war_goal = {
+								type = wg_war_in_heaven
+								owner = prev
+							}
+						}
+					}
+				}
+			}
+			remove_global_flag = war_in_heaven_ongoing
+			set_global_flag = war_in_heaven_ended
+		}
 		every_country = {
 			limit = { is_ai = no }		
 			country_event = { id = war_in_heaven.11 }
 		}
-		observer_event = { id = observer.79 }		
+		observer_event = { id = observer.79 }	
 	}
 }
 
@@ -1066,7 +1076,7 @@ country_event = {
 				root = { add_opinion_modifier = { who = prev modifier = opinion_non_aligned_league_fe } } 
 			}	
 
-			every_country = {
+			every_playable_country = {
 				limit = { 
 					is_ai = no 
 					OR = {
@@ -1078,7 +1088,7 @@ country_event = {
 				}		
 				country_event = { id = war_in_heaven.19 }
 			}
-			every_country = {
+			every_playable_country = {
 				limit = { 
 					is_ai = no
 					NOT = { is_in_federation_with = root }
@@ -1220,6 +1230,12 @@ country_event = {
 		}	
 		hidden_effect = {
 			from = {
+				if = {
+					limit = { has_federation = yes }
+					leave_alliance = {
+						override_requirements = yes
+					}
+				}
 				add_non_aligned_league_opinions = yes
 				if = {
 					limit = { is_ai = no }
@@ -1237,6 +1253,19 @@ country_event = {
 					override_requirements = yes
 				}
 				hidden_effect = {
+					if = { #end non-federation-sanctioned wars
+						limit = {
+							is_at_war = yes
+						}
+						every_war = {
+							remove_war_participant = prev
+						}
+						every_subject = {
+							every_war = {
+								remove_war_participant = prev
+							}
+						}
+					}
 					root.federation = {
 						set_federation_flag = non_aligned_league
 						if = {
@@ -1251,32 +1280,60 @@ country_event = {
 				}
 			}
 		}
-		else = {
-			# Let us set aside our rivalries, at least for now.
-			every_country = {
-				limit = {
-					is_in_federation_with = root
-					has_rival = from
-				}
-				end_rivalry = from
-			}
-			every_country = {
-				limit = {
-					is_in_federation_with = root
-					is_rival = from
-				}
-				from = { end_rivalry = prev }
-			}
+		else = {	
 			from = {
 				set_timed_country_flag = { flag = ai_no_leave_fed days = 7200 }
-				
+				hidden_effect = { #end rivalries, wars
+					if = {
+						limit = {
+							any_rival_country = {
+								has_federation = yes
+								federation = {
+									is_same_value = root.federation
+								}
+							}
+						}
+						every_rival_country = {
+							limit = {
+								has_federation = yes
+								federation = {
+									is_same_value = root.federation
+								}
+							}
+							prev = { end_rivalry = prev }
+						}
+					}
+					root.federation = {
+						if = {
+							limit = {
+								any_member = {
+									is_rival = prevprev
+								}
+							}
+							every_member = {
+								limit = {
+									is_rival = prevprev
+								}
+								end_rivalry = prevprev
+							}
+						}
+					}
+					if = {
+						limit = {
+							is_at_war = yes
+						}
+						every_war = {
+							remove_war_participant = prev
+						}
+					}
+				}
 				join_alliance = {
 					who = root
 					override_requirements = yes
 				}
 				hidden_effect = {
-					root.federation = { #counteract the -100 cohesion you'd normally get for new members
-						if = {
+					root.federation = {
+						if = { #counteract the -100 cohesion you'd normally get for new members
 							limit = {
 								has_federation_perk = cohesion_join_1
 							}
@@ -1350,23 +1407,23 @@ country_event = {
 	location = root
 	
 	trigger = {
-		is_subject = no
+		has_federation = yes
+		is_federation_leader = yes
+		federation = {
+			has_federation_flag = non_aligned_league
+		}
+		has_global_flag = war_in_heaven_nonaligned_league
+		NOT = { has_global_flag = war_in_heaven_nonaligned_league_war }
+		NOT = { has_country_flag = war_in_heaven_nonaligned_league_timer }
 		NOT = {
 			any_country = {
 				is_country_type = awakened_fallen_empire
 				is_at_war_with = prev
 			}
 		}
-		has_federation = yes
-		is_country_type = default
-		has_country_flag = war_in_heaven_league_leader
-		has_global_flag = war_in_heaven_nonaligned_league	
-		NOT = { has_global_flag = war_in_heaven_nonaligned_league_war }
-		NOT = { has_country_flag = war_in_heaven_nonaligned_league_timer }
-		
 		any_country = { 
 			is_country_type = awakened_fallen_empire 
-			has_country_flag = sleepers_awake_first_sleeper 
+			has_country_flag = sleepers_awake_first_sleeper
 		}
 		any_country = { 
 			is_country_type = awakened_fallen_empire 
@@ -1380,23 +1437,6 @@ country_event = {
 	
 	immediate = {
 		set_global_flag = war_in_heaven_nonaligned_league_war
-		
-		random_country = {
-			limit = { 
-				is_country_type = awakened_fallen_empire 
-				has_country_flag = sleepers_awake_first_sleeper 
-			}
-			save_event_target_as = FirstAwakened
-			save_global_event_target_as = FirstAwakened 	# Test-fix for AUG-22871
-		}
-		random_country = {
-			limit = { 
-				is_country_type = awakened_fallen_empire 
-				has_country_flag = sleepers_awake_ancient_rival
-			}
-			save_event_target_as = SecondAwakened
-			save_global_event_target_as = SecondAwakened 	# Test-fix for AUG-22871
-		}	
 	}
 
 	option = {
@@ -1406,16 +1446,14 @@ country_event = {
 			limit = {
 				is_country_type = awakened_fallen_empire
 				OR = {
-					has_country_flag = sleepers_awake_ancient_rival
-					has_country_flag = sleepers_awake_first_sleeper	
+					is_same_value = event_target:FirstSleeper
+					is_same_value = event_target:SecondSleeper
 				}
 			}
-			root = {
-				declare_war = {
-					target = prev
-					name = "NAME_The_War_in_Heaven"
-					attacker_war_goal = "wg_war_in_heaven"
-				}
+			declare_war = {
+				target = root
+				name = "NAME_The_War_in_Heaven"
+				attacker_war_goal = "wg_war_in_heaven"
 			}
 			hidden_effect = {
 				every_subject = {
@@ -1647,5 +1685,3 @@ country_event = {
 		name = war_in_heaven.22.a
 	}
 }
-
-# Ariphaos TODO: LNAP Leader management.

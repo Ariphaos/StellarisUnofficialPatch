@@ -435,6 +435,20 @@ country_event = {
 						size = starbase_swarm
 						owner = event_target:prethoryn_vgrd
 					}
+					star = {
+						create_ambient_object = {
+							type = "swarm_1"
+							location = this
+						}
+						last_created_ambient_object = {
+							set_ambient_object_flag = swarm_system_effect
+							set_location = {
+								target = prev
+								distance = 0
+								angle = random
+							}
+						}
+					}
 				}
 				every_country = {
 					limit = {
@@ -1758,7 +1772,7 @@ country_event = {
 		}
 		any_country = {
 			is_country_type = sentinels
-			count_owned_ships = {
+			count_owned_ship = {
 				count > 30
 			}
 			ROOT = {
@@ -2835,7 +2849,7 @@ event = {
 	trigger = {
 		any_country = {
 			is_country_type = "swarm"
-			count_owned_ships = {
+			count_owned_ship = {
 				limit = { is_ship_size = colony_ship_swarm }
 				count < 4
 			}
@@ -2890,7 +2904,7 @@ event = {
 		any_country = {
 			is_country_type = "swarm"
 			num_ships > 10
-			count_owned_ships = {
+			count_owned_ship = {
 				limit = { is_ship_size = construction_ship_swarm }
 				count < 6
 			}
@@ -3010,7 +3024,7 @@ country_event = {
 
 		if = {
 			limit = {
-				count_owned_ships = {
+				count_owned_ship = {
 					limit = { is_ship_size = colony_ship_swarm }
 					count < 3
 				}
@@ -3042,7 +3056,7 @@ country_event = {
 
 		if = {
 			limit = {
-				count_owned_ships = {
+				count_owned_ship = {
 					limit = { is_ship_size = construction_ship_swarm }
 					count < 6
 				}
@@ -3132,6 +3146,7 @@ country_event = {
 
 	trigger = {
 		is_country_type = swarm
+		has_global_flag = prethoryn_main_invasion
 	}
 
 	immediate = {
@@ -3655,5 +3670,56 @@ country_event = {
 	option = {
 		name = EXCELLENT
 		add_relic = "r_prethoryn_queen"
+	}
+}
+
+# Spawn System Effect
+ship_event = {
+	id = crisis.260
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		solar_system = {
+			star = {
+				create_ambient_object = {
+					type = "swarm_1"
+					location = this
+				}
+				last_created_ambient_object = {
+					set_ambient_object_flag = swarm_system_effect
+					set_location = {
+						target = prev
+						distance = 0
+						angle = random
+					}
+				}
+			}
+		}
+	}
+}
+
+# Remove System Effect
+country_event = {
+	id = crisis.261
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = swarm
+		fromfrom = { is_ship_size = starbase_swarm }
+	}
+
+	immediate = {
+		fromfrom = {
+			solar_system = {
+				random_system_ambient_object = {
+					limit = { has_ambient_object_flag = swarm_system_effect }
+					destroy_ambient_object = this
+				}
+			}
+		}
 	}
 }

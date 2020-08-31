@@ -711,7 +711,7 @@ country_event = { # per-country gatekeeper
 							has_technology = tech_combat_computers_1
 							any_owned_fleet = {
 								is_in_combat = no
-								count_fleet_ships = {
+								count_owned_ship = {
 									count > 1
 									limit = {
 										OR = {
@@ -1388,7 +1388,7 @@ country_event = {
 		set_country_flag = triggered_syndaw_530
 		random_owned_fleet = {
 			limit = {
-				count_fleet_ships = {
+				count_owned_ship = {
 					count > 1
 					limit = {
 						OR = {
@@ -1400,20 +1400,17 @@ country_event = {
 				}
 			}
 			save_event_target_as = destroyed_ships
-			root = {
-				while = {
-					count = 2
-					random_owned_ship = {
-						limit = {
-							fleet = { is_same_value = event_target:destroyed_ships }
-							OR = {
-								is_ship_size = corvette
-								is_ship_size = destroyer
-								is_ship_size = cruiser
-							}
+			while = {
+				count = 2
+				random_owned_ship = {
+					limit = {
+						OR = {
+							is_ship_size = corvette
+							is_ship_size = destroyer
+							is_ship_size = cruiser
 						}
-						destroy_ship = this
 					}
+					destroy_ship = this
 				}
 			}
 		}
@@ -1505,17 +1502,15 @@ planet_event = {
 		name = syndaw.540.b
 		custom_tooltip = syndaw.540.b.tooltip
 		trigger = {
-			AND = {
-				NOT = { any_owned_pop = { has_trait = trait_mechanical } }
-				
-				owner = {
-					any_owned_army = {
-						exists = planet
-						planet = { is_same_value = root }
-						OR = {
-							army_type = robotic_army
-							army_type = robotic_defense_army
-						}
+			NOT = { any_owned_pop = { has_trait = trait_mechanical } }
+			
+			owner = {
+				any_owned_army = {
+					exists = planet
+					planet = { is_same_value = root }
+					OR = {
+						army_type = robotic_army
+						army_type = robotic_defense_army
 					}
 				}
 			}
@@ -2075,7 +2070,24 @@ country_event = {
 
 		# establish comms
 		every_country = {
-			limit = { has_communications = event_target:current_uprising_originator }
+			limit = {
+				OR = {
+					has_communications = event_target:current_uprising_originator
+					intel_level = {
+						level > low
+						system = event_target:current_uprising_originator.capital_scope.solar_system
+					}
+					any_system = {
+						has_star_flag = machup_system_flip
+						prev = {
+							intel_level = {
+								level > low
+								system = prev
+							}
+						}
+					}
+				}
+			}
 			establish_communications_no_message = root
 			establish_contact = { who = root location = from }
 		}
@@ -2320,6 +2332,12 @@ country_event = {
 						}
 					}
 				}
+			}
+			every_system = {
+				limit = {
+					has_star_flag = machup_system_flip
+				}
+				remove_star_flag = machup_system_flip
 			}
 		}
 

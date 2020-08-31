@@ -379,9 +379,7 @@ planet_event = {
 	option = {
 		name = WORRYING
 		add_deposit = d_deep_sinkhole
-		custom_tooltip = quake_sinkhole_tooltip
 	}
-
 }
 
 planet_event = {
@@ -670,10 +668,10 @@ planet_event = {
 			modifier = "recent_impact"
 			days = 1800
 		}
+		custom_tooltip = good_impact_tooltip
 		hidden_effect = {
 			add_deposit = d_impact_crater
 		}
-		custom_tooltip = good_impact_tooltip
 	}
 	option = {
 		name = colony_mod.14.a
@@ -681,10 +679,10 @@ planet_event = {
 			modifier = "recent_impact"
 			days = 1800
 		}
+		custom_tooltip = good_impact_tooltip
 		hidden_effect = {
 			add_deposit = d_impact_crater
 		}
-		custom_tooltip = good_impact_tooltip
 	}
 }
 
@@ -1880,6 +1878,9 @@ country_event = { #Mirror portal followup events
 	
 	trigger = {
 		has_country_flag = dportal_trader
+		any_owned_planet = {
+			has_planet_flag = dportal_trader
+		}
 		NOT = { has_country_flag = dportal_empire_crisis_flag }
 	}
 	
@@ -1942,7 +1943,20 @@ planet_event = { #trade up
 
 	option = {
 		name = EXCELLENT
-		
+		if = {
+			limit = {
+				NOT = { has_modifier = dportal_trade_high }
+			}
+			if = {
+				limit = {
+					owner = { is_gestalt = no }
+				}
+				custom_tooltip = dportal_trade_increases_tooltip
+			}
+			else = {
+				custom_tooltip = dportal_trade_increases_gestalt_tooltip
+			}
+		}
 		if = {
 			limit = {
 				has_modifier = dportal_trade_low
@@ -2014,75 +2028,18 @@ planet_event = { #trade down
 		exclusive_trigger = { owner = { is_machine_empire = yes } }
 		if = {
 			limit = {
-				has_modifier = dportal_trade_high
-			}
-			hidden_effect = {
-				remove_modifier = dportal_trade_high
-				add_modifier = {
-					modifier = "dportal_trade_normal"
-					days = -1
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				has_modifier = dportal_trade_normal
-			}
-			hidden_effect = {
-				remove_modifier = dportal_trade_normal
-				add_modifier = {
-					modifier = "dportal_trade_low"
-					days = -1
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				AND = {
+				NAND = {
 					has_modifier = dportal_trade_low
 					owner = {
 						check_variable = {
-								which = dportal_empire_crisis
-								value < 5
+							which = dportal_empire_crisis
+							value < 5
 						}
 					}
 				}
 			}
-			owner = { 
-				hidden_effect = {
-					change_variable = {
-						which = dportal_empire_crisis
-						value = 1
-					}
-				}
-			}
+			custom_tooltip = dportal_trade_reduces_gestalt_tooltip
 		}
-		else_if = {
-			limit = {
-				AND = {
-					has_modifier = dportal_trade_low
-					owner = {
-						check_variable = {
-								which = dportal_empire_crisis
-								value >= 5
-						}
-					}
-				}
-			}
-			hidden_effect = {
-				remove_modifier = dportal_trade_low
-				add_modifier = {
-					modifier = "dportal_trade_crisis"
-					days = -1
-				}
-				planet_event = { id = colony.3033 days = 1825 random = 1825 }
-				owner = { set_country_flag = dportal_empire_crisis_flag }
-			}
-		}
-	}
-	option = {
-		name = colony.3032.a 
-		
 		if = {
 			limit = {
 				has_modifier = dportal_trade_high
@@ -2109,13 +2066,11 @@ planet_event = { #trade down
 		}
 		else_if = {
 			limit = {
-				AND = {
-					has_modifier = dportal_trade_low
-					owner = {
-						check_variable = {
-								which = dportal_empire_crisis
-								value < 5
-						}
+				has_modifier = dportal_trade_low
+				owner = {
+					check_variable = {
+						which = dportal_empire_crisis
+						value < 5
 					}
 				}
 			}
@@ -2130,22 +2085,108 @@ planet_event = { #trade down
 		}
 		else_if = {
 			limit = {
-				AND = {
+				has_modifier = dportal_trade_low
+				owner = {
+					check_variable = {
+							which = dportal_empire_crisis
+							value >= 5
+					}
+				}
+			}
+			add_modifier = {
+				modifier = "dportal_trade_crisis"
+				days = -1
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_low
+				planet_event = { id = colony.3033 days = 1825 random = 1825 }
+				owner = { set_country_flag = dportal_empire_crisis_flag }
+			}
+		}
+	}
+	option = {
+		name = colony.3032.a
+		if = {
+			limit = {
+				NAND = {
 					has_modifier = dportal_trade_low
 					owner = {
 						check_variable = {
-								which = dportal_empire_crisis
-								value >= 5
+							which = dportal_empire_crisis
+							value < 5
 						}
 					}
 				}
 			}
+			if = {
+				limit = {
+					owner = { is_gestalt = no }
+				}
+				custom_tooltip = dportal_trade_reduces_tooltip
+			}
+			else = {
+				custom_tooltip = dportal_trade_reduces_gestalt_tooltip
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = dportal_trade_high
+			}
 			hidden_effect = {
-				remove_modifier = dportal_trade_low
+				remove_modifier = dportal_trade_high
 				add_modifier = {
-					modifier = "dportal_trade_crisis"
+					modifier = "dportal_trade_normal"
 					days = -1
 				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_normal
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_normal
+				add_modifier = {
+					modifier = "dportal_trade_low"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_low
+				owner = {
+					check_variable = {
+							which = dportal_empire_crisis
+							value < 5
+					}
+				}
+			}
+			owner = { 
+				hidden_effect = {
+					change_variable = {
+						which = dportal_empire_crisis
+						value = 1
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_low
+				owner = {
+					check_variable = {
+							which = dportal_empire_crisis
+							value >= 5
+					}
+				}
+			}
+			add_modifier = {
+				modifier = "dportal_trade_crisis"
+				days = -1
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_low
 				planet_event = { id = colony.3033 days = 1825 random = 1825 }
 				owner = { set_country_flag = dportal_empire_crisis_flag }
 			}

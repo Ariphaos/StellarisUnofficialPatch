@@ -442,6 +442,9 @@ ship_event = {
 
 	immediate = {
 		owner = { country_event = { id = story.5 days = 30 } }
+		from = {
+			add_modifier = { modifier = primitive_robots years = -1 }
+		}
 	}
 
 	#option = {
@@ -460,7 +463,7 @@ ship_event = {
 	}
 }
 
- ## Make Rudimentary Robots not be presapients
+ ## Make Rudimentary Robots exist
  planet_event = {
 	id = distar.2599 #I am sorry
 	is_triggered_only = yes
@@ -677,6 +680,7 @@ ship_event = { #Biological version
 ship_event = {
 	id = distar.30
 	title = "distar.30.name"
+	diplomatic_title = BLANK_STRING
 	desc = "distar.30.desc"
 	show_sound = event_radio_chatter
 	location = fromfromfrom
@@ -2245,6 +2249,7 @@ country_event = {
 country_event = {
 	id = distar.62
 	title = "distar.62.name"
+	diplomatic_title = BLANK_STRING
 	desc = "distar.62.desc"
 	location = event_target:kohtalo_second_fleet
 
@@ -2266,6 +2271,7 @@ country_event = {
 country_event = {
 	id = distar.63
 	title = "distar.63.name"
+	diplomatic_title = BLANK_STRING
 	desc = "distar.63.desc"
 	location = event_target:kohtalo_second_fleet
 
@@ -2287,6 +2293,7 @@ country_event = {
 country_event = {
 	id = distar.64
 	title = "distar.64.name"
+	diplomatic_title = BLANK_STRING
 	desc = "distar.64.desc"
 	location = event_target:kohtalo_second_fleet
 
@@ -2308,6 +2315,7 @@ country_event = {
 country_event = {
 	id = distar.65
 	title = "distar.65.name"
+	diplomatic_title = BLANK_STRING
 	desc = "distar.65.desc"
 	location = event_target:kohtalo_second_fleet
 
@@ -2350,6 +2358,7 @@ country_event = {
 country_event = {
 	id = distar.66
 	title = "distar.66.name"
+	diplomatic_title = BLANK_STRING
 	desc = "distar.66.desc"
 	location = event_target:kohtalo_second_fleet
 
@@ -6070,6 +6079,7 @@ country_event = { #Death of the Matriarch
 		name = "distar.212.a"
 		hidden_effect = {
 			country_event = { id = distar.213 }
+			country_event = { id = galcom.110 days = 60 }
 		}
 	}
 }
@@ -13464,7 +13474,7 @@ country_event = {
 		event_target:time_loop_world = {
 			clear_deposits = yes
 			set_planet_flag = repaired_time_loop_shield
-			planet_event = { id = distar.2034 days = 3600 random = 7200 }
+			planet_event = { id = distar.2034 days = 7200 random = 14400 }
 		}
 	}
 	option = {
@@ -13485,6 +13495,14 @@ planet_event = {
 	immediate = {
 		set_planet_flag = time_loop_lizards_dead
 		clear_deposits = yes
+		if = {
+			limit = {
+				exists = orbital_station
+			}
+			orbital_station = {
+				dismantle = yes
+			}
+		}
 		if = {
 			limit = {
 				solar_system = {
@@ -14044,12 +14062,17 @@ country_event = {
 					}
 				}
 				type = default
-				day_zero_contact = no
+				exclude_day_zero_contact = root #will not establish contact with this country or its federation allies
 				effect = {
 					establish_communications_no_message = root
 					save_global_event_target_as = time_loop_country
 					species = {
 						save_global_event_target_as = time_loop_species
+					}
+					root = {
+						every_federation_ally = {
+							establish_communications = event_target:time_loop_country
+						}
 					}
 					##Copy technology
 					IF = {
@@ -14288,8 +14311,6 @@ country_event = {
 				days = 1
 			}
 		}
-		establish_communications_no_message = last_created_country
-		event_target:time_loop_country = { establish_communications_no_message = root }
 	}
 
 	option = {
@@ -14645,7 +14666,12 @@ country_event = {
 			orbit = {
 				planet_event = { id = distar.5056 days = 2 }
 				save_event_target_as = cache_present_location
-				owner = { save_event_target_as = enigmatic_cache_present_host }
+				if = {
+					limit = {
+						exists = owner
+					}
+					owner = { save_event_target_as = enigmatic_cache_present_host }
+				}
 				# sets 'scanned' planet flag on present location
 				if = {
 					limit = {
@@ -14777,6 +14803,7 @@ country_event = {
 		if = {
 			limit = {
 				exists = event_target:new_location
+				exists = event_target:enigmatic_cache_present_host
 				event_target:new_location = {
 					owner = {
 						is_same_value = event_target:enigmatic_cache_present_host
@@ -14793,11 +14820,14 @@ country_event = {
 		# remove flag if cache is moving to planet in different country
 		else_if = {
 			limit = {
-				NOR = {
-					exists = event_target:new_location
-					event_target:new_location = {
-						owner = {
-							is_same_value = event_target:enigmatic_cache_present_host
+				OR = {
+					NOT = { exists = event_target:new_location }
+					NOT = {
+						event_target:new_location = {
+							owner = {
+								exists = event_target:enigmatic_cache_present_host
+								is_same_value = event_target:enigmatic_cache_present_host
+							}
 						}
 					}
 				}
@@ -16259,10 +16289,9 @@ country_event = {
 
 	trigger = {
 		exists = event_target:enigmatic_cache_country
+		from = { has_special_project = ENIGMATIC_UPLIFTING }
 		fromfrom = {
-			owner = {
-				has_special_project = ENIGMATIC_UPLIFTING
-			}
+			is_capital = yes
 			any_fleet_in_orbit = {
 				exists = owner
 				owner = { is_same_value = event_target:enigmatic_cache_country }

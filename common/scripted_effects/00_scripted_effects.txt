@@ -65,6 +65,10 @@ create_crystal_country = {
 			}
 			effect = {
 				save_global_event_target_as = crystal_country
+				set_variable = {	# Variable to track number of Crystal Splitter Fleets sent out throughout the game session.
+					which = splitter_fleets_sent_var
+					value = 0
+				}
 			}
 		}
 	}
@@ -96,6 +100,10 @@ create_cloud_country = {
 			}
 			effect = {
 				save_global_event_target_as = cloud_country
+				add_modifier = {
+					modifier = cloud_power
+					days = -1
+				}
 			}
 		}
 	}
@@ -127,6 +135,83 @@ create_amoeba_country = {
 			}
 			effect = {
 				save_global_event_target_as = amoeba_country
+				if = {
+					limit = {
+						exists = event_target:amoeba_garrison_country
+					}
+					set_faction_hostility = {
+						set_hostile = no
+						set_neutral = yes
+						target = event_target:amoeba_garrison_country
+					}
+				}
+				if = {
+					limit = {
+						exists = event_target:amoeba_country_borderless
+					}
+					set_faction_hostility = {
+						set_hostile = no
+						set_neutral = yes
+						target = event_target:amoeba_country_borderless
+					}
+				}
+			}
+		}
+	}
+}
+
+# Checks if Space Amoeba country (global event target) exists
+# Creates the country and saves it if it does not
+create_amoeba_country_borderless = {
+	if = {
+		limit = { NOT = { exists = event_target:amoeba_country_borderless } }
+		create_country = {
+			name = "NAME_Spaceborne_Organics"
+			type = amoeba_borderless
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_1.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors={
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_global_event_target_as = amoeba_country_borderless
+				if = {
+					limit = {
+						exists = event_target:amoeba_garrison_country
+					}
+					set_faction_hostility = {
+						set_hostile = no
+						set_neutral = yes
+						target = event_target:amoeba_garrison_country
+					}
+				}
+				if = {
+					limit = {
+						exists = event_target:amoeba_country
+					}
+					set_faction_hostility = {
+						set_hostile = no
+						set_neutral = yes
+						target = event_target:amoeba_country
+					}
+				}
+				every_country = {
+					limit = {
+						has_communications = event_target:amoeba_country
+					}
+					establish_communications_no_message = event_target:amoeba_country_borderless
+				}
 			}
 		}
 	}
@@ -159,6 +244,14 @@ create_drone_country = {
 			effect = {
 				save_global_event_target_as = drone_country
 				set_graphical_culture = ancient_drone_01
+				set_variable = {	# Variable to track number of Ancient Mining Drone Expansion Fleets sent out throughout the game session.
+					which = expansion_fleets_sent_var
+					value = 0
+				}
+				set_variable = {	# Variable to track number of aggressiveAncient Mining Drone Expansion Fleets sent out throughout the game session.
+					which = aggressive_expansion_fleets_sent_var
+					value = 0
+				}
 			}
 		}
 	}
@@ -2577,7 +2670,7 @@ randomize_shroud_flags = {
 		25 = {
 			if = {
 				limit = {
-					count_owned_ships = {
+					count_owned_ship = {
 						limit = { is_ship_size = psionic_avatar }
 						count < 1
 					}
@@ -2702,7 +2795,7 @@ randomize_shroud_flags = {
 			if = {
 				limit = {
 					NOT = { has_country_flag = high.16 }
-					count_owned_ships = {
+					count_owned_ship = {
 						limit = { is_ship_size = psionic_avatar }
 						count < 1
 					}
@@ -3049,7 +3142,7 @@ randomize_shroud_flags = {
 						has_country_flag = high.1
 						has_country_flag = medium.1
 					}
-					count_owned_ships = {
+					count_owned_ship = {
 						limit = { is_ship_size = psionic_avatar }
 						count < 1
 					}
@@ -3563,111 +3656,20 @@ shroud_energy_cost = {
 # Scope: Something that has a species and an owner
 create_cybernetic_species_mod = {
 	species = {
-		save_event_target_as = changing_species
-
-		switch = {
-			trigger = has_trait
-
-			trait_pc_desert_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_desert
-				}
-			}
-			trait_pc_arid_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_arid
-				}
-			}
-			trait_pc_savannah_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_savannah
-				}
-			}
-			trait_pc_tropical_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_tropical
-				}
-			}
-			trait_pc_continental_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_continental
-				}
-			}
-			trait_pc_ocean_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_ocean
-				}
-			}
-			trait_pc_arctic_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_arctic
-				}
-			}
-			trait_pc_tundra_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_tundra
-				}
-			}
-			trait_pc_alpine_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_alpine
-				}
-			}
-			trait_pc_ai_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_ai
-				}
-			}
-			trait_pc_nuked_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_nuked
-				}
-			}
-			trait_pc_gaia_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_gaia
-				}
-			}
-			trait_pc_ringworld_habitable_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_ringworld_habitable
-				}
-			}
-			trait_pc_habitat_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_habitat
-				}
-			}
-			trait_pc_machine_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_machine
-				}
-			}
-			trait_pc_hive_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_hive
-				}
-			}
-			trait_pc_relic_preference = {
-				create_cybernetic_species_mod_with_pc_effect = {
-					planet_class = pc_relic
-				}
-			}
-			default = {
-				create_species = {
-					is_mod = yes
-					name = this
-					plural = this
-					class = this
-					portrait = this
-					traits = this
-					traits = {
-						trait = trait_cybernetic
-					}
-					homeworld = this
-				}
+		create_species = {
+			is_mod = yes
+			name = this
+			plural = this
+			class = this
+			portrait = this
+			traits = this
+			homeworld = this
+			traits = {
+				ideal_planet_class = this
+				trait = trait_cybernetic
 			}
 		}
+		save_event_target_as = changing_species
 	}
 
 	owner = {
@@ -3696,27 +3698,6 @@ create_cybernetic_species_mod = {
 				is_exact_same_species = event_target:changing_species
 			}
 			change_species = last_created_species
-		}
-	}
-}
-
-create_cybernetic_species_mod_with_pc_effect = {
-	create_species = {
-		is_mod = yes
-		name = this
-		plural = this
-		class = this
-		portrait = this
-		traits = this
-		traits = {
-			trait = trait_cybernetic
-		}
-		homeworld = this
-	}
-	prev = {
-		modify_species = {
-			species = last_created_species
-			ideal_planet_class = $planet_class$
 		}
 	}
 }
@@ -3900,7 +3881,7 @@ create_ai_constructors = {
 	if = {
 		limit = {
 			event_target:AI_crisis = {
-				count_owned_ships = {
+				count_owned_ship = {
 					limit = { is_ship_size = construction_ship_ai }
 					count < 8
 				}
@@ -4382,6 +4363,21 @@ create_fallen_empire_reinforcements = {
 
 
 create_fallen_empire_fleet = {
+	owner = {
+		create_leader = {
+			class = admiral
+			species = owner_main_species
+			name = random
+			skill = 10
+			leader_age_min = 25
+			leader_age_max = 45
+			traits = {
+				trait = random_trait
+				trait = random_trait
+				trait = random_trait
+			}
+		}
+	}
 	create_fleet = {
 		effect = {
 			set_owner = prev.owner
@@ -4425,6 +4421,7 @@ create_fallen_empire_fleet = {
 			}
 		}
 	}
+	last_created_fleet = { assign_leader = last_created_leader }
 }
 
 create_fallen_empire_starting_navy = {
@@ -4724,7 +4721,6 @@ end_crisis = {
 }
 
 # this = pop
-# root = country
 remove_hive_minded = {
 	if = {
 		limit = { has_trait = trait_hive_mind }
@@ -4732,13 +4728,11 @@ remove_hive_minded = {
 			species = this
 			remove_trait = trait_hive_mind
 			change_scoped_species = yes
-			# change only this pop's species
 		}
 	}
 }
 
 # this = pop
-# root = country
 remove_self_modified = {
 	if = {
 		limit = { has_trait = trait_self_modified }
@@ -4746,7 +4740,6 @@ remove_self_modified = {
 			species = this
 			remove_trait = trait_self_modified
 			change_scoped_species = yes
-			# change only this pop's species
 		}
 	}
 }
@@ -5073,7 +5066,7 @@ create_marauder_constructors = {
 	if = {
 		limit = {
 			event_target:raider_khanate = {
-				count_owned_ships = {
+				count_owned_ship = {
 					limit = { is_ship_size = constructor }
 					count < 5
 				}
@@ -6976,7 +6969,7 @@ fire_warning_sign = {
 							has_technology = tech_combat_computers_1
 							any_owned_fleet = {
 								is_in_combat = no
-								count_fleet_ships = {
+								count_owned_ship = {
 									count > 1
 									limit = {
 										OR = {
@@ -8733,7 +8726,7 @@ create_fe_servant_species = {
 		class = random_non_machine
 		portrait = random
 		traits = {
-			trait = "trait_pc_nuked_preference"
+			ideal_planet_class = root
 			trait = "trait_charismatic"
 		}
 	}
@@ -8744,7 +8737,7 @@ create_fe_servant_species = {
 			class = this
 			portrait = this
 			traits = {
-				trait = "trait_pc_nuked_preference"
+				ideal_planet_class = root
 				trait = "trait_strong"
 				trait = "trait_charismatic"
 				trait = "trait_nerve_stapled"
@@ -8992,5 +8985,1906 @@ give_next_ai_tech_option_effect = {
 end_war_effect = {
 	every_war_participant = {
 		prev = { remove_war_participant = prev }
+	}
+}
+
+create_tiyanki_fleet_1 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_country
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Bull"
+				design = "NAME_Tiyanki_Bull"
+			}
+			create_ship = {
+				name = "NAME_Calf"
+				design = "NAME_Tiyanki_Calf"
+			}
+			create_ship = {
+				name = "NAME_Calf"
+				design = "NAME_Tiyanki_Calf"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			set_location = event_target:giant
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				wait = { # Cooldown until they start moving
+					duration = 320
+					random = 80
+				}
+			}
+		}
+	}
+}
+
+create_tiyanki_fleet_2 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_country
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			set_location = event_target:giant
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				wait = { # Cooldown until they start moving
+					duration = 320
+					random = 80
+				}
+			}
+		}
+	}
+}
+
+create_tiyanki_fleet_3 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_country
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Bull"
+				design = "NAME_Tiyanki_Bull"
+			}
+			create_ship = {
+				name = "NAME_Bull"
+				design = "NAME_Tiyanki_Bull"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			create_ship = {
+				name = "NAME_Calf"
+				design = "NAME_Tiyanki_Calf"
+			}
+			set_location = event_target:giant
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				wait = { # Cooldown until they start moving
+					duration = 320
+					random = 80
+				}
+			}
+		}
+	}
+}
+
+create_tiyanki_fleet_4 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_country
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Bull"
+				design = "NAME_Tiyanki_Bull"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Calf"
+			}
+			create_ship = {
+				name = "NAME_Calf"
+				design = "NAME_Tiyanki_Calf"
+			}
+			create_ship = {
+				name = "NAME_Calf"
+				design = "NAME_Tiyanki_Calf"
+			}
+			create_ship = {
+				name = "NAME_Calf"
+				design = "NAME_Tiyanki_Calf"
+			}
+			set_location = event_target:giant
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				wait = { # Cooldown until they start moving
+					duration = 320
+					random = 80
+				}
+			}
+		}
+	}
+}
+
+create_tiyanki_fleet_5 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_country
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Cow"
+				design = "NAME_Tiyanki_Cow"
+			}
+			create_ship = {
+				name = "NAME_Bull"
+				design = "NAME_Tiyanki_Bull"
+			}
+			create_ship = {
+				name = "NAME_Bull"
+				design = "NAME_Tiyanki_Bull"
+			}
+			create_ship = {
+				name = "NAME_Hatchling"
+				design = "NAME_Tiyanki_Hatchling"
+			}
+			set_location = event_target:giant
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				wait = { # Cooldown until they start moving
+					duration = 320
+					random = 80
+				}
+			}
+		}
+	}
+}
+
+create_tiyanki_home_fleet_1 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 5
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 5
+				create_ship = {
+					name = "NAME_Bull"
+					design = "NAME_Tiyanki_Bull"
+				}
+			}
+			while = {
+				count = 8
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			while = {
+				count = 9
+				create_ship = {
+					name = "NAME_Calf"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			set_location = event_target:giant1
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 4
+				create_ship = {
+					name = "NAME_Calf"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			set_location = {
+				target = event_target:giant1
+				distance = 12
+				angle = 0
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+}
+
+create_tiyanki_home_fleet_2 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 5
+				create_ship = {
+					name = "NAME_Bull"
+					design = "NAME_Tiyanki_Bull"
+				}
+			}
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			while = {
+				count = 3
+				create_ship = {
+					name = "NAME_Calf"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			set_location = event_target:giant2
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 4
+				create_ship = {
+					name = "NAME_Bull"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			set_location = {
+				target = event_target:giant2
+				distance = 12
+				angle = 0
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+}
+
+create_tiyanki_home_fleet_3 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 6
+				create_ship = {
+					name = "NAME_Bull"
+					design = "NAME_Tiyanki_Bull"
+				}
+			}
+			while = {
+				count = 12
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Calf"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			set_location = event_target:giant3
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 4
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 2
+				create_ship = {
+					name = "NAME_Calf"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			while = {
+				count = 3
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			set_location = {
+				target = event_target:giant3
+				distance = 12
+				angle = 0
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+}
+
+create_tiyanki_home_fleet_4 = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 4
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 3
+				create_ship = {
+					name = "NAME_Bull"
+					design = "NAME_Tiyanki_Bull"
+				}
+			}
+			while = {
+				count = 12
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			while = {
+				count = 9
+				create_ship = {
+					name = "NAME_Calf"
+					design = "NAME_Tiyanki_Calf"
+				}
+			}
+			set_location = event_target:giant4
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 4
+				create_ship = {
+					name = "NAME_Cow"
+					design = "NAME_Tiyanki_Cow"
+				}
+			}
+			while = {
+				count = 6
+				create_ship = {
+					name = "NAME_Bull"
+					design = "NAME_Tiyanki_Bull"
+				}
+			}
+			set_location = {
+				target = event_target:giant4
+				distance = 12
+				angle = 0
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+		}
+	}
+}
+
+create_tiyanki_home_roaming_fleets = {
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 22
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			set_location = {
+				target = event_target:giant1
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = tiyanki.patrol.1
+							has_planet_flag = tiyanki_giant2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki.patrol.2
+							has_planet_flag = tiyanki_giant3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki.patrol.3
+							has_planet_flag = tiyanki_giant4
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki.patrol.4
+							has_planet_flag = tiyanki_giant1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 14
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			set_location = {
+				target = event_target:giant1
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = tiyanki2.patrol.1
+							has_planet_flag = tiyanki_giant4
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki2.patrol.2
+							has_planet_flag = tiyanki_giant3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki2.patrol.3
+							has_planet_flag = tiyanki_giant2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki2.patrol.4
+							has_planet_flag = tiyanki_giant1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 19
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			set_location = {
+				target = event_target:giant3
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = tiyanki3.patrol.1
+							has_planet_flag = tiyanki_giant2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki3.patrol.2
+							has_planet_flag = tiyanki_giant1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki3.patrol.3
+							has_planet_flag = tiyanki_giant4
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki3.patrol.4
+							has_planet_flag = tiyanki_giant3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Tiyanki_Space_Whale"
+		effect = {
+			set_owner = event_target:tiyanki_garrison_country
+			while = {
+				count = 16
+				create_ship = {
+					name = "NAME_Hatchling"
+					design = "NAME_Tiyanki_Hatchling"
+				}
+			}
+			set_location = {
+				target = event_target:giant2
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = passive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = tiyanki4.patrol.1
+							has_planet_flag = tiyanki_giant3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki4.patrol.2
+							has_planet_flag = tiyanki_giant4
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki4.patrol.3
+							has_planet_flag = tiyanki_giant1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = tiyanki4.patrol.4
+							has_planet_flag = tiyanki_giant2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+reset_tiyanki_variables = {
+	set_variable = {
+		which = tiyanki_cow_credits
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_cow_gas
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_cow_kills
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_bull_credits
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_bull_gas
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_bull_kills
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_hatchling_credits
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_hatchling_gas
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_hatchling_kills
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_calf_credits
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_calf_gas
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_calf_kills
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_cow_kill_counter
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_bull_kill_counter
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_hatchling_kill_counter
+		value = 0
+	}
+	set_variable = {
+		which = tiyanki_calf_kill_counter
+		value = 0
+	}
+
+	remove_country_flag = no_cows
+	remove_country_flag = no_bulls
+	remove_country_flag = no_calves
+	remove_country_flag = no_hatchlings
+}
+
+
+create_amoeba_home_fleet_1 = {
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Blue"
+				}
+			}
+			while = {
+				count = 8
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Blue"
+				}
+			}
+			set_location = event_target:amoeba_giant
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 5
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Zebra"
+				}
+			}
+			while = {
+				count = 6
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Zebra"
+				}
+			}
+			set_location = {
+				target = event_target:amoeba_giant
+				distance = 12
+				angle = 0
+			}
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+		}
+	}
+}
+
+create_amoeba_home_fleet_2 = {
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 5
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Zebra"
+				}
+			}
+			while = {
+				count = 21
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Zebra"
+				}
+			}
+			set_location = event_target:amoeba_star
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Orange"
+				}
+			}
+			while = {
+				count = 14
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Orange"
+				}
+			}
+			set_location = {
+				target = event_target:amoeba_star
+				distance = 12
+				angle = 0
+			}
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+		}
+	}
+}
+
+create_amoeba_home_roaming_fleets = {
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Blue"
+				}
+			}
+			while = {
+				count = 8
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Blue"
+				}
+			}
+			set_location = {
+				target = event_target:amoeba_ice_asteroid_1
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = amoeba.patrol.1
+							has_planet_flag = amoeba_ice_asteroid_2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba.patrol.2
+							has_planet_flag = amoeba_star
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba.patrol.3
+							has_planet_flag = amoeba_ice_asteroid_3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba.patrol.4
+							has_planet_flag = amoeba_giant1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba.patrol.5
+							has_planet_flag = amoeba_ice_asteroid_1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba.patrol.6
+							has_planet_flag = amoeba_star
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Teal"
+				}
+			}
+			while = {
+				count = 10
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Teal"
+				}
+			}
+			set_location = {
+				target = event_target:amoeba_ice_asteroid_2
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = amoeba2.patrol.1
+							has_planet_flag = amoeba_ice_asteroid_3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba2.patrol.2
+							has_planet_flag = amoeba_ice_asteroid_1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba2.patrol.3
+							has_planet_flag = amoeba_ice_asteroid_2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	create_fleet = {
+		name = "NAME_Amoeba_Swarm"
+		effect = {
+			set_owner = event_target:amoeba_garrison_country
+			while = {
+				count = 6
+				create_ship = {
+					name = ""
+					design = "NAME_Large_Space_Organism_Orange"
+				}
+			}
+			while = {
+				count = 7
+				create_ship = {
+					name = ""
+					design = "NAME_Small_Space_Organism_Orange"
+				}
+			}
+			set_location = {
+				target = event_target:amoeba_ice_asteroid_3
+				distance = 25
+				angle = 94
+			}
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 200
+			queue_actions = {
+				repeat = {
+					find_closest_planet = {
+						trigger = {
+							id = amoeba3.patrol.1
+							has_planet_flag = amoeba_ice_asteroid_2
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba3.patrol.2
+							has_planet_flag = amoeba_star
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba3.patrol.3
+							has_planet_flag = amoeba_ice_asteroid_1
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+					find_closest_planet  = {
+						trigger = {
+							id = amoeba3.patrol.4
+							has_planet_flag = amoeba_ice_asteroid_3
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+fire_random_centralisation_flavour_event_effect = {
+	hidden_effect = {
+		random_member = {
+			limit = {
+				is_gestalt = no
+				any_envoy = {
+					has_envoy_task = {
+						task = federation
+					}
+				}
+			}
+			random_list = {
+				1 = {
+					country_event = { id = envoy_events.16 days = 15 }
+					modifier = {
+						factor = 0.8
+						federation = {
+							federation_cohesion >= 90
+						}
+					}
+					modifier = {
+						factor = 1.5
+						federation = {
+							federation_cohesion <= 50
+						}
+					}
+					modifier = {
+						factor = 1.5
+						federation = {
+							federation_cohesion <= 25
+						}
+					}
+					modifier = {
+						factor = 1.5
+						federation = {
+							federation_cohesion <= 0
+						}
+					}
+				}
+				4 = { } #nej
+			}
+		}
+	}
+}
+
+# root/this = planet
+assimilation_effect = {
+	random_owned_pop = {
+		limit = {
+			has_citizenship_type = {
+				type = citizenship_assimilation
+				country = root.owner
+			}
+		}
+		if = { # ascended synths
+			limit = {
+				root.owner = {
+					has_country_flag = synthetic_empire
+				}
+			}
+			kill_pop = yes
+			root = {
+				create_pop = {
+					species = root.owner
+					ethos = root.owner
+				}
+			}
+		}
+		else = {
+			random_galaxy_species = {
+				limit = {
+					has_species_flag = assimilation_species_of_species@prev.species
+					has_species_flag = assimilation_species_of_empire@root.owner
+				}
+				save_event_target_as = convert_to_species
+			}
+			species = {
+				save_event_target_as = old_species
+			}
+			if = {
+				limit = {
+					exists = event_target:convert_to_species #should always exist
+				}
+				change_species = event_target:convert_to_species
+				root = {
+					change_variable = {
+						which = assimilation_counter
+						value = -1
+					}
+					while = { #to avoid doing the random_galaxy_species thing too many times
+						limit = {
+							exists = event_target:old_species
+							check_variable = {
+								which = assimilation_counter
+								value > 0
+							}
+							any_owned_species = {
+								is_same_value = event_target:old_species
+							}
+						}
+						random_owned_pop = {
+							limit = {
+								is_exact_same_species = event_target:old_species
+							}
+							change_species = event_target:convert_to_species
+							apply_post_assimilation_effects = yes
+						}
+						change_variable = {
+							which = assimilation_counter
+							value = -1
+						}
+					}
+				}
+				apply_post_assimilation_effects = yes
+			}
+		}
+	}
+}
+
+# pop scope, root = planet
+apply_post_assimilation_effects = {
+	if = { # assimilator empire
+		limit = {
+			root.owner = {
+				has_authority = auth_machine_intelligence
+				has_civic = civic_machine_assimilator
+			}
+		}
+		remove_culture_shock = yes
+		root.owner = { generate_cyborg_treats = yes } # scripted effect
+	}
+	else_if = { # hive mind, cyborg empire
+		limit = {
+			root.owner = {
+				OR = {
+					AND = {
+						has_authority = auth_hive_mind
+						NOT = { has_civic = civic_hive_devouring_swarm }
+					}
+					has_country_flag = flesh_weakened
+				}
+			}
+		}
+		remove_culture_shock = yes
+	}
+	if = { # set citizenship
+		limit = { root.owner = { has_authority = auth_machine_intelligence } }
+		set_citizenship_type = {
+			type = citizenship_full_machine
+			country = root.owner
+		}
+	}
+	else = {
+		set_citizenship_type = {
+			type = citizenship_full
+			country = root.owner
+		}
+	}
+
+	if = { # set citizenship
+		limit = { root.owner = { has_ethic = ethic_gestalt_consciousness } }
+		set_living_standard = {
+			type = living_standard_hive_mind
+			country = root.owner
+		}
+	}
+}
+
+breach_fix_resolution_galacticstudies_advanced_xenostudies = {
+	if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_galacticstudies_advanced_xenostudies"
+				is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+				is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+			}
+			in_breach_of = resolution_galacticstudies_advanced_xenostudies
+			can_set_ai_policy = yes
+			has_policy_flag = ai_outlawed
+		}
+		set_policy = {
+			policy = artificial_intelligence_policy
+			option = ai_servitude
+			cooldown = yes
+		}
+		custom_tooltip = "federations.10100.change_ai"
+	}
+
+	if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_galacticstudies_advanced_xenostudies"
+				is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+				is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+			}
+			in_breach_of = resolution_galacticstudies_advanced_xenostudies
+			has_met_primitives = yes
+			has_policy_flag = interference_passive
+		}
+		set_policy = {
+			policy = interference
+			option = interference_active
+			cooldown = yes
+		}
+		custom_tooltip = "federations.10100.change_interference"
+	}
+}
+
+breach_fix_resolution_galacticstudies_ethical_guideline_refactoring = {
+	if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+				is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+			}
+			in_breach_of = resolution_galacticstudies_ethical_guideline_refactoring
+			has_technology = tech_capacity_boosters
+		}
+		set_policy = {
+			policy = leader_enhancement
+			option = leader_enhancement_capacity_boosters
+			cooldown = yes
+		}
+		custom_tooltip = "federations.10110.capacity_boosters"
+	} else_if = {
+		limit = {
+				OR = {
+					is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+					is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+				}
+				in_breach_of = resolution_galacticstudies_ethical_guideline_refactoring
+				has_technology = tech_selected_lineages
+				NOT = { has_technology = tech_capacity_boosters }
+		}
+		set_policy = {
+			policy = leader_enhancement
+			option = leader_enhancement_selected_lineages
+			cooldown = yes
+		}
+		custom_tooltip = "federations.10110.selected_lineages"
+	}
+}
+
+breach_fix_resolution_greatergood_five_year_plans_normal = {
+	if = {
+		limit = {
+			# For greater good resolutions we want to explicitly look at if this specific
+			# resolution is active, since higher tiers have stricter requirements.
+			is_active_resolution = "resolution_greatergood_five_year_plans"
+			in_breach_of = resolution_greatergood_five_year_plans
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_living_standard = { type = living_standard_subsistence country = prev }
+				}
+				set_living_standard = { type = living_standard_normal country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10200.living_standard_normal"
+	}
+}
+
+breach_fix_resolution_greatergood_five_year_plans_stratified = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_five_year_plans"
+			in_breach_of = resolution_greatergood_five_year_plans
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_living_standard = { type = living_standard_subsistence country = prev }
+				}
+				set_living_standard = { type = living_standard_stratified country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10200.living_standard_stratified"
+	}
+}
+
+breach_fix_resolution_greatergood_greater_than_ourselves_living_standards = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+			in_breach_of = resolution_greatergood_greater_than_ourselves
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					OR = {
+						has_living_standard = { type = living_standard_subsistence country = prev }
+						has_living_standard = { type = living_standard_stratified country = prev }
+					}
+				}
+				set_living_standard = { type = living_standard_normal country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10200.living_standard_normal"
+	}
+}
+
+breach_fix_resolution_greatergood_greater_than_ourselves_thralls = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+			in_breach_of = resolution_greatergood_greater_than_ourselves
+			is_militarist = yes
+			host_has_dlc = "Utopia"
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_citizenship_type = { type = citizenship_slavery country = prev }
+					OR = {
+						has_slavery_type = { type = slavery_normal country = prev }
+						has_slavery_type = { type = slavery_livestock country = prev }
+					}
+				}
+				set_slavery_type = { type = slavery_military country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10210.thralls"
+	}
+}
+
+breach_fix_resolution_greatergood_greater_than_ourselves_servants = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+			in_breach_of = resolution_greatergood_greater_than_ourselves
+			host_has_dlc = "Utopia"
+			is_gestalt = no
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_citizenship_type = { type = citizenship_slavery country = prev }
+					OR = {
+						has_slavery_type = { type = slavery_normal country = prev }
+						has_slavery_type = { type = slavery_livestock country = prev }
+					}
+				}
+				set_slavery_type = { type = slavery_domestic country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10210.servants"
+	}
+}
+
+breach_fix_resolution_greatergood_greater_than_ourselves_no_utopia = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+			in_breach_of = resolution_greatergood_greater_than_ourselves
+			NOT = { host_has_dlc = "Utopia" }
+			NOR = {
+				has_valid_civic = civic_indentured_assets
+				has_valid_civic = civic_slaver_guilds
+			}
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_citizenship_type = { type = citizenship_slavery country = prev }
+				}
+				set_citizenship_type = { type = citizenship_limited country = prev }
+			}
+		}
+		custom_tooltip = "federations.10210.freeslaves"
+	}
+
+	breach_fix_resolution_greatergood_greater_than_ourselves_living_standards = yes
+}
+
+breach_fix_resolution_greatergood_balance_in_the_middle = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+			in_breach_of = resolution_greatergood_balance_in_the_middle
+			is_gestalt = no
+			NOR = {
+				has_valid_civic = civic_indentured_assets
+				has_valid_civic = civic_slaver_guilds
+			}
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_citizenship_type = { type = citizenship_slavery country = prev }
+				}
+				set_citizenship_type = { type = citizenship_limited country = prev }
+			}
+		}
+		custom_tooltip = "federations.10210.freeslaves"
+	}
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+			in_breach_of = resolution_greatergood_balance_in_the_middle
+			is_gestalt = no
+			NOR = {
+				has_valid_civic = civic_indentured_assets
+				has_valid_civic = civic_slaver_guilds
+			}
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					OR = {
+						has_living_standard = { type = living_standard_subsistence country = prev }
+						has_living_standard = { type = living_standard_stratified country = prev }
+						has_living_standard = { type = living_standard_normal country = prev }
+						has_living_standard = { type = living_standard_academic_privilege country = prev }
+					}
+				}
+				set_living_standard = { type = living_standard_good country = prev }
+			}
+		}
+		custom_tooltip = "federations.10220.living_standard"
+	}
+}
+
+breach_fix_resolution_greatergood_balance_in_the_middle_gestalt = {
+	if = {
+		limit = {
+			is_gestalt = yes
+			OR = {
+				AND = {
+					is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+					in_breach_of = resolution_greatergood_balance_in_the_middle
+				}
+				AND = {
+					is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+					in_breach_of = resolution_greatergood_universal_prosperity_mandate
+					NOT = { has_civic = "civic_machine_assimilator" }
+				}
+			}
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					NOR = {
+						has_trait = trait_machine_unit
+						has_trait = trait_mechanical
+					}
+					is_sapient = yes
+					has_citizenship_type = { type = citizenship_slavery country = prev }
+				}
+				set_citizenship_type = { type = citizenship_purge country = prev }
+				set_purge_type = { type = purge_displacement country = prev }
+			}
+		}
+		custom_tooltip = "federations.10210.displace_gestalt"
+	}
+}
+
+breach_fix_resolution_greatergood_universal_prosperity_mandate_freeslaves = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			in_breach_of = resolution_greatergood_universal_prosperity_mandate
+			is_gestalt = no
+			NOR = {
+				has_valid_civic = civic_indentured_assets
+				has_valid_civic = civic_slaver_guilds
+			}
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+					has_citizenship_type = { type = citizenship_slavery country = prev }
+				}
+				set_citizenship_type = { type = citizenship_limited country = prev }
+			}
+		}
+		custom_tooltip = "federations.10210.freeslaves"
+	}
+}
+
+breach_fix_resolution_greatergood_universal_prosperity_mandate_utopian = {
+	breach_fix_resolution_greatergood_universal_prosperity_mandate_freeslaves = yes
+
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			in_breach_of = resolution_greatergood_universal_prosperity_mandate
+			is_egalitarian = yes
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+				}
+				set_living_standard = { type = living_standard_utopian country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10230.complyutopian"
+	}
+}
+
+breach_fix_resolution_greatergood_universal_prosperity_mandate_chemical = {
+	breach_fix_resolution_greatergood_universal_prosperity_mandate_freeslaves = yes
+
+	if = {
+		limit = {
+			is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			in_breach_of = resolution_greatergood_universal_prosperity_mandate
+			has_technology = "tech_subdermal_stimulation"
+		}
+		hidden_effect = {
+			every_owned_species = {
+				limit = {
+					is_sapient = yes
+				}
+				set_living_standard = { type = living_standard_chemical_bliss country = prev }
+			}
+		}
+
+		custom_tooltip = "federations.10230.complychemical"
+	}
+}
+
+breach_fix_resolution_rulesofwar_reverence_for_life = {
+	if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_rulesofwar_reverence_for_life"
+				is_active_resolution = "resolution_rulesofwar_independent_tribunals"
+				is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
+				is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+			}
+			in_breach_of = resolution_rulesofwar_reverence_for_life
+			has_policy_flag = purge_allowed
+		}
+		hidden_effect = {
+			set_policy = {
+				policy = purge
+				option = purge_displacement_only
+				cooldown = yes
+			}
+		}
+
+		custom_tooltip = "federations.10300.comply"
+	}
+}
+
+breach_fix_resolution_rulesofwar_independent_tribunals = {
+	if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_rulesofwar_independent_tribunals"
+				is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
+				is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+			}
+			in_breach_of = resolution_rulesofwar_independent_tribunals
+			OR = {
+				has_policy_flag = orbital_bombardment_armageddon
+				has_policy_flag = orbital_bombardment_indiscriminate
+			}
+		}
+		hidden_effect = {
+			set_policy = {
+				policy = orbital_bombardment
+				option = orbital_bombardment_selective
+				cooldown = yes
+			}
+		}
+
+		custom_tooltip = "federations.10310.comply"
+	}
+}
+
+breach_fix_resolution_rulesofwar_last_resort_doctrine = {
+	if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
+				is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+			}
+			in_breach_of = resolution_rulesofwar_last_resort_doctrine
+			has_policy_flag = unrestricted_wars
+			is_gestalt = no
+		}
+		hidden_effect = {
+			set_policy = {
+				policy = war_philosophy
+				option = liberation_wars
+				cooldown = yes
+			}
+		}
+
+		custom_tooltip = "federations.10320.comply"
+	} else_if = {
+		limit = {
+			OR = {
+				is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
+				is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+			}
+			in_breach_of = resolution_rulesofwar_last_resort_doctrine
+			has_policy_flag = unrestricted_wars
+			is_gestalt = yes
+		}
+		hidden_effect = {
+			set_policy = {
+				policy = war_philosophy
+				option = no_wars
+				cooldown = yes
+			}
+		}
+
+		custom_tooltip = "federations.10320.complygestalt"
+	}
+}
+
+breach_fix_resolution_rulesofwar_demobilization_initiative = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+			in_breach_of = resolution_rulesofwar_demobilization_initiative
+			has_policy_flag = economic_policy_military
+		}
+		hidden_effect = {
+			set_policy = {
+				policy = economic_policy
+				option = economic_policy_balanced
+				cooldown = yes
+			}
+		}
+
+		custom_tooltip = "federations.10330.comply"
+	}
+}
+
+breach_fix_resolution_divinity_a_defined_purpose_nonsynthetic = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_divinity_a_defined_purpose"
+			in_breach_of = resolution_divinity_a_defined_purpose
+			has_policy_flag = ai_full_rights
+			NOT = { has_country_flag = synthetic_empire }
+			is_machine_empire = no
+		}
+		hidden_effect = {
+			set_policy = {
+				policy = artificial_intelligence_policy
+				option = ai_servitude
+				cooldown = yes
+			}
+		}
+
+		custom_tooltip = "federations.10340.complychangeai"
+	}
+}
+
+breach_fix_resolution_divinity_a_defined_purpose_machine = {
+	if = {
+		limit = {
+			is_active_resolution = "resolution_divinity_a_defined_purpose"
+			in_breach_of = resolution_divinity_a_defined_purpose
+			is_machine_empire = yes
+			NOT = { has_valid_civic = civic_machine_servitor }
+			NOT = { has_valid_civic = civic_machine_assimilator }
+			exists = event_target:defined_purpose_random_species
+		}
+		hidden_effect = {
+			force_add_civic = civic_machine_servitor
+
+			capital_scope = {
+				create_pop = {
+					species = event_target:defined_purpose_random_species
+				}
+			}
+		}
+
+		custom_tooltip = "federations.10340.complybecomerogueservitor_tooltip"
+	} else_if = {
+		limit = {
+			is_active_resolution = "resolution_divinity_a_defined_purpose"
+			in_breach_of = resolution_divinity_a_defined_purpose
+			is_machine_empire = yes
+			NOT = { has_valid_civic = civic_machine_servitor }
+			NOT = { has_valid_civic = civic_machine_assimilator }
+			NOT = { exists = event_target:defined_purpose_random_species }
+		}
+		hidden_effect = {
+			force_add_civic = civic_machine_servitor
+
+			create_species = {
+				name = random
+				class = random_non_machine
+				portrait = random
+				traits = random
+				effect = {
+					save_event_target_as = defined_purpose_backup_species
+				}
+			}
+
+			capital_scope = {
+				create_pop = {
+					species = event_target:defined_purpose_backup_species
+				}
+			}
+		}
+
+		custom_tooltip = "federations.10340.complybecomerogueservitor_tooltip"
 	}
 }

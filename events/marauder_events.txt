@@ -172,7 +172,7 @@ country_event = {
 		OR = {
 			AND = { # Last ship is Void Dwelling
 				FROMFROM = { is_ship_size = marauder_void_dwelling }
-				count_owned_ships = {
+				count_owned_ship = {
 					limit = { is_ship_size = marauder_void_dwelling }
 					count = 0
 				}
@@ -180,7 +180,7 @@ country_event = {
 			}
 			AND = { # Last ship is Starbase
 				FROMFROM = { is_ship_size = starbase_marauder }
-				count_owned_ships = {
+				count_owned_ship = {
 					limit = { is_ship_size = marauder_void_dwelling }
 					count = 0
 				}
@@ -835,7 +835,7 @@ country_event = {
 	trigger = {
 		is_country_type = dormant_marauders
 		has_country_flag = marauder_vengeance_begun
-		count_owned_ships = {
+		count_owned_ship = {
 			count = 0
 		}
 	}
@@ -1849,22 +1849,17 @@ country_event = {
 
 	immediate = {
 		set_country_flag = marauder_diplomacy_engaged
-		random_relation = {
-			limit = {
-				root = { is_rival = prev }
-			}
+		random_rival_country = {
 			save_event_target_as = raid_target_1
 		}
-		random_relation = {
+		random_rival_country = {
 			limit = {
-				root = { is_rival = prev }
 				NOT = { is_same_value = event_target:raid_target_1 }
 			}
 			save_event_target_as = raid_target_2
 		}
-		random_relation = {
+		random_rival_country = {
 			limit = {
-				root = { is_rival = prev }
 				NOR = {
 					is_same_value = event_target:raid_target_1
 					is_same_value = event_target:raid_target_2
@@ -1872,9 +1867,8 @@ country_event = {
 			}
 			save_event_target_as = raid_target_3
 		}
-		random_relation = {
+		random_rival_country = {
 			limit = {
-				root = { is_rival = prev }
 				NOR = {
 					is_same_value = event_target:raid_target_1
 					is_same_value = event_target:raid_target_2
@@ -1894,7 +1888,7 @@ country_event = {
 	option = {
 		name = marauder.31.a
 		trigger = {
-			event_target:raid_target_1 = { exists = this }
+			exists = event_target:raid_target_1
 		}
 		hidden_effect = {
 			event_target:raid_target_1 = { save_event_target_as = preliminary_target }
@@ -1926,7 +1920,7 @@ country_event = {
 	option = {
 		name = marauder.31.b
 		trigger = {
-			event_target:raid_target_2 = { exists = this }
+			exists = event_target:raid_target_2
 		}
 		hidden_effect = {
 			event_target:raid_target_2 = { save_event_target_as = preliminary_target }
@@ -1958,7 +1952,7 @@ country_event = {
 	option = {
 		name = marauder.31.c
 		trigger = {
-			event_target:raid_target_3 = { exists = this }
+			exists = event_target:raid_target_3
 		}
 		hidden_effect = {
 			event_target:raid_target_3 = { save_event_target_as = preliminary_target }
@@ -1990,7 +1984,7 @@ country_event = {
 	option = {
 		name = marauder.31.d
 		trigger = {
-			event_target:raid_target_4 = { exists = this }
+			exists = event_target:raid_target_4
 		}
 		hidden_effect = {
 			event_target:raid_target_4 = { save_event_target_as = preliminary_target }
@@ -2444,7 +2438,7 @@ country_event = {
 			NOT = { event_target:current_marauder_diplomacy = { has_country_flag = merc_fleet_3_hired } }
 		}
 		allow = {
-			resource_stockpile_compare = { resource = energy value >= smallmercallow }
+			resource_stockpile_compare = { resource = energy value >= @smallmercallow }
 			hidden_trigger = {
 				NOT = { event_target:current_marauder_diplomacy = { has_country_flag = merc_fleet_3_hired } }
 			}
@@ -6075,7 +6069,6 @@ event = {
 			save_event_target_as = marauder_raiding_country
 			random_country = {
 				limit = {
-					is_country_type = dormant_marauders
 					has_country_flag = parent_of@event_target:marauder_raiding_country
 				}
 				save_event_target_as = marauder_country
@@ -6419,8 +6412,7 @@ event = {
 				has_valid_civic = civic_hive_devouring_swarm
 				has_valid_civic = civic_machine_terminator
 			}
-			any_relation = {
-				prev = { is_rival = prev }
+			any_rival_country = {
 				NOR = {
 					has_country_flag = under_marauder_attack
 					has_country_flag = target_of_hired_ai_raid
@@ -6448,8 +6440,7 @@ event = {
 					has_valid_civic = civic_hive_devouring_swarm
 					has_valid_civic = civic_machine_terminator
 				}
-				any_relation = {
-					prev = { is_rival = prev }
+				any_rival_country = {
 					NOR = {
 						has_country_flag = under_marauder_attack
 						has_country_flag = target_of_hired_ai_raid
@@ -6502,9 +6493,8 @@ event = {
 				#	save_event_target_as = hired_marauders
 				event_target:hired_marauders = {
 					add_resource = { energy = @raidcost }
-					random_relation = {
+					random_rival_country = {
 						limit = {
-							prev = { is_rival = prev }
 							NOR = {
 								has_country_flag = under_marauder_attack
 								has_country_flag = target_of_hired_ai_raid
@@ -7490,6 +7480,7 @@ country_event = {
 	desc = "marauder.501.desc"
 	picture = GFX_evt_khan_throne_room
 	show_sound = event_radio_chatter
+	location = event_target:marauder_rally_point
 
 	is_triggered_only = yes
 
@@ -7824,12 +7815,13 @@ country_event = {
 
 	immediate = {
 		set_global_flag = great_khan_dead
+		set_country_flag = khan_dead_event_fine
 		from = {
 			save_event_target_as = khan_destroyer
 			set_country_flag = no_khan_do
 			if = {
 				limit = { is_ai = no }
-				country_event = { id = marauder.710 days = 10 random = 10 }
+				country_event = { id = marauder.710 days = 2 }
 			}
 		}
 		fromfrom = {
@@ -7841,11 +7833,21 @@ country_event = {
 			country_event = { id = marauder.510 }
 		}
 		country_event = { id = marauder.600 days = 200 random = 100 }
-		event_target:great_khan_ruler = {
-			kill_leader = { show_notification = no }
+		if = {
+			limit = {
+				exists = event_target:great_khan_ruler
+			}
+			event_target:great_khan_ruler = {
+				kill_leader = { show_notification = no }
+			}
 		}
-		event_target:great_khan = {
-			kill_leader = { show_notification = no }
+		if = {
+			limit = {
+				exists = event_target:great_khan
+			}
+			event_target:great_khan = {
+				kill_leader = { show_notification = no }
+			}
 		}
 	}
 }
@@ -7901,6 +7903,7 @@ country_event = {
 
 	immediate = {
 		set_global_flag = great_khan_dead
+		set_country_flag = khan_dead_event_fine
 		random_list = {
 			10 = { set_country_flag = khan_dead_poison }
 			10 = { set_country_flag = khan_dead_disease }
@@ -7913,11 +7916,21 @@ country_event = {
 			country_event = { id = marauder.513 }
 		}
 		country_event = { id = marauder.600 days = 200 random = 100 }
-		event_target:great_khan_ruler = {
-			kill_leader = { show_notification = no }
+		if = {
+			limit = {
+				exists = event_target:great_khan_ruler
+			}
+			event_target:great_khan_ruler = {
+				kill_leader = { show_notification = no }
+			}
 		}
-		event_target:great_khan = {
-			kill_leader = { show_notification = no }
+		if = {
+			limit = {
+				exists = event_target:great_khan
+			}
+			event_target:great_khan = {
+				kill_leader = { show_notification = no }
+			}
 		}
 	}
 }
@@ -7970,6 +7983,7 @@ country_event = {
 
 	immediate = {
 		set_global_flag = great_khan_dead
+		set_country_flag = khan_dead_event_fine
 		set_country_flag = khan_dead_age
 		observer_event = { id = observer.17 }
 		every_country = {
@@ -8184,7 +8198,7 @@ country_event = {
 		is_country_type = dormant_marauders
 		fromfrom = { is_ship_size = marauder_void_dwelling }
 		from = { is_country_type = default }
-		count_owned_ships = {
+		count_owned_ship = {
 			limit = { is_ship_size = marauder_void_dwelling }
 			count >= 3
 		}
@@ -8963,9 +8977,11 @@ country_event = {
 
 	trigger = {
 		is_country_type = awakened_marauders
+		NOT = { has_country_flag = marauder600_happened }
 	}
 
 	immediate = {
+		set_country_flag = marauder600_happened
 		random_list = {
 			60 = {
 				# Fractures into Diadochi
@@ -9017,7 +9033,7 @@ country_event = {
 		owner_species = { save_event_target_as = marauder_species }
 		every_owned_fleet = {
 			limit = {
-				count_fleet_ships = {
+				count_owned_ship = {
 					count < 1
 					limit = { is_ship_size = starbase_marauder }
 				}
@@ -9094,7 +9110,7 @@ country_event = {
 		owner_species = { save_event_target_as = marauder_species }
 		every_owned_fleet = {
 			limit = {
-				count_fleet_ships = {
+				count_owned_ship = {
 					count < 1
 					limit = { is_ship_size = starbase_marauder }
 				}
@@ -9256,7 +9272,7 @@ country_event = {
 		owner_species = { save_event_target_as = marauder_species }
 		every_owned_fleet = {
 			limit = {
-				count_fleet_ships = {
+				count_owned_ship = {
 					count < 1
 					limit = { is_ship_size = starbase_marauder }
 				}
@@ -10109,5 +10125,56 @@ country_event = {
 	}
 	immediate = {
 		set_global_flag = great_khan_dead
+		if = {
+			limit = { exists = event_target:great_khan_ruler }
+			event_target:great_khan_ruler = {
+				kill_leader = { show_notification = no }
+			} 
+		}
+		if = {
+			limit = { exists = event_target:great_khan }
+			event_target:great_khan = {
+				kill_leader = { show_notification = no }
+			}
+		}
+		country_event = { id = marauder.712 days = 10 }
+	}
+}
+
+# copy of marauder.514, fallback for when the Khan mysteriously dies outside of the events meant to kill them.
+country_event = {
+	id = marauder.712
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = khan_dead_event_fine }
+	}
+	immediate = {
+		set_global_flag = great_khan_dead
+		set_country_flag = khan_dead_event_fine
+		set_country_flag = khan_dead_age
+		observer_event = { id = observer.17 }
+		every_country = {
+			limit = { is_ai = no }
+			country_event = { id = marauder.513 }
+		}
+		country_event = { id = marauder.600 days = 200 random = 100 }
+		if = {
+			limit = {
+				exists = event_target:great_khan_ruler
+			}
+			event_target:great_khan_ruler = {
+				kill_leader = { show_notification = no }
+			}
+		}
+		if = {
+			limit = {
+				exists = event_target:great_khan
+			}
+			event_target:great_khan = {
+				kill_leader = { show_notification = no }
+			}
+		}
 	}
 }

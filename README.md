@@ -58,6 +58,10 @@ This mod should go at the very top of your load order, so other mods overwrite i
 
 I highly suggest using a three-way merge tool, such as [Winmerge](https://winmerge.org/), when managing this project. It makes updating for new releases, evaluating other fixes, and so on a comparative breeze. Updating this project to a new Stellaris release takes me a couple hours, roughly.
 
+### Branch Policy
+
+Master branch is for development. Each major version will get its own branch from 2.6 on.
+
 ### A Note on Incorporating Fixes
 
 Many times, I have seen 'fixes' that do not actually address the issue. Just because another mod exists that claims to fix something, does not mean it does. Many of them paper over the issue, and the result is a borderline exploit or cheat.

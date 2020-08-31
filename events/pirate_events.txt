@@ -1,10 +1,7 @@
-############################
-#
+###############################################
 # Pirate Events
-#
-# Written by Henrik Thyrwall
-#
-############################
+# Written by Henrik Thyrwall (& Gemma Thomson)
+###############################################
 
 namespace = pirate
 
@@ -1616,4 +1613,232 @@ ship_event = {
 			}
 		}
 	}
+}
+
+############################
+# Late-game Pirates
+# Written by Gemma Thomson
+############################
+
+# Setup (triggered by on_late_game_pulse): Choose a pirate fleet to spawn
+event = {
+    id = pirate.100
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+		end_game_years_passed >= 0
+        any_system = {
+            has_system_trade_value >= 180
+        }
+    }
+
+    immediate = {
+        random_list = {
+            1 = { #Bemat Thalassocracy
+				event_target:global_event_country = {
+					country_event = { id = pirate.150 days = 550 }
+				}
+            }
+            # More pirate encounters can be added here
+            6 = {}
+        }
+    }
+}
+
+### Bemat Thalassocracy ###
+
+# Setup (event_target:global_event_country scope; randomly triggered in pirate.100): Find a suitable spawn point
+country_event = {
+    id = pirate.150
+    hide_window = yes
+    is_triggered_only = yes
+
+	trigger = {
+		NOR = {
+			exists = event_target:thalassocracy_country
+			any_country = { has_country_flag = met_thalassocracy }
+		}
+	}
+
+    immediate = {
+		create_thalassocracy_country = yes
+        if = { #Prioritise unoccupied systems
+            limit = {
+                any_system = {
+					num_planets_in_system > 1
+                    NOR = {
+                        exists = space_owner
+                        has_star_flag = hostile_system
+                        has_star_flag = guardian
+						has_star_flag = tiyanki_home_system
+						has_star_flag = amoeba_home_system
+						has_star_flag = lcluster
+						has_star_flag = sealed_system
+                    }
+                }
+            }
+            random_system = {
+                limit = {
+					num_planets_in_system > 1
+                    NOR = {
+                        exists = space_owner
+                        has_star_flag = hostile_system
+                        has_star_flag = guardian
+						has_star_flag = tiyanki_home_system
+						has_star_flag = amoeba_home_system
+						has_star_flag = lcluster
+						has_star_flag = sealed_system
+                    }
+                }
+                save_global_event_target_as = thalassocracy_target_system
+                random_system_planet = {
+                    save_event_target_as = thalassocracy_spawn_planet
+                    set_planet_flag = thalassocracy_visited
+                }
+                random_system_planet = {
+                    limit = {
+                        NOT = { has_planet_flag = thalassocracy_visited }
+                    }
+                    save_event_target_as = thalassocracy_target_planet
+                }
+                create_thalassocracy_fleet = yes
+				event_target:thalassocracy_country = {
+					set_country_flag = spawned_fleet
+				}
+            }
+        }
+        else_if = { #Pop up in a semi-convenient, empire-owned system, if possible
+            limit = { #Must be duplicated below, in the random_system effect
+                any_system = {
+                    exists = space_owner
+					num_planets_in_system > 1
+                    NOR = {
+                        is_pirate_system = yes
+                        has_star_flag = hostile_system
+                        has_star_flag = guardian
+                        has_star_flag = enclave
+                        any_system_planet = { is_capital = yes }
+                    }
+                    has_system_trade_value >= 80
+                    distance = {
+                        source = this.capital_scope.solar_system
+                        use_bypasses = no
+                        min_jumps = 2
+                        max_jumps = 5
+                    }
+                }
+            }
+            random_system = {
+                limit = {
+                    exists = space_owner
+					num_planets_in_system > 1
+                    NOR = {
+                        is_pirate_system = yes
+                        has_star_flag = hostile_system
+                        has_star_flag = guardian
+                        has_star_flag = enclave
+                        any_system_planet = { is_capital = yes }
+                    }
+                    has_system_trade_value >= 80
+                    distance = {
+                        source = this.capital_scope.solar_system
+                        use_bypasses = no
+                        min_jumps = 2
+                        max_jumps = 5
+                    }
+                }
+                save_global_event_target_as = thalassocracy_target_system
+                random_system_planet = {
+                    save_event_target_as = thalassocracy_spawn_planet
+                    set_planet_flag = thalassocracy_visited
+                }
+                random_planet = {
+                    limit = {
+                        NOT = { has_planet_flag = thalassocracy_visited }
+                    }
+                    save_event_target_as = thalassocracy_target_planet
+                }
+                create_thalassocracy_fleet = yes
+				event_target:thalassocracy_country = { set_country_flag = spawned_fleet }
+				space_owner = {
+					country_event = { id = pirate.155 days = 0 } #Establish contact
+				}
+            }
+        }
+        else = {
+            #Nothing; await next pulse/valid country
+        }
+    }
+}
+
+# The pirates encounter an empire (triggered by on_first_contact)
+# This = Initiating (e.g. player) empire
+# From = Pirate empire
+country_event = {
+    id = pirate.155
+    title = "pirate.155.name"
+    desc = {
+        text = "pirate.155.desc.regular"
+        trigger = { is_regular_empire = yes }
+    }
+    desc = {
+        text = "pirate.155.desc.machine"
+        trigger = { is_machine_empire = yes }
+    }
+    desc = {
+        text = "pirate.155.desc.hive"
+        trigger = { is_hive_empire = yes }
+    }
+    is_triggered_only = yes
+
+    diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:thalassocracy_species
+		room = ethic_spaceship_room
+	}
+    show_sound = event_ship_bridge
+    location = event_target:thalassocracy_target_system
+
+	trigger = {
+		exists = event_target:thalassocracy_country
+		event_target:thalassocracy_country = {
+			has_country_flag = spawned_fleet
+		}
+		NOR = {
+			has_communications = from
+			has_country_flag = met_thalassocracy
+		}
+	}
+
+    immediate = {
+		establish_communications_no_message = event_target:thalassocracy_country
+        set_country_flag = met_thalassocracy
+    }
+
+    option = { #Disbelief
+        name = "pirate.155.a"
+    }
+    option = { #Scum!
+        name = "pirate.155.b"
+        trigger = {
+            NOR = {
+                is_pacifist = yes
+                is_machine_empire = yes
+                is_megacorp = yes
+            }
+        }
+    }
+    option = {
+        name = "pirate.155.pacifist"
+        trigger = { is_pacifist = yes }
+    }
+    option = {
+        name = "pirate.155.machine"
+        trigger = { is_machine_empire = yes }
+    }
+    option = {
+        name = "pirate.155.corp"
+        trigger = { is_megacorp = yes }
+    }
 }

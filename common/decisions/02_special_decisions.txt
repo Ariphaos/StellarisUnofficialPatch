@@ -839,6 +839,7 @@ decision_arcology_project = {
 			has_modifier = resort_colony
 			has_modifier = penal_colony
 			has_modifier = slave_colony
+			has_modifier = pm_wenkwort_custodian
 		}
 		habitable_structure = no
 		exists = owner
@@ -998,7 +999,10 @@ decision_market_nomination = {
 	}
 
 	potential = {
-		has_global_flag = ongoing_market_nomination
+		OR = {
+			has_global_flag = ongoing_market_nomination
+			has_global_flag = ongoing_market_relocation_nomination
+		}
 		#from = { has_communications = event_target:50percentcomms } # should include self
 		from = { has_country_flag = market_nomination_eligible }
 	}
@@ -1745,5 +1749,104 @@ decision_project_cornucopia = {
 			factor = 0
 			num_pops < 20
 		}
+	}
+}
+
+# Advanced Habitat
+decision_upgrade_habitat = {
+	owned_planets_only = yes
+	icon = decision_satellite_in_orbit
+
+	enactment_time = 720
+	resources = {
+		category = decisions
+		cost = {
+			alloys = 1000
+		}
+	}
+
+	potential = {
+		is_planet_class = pc_habitat
+		NOT = { has_planet_flag = advanced_habitat }
+		exists = owner
+		owner = {
+			has_technology = tech_habitat_2
+		}
+	}
+
+	allow = {
+		free_district_slots = 0
+	}
+
+	effect = {
+		hidden_effect = {
+			set_planet_entity = {
+				entity = "habitat_phase_02_entity"
+				graphical_culture = owner
+			}
+			set_planet_flag = advanced_habitat
+		}
+		set_planet_size = 6
+
+		if = {
+			limit = {
+				owner = {
+					has_ascension_perk = ap_voidborn
+					NOT = { has_technology = tech_habitat_3 }
+					NOT = { has_tech_option = tech_habitat_3 }
+				}
+			}
+			owner = {
+				add_research_option = tech_habitat_3
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 1
+	}
+}
+
+decision_upgrade_habitat_2 = {
+	owned_planets_only = yes
+	icon = decision_satellite_in_orbit
+
+	enactment_time = 1440
+	resources = {
+		category = decisions
+		cost = {
+			alloys = 1500
+		}
+	}
+
+	potential = {
+		is_planet_class = pc_habitat
+		has_planet_flag = advanced_habitat
+		NOT = { has_planet_flag = advanced_habitat_2 }
+		exists = owner
+		owner = {
+			has_technology = tech_habitat_3
+		}
+	}
+
+	allow = {
+		free_district_slots = 0
+		has_major_upgraded_capital = yes
+	}
+
+	effect = {
+		hidden_effect = {
+			set_planet_entity = {
+				entity = "habitat_phase_03_entity"
+				graphical_culture = owner
+			}
+
+			set_planet_flag = advanced_habitat_2
+		}
+		set_planet_size = 8
+	}
+
+	ai_weight = {
+		weight = 1
 	}
 }
