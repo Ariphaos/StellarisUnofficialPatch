@@ -1,0 +1,258 @@
+# from = country
+# this = species
+
+migration_control_yes = {
+	token = migration_control_yes
+
+	ai_will_do = {
+		factor = 2
+		modifier = {
+			factor = 0.1
+			from = { NOT = { has_authority = auth_machine_intelligence } }
+		}
+		modifier = {
+			factor = 100
+			has_citizenship_type = { country = from type = citizenship_slavery }
+			OR = {
+				ariphaos_patch_slaves_rare_trait = no
+				ariphaos_patch_slaves_poor_merit = yes
+			}
+		}
+	}
+}
+
+migration_control_no = {
+	token = migration_control_no
+
+	potential = {
+		exists = from
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		custom_tooltip = {
+			NOR = {
+				has_citizenship_type = { country = from type = citizenship_purge_machine }
+				has_citizenship_type = { country = from type = citizenship_purge }
+			}
+			text = not_undesirables_tooltip
+		}
+		NAND = {
+			has_citizenship_type = { country = from type = citizenship_slavery }
+			OR = {
+				has_slavery_type = { country = from type = slavery_livestock }
+				has_slavery_type = { country = from type = slavery_matrix }
+			}
+		}
+	}
+	ai_will_do = {
+		factor = 1
+	}
+}
+
+population_control_yes = {
+	token = population_control_yes
+
+	pop_modifier = {
+		pop_happiness = -0.1
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		from = {
+			NOT = { has_policy_flag = population_controls_not_allowed }
+		}
+		if = {
+			limit = {
+				OR = {
+					has_citizenship_type = { country = from type = citizenship_purge }
+					has_citizenship_type = { country = from type = citizenship_purge_machine }
+				}
+			}
+			always = yes
+		}
+		else = {
+			custom_tooltip = {
+				fail_text = same_species_disallowed
+				NOT = { is_same_species = from }
+			}
+			custom_tooltip = {
+				fail_text = empire_xenophile
+				from = {
+					NOR = {
+						has_ethic = ethic_xenophile
+						has_ethic = ethic_fanatic_xenophile
+					}
+				}
+			}
+		}
+	}
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 100
+			has_citizenship_type = { country = from type = citizenship_slavery }
+			OR = {
+				ariphaos_patch_slaves_rare_trait = no
+				ariphaos_patch_slaves_poor_merit = yes
+			}
+		}
+	}
+}
+
+population_control_no = {
+	token = population_control_no
+
+	potential = {
+		always = yes
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		custom_tooltip = {
+			NOR = {
+				has_citizenship_type = { country = from type = citizenship_purge_machine }
+				has_citizenship_type = { country = from type = citizenship_purge }
+			}
+			text = not_undesirables_tooltip
+		}
+		custom_tooltip = {
+			fail_text = "HIVE_MIND_SPECIES_CITIZENS_ONLY"
+			OR = {
+				NOT = { from = { has_authority = auth_hive_mind } }
+				has_trait = trait_hive_mind
+			}
+		}
+	}
+	ai_will_do = {
+		factor = 2
+	}
+}
+
+colonization_control_yes = {
+	token = colonization_control_yes
+
+	potential = {
+		NAND = {
+			from = { has_authority = auth_machine_intelligence }
+			OR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+			}
+		}
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		if = {
+			limit = {
+				OR = {
+					has_citizenship_type = { country = from type = citizenship_purge }
+					has_citizenship_type = { country = from type = citizenship_purge_machine }
+					has_citizenship_type = { country = from type = citizenship_slavery }
+					has_citizenship_type = { country = from type = citizenship_robot_servitude }
+				}
+			}
+			always = yes
+		}
+		else = {
+			custom_tooltip = {
+				fail_text = same_species_disallowed
+				NOT = { is_same_species = from }
+			}
+		}
+	}
+
+	ai_will_do = {
+		factor = 2
+		modifier = {
+			factor = 0
+			from = {
+				NOR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			has_trait = trait_cybernetic
+			from = { has_valid_civic = civic_machine_assimilator }
+		}
+	}
+}
+
+colonization_control_no = {
+	token = colonization_control_no
+
+	potential = {
+		exists = from
+		NAND = {
+			from = { has_authority = auth_machine_intelligence }
+			NOR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+				AND = {
+					has_trait = trait_cybernetic
+					from = { has_valid_civic = civic_machine_assimilator }
+				}
+				from = { has_valid_civic = civic_machine_servitor }
+			}
+		}
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		custom_tooltip = {
+			NOR = {
+				has_citizenship_type = { country = from type = citizenship_purge_machine }
+				has_citizenship_type = { country = from type = citizenship_purge }
+			}
+			text = not_undesirables_tooltip
+		}
+		custom_tooltip = {
+			fail_text = "HIVE_MIND_SPECIES_CITIZENS_ONLY"
+			OR = {
+				NOT = { from = { has_authority = auth_hive_mind } }
+				has_trait = trait_hive_mind
+			}
+		}
+		custom_tooltip = {
+			fail_text = "ROBOTS_CANNOT_COLONIZE"
+			OR = {
+				NOT = { has_trait = trait_mechanical }
+				from = { has_technology = tech_droid_workers }
+				from = { has_authority = auth_machine_intelligence }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "SPECIES_CANNOT_COLONIZE"
+			NOR = {
+				has_trait = trait_syncretic_proles
+				has_trait = trait_nerve_stapled
+			}
+		}
+		custom_tooltip = {
+			fail_text = is_slaves_not_battle_thralls
+			NAND = {
+				has_citizenship_type = { country = from type = citizenship_slavery }
+				NOR = {
+					has_slavery_type = { country = from type = slavery_military }
+					has_slavery_type = { country = from type = slavery_indentured }
+				}
+			}
+		}
+	}
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			from = { has_valid_civic = civic_machine_servitor }
+			NOR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+			}
+		}
+	}
+}

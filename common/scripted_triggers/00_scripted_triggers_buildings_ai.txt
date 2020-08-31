@@ -1,0 +1,428 @@
+buildings_simple_allow = {
+	planet = {
+		OR = {
+			AND = {
+				buildings_unemployed = yes
+				num_free_districts = { type = district_generator value = 0 }
+				OR = {
+					num_free_districts = { type = district_mining value = 0 }
+					owner = { country_uses_food = yes }
+				}
+				OR = {
+					num_free_districts = { type = district_farming value = 0 }
+					owner = { country_uses_food = no }
+				}
+			}
+			AND = {
+				exists = owner
+				owner = { is_ai = no }
+			}
+		}
+	}
+}
+
+building_basic_income_check = {
+	planet = {
+		exists = owner
+		OR = {
+			owner = { is_ai = no }
+			AND = {
+				buildings_unemployed = yes
+				owner = {
+					OR = {
+						has_monthly_income = {
+							resource = energy
+							value > -5
+						}
+						has_resource = { type = energy amount > 1500 }
+					}
+
+					OR = {
+						has_monthly_income = {
+							resource = minerals
+							value > 0
+						}
+						has_resource = { type = minerals amount > 1500 }
+					}
+				}
+			}
+		}
+	}
+}
+
+building_relaxed_basic_income_check = {
+	planet = {
+		exists = owner
+		OR = {
+			owner = { is_ai = no }
+			buildings_unemployed = yes
+			AND = {
+				owner = {
+					OR = {
+						has_monthly_income = {
+							resource = energy
+							value > -5
+						}
+						has_resource = { type = energy amount > 1000 }
+					}
+
+					OR = {
+						has_monthly_income = {
+							resource = minerals
+							value > 0
+						}
+						has_resource = { type = minerals amount > 1000 }
+					}
+				}
+			}
+		}
+	}
+}
+
+buildings_build_building = {
+	planet_devastation < 10
+	NOT = {
+		planet = {
+			any_owned_pop = {
+				has_citizenship_type = { type = citizenship_purge }
+			}
+		}
+	}
+	OR = {
+		has_modifier = planet_population_control
+		has_modifier = planet_population_control_gestalt
+		has_modifier = planet_robot_assembly_control
+		has_modifier = planet_growth_discouraged
+		free_district_slots = 0
+		any_owned_pop = {
+			is_unemployed = yes
+			NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+			NOR = {
+				is_pop_category = specialist
+				is_pop_category = ruler
+			}
+		}#Prevent unemployed specialist/rulers and bio_trophies problems.
+	}
+	NAND = {
+		exists = owner
+		owner = { is_lithoid_devouring_swarm = yes }
+		is_lithoid_devouring_swarm_consumption_world = yes
+	}
+}
+
+country_uses_food = {
+	OR = {
+		NOR = {
+			has_authority = auth_machine_intelligence
+			is_lithoid_empire = yes
+		}
+		any_owned_pop = {
+			is_organic_species = yes
+			is_lithoid = no
+			is_being_purged = no
+			is_sapient = yes
+		}
+	}
+}
+
+country_uses_consumer_goods = {
+	OR = {
+		is_regular_empire = yes
+		has_valid_civic = civic_machine_servitor
+	}
+}
+
+buildings_unemployed = {
+	planet = {
+		any_owned_pop = {
+			OR = {
+				is_unemployed = yes
+				has_job = servant
+			}
+			NOR = {
+				is_pop_category = specialist
+				is_pop_category = ruler
+			}
+			worker_job_check_trigger = yes
+		}
+	}
+}
+
+buildings_difficulty = {
+	is_difficulty > 2
+	years_passed > 20
+	has_resource = { type = energy amount > 1000 }
+	has_resource = { type = minerals amount > 2000 }
+}
+
+buildings_stop_pop = {
+	exists = owner
+	OR = {
+		owner = { is_ai = no }
+		AND = {
+			count_pops = { limit = { is_sapient = yes } count >= 27 }
+			is_planet_class = pc_habitat
+			NOT = { owner = { is_gestalt = yes } }
+		}
+		AND = {
+			is_planet_class = pc_habitat
+			owner = { is_gestalt = yes }
+			count_pops = { limit = { is_sapient = yes } count >= 75 }
+			OR = {
+				free_housing < 1
+				free_jobs < 1
+			}
+			free_building_slots = 0
+		}
+		AND = {
+			has_building_construction = no
+			planet_devastation < 1
+			free_jobs < 1
+			OR = {
+				count_pops = { limit = { is_sapient = yes } count >= 82 }
+				AND = {
+					num_pops > 77
+					owner = { is_hive_empire = yes }
+				}
+			}
+			NOT = { is_planet_class = pc_habitat }
+		}
+	}
+}
+
+districts_build_district = {
+	OR = {
+		has_modifier = planet_population_control
+		has_modifier = planet_population_control_gestalt
+		has_modifier = planet_robot_assembly_control
+		has_modifier = planet_growth_discouraged
+		any_owned_pop = {
+			is_unemployed = yes
+			OR = {
+				specialist_job_check_trigger = no
+				has_citizenship_type = { type = citizenship_slavery }
+			}
+			NOR = { has_citizenship_type = { type = citizenship_assimilation } }
+		}
+		owner = { is_ai = yes }
+		AND = {
+			planet_devastation < 10
+			has_building_construction = no
+			buildings_unemployed = yes
+			NOT = {
+				planet = {
+					any_owned_pop = {
+						has_citizenship_type = { type = citizenship_purge }
+					}
+				}
+			}
+		}
+	}
+	NOT = {
+		exists = owner
+		owner = { is_lithoid_devouring_swarm = yes }
+		is_lithoid_devouring_swarm_consumption_world = yes
+	}
+}
+
+districts_good_energy = {
+	planet = {
+		OR = {
+			has_modifier = hazardous_weather
+			has_modifier = divine_algorithm
+			has_modifier = energy_relic
+			has_modifier = gas_rich_planet_fo_realz
+			has_planet_flag = buildings_good_energy
+		}
+	}
+}
+
+districts_good_minerals = {
+	planet = {
+		OR = {
+			has_modifier = extensive_moon_system
+			has_modifier = carbon_world
+			has_modifier = mineral_rich
+			has_modifier = ultra_rich
+			has_modifier = asteroid_belt
+			has_modifier = minerals_relic
+			has_planet_flag = buildings_good_minerals
+		}
+	}
+}
+
+districts_good_food = {
+	planet = {
+		OR = {
+			has_modifier = lush_planet
+			has_planet_flag = buildings_good_food
+		}
+	}
+}
+
+jobs_work_minerals_goods = {
+	exists = owner
+	owner = {
+		is_ai = yes
+		OR = {
+			AND = {
+				has_resource = {
+					type = minerals
+					amount < 5000
+				}
+				has_resource = {
+					type = consumer_goods
+					amount > 1500
+				}
+			}
+			AND = {
+				has_resource = {
+					type = minerals
+					amount < 3000
+				}
+				has_resource = {
+					type = consumer_goods
+					amount > 750
+				}
+			}
+			AND = {
+				has_resource = {
+					type = minerals
+					amount < 501
+				}
+				has_resource = {
+					type = consumer_goods
+					amount > 500
+				}
+			}
+		}
+	}
+}#If true makes the AI really value mining jobs and stops organics from working factory jobs.
+
+buildings_no_motes = {
+	exists = owner
+	owner = {
+		is_ai = yes
+		has_deficit = volatile_motes
+		resource_stockpile_compare = { #can buy on market
+			resource = energy
+			value < 1500
+		}
+	}
+}#Used to destroy buildings that require the SR but lack it.
+
+buildings_no_crystals = {
+	exists = owner
+	owner = {
+		is_ai = yes
+		has_deficit = rare_crystals
+		resource_stockpile_compare = { #can buy on market
+			resource = energy
+			value < 1500
+		}
+	}
+}#Used to destroy buildings that require the SR but lack it.
+
+buildings_no_exotic_gases = {
+	exists = owner
+	owner = {
+		is_ai = yes
+		has_deficit = exotic_gases
+		resource_stockpile_compare = { #can buy on market
+			resource = energy
+			value < 1500
+		}
+	}
+}#Used to destroy buildings that require the SR but lack it.
+
+buildings_has_motes = {
+	exists = owner
+	OR = {
+		owner = {
+			NOT = { has_country_flag = buildings_new_mote_building }
+			has_monthly_income = {
+				resource = volatile_motes
+				value >= 2
+			}
+		}
+		AND ={
+			free_building_slots > 2
+			owner = {
+				has_technology = tech_volatile_motes
+				has_monthly_income = {
+					resource = volatile_motes
+					value >= 1
+				}
+			}
+		}#Can follow up the building with a new mote plant
+	}
+}#Used in the buildings file to determine if the country has the needed Strategic Resource.
+
+buildings_has_crystals = {
+	exists = owner
+	OR = {
+		owner = {
+			NOT = { has_country_flag = buildings_new_crystal_building }
+			has_monthly_income = {
+				resource = rare_crystals
+				value >= 2
+			}
+		}
+		AND ={
+			free_building_slots > 2
+			owner = {
+				has_technology = tech_rare_crystals
+				has_monthly_income = {
+					resource = rare_crystals
+					value >= 1
+				}
+			}
+		}#Can follow up the building with a new mote plant
+	}
+}#Used in the buildings file to determine if the country has the needed Strategic Resource.
+
+buildings_has_exotic_gases = {
+	exists = owner
+	OR = {
+		owner = {
+			NOT = { has_country_flag = buildings_new_gas_building }
+			has_monthly_income = {
+				resource = exotic_gases
+				value >= 2
+			}
+		}
+		AND ={
+			free_building_slots > 2
+			owner = {
+				has_technology = tech_exotic_gases
+				has_monthly_income = {
+					resource = exotic_gases
+					value >= 1
+				}
+			}
+		}#Can follow up the building with a new mote plant
+	}
+}#Used in the buildings file to determine if the country has the needed Strategic Resource.
+
+buildings_upgrade_allow = {
+	exists = owner
+	OR = {
+		owner = { is_ai = no }
+		buildings_unemployed = yes
+	}
+}
+
+jobs_any_research = {
+	planet = {
+		any_owned_pop = {
+			OR = {
+				has_job = head_researcher
+				has_job = researcher
+				has_job = brain_drone
+				has_job = calculator
+				has_job = dimensional_portal_researcher
+				has_job = dimensional_portal_researcher_gestalt
+			}
+		}
+	}
+}

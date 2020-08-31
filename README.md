@@ -16,7 +16,7 @@ We accept fixes for the following issues. Some issues might span multiple catego
 
 * **Functionality** A 'general bug'. Something straight up doesn't work, or works inappropriately.
 
-* **Oversights** These are issues that may surprise the player when encountered, though they may not technically be bugs. These aren't balance per se, but rather player frustration, or if the player gets away with something they probably shouldn't. 
+* **Oversights** These are issues that may surprise the player when encountered, though they may not technically be bugs. These aren't balance per se, but rather player frustration, or if the player gets away with something it seems like they shouldn't. 
 
 * **Balance** For a balance fix to make it in, something needs to be seriously wrong. Not just 'this feels unbalanced' but 'this dramatically impacts game experience and is clearly inappropriate'. 
 
@@ -27,6 +27,10 @@ We accept fixes for the following issues. Some issues might span multiple catego
 * **AI Improvements** Tweaks to the AI to make it handle situations more intelligently. Some of these are taken from Glavius or StarNet.
 
 * **Cosmetics** Typos, incorrect icons, graphical issues, and other elements that do not impact gameplay in any fashion.  
+
+## What is out of scope
+
+* **Tuning** If something is functioning but merely 'unbalanced', it isn't our job to fix it. Tuning is only appropriate when necessary as a part of a larger fix, where numbers are needed and Paradox provides none.
 
 ## Usage
 

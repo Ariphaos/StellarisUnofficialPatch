@@ -1,0 +1,2224 @@
+##############################
+# Colony Events
+##############################
+
+namespace = colony_mod
+
+planet_event = { #Irradiated
+	id = colony_mod.1
+	title = "colony_mod.1.name"
+	desc = {
+		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		text = "colony_mod.1.desc"
+	}
+	desc = {
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		text = "colony_mod.1.desc_mach"
+	}
+	picture = GFX_evt_alien_city
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		has_modifier = "irradiated_planet"
+		NOT = { has_planet_flag = irradiated_colony_flag } 
+		num_pops > 0
+	}
+	
+	immediate = {
+		set_planet_flag = irradiated_colony_flag
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.1.a
+		custom_tooltip = irradiated_planet_tooltip
+		hidden_effect = {
+			random_list = {
+				20 = { planet_event = { id = colony_mod.6 days = 40 random = 20 } }
+				20 = { planet_event = { id = colony_mod.7 days = 40 random = 20} }
+				20 = { planet_event = { id = colony_mod.8 days = 40 random = 20} }
+				40 = { planet_event = { id = colony_mod.9 days = 40 random = 20} }
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = colony_mod.6
+	title = "colony_mod.6.name"
+	desc = "colony_mod.6.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.6.a #physics
+		add_deposit = d_ancient_bombardment_craters
+	}
+}
+
+planet_event = {
+	id = colony_mod.7
+	title = "colony_mod.7.name"
+	desc = "colony_mod.7.desc"
+	picture = GFX_evt_ground_combat
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.7.a #eng
+		add_deposit = d_ancient_battlefield
+	}
+}
+
+planet_event = {
+	id = colony_mod.8
+	title = "colony_mod.8.name"
+	desc = {
+		text = "colony_mod.8.desc"
+		trigger = {
+			owner = {
+				NOR = {
+					has_government = gov_machine_terminator
+					has_civic = civic_fanatic_purifiers
+				}
+			}
+		}
+	}
+	desc = {
+		text = "colony_mod.8.desc_mach"
+		trigger = { 
+			owner = { 
+				OR = { 
+					has_civic = civic_fanatic_purifiers
+					has_government = gov_machine_terminator
+				}
+			}  
+		}
+	}
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.8.a #soc
+		add_deposit = d_irradiated_ruins
+	}
+}
+
+planet_event = {
+	id = colony_mod.9
+	title = "colony_mod.9.name"
+	desc = "colony_mod.9.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.9.a #modifier
+		add_modifier = {
+			modifier = "planet_uncertain_past"
+			days = -1
+		}
+	}
+}
+
+planet_event = { #titanic life
+	id = colony_mod.2
+	title = "colony_mod.2.name"
+	desc = "colony_mod.2.desc"
+	picture = GFX_evt_alien_nature
+	show_sound = event_air_raid_siren
+	location = ROOT
+	trackable = yes
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		has_modifier = "titanic_life"
+		NOT = { has_planet_flag = titanic_life_colony_flag }
+		num_pops > 0
+	}
+	
+	immediate = {
+		set_planet_flag = titanic_life_colony_flag
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.2.a# yes
+		# study them, may have bad outcome, such as a hostile unit spawning
+		enable_special_project = {
+			name = "titanic_life_study_normal"
+			location = this
+			owner = root
+		}
+	}
+	
+	option = {
+		name = colony_mod.2.b# no
+		#no effect, don't bother them
+	}
+	
+	option = {
+		name = colony_mod.2.c
+		trigger = {
+			owner = { OR = { has_ethic = ethic_xenophile has_ethic = ethic_fanatic_xenophile } #nice, for xenophiles
+			}
+		}
+		# study them, bad outcome less likely but takes longer.
+		# Remove blockers in success result
+		enable_special_project = {
+			name = "titanic_life_study_nice"
+			location = this
+			owner = root
+		}
+		hidden_effect = {
+			set_planet_flag = nice_titan_study
+		}
+	}
+	
+	option = {
+		name = colony_mod.2.d
+		trigger = {
+			owner = { 
+				OR = { 
+					has_ethic = ethic_xenophobe 
+					has_ethic = ethic_fanatic_xenophobe 
+					has_authority = auth_hive_mind
+				} #mean, for xenophobe
+			}
+		}
+		# study them, takes less time but you will likely get a bad effect too
+		# huge food output increase
+		enable_special_project = {
+			name = "titanic_life_study_mean"
+			location = this
+			owner = root
+		}
+		add_modifier = {
+			modifier = "eat_the_titans"
+			days = -1
+		}
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.101
+	title = "colony_mod.101.name"
+	desc = "colony_mod.101.desc"
+	picture = GFX_evt_alien_cavemen
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = EXCELLENT
+		trigger = {
+			NOT = {
+				has_planet_flag = nice_titan_study
+			}
+		}
+		hidden_effect = {
+			owner = { set_country_flag = titanic_life_soldiers } #Owner flag not actually needed, but could have techs or other things tie into it
+			set_planet_flag = titanic_life_can_build
+		}
+		custom_tooltip = titanic_recruit_tooltip
+	}
+	
+	option = {
+		name = EXCELLENT
+		trigger = {
+			has_planet_flag = nice_titan_study
+		}
+		hidden_effect = {
+			owner = { set_country_flag = titanic_life_soldiers } #Owner flag not actually needed, but could have techs or other things tie into it
+			set_planet_flag = titanic_life_can_build
+			every_deposit = {
+				limit = { is_deposit_type = d_titanic_life_blocker }
+				clear_blocker = yes
+			}
+		}
+		custom_tooltip = titanic_recruit_phile_tooltip
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.102
+	title = "colony_mod.102.name"
+	desc = "colony_mod.102.desc"
+	picture = GFX_evt_ground_combat
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_country = {
+			name = "NAME_Titanic_Life"
+			type = faction
+			effect = {
+				establish_communications_no_message = root.owner
+			}
+		}
+		create_species = {
+			name = "NAME_Titans"
+			class = random_non_machine
+			portrait = random
+			traits = random
+		}
+		create_army = {
+			name = "NAME_Enraged_Guardian"
+			owner = last_created
+			species = last_created
+			type = "titanic_guardian_army"
+		}
+		create_army = {
+			name = "NAME_Enraged_Titan"
+			owner = last_created
+			species = last_created
+			type = "titanic_guardian_army"
+		}
+		create_army = {
+			name = "NAME_Enraged_Titan"
+			owner = last_created
+			species = last_created
+			type = "titanic_guardian_army"
+		}
+	}
+	
+	option = {
+		name = TERRIBLE
+		custom_tooltip = titanic_uprising_tooltip
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.3 #unstable tectonics
+	title = "colony_mod.3.name"
+	desc = "colony_mod.3.desc"
+	picture = GFX_evt_colony_settlement
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		has_modifier = "unstable_tectonics"
+		NOT = { has_modifier = "recent_quake" }
+		num_pops > 0
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.3.a
+		add_modifier = {
+			modifier = "recent_quake"
+			days = 365
+		}
+		custom_tooltip = quake_report_tooltip
+		hidden_effect = {
+			random_list = {
+				33 = { planet_event = { id = colony_mod.21 days = 10 random = 5 } }
+				33 = { planet_event = { id = colony_mod.22 days = 10 random = 5 } }
+				33 = { planet_event = { id = colony_mod.23 days = 10 random = 5 } }
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = colony_mod.21
+	title = "colony_mod.21.name"
+	desc = "colony_mod.21.desc"
+	picture = GFX_evt_colony_settlement
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = WORRYING
+		add_deposit = d_deep_sinkhole
+		custom_tooltip = quake_sinkhole_tooltip
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.22
+	title = "colony_mod.21.name"
+	desc = "colony_mod.22.desc"
+	picture = GFX_evt_colony_settlement
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = REMARKABLE
+		OWNER = {
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = @tier1materialreward
+				min = @tier1materialmin
+				max = @tier1materialmax
+			}
+		}
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.23
+	title = "colony_mod.21.name"
+	desc = "colony_mod.23.desc"
+	picture = GFX_evt_colony_settlement
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = GOOD
+	#no effect
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.4 #asteroid belt
+	title = "colony_mod.4.name"
+	desc = "colony_mod.4.desc"
+	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		has_modifier = "asteroid_belt"
+		NOT = { has_modifier = "recent_comet" } 
+		num_pops > 0
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.4.a
+		add_modifier = {
+			modifier = "recent_comet"
+			days = 1800
+		}
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.5
+	title = "colony_mod.5.name"
+	desc = "colony_mod.5.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_air_raid_siren
+	location = ROOT
+	trackable = yes
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		owner = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		has_modifier = "atmospheric_hallucinogen"
+		NOT = { has_planet_flag = atmospheric_hallucinogen_colony_flag }
+		num_pops > 0
+	}
+	
+	immediate = {
+		set_planet_flag = atmospheric_hallucinogen_colony_flag
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.5.a
+		enable_special_project = {
+			name = "hallucinogen_removal"
+			location = this
+			owner = root
+		}
+	}
+	
+	option = {
+		name = colony_mod.5.b
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.10 #success
+	title = "colony_mod.10.name"
+	desc = "colony_mod.10.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = GOOD
+		remove_modifier = "atmospheric_hallucinogen"
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.11 #failure
+	title = "colony_mod.11.name"
+	desc = "colony_mod.11.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = MARVELOUS
+		hidden_effect = {
+			remove_modifier = "atmospheric_hallucinogen"
+			add_modifier = {
+				modifier = "atmospheric_hallucinogen_good"
+				days = -1
+			}
+		}
+		custom_tooltip = hallucinogen_update_tooltip
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.12 #asteroid_impacts
+	title = "colony_mod.12.name"
+	desc = {
+		text = "colony_mod.12.desc"
+		trigger = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
+	}
+	desc = {
+		text = colony_mod.12.desc_gestalt
+		trigger = { owner = { has_ethic = ethic_gestalt_consciousness } }
+	}
+	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_air_raid_siren
+	location = ROOT
+	trackable = yes
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		NOT = { has_planet_flag = asteroid_defences_colony_flag }
+		has_modifier = "asteroid_impacts"
+		NOT = { has_modifier = "recent_impact" }
+		num_pops > 1
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.12.a #eh
+		if = {
+			limit = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
+			add_modifier = {
+				modifier = "recent_impact"
+				days = 1800
+			}
+		}
+		add_planet_devastation = 20
+	}
+	option = {
+		name = colony_mod.12.b #help
+		enable_special_project = {
+			name = "impact_defence_system"
+			location = this
+			owner = root
+		}
+		if = {
+			limit = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
+			add_modifier = {
+				modifier = "recent_impact"
+				days = 1800
+			}
+		}
+		add_planet_devastation = 20
+	}
+}
+
+planet_event = {
+	id = colony_mod.13 #impact_defence_system
+	title = "colony_mod.13.name"
+	desc = "colony_mod.13.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = SPLENDID
+		hidden_effect = {
+			set_planet_flag = asteroid_defences_colony_flag
+		}
+	}
+
+}
+
+planet_event = {
+	id = colony_mod.14 #asteroid_impacts - good
+	title = "colony_mod.14.name"
+	desc = "colony_mod.14.desc"
+	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_air_raid_siren
+	location = ROOT
+	trackable = yes
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		NOT = { has_planet_flag = asteroid_defences_colony_flag }
+		has_modifier = "asteroid_impacts"
+		num_pops > 1
+		NOR = { 
+			has_modifier = "recent_impact"
+			has_deposit = d_impact_crater
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.14.b #help
+		enable_special_project = {
+			name = "impact_defence_system"
+			location = this
+			owner = root
+		}
+		add_modifier = {
+			modifier = "recent_impact"
+			days = 1800
+		}
+		hidden_effect = {
+			add_deposit = d_impact_crater
+		}
+		custom_tooltip = good_impact_tooltip
+	}
+	option = {
+		name = colony_mod.14.a
+		add_modifier = {
+			modifier = "recent_impact"
+			days = 1800
+		}
+		hidden_effect = {
+			add_deposit = d_impact_crater
+		}
+		custom_tooltip = good_impact_tooltip
+	}
+}
+
+planet_event = { #strong magnetic field good
+	id = colony_mod.16
+	title = "colony_mod.16.name"
+	desc = "colony_mod.16.desc"
+	picture = GFX_evt_alien_city
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		has_modifier = "strong_magnetic_field"
+		NOT = { has_modifier = "magnetic_research_boost" }
+		NOT = { has_modifier = "magnetic_disruption" }
+		NOT = { has_planet_flag = magnetic_mystery_solved }
+		num_pops > 0
+	}
+	
+	immediate = {
+		OWNER = {
+			change_variable = { #check_variable
+				which = "magnetic_planet_research"
+				value = 1
+			}
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = FASCINATING
+		#Idea to revisit: research bonus/increase flag - after a number, say 5, of these events a new special project is enabled to make the effect permanent
+		add_modifier = {
+			modifier = "magnetic_research_boost"
+			days = 1800
+		}
+		OWNER = {
+			if = {
+				limit = {
+					check_variable = {which = magnetic_planet_research value = 3}
+				}
+				enable_special_project = {
+					name = "MAGNETIC_PLANET_RESEARCH_PROJECT"
+					location = root
+					owner = this
+				}
+			}
+		}
+	}
+}
+
+planet_event = { #strong magnetic field bad
+	id = colony_mod.17
+	title = "colony_mod.17.name"
+	desc = "colony_mod.17.desc"
+	picture = GFX_evt_alien_city
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		has_ground_combat = no
+		is_capital = no
+	}
+	
+	trigger = {
+		owner = { is_ai = no }
+		has_modifier = "strong_magnetic_field"
+		NOT = { has_modifier = "magnetic_research_boost" }
+		NOT = { has_modifier = "magnetic_disruption" }
+		NOT = { has_planet_flag = magnetic_mystery_solved }
+		num_pops > 0
+	}
+	
+	immediate = {
+		OWNER = {
+			change_variable = { #check_variable
+				which = "magnetic_planet_research"
+				value = 1
+			}
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = UNFORTUNATE
+		#research penalty/unhappiness
+		add_modifier = {
+			modifier = "magnetic_disruption"
+			days = 1800
+		}
+		OWNER = {
+			if = {
+				limit = {
+					check_variable = {which = magnetic_planet_research value = 3}
+				}
+				enable_special_project = {
+					name = "MAGNETIC_PLANET_RESEARCH_PROJECT"
+					location = root
+					owner = this
+				}
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = colony_mod.18
+	title = "colony_mod.18.name"
+	desc = "colony_mod.18.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_air_raid_siren
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = colony_mod.18.a #modifier
+		set_planet_flag = magnetic_mystery_solved
+		add_modifier = {
+			modifier = "magnetic_research_boost"
+			days = -1
+		}
+	}
+}
+
+#Setup event to add Titanic life blockers to planets with the modifier
+#Bit of a hack as it is not possible in system initializers
+#Slight spam as it will happen along with the "First discovery" event the first time you survey a Titanic life planet, but can't be helped easily
+event = {
+	id = colony_mod.100
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		every_planet = {
+			limit = {
+				has_modifier = titanic_life
+			}
+			add_deposit = d_titanic_life_blocker
+		}
+	}
+}
+
+#Gatekeeper - Colony Events
+planet_event = {
+	id = colony_mod.161
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			AND = { 
+				has_modifier = strong_magnetic_field
+				NOT = { has_planet_flag = magnetic_mystery_solved }
+			}
+			has_modifier = asteroid_impacts
+			has_modifier = irradiated_planet
+			has_modifier = titanic_life
+			has_modifier = unstable_tectonics
+			has_modifier = asteroid_belt
+			has_modifier = atmospheric_hallucinogen
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = { 
+				has_modifier = strong_magnetic_field
+				has_modifier = "strong_magnetic_field"
+				NOT = { has_modifier = "magnetic_research_boost" }
+				NOT = { has_modifier = "magnetic_disruption" }
+				has_ground_combat = no
+				num_pops > 0
+			}
+			random_list = {
+				50 = { planet_event = { id = colony_mod.16 days = 30 random = 90 } }
+				50 = { planet_event = { id = colony_mod.17 days = 30 random = 90 } }
+			}
+			break = yes
+		}
+		if = {
+			limit = { 
+				has_modifier = asteroid_impacts
+				NOT = { has_planet_flag = asteroid_defences_colony_flag }
+				num_pops > 1
+				NOT = { has_modifier = "recent_impact" }
+			}
+			random_list = {
+				50 = { planet_event = { id = colony_mod.12 days = 30 random = 90 } }
+				50 = { planet_event = { id = colony_mod.14 days = 30 random = 90 } }
+			}
+			break = yes
+		}
+			
+		if = {
+			limit = { 
+				has_modifier = irradiated_planet 
+				NOT = { has_planet_flag = irradiated_colony_flag } 
+			}
+			planet_event = { id = colony_mod.1 days = 30 random = 90 }
+			break = yes
+		}
+		
+		if = {
+			limit = { 
+				has_modifier = titanic_life
+				NOR = { 
+					has_planet_flag = titanic_life_colony_flag
+					owner = { has_ethic = ethic_gestalt_consciousness }
+				}
+			}
+			planet_event = { id = colony_mod.2 days = 30 random = 90 }
+			break = yes
+		}
+	
+		if = {
+			limit = { 
+				has_modifier = unstable_tectonics
+				NOT = { has_modifier = recent_quake }
+			}
+			planet_event = { id = colony_mod.3 days = 30 random = 90 }
+			break = yes
+		}
+
+		if = {
+			limit = { 
+				has_modifier = "asteroid_belt"
+				NOR = { 
+					has_modifier = "recent_comet" 
+					owner = { has_ethic = ethic_gestalt_consciousness }
+				}
+			}
+			planet_event = { id = colony_mod.4 days = 30 random = 90 }
+			break = yes
+		}
+		
+		if = {
+			limit = { 
+				has_modifier = atmospheric_hallucinogen 
+				NOR = {
+					has_planet_flag = atmospheric_hallucinogen_colony_flag
+					owner = { has_ethic = ethic_gestalt_consciousness } 
+				}
+			}
+			planet_event = { id = colony_mod.5 days = 30 random = 90 }
+			break = yes
+		}
+	}
+}
+
+planet_event = { # Rogue moon
+	id = colony.3001
+	title = "colony.3001.name"
+	desc = "colony.3001.desc"
+	picture = GFX_evt_asteroid_approaching_planet
+	location = ROOT
+	trackable = yes
+	
+	trigger = {
+		has_owner = yes
+		original_owner = yes
+		is_homeworld = no
+		owner = {
+			is_ai = no
+			NOT = { has_country_flag = roguemoon_country }
+		}
+		is_capital = no
+		has_ground_combat = no
+		is_occupied_flag = no
+		num_pops > 0
+		NOR = {
+			is_planet_class = pc_habitat
+			is_planet_class = pc_ringworld_habitable
+			has_planet_flag = colony_event
+		}
+		has_moon = yes
+		any_moon = {
+			habitable_planet = no
+			NOT = { is_planet_class = pc_habitat }
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = roguemoon_event
+		set_planet_flag = colony_event
+		owner = { set_country_flag = roguemoon_country }
+		random_moon = {
+			limit = {
+				habitable_planet = no
+			}
+			save_event_target_as = roguemoon
+		}
+	}
+	
+	option = {
+		name = CURIOUS
+		enable_special_project = {
+			name = "ROGUEMOON_PROJECT"
+			location = this
+			owner = root
+		}
+	}
+}
+
+planet_event = { #rogue moonbase
+	id = colony.3002
+	title = "colony.3002.name"
+	desc = "colony.3002.desc"
+	picture = GFX_evt_alien_ruins
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = ASTOUNDING 
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			if = {
+				limit = {
+					has_tech_option = tech_mine_dark_matter
+				}
+				add_tech_progress = {
+					tech = tech_mine_dark_matter
+					progress = 0.5
+				}
+			}
+			else = {
+				add_research_option = tech_mine_dark_matter
+				add_tech_progress = {
+					tech = tech_mine_dark_matter
+					progress = 0.25
+				}
+			}
+		}
+		event_target:roguemoon = {
+			add_deposit = d_dark_matter_deposit_1
+		}
+	}
+}
+
+planet_event = { #dimensional moon
+	id = colony.3003
+	title = "colony.3003.name"
+	desc = "colony.3003.desc"
+	picture = GFX_evt_alien_ruins
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = FASCINATING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			if = {
+				limit = {
+					has_tech_option = tech_jump_drive_1
+				}
+				add_tech_progress = {
+					tech = tech_jump_drive_1
+					progress = 0.15
+				}
+			}
+			else = {
+				add_research_option = tech_jump_drive_1
+				add_tech_progress = {
+					tech = tech_jump_drive_1
+					progress = 0.1
+				}
+			}
+		}
+	}
+}
+
+planet_event = { #Dimensional portal
+	id = colony.3005
+	title = "colony.3005.name"
+	desc = "colony.3005.desc"
+	picture = GFX_evt_wormhole
+	location = ROOT
+	trackable = yes
+	
+	trigger = {
+		has_owner = yes
+		original_owner = yes
+		is_homeworld = no
+		owner = {
+			is_ai = no
+			NOT = { has_country_flag = dportal_country }
+		}
+		is_capital = no
+		has_ground_combat = no
+		is_occupied_flag = no
+		num_pops > 0
+		NOR = {
+			is_planet_class = pc_habitat
+			is_planet_class = pc_ringworld_habitable
+			has_planet_flag = colony_event
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = dportal_event
+		set_planet_flag = colony_event
+		owner = { set_country_flag = dportal_country }
+
+	}
+	
+	option = {
+		name = INTRIGUING 
+		enable_special_project = {
+			name = "DPORTAL_PROJECT"
+			location = this
+			owner = root
+		}
+		if = {
+			limit = {
+				owner = {
+					is_gestalt = yes 
+				}
+			}
+			add_deposit = d_portal_research_zone_gestalt
+		}
+		else = {
+			add_deposit = d_portal_research_zone
+		}
+	}
+}
+
+planet_event = { #hell
+	id = colony.3006
+	title = "colony.3006.name"
+	desc = {
+		text = colony.3006.spir.desc
+		trigger = {
+			owner = { is_spiritualist = yes }
+		}
+	}
+	desc = {
+		text = colony.3006.desc
+		trigger = {
+			owner = { is_spiritualist = no }
+		}
+	}
+	picture = GFX_evt_space_funeral
+	location = ROOT
+
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = dportal_hell
+	}
+
+	option = {
+		trigger = {
+		owner = {
+				is_spiritualist = no
+			}
+		}
+		name = colony.3006.science 
+		enable_special_project = {
+			name = "DPORTAL_PROJECT_SCIENCE"
+			location = this
+			owner = root
+		}
+	}
+	
+	option = {
+		name = colony.3006.psi.prayer
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+				has_technology = tech_psionic_theory
+			}
+		}
+		enable_special_project = {
+			name = "DPORTAL_PROJECT_PSI_PRAYER"
+			location = this
+			owner = root
+		}
+	}
+	option = {
+		name = colony.3006.prayer
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+				NOT = {	has_technology = tech_psionic_theory }
+			}
+		}
+		enable_special_project = {
+			name = "DPORTAL_PROJECT_PRAYER"
+			location = this
+			owner = root
+		}
+	}
+	
+	option = {
+		name = colony.3006.rocks
+		trigger = {
+			owner = {
+				is_spiritualist = no
+				has_civic = civic_feudal_realm
+			}
+		}
+		enable_special_project = {
+			name = "DPORTAL_PROJECT_ROCKS"
+			location = this
+			owner = root
+		}
+	}
+	
+	option = {
+		name = colony.3006.keep
+		#add_deposit = d_portal_research_zone
+		custom_tooltip = portal_zone_tooltip
+	}
+}
+
+planet_event = { #science
+	id = colony.3010
+	title = "colony.3010.name"
+	desc = "colony.3010.desc"
+	picture = GFX_evt_news_room
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			if = {
+				limit = {
+					has_tech_option = tech_power_plant_4
+				}
+				add_tech_progress = {
+					tech = tech_power_plant_4
+					progress = 0.5
+				}
+			}
+			else_if = {
+				limit = {
+					has_technology = tech_power_plant_3
+				}
+				add_research_option = tech_power_plant_4
+				add_tech_progress = {
+					tech = tech_power_plant_4
+					progress = 0.25
+				}
+			}	
+			else_if = {
+				limit = {
+					has_tech_option = tech_power_plant_3
+				}
+				add_tech_progress = {
+					tech = tech_power_plant_3
+					progress = 0.5
+				}
+			}
+			else = {
+				add_research_option = tech_power_plant_3
+				add_tech_progress = {
+					tech = tech_power_plant_3
+					progress = 0.25
+				}
+			}
+		}
+		custom_tooltip = portal_closed_tooltip
+		hidden_effect = { set_planet_flag = dportal_closed }
+	}
+}
+
+planet_event = { #prayer
+	id = colony.3011
+	title = "colony.3010.name"
+	desc = "colony.3011.desc"
+	desc = {
+		text = colony.3011.psi.desc
+		trigger = {
+			owner = {
+				has_technology = tech_psionic_theory
+			}
+		}
+	}
+	desc = {
+		text = colony.3011.desc
+		trigger = {
+			owner = {
+				NOT = { has_technology = tech_psionic_theory }
+			}
+		}
+	}
+	picture = GFX_evt_news_room
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			if = {	
+				limit = {
+					NOT = { has_tech_option = tech_psionic_theory }
+				}
+				add_research_option = tech_psionic_theory
+				add_tech_progress = {
+					tech = tech_psionic_theory
+					progress = 0.8
+				}
+			}
+			
+			add_research_option = tech_psionic_barrier
+			add_tech_progress = {
+				tech = tech_psionic_barrier
+				progress = 0.5
+			}
+		}
+		custom_tooltip = portal_closed_tooltip
+		hidden_effect = { set_planet_flag = dportal_closed }
+	}
+}
+
+planet_event = { #rocks
+	id = colony.3012
+	title = "colony.3010.name"
+	desc = "colony.3012.desc"
+	picture = GFX_evt_news_room
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			if = {
+				limit = {
+					has_tech_option = tech_mining_3
+				}
+				add_tech_progress = {
+					tech = tech_mining_3
+					progress = 0.5
+				}
+			}
+			else_if = {
+				limit = {
+					has_technology = tech_mining_2
+				}
+				add_research_option = tech_mining_3
+				add_tech_progress = {
+					tech = tech_mining_3
+					progress = 0.25
+				}
+			}	
+			else_if = {
+				limit = {
+					has_tech_option = tech_mining_2
+				}
+				add_tech_progress = {
+					tech = tech_mining_2
+					progress = 0.5
+				}
+			}
+			else = {
+				add_research_option = tech_mining_2
+				add_tech_progress = {
+					tech = tech_mining_2
+					progress = 0.25
+				}
+			}	
+		}
+		custom_tooltip = portal_closed_tooltip
+		hidden_effect = { set_planet_flag = dportal_closed }
+	}
+}
+
+planet_event = { #energy
+	id = colony.3007
+	title = "colony.3007.name"
+	desc = "colony.3007.desc"
+	picture = GFX_evt_star_white
+	location = ROOT
+
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = dportal_energy
+	}
+
+	option = {
+		name = FASCINATING
+		set_planet_flag = dportal_energy
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			if = {
+				limit = {
+					has_tech_option = tech_plasma_3
+				}
+				add_tech_progress = {
+					tech = tech_plasma_3
+					progress = 0.5
+				}
+			}
+			else_if = {
+				limit = {
+					has_technology = tech_plasma_2
+				}
+				add_research_option = tech_plasma_3
+				add_tech_progress = {
+					tech = tech_plasma_3
+					progress = 0.25
+				}
+			}	
+			else_if = {
+				limit = {
+					has_tech_option = tech_plasma_2
+				}
+				add_tech_progress = {
+					tech = tech_plasma_2
+					progress = 0.5
+				}
+			}
+			else_if = {
+				limit = {
+					has_technology = tech_plasma_1
+				}
+				add_research_option = tech_plasma_2
+				add_tech_progress = {
+					tech = tech_plasma_2
+					progress = 0.25
+				}
+			}
+			else_if = {
+				limit = {
+					has_tech_option = tech_plasma_1
+				}
+				add_tech_progress = {
+					tech = tech_plasma_1
+					progress = 0.5
+				}
+			}
+			else = {
+				add_research_option = tech_plasma_1
+				add_tech_progress = {
+					tech = tech_plasma_1
+					progress = 0.25
+				}
+			}	
+		}
+		custom_tooltip = portal_energy_tooltip
+	}
+}
+
+planet_event = { #null void
+	id = colony.3008
+	title = "colony.3008.name"
+	desc = "colony.3008.desc"
+	picture = GFX_evt_shrouded
+	location = ROOT
+
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = dportal_void
+	}
+
+	option = {
+		name = FASCINATING
+		
+		owner = {
+			add_research_option = null_void_beam
+				add_tech_progress = {
+					tech = null_void_beam
+					progress = 0.5
+				}
+		}
+		custom_tooltip = portal_void_tooltip
+		hidden_effect = {
+			planet_event = { id = colony.3040 days = 1825 random = 1825 }
+		}
+	}
+}
+
+planet_event = { #Probe the Void
+	id = colony.3040
+	title = "colony.3040.name"
+	desc = "colony.3040.desc"
+	picture = GFX_evt_wormhole
+	location = ROOT
+	trackable = yes
+	
+	trigger = {
+		has_owner = yes
+		original_owner = yes
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTRIGUING 
+		enable_special_project = {
+			name = "NULLVOID_PROJECT"
+			location = this
+			owner = root
+		}
+	}
+}
+
+planet_event = { #increase production
+	id = colony.3041
+	title = "colony.3041.name"
+	desc = "colony.3041.desc"
+	picture = GFX_evt_shrouded
+	location = ROOT
+	trackable = yes
+	
+	trigger = {
+		has_owner = yes
+		original_owner = yes
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = EXCELLENT 
+		custom_tooltip = portal_void_tooltip2
+		set_planet_flag = dportal_void2
+	}
+}
+
+planet_event = { #mirror
+	id = colony.3009
+	title = "colony.3009.name"
+	desc = "colony.3009.desc"
+	picture = GFX_evt_galactic_senate
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.3009.a.robot
+		exclusive_trigger = { owner = { is_machine_empire = yes } }
+		hidden_effect = {
+			planet_event = { id = colony.3020 }
+		}
+	}
+	option = {
+		name = colony.3009.a
+		hidden_effect = {
+			planet_event = { id = colony.3020 }
+		}
+	}
+	
+}
+
+planet_event = { #message 1
+	id = colony.3020
+	title = "colony.3020.name"
+	desc = {
+		text = colony.3020.desc
+		trigger = {
+			 owner = { is_machine_empire = no }
+		}
+	}
+	desc = {
+		text = colony.3020.desc.robot
+		trigger = {
+			 owner = { is_machine_empire = yes }
+		}
+	}
+
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = root.owner.leader
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	
+	option = {
+		name = colony.3020.a
+		hidden_effect = {
+			planet_event = { id = colony.3021 }
+		}
+	}
+	option = {
+		name = colony.3020.a.robot
+		exclusive_trigger = { owner = { is_machine_empire = yes } }
+		hidden_effect = {
+			planet_event = { id = colony.3021 }
+		}
+	}
+}
+
+planet_event = { #message 2
+	id = colony.3021
+	title = "colony.3020.name"
+	desc = {
+		text = colony.3021.desc
+		trigger = {
+			 owner = { is_machine_empire = no }
+		}
+	}
+	desc = {
+		text = colony.3021.desc.robot
+		trigger = {
+			 owner = { is_machine_empire = yes }
+		}
+	}
+
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = root.owner.leader
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	
+	option = {
+		name = colony.3021.a #talk more
+		trigger = { owner = { is_machine_empire = no } }
+		hidden_effect = {
+			planet_event = { id = colony.3022 }
+		}
+	}
+	
+	option = {
+		name = colony.3021.b #just trade
+		trigger = { owner = { is_machine_empire = no } }
+		response_text = mirror_trade_reply
+		set_planet_flag = dportal_trader
+		hidden_effect = {
+			add_modifier = {
+				modifier = "dportal_trade_normal"
+				days = -1
+			}
+			owner = {
+				set_country_flag = dportal_trader
+			}
+		}
+	}
+	option = {
+		name = colony.3021.a.robot #talk more
+		trigger = { owner = { is_machine_empire = yes } }
+		hidden_effect = {
+			planet_event = { id = colony.3022 }
+		}
+	}
+	
+	option = {
+		name = colony.3021.b.robot #just trade
+		trigger = { owner = { is_machine_empire = yes } }
+		response_text = mirror_trade_reply.robot
+		set_planet_flag = dportal_trader
+		hidden_effect = {
+			add_modifier = {
+				modifier = "dportal_trade_normal"
+				days = -1
+			}
+			owner = {
+				set_country_flag = dportal_trader
+			}
+		}
+	}
+}
+
+planet_event = { #message 3
+	id = colony.3022
+	title = "colony.3020.name"
+	desc = {
+		text = colony.3022.desc
+		trigger = {
+			 owner = { is_machine_empire = no }
+		}
+	}
+	desc = {
+		text = colony.3022.desc.robot
+		trigger = {
+			 owner = { is_machine_empire = yes }
+		}
+	}
+
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = root.owner.leader
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	
+	option = {
+		name = colony.3022.a
+		hidden_effect = {
+			planet_event = { id = colony.3023 }
+		}
+	}
+	option = {
+		name = colony.3022.a.robot
+		exclusive_trigger = { owner = { is_machine_empire = yes } }
+		hidden_effect = {
+			planet_event = { id = colony.3023 }
+		}
+	}
+	
+}
+
+planet_event = { #message 4
+	id = colony.3023
+	title = "colony.3020.name"
+	desc = {
+		text = colony.3023.desc
+		trigger = {
+			 owner = { is_machine_empire = no }
+		}
+	}
+	desc = {
+		text = colony.3023.desc.robot
+		trigger = {
+			 owner = { is_machine_empire = yes }
+		}
+	}
+
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = root.owner.leader
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	
+	option = {
+		name = colony.3023.a
+		hidden_effect = {
+			planet_event = { id = colony.3024 }
+		}
+	}
+	option = {
+		name = colony.3023.a.robot
+		exclusive_trigger = { owner = { is_machine_empire = yes } }
+		hidden_effect = {
+			planet_event = { id = colony.3024 }
+		}
+	}
+}
+
+planet_event = { #message 5
+	id = colony.3024
+	title = "colony.3020.name"
+	desc = {
+		text = colony.3024.desc
+		trigger = {
+			 owner = { is_machine_empire = no }
+		}
+	}
+	desc = {
+		text = colony.3024.desc.robot
+		trigger = {
+			 owner = { is_machine_empire = yes }
+		}
+	}
+
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = root.owner.leader
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	
+	option = {
+		name = colony.3024.a #trade
+		response_text = mirror_trade_reply2
+		set_planet_flag = dportal_trader
+		hidden_effect = {
+			add_modifier = {
+				modifier = "dportal_trade_normal"
+				days = -1
+			}
+			owner = {
+				set_country_flag = dportal_trader
+			}
+		}
+	}
+	option = {
+		name = colony.3024.a.robot #trade
+		exclusive_trigger = { owner = { is_machine_empire = yes } }
+		response_text = mirror_trade_reply2.robot
+		set_planet_flag = dportal_trader
+		hidden_effect = {
+			add_modifier = {
+				modifier = "dportal_trade_normal"
+				days = -1
+			}
+			owner = {
+				set_country_flag = dportal_trader
+			}
+		}
+	}
+}
+
+event = {
+	id = colony.3029
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_playable_country = {
+			has_country_flag = dportal_trader
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = { has_country_flag = dportal_trader }
+			country_event = { id = colony.3030 }
+		}
+	}
+}
+
+country_event = { #Mirror portal followup events
+	id = colony.3030
+
+	is_triggered_only = yes
+	hide_window = yes
+	
+	trigger = {
+		has_country_flag = dportal_trader
+		NOT = { has_country_flag = dportal_empire_crisis_flag }
+	}
+	
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				has_planet_flag = dportal_trader
+			}
+			save_event_target_as = dportal_trade_planet
+		}
+		event_target:dportal_trade_planet = {
+			if = {
+				limit = {
+					has_modifier = dportal_trade_normal
+				}
+				random_list = {
+					60 = { } #no effect
+					10 = { planet_event = { id = colony.3031 }} #trade goes up
+					10 = { planet_event = { id = colony.3032 }} #trade goes down	
+				}
+			}
+			else_if = {
+				limit = {
+					has_modifier = dportal_trade_low
+				}
+				random_list = {
+					20 = { } #no effect
+					20 = { planet_event = { id = colony.3031 }} #trade goes up
+					10 = { planet_event = { id = colony.3032 }} #trade goes down	
+				}
+			}
+			else_if = {
+				limit = {
+					has_modifier = dportal_trade_high
+				}
+				random_list = {
+					30 = {} #no effect
+					10 = { planet_event = { id = colony.3031 }} #trade goes up
+					20 = { planet_event = { id = colony.3032 }} #trade goes down	
+				}
+			}
+			
+		}
+		
+	}
+
+}
+
+planet_event = { #trade up
+	id = colony.3031
+	title = "colony.3031.name"
+	desc = "colony.3031.desc"
+	picture = GFX_evt_wormhole
+	location = ROOT
+
+	is_triggered_only = yes
+	
+	immediate = {
+	}
+
+	option = {
+		name = EXCELLENT
+		
+		if = {
+			limit = {
+				has_modifier = dportal_trade_low
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_low
+				add_modifier = {
+					modifier = "dportal_trade_normal"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_normal
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_normal
+				add_modifier = {
+					modifier = "dportal_trade_high"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_high
+			}
+			owner = { 
+				add_monthly_resource_mult = {
+					resource = consumer_goods
+					value = 6
+					min = 100
+				}
+				add_monthly_resource_mult = {
+					resource = volatile_motes
+					value = 3
+					min = 50
+				}
+				add_monthly_resource_mult = {
+					resource = exotic_gases
+					value = 3
+					min = 50
+				}
+				add_monthly_resource_mult = {
+					resource = rare_crystals
+					value = 3
+					min = 50
+				}				
+			}
+		}
+	}
+}
+
+planet_event = { #trade down
+	id = colony.3032
+	title = "colony.3032.name"
+	desc = "colony.3032.desc"
+	picture = GFX_evt_wormhole
+	location = ROOT
+
+	is_triggered_only = yes
+	
+	immediate = {
+	}
+	
+	option = {
+		name = colony.3032.a.robot 
+		exclusive_trigger = { owner = { is_machine_empire = yes } }
+		if = {
+			limit = {
+				has_modifier = dportal_trade_high
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_high
+				add_modifier = {
+					modifier = "dportal_trade_normal"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_normal
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_normal
+				add_modifier = {
+					modifier = "dportal_trade_low"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				AND = {
+					has_modifier = dportal_trade_low
+					owner = {
+						check_variable = {
+								which = dportal_empire_crisis
+								value < 5
+						}
+					}
+				}
+			}
+			owner = { 
+				hidden_effect = {
+					change_variable = {
+						which = dportal_empire_crisis
+						value = 1
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				AND = {
+					has_modifier = dportal_trade_low
+					owner = {
+						check_variable = {
+								which = dportal_empire_crisis
+								value >= 5
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_low
+				add_modifier = {
+					modifier = "dportal_trade_crisis"
+					days = -1
+				}
+				planet_event = { id = colony.3033 days = 1825 random = 1825 }
+				owner = { set_country_flag = dportal_empire_crisis_flag }
+			}
+		}
+	}
+	option = {
+		name = colony.3032.a 
+		
+		if = {
+			limit = {
+				has_modifier = dportal_trade_high
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_high
+				add_modifier = {
+					modifier = "dportal_trade_normal"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_modifier = dportal_trade_normal
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_normal
+				add_modifier = {
+					modifier = "dportal_trade_low"
+					days = -1
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				AND = {
+					has_modifier = dportal_trade_low
+					owner = {
+						check_variable = {
+								which = dportal_empire_crisis
+								value < 5
+						}
+					}
+				}
+			}
+			owner = { 
+				hidden_effect = {
+					change_variable = {
+						which = dportal_empire_crisis
+						value = 1
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				AND = {
+					has_modifier = dportal_trade_low
+					owner = {
+						check_variable = {
+								which = dportal_empire_crisis
+								value >= 5
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				remove_modifier = dportal_trade_low
+				add_modifier = {
+					modifier = "dportal_trade_crisis"
+					days = -1
+				}
+				planet_event = { id = colony.3033 days = 1825 random = 1825 }
+				owner = { set_country_flag = dportal_empire_crisis_flag }
+			}
+		}
+	}
+}
+
+planet_event = { #the end of dportal_empire
+	id = colony.3033
+	title = "colony.3033.name"
+	desc = {
+		text = colony.3033.desc
+		trigger = {
+			 owner = { is_machine_empire = no }
+		}
+	}
+	desc = {
+		text = colony.3033.desc.robot
+		trigger = {
+			 owner = { is_machine_empire = yes }
+		}
+	}
+	picture = GFX_evt_wormhole
+	location = ROOT
+	diplomatic = yes
+	
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	is_triggered_only = yes
+	
+	immediate = {
+		
+	}
+	
+	option = {
+		name = colony.3033.a
+		trigger = { owner = { is_machine_empire = no } }
+		is_dialog_only = yes
+		response_text = colony.3033.reply
+	}
+	option = {
+		name = colony.3033.b
+		trigger = { owner = { is_machine_empire = no } }
+		is_dialog_only = yes
+		response_text = colony.3033.reply
+	}
+	option = {
+		name = colony.3033.c
+		trigger = { owner = { is_machine_empire = no } }
+		is_dialog_only = yes
+		response_text = colony.3033.reply
+	}
+
+	option = {
+		name = colony.3033.d
+		trigger = { owner = { is_machine_empire = no } }
+		hidden_effect = {
+			remove_modifier = dportal_trade_crisis
+		}
+	}
+	option = {
+		name = colony.3033.a.robot
+		trigger = { owner = { is_machine_empire = yes } }
+		is_dialog_only = yes
+		response_text = colony.3033.reply
+	}
+	option = {
+		name = colony.3033.d.robot
+		trigger = { owner = { is_machine_empire = yes } }
+		hidden_effect = {
+			remove_modifier = dportal_trade_crisis
+		}
+	}
+}

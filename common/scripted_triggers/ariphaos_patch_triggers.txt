@@ -1,0 +1,309 @@
+
+# Stuff that can't be easily replicated.
+ariphaos_patch_slaves_rare_trait = {
+	OR = {
+		has_trait = trait_pc_nuked_preference
+		has_trait = trait_syncretic_proles
+		has_trait = trait_very_strong
+		has_trait = trait_nerve_stapled
+		has_trait = trait_delicious
+		has_trait = trait_fertile
+		has_trait = trait_presapient_earthbound
+		has_trait = trait_presapient_proles
+		has_trait = trait_presapient_conservative
+		has_trait = trait_presapient_docile_livestock
+		has_trait = trait_presapient_starborn
+	}
+}
+
+ariphaos_patch_slaves_good_flaw = {
+	OR = {
+		has_trait = trait_fleeting
+		has_trait = trait_fleeting_lithoid
+		has_trait = trait_wasteful
+		has_trait = trait_slow_learners
+	}
+}
+
+# Difficult to remove - 2 point flaws.
+ariphaos_patch_slaves_poor_flaw = {
+	OR = {
+		has_trait = trait_repugnant
+		has_trait = trait_nonadaptive
+		has_trait = trait_slow_breeders
+	}
+}
+
+ariphaos_patch_slaves_good_merit = {
+	OR = {
+		has_trait = trait_lithoid_scintillating
+		has_trait = trait_lithoid_volatile_excretions
+		has_trait = trait_lithoid_gaseous_byproducts
+		has_trait = trait_conformists
+		has_trait = trait_agrarian
+		has_trait = trait_ingenious
+		has_trait = trait_industrious
+		has_trait = trait_thrifty
+		has_trait = trait_charismatic
+		has_trait = trait_rapid_breeders
+		has_trait = trait_adaptive
+	}
+}
+
+# Wasted points.
+ariphaos_patch_slaves_poor_merit = {
+	OR = {
+		has_trait = trait_intelligent
+		has_trait = trait_natural_engineers
+		has_trait = trait_natural_sociologists
+		has_trait = trait_natural_physicists
+		has_trait = trait_talented
+		has_trait = trait_quick_learners
+		has_trait = trait_enduring
+		has_trait = trait_extremely_adaptive
+		has_trait = trait_intelligent
+		has_trait = trait_venerable
+		has_trait = trait_erudite
+		has_trait = trait_presapient_natural_intellectuals
+		has_trait = trait_presapient_irradiated
+	}
+}
+
+# has_trait = trait_conservational
+# 
+# Straight to the selling/purge block, do not pass go.
+ariphaos_patch_slaves_expel = {
+	OR = {
+		has_trait = trait_self_modified
+		#AND = {
+		#	ariphaos_patch_slaves_poor_merit = yes
+		#	ariphaos_patch_slaves_rare_trait = no
+		#	ariphaos_patch_slaves_poor_flaw = yes
+		#}
+	}
+}
+
+ariphaos_patch_slaves_entertainer = {
+	ariphaos_patch_slaves_poor_merit = no
+	NOR = { 
+		has_trait = trait_repugnant
+		has_trait = trait_quarrelsome
+		has_trait = trait_nerve_stapled
+		has_trait = trait_syncretic_proles
+	}
+	has_trait = trait_charismatic
+	has_trait = trait_traditional
+}
+
+ariphaos_patch_slaves_clerk = {
+	ariphaos_patch_slaves_poor_merit = no
+	OR = {
+		has_trait = trait_thrifty
+		has_trait = trait_nuumismatic_administration
+	}
+	has_trait = trait_charismatic
+	NOT = { has_trait = trait_repugnant }
+}
+
+
+# 		has_trait = trait_robust
+
+# Entertainers
+# trait_charismatic
+# trait_traditional
+# trait_quarrelsome
+# NOT = { has_trait = trait_syncretic_proles }
+#		NOT = { has_trait = trait_nerve_stapled }
+
+# Super-clerks
+# 		has_trait = trait_repugnant
+#		has_trait = trait_thrifty | trait_nuumismatic_administration
+#		has_trait = trait_charismatic
+
+ariphaos_patch_build_urban = {
+	num_free_districts = { type = district_generator value = 0 }
+	OR = {
+		AND = { 
+			owner = { country_uses_food = no }
+			num_free_districts = { type = district_mining value > 0 }
+		}
+		AND = { 
+			owner = { country_uses_food = yes }
+			num_free_districts = { type = district_farming value > 0 }
+		}
+	}
+	ariphaos_patch_unemployed_worker_complex = yes
+}
+
+ariphaos_patch_block_urban = {
+	OR = {
+		num_free_districts = { type = district_generator value > 0 }
+		AND = { 
+			owner = { country_uses_food = no }
+			num_free_districts = { type = district_mining value > 0 }
+		}
+		AND = { 
+			owner = { country_uses_food = yes }
+			num_free_districts = { type = district_farming value > 0 }
+		}
+	}
+	free_housing > 0
+}
+
+ariphaos_patch_unemployed_worker = {
+	any_owned_pop = {
+		OR = {
+			is_unemployed = yes
+			has_job = servant
+		}
+		NOR = {
+			is_pop_category = specialist
+			is_pop_category = ruler
+		}
+		worker_job_check_trigger = yes
+	}
+}
+
+ariphaos_patch_unemployed_worker_complex = {
+	any_owned_pop = {
+		OR = {
+			is_unemployed = yes
+			has_job = servant
+		}
+		NOR = {
+			is_pop_category = specialist
+			is_pop_category = ruler
+		}
+		OR = {
+			NOT = { has_trait = trait_mechanical }
+			owner = { has_technology = tech_droid_workers }
+		}
+		worker_job_check_trigger = yes
+	}
+}
+ariphaos_patch_unemployed_low_class_trigger = {
+	OR = {
+		is_unemployed = yes
+		has_job = servant
+	}
+	NOT = { is_pop_category = ruler }
+	worker_job_check_trigger = yes
+}
+
+# Detect if we can promote someone, and if someone can fill their role.
+ariphaos_patch_unemployed_specialist = {
+	any_owned_pop = {
+		ariphaos_patch_unemployed_low_class_trigger = yes
+	}
+	any_owned_pop = {
+		is_enslaved = no
+		is_being_assimilated = no
+		is_being_purged = no
+		NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+		NOT = { is_pop_category = ruler }
+		NOT = { has_trait = trait_syncretic_proles }
+		NOT = { has_trait = trait_nerve_stapled }
+		OR = {
+			AND = {
+				is_pop_category = worker
+				NOT = { has_job = soldier }
+			}
+			is_unemployed = yes
+		}
+		OR = {
+			NOT = { has_trait = trait_mechanical }
+			owner = { has_technology = tech_droid_workers }
+		}
+	}
+}
+
+ariphaos_patch_unemployed_complex_specialist = {
+	any_owned_pop = {
+		ariphaos_patch_unemployed_low_class_trigger = yes
+	}
+	any_owned_pop = {
+		is_enslaved = no
+		is_being_assimilated = no
+		is_being_purged = no
+		NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+		NOT = { is_pop_category = ruler }
+		NOT = { has_trait = trait_syncretic_proles }
+		NOT = { has_trait = trait_nerve_stapled }
+		OR = {
+			AND = {
+				is_pop_category = worker
+				NOT = { has_job = soldier }
+			}
+			is_unemployed = yes
+		}
+		OR = {
+			NOT = { has_trait = trait_mechanical }
+			AND = {
+				owner = { has_technology = tech_synthetic_workers }
+				owner = { NOT = { has_policy_flag = ai_outlawed } }
+			}
+		}
+	}
+}
+
+ariphaos_patch_buildings_allow_complex = {
+	exists = owner
+	OR = {
+		owner = { is_ai = no }
+		ariphaos_patch_unemployed_complex_specialist = yes
+	}
+}
+
+ariphaos_patch_buildings_allow_specialist = {
+	exists = owner
+	OR = {
+		owner = { is_ai = no }
+		ariphaos_patch_unemployed_specialist = yes
+	}
+}
+
+ariphaos_patch_buildings_allow_worker_complex = {
+	exists = owner
+	OR = {
+		owner = { is_ai = no }
+		AND = {
+			ariphaos_patch_unemployed_worker_complex = yes
+			num_free_districts = { type = district_generator value = 0 }
+			OR = {
+				num_free_districts = { type = district_mining value = 0 }
+				owner = { country_uses_food = yes }
+			}
+			OR = {
+				num_free_districts = { type = district_farming value = 0 }
+				owner = { country_uses_food = no }
+			}
+		}
+	}
+}
+
+ariphaos_patch_buildings_allow_worker = {
+	exists = owner
+	OR = {
+		owner = { is_ai = no }
+		AND = {
+			ariphaos_patch_unemployed_worker = yes
+			num_free_districts = { type = district_generator value = 0 }
+			OR = {
+				num_free_districts = { type = district_mining value = 0 }
+				owner = { country_uses_food = yes }
+			}
+			OR = {
+				num_free_districts = { type = district_farming value = 0 }
+				owner = { country_uses_food = no }
+			}
+		}
+	}
+}
+
+ariphaos_patch_ai_destroy_building = {
+	exists = owner
+	AND = {
+		owner = { is_ai = yes }
+		free_jobs > 5
+	}
+}

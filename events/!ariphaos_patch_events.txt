@@ -1,0 +1,294 @@
+namespace = ariphaos_patch
+
+# Event for version handling.
+event = {
+    id = ariphaos_patch.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+       set_global_flag = ariphaos_unofficial_patch_26
+    }
+}
+
+# Progress.2, but for remnants.
+ship_event = {
+    id = ariphaos_patch.2
+    hide_window = yes
+    is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			is_ai = no
+			NOT = {
+				has_country_flag = Story5
+			}
+		}
+		FROM = {
+			has_owner = no
+			OR = {
+				is_planet_class = pc_relic
+				is_planet_class = pc_city
+				is_planet_class = pc_nuked
+				is_planet_class = pc_habitat
+				is_planet_class = pc_ringworld_habitable
+				is_planet_class = pc_ringworld_habitable_damaged
+			}
+		}
+	}
+
+    immediate = {
+       owner = { country_event = { id = story.5 days = 30 } }
+    }
+}
+
+# Grant living metal tech option if a deposit is in our territory, or if we have a fabricator.
+country_event = {
+    id = ariphaos_patch.3
+    hide_window = yes
+    is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = default
+		NOR = {
+			has_technology = tech_mine_living_metal
+			has_tech_option = tech_mine_living_metal
+		}
+		OR = {
+			any_planet_within_border = { has_deposit = d_living_metal_deposit }
+		}
+	}
+	
+	immediate = {
+		add_research_option = tech_mine_living_metal
+	}
+	
+}
+
+# Automagically close borders.
+# ROOT = country closing the borders
+# FROM = previous war participant.
+country_event = {
+    id = ariphaos_patch.44
+    hide_window = yes
+    is_triggered_only = yes
+	
+	# The AI will do this on their own. Make sure the message is generated.
+	trigger = {
+		is_ai = no
+	}
+
+    immediate = {
+       set_closed_borders = {
+			who = from
+			status = yes
+		}
+    }
+}
+
+# Sets a short timed flag if pox/armageddon bombardment is going on, so the planet can be appropriately nuked.
+# Ariphaos todo: Should we just turn the planet into a tomb world once devastation is over 100? Give players the option to fully nuke the planet if they kill the last pop before it reaches 100?
+planet_event = {
+    id = ariphaos_patch.81
+    hide_window = yes
+    is_triggered_only = yes
+	
+	trigger = {
+		planet_devastation >= 100
+		OR = {
+			has_orbital_bombardment_stance = armageddon
+			has_orbital_bombardment_stance = pox
+		}
+	}
+
+    immediate = {
+		set_timed_planet_flag = {
+			flag = ariphaos_patch_flag_tomb_bombardment
+			days = 7
+		}
+    }
+}
+
+# Catch-all trait adding event.
+country_event = {
+	id = ariphaos_patch.2560
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		from = { ariphaos_patch_leader_add_traits = yes }
+	}
+
+}
+
+# Populate the galaxy with terraforming candidates based on habitability setting.
+event = {
+    id = ariphaos_patch.2575
+    hide_window = yes
+    is_triggered_only = yes
+	
+	immediate = {
+		every_system = {
+			limit = {
+				NOR = {
+					is_star_class = sc_black_hole
+					is_star_class = sc_neutron_star
+					is_star_class = sc_pulsar
+					has_star_flag = empire_home_system
+				}
+			}
+			every_system_planet = {
+				limit = {
+					NOR = { 
+						has_modifier = terraforming_candidate
+						has_anomaly = yes
+						is_preventing_anomaly = yes
+					}
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+					}
+				}
+
+# Turns out colonizable_planet_odds can't be retrieved because of course it can't.		
+#				get_galaxy_setup_value = { 
+#					setting = colonizable_planet_odds
+#					which = local_habitability_num
+#					scale_by = 4
+#				}
+#					
+#				while = {
+#					count = local_habitability_num
+#				}
+				random_list = {
+					98 = { }
+					2 = {
+						add_modifier = {
+							modifier = "terraforming_candidate"
+							days = -1
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+    id = ariphaos_patch.9998
+    hide_window = yes
+    is_triggered_only = yes
+	
+	trigger = {
+		is_regular_empire = yes
+		is_country_type = default
+	}
+	
+	immediate = {
+		add_modifier = {
+			modifier = ariphaos_patch_political_restructuring
+			days = 720
+		}
+		every_owned_pop = {
+			limit = {
+				is_same_species = ROOT
+			}
+			random_list = {
+				25 = {
+					modifier = {
+						factor = 0
+						ROOT = { is_homicidal = yes }
+					}
+				}
+				25 = {
+					modifier = {
+						factor = 0
+						ROOT = { is_xenophobe = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_xenophobe }
+					}
+					pop_change_ethic = ethic_xenophobe
+				}
+				25 = { 
+					modifier = {
+						factor = 0
+						ROOT = { is_xenophile = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_xenophile }
+					}
+					pop_change_ethic = ethic_xenophile
+				}
+				25 = {
+					modifier = {
+						factor = 0
+						ROOT = { is_militarist = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_militarist }
+					}
+					pop_change_ethic = ethic_militarist
+				}
+				25 = { 
+					modifier = {
+						factor = 0
+						ROOT = { is_pacifist = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_pacifist }
+					}
+					pop_change_ethic = ethic_pacifist
+				}
+				25 = {
+					modifier = {
+						factor = 0
+						ROOT = { is_materialist = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_materialist }
+					}
+					pop_change_ethic = ethic_materialist
+				}
+				25 = { 
+					modifier = {
+						factor = 0
+						ROOT = { is_spiritualist = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_spiritualist }
+					}
+					pop_change_ethic = ethic_spiritualist
+				}
+				25 = {
+					modifier = {
+						factor = 0
+						ROOT = { is_egalitarian = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_egalitarian }
+					}
+					pop_change_ethic = ethic_egalitarian
+				}
+				25 = { 
+					modifier = {
+						factor = 0
+						ROOT = { is_authoritarian = no }
+					}
+					modifier = {
+						factor = 2
+						ROOT = { has_ethic = ethic_fanatic_authoritarian }
+					}
+					pop_change_ethic = ethic_authoritarian
+				}
+			}
+		}
+	}
+}
