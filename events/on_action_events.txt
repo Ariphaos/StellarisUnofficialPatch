@@ -4454,7 +4454,7 @@ country_event = {
 	desc = {
 		text = "action.11.desc"
 		trigger = {
-			fromfrom = { NOT = { has_relation_flag = { who = root flag = AbandonedRefugees } } }
+			NOT = { fromfrom = { has_relation_flag = { who = root flag = AbandonedRefugees } } }
 		}
 	}
 	desc = {
@@ -5598,7 +5598,6 @@ country_event = {
 # Other Empires react to a Pop dying in a purge
 planet_event = {
 	id = action.21
-
 	hide_window = yes
 
 	is_triggered_only = yes
@@ -5608,9 +5607,9 @@ planet_event = {
 			is_robot_pop = no
 			is_sapient = yes
 			NOT = { has_trait = "trait_hive_mind" }
-			OR = {
-				NOT = { has_citizenship_type = { country = from type = citizenship_purge } }
-				NOT = { has_purge_type = { country = from type = purge_neutering } }
+			NAND = {
+				has_citizenship_type = { country = from type = citizenship_purge }
+				has_purge_type = { country = from type = purge_neutering }
 			}
 		}
 		is_controlled_by = FROM
@@ -5620,9 +5619,11 @@ planet_event = {
 		every_country = {
 			limit = {
 				has_communications = FROM
-				NOT = { is_country = FROM }
-				NOT = { is_same_species = ROOT }
-				NOT = { has_ai_personality_behaviour = purger }
+				NOR = {
+					is_country = FROM
+					is_same_species = FROMFROM
+					has_ai_personality_behaviour = purger
+				}
 				OR = {
 					is_country_type = default
 					has_ai_personality = awakened_fallen_empire_xenophile
@@ -5634,7 +5635,7 @@ planet_event = {
 			limit = {
 				has_communications = FROM
 				NOT = { is_country = FROM }
-				is_same_species = ROOT
+				is_same_species = FROMFROM
 			}
 			add_opinion_modifier = { who = FROM modifier = opinion_genocidal_our_species }
 		}
@@ -6746,8 +6747,11 @@ planet_event = {
 	hide_window = yes
 	is_triggered_only = yes
 
-	trigger = {
+	pre_triggers = {
 		has_owner = yes
+	}
+
+	trigger = {
 		NOT = { exists = fromfrom }
 		owner = {
 			OR = {
