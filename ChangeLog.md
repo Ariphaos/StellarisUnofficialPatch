@@ -1,5 +1,6 @@
 
 ### Sep 11st
+* Fix location target Event: Dyson Sphere (utopia.30)
 * Add location to graygoo.181
 * Fix location rubricator_dragon_fleet (ancrel.40180)
 * Fix pre_triggers id = colony.1533
