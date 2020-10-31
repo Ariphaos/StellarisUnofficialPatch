@@ -354,13 +354,13 @@ country_event = {
 	desc = "distar.10.desc"
 	picture = GFX_evt_star_yellow
 	show_sound = event_scanner
-	location = fromfrom
+	location = fromfromfrom
 
 	is_triggered_only = yes
 
 	option = {
 		name = TERRIBLE
-		fromfrom = {
+		fromfromfrom = {
 			add_modifier = { modifier = superflare_struck years = 20 }
 			hidden_effect = { remove_modifier = "superflare_planet" }
 			random_owned_pop = {
@@ -762,6 +762,9 @@ planet_event = {
 				count_pops = {
 					limit = { NOT = { has_trait = trait_mechanical } }
 					count > 5
+				}
+				count_pops = {
+					limit = { NOT = { has_trait = trait_mechanical } }
 					count < 13
 				}
 			}
@@ -906,15 +909,15 @@ planet_event = { #Onetime
 			auto_delete = yes
 			flag = {
 				background = {
-					category = "backgrounds"
-					file = "00_solid.dds"
-				}
-				colors = {
-					"red"
-					"red"
-					"null"
-					"null"
-				}
+    		        category = "backgrounds"
+    		        file = "00_solid.dds"
+    		    }
+    		    colors = {
+    		        "red"
+    		        "red"
+    		        "null"
+    		        "null"
+    		    }
 			}
 			effect = {
 				establish_communications_no_message = root.owner
@@ -1038,25 +1041,52 @@ planet_event = { #Rage Virus cured
 				}
 			}
 			if = {
- 				limit = { NOT = { has_technology = tech_genome_mapping } }
- 				give_technology = { tech = tech_genome_mapping }
+ 			    limit = {
+					NOT = { has_technology = tech_genome_mapping }
+					OR = {
+						NOT = { has_authority = auth_machine_intelligence }
+						has_civic = civic_machine_assimilator
+						has_civic = civic_machine_servitor
+					}
+				}
+ 			    give_technology = { tech = tech_genome_mapping }
  			}
  			else_if = {
- 				limit = { NOT = { has_technology = tech_frontier_health } }
- 				give_technology = { tech = tech_frontier_health }
+ 			    limit = {
+					NOT = { has_technology = tech_frontier_health }
+					is_gestalt = no
+				}
+ 			    give_technology = { tech = tech_frontier_health }
  			}
  			else_if = {
- 				limit = { NOT = { has_technology = tech_frontier_hospital } }
- 				give_technology = { tech = tech_frontier_hospital }
+ 				limit = {
+					NOT = { has_technology = tech_frontier_hospital }
+					is_gestalt = no
+				}
+ 			    give_technology = { tech = tech_frontier_hospital }
  			}
  			else_if = {
- 				limit = { NOT = { has_technology = tech_vitality_boosters } }
- 				give_technology = { tech = tech_vitality_boosters }
+ 				limit = {
+					NOT = { has_technology = tech_vitality_boosters }
+					OR = {
+						NOT = { has_authority = auth_machine_intelligence }
+						has_civic = civic_machine_assimilator
+					}
+				}
+ 			    give_technology = { tech = tech_vitality_boosters }
  			}
  			else_if = {
  				limit = { has_technology = tech_vitality_boosters }
- 				give_technology = { tech = tech_repeatable_improved_leader_life_span }
- 			}
+ 			    give_technology = { tech = tech_repeatable_improved_leader_life_span }
+			}
+			else = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = @tier3researchreward
+					min = @tier3researchmin
+					max = @tier3researchmax
+				}
+			}
 		}
 	}
 }
@@ -2729,11 +2759,11 @@ ship_event = {
 			effect = {
 				set_owner = root.owner
 				create_ship = {
-					name = "NAME_Cryonic_Clones_Colonizer"
-					random_existing_design = colonizer
-					colonizer_species = event_target:cryonic_clones
-					prefix = no
-					upgradable = no
+				    name = "NAME_Cryonic_Clones_Colonizer"
+				    random_existing_design = colonizer
+				    colonizer_species = event_target:cryonic_clones
+				    prefix = no
+				    upgradable = no
 				}
 				set_location = {
 					target = root
@@ -2786,7 +2816,7 @@ ship_event = {
 						create_pop = {
 							species = event_target:cryonic_clones
 						}
-					}
+	    			}
 				}
 			}
 		}
@@ -2822,7 +2852,7 @@ ship_event = {
 						create_pop = {
 							species = event_target:cryonic_clones
 						}
-					}
+	    			}
 				}
 			}
 		}
@@ -2901,7 +2931,7 @@ ship_event = {
 						create_pop = {
 							species = event_target:cryonic_clones
 						}
-					}
+	    			}
 				}
 			}
 		}
@@ -2935,7 +2965,7 @@ ship_event = {
 						create_pop = {
 							species = event_target:cryonic_clones
 						}
-					}
+	    			}
 				}
 			}
 		}
@@ -3215,7 +3245,11 @@ ship_event = {
 	}
 }
 
-country_event = { #on_planet_attackers_win
+# on_planet_attackers_win
+# This = country, leader attacker
+# From = country, planet owner
+# FromFrom = planet
+country_event = {
 	id = distar.81
 	hide_window = yes
 
@@ -3253,9 +3287,12 @@ country_event = {
 	option = {
 		name = "distar.82.a"
 		event_target:dead_god_planet = {
-			every_owned_pop = {
-				limit = { is_same_species = event_target:worshipper_species }
-				add_modifier = { modifier = conviction days = 7200 }
+			custom_tooltip = distar.82.a.tt
+			hidden_effect = {
+				every_owned_pop = {
+					limit = { is_same_species = event_target:worshipper_species }
+					add_modifier = { modifier = conviction days = 7200 }
+				}
 			}
 		}
 	}
@@ -5683,16 +5720,16 @@ country_event = { #Scientist dies
 	option = {
 		name = INCREDIBLE
 		if = {
- 			limit = { NOT = { has_technology = tech_psionic_theory } }
- 			give_technology = { tech = tech_psionic_theory }
+ 		    limit = { NOT = { has_technology = tech_psionic_theory } }
+ 		    give_technology = { tech = tech_psionic_theory }
  		}
  		else_if = {
- 			limit = { NOT = { has_technology = tech_telepathy } }
- 			give_technology = { tech = tech_telepathy }
+ 		    limit = { NOT = { has_technology = tech_telepathy } }
+ 		    give_technology = { tech = tech_telepathy }
  		}
  		else_if = {
  			limit = { NOT = { has_technology = tech_precognition_interface } }
- 			give_technology = { tech = tech_precognition_interface }
+ 		    give_technology = { tech = tech_precognition_interface }
  		}
  		else = {
  			add_monthly_resource_mult = {
@@ -5740,16 +5777,16 @@ country_event = {
 	option = {
 		name = FASCINATING
 		if = {
- 			limit = { NOT = { has_technology = tech_psionic_theory } }
- 			give_technology = { tech = tech_psionic_theory }
+ 		    limit = { NOT = { has_technology = tech_psionic_theory } }
+ 		    give_technology = { tech = tech_psionic_theory }
  		}
  		else_if = {
- 			limit = { NOT = { has_technology = tech_telepathy } }
- 			give_technology = { tech = tech_telepathy }
+ 		    limit = { NOT = { has_technology = tech_telepathy } }
+ 		    give_technology = { tech = tech_telepathy }
  		}
  		else_if = {
  			limit = { NOT = { has_technology = tech_precognition_interface } }
- 			give_technology = { tech = tech_precognition_interface }
+ 		    give_technology = { tech = tech_precognition_interface }
  		}
 		add_monthly_resource_mult = {
 			resource = society_research
@@ -6077,6 +6114,16 @@ country_event = { #Death of the Matriarch
 
 	option = {
 		name = "distar.212.a"
+		trigger = { NOT = { has_valid_civic = civic_memorialist } }
+		hidden_effect = {
+			country_event = { id = distar.213 }
+			country_event = { id = galcom.110 days = 60 }
+		}
+	}
+
+	option = {
+		name = UNDERSTOOD
+		trigger = { has_valid_civic = civic_memorialist }
 		hidden_effect = {
 			country_event = { id = distar.213 }
 			country_event = { id = galcom.110 days = 60 }
@@ -6113,27 +6160,27 @@ country_event = {
 			type = faction
 			auto_delete = yes
 			flag = {
-				icon = {
-					category = "special"
-					file = "unknown.dds"
-				}
-				background = {
-					category = "backgrounds"
-					file = "00_solid.dds"
-				}
-				colors = {
-					"red"
-					"red"
-					"null"
-					"null"
-				}
-			}
-			effect = {
-				save_event_target_as = reth_country
-			}
-		}
-		event_target:reth_country = {
-			set_faction_hostility = {
+    		    icon = {
+    		        category = "special"
+    		        file = "unknown.dds"
+    		    }
+    		    background = {
+    		        category = "backgrounds"
+    		        file = "00_solid.dds"
+    		    }
+    		    colors = {
+    		        "red"
+    		        "red"
+    		        "null"
+    		        "null"
+    		    }
+    		}
+    		effect = {
+    			save_event_target_as = reth_country
+    		}
+    	}
+    	event_target:reth_country = {
+    		set_faction_hostility = {
 				target = root.owner
 				set_hostile = no
 				set_neutral = no
@@ -7242,14 +7289,9 @@ country_event = { #Switch owner on ground invasion successful to prevent endless
 		set_country_flag = subdued_ratling_planet
 		fromfrom = {
 			set_owner = root
-			every_owned_pop = {
-				limit = {
-					is_same_species = event_target:ratling_species
-				}
-				add_modifier = {
-					modifier = culture_shock_early_space_age
-					years = 5
-				}
+			add_modifier = {
+				modifier = planet_culture_shock
+				years = 10
 			}
 		}
 	}
@@ -7654,7 +7696,6 @@ country_event = { #Create Full Ratling Empire #Root = Global Event Country
 				tech_nano_vitality_crops = { give_technology = { tech = tech_nano_vitality_crops } }
 				tech_power_hub_1 = { give_technology = { tech = tech_power_hub_1 } }
 				tech_food_processing_1 = { give_technology = { tech = tech_food_processing_1 } }
-				tech_psionic_theory = { give_technology = { tech = tech_psionic_theory } }
 			}
 
 			##Add resources
@@ -9083,7 +9124,7 @@ planet_event = { #on_spawn
 			create_pop = {
 				species = event_target:livestock_species
 			}
-		}
+	    }
 	}
 }
 
@@ -10076,7 +10117,7 @@ country_event = { #Atomic Clock follow-up: Selection
 				}
 				country_event = { id = distar.315 } #Useable Gray Goo ship is built
 			}
-			0 = {
+			0 = { 
 				modifier = {
 					add = 1
 					FROMFROM.solar_system = {
@@ -10264,19 +10305,19 @@ country_event = { #A useable Gray Goo Ship is built
 			auto_delete = yes
 			flag = {
 				icon = {
-					category = "special"
-					file = "unknown.dds"
-				}
-				background = {
-					category = "backgrounds"
-					file = "00_solid.dds"
-				}
-				colors = {
-					"dark_grey"
-					"dark_grey"
-					"null"
-					"null"
-				}
+    		        category = "special"
+    		        file = "unknown.dds"
+    		    }
+    		    background = {
+    		        category = "backgrounds"
+    		        file = "00_solid.dds"
+    		    }
+    		    colors = {
+    		        "dark_grey"
+    		        "dark_grey"
+    		        "null"
+    		        "null"
+    		    }
 			}
 			effect = {
 				set_faction_hostility = {
@@ -10377,7 +10418,9 @@ country_event = { #An unmanned computer network is built
 					random_mining_station = { dismantle = yes }
 					create_research_station = { owner = root }
 				}
-				add_modifier = { modifier = nanite_network days = -1 }
+				hidden_effect = {
+					add_modifier = { modifier = nanite_network days = -1 }
+				}
 				add_deposit = d_engineering_10
 			}
 		}
@@ -10497,15 +10540,14 @@ ship_event = {
 
 	trigger = {
 		owner = {
-			NOR = {
-				has_authority = auth_machine_intelligence
-				has_ethic = ethic_gestalt_consciousness
+			NOT = {
 				any_country = {
 					has_country_flag = vechtar_zavonia_chain
 				}
 			}
 		}
 	}
+	
 	immediate = {
 		owner = {
 			country_event = { id = story.5 days = 30 }
@@ -10580,6 +10622,7 @@ country_event = {
 					initializer = vechtar_zavonia_system
 				}
 			}
+			add_extra_hyperlane_to_spawned_system_effect = yes
 		}
 		begin_event_chain = {
 			event_chain = "generation_ship_chain"
@@ -12358,17 +12401,9 @@ ship_event = {
 		picture = GFX_evt_ship_in_orbit_2
 	}
 	show_sound = event_mystic_reveal
-	location = From
+	location = root
 
 	is_triggered_only = yes
-
-	#trigger = {	# no need, as the flag is set nowhere
-	#	owner = {
-	#		NOT = {
-	#			has_country_flag = hologram
-	#		}
-	#	}
-	#}
 
 	immediate = {
 		owner = {
@@ -12558,10 +12593,6 @@ country_event = {
 		}
 		event_target:anomalous_star = {
 			add_deposit = d_energy_8
-			surveyed = {
- 				set_surveyed = yes
-   				surveyor = root
- 			}
 		}
 	}
 }
@@ -12904,7 +12935,6 @@ country_event = {
 	trigger = {
 		has_country_flag = stored_azizian_dna
 		last_increased_tech = tech_cloning
-		NOT = { has_country_flag = offered_to_clone_azizians }
 	}
 
 	option = {
@@ -13296,7 +13326,22 @@ ship_event = {
 ship_event = {
 	id = distar.2015
 	title = "distar.2015.name"
-	desc = "distar.2015.desc"
+	desc = {
+		text = distar.2015.desc
+		trigger = {
+			owner = {
+				NOT = { has_valid_civic = civic_machine_terminator }
+			}
+		}
+	}
+	desc = {
+		text = distar.2015.desc.terminator
+		trigger = {
+			owner = {
+				has_valid_civic = civic_machine_terminator
+			}
+		}
+	}
 	picture = GFX_evt_microscopic_life
 	show_sound = event_alien_nature
 	location = from
@@ -13305,9 +13350,28 @@ ship_event = {
 
 	option = {
 		name = FASCINATING
+		trigger = {
+			owner = {
+				NOT = { has_valid_civic = civic_machine_terminator }
+			}
+		}
 		from = {
 			add_deposit = d_society_3
  		}
+	}
+	option = {
+		name = distar.2015.A.machine
+		trigger = {
+			owner = {
+				has_authority = auth_machine_intelligence
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+			}
+		}
 	}
 }
 
@@ -13587,6 +13651,7 @@ country_event = {
 	immediate = {
 		event_target:time_loop_world = {
 			change_pc = pc_nuked
+			set_planet_flag = nuked_planet_anomalies_disabled
 		}
 	}
 
@@ -14337,6 +14402,7 @@ event = {
 		# Risa fix: there's no reason for the country trigger.
 		any_playable_country = {
 			is_ai = no
+			#is_at_war = no
 		}
 	}
 	immediate = {
@@ -14365,38 +14431,6 @@ planet_event = {
 	hide_window = yes
 
 	immediate = {
-		# save spawn point
-		solar_system = {
-			if = {
-				limit = {
-					any_system_megastructure = {
-						OR = {
-							is_megastructure_type = gateway_ruined
-							is_megastructure_type = gateway_restored
-							is_megastructure_type = gateway_final
-							is_megastructure_type = lgate_base
-						}
-					}
-				}
-				random_system_megastructure = {
-					limit = {
-						OR = {
-							is_megastructure_type = gateway_ruined
-							is_megastructure_type = gateway_restored
-							is_megastructure_type = gateway_final
-							is_megastructure_type = lgate_base
-						}
-					}
-					save_event_target_as = spawning_gateway
-				}
-			}
-			# use root planet as spawn point if fired for debugging
-			else = {
-				root = {
-					save_event_target_as = spawning_gateway
-				}
-			}
-		}
 		# Finding a target planet to scan and spawning enigmatic cache system
 		if = {
 			limit = {
@@ -14405,10 +14439,10 @@ planet_event = {
 					owner = {
 						is_country_type = default
 						is_at_war = no
-						any_owned_planet = {
-							is_colony = yes
-							NOT = { has_planet_flag = has_been_scanned }
-						}
+					}
+					any_system_planet = {
+						exists = owner
+						NOT = { has_planet_flag = has_been_scanned }
 					}
 				}
 			}
@@ -14420,10 +14454,10 @@ planet_event = {
 							is_ai = no
 							is_country_type = default
 							is_at_war = no
-							any_owned_planet = {
-								is_colony = yes
-								NOT = { has_planet_flag = has_been_scanned }
-							}
+						}
+						any_system_planet = {
+							exists = owner
+							NOT = { has_planet_flag = has_been_scanned }
 						}
 					}
 				}
@@ -14434,14 +14468,41 @@ planet_event = {
 							is_country_type = default
 							is_at_war = no
 							is_ai = no
-							any_owned_planet = {
-								is_colony = yes
-								NOT = { has_planet_flag = has_been_scanned }
-							}
+						}
+						any_system_planet = {
+							exists = owner
+							NOT = { has_planet_flag = has_been_scanned }
 						}
 					}
 					random_system_planet = {
-						limit = { exists = owner }
+						limit = {
+							exists = owner
+							NOT = { has_planet_flag = has_been_scanned }
+						}
+						#set_planet_flag = has_been_scanned
+						save_event_target_as = new_location
+						solar_system = { set_star_flag = enigmatic_cache_system }
+					}
+				}
+			}
+			else = {
+				closest_system = {
+					limit = {
+						exists = owner
+						owner = {
+							is_country_type = default
+							is_at_war = no
+						}
+						any_system_planet = {
+							exists = owner
+							NOT = { has_planet_flag = has_been_scanned }
+						}
+					}
+					random_system_planet = {
+						limit = {
+							exists = owner
+							NOT = { has_planet_flag = has_been_scanned }
+						}
 						#set_planet_flag = has_been_scanned
 						save_event_target_as = new_location
 						solar_system = { set_star_flag = enigmatic_cache_system }
@@ -14455,11 +14516,9 @@ planet_event = {
 					exists = owner
 					owner = {
 						is_country_type = default
-						is_at_war = no
-						any_owned_planet = {
-							is_colony = yes
-							NOT = { has_planet_flag = has_been_scanned }
-						}
+					}
+					any_system_planet = {
+						exists = owner
 					}
 				}
 				random_system_planet = {
@@ -14539,8 +14598,7 @@ country_event = {
 			}
 		}
 		# Sets new location for cache
-		country_event = { id = distar.5052 days = 3600 }
-		#country_event = { id = distar.5052 days = 30 }
+		country_event = { id = distar.5052 days = 3600 } #In effect, sets a duration for the Cache's planet-scanning modifiers.
 	}
 }
 
@@ -14651,8 +14709,9 @@ country_event = {
 			any_owned_ship = {
 				has_ship_flag = enigmatic_cache_ship
 				exists = orbit
-				orbit = {
-					owner = { is_researching_special_project = ENIGMATIC_CACHE_PROJECT }
+				exists = orbit.owner
+				orbit.owner = {
+					is_researching_special_project = ENIGMATIC_CACHE_PROJECT
 				}
 			}
 		}
@@ -15311,7 +15370,7 @@ event = {
 					is_hostile = event_target:enigmatic_cache_country
 					event_target:enigmatic_cache_country = { is_hostile = prev }
 				}
-				is_ai = no
+				is_at_war = no
 			}
 		}
 		### There is a player empire that has already been scanned
@@ -16148,7 +16207,7 @@ country_event = {
 			custom_tooltip = applied_enigmatic_madness.tooltip
 		}
 		if = {
-			limit = { has_country_flag = trait_enigmatic_intelligence_failed }
+			limit = { has_country_flag = applied_enigmatic_intelligence_failed }
 			custom_tooltip = trait_enigmatic_intelligence_failed.tooltip
 		}
 	}
@@ -16650,21 +16709,21 @@ country_event = {
 			name = "NAME_Ancient_Drones"
 			type = faction
 			flag = {
-				icon = {
-					category = "pirate"
-					file = "flag_pirate_3.dds"
-				}
-				background = {
-					category = "backgrounds"
-					file = "00_solid.dds"
-				}
-				colors = {
-					"black"
-					"black"
-					"null"
-					"null"
-				}
-			}
+    		    icon = {
+    		        category = "pirate"
+    		        file = "flag_pirate_3.dds"
+    		    }
+    		    background = {
+    		        category = "backgrounds"
+    		        file = "00_solid.dds"
+    		    }
+    		    colors = {
+    		        "black"
+    		        "black"
+    		        "null"
+    		        "null"
+    		    }
+    		}
 			effect = {
 				set_faction_hostility = {
 					target = root
@@ -17496,25 +17555,25 @@ ship_event = {
 			name = random
 			type = faction
 			flag = {
-				icon = {
-					category = "special"
-					file = "unknown.dds"
-				}
-				background = {
-					category = "backgrounds"
-					file = "00_solid.dds"
-				}
-				colors = {
-					"blue"
-					"blue"
-					"null"
-					"null"
-				}
-			}
-			effect = {
-				save_event_target_as = stranded_scientist_country
-			}
-		}
+    		    icon = {
+    		        category = "special"
+    		        file = "unknown.dds"
+    		    }
+    		    background = {
+    		        category = "backgrounds"
+    		        file = "00_solid.dds"
+    		    }
+    		    colors = {
+    		        "blue"
+    		        "blue"
+    		        "null"
+    		        "null"
+    		    }
+    		}
+    		effect = {
+    			save_event_target_as = stranded_scientist_country
+    		}
+    	}
 		event_target:stranded_scientist_country = {
 			create_leader = {
 				class = scientist
@@ -17720,7 +17779,7 @@ country_event = { # More info about the molluscs
 		trigger = {		# Prevents Genocidal Empires from integrating molluscs
 			is_homicidal = no
 		}
-
+		
 		name = distar.3031.a
 
 		enable_special_project = {
@@ -18040,10 +18099,18 @@ country_event = { # Spike in energy readings from a nearby solar system observed
 		}
 	}
 
+	after = {
+		hidden_effect = {
+			country_event = { id = distar.3043 days = 3 } 
+		}
+	}
+
 	option = { # How strange. Take it apart.
 		name = distar.3041.a
 		custom_tooltip = distar.3040.b.tooltip
-		leader = { add_experience = 800 }
+		from = {
+			leader = { add_experience = 800 }
+		}
 		add_monthly_resource_mult = {
 			resource = physics_research
 			value = @tier4researchreward
@@ -18061,12 +18128,42 @@ country_event = { # Spike in energy readings from a nearby solar system observed
 	option = { # Intriguing. Research it further.
 		name = distar.3041.b
 		custom_tooltip = distar.3041.b.tooltip
-		leader = { add_experience = 800 }
+		from = {
+			leader = { add_experience = 800 }
+		}
 		hidden_effect = {
 			event_target:asteroid_target = {
 				add_deposit = d_physics_7
 			}
 		}
+	}
+}
+
+### Possible First Wormhole Encountered event due to event distar.3042
+country_event = {
+	id = distar.3043
+	title = apoc.5.name
+	desc = "apoc.5.desc"
+	picture = GFX_evt_wormhole
+	show_sound = event_radio_chatter
+	location = event_target:system_one
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = encountered_first_wormhole }
+	}
+
+	immediate = {
+		event_target:system_one = { 
+			save_event_target_as = wormhole_system
+		}
+		set_country_flag = encountered_first_wormhole
+		add_seen_bypass_type = wormhole
+	}
+
+	option = {
+		name = apoc.5.a
 	}
 }
 
@@ -18183,37 +18280,65 @@ country_event = { # Alien Box opened
 		name = distar.3055.a
 		custom_tooltip = distar.3055.a.tooltip
 		hidden_effect = {
-			every_owned_pop = {
+			if = {
 				limit = {
-					OR = {
-						is_same_species = root
+					has_trait = trait_strong
+				}
+				modify_species = {
+					species = this
+					#remove_trait = trait_strong
+					add_trait = trait_social_pheromones
+				}
+				set_country_flag = strong_removed_verystrong_added
+			}
+			else_if = {
+				limit = {
+					has_trait = trait_weak
+				}
+				modify_species = {
+					species = this
+					#remove_trait = trait_weak
+					add_trait = trait_social_pheromones
+				}
+				set_country_flag = weak_removed_strong_added
+			}
+			else_if = {
+				#limit = {
+				#	NOR = {
+				#		has_trait = trait_weak
+				#		has_trait = trait_strong
+				#		has_trait = trait_very_strong
+				#	}
+				#}
+				modify_species = {
+					species = this
+					add_trait = trait_social_pheromones
+				}
+				set_country_flag = verystrong_added
+			}
+			change_dominant_species = {
+				species = last_created_species
+			}
+			while = {
+				limit = {
+					any_owned_pop = {
 						is_subspecies = root
+						NOT = { has_trait = trait_social_pheromones }
 					}
 				}
-				modify_species = {
-					species = this
-					add_trait = trait_social_pheromones
-				}
-			}
-			every_owned_leader = {
-				limit = { is_same_species = root }
-				change_species = last_created_species
-			}
-
-			every_owned_pop = {
-				limit = {
-					NOR = {
-						is_same_species = root
-						is_same_species = last_created_species
+				random_owned_pop = {
+					limit = {
+						is_subspecies = root
+						NOT = { has_trait = trait_social_pheromones }
 					}
-					is_subspecies = root
-				}
-				modify_species = {
-					species = this
-					add_trait = trait_social_pheromones
+					root = {
+						modify_species = {
+							species = prev.species
+							add_trait = trait_social_pheromones
+						}
+					}
 				}
 			}
-			set_country_flag = verystrong_added
 			set_country_flag = modification_stronger # actually socialer now, but keeping the flags
 			country_event = { id = distar.3057 days = 5 }
 		}
@@ -18223,37 +18348,65 @@ country_event = { # Alien Box opened
 		name = distar.3055.b
 		custom_tooltip = distar.3055.b.tooltip
 		hidden_effect = {
-			every_owned_pop = {
+			if = {
 				limit = {
-					OR = {
-						is_same_species = root
+					has_trait = trait_adaptive
+				}
+				modify_species = {
+					species = this
+					#remove_trait = trait_adaptive
+					add_trait = trait_bioadaptability
+				}
+				set_country_flag = adaptive_removed_extremelyadaptive_added
+			}
+			if = {
+				limit = {
+					has_trait = trait_nonadaptive
+				}
+				modify_species = {
+					species = this
+					#remove_trait = trait_nonadaptive
+					add_trait = trait_bioadaptability
+				}
+				set_country_flag = nonadaptive_removed_adaptive_added
+			}
+			if = {
+				#limit = {
+				#	NOR = {
+				#		has_trait = trait_nonadaptive
+				#		has_trait = trait_adaptive
+				#		has_trait = trait_extremely_adaptive
+				#	}
+				#}
+				modify_species = {
+					species = this
+					add_trait = trait_bioadaptability
+				}
+				set_country_flag = extremelyadaptive_added
+			}
+			change_dominant_species = {
+				species = last_created_species
+			}
+			while = {
+				limit = {
+					any_owned_pop = {
 						is_subspecies = root
+						NOT = { has_trait = trait_bioadaptability }
 					}
 				}
-				modify_species = {
-					species = this
-					add_trait = trait_bioadaptability
-				}
-			}
-			every_owned_leader = {
-				limit = { is_same_species = root }
-				change_species = last_created_species
-			}
-
-			every_owned_pop = {
-				limit = {
-					NOR = {
-						is_same_species = root
-						is_same_species = last_created_species
+				random_owned_pop = {
+					limit = {
+						is_subspecies = root
+						NOT = { has_trait = trait_bioadaptability }
 					}
-					is_subspecies = root
-				}
-				modify_species = {
-					species = this
-					add_trait = trait_bioadaptability
+					root = {
+						modify_species = {
+							species = prev.species
+							add_trait = trait_bioadaptability
+						}
+					}
 				}
 			}
-			set_country_flag = extremelyadaptive_added
 			set_country_flag = modification_adaptive
 			country_event = { id = distar.3057 days = 5 }
 		}
@@ -18263,32 +18416,64 @@ country_event = { # Alien Box opened
 		name = distar.3055.c
 		custom_tooltip = distar.3055.c.tooltip
 		hidden_effect = {
-			every_owned_pop = {
-				limit = { is_same_species = root }
-				modify_species = {
-					species = this
-					add_trait = trait_limited_regeneration
-				}
-			}
-			every_owned_leader = {
-				limit = { is_same_species = root }
-				change_species = last_created_species
-			}
-
-			every_owned_pop = {
+			if = {
 				limit = {
-					NOR = {
-						is_same_species = root
-						is_same_species = last_created_species
-					}
-					is_subspecies = root
+					has_trait = trait_enduring
+				}
+				modify_species = {
+					species = this
+					#remove_trait = trait_enduring
+					add_trait = trait_limited_regeneration
+				}
+				set_country_flag = enduring_removed_venerable_added
+			}
+			else_if = {
+				limit = {
+					has_trait = trait_fleeting
 				}
 				modify_species = {
 					species = this
 					add_trait = trait_limited_regeneration
 				}
+				set_country_flag = fleeting_removed_enduring_added
 			}
-			set_country_flag = venerable_added
+			else = {
+				#limit = {
+				#	NOR = {
+				#		has_trait = trait_fleeting
+				#		has_trait = trait_enduring
+				#		has_trait = trait_venerable
+				#	}
+				#}
+				modify_species = {
+					species = this
+					add_trait = trait_limited_regeneration
+				}
+				set_country_flag = venerable_added
+			}
+			change_dominant_species = {
+				species = last_created_species
+			}
+			while = {
+				limit = {
+					any_owned_pop = {
+						is_subspecies = root
+						NOT = { has_trait = trait_limited_regeneration }
+					}
+				}
+				random_owned_pop = {
+					limit = {
+						is_subspecies = root
+						NOT = { has_trait = trait_limited_regeneration }
+					}
+					root = {
+						modify_species = {
+							species = prev.species
+							add_trait = trait_limited_regeneration
+						}
+					}
+				}
+			}
 			set_country_flag = modification_longlived
 			country_event = { id = distar.3057 days = 5 }
 		}
@@ -19379,8 +19564,13 @@ event = {
 				pc_desert = { set_planet_entity = { entity = pc_desert } }
 				pc_desert = { set_planet_entity = { entity = pc_desert } }
 			}
-			owner = {
-				country_event = { id = distar.5015 }
+			if = {
+				limit = { exists = owner }
+				owner = { country_event = { id = distar.5015 } }
+			}
+			else_if = {
+				limit = { exists = space_owner }
+				space_owner = { country_event = { id = distar.5015 } }
 			}
 			set_planet_flag = rifts_removed
 			remove_modifier = egg_rifts
@@ -20161,6 +20351,7 @@ country_event = {
 				min_orientation_angle = 44
 				max_orientation_angle = 46
 				initializer = distantstars_init_01
+				hyperlane = no
 			}
 			random_system = {
 				limit = { has_star_flag = lcluster1 }

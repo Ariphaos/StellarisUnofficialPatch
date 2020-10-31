@@ -69,6 +69,12 @@ create_crystal_country = {
 					which = splitter_fleets_sent_var
 					value = 0
 				}
+				every_country = {
+					limit = {
+						has_country_flag = established_comms_with_crystals
+					}
+					establish_communications_no_message = prev
+				}
 			}
 		}
 	}
@@ -103,6 +109,12 @@ create_cloud_country = {
 				add_modifier = {
 					modifier = cloud_power
 					days = -1
+				}
+				every_country = {
+					limit = {
+						has_country_flag = established_comms_with_clouds
+					}
+					establish_communications_no_message = prev
 				}
 			}
 		}
@@ -154,6 +166,12 @@ create_amoeba_country = {
 						set_neutral = yes
 						target = event_target:amoeba_country_borderless
 					}
+				}
+				every_country = {
+					limit = {
+						has_country_flag = established_comms_with_amoebas
+					}
+					establish_communications_no_message = prev
 				}
 			}
 		}
@@ -208,7 +226,10 @@ create_amoeba_country_borderless = {
 				}
 				every_country = {
 					limit = {
-						has_communications = event_target:amoeba_country
+						OR = {
+							has_communications = event_target:amoeba_country
+							has_country_flag = established_comms_with_amoebas
+						}
 					}
 					establish_communications_no_message = event_target:amoeba_country_borderless
 				}
@@ -252,6 +273,12 @@ create_drone_country = {
 					which = aggressive_expansion_fleets_sent_var
 					value = 0
 				}
+				every_country = {
+					limit = {
+						has_country_flag = established_comms_with_drones
+					}
+					establish_communications_no_message = prev
+				}
 			}
 		}
 	}
@@ -283,7 +310,82 @@ create_tiyanki_country = {
 			}
 			effect = {
 				save_global_event_target_as = tiyanki_country
+				every_country = {
+					limit = {
+						has_country_flag = established_comms_with_tiyanki
+					}
+					establish_communications_no_message = prev
+				}
 			}
+		}
+	}
+}
+
+# Checks if Subterraneans (player-only event nation) exists
+# Creates the country and saves it if it does not
+# use in planet scope
+create_subterranean_nation = {
+	if = {
+		limit = {
+			NOT = {
+				any_country = {
+					is_country_type = adversary
+					has_country_flag = subterranean_nation
+				}
+			}
+		}
+		create_species = {
+			name = random
+			class = random_non_machine
+			portrait = random
+			traits = random
+			homeworld = root
+		}
+		create_country = {
+			name = "NAME_Subterranean_Nation"
+			species = last_created_species
+			type = adversary
+			ethos = random
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_10.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors={
+					"red"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		last_created_country = {
+			set_relation_flag = {
+				who = root.owner
+				flag = subterror
+			}
+			set_country_flag = subterranean_nation
+			establish_contact = { who = event_target:subterranean_planet_owner location = root }
+			establish_communications_no_message = event_target:subterranean_planet_owner
+			save_event_target_as = subterranean_nation
+			owner_species = { save_event_target_as = subterranean_species }
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { exists = event_target:subterranean_nation }
+		}
+		random_country = {
+			limit = {
+				is_country_type = adversary
+				has_country_flag = subterranean_nation
+			}
+			save_event_target_as = subterranean_nation
 		}
 	}
 }
@@ -1709,6 +1811,16 @@ add_random_leader_trait = {
 						}
 						add_trait = trait_ruler_explorer
 						set_timed_leader_flag = { flag = gained_trait_ruler_explorer days = 7 }
+						set_timed_leader_flag = { flag = has_gained_trait days = 7 }
+					}
+				}
+				5 = {
+					if = {
+						limit = {
+							NOT = { has_trait = trait_ruler_charismatic }
+						}
+						add_trait = trait_ruler_charismatic
+						set_timed_leader_flag = { flag = gained_trait_ruler_charismatic days = 7 }
 						set_timed_leader_flag = { flag = has_gained_trait days = 7 }
 					}
 				}
@@ -3658,14 +3770,14 @@ create_cybernetic_species_mod = {
 	species = {
 		create_species = {
 			is_mod = yes
-			name = from
-			plural = from
-			class = from
-			portrait = from
-			traits = from
-			homeworld = from
+			name = this
+			plural = this
+			class = this
+			portrait = this
+			traits = this
+			homeworld = this
 			traits = {
-				ideal_planet_class = from
+				ideal_planet_class = this
 				trait = trait_cybernetic
 			}
 		}
@@ -3712,7 +3824,7 @@ set_all_comms_surveyed = {
   				set_surveyed = yes
    				surveyor = Prev
    			}
-		}
+    	}
 	}
 }
 
@@ -4744,6 +4856,7 @@ remove_self_modified = {
 	}
 }
 
+#deprecated
 remove_culture_shock = {
 	if = {
 		limit = { has_modifier = culture_shock_stone_age }
@@ -4812,6 +4925,7 @@ nuke_primitives_effect = {
 	reroll_planet = yes
 	remove_all_buildings = yes
 	add_deposit = d_metal_boneyard
+	set_planet_flag = nuked_planet_anomalies_disabled
 }
 
 nuke_primitives_toxic_effect = {
@@ -5579,7 +5693,12 @@ create_broken_fe_outpost = {
 
 assign_first_diadochi_planets = {
 	random_system_within_border = {
-		limit = { is_potential_diadochi_system = yes }
+		limit = {
+			is_potential_diadochi_system = yes
+			any_system_planet = {
+				has_owner = yes
+			}
+		}
 		save_event_target_as = first_diadochi_origin
 	}
 	effect_on_blob = {
@@ -5592,272 +5711,274 @@ assign_first_diadochi_planets = {
 		}
 		effect = {
 			set_star_flag = first_diadochi_system
-			if = {
-				limit = { NOT = { exists = event_target:first_diadochi_first_planet_system } }
-				save_event_target_as = first_diadochi_first_planet_system
-			}
 		}
-	}
-	if = {
-		limit = { exists = event_target:first_diadochi_first_planet_system }
-		save_event_target_as = first_diadochi_origin
 	}
 }
 create_first_diadochi = {
-	create_country = {
-		name_list = random
-		species = event_target:marauder_species
-		type = default
-		authority = auth_imperial
-		civics = { civic = civic_diadochi }
-		origin = "origin_khan_successor"
-		ethos = {
-			ethic = ethic_fanatic_militarist
-			ethic = ethic_xenophobe
-		}
-		ignore_initial_colony_error = yes
-	}
-	last_created_country = {
-		save_event_target_as = first_diadochi
-		set_country_flag = diadochi_1
-		set_country_flag = diadochi
-		set_name = random
-	}
-	# Flip Starbases
-	every_system_within_border = {
+	if = {
 		limit = {
-			has_star_flag = first_diadochi_system
-			exists = starbase
+			exists = event_target:first_diadochi_origin
 		}
-		starbase = {
+		create_country = {
+			name_list = random
+			species = event_target:marauder_species
+			type = default
+			authority = auth_imperial
+			civics = { civic = civic_diadochi }
+			origin = "origin_khan_successor"
+			ethos = {
+				ethic = ethic_fanatic_militarist
+				ethic = ethic_xenophobe
+			}
+			ignore_initial_colony_error = yes
+		}
+		last_created_country = {
+			save_event_target_as = first_diadochi
+			set_country_flag = diadochi_1
+			set_country_flag = diadochi
+			set_name = random
+		}
+		# Flip Starbases
+		every_system_within_border = {
+			limit = {
+				has_star_flag = first_diadochi_system
+				exists = starbase
+			}
+			starbase = {
+				set_owner = event_target:first_diadochi
+			}
+		}
+		# Flip Planets
+		every_owned_planet = {
+			limit = {
+				solar_system = { has_star_flag = first_diadochi_system }
+			}
 			set_owner = event_target:first_diadochi
+			set_controller = event_target:first_diadochi
 		}
-	}
-	# Flip Planets
-	every_owned_planet = {
-		limit = {
-			solar_system = { has_star_flag = first_diadochi_system }
-		}
-		set_owner = event_target:first_diadochi
-		set_controller = event_target:first_diadochi
-	}
-	event_target:first_diadochi = {
-		add_resource = {
-			minerals = 20000
-			energy = 20000
-			alloys = 20000
-			consumer_goods = 20000
-			food = 20000
-			influence = 1000
-		}
-		copy_techs_from = { target = root }
-		every_owned_starbase = {
-			set_starbase_size = starbase_outpost
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+		event_target:first_diadochi = {
+			add_resource = {
+				minerals = 20000
+				energy = 20000
+				alloys = 20000
+				consumer_goods = 20000
+				food = 20000
+				influence = 1000
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-				set_starbase_module = {
-					slot = 1
-					module = shipyard
+			copy_techs_from = { target = root }
+			every_owned_starbase = {
+				set_starbase_size = starbase_outpost
+			}
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
 				}
-				set_starbase_module = {
-					slot = 2
-					module = shipyard
-				}
-				set_starbase_module = {
-					slot = 3
-					module = shipyard
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+					set_starbase_module = {
+						slot = 1
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 2
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 3
+						module = shipyard
+					}
 				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
-			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-			}
-		}
-		# Survey Own Space
-		every_planet_within_border = {
-			surveyed = {
-				set_surveyed = yes
-				surveyor = event_target:first_diadochi
-			}
-		}
-		# Survey Rest of Marauder's Space
-		root = {
+			# Survey Own Space
 			every_planet_within_border = {
 				surveyed = {
 					set_surveyed = yes
 					surveyor = event_target:first_diadochi
 				}
 			}
+			# Survey Rest of Marauder's Space
+			root = {
+				every_planet_within_border = {
+					surveyed = {
+						set_surveyed = yes
+						surveyor = event_target:first_diadochi
+					}
+				}
+			}
+			# Mining and Research Stations
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_mining_station
+					has_mining_station = no
+				}
+				create_mining_station = {
+					owner = event_target:first_diadochi
+				}
+			}
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_research_station
+					has_research_station = no
+				}
+				create_research_station = {
+					owner = event_target:first_diadochi
+				}
+			}
+			### Units
+			create_ship_design = { design = "NAME_Pirate_Transport" }
+			add_ship_design = last_created_design
+			create_ship_design = { design = "NAME_Clan_Builder" }
+			add_ship_design = last_created_design
+			random_owned_planet = { save_event_target_as = unit_spawn_point }
+			# Fleet
+			create_leader = {
+				class = admiral
+				species = owner_main_species
+				name = random
+				skill = 3
+				leader_age_min = 25
+				leader_age_max = 45
+				traits = {
+					trait = leader_trait_mercenary_warrior
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:first_diadochi
+					while = {
+						count = 16
+						create_ship = {
+							name = random
+							design = "NAME_Outrider"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 8
+						create_ship = {
+							name = random
+							design = "NAME_Lancer"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 6
+						create_ship = {
+							name = random
+							design = "NAME_Void_Champion"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 1
+						create_ship = {
+							name = random
+							design = "NAME_Ancestral_Glory"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					assign_leader = last_created_leader
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 45
+						angle = random
+					}
+				}
+				settings = {
+					uses_naval_capacity = no
+				}
+			}
+			# Armies
+			create_leader = {
+				class = general
+				species = owner_main_species
+				name = random
+				skill = 3
+				traits = {
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:first_diadochi
+					while = {
+						count = 12
+						create_army_transport = {
+							ship_name = "NAME_Pirate_Transport"
+							graphical_culture = "mammalian_01"
+							army_type = "assault_army"
+							species = event_target:first_diadochi
+						}
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
+			last_created_army = { assign_leader = last_created_leader }
+			# Constructor
+			create_fleet = {
+				effect = {
+					set_owner = event_target:first_diadochi
+					create_ship = {
+						name = random
+						design = "NAME_Clan_Builder"
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
 		}
-		# Mining and Research Stations
-		every_planet_within_border = {
+		# Establish Communications
+		every_country = {
 			limit = {
-				has_deposit_for = shipclass_mining_station
-				has_mining_station = no
+				OR = {
+					has_communications = root
+					has_government = gov_diadochi
+				}
 			}
-			create_mining_station = {
-				owner = event_target:first_diadochi
-			}
+			establish_communications_no_message = event_target:first_diadochi
 		}
-		every_planet_within_border = {
-			limit = {
-				has_deposit_for = shipclass_research_station
-				has_research_station = no
-			}
-			create_research_station = {
-				owner = event_target:first_diadochi
-			}
-		}
-		### Units
-		create_ship_design = { design = "NAME_Pirate_Transport" }
-		add_ship_design = last_created_design
-		create_ship_design = { design = "NAME_Clan_Builder" }
-		add_ship_design = last_created_design
-		random_owned_planet = { save_event_target_as = unit_spawn_point }
-		# Fleet
-		create_leader = {
-			class = admiral
-			species = owner_main_species
-			name = random
-			skill = 3
-			leader_age_min = 25
-			leader_age_max = 45
-			traits = {
-				trait = leader_trait_mercenary_warrior
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:first_diadochi
-				while = {
-					count = 16
-					create_ship = {
-						name = random
-						design = "NAME_Outrider"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 8
-					create_ship = {
-						name = random
-						design = "NAME_Lancer"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 6
-					create_ship = {
-						name = random
-						design = "NAME_Void_Champion"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 1
-					create_ship = {
-						name = random
-						design = "NAME_Ancestral_Glory"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				assign_leader = last_created_leader
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 45
-					angle = random
-				}
-			}
-			settings = {
-				uses_naval_capacity = no
-			}
-		}
-		# Armies
-		create_leader = {
-			class = general
-			species = owner_main_species
-			name = random
-			skill = 3
-			traits = {
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:first_diadochi
-				while = {
-					count = 12
-					create_army_transport = {
-						ship_name = "NAME_Pirate_Transport"
-						graphical_culture = "mammalian_01"
-						army_type = "assault_army"
-						species = event_target:first_diadochi
-					}
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-		last_created_army = { assign_leader = last_created_leader }
-		# Constructor
-		create_fleet = {
-			effect = {
-				set_owner = event_target:first_diadochi
-				create_ship = {
-					name = random
-					design = "NAME_Clan_Builder"
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-	}
-	# Establish Communications
-	every_country = {
-		limit = {
-			OR = {
-				has_communications = root
-				has_government = gov_diadochi
-			}
-		}
-		establish_communications_no_message = event_target:first_diadochi
 	}
 }
 
 assign_second_diadochi_planets = {
 	random_system_within_border = {
-		limit = { is_potential_diadochi_system = yes }
+		limit = {
+			is_potential_diadochi_system = yes
+			any_system_planet = {
+				has_owner = yes
+			}
+		}
 		save_event_target_as = second_diadochi_origin
 	}
 	effect_on_blob = {
@@ -5870,272 +5991,274 @@ assign_second_diadochi_planets = {
 		}
 		effect = {
 			set_star_flag = second_diadochi_system
-			if = {
-				limit = { NOT = { exists = event_target:second_diadochi_first_planet_system } }
-				save_event_target_as = second_diadochi_first_planet_system
-			}
 		}
-	}
-	if = {
-		limit = { exists = event_target:second_diadochi_first_planet_system }
-		save_event_target_as = second_diadochi_origin
 	}
 }
 create_second_diadochi = {
-	create_country = {
-		name_list = random
-		species = event_target:marauder_species
-		type = default
-		authority = auth_imperial
-		civics = { civic = civic_diadochi }
-		origin = "origin_khan_successor"
-		ethos = {
-			ethic = ethic_fanatic_militarist
-			ethic = ethic_xenophobe
-		}
-		ignore_initial_colony_error = yes
-	}
-	last_created_country = {
-		save_event_target_as = second_diadochi
-		set_country_flag = diadochi_2
-		set_country_flag = diadochi
-		set_name = random
-	}
-	# Flip Starbases
-	every_system_within_border = {
+	if = {
 		limit = {
-			has_star_flag = second_diadochi_system
-			exists = starbase
+			exists = event_target:second_diadochi_origin
 		}
-		starbase = {
+		create_country = {
+			name_list = random
+			species = event_target:marauder_species
+			type = default
+			authority = auth_imperial
+			civics = { civic = civic_diadochi }
+			origin = "origin_khan_successor"
+			ethos = {
+				ethic = ethic_fanatic_militarist
+				ethic = ethic_xenophobe
+			}
+			ignore_initial_colony_error = yes
+		}
+		last_created_country = {
+			save_event_target_as = second_diadochi
+			set_country_flag = diadochi_2
+			set_country_flag = diadochi
+			set_name = random
+		}
+		# Flip Starbases
+		every_system_within_border = {
+			limit = {
+				has_star_flag = second_diadochi_system
+				exists = starbase
+			}
+			starbase = {
+				set_owner = event_target:second_diadochi
+			}
+		}
+		# Flip Planets
+		every_owned_planet = {
+			limit = {
+				solar_system = { has_star_flag = second_diadochi_system }
+			}
 			set_owner = event_target:second_diadochi
+			set_controller = event_target:second_diadochi
 		}
-	}
-	# Flip Planets
-	every_owned_planet = {
-		limit = {
-			solar_system = { has_star_flag = second_diadochi_system }
-		}
-		set_owner = event_target:second_diadochi
-		set_controller = event_target:second_diadochi
-	}
-	event_target:second_diadochi = {
-		add_resource = {
-			minerals = 20000
-			energy = 20000
-			alloys = 20000
-			consumer_goods = 20000
-			food = 20000
-			influence = 1000
-		}
-		copy_techs_from = { target = root }
-		every_owned_starbase = {
-			set_starbase_size = starbase_outpost
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+		event_target:second_diadochi = {
+			add_resource = {
+				minerals = 20000
+				energy = 20000
+				alloys = 20000
+				consumer_goods = 20000
+				food = 20000
+				influence = 1000
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-				set_starbase_module = {
-					slot = 1
-					module = shipyard
+			copy_techs_from = { target = root }
+			every_owned_starbase = {
+				set_starbase_size = starbase_outpost
+			}
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
 				}
-				set_starbase_module = {
-					slot = 2
-					module = shipyard
-				}
-				set_starbase_module = {
-					slot = 3
-					module = shipyard
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+					set_starbase_module = {
+						slot = 1
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 2
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 3
+						module = shipyard
+					}
 				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
-			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-			}
-		}
-		# Survey Own Space
-		every_planet_within_border = {
-			surveyed = {
-				set_surveyed = yes
-				surveyor = event_target:second_diadochi
-			}
-		}
-		# Survey Rest of Marauder's Space
-		root = {
+			# Survey Own Space
 			every_planet_within_border = {
 				surveyed = {
 					set_surveyed = yes
 					surveyor = event_target:second_diadochi
 				}
 			}
+			# Survey Rest of Marauder's Space
+			root = {
+				every_planet_within_border = {
+					surveyed = {
+						set_surveyed = yes
+						surveyor = event_target:second_diadochi
+					}
+				}
+			}
+			# Mining and Research Stations
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_mining_station
+					has_mining_station = no
+				}
+				create_mining_station = {
+					owner = event_target:second_diadochi
+				}
+			}
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_research_station
+					has_research_station = no
+				}
+				create_research_station = {
+					owner = event_target:second_diadochi
+				}
+			}
+			### Units
+			create_ship_design = { design = "NAME_Pirate_Transport" }
+			add_ship_design = last_created_design
+			create_ship_design = { design = "NAME_Clan_Builder" }
+			add_ship_design = last_created_design
+			random_owned_planet = { save_event_target_as = unit_spawn_point }
+			# Fleet
+			create_leader = {
+				class = admiral
+				species = owner_main_species
+				name = random
+				skill = 3
+				leader_age_min = 25
+				leader_age_max = 45
+				traits = {
+					trait = leader_trait_mercenary_warrior
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:second_diadochi
+					while = {
+						count = 16
+						create_ship = {
+							name = random
+							design = "NAME_Outrider"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 8
+						create_ship = {
+							name = random
+							design = "NAME_Lancer"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 6
+						create_ship = {
+							name = random
+							design = "NAME_Void_Champion"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 1
+						create_ship = {
+							name = random
+							design = "NAME_Ancestral_Glory"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					assign_leader = last_created_leader
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 45
+						angle = random
+					}
+				}
+				settings = {
+					uses_naval_capacity = no
+				}
+			}
+			# Armies
+			create_leader = {
+				class = general
+				species = owner_main_species
+				name = random
+				skill = 3
+				traits = {
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:second_diadochi
+					while = {
+						count = 12
+						create_army_transport = {
+							ship_name = "NAME_Pirate_Transport"
+							graphical_culture = "mammalian_01"
+							army_type = "assault_army"
+							species = event_target:first_diadochi
+						}
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
+			last_created_army = { assign_leader = last_created_leader }
+			# Constructor
+			create_fleet = {
+				effect = {
+					set_owner = event_target:second_diadochi
+					create_ship = {
+						name = random
+						design = "NAME_Clan_Builder"
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
 		}
-		# Mining and Research Stations
-		every_planet_within_border = {
+		# Establish Communications
+		every_country = {
 			limit = {
-				has_deposit_for = shipclass_mining_station
-				has_mining_station = no
+				OR = {
+					has_communications = root
+					has_government = gov_diadochi
+				}
 			}
-			create_mining_station = {
-				owner = event_target:second_diadochi
-			}
+			establish_communications_no_message = event_target:second_diadochi
 		}
-		every_planet_within_border = {
-			limit = {
-				has_deposit_for = shipclass_research_station
-				has_research_station = no
-			}
-			create_research_station = {
-				owner = event_target:second_diadochi
-			}
-		}
-		### Units
-		create_ship_design = { design = "NAME_Pirate_Transport" }
-		add_ship_design = last_created_design
-		create_ship_design = { design = "NAME_Clan_Builder" }
-		add_ship_design = last_created_design
-		random_owned_planet = { save_event_target_as = unit_spawn_point }
-		# Fleet
-		create_leader = {
-			class = admiral
-			species = owner_main_species
-			name = random
-			skill = 3
-			leader_age_min = 25
-			leader_age_max = 45
-			traits = {
-				trait = leader_trait_mercenary_warrior
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:second_diadochi
-				while = {
-					count = 16
-					create_ship = {
-						name = random
-						design = "NAME_Outrider"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 8
-					create_ship = {
-						name = random
-						design = "NAME_Lancer"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 6
-					create_ship = {
-						name = random
-						design = "NAME_Void_Champion"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 1
-					create_ship = {
-						name = random
-						design = "NAME_Ancestral_Glory"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				assign_leader = last_created_leader
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 45
-					angle = random
-				}
-			}
-			settings = {
-				uses_naval_capacity = no
-			}
-		}
-		# Armies
-		create_leader = {
-			class = general
-			species = owner_main_species
-			name = random
-			skill = 3
-			traits = {
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:second_diadochi
-				while = {
-					count = 12
-					create_army_transport = {
-						ship_name = "NAME_Pirate_Transport"
-						graphical_culture = "mammalian_01"
-						army_type = "assault_army"
-						species = event_target:first_diadochi
-					}
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-		last_created_army = { assign_leader = last_created_leader }
-		# Constructor
-		create_fleet = {
-			effect = {
-				set_owner = event_target:second_diadochi
-				create_ship = {
-					name = random
-					design = "NAME_Clan_Builder"
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-	}
-	# Establish Communications
-	every_country = {
-		limit = {
-			OR = {
-				has_communications = root
-				has_government = gov_diadochi
-			}
-		}
-		establish_communications_no_message = event_target:second_diadochi
 	}
 }
 
 assign_third_diadochi_planets = {
 	random_system_within_border = {
-		limit = { is_potential_diadochi_system = yes }
+		limit = {
+			is_potential_diadochi_system = yes
+			any_system_planet = {
+				has_owner = yes
+			}
+		}
 		save_event_target_as = third_diadochi_origin
 	}
 	effect_on_blob = {
@@ -6148,272 +6271,274 @@ assign_third_diadochi_planets = {
 		}
 		effect = {
 			set_star_flag = third_diadochi_system
-			if = {
-				limit = { NOT = { exists = event_target:third_diadochi_first_planet_system } }
-				save_event_target_as = third_diadochi_first_planet_system
-			}
 		}
-	}
-	if = {
-		limit = { exists = event_target:third_diadochi_first_planet_system }
-		save_event_target_as = third_diadochi_origin
 	}
 }
 create_third_diadochi = {
-	create_country = {
-		name_list = random
-		species = event_target:marauder_species
-		type = default
-		authority = auth_imperial
-		civics = { civic = civic_diadochi }
-		origin = "origin_khan_successor"
-		ethos = {
-			ethic = ethic_fanatic_militarist
-			ethic = ethic_xenophobe
-		}
-		ignore_initial_colony_error = yes
-	}
-	last_created_country = {
-		save_event_target_as = third_diadochi
-		set_country_flag = diadochi_3
-		set_country_flag = diadochi
-		set_name = random
-	}
-	# Flip Starbases
-	every_system_within_border = {
+	if = {
 		limit = {
-			has_star_flag = third_diadochi_system
-			exists = starbase
+			exists = event_target:third_diadochi_origin
 		}
-		starbase = {
+		create_country = {
+			name_list = random
+			species = event_target:marauder_species
+			type = default
+			authority = auth_imperial
+			civics = { civic = civic_diadochi }
+			origin = "origin_khan_successor"
+			ethos = {
+				ethic = ethic_fanatic_militarist
+				ethic = ethic_xenophobe
+			}
+			ignore_initial_colony_error = yes
+		}
+		last_created_country = {
+			save_event_target_as = third_diadochi
+			set_country_flag = diadochi_3
+			set_country_flag = diadochi
+			set_name = random
+		}
+		# Flip Starbases
+		every_system_within_border = {
+			limit = {
+				has_star_flag = third_diadochi_system
+				exists = starbase
+			}
+			starbase = {
+				set_owner = event_target:third_diadochi
+			}
+		}
+		# Flip Planets
+		every_owned_planet = {
+			limit = {
+				solar_system = { has_star_flag = third_diadochi_system }
+			}
 			set_owner = event_target:third_diadochi
+			set_controller = event_target:third_diadochi
 		}
-	}
-	# Flip Planets
-	every_owned_planet = {
-		limit = {
-			solar_system = { has_star_flag = third_diadochi_system }
-		}
-		set_owner = event_target:third_diadochi
-		set_controller = event_target:third_diadochi
-	}
-	event_target:third_diadochi = {
-		add_resource = {
-			minerals = 20000
-			energy = 20000
-			alloys = 20000
-			consumer_goods = 20000
-			food = 20000
-			influence = 1000
-		}
-		copy_techs_from = { target = root }
-		every_owned_starbase = {
-			set_starbase_size = starbase_outpost
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+		event_target:third_diadochi = {
+			add_resource = {
+				minerals = 20000
+				energy = 20000
+				alloys = 20000
+				consumer_goods = 20000
+				food = 20000
+				influence = 1000
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-				set_starbase_module = {
-					slot = 1
-					module = shipyard
+			copy_techs_from = { target = root }
+			every_owned_starbase = {
+				set_starbase_size = starbase_outpost
+			}
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
 				}
-				set_starbase_module = {
-					slot = 2
-					module = shipyard
-				}
-				set_starbase_module = {
-					slot = 3
-					module = shipyard
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+					set_starbase_module = {
+						slot = 1
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 2
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 3
+						module = shipyard
+					}
 				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
-			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-			}
-		}
-		# Survey Own Space
-		every_planet_within_border = {
-			surveyed = {
-				set_surveyed = yes
-				surveyor = event_target:third_diadochi
-			}
-		}
-		# Survey Rest of Marauder's Space
-		root = {
+			# Survey Own Space
 			every_planet_within_border = {
 				surveyed = {
 					set_surveyed = yes
 					surveyor = event_target:third_diadochi
 				}
 			}
+			# Survey Rest of Marauder's Space
+			root = {
+				every_planet_within_border = {
+					surveyed = {
+						set_surveyed = yes
+						surveyor = event_target:third_diadochi
+					}
+				}
+			}
+			# Mining and Research Stations
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_mining_station
+					has_mining_station = no
+				}
+				create_mining_station = {
+					owner = event_target:third_diadochi
+				}
+			}
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_research_station
+					has_research_station = no
+				}
+				create_research_station = {
+					owner = event_target:third_diadochi
+				}
+			}
+			### Units
+			create_ship_design = { design = "NAME_Pirate_Transport" }
+			add_ship_design = last_created_design
+			create_ship_design = { design = "NAME_Clan_Builder" }
+			add_ship_design = last_created_design
+			random_owned_planet = { save_event_target_as = unit_spawn_point }
+			# Fleet
+			create_leader = {
+				class = admiral
+				species = owner_main_species
+				name = random
+				skill = 3
+				leader_age_min = 25
+				leader_age_max = 45
+				traits = {
+					trait = leader_trait_mercenary_warrior
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:third_diadochi
+					while = {
+						count = 16
+						create_ship = {
+							name = random
+							design = "NAME_Outrider"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 8
+						create_ship = {
+							name = random
+							design = "NAME_Lancer"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 6
+						create_ship = {
+							name = random
+							design = "NAME_Void_Champion"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 1
+						create_ship = {
+							name = random
+							design = "NAME_Ancestral_Glory"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					assign_leader = last_created_leader
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 45
+						angle = random
+					}
+				}
+				settings = {
+					uses_naval_capacity = no
+				}
+			}
+			# Armies
+			create_leader = {
+				class = general
+				species = owner_main_species
+				name = random
+				skill = 3
+				traits = {
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:third_diadochi
+					while = {
+						count = 12
+						create_army_transport = {
+							ship_name = "NAME_Pirate_Transport"
+							graphical_culture = "mammalian_01"
+							army_type = "assault_army"
+							species = event_target:first_diadochi
+						}
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
+			last_created_army = { assign_leader = last_created_leader }
+			# Constructor
+			create_fleet = {
+				effect = {
+					set_owner = event_target:third_diadochi
+					create_ship = {
+						name = random
+						design = "NAME_Clan_Builder"
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
 		}
-		# Mining and Research Stations
-		every_planet_within_border = {
+		# Establish Communications
+		every_country = {
 			limit = {
-				has_deposit_for = shipclass_mining_station
-				has_mining_station = no
+				OR = {
+					has_communications = root
+					has_government = gov_diadochi
+				}
 			}
-			create_mining_station = {
-				owner = event_target:third_diadochi
-			}
+			establish_communications_no_message = event_target:third_diadochi
 		}
-		every_planet_within_border = {
-			limit = {
-				has_deposit_for = shipclass_research_station
-				has_research_station = no
-			}
-			create_research_station = {
-				owner = event_target:third_diadochi
-			}
-		}
-		### Units
-		create_ship_design = { design = "NAME_Pirate_Transport" }
-		add_ship_design = last_created_design
-		create_ship_design = { design = "NAME_Clan_Builder" }
-		add_ship_design = last_created_design
-		random_owned_planet = { save_event_target_as = unit_spawn_point }
-		# Fleet
-		create_leader = {
-			class = admiral
-			species = owner_main_species
-			name = random
-			skill = 3
-			leader_age_min = 25
-			leader_age_max = 45
-			traits = {
-				trait = leader_trait_mercenary_warrior
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:third_diadochi
-				while = {
-					count = 16
-					create_ship = {
-						name = random
-						design = "NAME_Outrider"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 8
-					create_ship = {
-						name = random
-						design = "NAME_Lancer"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 6
-					create_ship = {
-						name = random
-						design = "NAME_Void_Champion"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 1
-					create_ship = {
-						name = random
-						design = "NAME_Ancestral_Glory"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				assign_leader = last_created_leader
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 45
-					angle = random
-				}
-			}
-			settings = {
-				uses_naval_capacity = no
-			}
-		}
-		# Armies
-		create_leader = {
-			class = general
-			species = owner_main_species
-			name = random
-			skill = 3
-			traits = {
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:third_diadochi
-				while = {
-					count = 12
-					create_army_transport = {
-						ship_name = "NAME_Pirate_Transport"
-						graphical_culture = "mammalian_01"
-						army_type = "assault_army"
-						species = event_target:first_diadochi
-					}
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-		last_created_army = { assign_leader = last_created_leader }
-		# Constructor
-		create_fleet = {
-			effect = {
-				set_owner = event_target:third_diadochi
-				create_ship = {
-					name = random
-					design = "NAME_Clan_Builder"
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-	}
-	# Establish Communications
-	every_country = {
-		limit = {
-			OR = {
-				has_communications = root
-				has_government = gov_diadochi
-			}
-		}
-		establish_communications_no_message = event_target:third_diadochi
 	}
 }
 
 assign_fourth_diadochi_planets = {
 	random_system_within_border = {
-		limit = { is_potential_diadochi_system = yes }
+		limit = {
+			is_potential_diadochi_system = yes
+			any_system_planet = {
+				has_owner = yes
+			}
+		}
 		save_event_target_as = fourth_diadochi_origin
 	}
 	effect_on_blob = {
@@ -6426,266 +6551,263 @@ assign_fourth_diadochi_planets = {
 		}
 		effect = {
 			set_star_flag = fourth_diadochi_system
-			if = {
-				limit = { NOT = { exists = event_target:fourth_diadochi_first_planet_system } }
-				save_event_target_as = fourth_diadochi_first_planet_system
-			}
 		}
-	}
-	if = {
-		limit = { exists = event_target:fourth_diadochi_first_planet_system }
-		save_event_target_as = fourth_diadochi_origin
 	}
 }
 create_fourth_diadochi = {
-	create_country = {
-		name_list = random
-		species = event_target:marauder_species
-		type = default
-		authority = auth_imperial
-		civics = { civic = civic_diadochi }
-		origin = "origin_khan_successor"
-		ethos = {
-			ethic = ethic_fanatic_militarist
-			ethic = ethic_xenophobe
-		}
-		ignore_initial_colony_error = yes
-	}
-	last_created_country = {
-		save_event_target_as = fourth_diadochi
-		set_country_flag = diadochi_4
-		set_country_flag = diadochi
-		set_name = random
-	}
-	# Flip Starbases
-	every_system_within_border = {
+	if = {
 		limit = {
-			has_star_flag = fourth_diadochi_system
-			exists = starbase
+			exists = event_target:fourth_diadochi_origin
 		}
-		starbase = {
+		create_country = {
+			name_list = random
+			species = event_target:marauder_species
+			type = default
+			authority = auth_imperial
+			civics = { civic = civic_diadochi }
+			origin = "origin_khan_successor"
+			ethos = {
+				ethic = ethic_fanatic_militarist
+				ethic = ethic_xenophobe
+			}
+			ignore_initial_colony_error = yes
+		}
+		last_created_country = {
+			save_event_target_as = fourth_diadochi
+			set_country_flag = diadochi_4
+			set_country_flag = diadochi
+			set_name = random
+		}
+		# Flip Starbases
+		every_system_within_border = {
+			limit = {
+				has_star_flag = fourth_diadochi_system
+				exists = starbase
+			}
+			starbase = {
+				set_owner = event_target:fourth_diadochi
+			}
+		}
+		# Flip Planets
+		every_owned_planet = {
+			limit = {
+				solar_system = { has_star_flag = fourth_diadochi_system }
+			}
 			set_owner = event_target:fourth_diadochi
+			set_controller = event_target:fourth_diadochi
 		}
-	}
-	# Flip Planets
-	every_owned_planet = {
-		limit = {
-			solar_system = { has_star_flag = fourth_diadochi_system }
-		}
-		set_owner = event_target:fourth_diadochi
-		set_controller = event_target:fourth_diadochi
-	}
-	event_target:fourth_diadochi = {
-		add_resource = {
-			minerals = 20000
-			energy = 20000
-			alloys = 20000
-			consumer_goods = 20000
-			food = 20000
-			influence = 1000
-		}
-		copy_techs_from = { target = root }
-		every_owned_starbase = {
-			set_starbase_size = starbase_outpost
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+		event_target:fourth_diadochi = {
+			add_resource = {
+				minerals = 20000
+				energy = 20000
+				alloys = 20000
+				consumer_goods = 20000
+				food = 20000
+				influence = 1000
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-				set_starbase_module = {
-					slot = 1
-					module = shipyard
+			copy_techs_from = { target = root }
+			every_owned_starbase = {
+				set_starbase_size = starbase_outpost
+			}
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
 				}
-				set_starbase_module = {
-					slot = 2
-					module = shipyard
-				}
-				set_starbase_module = {
-					slot = 3
-					module = shipyard
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+					set_starbase_module = {
+						slot = 1
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 2
+						module = shipyard
+					}
+					set_starbase_module = {
+						slot = 3
+						module = shipyard
+					}
 				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
+			if = {
+				limit = {
+					any_owned_starbase = { has_starbase_size = starbase_outpost }
+				}
+				random_owned_starbase = {
+					limit = { has_starbase_size = starbase_outpost }
+					set_starbase_size = starbase_starhold
+				}
 			}
-		}
-		if = {
-			limit = {
-				any_owned_starbase = { has_starbase_size = starbase_outpost }
-			}
-			random_owned_starbase = {
-				limit = { has_starbase_size = starbase_outpost }
-				set_starbase_size = starbase_starhold
-			}
-		}
-		# Survey Own Space
-		every_planet_within_border = {
-			surveyed = {
-				set_surveyed = yes
-				surveyor = event_target:fourth_diadochi
-			}
-		}
-		# Survey Rest of Marauder's Space
-		root = {
+			# Survey Own Space
 			every_planet_within_border = {
 				surveyed = {
 					set_surveyed = yes
 					surveyor = event_target:fourth_diadochi
 				}
 			}
+			# Survey Rest of Marauder's Space
+			root = {
+				every_planet_within_border = {
+					surveyed = {
+						set_surveyed = yes
+						surveyor = event_target:fourth_diadochi
+					}
+				}
+			}
+			# Mining and Research Stations
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_mining_station
+					has_mining_station = no
+				}
+				create_mining_station = {
+					owner = event_target:fourth_diadochi
+				}
+			}
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_research_station
+					has_research_station = no
+				}
+				create_research_station = {
+					owner = event_target:fourth_diadochi
+				}
+			}
+			### Units
+			create_ship_design = { design = "NAME_Pirate_Transport" }
+			add_ship_design = last_created_design
+			create_ship_design = { design = "NAME_Clan_Builder" }
+			add_ship_design = last_created_design
+			random_owned_planet = { save_event_target_as = unit_spawn_point }
+			# Fleet
+			create_leader = {
+				class = admiral
+				species = owner_main_species
+				name = random
+				skill = 3
+				leader_age_min = 25
+				leader_age_max = 45
+				traits = {
+					trait = leader_trait_mercenary_warrior
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:fourth_diadochi
+					while = {
+						count = 16
+						create_ship = {
+							name = random
+							design = "NAME_Outrider"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 8
+						create_ship = {
+							name = random
+							design = "NAME_Lancer"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 6
+						create_ship = {
+							name = random
+							design = "NAME_Void_Champion"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					while = {
+						count = 1
+						create_ship = {
+							name = random
+							design = "NAME_Ancestral_Glory"
+							prefix = no
+							graphical_culture = "pirate_01"
+						}
+					}
+					assign_leader = last_created_leader
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 45
+						angle = random
+					}
+				}
+				settings = {
+					uses_naval_capacity = no
+				}
+			}
+			# Armies
+			create_leader = {
+				class = general
+				species = owner_main_species
+				name = random
+				skill = 3
+				traits = {
+					trait = random_trait
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = event_target:fourth_diadochi
+					while = {
+						count = 12
+						create_army_transport = {
+							ship_name = "NAME_Pirate_Transport"
+							graphical_culture = "mammalian_01"
+							army_type = "assault_army"
+							species = event_target:first_diadochi
+						}
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
+			last_created_army = { assign_leader = last_created_leader }
+			# Constructor
+			create_fleet = {
+				effect = {
+					set_owner = event_target:fourth_diadochi
+					create_ship = {
+						name = random
+						design = "NAME_Clan_Builder"
+					}
+					set_location = {
+						target = event_target:unit_spawn_point
+						distance = 20
+						angle = random
+					}
+				}
+			}
 		}
-		# Mining and Research Stations
-		every_planet_within_border = {
+		# Establish Communications
+		every_country = {
 			limit = {
-				has_deposit_for = shipclass_mining_station
-				has_mining_station = no
+				OR = {
+					has_communications = root
+					has_government = gov_diadochi
+				}
 			}
-			create_mining_station = {
-				owner = event_target:fourth_diadochi
-			}
+			establish_communications_no_message = event_target:fourth_diadochi
 		}
-		every_planet_within_border = {
-			limit = {
-				has_deposit_for = shipclass_research_station
-				has_research_station = no
-			}
-			create_research_station = {
-				owner = event_target:fourth_diadochi
-			}
-		}
-		### Units
-		create_ship_design = { design = "NAME_Pirate_Transport" }
-		add_ship_design = last_created_design
-		create_ship_design = { design = "NAME_Clan_Builder" }
-		add_ship_design = last_created_design
-		random_owned_planet = { save_event_target_as = unit_spawn_point }
-		# Fleet
-		create_leader = {
-			class = admiral
-			species = owner_main_species
-			name = random
-			skill = 3
-			leader_age_min = 25
-			leader_age_max = 45
-			traits = {
-				trait = leader_trait_mercenary_warrior
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:fourth_diadochi
-				while = {
-					count = 16
-					create_ship = {
-						name = random
-						design = "NAME_Outrider"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 8
-					create_ship = {
-						name = random
-						design = "NAME_Lancer"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 6
-					create_ship = {
-						name = random
-						design = "NAME_Void_Champion"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				while = {
-					count = 1
-					create_ship = {
-						name = random
-						design = "NAME_Ancestral_Glory"
-						prefix = no
-						graphical_culture = "pirate_01"
-					}
-				}
-				assign_leader = last_created_leader
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 45
-					angle = random
-				}
-			}
-			settings = {
-				uses_naval_capacity = no
-			}
-		}
-		# Armies
-		create_leader = {
-			class = general
-			species = owner_main_species
-			name = random
-			skill = 3
-			traits = {
-				trait = random_trait
-			}
-		}
-		create_fleet = {
-			effect = {
-				set_owner = event_target:fourth_diadochi
-				while = {
-					count = 12
-					create_army_transport = {
-						ship_name = "NAME_Pirate_Transport"
-						graphical_culture = "mammalian_01"
-						army_type = "assault_army"
-						species = event_target:first_diadochi
-					}
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-		last_created_army = { assign_leader = last_created_leader }
-		# Constructor
-		create_fleet = {
-			effect = {
-				set_owner = event_target:fourth_diadochi
-				create_ship = {
-					name = random
-					design = "NAME_Clan_Builder"
-				}
-				set_location = {
-					target = event_target:unit_spawn_point
-					distance = 20
-					angle = random
-				}
-			}
-		}
-	}
-	# Establish Communications
-	every_country = {
-		limit = {
-			OR = {
-				has_communications = root
-				has_government = gov_diadochi
-			}
-		}
-		establish_communications_no_message = event_target:fourth_diadochi
 	}
 }
 
@@ -6716,18 +6838,22 @@ assign_diadochi_systems = {
 				}
 			}
 		}
-		event_target:third_diadochi_origin = {
-			closest_system = {
-				limit = { is_potential_diadochi_system = yes }
-				max_steps = 20
-				set_star_flag = third_diadochi_system
+		if = { limit = { exists = event_target:third_diadochi_origin }
+			event_target:third_diadochi_origin = {
+				closest_system = {
+					limit = { is_potential_diadochi_system = yes }
+					max_steps = 20
+					set_star_flag = third_diadochi_system
+				}
 			}
 		}
-		event_target:fourth_diadochi_origin = {
-			closest_system = {
-				limit = { is_potential_diadochi_system = yes }
-				max_steps = 20
-				set_star_flag = fourth_diadochi_system
+		if = { limit = { exists = event_target:fourth_diadochi_origin }
+			event_target:fourth_diadochi_origin = {
+				closest_system = {
+					limit = { is_potential_diadochi_system = yes }
+					max_steps = 20
+					set_star_flag = fourth_diadochi_system
+				}
 			}
 		}
 	}
@@ -6918,7 +7044,10 @@ fire_warning_sign = {
 				random_owned_planet = {
 					limit = {
 						is_occupied_flag = no
-						any_owned_pop = { has_job = researcher }
+						num_assigned_jobs = {
+							job = researcher
+							value >= 1
+						}
 					}
 					planet_event = {
 						id = syndaw.520
@@ -6931,7 +7060,10 @@ fire_warning_sign = {
 						has_country_flag = triggered_syndaw_520
 						NOT = {
 							any_owned_planet = {
-								any_owned_pop = { has_job = researcher }
+								num_assigned_jobs = {
+									job = researcher
+									value >= 1
+								}
 							}
 						}
 					}
@@ -7439,59 +7571,12 @@ remove_muutagan_trades = {
 }
 
 add_leader_traits_after_modification = {
-	ariphaos_patch_leader_add_traits = yes
+	ariphaos_patch_leader_change_traits = yes
 }
 
+# Duplicated for compatibility purposes.
 remove_leader_traits_after_modification = {
-	if = {
-		limit = {
-			species = {
-				OR = {
-					NOT = { has_trait = trait_erudite }
-					has_trait = trait_cybernetic
-					has_trait = trait_psionic
-					has_trait = trait_latent_psionic
-					has_trait = trait_machine_unit
-					has_trait = trait_mechanical
-				}
-			}
-		}
-		if = {
-			limit = {
-				has_trait = leader_trait_admiral_erudite
-			}
-			remove_trait = leader_trait_admiral_erudite
-			remove_ruler_trait = leader_trait_ruler_erudite
-		}
-		if = {
-			limit = {
-				has_trait = leader_trait_general_erudite
-			}
-			remove_trait = leader_trait_general_erudite
-			remove_ruler_trait = leader_trait_ruler_erudite
-		}
-		if = {
-			limit = {
-				has_trait = leader_trait_governor_erudite
-			}
-			remove_trait = leader_trait_governor_erudite
-			remove_ruler_trait = leader_trait_ruler_erudite
-		}
-		if = {
-			limit = {
-				has_trait = leader_trait_scientist_erudite
-			}
-			remove_trait = leader_trait_scientist_erudite
-			remove_ruler_trait = leader_trait_ruler_erudite
-		}
-		if = {
-			limit = {
-				has_trait = leader_trait_ruler_erudite
-			}
-			remove_trait = leader_trait_ruler_erudite
-			remove_ruler_trait = leader_trait_ruler_erudite
-		}
-	}
+	ariphaos_patch_leader_change_traits = yes
 }
 
 incr_minerallump1_var = {
@@ -8510,7 +8595,6 @@ create_enigmatic_cache_fleet = {
 			set_fleet_stance = passive
 			set_aggro_range_measure_from = self
 			set_aggro_range = 100
-			#save_global_event_target_as = enigmatic_cache_ship
 			auto_move_to_planet = {
 				target = event_target:new_location
 				clear_auto_move_on_arrival = no
@@ -8649,61 +8733,65 @@ create_built_robot_species = {
 
 		effect = {
 			set_species_flag = mechanical_species@prev
-
 			if = {
 				limit = {
 					prev = { use_robot_portrait_sd_hum_robot = yes }
 				}
 				change_species_portrait = sd_hum_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_mam_robot = yes }
 				}
 				change_species_portrait = sd_mam_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_rep_robot = yes }
 				}
 				change_species_portrait = sd_rep_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_avi_robot = yes }
 				}
 				change_species_portrait = sd_avi_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_art_robot = yes }
 				}
 				change_species_portrait = sd_art_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_mol_robot = yes }
 				}
 				change_species_portrait = sd_mol_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_fun_robot = yes }
 				}
 				change_species_portrait = sd_fun_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_pla_robot = yes }
 				}
 				change_species_portrait = sd_pla_robot
+			}
+			else_if = {
+				limit = {
+					prev = { use_robot_portrait_sd_lit_robot = yes }
+				}
+				change_species_portrait = lith_machine
+			}
+			else_if = {
+				limit = {
+					prev = { use_robot_portrait_sd_nec_robot = yes }
+				}
+				change_species_portrait = nec_machine
 			}
 		}
 	}
@@ -8758,54 +8846,59 @@ create_fe_servant_robots = {
 				}
 				change_species_portrait = sd_hum_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_mam_robot = yes }
 				}
 				change_species_portrait = sd_mam_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_rep_robot = yes }
 				}
 				change_species_portrait = sd_rep_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_avi_robot = yes }
 				}
 				change_species_portrait = sd_avi_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_art_robot = yes }
 				}
 				change_species_portrait = sd_art_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_mol_robot = yes }
 				}
 				change_species_portrait = sd_mol_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_fun_robot = yes }
 				}
 				change_species_portrait = sd_fun_robot
 			}
-
-			if = {
+			else_if = {
 				limit = {
 					prev = { use_robot_portrait_sd_pla_robot = yes }
 				}
 				change_species_portrait = sd_pla_robot
+			}
+			else_if = {
+				limit = {
+					prev = { use_robot_portrait_sd_lit_robot = yes }
+				}
+				change_species_portrait = lith_machine
+			}
+			else_if = {
+				limit = {
+					prev = { use_robot_portrait_sd_nec_robot = yes }
+				}
+				change_species_portrait = nec_machine
 			}
 		}
 	}
@@ -8979,27 +9072,21 @@ create_tiyanki_fleet_1 = {
 		effect = {
 			set_owner = event_target:tiyanki_country
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Bull"
 				design = "NAME_Tiyanki_Bull"
 			}
 			create_ship = {
-				name = "NAME_Calf"
 				design = "NAME_Tiyanki_Calf"
 			}
 			create_ship = {
-				name = "NAME_Calf"
 				design = "NAME_Tiyanki_Calf"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			set_location = event_target:giant
@@ -9022,23 +9109,18 @@ create_tiyanki_fleet_2 = {
 		effect = {
 			set_owner = event_target:tiyanki_country
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			set_location = event_target:giant
@@ -9061,23 +9143,18 @@ create_tiyanki_fleet_3 = {
 		effect = {
 			set_owner = event_target:tiyanki_country
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Bull"
 				design = "NAME_Tiyanki_Bull"
 			}
 			create_ship = {
-				name = "NAME_Bull"
 				design = "NAME_Tiyanki_Bull"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			create_ship = {
-				name = "NAME_Calf"
 				design = "NAME_Tiyanki_Calf"
 			}
 			set_location = event_target:giant
@@ -9100,31 +9177,24 @@ create_tiyanki_fleet_4 = {
 		effect = {
 			set_owner = event_target:tiyanki_country
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Bull"
 				design = "NAME_Tiyanki_Bull"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Calf"
 			}
 			create_ship = {
-				name = "NAME_Calf"
 				design = "NAME_Tiyanki_Calf"
 			}
 			create_ship = {
-				name = "NAME_Calf"
 				design = "NAME_Tiyanki_Calf"
 			}
 			create_ship = {
-				name = "NAME_Calf"
 				design = "NAME_Tiyanki_Calf"
 			}
 			set_location = event_target:giant
@@ -9147,23 +9217,18 @@ create_tiyanki_fleet_5 = {
 		effect = {
 			set_owner = event_target:tiyanki_country
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Cow"
 				design = "NAME_Tiyanki_Cow"
 			}
 			create_ship = {
-				name = "NAME_Bull"
 				design = "NAME_Tiyanki_Bull"
 			}
 			create_ship = {
-				name = "NAME_Bull"
 				design = "NAME_Tiyanki_Bull"
 			}
 			create_ship = {
-				name = "NAME_Hatchling"
 				design = "NAME_Tiyanki_Hatchling"
 			}
 			set_location = event_target:giant
@@ -9188,28 +9253,24 @@ create_tiyanki_home_fleet_1 = {
 			while = {
 				count = 5
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 5
 				create_ship = {
-					name = "NAME_Bull"
 					design = "NAME_Tiyanki_Bull"
 				}
 			}
 			while = {
 				count = 8
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
 			while = {
 				count = 9
 				create_ship = {
-					name = "NAME_Calf"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
@@ -9227,14 +9288,12 @@ create_tiyanki_home_fleet_1 = {
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 4
 				create_ship = {
-					name = "NAME_Calf"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
@@ -9258,28 +9317,24 @@ create_tiyanki_home_fleet_2 = {
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 5
 				create_ship = {
-					name = "NAME_Bull"
 					design = "NAME_Tiyanki_Bull"
 				}
 			}
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
 			while = {
 				count = 3
 				create_ship = {
-					name = "NAME_Calf"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
@@ -9297,14 +9352,12 @@ create_tiyanki_home_fleet_2 = {
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 4
 				create_ship = {
-					name = "NAME_Bull"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
@@ -9328,28 +9381,24 @@ create_tiyanki_home_fleet_3 = {
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 6
 				create_ship = {
-					name = "NAME_Bull"
 					design = "NAME_Tiyanki_Bull"
 				}
 			}
 			while = {
 				count = 12
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Calf"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
@@ -9367,21 +9416,18 @@ create_tiyanki_home_fleet_3 = {
 			while = {
 				count = 4
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 2
 				create_ship = {
-					name = "NAME_Calf"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
 			while = {
 				count = 3
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
@@ -9405,28 +9451,24 @@ create_tiyanki_home_fleet_4 = {
 			while = {
 				count = 4
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 3
 				create_ship = {
-					name = "NAME_Bull"
 					design = "NAME_Tiyanki_Bull"
 				}
 			}
 			while = {
 				count = 12
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
 			while = {
 				count = 9
 				create_ship = {
-					name = "NAME_Calf"
 					design = "NAME_Tiyanki_Calf"
 				}
 			}
@@ -9444,14 +9486,12 @@ create_tiyanki_home_fleet_4 = {
 			while = {
 				count = 4
 				create_ship = {
-					name = "NAME_Cow"
 					design = "NAME_Tiyanki_Cow"
 				}
 			}
 			while = {
 				count = 6
 				create_ship = {
-					name = "NAME_Bull"
 					design = "NAME_Tiyanki_Bull"
 				}
 			}
@@ -9475,7 +9515,6 @@ create_tiyanki_home_roaming_fleets = {
 			while = {
 				count = 22
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
@@ -9541,7 +9580,6 @@ create_tiyanki_home_roaming_fleets = {
 			while = {
 				count = 14
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
@@ -9607,7 +9645,6 @@ create_tiyanki_home_roaming_fleets = {
 			while = {
 				count = 19
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
@@ -9673,7 +9710,6 @@ create_tiyanki_home_roaming_fleets = {
 			while = {
 				count = 16
 				create_ship = {
-					name = "NAME_Hatchling"
 					design = "NAME_Tiyanki_Hatchling"
 				}
 			}
@@ -10278,22 +10314,7 @@ apply_post_assimilation_effects = {
 				has_civic = civic_machine_assimilator
 			}
 		}
-		remove_culture_shock = yes
 		root.owner = { generate_cyborg_treats = yes } # scripted effect
-	}
-	else_if = { # hive mind, cyborg empire
-		limit = {
-			root.owner = {
-				OR = {
-					AND = {
-						has_authority = auth_hive_mind
-						NOT = { has_civic = civic_hive_devouring_swarm }
-					}
-					has_country_flag = flesh_weakened
-				}
-			}
-		}
-		remove_culture_shock = yes
 	}
 	if = { # set citizenship
 		limit = { root.owner = { has_authority = auth_machine_intelligence } }
@@ -10831,6 +10852,12 @@ breach_fix_resolution_divinity_a_defined_purpose_machine = {
 			exists = event_target:defined_purpose_random_species
 		}
 		hidden_effect = {
+			if = {
+				limit = {
+					has_origin = origin_machine
+				}
+				set_origin = origin_default
+			}
 			force_add_civic = civic_machine_servitor
 
 			capital_scope = {
@@ -10851,6 +10878,12 @@ breach_fix_resolution_divinity_a_defined_purpose_machine = {
 			NOT = { exists = event_target:defined_purpose_random_species }
 		}
 		hidden_effect = {
+			if = {
+				limit = {
+					has_origin = origin_machine
+				}
+				set_origin = origin_default
+			}
 			force_add_civic = civic_machine_servitor
 
 			create_species = {
@@ -10871,5 +10904,788 @@ breach_fix_resolution_divinity_a_defined_purpose_machine = {
 		}
 
 		custom_tooltip = "federations.10340.complybecomerogueservitor_tooltip"
+	}
+}
+
+### Death Cult sacrifices (which supplement sacrificial edicts)
+
+# Durations may be 1800 (standard), 2160 (has either trait_ruler_charismatic OR resolution_rulesofwar_demobilization_initiative) or 2520 (has both of the above). @values are not supported.
+
+sacrifice_togetherness_one = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_1"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_1"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_1"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_togetherness_1"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_togetherness_two = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_2"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_2"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_2"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_togetherness_2"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_togetherness_three = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_3"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_3"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_3"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_togetherness_3"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_togetherness_four = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_4"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_4"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_4"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_togetherness_4"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_togetherness_five = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_5"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_5"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_togetherness_5"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_togetherness_5"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_harmony_one = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_1"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_1"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_1"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_harmony_1"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_harmony_two = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_2"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_2"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_2"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_harmony_2"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_harmony_three = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_3"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_3"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_3"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_harmony_3"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_harmony_four = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_4"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_4"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_4"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_harmony_4"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_harmony_five = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_5"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_5"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_harmony_5"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_harmony_5"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_bounty_one = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_1"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_1"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_1"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_bounty_1"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_bounty_two = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_2"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_2"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_2"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_bounty_2"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_bounty_three = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_3"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_3"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_3"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_bounty_3"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_bounty_four = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_4"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_4"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_4"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_bounty_4"
+			days = 1800
+		}
+	}
+}
+
+sacrifice_bounty_five = {
+	if = { #Charismatic ruler boosts edict duration
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			NOT = { is_active_resolution = "resolution_rulesofwar_demobilization_initiative" }
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_5"
+			days = 2160
+		}
+	}
+	else_if = { #Rules of War 5 boosts edict duration
+		limit = {
+			NAND = {
+				exists = ruler
+				ruler = { has_trait = trait_ruler_charismatic }
+			}
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_5"
+			days = 2160
+		}
+	}
+	else_if = { #Both edict boosts are active
+		limit = {
+			exists = ruler
+			ruler = { has_trait = trait_ruler_charismatic }
+			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+		}
+		add_modifier = {
+			modifier = "sacrifice_bounty_5"
+			days = 2520
+		}
+	}
+	else = { #Standard edict-accompanying modifier
+		add_modifier = {
+			modifier = "sacrifice_bounty_5"
+			days = 1800
+		}
+	}
+}
+
+add_extra_hyperlane_to_spawned_system_effect = {
+	hidden_effect = {
+		last_created_system = {
+			if = {
+				limit = {
+					any_system = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 10
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+				}
+				random_system = {
+					limit = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 10
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+					add_hyperlane = {
+						from = this
+						to = prev
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					any_system = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 15
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+				}
+				random_system = {
+					limit = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 15
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+					add_hyperlane = {
+						from = this
+						to = prev
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					any_system = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 25
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+				}
+				random_system = {
+					limit = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 25
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+					add_hyperlane = {
+						from = this
+						to = prev
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					any_system = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 40
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+				}
+				random_system = {
+					limit = {
+						distance = {
+							source = prev
+							type = euclidean
+							min_distance >= 1
+							max_distance <= 40
+						}
+						NOT = { has_hyperlane_to = prev }
+					}
+					add_hyperlane = {
+						from = this
+						to = prev
+					}
+				}
+			}
+		}
 	}
 }

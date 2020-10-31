@@ -31,12 +31,14 @@ event = {
 						limit = { has_owner = no }
 						spawn_system = { initializer = "special_init_03" }
 					}
+					add_extra_hyperlane_to_spawned_system_effect = yes
 				}
 				10 = {
 					random_system = {
 						limit = { has_owner = no }
 						spawn_system = { initializer = "special_init_04" }
 					}
+					add_extra_hyperlane_to_spawned_system_effect = yes
 				}
 			}
 		}
@@ -467,7 +469,7 @@ country_event = {
 						species = owner_main_species
 					}
 				}
-				last_created_leader = { ariphaos_patch_leader_add_traits = yes } # If a mod adds starting cybernetics or something.
+				last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
 				set_leader = last_created_leader
 			}
 		}
@@ -814,6 +816,16 @@ planet_event = {
 				limit = { owner = { has_origin = origin_mechanists } }
 				add_building = building_robot_assembly_plant
 			}
+			if = {
+				limit = {
+					owner = {
+						has_origin = origin_necrophage
+						NOT = { has_civic = civic_fanatic_purifiers } #purges them instead
+						NOT = { has_ai_personality_behaviour = purger }
+					}
+				}
+				add_building = building_necrophage_elevation_chamber
+			}
 		}
 	}
 }
@@ -862,7 +874,14 @@ planet_event = {
 				}
 			}
 			else_if = {
-				limit = { owner = { has_origin = origin_syncretic_evolution } }
+				limit = {
+					owner = {
+						OR = {
+							has_origin = origin_syncretic_evolution
+							has_origin = origin_necrophage
+						}
+					}
+				}
 				random_galaxy_species = {
 					limit = {
 						has_species_flag = syncretic_species@root.owner
@@ -920,7 +939,14 @@ planet_event = {
 				}
 			}
 			else_if = {
-				limit = { owner = { has_origin = origin_syncretic_evolution } }
+				limit = {
+					owner = {
+						OR = {
+							has_origin = origin_syncretic_evolution
+							has_origin = origin_necrophage
+						}
+					}
+				}
 				random_galaxy_species = {
 					limit = {
 						has_species_flag = syncretic_species@root.owner
@@ -1246,6 +1272,72 @@ country_event = {
 			create_research_station = {
 				owner = ROOT
 			}
+		}
+		if = {
+			limit = {
+				has_origin = origin_necrophage
+				NOT = { has_civic = civic_fanatic_purifiers }
+				NOT = { has_ai_personality_behaviour = purger }
+			}
+			country_event = { id = necroids.2 days = 3420 } #tell them about the necrophage mechanic
+		}
+		if = {
+			limit = {
+				has_origin = origin_necrophage
+				is_ai = yes
+			}
+			country_event = { id = necroids.6 days = 1800 }
+			country_event = { id = necroids.6 days = 3600 }
+			country_event = { id = necroids.6 days = 5400 }
+			country_event = { id = necroids.6 days = 7200 }
+		}
+		if = {
+			limit = {
+				has_origin = origin_necrophage
+				OR = {
+					has_country_flag = necrophage_commonwealth
+					has_country_flag = necrophage_une
+				}
+			}
+			random_country = {
+				limit = {
+					OR = {
+						AND = {
+							has_country_flag = human_1
+							prev = { has_country_flag = necrophage_commonwealth }
+						}
+						AND = {
+							has_country_flag = human_2
+							prev = { has_country_flag = necrophage_une }
+						}
+					}
+				}
+				random_owned_pop = {
+					limit = {
+						NOT = { is_same_species = prev }
+					}
+					species = { save_event_target_as = correct_prepatent_species }
+				}
+			}
+			every_owned_pop = {
+				limit = {
+					NOT = { is_same_species = owner_species }
+				}
+				planet = {
+					create_pop = {
+						species = event_target:correct_prepatent_species
+					}
+				}
+				kill_pop = yes
+			}
+			remove_country_flag = necrophage_une
+			remove_country_flag = necrophage_commonwealth
+		}
+		if = {
+			limit = {
+				has_civic = civic_reanimated_armies
+			}
+			add_research_option = tech_centralized_command
 		}
 	}
 }

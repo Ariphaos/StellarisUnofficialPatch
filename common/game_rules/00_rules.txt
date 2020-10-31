@@ -231,6 +231,7 @@ can_vote_in_democratic_election = {
 	is_being_purged = no
 }
 
+#Checks whether any leaders (scientists etc) can be formed from this pop
 #Root = country
 #This = pop
 can_generate_leader_from_pop = {
@@ -243,8 +244,18 @@ can_generate_leader_from_pop = {
 		root = { has_authority = auth_machine_intelligence }
 		root = { is_mechanical_empire = yes }
 	}
+	OR = {
+		is_same_species = root
+		root = {
+			NAND = {
+				has_origin = origin_necrophage
+				has_trait = trait_necrophage
+			}
+		}
+	}
 }
 
+#Checks whether this species is eligible to become rulers through elections
 #Root = country
 #This = species
 can_generate_leader_from_species = {
@@ -267,6 +278,15 @@ can_generate_military_leader_from_pop = {
 		root = { has_technology = tech_synthetic_leaders }
 		root = { has_authority = auth_machine_intelligence }
 		root = { is_mechanical_empire = yes }
+	}
+	OR = {
+		is_same_species = root
+		root = {
+			NAND = {
+				has_origin = origin_necrophage
+				has_trait = trait_necrophage
+			}
+		}
 	}
 }
 
@@ -531,10 +551,7 @@ can_colonize_with_pop = {
 	}
 	if = {
 		limit = {
-			OR = {
-				has_culture_shock = yes
-				is_sapient = no
-			}
+			is_sapient = no
 		}
 		custom_tooltip = {
 			always = no
@@ -637,6 +654,18 @@ can_species_procreate = {
 	NAND = {
 		root = { has_modifier = slave_colony }
 		NOT = { has_citizenship_type = { type = citizenship_slavery country = root.owner } }
+	}
+	if = {
+		limit = {
+			has_trait = trait_necrophage
+		}
+		NOT = {
+			root = {
+				any_owned_species = {
+					species_can_be_necrophaged = yes
+				}
+			}
+		}
 	}
 }
 
@@ -994,10 +1023,28 @@ ai_should_restrict_system = {
 					is_country_type = marauder_raiders
 				}
 			}
-			has_star_flag = crystal_home_system
-			any_fleet_in_system = {
-				exists = owner
-				owner = { is_country_type = crystal }
+			OR = {
+				AND = {
+					has_star_flag = crystal_home_system
+					any_fleet_in_system = {
+						exists = owner
+						owner = { is_country_type = crystal }
+					}
+				}
+				AND = {
+					has_star_flag = amoeba_home_system
+					any_fleet_in_system = {
+						exists = owner
+						owner = { is_country_type = amoeba_garrison }
+					}
+				}
+				AND = {
+					has_star_flag = drone_home_system
+					any_fleet_in_system = {
+						exists = owner
+						owner = { is_country_type = drone }
+					}
+				}
 			}
 		}
 	}
@@ -1057,11 +1104,11 @@ can_enter_system_by_jump = {
 
 # This = pop
 can_resettle_pop = {
-	IF = { #Done as an IF/ELSE so the tooltip isn't hideous and unreadable
+	if = { #Done as an IF/ELSE so the tooltip isn't hideous and unreadable
 		limit = { is_shackled_robot = yes }
-		is_shackled_robot = yes
+		always = yes
 	}
-	ELSE_IF = {
+	else_if = {
 		limit = {
 			planet = {
 				OR = {
@@ -1073,17 +1120,22 @@ can_resettle_pop = {
 				}
 			}
 		}
-		planet = {
-			OR = {
-				has_modifier = doomsday_1
-				has_modifier = doomsday_2
-				has_modifier = doomsday_3
-				has_modifier = doomsday_4
-				has_modifier = doomsday_5
+		always = yes
+	}
+	else_if = {
+		limit = {
+			planet = {
+				has_modifier = planet_culture_shock
+			}
+		}
+		OR = {
+			is_same_species = planet.owner
+			planet = {
+				NOT = { has_modifier = planet_culture_shock }
 			}
 		}
 	}
-	ELSE = {
+	else = {
 		owner = {
 			OR = {
 				has_policy_flag = resettlement_allowed
@@ -1359,7 +1411,6 @@ can_be_sold_on_slave_market = {
 	}
 	OR ={
 		ROOT = { is_ai = no }
-		ariphaos_patch_slaves_expel = yes
 		AND = {
 			is_unemployed = yes
 			is_being_assimilated = no
@@ -1428,4 +1479,44 @@ must_be_advanced_empire = {
 # This = country
 is_allowed_to_be_advanced_empire = {
 	always = yes
+}
+
+# This = planet
+has_enough_pops_for_necrophage_on_planet = {
+	owner = { has_origin = origin_necrophage }
+	has_available_jobs = necro_apprentice
+	if = {
+		limit = {
+			has_planet_flag = necrophage_alert_timer
+		}
+		count_owned_pop = {
+			count = 0
+			limit = {
+				species = { species_can_be_necrophaged = yes }
+			}
+		}
+	}
+	else_if = {
+		limit = { has_building = building_necrophage_elevation_chamber }
+		count_owned_pop = {
+			count < 3
+			limit = {
+				species = { species_can_be_necrophaged = yes }
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			has_building = building_necrophage_house_of_apotheosis
+		}
+		count_owned_pop = {
+			count < 6
+			limit = {
+				species = { species_can_be_necrophaged = yes }
+			}
+		}
+	}
+	else = {
+		always = no
+	}
 }

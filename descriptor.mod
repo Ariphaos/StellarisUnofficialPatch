@@ -1,8 +1,8 @@
-version="2.7.2.1"
+version="2.8.0.0"
 tags={
 	"Fixes"
 }
 picture="thumbnail.png"
-name="~~Ariphaos Unofficial Patch (2.7)"
-supported_version="2.7.2"
+name="!!Ariphaos Unofficial Patch (2.8)"
+supported_version="2.8.0"
 remote_file_id="1995601384"

@@ -604,47 +604,7 @@ planet_event = {
 	immediate = {
 		owner = { save_event_target_as = subterranean_planet_owner }
 		set_planet_flag = seismic_disturbance_friendly
-		create_species = {
-			name = random
-			class = random_non_machine
-			portrait = random
-			traits = random
-			homeworld = root
-		}
-		create_country = {
-			name = "NAME_Subterranean_Nation"
-			species = last_created
-			type = adversary
-			ethos = random
-			auto_delete = no
-			flag = {
-				icon = {
-					category = "zoological"
-					file = "flag_zoological_10.dds"
-				}
-				background= {
-					category = "backgrounds"
-					file = "new_dawn.dds"
-				}
-				colors={
-					"red"
-					"black"
-					"null"
-					"null"
-				}
-			}
-		}
-		last_created_country = {
-			set_relation_flag = {
-				who = root.owner
-				flag = subterror
-			}
-			set_country_flag = subterranean_nation
-			establish_contact = { who = event_target:subterranean_planet_owner location = root }
-			establish_communications_no_message = event_target:subterranean_planet_owner
-			save_event_target_as = subterranean_nation
-			owner_species = { save_event_target_as = subterranean_species }
-		}
+		create_subterranean_nation = yes
 	}
 
 	option = {
@@ -744,6 +704,7 @@ planet_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		create_subterranean_nation = yes #makes sure the event targets are set
 		owner = { set_country_flag = subterranean_invasion_country }
 		set_planet_flag = subterranean_invasion_planet
 		event_target:subterranean_nation = {
@@ -2572,6 +2533,7 @@ planet_event = {
 		}
 		name = colony.107.a
 		change_pc = pc_nuked
+		hidden_effect = { set_planet_flag = nuked_planet_anomalies_disabled }
 		if = { #Destroys colony if no planet pops can live on Tomb Worlds
 			limit = {
 				NOT = {
@@ -2613,7 +2575,8 @@ planet_event = {
 			}
 		}
 		name = EXCELLENT
-		change_pc = pc_nuked
+		hidden_effect = { change_pc = pc_nuked }
+		set_planet_flag = nuked_planet_anomalies_disabled
 		hidden_effect = {
 			remove_modifier = "abandoned_terraforming"
 		}
@@ -2880,6 +2843,7 @@ planet_event = {
 		NOT = { has_global_flag = underground_vault_global }
 		NOT = { has_planet_flag = armageddon_nuked }
 		is_planet_class = pc_nuked
+		NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
 		NOR = {
 			has_planet_flag = primitives_nuked_themselves
 			solar_system = {
@@ -2951,16 +2915,23 @@ planet_event = {
 			portrait = random
 			traits = random
 			homeworld = root
+			effect = {
+				save_event_target_as = vault_survivor_species
+			}
 		}
+	}
 
+	option = {
+		name = colony.152.a
+		add_deposit = d_underground_vault_2
 		create_pop = {
-			species = last_created
+			species = event_target:vault_survivor_species
 		}
 		create_pop = {
-			species = last_created
+			species = event_target:vault_survivor_species
 		}
 		create_pop = {
-			species = last_created
+			species = event_target:vault_survivor_species
 		}
 	}
 	option = {
@@ -2971,23 +2942,19 @@ planet_event = {
 			}
 		}
 		add_deposit = d_underground_vault_2
-		create_species = {
-			name = random
-			class = random_non_machine
-			portrait = random
-			traits = random
-		}
-
 		create_pop = {
-			species = last_created
+			species = event_target:vault_survivor_species
 		}
 		create_pop = {
-			species = last_created
+			species = event_target:vault_survivor_species
 		}
 		create_pop = {
-			species = last_created
+			species = event_target:vault_survivor_species
 		}
-		last_created_pop = { set_citizenship_type = { type = citizenship_slavery cooldown = yes } }
+		custom_tooltip = colony.152.b.tooltip
+		hidden_effect = {
+			last_created_pop = { set_citizenship_type = { type = citizenship_slavery cooldown = yes } }
+		}
 	}
 	option = {
 		name = colony.152.c
@@ -3145,6 +3112,10 @@ planet_event = {
 		owner = { is_ai = no }
 		NOT = { has_planet_flag = armageddon_nuked }
 		is_planet_class = pc_nuked
+		OR = {
+			has_planet_flag = primitives_nuked_themselves
+			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
+		}
 		NOR = {
 			has_planet_flag = wasteland_nuclear_bomb
 			solar_system = {
@@ -3154,6 +3125,11 @@ planet_event = {
 			}
 		}
 		num_pops > 0
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_155
+			}
+		}
 	}
 
 	is_triggered_only = yes
@@ -3161,6 +3137,9 @@ planet_event = {
 	immediate = {
 		hidden_effect = {
 			set_planet_flag = wasteland_nuclear_bomb
+			owner = {
+				set_country_flag = had_colony_155
+			}
 		}
 	}
 
@@ -3230,6 +3209,10 @@ planet_event = {
 		owner = { is_ai = no }
 		NOT = { has_planet_flag = armageddon_nuked }
 		is_planet_class = pc_nuked
+		OR = {
+			has_planet_flag = primitives_nuked_themselves
+			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
+		}
 		NOR = {
 			has_planet_flag = wasteland_particle_accelerator
 			solar_system = {
@@ -3239,12 +3222,20 @@ planet_event = {
 			}
 		}
 		num_pops > 0
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_160
+			}
+		}
 	}
 
 	is_triggered_only = yes
 
 	immediate = {
 		set_planet_flag = wasteland_particle_accelerator
+		owner = {
+			set_country_flag = had_colony_160
+		}
 	}
 
 	option = {
@@ -3275,6 +3266,10 @@ planet_event = {
 		owner = { is_ai = no }
 		NOT = { has_planet_flag = armageddon_nuked }
 		is_planet_class = pc_nuked
+		OR = {
+			has_planet_flag = primitives_nuked_themselves
+			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
+		}
 		NOR = {
 			has_planet_flag = wasteland_infrastructure
 			solar_system = {
@@ -3284,6 +3279,11 @@ planet_event = {
 			}
 		}
 		num_pops > 0
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_161
+			}
+		}
 	}
 
 	is_triggered_only = yes
@@ -3291,6 +3291,9 @@ planet_event = {
 	immediate = {
 		hidden_effect = {
 			set_planet_flag = wasteland_infrastructure
+			owner = {
+				set_country_flag = had_colony_161
+			}
 		}
 	}
 
@@ -3328,6 +3331,7 @@ planet_event = {
 		NOR = {
 			has_planet_flag = wasteland_space_station
 			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = nuked_planet_anomalies_disabled
 			solar_system = {
 				any_system_planet = {
 					is_capital = yes
@@ -3335,6 +3339,11 @@ planet_event = {
 			}
 		}
 		num_pops > 0
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_162
+			}
+		}
 	}
 
 	is_triggered_only = yes
@@ -3342,6 +3351,9 @@ planet_event = {
 	immediate = {
 		hidden_effect = {
 			set_planet_flag = wasteland_space_station
+			owner = {
+				set_country_flag = had_colony_162
+			}
 		}
 	}
 
@@ -3380,6 +3392,11 @@ planet_event = {
 		owner = { is_ai = no }
 		NOT = { has_planet_flag = armageddon_nuked }
 		is_planet_class = pc_nuked
+		OR = {
+			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = armageddon_nuked
+			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
+		}
 		NOR = {
 			has_planet_flag = wasteland_radiation
 			solar_system = {
@@ -3390,6 +3407,11 @@ planet_event = {
 		}
 		owner = { NOT = { has_ethic = ethic_gestalt_consciousness } }
 		num_pops > 0
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_163
+			}
+		}
 	}
 
 	is_triggered_only = yes
@@ -3397,6 +3419,9 @@ planet_event = {
 	immediate = {
 		hidden_effect = {
 			set_planet_flag = wasteland_radiation
+			owner = {
+				set_country_flag = had_colony_163
+			}
 		}
 	}
 
@@ -3431,6 +3456,11 @@ planet_event = {
 		owner = { is_ai = no }
 		NOT = { has_planet_flag = armageddon_nuked }
 		is_planet_class = pc_nuked
+		OR = {
+			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = armageddon_nuked
+			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
+		}
 		NOR = {
 			has_planet_flag = wasteland_pacifist_movement
 			solar_system = {
@@ -3452,6 +3482,11 @@ planet_event = {
 			is_enslaved = no
 			is_being_purged = no
 		}
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_164
+			}
+		}
 	}
 
 	is_triggered_only = yes
@@ -3462,6 +3497,9 @@ planet_event = {
 	immediate = {
 		hidden_effect = {
 			set_planet_flag = wasteland_pacifist_movement
+			owner = {
+				set_country_flag = had_colony_164
+			}
 		}
 	}
 
@@ -3612,6 +3650,7 @@ planet_event = {
 		NOR = {
 			has_planet_flag = wasteland_orbital_debris
 			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = nuked_planet_anomalies_disabled
 			solar_system = {
 				any_system_planet = {
 					is_capital = yes
@@ -3619,6 +3658,11 @@ planet_event = {
 			}
 		}
 		num_pops > 0
+		NOT = {
+			owner = {
+				has_country_flag = had_colony_170
+			}
+		}
 	}
 
 	is_triggered_only = yes
@@ -3626,6 +3670,9 @@ planet_event = {
 	immediate = {
 		hidden_effect = {
 			set_planet_flag = wasteland_orbital_debris
+			owner = {
+				set_country_flag = had_colony_170
+			}
 		}
 	}
 

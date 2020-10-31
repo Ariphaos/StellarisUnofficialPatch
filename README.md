@@ -12,13 +12,15 @@ We accept fixes for the following issues. Some issues might span multiple catego
 
 * **Crashes** Naturally. Only one of these so far.
 
-* **Exploits** Things that were clearly not intended by the developers. Generating infinite resources, typically.
+* **Exploits** Things that were clearly not intended by the developers that can give the player an edge or circumvent a problem.
 
-* **Functionality** A 'general bug'. Something straight up doesn't work, or works inappropriately.
+* **Functionality** Added abilities, often requested at one point or another.
 
-* **Oversights** These are issues that may surprise the player when encountered, though they may not technically be bugs. These aren't balance per se, but rather player frustration, or if the player gets away with something it seems like they shouldn't. 
+* **Bugfixes** General bugfixes that aren't necessarily critical.
 
-* **Balance** For a balance fix to make it in, something needs to be seriously wrong. Not just 'this feels unbalanced' but 'this dramatically impacts game experience and is clearly inappropriate'. 
+* **Subjectives** These are issues that look like bugs or oversights. Things like the Baldarak going to a fake gas giant and other elements that impact flavor more than game balance. 
+
+* **Balance** These are subjective fixes of things that look like bugs or oversights that do impact game balance (thus the term). The effect is usually fairly minor.
 
 * **Performance** These fixes do not impact gameplay, but remove extraneous processing.
 
@@ -33,6 +35,10 @@ We accept fixes for the following issues. Some issues might span multiple catego
 * **Tuning** If something is functioning but merely 'unbalanced', it isn't our job to fix it. Tuning is only appropriate when necessary as a part of a larger fix, where numbers are needed and Paradox provides none.
 
 ## Usage
+
+### Old Versions
+
+See releases for legacy versions.
 
 ### Mod Authors
 
@@ -50,18 +56,18 @@ This mod should go at the very top of your load order, so other mods overwrite i
 
 #### Compatibility
 
-* Mods that allow multiple ascensions. Making such mods based off of this patch is utterly trivial, and I might toss my personal mods up.  
-
-* Everything else should be compatible. If not, it's a bug.
+* Everything should be compatible. If not, it's a bug. 
 
 ## Contributing
 
-I highly suggest using a three-way merge tool, such as [Winmerge](https://winmerge.org/), when managing this project. It makes updating for new releases, evaluating other fixes, and so on a comparative breeze. Updating this project to a new Stellaris release takes me a couple hours, roughly.
+I highly suggest using a three-way merge tool, such as [Winmerge](https://winmerge.org/), when managing this project. It makes updating for new releases, evaluating other fixes, and so on a comparative breeze. Updating this project to a new Stellaris release takes me a couple hours, roughly. For 2.8 I took the time to re-document everything for Github here.
 
-### A Note on Incorporating Fixes
+* Please document your changes clearly. Include relevant updates to AllChanges.md if making a PR.
 
-Many times, I have seen 'fixes' that do not actually address the issue. Just because another mod exists that claims to fix something, does not mean it does. Many of them paper over the issue, and the result is a borderline exploit or cheat.
+* Please do not make unnecessary changes e.g. to whitespace.
+
+* Understand that your contribution will be shared with the wider community and that you will be allowing others to build on your fixes.
 
 ## Branch Policy
 
-Every major (x.x) release of Stellaris will get its own branch (2.6, 2.7, etc). 'Master' will be used as the general development branch for the current version.
+Every major (x.x) release of Stellaris will get its own branch (2.6, 2.7, etc) at the end of that version's release cycle. 'Master' will be used as the general development branch for the current version.
