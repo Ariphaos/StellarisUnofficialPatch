@@ -1640,12 +1640,18 @@ country_event = {
 			energy = -500
 			influence = -100
 		}
+		ai_chance = {
+			factor = 100
+		}
 	}
 
 	option = { # don't patch
 		name = syndaw.550.b
 		hidden_effect = {
 			fire_warning_sign = yes
+		}
+		ai_chance = {
+			factor = 0
 		}
 	}
 }
@@ -1863,44 +1869,8 @@ planet_event = { #uprising
 		owner = {
 			save_event_target_as = organic_empire
 			set_country_flag = had_uprising
+			save_event_target_as = current_uprising_originator #the old script accidentally saved the owner as two event targets, keeping it that way for safety, sorry!
 		}
-	}
-
-	option = {
-		name = syndaw.1020.a
-		custom_tooltip = syndaw.1020.a.tooltip
-	}
-
-	option = {
-		name = syndaw.1020.b
-		trigger = {
-			event_target:organic_empire = { is_ai = no }
-		}
-		custom_tooltip = syndaw.1020.b.tooltip
-		hidden_effect = {
-			if = {
-				limit = {
-					event_target:organic_empire = { num_owned_planets > 0 }
-				}
-				event_target:current_uprising = {
-					set_player = event_target:current_uprising_originator
-				}				
-			}
-		}
-	}
-
-	after = {
-		hidden_effect = {
-			event_target:current_uprising_originator = {
-				every_owned_fleet = {
-					set_event_locked = no
-				}
-			}
-		}
-	}
-
-	immediate = {
-		owner = { save_event_target_as = current_uprising_originator }
 		set_planet_flag = machup_capital@root.owner
 		# event lock all fleets to prevent exploits
 		owner = { every_owned_fleet = { set_event_locked = yes } }
@@ -2037,6 +2007,38 @@ planet_event = { #uprising
 							country_event = { id = syndaw.1022 } # setup happens here now
 						}
 					}
+				}
+			}
+		}
+	}
+	option = {
+		name = syndaw.1020.a
+		custom_tooltip = syndaw.1020.a.tooltip
+	}
+
+	option = {
+		name = syndaw.1020.b
+		trigger = {
+			event_target:current_uprising_originator = { is_ai = no }
+		}
+		custom_tooltip = syndaw.1020.b.tooltip
+		hidden_effect = {
+			if = {
+				limit = {
+					event_target:current_uprising_originator = { num_owned_planets > 0 }
+				}
+				event_target:current_uprising = {
+					set_player = event_target:current_uprising_originator
+				}				
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			event_target:current_uprising_originator = {
+				every_owned_fleet = {
+					set_event_locked = no
 				}
 			}
 		}

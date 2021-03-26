@@ -63,8 +63,12 @@ As of the 2.8 release this should include all substantive changes. I may have mi
 * pop_jobs/06_event_jobs: Make underground trade worker trigger on xenophobe rather than xenophile.
 * pop_jobs/06_event_jobs: Fix feral overload jobs.
 
+* resolutions: Can't ban the galactic slave trade before the galactic market is founded.
+
 * scripted_effects/00_scripted_effects: Awakened FE not part of the War in Heaven don't give LNAP relation penalties.
 * scripted_effects/00_scripted_effects: Cleaned up leader trait modifying script and made sure it all applied properly in a compatible fashion.
+
+* solar_system_initializers/megacorp: Prevented Chor's Compass from spawning in bottlenecks. Seems to confuse the AI.
 
 * ship_sizes/00_ship_sizes: Sponsored colony ships are treated as colony ships.
 * ship_sizes/00_ship_sizes: Removed conflicting acceleration entry for transport ships.
@@ -152,8 +156,6 @@ As of the 2.8 release this should include all substantive changes. I may have mi
 * anomalies/95_anomaly_categories_distant_stars: Allow Diamond Star to trigger in binary or trinary systems.
 
 * global_ship_designs/event_ship_designs_anomalies: Made the salvage cruiser a proper fleet ship. Still can't be upgraded.
-
-* on_actions: Re-enabled action.31 (may no longer be necessary)
 
 * scripted_effects/00_scripted_effects: Xenophobe FE servants are based off of someone.
 * scripted_effects/00_scripted_effects: Points of Interest for Distant Stars guardians.
@@ -274,7 +276,8 @@ As of the 2.8 release this should include all substantive changes. I may have mi
 
 * component_templates/00_utilities_roles: AI won't use sapient tech if AI is outlawed (heh).
 
-* countries/00_country_types: Default constructors and science ships min and max 5 each.
+* countries/00_country_types: Default science ships min and max 5 each.
+* countries/00_country_types: Default constructor ships min and max 6 each.
 * countries/00_country_types: Default max titans at 5.
 * countries/00_country_types: Awakened FEs go for 5 constructors and up to 5 titans.
 
@@ -311,6 +314,8 @@ As of the 2.8 release this should include all substantive changes. I may have mi
 * events/war_in_heaven_events: Increase AI peace duration in case the war doesn't trigger right away.
 
 ## Cosmetics
+
+* diplomatic_actions: Turned off notifications for some relations. (Starnet)
 
 * events (several): Fixed missing or inappropriate go-to locations.
 
