@@ -109,6 +109,29 @@ planet_event = {
 	}
 }
 
+# Make sure bombarded infested worlds revert to barren.
+event = {
+	id = ariphaos_patch.92
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_planet = {
+			limit = {
+				has_owner = no
+				is_planet_class = pc_infested
+				is_under_colonization = no
+			}
+			
+			change_pc = pc_barren
+			add_modifier = {
+				modifier = "terraforming_candidate"
+				days = -1
+			}
+		}
+	}
+}
+
 # Catch-all trait adding event.
 country_event = {
 	id = ariphaos_patch.2560
@@ -127,6 +150,18 @@ country_event = {
 # Populate the galaxy with terraforming candidates based on habitability setting.
 event = {
 	id = ariphaos_patch.2575
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:global_event_country = {
+			country_event = { id = ariphaos_patch.25751 days = 1 }
+		}
+	}
+}
+	
+country_event = {
+	id = ariphaos_patch.25750
 	hide_window = yes
 	is_triggered_only = yes
 
@@ -155,25 +190,100 @@ event = {
 					}
 				}
 
-# Turns out colonizable_planet_odds can't be retrieved because of course it can't.
-#				get_galaxy_setup_value = {
-#					setting = colonizable_planet_odds
-#					which = local_habitability_num
-#					scale_by = 4
-#				}
-#
-#				while = {
-#					count = local_habitability_num
-#				}
 				random_list = {
-					98 = { }
-					2 = {
+					96 = { }
+					4 = {
 						add_modifier = {
 							modifier = "terraforming_candidate"
 							days = -1
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = ariphaos_patch.25751
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		every_planet = {
+			limit = {
+				planet_size < 26
+				planet_size > 9
+				NOR = {
+					has_modifier = terraforming_candidate
+					has_anomaly = yes
+					is_preventing_anomaly = yes
+				}
+				OR = {
+					is_planet_class = pc_barren
+					is_planet_class = pc_barren_cold
+				}
+				solar_system = {
+					NOR = {
+						is_star_class = sc_black_hole
+						is_star_class = sc_neutron_star
+						is_star_class = sc_pulsar
+						has_star_flag = empire_home_system
+					}
+				}
+				
+			}
+			random_list = {
+				96 = { }
+				4 = {
+					add_modifier = {
+						modifier = "terraforming_candidate"
+						days = -1
+					}
+				}
+			}
+		}
+	}
+}
+
+event = {
+	id = ariphaos_patch.3101
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				has_origin = origin_remnants
+			}
+			country_event = { id = ariphaos_patch.31010 days = 1 }
+		}
+	}
+}
+
+country_event = {
+	id = ariphaos_patch.31010
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		capital_scope.solar_system = {
+			every_neighbor_system = {
+			    every_system_planet = {
+					limit = {
+						has_planet_flag = prescripted_ideal
+					}
+					set_planet_flag = ariphaos_patch_remnants
+				}
+			
+			    every_neighbor_system = {
+					every_system_planet = {
+						limit = {
+							has_planet_flag = prescripted_ideal
+						}
+						set_planet_flag = ariphaos_patch_remnants
+					}
+			    }
 			}
 		}
 	}
