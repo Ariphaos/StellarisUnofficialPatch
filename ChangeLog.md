@@ -1,4 +1,9 @@
 
+## March 28th
+
+* Fix Assimilation Rights bug (FireGolem)
+* Fix Mass Extinction Event Chain for multiplayer (FireGolem)
+* Improved whole L-Cluster event init (FireGolem)
 
 ## February 27th
 
