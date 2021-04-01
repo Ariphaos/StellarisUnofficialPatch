@@ -7336,7 +7336,7 @@ country_event = { #Bounce to make sure we do not spawn Ratlings during ongoing p
 				any_system = {
 					has_star_flag = ratling_system
 					NOT = { #At least one Ratling system does not have ongoing starbase construction
-						any_ship_in_system = {
+						any_fleet_in_system = {
 							is_ship_size = constructor
 							is_constructing = starbase
 						}
@@ -7391,7 +7391,7 @@ country_event = { #Create Full Ratling Empire #Root = Global Event Country
 		any_system = {
 			has_star_flag = ratling_system
 			NOT = { #At least one Ratling system does not have ongoing starbase construction
-				any_ship_in_system = {
+				any_fleet_in_system = {
 					is_ship_size = constructor
 					is_constructing = starbase
 				}
@@ -7559,7 +7559,7 @@ country_event = { #Create Full Ratling Empire #Root = Global Event Country
 					AND = {
 						exists = owner
 						NOT = {
-							owner = { is_same_value = event_target:ratling_country }
+							owner = { is_same_empire = event_target:ratling_country }
 						}
 					}
 				}
@@ -7998,7 +7998,7 @@ country_event = { #Adds CBs and opinion mods on Communications Established (acti
 		every_system = {
 			limit = {
 				has_star_flag = ratling_system
-				owner = { is_same_value = from }
+				owner = { is_same_empire = from }
 			}
 			add_claims = {
 				who = event_target:ratling_country
@@ -8048,7 +8048,7 @@ country_event = { #Adds CBs and opinion mods on Communications Established (acti
 			every_system = {
 				limit = {
 					has_star_flag = ratling_system
-					owner = { is_same_value = from }
+					owner = { is_same_empire = from }
 				}
 				add_claims = {
 					who = event_target:ratling_country
@@ -10117,7 +10117,7 @@ country_event = { #Atomic Clock follow-up: Selection
 				}
 				country_event = { id = distar.315 } #Useable Gray Goo ship is built
 			}
-			0 = { 
+			0 = {
 				modifier = {
 					add = 1
 					FROMFROM.solar_system = {
@@ -10198,8 +10198,8 @@ country_event = { #Atomic Clock follow-up: A system planet is terraformed
 	option = {
 		trigger = {
 			event_target:atomic_clock_planet.solar_system = {
-				any_ship_in_system = {
-					owner = { is_same_value = root }
+				any_fleet_in_system = {
+					owner = { is_same_empire = root }
 					OR = {
 						is_ship_class = shipclass_military_station
 						is_ship_class = shipclass_military
@@ -10547,7 +10547,7 @@ ship_event = {
 			}
 		}
 	}
-	
+
 	immediate = {
 		owner = {
 			country_event = { id = story.5 days = 30 }
@@ -14932,7 +14932,7 @@ planet_event = {
 		NOT = {
 			any_fleet_in_orbit = {
 				exists = owner
-				owner = { is_same_value = event_target:enigmatic_cache_country }
+				owner = { is_same_empire = event_target:enigmatic_cache_country }
 			}
 		}
 	}
@@ -14949,7 +14949,7 @@ planet_event = {
 				NOT = {
 					any_fleet_in_orbit = {
 						exists = owner
-						owner = { is_same_value = event_target:enigmatic_cache_country }
+						owner = { is_same_empire = event_target:enigmatic_cache_country }
 					}
 				}
 			}
@@ -16374,7 +16374,7 @@ country_event = {
 			is_capital = yes
 			any_fleet_in_orbit = {
 				exists = owner
-				owner = { is_same_value = event_target:enigmatic_cache_country }
+				owner = { is_same_empire = event_target:enigmatic_cache_country }
 			}
 		}
 	}
@@ -16447,7 +16447,7 @@ ship_event = {
 						NOT = { has_star_flag = guardian }
 						OR = {
 							has_owner = no
-							owner = { is_same_value = root.owner }
+							owner = { is_same_empire = root.owner }
 						}
 						any_system_planet = {
 							is_asteroid = yes
@@ -17798,7 +17798,7 @@ country_event = { # More info about the molluscs
 		trigger = {		# Prevents Genocidal Empires from integrating molluscs
 			is_homicidal = no
 		}
-		
+
 		name = distar.3031.a
 
 		enable_special_project = {
@@ -18120,7 +18120,7 @@ country_event = { # Spike in energy readings from a nearby solar system observed
 
 	after = {
 		hidden_effect = {
-			country_event = { id = distar.3043 days = 3 } 
+			country_event = { id = distar.3043 days = 3 }
 		}
 	}
 
@@ -18174,7 +18174,7 @@ country_event = {
 	}
 
 	immediate = {
-		event_target:system_one = { 
+		event_target:system_one = {
 			save_event_target_as = wormhole_system
 		}
 		set_country_flag = encountered_first_wormhole
@@ -20347,13 +20347,11 @@ country_event = {
 	}
 }
 
-# spawn l-cluster
+# Spawn l-cluster (bit optimized by FirePrince)
 country_event = {
 	id = distar.11000
 	hide_window = yes
-
 	is_triggered_only = yes
-
 	fire_only_once = yes
 
 	immediate = {
@@ -20371,15 +20369,21 @@ country_event = {
 				initializer = distantstars_init_01
 				hyperlane = no
 			}
-			random_system = {
-				limit = { has_star_flag = lcluster1 }
-				save_global_event_target_as = lcluster1
+			if = { limit = { NOT = { exists = event_target:lcluster1 } }
+				random_system = {
+					limit = { has_star_flag = lcluster1 }
+					save_global_event_target_as = lcluster1
+				}
+			}
+			event_target:lcluster1 = {
 				spawn_system = {
 					min_distance >= 29
 					max_distance <= 31
 					min_orientation_angle = 24
 					max_orientation_angle = 66
 					initializer = distantstars_init_02
+					hyperlane = no
+					is_discovered = no
 				}
 				spawn_system = {
 					min_distance >= 29
@@ -20387,6 +20391,8 @@ country_event = {
 					min_orientation_angle = 114
 					max_orientation_angle = 156
 					initializer = distantstars_init_03
+					hyperlane = no
+					is_discovered = no
 				}
 				spawn_system = {
 					min_distance >= 30
@@ -20394,28 +20400,42 @@ country_event = {
 					min_orientation_angle = 340
 					max_orientation_angle = 20
 					initializer = distantstars_init_01b
+					hyperlane = no
+					is_discovered = no
 				}
 			}
-			random_system = {
-				limit = { has_star_flag = lcluster2 }
-				save_global_event_target_as = lcluster2
+			if = { limit = { NOT = { exists = event_target:lcluster2 } }
+				random_system = {
+					limit = { has_star_flag = lcluster2 }
+					save_global_event_target_as = lcluster2
+				}
+			}
+			event_target:lcluster2 = {
 				spawn_system = {
 					min_distance >= 30
 					max_distance <= 60
 					min_orientation_angle = 0
 					max_orientation_angle = 40
 					initializer = distantstars_init_02b
+					hyperlane = no
+					is_discovered = no
 				}
 			}
-			random_system = {
-				limit = { has_star_flag = lcluster3 }
-				save_global_event_target_as = lcluster3
+			if = { limit = { NOT = { exists = event_target:lcluster3 } }
+				random_system = {
+					limit = { has_star_flag = lcluster3 }
+					save_global_event_target_as = lcluster3
+				}
+			}
+			event_target:lcluster3 = {
 				spawn_system = {
 					min_distance >= 20
 					max_distance <= 30
 					min_orientation_angle = 24
 					max_orientation_angle = 66
 					initializer = distantstars_init_04
+					hyperlane = no
+					is_discovered = no
 				}
 				spawn_system = {
 					min_distance >= 10
@@ -20423,17 +20443,26 @@ country_event = {
 					min_orientation_angle = 250
 					max_orientation_angle = 290
 					initializer = distantstars_init_03b
+					hyperlane = no
+					is_discovered = no
 				}
 			}
-			random_system = {
-				limit = { has_star_flag = lcluster4 }
-				save_global_event_target_as = lcluster4
+			if = { limit = { NOT = { exists = event_target:lcluster4 } }
+				random_system = {
+					limit = { has_star_flag = lcluster4 }
+					save_global_event_target_as = lcluster4
+				}
+			}
+
+			event_target:lcluster4 = {
 				spawn_system = {
 					min_distance >= 5
 					max_distance <= 10
 					min_orientation_angle = 250
 					max_orientation_angle = 290
 					initializer = distantstars_init_05
+					hyperlane = no
+					is_discovered = no
 				}
 				spawn_system = {
 					min_distance >= 30
@@ -20441,41 +20470,54 @@ country_event = {
 					min_orientation_angle = 20
 					max_orientation_angle = 160
 					initializer = distantstars_init_04b
+					hyperlane = no
+					is_discovered = no
+				}
+			}
+			# We need only one target for the same issue, so take the better instead of "lcluster5"
+			if = { limit = { NOT = { exists = event_target:lcluster_factory_system } }
+				random_system = {
+					limit = { has_star_flag = lcluster5 }
+					save_global_event_target_as = lcluster_factory_system
 				}
 			}
 		}
 
-		random_system = {
-			limit = { has_star_flag = lcluster5 }
-			save_global_event_target_as = lcluster5
+		if = { limit = { NOT = { exists = event_target:lcluster1b } }
+			random_system = {
+				limit = { has_star_flag = lcluster1b }
+				save_global_event_target_as = lcluster1b
+			}
 		}
-		random_system = {
-			limit = { has_star_flag = lcluster1b }
-			save_global_event_target_as = lcluster1b
+		if = { limit = { NOT = { exists = event_target:lcluster2b } }
+			random_system = {
+				limit = { has_star_flag = lcluster2b }
+				save_global_event_target_as = lcluster2b
+			}
 		}
-		random_system = {
-			limit = { has_star_flag = lcluster2b }
-			save_global_event_target_as = lcluster2b
+		if = { limit = { NOT = { exists = event_target:lcluster3b } }
+			random_system = {
+				limit = { has_star_flag = lcluster3b }
+				save_global_event_target_as = lcluster3b
+			}
 		}
-		random_system = {
-			limit = { has_star_flag = lcluster3b }
-			save_global_event_target_as = lcluster3b
-		}
-		random_system = {
-			limit = { has_star_flag = lcluster4b }
-			save_global_event_target_as = lcluster4b
+		if = { limit = { NOT = { exists = event_target:lcluster4b } }
+			random_system = {
+				limit = { has_star_flag = lcluster4b }
+				save_global_event_target_as = lcluster4b
+			}
 		}
 
-		# clear all hyperlanes to and within the cluster
+		## Clear all hyperlanes to and within the cluster
 		every_system = {
 			limit = { has_star_flag = lcluster }
 			isolate_system = yes
 		}
 
-		# add hyperlanes
-		event_target:lcluster5 = {
+		## Add hyperlanes
+		event_target:lcluster_factory_system = {
 			add_hyperlane = {
-				from = event_target:lcluster5
+				from = event_target:lcluster_factory_system
 				to = event_target:lcluster4
 			}
 		}
@@ -20517,7 +20559,6 @@ country_event = {
 				to = event_target:lcluster2b
 			}
 		}
-
 		event_target:lcluster1 = {
 			add_hyperlane = {
 				from = event_target:lcluster1
@@ -21060,7 +21101,7 @@ fleet_event = {
 		from = {
 			has_star_flag = dragon_point
 			NOT = { has_star_flag = visited_dragon_point@root.owner }
-			any_ship_in_system = {
+			any_fleet_in_system = {
 				is_ship_size = nanite_space_dragon_baby
 			}
 		}
