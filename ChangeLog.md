@@ -1,4 +1,10 @@
 
+## April 1st
+
+* Allow the Awoken to be destroyed (FireGolem)
+* Enable boosting nominated planet during relocation.
+* Bugfixes from my own mistakes.
+
 ## March 28th
 
 * Fix Assimilation Rights bug (FireGolem)
