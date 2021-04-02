@@ -1,4 +1,10 @@
 
+## April 1st
+
+* Allow the Awoken to be destroyed (FireGolem)
+* Enable boosting nominated planet during relocation.
+* Bugfixes from my own mistakes.
+
 ## March 28th
 
 * Fix Assimilation Rights bug (FireGolem)
@@ -86,7 +92,4 @@
 * Scope fix: any_ship to any_owned_ship.
 * Some more scope fixes.
 
-### August 31st
-
-* Only change from release in this upload is tweaking the purging script to be less aggressive for resource extraction, per feedback.
 
