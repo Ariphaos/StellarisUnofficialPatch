@@ -1,4 +1,7 @@
 
+## April 2st
+* Fix Feral overload event flag (colony_event); interrupts with any other colony event chain (Tannhäuser Cake/FireGolem)
+
 ## April 1st
 
 * Allow the Awoken to be destroyed (FireGolem)
