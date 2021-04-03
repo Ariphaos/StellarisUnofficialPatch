@@ -1,3 +1,8 @@
+# ChangeLog
+
+## April 2nd
+
+* Fix Feral overload event flag (colony_event); interrupts with any other colony event chain (Tannhäuser Cake)
 
 ## April 1st
 
@@ -22,7 +27,7 @@
 * Fix for fanatic purifier necrophage abductions (GhostWraith)
 
 * Thanks Anaphysik for these and following fixes - and apologies for getting them out so late:
-* Fixed the end of the Fall of the Shallarians chain. 
+* Fixed the end of the Fall of the Shallarians chain.
 * Fixed literally unplayable Atomic Clock timing.
 * Fixed a number of literally unplayable typos.
 * Fixed a small bug in the Oracle chain.
@@ -75,15 +80,17 @@
 * Paradox let droids be colonists again.
 
 ### Sep 11st
+
 * Fix location target Event: Dyson Sphere (utopia.30)
 * Add location to graygoo.181
 * Fix location rubricator_dragon_fleet (ancrel.40180)
 * Fix pre_triggers id = colony.1533
 * Merge needless (and conflicting?) double "allow" again (graygoo.503)
 * Use widely pre_triggers (performance)
-* remove widely unnecessary logical operators 
+* remove widely unnecessary logical operators
 
 ### Sep 6st
+
 * Merge needless and conflicting double "allow" (graygoo.503)
 ** minor scope/syntax fixes on Distars events.
 
@@ -91,5 +98,3 @@
 
 * Scope fix: any_ship to any_owned_ship.
 * Some more scope fixes.
-
-
