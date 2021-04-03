@@ -1,8 +1,8 @@
 # ChangeLog
 
-## April 2st
+## April 2nd
 
-* Fix Feral overload event flag (colony_event); interrupts with any other colony event chain (Tannhäuser Cake/FireGolem)
+* Fix Feral overload event flag (colony_event); interrupts with any other colony event chain (Tannhäuser Cake)
 
 ## April 1st
 
