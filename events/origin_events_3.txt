@@ -1,0 +1,249 @@
+################################
+#
+# Origin Events
+#
+###############################
+namespace = origin
+
+#Tree of Life
+
+#Add ToL to new colonies
+planet_event = {
+	id = origin.3001
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_origin = origin_tree_of_life
+		}
+	}
+
+	immediate = {
+		add_deposit = d_tree_of_life_colony
+		remove_modifier = no_lifetree #as the planet transfer events fire before this
+	}
+}
+
+#Tree destroyed (oh no!)
+#silently kill tree
+planet_event = {
+	id = origin.3002
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			has_deposit = d_tree_of_life_colony
+			has_deposit = d_tree_of_life_home
+		}
+	}
+
+	immediate = {
+		remove_deposit = d_tree_of_life_colony
+		remove_deposit = d_tree_of_life_home
+	}
+}
+
+#informatively kill tree
+planet_event = {
+	id = origin.3003
+	title = "origin.3003.name"
+	desc = "origin.3003.desc"
+	picture = GFX_evt_physics_research #TODO better pic
+	show_sound = event_alien_nature
+
+	is_triggered_only = yes
+
+	trigger = {
+		planet_devastation >= 50
+		OR = {
+			has_deposit = d_tree_of_life_colony
+			has_deposit = d_tree_of_life_home
+		}
+	}
+	
+	immediate = {
+		remove_deposit = d_tree_of_life_colony
+		remove_deposit = d_tree_of_life_home
+	}
+
+	option = {
+		name = UNFORTUNATE
+		tooltip = { 
+			remove_deposit = d_tree_of_life_colony
+			remove_deposit = d_tree_of_life_home
+		}
+		add_modifier = { modifier = no_lifetree }
+	}
+}
+
+#modify the modifier for lacking Tree
+planet_event = {
+	id = origin.3004
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				FROM = { has_origin = origin_tree_of_life }
+				NOR = {
+					has_deposit = d_tree_of_life_colony
+					has_deposit = d_tree_of_life_home
+				}
+			}
+			AND = { 
+				FROM = { NOT = { has_origin = origin_tree_of_life } }
+				has_modifier = no_lifetree
+			}
+		}
+	
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				FROM = { has_origin = origin_tree_of_life }
+			}
+			add_modifier = { modifier = no_lifetree }
+		}
+		if = {
+			limit = {
+				FROM = { NOT = { has_origin = origin_tree_of_life } }
+			}
+			remove_modifier = no_lifetree
+		}
+	}
+}
+
+#Lithoid origin
+planet_event = {
+	id = origin.3010
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		FROM = { 
+			exists = FROM
+			is_ship_size = lithoid_colonizer
+		} 
+	}
+
+	immediate = {
+		add_deposit = d_buried_lithoids
+		add_deposit = d_buried_lithoids
+		add_modifier = { modifier = lithoid_crater }
+	}
+}
+
+#Remnants
+country_event = {
+	id = origin.3100
+	title = "origin.3100.name"
+	desc = "origin.3100.desc"
+	picture = GFX_evt_relic_world
+	show_sound = event_alien_nature
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = EXCELLENT 
+		locked_random_list = {
+			10 = {
+				add_random_research_option = {
+					add_progress = 0.95
+					area = engineering
+					tier = 1
+					ignore_prereqs = yes
+					fail_effects = {
+						add_monthly_resource_mult = {
+							resource = engineering_research
+							value = @tier5researchreward
+							min = @tier5researchmin
+							max = @tier5researchmax
+						}
+					}
+				}
+			}
+			10 = {
+				add_random_research_option = {
+					add_progress = 0.95
+					area = physics
+					tier = 1
+					ignore_prereqs = yes
+					fail_effects = {
+						add_monthly_resource_mult = {
+							resource = physics_research
+							value = @tier5researchreward
+							min = @tier5researchmin
+							max = @tier5researchmax
+						}
+					}
+				}
+			}
+			10 = {
+				add_random_research_option = {
+					add_progress = 0.95
+					area = society
+					tier = 1
+					ignore_prereqs = yes
+					fail_effects = {
+						add_monthly_resource_mult = {
+							resource = society_research
+							value = @tier5researchreward
+							min = @tier5researchmin
+							max = @tier5researchmax
+						}
+					}
+				}
+			}
+		}
+	}
+}
+planet_event = {
+	id = origin.3101
+	title = "origin.3101.name"
+	desc = "origin.3101.desc"
+	picture = GFX_evt_overgrown_city
+	show_sound = event_alien_nature
+
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = { 
+			has_origin = origin_remnants
+		} 
+		has_planet_flag = prescripted_ideal
+		has_planet_flag = ariphaos_patch_remnants
+	}
+
+	option = {
+		name = EXCELLENT
+		add_modifier = { modifier = colonial_remains }
+		add_deposit = d_ruined_arcology
+		hidden_effect = { #maybe add a random blocker to hint at why the colony was lost
+			random_list = {
+				50 = {}
+				5 = { add_deposit = d_radioactive_wasteland }
+				5 = { add_deposit = d_city_ruins }
+				5 = { add_deposit = d_crater }
+				5 = { add_deposit = d_mutant_landfill }
+				5 = { add_deposit = d_ancient_bombardment_craters }
+				5 = { add_deposit = d_ancient_battlefield }
+				5 = { add_deposit = d_impact_crater }
+				5 = { add_deposit = d_ancient_particle_accelerator }
+				5 = { add_deposit = d_harvester_fields }
+				5 = { add_deposit = d_organic_landfill }
+				1 = { add_deposit = d_organic_slurry }
+			}
+		}
+	}
+}
