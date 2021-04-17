@@ -145,93 +145,6 @@ country_event = {
 	}
 }
 
-fleet_event = {
-	id = leviathans.96
-	title = "action.10.name"
-	desc = "action.15.desc.enclave"
-	picture = GFX_evt_star_chart
-	location = FROM
-	trackable = yes
-	
-	is_triggered_only = yes
-	
-	trigger = {
-		owner = {
-			is_country_type = default
-			exists = capital_scope
-		}
-		from = {
-			has_star_flag = enclave
-			any_ship_in_system = {
-				exists = owner
-				owner = {
-					is_country_type = enclave
-					NOR = {
-						has_communications = root.owner
-						reverse_has_relation_flag = {
-							flag = ongoing_enclave_investigation
-							who = root.owner
-						}
-					}
-				}
-			}
-		}
-	}
-
-	immediate = {
-		owner = {
-			capital_scope = { save_event_target_as = pc_home }
-			from = {
-				random_fleet_in_system = {
-					limit = {
-						exists = owner
-						owner = { is_country_type = enclave }
-					}
-					owner = {
-						save_event_target_as = target_enclave
-						country_event = { id = leviathans.97 days = 300 random = 50 }
-						enable_special_project = {
-							name = "INVESTIGATE_ENCLAVE"
-							location = event_target:pc_home
-							owner = root.owner
-						}
-						country_event = { id = leviathans.960 }
-					}
-				}
-			}
-			set_relation_flag = {
-				flag = ongoing_enclave_investigation
-				who = event_target:target_enclave
-			}
-		}
-	}
-	
-	option = {
-		name = "action.10.a"
-		owner = {
-			tooltip = {
-				enable_special_project = {
-					name = "INVESTIGATE_ENCLAVE"
-					location = event_target:pc_home
-					owner = ROOT
-				}
-			}
-		}
-	}
-}
-
-country_event = { # passthrough for story.7
-	id = leviathans.960
-	hide_window = yes
-	is_triggered_only = yes
-
-	immediate = {
-		from.owner = {
-			country_event = { id = story.7 days = 2 }
-		}
-	}
-}
-
 # Enclaves make contact after 300 days
 country_event = {
 	id = leviathans.97
@@ -240,39 +153,14 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		exists = event_target:pc_home
-		event_target:pc_home = {
-			exists = owner
-			owner = {
-				NOT = { has_communications = root }
-				has_relation_flag = {
-					flag = ongoing_enclave_investigation
-					who = root
-				}
-			}
-		}
+		exists = from.contact_country
+		from.contact_country = { NOT = { has_communications = root } }
 	}
 
 	immediate = {
-		event_target:pc_home = {
-			if = {
-				limit = {
-					exists = owner
-					owner = {
-						NOT = {
-							has_communications = root
-						}
-						has_relation_flag = {
-							flag = ongoing_enclave_investigation
-							who = root
-						}
-					}
-				}
-				owner = {
-					root = { establish_communications_no_message = prev }
-					country_event = { id = leviathans.98 }
-				}
-			}
+		from.contact_country = {
+			root = { establish_communications_no_message = prev }
+			country_event = { id = leviathans.98 }
 		}
 	}
 }
@@ -289,22 +177,14 @@ country_event = {
 
 	after = {
 		hidden_effect = {
-			if = {
-				limit = {
-					from = { has_country_flag = trader_enclave_country }
+			from = {
+				switch = {
+					trigger = has_country_flag
+					trader_enclave_country = { country_event = { id = leviathans.101 } }
+					artist_enclave_country = { country_event = { id = leviathans.301 } }
+					curator_enclave_country = { country_event = { id = leviathans.501 } }
+					default = { log_error = "Unexpected enclave type or missing script flag" }
 				}
-				from = { country_event = { id = leviathans.101 } }
-				break = yes
-			}
-			if = {
-				limit = { from = { has_country_flag = artist_enclave_country } }
-				from = { country_event = { id = leviathans.301 } }
-				break = yes
-			}
-			if = {
-				limit = { from = { has_country_flag = curator_enclave_country } }
-				from = { country_event = { id = leviathans.501 } }
-				break = yes
 			}
 		}
 	}
@@ -332,108 +212,6 @@ country_event = {
 
 	option = {
 		name = leviathans.98.a
-		trigger = {
-			NOR = {
-				has_valid_civic = civic_fanatic_purifiers
-				has_valid_civic = civic_hive_devouring_swarm
-				has_valid_civic = civic_machine_terminator
-			}
-		}
-	}
-}
-
-# Communication Established
-country_event = {
-	id = leviathans.99
-	title = "leviathans.99.name"
-	desc = leviathans.99.desc
-	picture = GFX_evt_throne_room
-	show_sound = event_radio_chatter
-	
-	is_triggered_only = yes
-
-	immediate = { establish_communications_no_message = FROMFROM }
-
-	after = {
-		if = {
-			limit = {
-				OR = {
-					has_ethic = ethic_xenophile
-					has_ethic = ethic_fanatic_xenophile
-				}
-			}
-			add_monthly_resource_mult = {
-				resource = influence
-				value = @tier2influencecontactxenophile
-				min = @tier2influencecontactmin
-				max = @tier2influencecontactmax
-			}
-		}
-		else = {
-			add_monthly_resource_mult = {
-				resource = influence
-				value = @tier2influencecontact
-				min = @tier2influencecontactmin
-				max = @tier2influencecontactmax
-			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					fromfrom = {
-						has_country_flag = trader_enclave_country
-					}
-				}
-				fromfrom = { country_event = { id = leviathans.101 } }
-				break = yes
-			}
-			if = {
-				limit = {
-					fromfrom = {
-						has_country_flag = artist_enclave_country
-					}
-				}
-				fromfrom = {
-					country_event = { id = leviathans.301 }
-				}
-				set_country_flag = enclave_artist_encountered
-				break = yes
-			}
-			if = {
-				limit = {
-					fromfrom = {
-						has_country_flag = curator_enclave_country
-					}
-				}
-				fromfrom = { country_event = { id = leviathans.501 } }
-				break = yes
-			}
-		}
-	}
-
-	option = {
-		name = SCUM
-		trigger = {
-			has_valid_civic = civic_fanatic_purifiers
-		}
-	}
-	
-	option = {
-		name = TASTY
-		trigger = {
-			has_valid_civic = civic_hive_devouring_swarm
-		}
-	}
-
-	option = {
-		name = EXTERMINATE
-		trigger = {
-			has_valid_civic = civic_machine_terminator
-		}
-	}
-
-	option = {
-		name = "leviathans.98.a"
 		trigger = {
 			NOR = {
 				has_valid_civic = civic_fanatic_purifiers
@@ -2302,6 +2080,10 @@ country_event = {
 	hide_window = yes
 	
 	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:traders
+	}
 	
 	immediate = {
 		remove_relation_flag = {
@@ -2318,7 +2100,11 @@ country_event = {
 	hide_window = yes
 	
 	is_triggered_only = yes
-	
+
+	trigger = {
+		exists = event_target:traders
+	}
+
 	immediate = {
 		remove_relation_flag = {
 			who = event_target:traders
@@ -2334,7 +2120,11 @@ country_event = {
 	hide_window = yes
 	
 	is_triggered_only = yes
-	
+
+	trigger = {
+		exists = event_target:traders
+	}
+
 	immediate = {
 		remove_relation_flag = {
 			who = event_target:traders
@@ -4363,7 +4153,7 @@ planet_event = {
 #	is_triggered_only = yes
 #
 #	immediate = {
-#		random_planet = {
+#		random_galaxy_planet = {
 #			limit = {
 #				has_planet_flag = guardians_artists_planet
 #			}
@@ -4504,7 +4294,7 @@ country_event = {
 
 	after = {
 		event_target:this_planet = {
-			random_pop = {
+			random_owned_pop = {
 				kill_pop = yes
 			}
 		}
@@ -4597,7 +4387,7 @@ country_event = {
 	
 	immediate = {
 		set_timed_country_flag = { flag = enclave_artist_ignores days = 3600 }
-		random_planet = {
+		random_galaxy_planet = {
 			limit = {
 				has_planet_flag = guardians_artists_planet
 			}
@@ -4648,7 +4438,7 @@ country_event = {
 	}
 
 	immediate = {
-		random_planet = {
+		random_galaxy_planet = {
 			limit = {
 				has_planet_flag = guardians_artists_planet
 			}
@@ -5461,7 +5251,14 @@ country_event = {
 				save_event_target_as = destroyed_station_location
 			}
 			if = { #Change capital
-				limit = { is_custom_capital_location = yes }
+				limit = {
+					is_custom_capital_location = yes
+					owner = {
+						any_owned_fleet = {
+							has_fleet_flag = artist_enclave_station
+						}
+					}
+				}
 				owner = {
 					random_owned_fleet = {
 						limit = { has_fleet_flag = artist_enclave_station }
@@ -5469,44 +5266,28 @@ country_event = {
 					}
 					set_custom_capital_location = event_target:newCustomCapital
 				}
-			}
-		}
-		every_playable_country = {
-			limit = {
-				has_communications = root
-				NOT = { is_same_value = from }
-			}
-			if = {
-				limit = {
-					fromfrom = {
-						owner = {
-							any_owned_fleet = {
-								has_fleet_flag = artist_enclave_station
-							}
-						}
+				every_playable_country = {
+					limit = {
+						has_communications = root
+						NOT = { is_same_value = root.from }
 					}
+					country_event = { id = leviathans.332 }
 				}
-				country_event = { id = leviathans.332 }
+				random_playable_country = {
+					observer_event = { id = observer.11 }
+				}
 			}
 			else = {
-				country_event = { id = leviathans.333 }
-			}
-		}
-		random_playable_country = {
-			if = {
-				limit = {
-					fromfrom = {
-						owner = {
-							any_owned_fleet = {
-								has_fleet_flag = artist_enclave_station
-							}
-						}
+				every_playable_country = {
+					limit = {
+						has_communications = root
+						NOT = { is_same_value = root.from }
 					}
+					country_event = { id = leviathans.333 }
 				}
-				observer_event = { id = observer.11 }
-			}
-			else = {
-				observer_event = { id = observer.12 }
+				random_playable_country = {
+					observer_event = { id = observer.12 }
+				}
 			}
 		}
 	}
@@ -5799,6 +5580,31 @@ country_event = {
 			country_event = { id = leviathans.590 }
 		}
 	}
+	
+	option = { # Sell Intel
+		name = leviathans.500.h
+		custom_gui = "enclave_curator_option"
+		trigger = {
+			is_homicidal = no
+			any_country = {
+				valid_curators_intel_trade_target = yes
+			}
+		}
+		allow = {
+			custom_tooltip = {
+				fail_text = leviathans.500.d.opinion
+				event_target:curators = {
+					trust = { 
+						who = root
+						value >= 50
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = leviathans.599 }
+		}
+	}
 
 	option = { # Think Tank
 		name = leviathans.500.f
@@ -6080,6 +5886,30 @@ country_event = {
 		}
 		hidden_effect = {
 			country_event = { id = leviathans.590 }
+		}
+	}
+
+	option = { # Sell Intel
+		name = leviathans.500.h
+		custom_gui = "enclave_curator_option"
+		allow = {
+			custom_tooltip = {
+				fail_text = leviathans.500.d.opinion
+				event_target:curators = {
+					trust = { 
+						who = root
+						value >= 50
+					}
+				}
+			}
+		}
+		trigger = {
+			any_country = {
+				valid_curators_intel_trade_target = yes
+			}
+		}
+		hidden_effect = {
+			country_event = { id = leviathans.599 }
 		}
 	}
 
@@ -6401,173 +6231,17 @@ country_event = {
 		custom_tooltip = opinion10
 		trigger = {
 			any_country = {
-				OR = {
-					is_country_type = guardian
-					is_country_type = guardian_dragon
-					is_country_type = guardian_sphere
-					is_country_type = guardian_wraith
-					is_country_type = guardian_horror
-					is_country_type = guardian_fortress
-					is_country_type = guardian_hiver
-					is_country_type = guardian_stellarite
-					is_country_type = guardian_dreadnought
-					is_country_type = guardian_scavenger_bot
-					is_country_type = guardian_elderly_tiyanki
-					is_country_type = guardian_hatchling
-				}
+				is_guardian_country = yes
+				NOT = { is_country_type = guardian } #unused I think, but just in case
 				NOT = { 
 					has_communications = root
 				}
 				num_fleets > 0
 				any_owned_fleet = {
+					exists = solar_system
 					solar_system = {
-						NOR = {
-							is_point_of_interest = {
-								id = curator_poi_dragon
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_technosphere
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_wraith
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_horror
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_fortress
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_hiver
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_stellarite
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_dreadnought
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_scavenger_bot
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_elderly_tiyanki
-								owner = root
-								event_chain = curator_poi_chain
-							}
-							is_point_of_interest = {
-								id = curator_poi_hatchling
-								owner = root
-								event_chain = curator_poi_chain
-							}
-						}
-					}
-				}
-			}
-			event_target:curators = { #debug_scope_type = country
-				any_owned_fleet = {
-					closest_system = {
-						min_steps = 0
-						max_steps = 999
-						limit = {
-							has_star_flag = guardian
-							any_fleet_in_system = {
-								exists = owner
-								owner = {
-									NOT = {
-										has_communications = root
-									}
-									OR = {
-										is_country_type = guardian
-										is_country_type = guardian_dragon
-										is_country_type = guardian_sphere
-										is_country_type = guardian_wraith
-										is_country_type = guardian_horror
-										is_country_type = guardian_fortress
-										is_country_type = guardian_hiver
-										is_country_type = guardian_stellarite
-										is_country_type = guardian_dreadnought
-										is_country_type = guardian_scavenger_bot
-										is_country_type = guardian_elderly_tiyanki
-										is_country_type = guardian_hatchling
-									}
-								}
-							}
-							NOR = {
-								is_point_of_interest = {
-									id = curator_poi_dragon
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_technosphere
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_wraith
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_horror
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_fortress
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_hiver
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_stellarite
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_dreadnought
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_scavenger_bot
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_elderly_tiyanki
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_hatchling
-									owner = root
-									event_chain = curator_poi_chain
-								}
-							}
-						}
+						has_star_flag = guardian
+						is_curator_guardian_poi = no
 					}
 				}
 			}
@@ -6582,452 +6256,96 @@ country_event = {
 					who = root
 					amount = 10
 				}
-			}		
-			event_target:curators = {
-				random_owned_fleet = {
-					limit = {}
-					closest_system = {
-						min_steps = 0
-						max_steps = 999
+			}
+			capital_scope = {
+				closest_system = {
+					min_steps = 0
+					max_steps = 999
+					limit = {
+						has_star_flag = guardian
+						is_curator_guardian_poi = no
+						any_fleet_in_system = {
+							exists = owner
+							owner = {
+								is_guardian_country = yes
+								NOT = { is_country_type = guardian }
+								NOT = {
+									has_communications = root
+								}
+							}
+						}
+					}
+					random_fleet_in_system = {
 						limit = {
-							has_star_flag = guardian
-							any_fleet_in_system = {
-								exists = owner
-								owner = {
-									is_guardian_country = yes
-									NOT = {
-										has_communications = root
-									}
-								}
-							}
-							NOR = {
-								is_point_of_interest = {
-									id = curator_poi_dragon
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_technosphere
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_wraith
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_horror
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_fortress
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_hiver
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_stellarite
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_dreadnought
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_scavenger_bot
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_elderly_tiyanki
-									owner = root
-									event_chain = curator_poi_chain
-								}
-								is_point_of_interest = {
-									id = curator_poi_hatchling
-									owner = root
-									event_chain = curator_poi_chain
+							exists = owner
+							owner = {
+								is_guardian_country = yes
+								NOT = { is_country_type = guardian }
+								NOT = {
+									has_communications = root
 								}
 							}
 						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_dragon
+						owner = {
+							switch = {
+								trigger = is_country_type
+								guardian_dragon = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_dragon
 									}
 								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
+								guardian_sphere = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_technosphere
 									}
 								}
-								create_point_of_interest = {
-									id = curator_poi_dragon
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_sphere
+								guardian_horror = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_horror
 									}
 								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
+								guardian_stellarite = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_stellarite
 									}
 								}
-								create_point_of_interest = {
-									id = curator_poi_technosphere
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_horror
+								guardian_hiver = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_hiver
 									}
 								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
+								guardian_fortress = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_fortress
 									}
 								}
-								create_point_of_interest = {
-									id = curator_poi_horror
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_stellarite
+								guardian_wraith = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_wraith
 									}
 								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
+								guardian_dreadnought = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_dreadnought
 									}
 								}
-								create_point_of_interest = {
-									id = curator_poi_stellarite
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_hiver
+								guardian_hatchling = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_hatchling
 									}
 								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
+								guardian_scavenger_bot = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_scavenger_bot
 									}
 								}
-								create_point_of_interest = {
-									id = curator_poi_hiver
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_fortress
+								guardian_elderly_tiyanki = {
+									create_curator_guardian_poi = {
+										POI = curator_poi_tiyanki
 									}
 								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
-									}
-								}
-								create_point_of_interest = {
-									id = curator_poi_fortress
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_wraith
-									}
-								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
-									}
-								}
-								create_point_of_interest = {
-									id = curator_poi_wraith
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_dreadnought
-									}
-								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
-									}
-								}
-								create_point_of_interest = {
-									id = curator_poi_dreadnought
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_fleet_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_scavenger_bot
-									}
-								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
-									}
-								}
-								create_point_of_interest = {
-									id = curator_poi_scavenger_bot
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_ship_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_elderly_tiyanki
-									}
-								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
-									}
-								}
-								create_point_of_interest = {
-									id = curator_poi_elderly_tiyanki
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
-								}
-							}
-							break = yes
-						}
-						if = {
-							limit = {
-								any_ship_in_system = {
-									exists = owner
-									owner = {
-										NOT = {
-											has_communications = root
-										}
-										is_country_type = guardian_hatchling
-									}
-								}
-							}
-							root = {
-								if = {
-									limit = {
-										NOT = {
-											has_event_chain = curator_poi_chain
-										}
-									}
-									begin_event_chain = {
-										event_chain = curator_poi_chain
-										target = this
-									}
-								}
-								create_point_of_interest = {
-									id = curator_poi_hatchling
-									name = curator_poi_title
-									desc = curator_poi_desc
-									event_chain = curator_poi_chain
-									location = prev
+								default = {
+									log_error = "No option in leviathans.508.a for Leviathan country [This.GetCountryType]"
 								}
 							}
 							break = yes
@@ -8869,6 +8187,198 @@ country_event = {
 	}
 }
 
+# Curator Buy Intel Menu
+country_event = {
+	id = leviathans.599
+	title = leviathans.599.name
+	desc = leviathans.599.desc
+	
+	is_triggered_only = yes
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+
+	picture_event_data = {
+		portrait = event_target:curators
+		room = enclave_curator_room
+	}
+
+	immediate = {
+		set_country_flag = curator_enclave_diplomacy_engaged
+		event_target:curators = {
+			owner_species = { save_event_target_as = curator_species }
+		}
+		random_country = {
+			limit = {
+				valid_curators_intel_trade_target = yes
+			}
+			save_event_target_as = curator_customer_1
+			random_country = {
+				limit = {
+					NOT = { is_same_value = event_target:curator_customer_1 }
+					valid_curators_intel_trade_target = yes
+				}
+				save_event_target_as = curator_customer_2
+				random_country = {
+					limit = {
+						NOT = { is_same_value = event_target:curator_customer_1 }
+						NOT = { is_same_value = event_target:curator_customer_2 }
+						valid_curators_intel_trade_target = yes
+					}
+					save_event_target_as = curator_customer_3
+					random_country = {
+						limit = {
+							NOT = { is_same_value = event_target:curator_customer_1 }
+							NOT = { is_same_value = event_target:curator_customer_2 }
+							NOT = { is_same_value = event_target:curator_customer_3 }
+							valid_curators_intel_trade_target = yes
+						}
+						save_event_target_as = curator_customer_4
+					}
+				}
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = curator_enclave_diplomacy_engaged
+		}
+	}
+
+	option = {
+		name = leviathans.599.a
+		response_text = leviathans.599.yes.reply
+		custom_gui = "enclave_curator_option"
+		allow = { 
+			resource_stockpile_compare = { resource = energy value >= 1000 }
+		}
+		trigger = {
+			exists = event_target:curator_customer_1
+		}
+		add_resource = { energy = -1000 }
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:curators = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+			set_timed_relation_flag = {
+				who = event_target:curator_customer_1
+				flag = curator_bought_intel_on
+				years = 10
+			}
+		}
+		add_intel = {
+			who = event_target:curator_customer_1
+			amount = 20
+		}
+	}
+	option = {
+		name = leviathans.599.b
+		response_text = leviathans.599.yes.reply
+		custom_gui = "enclave_curator_option"
+		allow = { 
+			resource_stockpile_compare = { resource = energy value >= 1000 }
+		}
+		trigger = {
+			exists = event_target:curator_customer_2
+		}
+		add_resource = { energy = -1000 }
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:curators = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+			set_timed_relation_flag = {
+				who = event_target:curator_customer_2
+				flag = curator_bought_intel_on
+				years = 10
+			}
+		}
+		add_intel = {
+			who = event_target:curator_customer_2
+			amount = 20
+		}
+	}
+	option = {
+		name = leviathans.599.c
+		response_text = leviathans.599.yes.reply
+		custom_gui = "enclave_curator_option"
+		allow = { 
+			resource_stockpile_compare = { resource = energy value >= 1000 }
+		}
+		trigger = {
+			exists = event_target:curator_customer_3
+		}
+		add_resource = { energy = -1000 }
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:curators = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+			set_timed_relation_flag = {
+				who = event_target:curator_customer_3
+				flag = curator_bought_intel_on
+				years = 10
+			}
+		}
+		add_intel = {
+			who = event_target:curator_customer_3
+			amount = 20
+		}
+	}
+	option = {
+		name = leviathans.599.d
+		response_text = leviathans.599.yes.reply
+		custom_gui = "enclave_curator_option"
+		allow = { 
+			resource_stockpile_compare = { resource = energy value >= 1000 }
+		}
+		trigger = {
+			exists = event_target:curator_customer_4
+		}
+		add_resource = { energy = -1000 }
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:curators = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+			set_timed_relation_flag = {
+				who = event_target:curator_customer_4
+				flag = curator_bought_intel_on
+				years = 10
+			}
+		}
+		add_intel = {
+			who = event_target:curator_customer_4
+			amount = 20
+		}
+	}
+	option = { # Back
+		name = leviathans.506.d
+		custom_gui = "enclave_curator_option"
+		hidden_effect = {
+			country_event = { id = leviathans.505 }
+		}
+	}
+	option = { # Sign Off
+		name = leviathans.506.e
+		custom_gui = "enclave_curator_option"
+		default_hide_option = yes
+	}
+}
+
 # Port
 country_event = {
 	id = leviathans.501
@@ -8966,7 +8476,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		months = 80
+		months = 160
 	}
 	
 	immediate = {
@@ -9364,7 +8874,7 @@ fleet_event = {
 	trigger = {
 		from = {
 			has_star_flag = guardians_dragon_system
-			any_ship_in_system = { is_ship_size = space_dragon_red }
+			any_fleet_in_system = { is_ship_size = space_dragon_red }
 		}
 		owner = {
 			NOT = {
@@ -9805,7 +9315,7 @@ fleet_event = {
 	immediate = {
 		closest_system = {
 			limit = {
-				any_ship_in_system = {
+				any_fleet_in_system = {
 					OR = {
 						is_ship_size = mining_station
 						is_ship_size = research_station
@@ -9905,7 +9415,7 @@ fleet_event = {
 	immediate = {
 		closest_system = {
 			limit = {
-				any_ship_in_system = {
+				any_fleet_in_system = {
 					OR = {
 						is_ship_size = mining_station
 						is_ship_size = research_station
@@ -10431,8 +9941,11 @@ country_event = {
 		}
 		add_resource = { influence = 300 }
 		add_relic = r_dragon_trophy
-		capital_scope = {
-			add_deposit = d_dragon_monument
+		if = { #maybe the Tiyanki accidentally killed them
+			limit = { exists = capital_scope }
+			capital_scope = {
+				add_deposit = d_dragon_monument
+			}
 		}
 	}
 
@@ -10447,8 +9960,11 @@ country_event = {
 		}
 		add_resource = { influence = 300 }
 		add_relic = r_dragon_trophy
-		capital_scope = {
-			add_deposit = d_dragon_monument
+		if = { #maybe the Tiyanki accidentally killed them
+			limit = { exists = capital_scope }
+			capital_scope = {
+				add_deposit = d_dragon_monument
+			}
 		}
 	}
 }
@@ -10617,7 +10133,7 @@ fleet_event = {
 			NOT = { has_country_flag = guardians_stellarite_encountered }
 		}
 		from = {
-			any_ship_in_system = {
+			any_fleet_in_system = {
 				exists = owner
 				owner = {
 					is_country_type = guardian_stellarite
@@ -11966,6 +11482,7 @@ country_event = {
 				has_technology = tech_synthetic_workers
 				has_technology = tech_synthetic_leaders
 			}
+			can_research_technology = tech_robotic_workers
 		}
 		add_research_option = tech_robotic_workers
 		add_tech_progress = {
@@ -11983,6 +11500,7 @@ country_event = {
 				has_technology = tech_synthetic_workers
 				has_technology = tech_synthetic_leaders
 			}
+			can_research_technology = tech_droid_workers
 		}
 		add_research_option = tech_droid_workers
 		add_tech_progress = {
@@ -12000,6 +11518,7 @@ country_event = {
 				has_technology = tech_synthetic_workers
 				has_technology = tech_synthetic_leaders
 			}
+			can_research_technology = tech_synthetic_workers
 		}
 		add_research_option = tech_synthetic_workers
 		add_tech_progress = {
@@ -12017,6 +11536,7 @@ country_event = {
 				has_ethic = ethic_gestalt_consciousness
 				has_technology = tech_synthetic_leaders
 			}
+			can_research_technology = tech_synthetic_leaders
 		}
 		add_research_option = tech_synthetic_leaders
 		add_tech_progress = {
@@ -12802,8 +12322,8 @@ country_event = {
 								status = no
 							}
 						}
-						surveyed = {
-							set_surveyed = yes
+						set_surveyed = {
+							surveyed = yes
 							surveyor = root
 						}
 					}
@@ -12838,7 +12358,7 @@ event = {
 	}
 
 	immediate = {
-		random_planet = {
+		random_galaxy_planet = {
 			limit = { has_planet_flag = guardians_wraith_pulsar }
 			remove_planet_flag = guardians_wraith_pulsar
 		}
@@ -12901,7 +12421,7 @@ event = {
 	}
 
 	immediate = {
-		random_planet = {
+		random_galaxy_planet = {
 			limit = { has_modifier = germinating_wraith }
 			save_event_target_as = wraith_star
 			remove_modifier = germinating_wraith
@@ -13434,9 +12954,14 @@ country_event = {
 
 	option = {
 		name = "leviathans.2101.a"
-		begin_event_chain = {
-			event_chain = "enigmatic_fortress_chain"
-			target = root
+		if = {
+			limit = {
+				NOT = { has_event_chain = enigmatic_fortress_chain }
+			}
+			begin_event_chain = {
+				event_chain = "enigmatic_fortress_chain"
+				target = root
+			}
 		}
 		hidden_effect = { country_event = { id = leviathans.2111 } }
 	}
@@ -15069,11 +14594,11 @@ country_event = {
 		}
 		create_ambient_object = {
 			type = "dormant_hive_base_2_object"
-		}
-		last_created_ambient_object = {
-			set_location = FROMFROM
-			set_ambient_object_flag = boardable_hive_asteroid
-			save_event_target_as = boardable_hive_asteroid
+			location = fromfrom
+			effect = {
+				set_ambient_object_flag = boardable_hive_asteroid
+				save_event_target_as = boardable_hive_asteroid
+			}
 		}
 		FROM = {
 			country_event = { id = leviathans.3204 }

@@ -35,6 +35,33 @@ print_scope_effect = {
 	log = "------------------------------"
 }
 
+establish_communication_with_subjects_and_federation = {
+	every_subject = {
+		limit = {
+			NOT = { is_subject_type = scion }
+			NOR = {
+				has_communications = prevprev
+				has_active_first_contact_with = prevprev
+				has_country_flag = $FLAG$
+			}
+		}
+		establish_communications_no_message = prevprev
+		set_country_flag = $FLAG$
+	}
+	every_federation_ally = {
+		limit = {
+			NOR = {
+				has_communications = prevprev
+				has_active_first_contact_with = prevprev
+				has_country_flag = $FLAG$
+			}
+		}
+		establish_communications_no_message = prevprev
+		set_country_flag = $FLAG$
+	}
+}
+
+
 # Checks if Crystalline Entity country (global event target) exists
 # Creates the country and saves it if it does not
 create_crystal_country = {
@@ -71,9 +98,10 @@ create_crystal_country = {
 				}
 				every_country = {
 					limit = {
-						has_country_flag = established_comms_with_crystals
+						has_country_flag = crystals_encountered
 					}
 					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = crystals_encountered }
 				}
 			}
 		}
@@ -112,9 +140,10 @@ create_cloud_country = {
 				}
 				every_country = {
 					limit = {
-						has_country_flag = established_comms_with_clouds
+						has_country_flag = void_clouds_encountered
 					}
 					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = void_clouds_encountered }
 				}
 			}
 		}
@@ -169,9 +198,10 @@ create_amoeba_country = {
 				}
 				every_country = {
 					limit = {
-						has_country_flag = established_comms_with_amoebas
+						has_country_flag = amoeba_encountered
 					}
 					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = amoeba_encountered }
 				}
 			}
 		}
@@ -227,11 +257,15 @@ create_amoeba_country_borderless = {
 				every_country = {
 					limit = {
 						OR = {
-							has_communications = event_target:amoeba_country
-							has_country_flag = established_comms_with_amoebas
+							AND = {
+								exists = event_target:amoeba_country
+								has_communications = event_target:amoeba_country
+							}
+							has_country_flag = amoeba_encountered
 						}
 					}
 					establish_communications_no_message = event_target:amoeba_country_borderless
+					establish_communication_with_subjects_and_federation = { FLAG = amoeba_encountered }
 				}
 			}
 		}
@@ -265,19 +299,151 @@ create_drone_country = {
 			effect = {
 				save_global_event_target_as = drone_country
 				set_graphical_culture = ancient_drone_01
-				set_variable = {	# Variable to track number of Ancient Mining Drone Expansion Fleets sent out throughout the game session.
-					which = expansion_fleets_sent_var
-					value = 0
+				every_country = {
+					limit = {
+						has_country_flag = drones_encountered
+					}
+					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = drones_encountered }
 				}
-				set_variable = {	# Variable to track number of aggressiveAncient Mining Drone Expansion Fleets sent out throughout the game session.
-					which = aggressive_expansion_fleets_sent_var
-					value = 0
+			}
+		}
+	}
+}
+
+# Checks if Mining Drone Expansion Fleet country (global event target) exists; creates the country if it does not
+create_mining_drone_expansion_country = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:mining_drone_expansion_country }
+		}
+		create_country = {
+			name = "NAME_Mining_Drone_Expansion_Initiative"
+			type = drone_faction
+			flag = {
+				icon = {
+					category = "legion"
+					file = "flag_mp_beta_04.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = { "black" "black" "null" "null" }
+			}
+			effect = {
+				set_country_flag = mining_drone_expansion_country
+				save_global_event_target_as = mining_drone_expansion_country
+				set_graphical_culture = ancient_drone_01
+				set_faction_hostility = {
+					set_hostile = no
+					set_neutral = yes
+					set_friendly = no
 				}
 				every_country = {
 					limit = {
-						has_country_flag = established_comms_with_drones
+						OR = {
+							has_country_flag = drones_encountered
+							has_communications = event_target:drone_country
+						}
 					}
 					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = drones_encountered }
+				}
+			}
+		}
+	}
+}
+# Checks if Aggressive Mining Drone Expansion Fleet country (global event target) exists; creates the country if it does not
+create_aggressive_drone_expansion_country = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:aggressive_drone_expansion_country }
+		}
+		create_country = {
+			name = "NAME_Aggressive_Mining_Drone_Expansion_Initiative"
+			type = drone_faction
+			flag = {
+				icon = {
+					category = "legion"
+					file = "flag_mp_beta_05.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = { "black" "black" "null" "null" }
+			}
+			effect = {
+				set_country_flag = aggressive_drone_expansion_country
+				save_global_event_target_as = aggressive_drone_expansion_country
+				set_graphical_culture = ancient_drone_01
+				set_faction_hostility = {
+					set_hostile = no
+					set_neutral = yes
+					set_friendly = no
+				}
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = drones_encountered
+							has_communications = event_target:drone_country
+						}
+					}
+					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = drones_encountered }
+				}
+			}
+		}
+	}
+}
+# Checks if Cracked Crystalline Shard country (global event target) exists; creates the country if it does not
+create_crystal_splitter_country = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:crystal_splitter_country }
+		}
+		create_country = {
+			name = "NAME_Cracked_Crystalline_Shard"
+			type = crystal_faction
+			flag = {
+				icon = {
+					category = "pointy"
+					file = "flag_pointy_15.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = { "black" "black" "null" "null" }
+			}
+			effect = {
+				set_country_flag = crystal_splitter_country
+				save_global_event_target_as = crystal_splitter_country
+				set_faction_hostility = {
+					set_hostile = no
+					set_neutral = yes
+					set_friendly = no
+				}
+				every_country = {
+					limit = { has_modifier = pacified_crystals }
+					prev = {
+						set_faction_hostility = {
+							set_hostile = no
+							set_neutral = yes
+							target = prev
+						}
+					}
+				}
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = crystals_encountered
+							has_communications = event_target:crystal_country
+						}
+					}
+					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = crystals_encountered }
 				}
 			}
 		}
@@ -312,9 +478,10 @@ create_tiyanki_country = {
 				save_global_event_target_as = tiyanki_country
 				every_country = {
 					limit = {
-						has_country_flag = established_comms_with_tiyanki
+						has_country_flag = tiyanki_encountered
 					}
 					establish_communications_no_message = prev
+					establish_communication_with_subjects_and_federation = { FLAG = tiyanki_encountered }
 				}
 			}
 		}
@@ -363,17 +530,17 @@ create_subterranean_nation = {
 					"null"
 				}
 			}
-		}
-		last_created_country = {
-			set_relation_flag = {
-				who = root.owner
-				flag = subterror
+			effect = {
+				set_relation_flag = {
+					who = root.owner
+					flag = subterror
+				}
+				set_country_flag = subterranean_nation
+				establish_contact = { who = event_target:subterranean_planet_owner location = root }
+				establish_communications_no_message = event_target:subterranean_planet_owner
+				save_event_target_as = subterranean_nation
+				owner_species = { save_event_target_as = subterranean_species }
 			}
-			set_country_flag = subterranean_nation
-			establish_contact = { who = event_target:subterranean_planet_owner location = root }
-			establish_communications_no_message = event_target:subterranean_planet_owner
-			save_event_target_as = subterranean_nation
-			owner_species = { save_event_target_as = subterranean_species }
 		}
 	}
 	else_if = {
@@ -2091,6 +2258,29 @@ spawn_planet_temperature_effect2 = {
 	}
 }
 
+create_curator_guardian_poi = {
+	root = {
+		if = {
+			limit = {
+				NOT = {
+					has_event_chain = curator_poi_chain
+				}
+			}
+			begin_event_chain = {
+				event_chain = curator_poi_chain
+				target = this
+			}
+		}
+		create_point_of_interest = {
+			id = $POI$
+			name = curator_poi_title
+			desc = curator_poi_desc
+			event_chain = curator_poi_chain
+			location = prevprevprev
+		}
+	}
+}
+
 end_curator_chain = {
 	if = {
 		limit = {
@@ -2104,9 +2294,9 @@ end_curator_chain = {
 				has_point_of_interest = { poi = curator_poi_hiver }
 				has_point_of_interest = { poi = curator_poi_stellarite }
 				has_point_of_interest = { poi = curator_poi_dreadnought }
-				has_point_of_interest = { poi = curator_poi_scavenger_bot }
-				has_point_of_interest = { poi = curator_poi_elderly_tiyanki }
 				has_point_of_interest = { poi = curator_poi_hatchling }
+				has_point_of_interest = { poi = curator_poi_tiyanki }
+				has_point_of_interest = { poi = curator_poi_scavenger_bot }
 			}
 		}
 		end_event_chain = curator_poi_chain
@@ -2228,6 +2418,30 @@ make_unleashed_messenger = {
 		}
 		else = { modify_species = { portrait = rep4 } }
 	}
+	if = {
+		limit = { root = { is_species_class = AVI } }
+		if = {
+			limit = { NOT = { root = { species_portrait = avi1 } } }
+			modify_species = { portrait = avi1 }
+		}
+		else = { modify_species = { portrait = avi4 } }
+	}
+	if = {
+		limit = { root = { is_species_class = LITHOID } }
+		if = {
+			limit = { NOT = { root = { species_portrait = lith10 } } }
+			modify_species = { portrait = lith10 }
+		}
+		else = { modify_species = { portrait = lith4 } }
+	}
+	if = {
+		limit = { root = { is_species_class = NECROID } }
+		if = {
+			limit = { NOT = { root = { species_portrait = nec12 } } }
+			modify_species = { portrait = nec12 }
+		}
+		else = { modify_species = { portrait = nec11 } }
+	}
 }
 
 make_leashed_messenger = {
@@ -2286,6 +2500,30 @@ make_leashed_messenger = {
 			modify_species = { portrait = rep8 }
 		}
 		else = { modify_species = { portrait = rep4 } }
+	}
+	if = {
+		limit = { root = { is_species_class = AVI } }
+		if = {
+			limit = { NOT = { root = { species_portrait = avi1 } } }
+			modify_species = { portrait = avi1 }
+		}
+		else = { modify_species = { portrait = avi4 } }
+	}
+	if = {
+		limit = { root = { is_species_class = LITHOID } }
+		if = {
+			limit = { NOT = { root = { species_portrait = lith10 } } }
+			modify_species = { portrait = lith10 }
+		}
+		else = { modify_species = { portrait = lith4 } }
+	}
+	if = {
+		limit = { root = { is_species_class = NECROID } }
+		if = {
+			limit = { NOT = { root = { species_portrait = nec12 } } }
+			modify_species = { portrait = nec12 }
+		}
+		else = { modify_species = { portrait = nec11 } }
 	}
 }
 
@@ -3820,8 +4058,8 @@ set_all_comms_surveyed = {
 			has_communications = from
 		}
 		prev = {
-			surveyed = {
-  				set_surveyed = yes
+			set_surveyed = {
+  				surveyed = yes
    				surveyor = Prev
    			}
     	}
@@ -4621,31 +4859,7 @@ add_awakened_fallen_empire_fleet = {
 			any_country = {
 				is_country_type = default
 				OR = {
-					fleet_power > 80000
-					AND = {
-						has_federation = yes
-						federation = {
-							fleet_power > 80000
-						}
-					}
-					AND = {
-						fleet_power > 50000
-						any_country = {
-							has_defensive_pact = prev
-							fleet_power > 50000
-						}
-					}
-				}
-			}
-		}
-		country_event = { id = fallen_empires.13 }
-	}
-	if = {
-		limit = {
-			any_country = {
-				is_country_type = default
-				OR = {
-					fleet_power > 150000
+					fleet_power > 120000
 					AND = {
 						has_federation = yes
 						federation = {
@@ -4653,10 +4867,10 @@ add_awakened_fallen_empire_fleet = {
 						}
 					}
 					AND = {
-						fleet_power > 80000
+						fleet_power > 75000
 						any_country = {
 							has_defensive_pact = prev
-							fleet_power > 80000
+							fleet_power > 75000
 						}
 					}
 				}
@@ -4681,34 +4895,6 @@ add_awakened_fallen_empire_fleet = {
 						any_country = {
 							has_defensive_pact = prev
 							fleet_power > 120000
-						}
-					}
-				}
-			}
-		}
-		country_event = { id = fallen_empires.13 }
-	}
-}
-
-add_awakened_fallen_empire_fleet_small = {
-	country_event = { id = fallen_empires.13 }
-	if = {
-		limit = {
-			any_country = {
-				is_country_type = default
-				OR = {
-					fleet_power > 150000
-					AND = {
-						has_federation = yes
-						federation = {
-							fleet_power > 150000
-						}
-					}
-					AND = {
-						fleet_power > 80000
-						any_country = {
-							has_defensive_pact = prev
-							fleet_power > 80000
 						}
 					}
 				}
@@ -4744,6 +4930,7 @@ add_non_aligned_league_opinions = {
 	every_country = {
 		limit = {
 			is_in_federation_with = prevprev
+			NOT = { is_same_value = prev }
 			NOT = {
 				has_opinion_modifier = {
 					who = prev
@@ -4767,6 +4954,7 @@ add_non_aligned_league_opinions = {
 	}
 }
 
+#Used for setting up breakaway machine empires. Not suitable for event rewards.
 # this = country
 add_100_unity_per_year_passed = {
 	switch = {
@@ -5699,8 +5887,10 @@ assign_first_diadochi_planets = {
 			is_potential_diadochi_system = yes
 			any_system_planet = {
 				has_owner = yes
+				is_owned_by = root
 			}
 		}
+		set_star_flag = first_diadochi_system
 		save_event_target_as = first_diadochi_origin
 	}
 	effect_on_blob = {
@@ -5812,16 +6002,16 @@ create_first_diadochi = {
 			}
 			# Survey Own Space
 			every_planet_within_border = {
-				surveyed = {
-					set_surveyed = yes
+				set_surveyed = {
+					surveyed = yes
 					surveyor = event_target:first_diadochi
 				}
 			}
 			# Survey Rest of Marauder's Space
 			root = {
 				every_planet_within_border = {
-					surveyed = {
-						set_surveyed = yes
+					set_surveyed = {
+						surveyed = yes
 						surveyor = event_target:first_diadochi
 					}
 				}
@@ -5979,8 +6169,10 @@ assign_second_diadochi_planets = {
 			is_potential_diadochi_system = yes
 			any_system_planet = {
 				has_owner = yes
+				is_owned_by = root
 			}
 		}
+		set_star_flag = second_diadochi_system
 		save_event_target_as = second_diadochi_origin
 	}
 	effect_on_blob = {
@@ -6092,16 +6284,16 @@ create_second_diadochi = {
 			}
 			# Survey Own Space
 			every_planet_within_border = {
-				surveyed = {
-					set_surveyed = yes
+				set_surveyed = {
+					surveyed = yes
 					surveyor = event_target:second_diadochi
 				}
 			}
 			# Survey Rest of Marauder's Space
 			root = {
 				every_planet_within_border = {
-					surveyed = {
-						set_surveyed = yes
+					set_surveyed = {
+						surveyed = yes
 						surveyor = event_target:second_diadochi
 					}
 				}
@@ -6213,7 +6405,7 @@ create_second_diadochi = {
 							ship_name = "NAME_Pirate_Transport"
 							graphical_culture = "mammalian_01"
 							army_type = "assault_army"
-							species = event_target:first_diadochi
+							species = event_target:second_diadochi
 						}
 					}
 					set_location = {
@@ -6259,8 +6451,10 @@ assign_third_diadochi_planets = {
 			is_potential_diadochi_system = yes
 			any_system_planet = {
 				has_owner = yes
+				is_owned_by = root
 			}
 		}
+		set_star_flag = third_diadochi_system
 		save_event_target_as = third_diadochi_origin
 	}
 	effect_on_blob = {
@@ -6372,16 +6566,16 @@ create_third_diadochi = {
 			}
 			# Survey Own Space
 			every_planet_within_border = {
-				surveyed = {
-					set_surveyed = yes
+				set_surveyed = {
+					surveyed = yes
 					surveyor = event_target:third_diadochi
 				}
 			}
 			# Survey Rest of Marauder's Space
 			root = {
 				every_planet_within_border = {
-					surveyed = {
-						set_surveyed = yes
+					set_surveyed = {
+						surveyed = yes
 						surveyor = event_target:third_diadochi
 					}
 				}
@@ -6493,7 +6687,7 @@ create_third_diadochi = {
 							ship_name = "NAME_Pirate_Transport"
 							graphical_culture = "mammalian_01"
 							army_type = "assault_army"
-							species = event_target:first_diadochi
+							species = event_target:third_diadochi
 						}
 					}
 					set_location = {
@@ -6539,8 +6733,10 @@ assign_fourth_diadochi_planets = {
 			is_potential_diadochi_system = yes
 			any_system_planet = {
 				has_owner = yes
+				is_owned_by = root
 			}
 		}
+		set_star_flag = fourth_diadochi_system
 		save_event_target_as = fourth_diadochi_origin
 	}
 	effect_on_blob = {
@@ -6652,16 +6848,16 @@ create_fourth_diadochi = {
 			}
 			# Survey Own Space
 			every_planet_within_border = {
-				surveyed = {
-					set_surveyed = yes
+				set_surveyed = {
+					surveyed = yes
 					surveyor = event_target:fourth_diadochi
 				}
 			}
 			# Survey Rest of Marauder's Space
 			root = {
 				every_planet_within_border = {
-					surveyed = {
-						set_surveyed = yes
+					set_surveyed = {
+						surveyed = yes
 						surveyor = event_target:fourth_diadochi
 					}
 				}
@@ -6773,7 +6969,7 @@ create_fourth_diadochi = {
 							ship_name = "NAME_Pirate_Transport"
 							graphical_culture = "mammalian_01"
 							army_type = "assault_army"
-							species = event_target:first_diadochi
+							species = event_target:fourth_diadochi
 						}
 					}
 					set_location = {
@@ -9061,6 +9257,70 @@ give_next_ai_tech_option_effect = {
 	}
 }
 
+give_next_habitability_tech_option_effect = {
+	if = {
+		limit = {
+			NOT = { has_technology = tech_colonization_2 }
+			can_research_technology = tech_colonization_2
+		}
+		give_tech_option_or_progress_effect = {
+			TECH = tech_colonization_2
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { has_technology = tech_colonization_3 }
+			can_research_technology = tech_colonization_3
+		}
+		give_tech_option_or_progress_effect = {
+			TECH = tech_colonization_3
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { has_technology = tech_colonization_4 }
+			can_research_technology = tech_colonization_4
+		}
+		give_tech_option_or_progress_effect = {
+			TECH = tech_colonization_4
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { has_technology = tech_colonization_5 }
+			can_research_technology = tech_colonization_5
+		}
+		give_tech_option_or_progress_effect = {
+			TECH = tech_colonization_5
+		}
+	}
+	else = {
+		add_monthly_resource_mult = {
+			 resource = society_research
+			 value = @tier3researchreward
+			 min = @tier3researchmin
+			 max = @tier3researchmax
+		 }
+	}
+}
+
+give_tech_option_or_progress_effect = {
+	if = {
+		limit = { NOT = { has_tech_option = $TECH$ } }
+		add_research_option = $TECH$
+		add_tech_progress = {
+			tech = $TECH$
+			progress = 0.25
+		}
+	}
+	else = {
+		add_tech_progress = {
+			tech = $TECH$
+			progress = 0.5
+		}
+	}
+}
+
 #Use in war scope. War is deleted.
 end_war_effect = {
 	every_war_participant = {
@@ -10187,6 +10447,73 @@ create_amoeba_home_roaming_fleets = {
 	}
 }
 
+#Mining Drone Expansion Fleets (4th Anniversary)
+create_mining_drone_expansion_fleet = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Expansion_Fleet"
+		effect = {
+			set_owner = event_target:mining_drone_expansion_country
+			set_fleet_stance = passive
+			create_ship = {
+				name = ""
+				design = "NAME_Ancient_Mining_Expansion_Barge"
+			}
+			while = {
+				count = 4
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Mining_Expansion_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mining_drone_expansion_starting_planet
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mining_drone_expansion_fleet
+			queue_actions = {
+				wait = {
+					duration = 20
+					random = 10
+				}
+				move_to = event_target:mining_drone_expansion_destination_system
+			}
+		}
+	}
+}
+create_aggressive_drone_expansion_fleet = {
+	create_fleet = {
+		name = "NAME_Aggressive_Mining_Drone_Expansion_Fleet"
+		effect = {
+			set_owner = event_target:aggressive_drone_expansion_country
+			set_fleet_stance = passive
+			create_ship = {
+				name = ""
+				design = "NAME_Ancient_Mining_Expansion_Barge"
+			}
+			while = {
+				count = 10
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Mining_Expansion_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:aggressive_drone_expansion_starting_planet
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = aggressive_drone_expansion_fleet
+			queue_actions = {
+				wait = {
+					duration = 20
+					random = 10
+				}
+				move_to = event_target:aggressive_drone_expansion_destination_system
+			}
+		}
+	}
+}
 
 fire_random_centralisation_flavour_event_effect = {
 	hidden_effect = {
@@ -10254,6 +10581,12 @@ assimilation_effect = {
 					species = root.owner
 					ethos = root.owner
 				}
+				owner = {
+					if = {
+						limit = { has_ascension_perk = ap_become_the_crisis }
+						complete_crisis_objective = crisobj_purge_pops
+					}
+				}
 			}
 		}
 		else = {
@@ -10272,6 +10605,12 @@ assimilation_effect = {
 					exists = event_target:convert_to_species #should always exist
 				}
 				change_species = event_target:convert_to_species
+				owner = {
+					if = {
+						limit = { has_ascension_perk = ap_become_the_crisis }
+						complete_crisis_objective = crisobj_purge_pops
+					}
+				}
 				root = {
 					change_variable = {
 						which = assimilation_counter
@@ -10299,9 +10638,18 @@ assimilation_effect = {
 							which = assimilation_counter
 							value = -1
 						}
+						owner = {
+							if = {
+								limit = { has_ascension_perk = ap_become_the_crisis }
+								complete_crisis_objective = crisobj_purge_pops
+							}
+						}
 					}
 				}
 				apply_post_assimilation_effects = yes
+			}
+			else = {
+				log_error = "No species found for \\[This.Species.GetName] pop owned by \\[This.Owner.GetName] on \\[This.Planet.GetName] to assimilate to"
 			}
 		}
 	}
@@ -10379,6 +10727,10 @@ breach_fix_resolution_galacticstudies_advanced_xenostudies = {
 			in_breach_of = resolution_galacticstudies_advanced_xenostudies
 			can_set_ai_policy = yes
 			has_policy_flag = ai_outlawed
+			can_set_policy = {
+				policy = artificial_intelligence_policy
+				option = ai_servitude
+			}
 		}
 		set_policy = {
 			policy = artificial_intelligence_policy
@@ -10398,6 +10750,10 @@ breach_fix_resolution_galacticstudies_advanced_xenostudies = {
 			in_breach_of = resolution_galacticstudies_advanced_xenostudies
 			has_met_primitives = yes
 			has_policy_flag = interference_passive
+			can_set_policy = {
+				policy = interference
+				option = interference_active
+			}
 		}
 		set_policy = {
 			policy = interference
@@ -10417,6 +10773,10 @@ breach_fix_resolution_galacticstudies_ethical_guideline_refactoring = {
 			}
 			in_breach_of = resolution_galacticstudies_ethical_guideline_refactoring
 			has_technology = tech_capacity_boosters
+			can_set_policy = {
+				policy = leader_enhancement
+				option = leader_enhancement_capacity_boosters
+			}
 		}
 		set_policy = {
 			policy = leader_enhancement
@@ -10433,6 +10793,10 @@ breach_fix_resolution_galacticstudies_ethical_guideline_refactoring = {
 				in_breach_of = resolution_galacticstudies_ethical_guideline_refactoring
 				has_technology = tech_selected_lineages
 				NOT = { has_technology = tech_capacity_boosters }
+				can_set_policy = {
+					policy = leader_enhancement
+					option = leader_enhancement_selected_lineages
+				}
 		}
 		set_policy = {
 			policy = leader_enhancement
@@ -10749,6 +11113,10 @@ breach_fix_resolution_rulesofwar_reverence_for_life = {
 			}
 			in_breach_of = resolution_rulesofwar_reverence_for_life
 			has_policy_flag = purge_allowed
+			can_set_policy = {
+				policy = purge
+				option = purge_displacement_only
+			}
 		}
 		hidden_effect = {
 			set_policy = {
@@ -10775,6 +11143,10 @@ breach_fix_resolution_rulesofwar_independent_tribunals = {
 				has_policy_flag = orbital_bombardment_armageddon
 				has_policy_flag = orbital_bombardment_indiscriminate
 			}
+			can_set_policy = {
+				policy = orbital_bombardment
+				option = orbital_bombardment_selective
+			}
 		}
 		hidden_effect = {
 			set_policy = {
@@ -10798,6 +11170,10 @@ breach_fix_resolution_rulesofwar_last_resort_doctrine = {
 			in_breach_of = resolution_rulesofwar_last_resort_doctrine
 			has_policy_flag = unrestricted_wars
 			is_gestalt = no
+			can_set_policy = {
+				policy = war_philosophy
+				option = liberation_wars
+			}
 		}
 		hidden_effect = {
 			set_policy = {
@@ -10817,6 +11193,10 @@ breach_fix_resolution_rulesofwar_last_resort_doctrine = {
 			in_breach_of = resolution_rulesofwar_last_resort_doctrine
 			has_policy_flag = unrestricted_wars
 			is_gestalt = yes
+			can_set_policy = {
+				policy = war_philosophy
+				option = no_wars
+			}
 		}
 		hidden_effect = {
 			set_policy = {
@@ -10836,6 +11216,10 @@ breach_fix_resolution_rulesofwar_demobilization_initiative = {
 			is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
 			in_breach_of = resolution_rulesofwar_demobilization_initiative
 			has_policy_flag = economic_policy_military
+			can_set_policy = {
+				policy = economic_policy
+				option = economic_policy_balanced
+			}
 		}
 		hidden_effect = {
 			set_policy = {
@@ -10857,6 +11241,10 @@ breach_fix_resolution_divinity_a_defined_purpose_nonsynthetic = {
 			has_policy_flag = ai_full_rights
 			NOT = { has_country_flag = synthetic_empire }
 			is_machine_empire = no
+			can_set_policy = {
+				policy = artificial_intelligence_policy
+				option = ai_servitude
+			}
 		}
 		hidden_effect = {
 			set_policy = {
@@ -11715,6 +12103,571 @@ add_extra_hyperlane_to_spawned_system_effect = {
 					}
 				}
 			}
+		}
+	}
+}
+
+add_imp_concession_ports_0 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+}
+
+add_imp_concession_ports_1 = {
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_1 }
+}
+
+add_imp_concession_ports_2 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_2 }
+}
+
+add_imp_concession_ports_3 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_3 }
+}
+
+add_imp_concession_ports_4 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_4 }
+}
+
+add_imp_concession_ports_5 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_5 }
+}
+
+add_imp_concession_ports_6 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_6 }
+}
+
+add_imp_concession_ports_7 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_7 }
+}
+
+add_imp_concession_ports_8 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_8 }
+}
+
+add_imp_concession_ports_9 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_8
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_9 }
+}
+
+add_imp_concession_ports_10 = {
+	remove_modifier = imp_concession_ports_1
+	remove_modifier = imp_concession_ports_2
+	remove_modifier = imp_concession_ports_3
+	remove_modifier = imp_concession_ports_4
+	remove_modifier = imp_concession_ports_5
+	remove_modifier = imp_concession_ports_6
+	remove_modifier = imp_concession_ports_7
+	remove_modifier = imp_concession_ports_9
+	remove_modifier = imp_concession_ports_10
+	add_modifier = { modifier = imp_concession_ports_10 }
+}
+
+can_build_crisis_star_eater = {
+	set_country_flag = can_build_crisis_star_eater
+	create_ship_design = { design = "NAME_Crisis_Star_Eater" }
+    add_ship_design = last_created_design
+}
+
+destroy_star_system = {
+	set_star_class = sc_black_hole
+	every_system_ambient_object = {
+        destroy_ambient_object = this
+    }
+	every_system_planet = {
+        limit = { is_star = yes }
+		create_ambient_object = {
+			type = "star_explosion"
+			play_animation_once = yes
+			location = this
+		}
+		last_created_ambient_object = {
+			set_location = {
+				target = prev
+				distance = 0
+				angle = random
+			}
+		}
+		change_pc = pc_black_hole
+	}
+    every_system_planet = {
+        limit = { 
+            is_star = no
+            is_asteroid = no
+            NOR = {
+            	is_planet_class = pc_shattered
+            	is_planet_class = pc_shattered_2
+            	is_planet_class = pc_shielded
+            	is_planet_class = pc_ringworld_habitable_damaged
+        		is_planet_class = pc_ringworld_tech_damaged
+        		is_planet_class = pc_ringworld_seam_damaged
+            }
+        }
+        if = {
+            limit = { is_colony = yes }
+            remove_all_buildings = yes
+            destroy_colony = yes
+            if = {
+                limit = { is_planet_class = pc_habitat }
+                spawn_habitat_cracker_effect = yes
+                remove_planet = yes
+            }
+            else_if = {
+                limit = { is_planet_class = pc_ringworld_habitable }
+                spawn_ringworld_cracker_effect = yes
+                change_pc = pc_ringworld_habitable_damaged
+            }
+            else = {
+                change_pc = pc_shattered
+            }
+        }
+        else_if = {
+            limit = { is_planet_class = pc_ringworld_habitable }
+            spawn_ringworld_cracker_effect = yes
+            change_pc = pc_ringworld_habitable_damaged
+        }
+        else_if = {
+            limit = { is_planet_class = pc_ringworld_tech }
+            spawn_ringworld_cracker_effect = yes
+            change_pc = pc_ringworld_tech_damaged
+        }
+        else_if = {
+            limit = { is_planet_class = pc_ringworld_seam }
+            spawn_ringworld_cracker_effect = yes
+            change_pc = pc_ringworld_seam_damaged
+        }
+        else = {
+            change_pc = pc_shattered
+        }
+    }
+    every_system_planet = {
+        limit = {
+            OR = {
+                has_mining_station = yes
+                has_research_station = yes
+                has_observation_outpost = yes
+            }
+        }
+        if = {
+            limit = { has_mining_station = yes }
+            random_mining_station = { dismantle = yes }
+        }
+        if = {
+            limit = { has_research_station = yes }
+            random_research_station = { dismantle = yes } 
+        }
+        else = { 
+            observation_outpost = { dismantle = yes }
+        }
+    }
+    every_system_planet = { 
+        clear_deposits = yes
+        clear_planet_modifiers = yes
+        prevent_anomaly = yes
+    }
+    every_system_planet = {
+        limit = { is_asteroid = yes }
+        clear_deposits = yes
+    }
+    every_fleet_in_system = {
+        limit = {
+			NOT = { is_same_value = from }
+		}
+		if = {
+			limit = {
+				exists = event_target:crisis_country #i.e. not final destruction of all matter
+				is_mobile = yes
+			}
+			set_mia = yes
+		}
+		else = {
+			destroy_fleet = this
+		}
+    }
+    every_system_megastructure = {
+    	if = {
+    		limit = {
+				OR = {
+    				is_megastructure_type = ring_world_restored 
+    				is_megastructure_type = ring_world_ruined
+    				is_megastructure_type = ring_world_2
+    			}
+    		}
+    		solar_system = {
+    			spawn_planet = {
+					class = "pc_ringworld_tech_damaged"
+					location = prev
+					orbit_angle_offset = 30
+				}
+				spawn_planet = {
+					class = "pc_ringworld_seam_damaged"
+					location = prev
+				}
+				spawn_planet = {
+					class = "pc_ringworld_habitable_damaged"
+					location = prev
+					orbit_angle_offset = -30
+				}
+			}
+			remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = spy_orb_1
+    				is_megastructure_type = spy_orb_2
+    				is_megastructure_type = spy_orb_3
+    				is_megastructure_type = spy_orb_4
+    				is_megastructure_type = spy_orb_ruined
+    				is_megastructure_type = spy_orb_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "spy_orb_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = think_tank_1
+    				is_megastructure_type = think_tank_2
+    				is_megastructure_type = think_tank_3
+    				is_megastructure_type = think_tank_4
+    				is_megastructure_type = think_tank_ruined
+    				is_megastructure_type = think_tank_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "think_tank_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = strategic_coordination_center_1
+    				is_megastructure_type = strategic_coordination_center_2
+    				is_megastructure_type = strategic_coordination_center_3
+    				is_megastructure_type = strategic_coordination_center_ruined
+    				is_megastructure_type = strategic_coordination_center_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "strategic_coordination_center_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = mega_art_installation_1
+    				is_megastructure_type = mega_art_installation_2
+    				is_megastructure_type = mega_art_installation_3
+    				is_megastructure_type = mega_art_installation_4
+    				is_megastructure_type = strategic_coordination_center_ruined
+    				is_megastructure_type = strategic_coordination_center_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "mega_art_installation_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = interstellar_assembly_1
+    				is_megastructure_type = interstellar_assembly_2
+    				is_megastructure_type = interstellar_assembly_3
+    				is_megastructure_type = interstellar_assembly_4
+    				is_megastructure_type = interstellar_assembly_ruined
+    				is_megastructure_type = interstellar_assembly_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "interstellar_assembly_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = mega_shipyard_1
+    				is_megastructure_type = mega_shipyard_2
+    				is_megastructure_type = mega_shipyard_3
+    				is_megastructure_type = mega_shipyard_ruined
+    				is_megastructure_type = mega_shipyard_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "mega_shipyard_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else_if = {
+    		limit = {
+    			OR = {
+    				is_megastructure_type = matter_decompressor_1
+    				is_megastructure_type = matter_decompressor_2
+    				is_megastructure_type = matter_decompressor_3
+    				is_megastructure_type = matter_decompressor_4
+    				is_megastructure_type = matter_decompressor_ruined
+    				is_megastructure_type = matter_decompressor_restored
+    			}
+    		}
+    		solar_system = {
+    			spawn_megastructure = { 
+    				type = "matter_decompressor_permanently_ruined"
+    				coords_from = prev
+    			}
+    		}
+    		remove_megastructure = this
+    	}
+    	else = {
+    		remove_megastructure = this
+    	}
+    }
+    star = {
+        create_ambient_object = {
+            type = "destroyed_system"
+            location = this
+        }
+        last_created_ambient_object = {
+            set_ambient_object_flag = destroyed_system_effect
+            set_location = {
+                target = prev
+                distance = 0
+                angle = random
+            }
+        }
+    }
+}
+
+rebellion_remove_from_wars = {
+	if = {
+		limit = { is_at_war = yes }
+		every_war = { 
+			limit = {
+				NOR = {
+					using_war_goal = {
+						type = wg_war_in_heaven
+						owner = attacker
+					}
+					using_war_goal = {
+						type = wg_declared_crisis
+						owner = attacker
+					}
+				}
+			}
+			remove_war_participant = prev 
+		}
+		every_subject = {
+			every_war = { 
+				limit = {
+					NOR = {
+						using_war_goal = {
+							type = wg_war_in_heaven
+							owner = attacker
+						}
+						using_war_goal = {
+							type = wg_declared_crisis
+							owner = attacker
+						}
+					}
+				}
+				remove_war_participant = prev 
+			}
+		}
+	}
+}
+
+#scope = scion
+create_scion_wormhole_link = {
+	capital_scope = {
+		solar_system = { save_event_target_as = home_system }
+	}
+	event_target:scion_master = {
+		random_system_within_border = { save_event_target_as = fe_target_system }
+	}
+	event_target:home_system = {
+		event_target:fe_target_system = {
+			prev = { # done this way to ensure we don't spawn "orphan wormholes (wormholes that aren't linked to anything)
+				spawn_natural_wormhole = {
+					bypass_type = wormhole
+					random_pos = no
+					orbit_angle = 360
+				}
+			}
+			spawn_natural_wormhole = {
+				bypass_type = wormhole
+				random_pos = no
+				orbit_angle = 270
+			}
+			link_wormholes = prev
+		}
+	}
+	set_country_flag = encountered_first_wormhole
+	add_seen_bypass_type = wormhole
+}
+
+
+add_tech_option_or_research_effect = {
+	if = {
+		limit = {
+			OR = {
+				has_technology = $TECH$
+				NOT = { can_research_technology = $TECH$ }
+			}
+		}
+		give_scaled_tech_bonus_effect = { #18 i.e. @tier2researchreward if $PROGRESS$ is 0.25
+			VALUE = @\[( 72 * $PROGRESS$ )]
+			CATEGORY = $CATEGORY$
+		}
+	}
+	else_if = {
+		limit = { NOT = { has_tech_option = $TECH$ } }
+		add_research_option = $TECH$
+		add_tech_progress = {
+			tech = $TECH$
+			progress = $PROGRESS$
+		}
+	}
+	else = {
+		add_tech_progress_effect = { #give a bit more if they already have the option
+			TECH = $TECH$ #the formula basically means min( 1, <calced value> ), it's needed because trying to grant more than 1 causes error messages
+			PROGRESS = @\[ ( ( 1 + ( 1.5 * $PROGRESS$ ) ) / 2 ) - ( | 1 - ( 1.5 * $PROGRESS$ ) | / 2 ) ]
+		}
+	}
+}
+
+add_tech_progress_effect = {
+	add_tech_progress = {
+		tech = $TECH$
+		progress = $PROGRESS$
+	}
+}
+
+give_scaled_tech_bonus_effect = {
+	add_monthly_resource_mult = {
+		resource = $CATEGORY$
+		value = $VALUE$
+	}
+}
+
+give_tech_no_error_effect = {
+	if = {
+		limit = {
+			NOT = { has_technology = $TECH$ }
+		}
+		give_technology = {
+			message = $MESSAGE$
+			tech = $TECH$
 		}
 	}
 }

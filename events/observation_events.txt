@@ -225,7 +225,7 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		random_planet = {
+		random_galaxy_planet = {
 			limit = { has_planet_flag = asteroid_sighted_prim_planet }
 			save_event_target_as = asteroid_prim_planet
 		}
@@ -1312,7 +1312,7 @@ country_event = {
 	desc = "observation.53.desc"
 	picture = GFX_evt_smugglers_in_bar
 	show_sound = event_planetary_riot ## Change to burning settlement or ground battle?
-	location = FROMFROM
+	location = FROMFROMFROM
 	
 	is_triggered_only = yes
 	
@@ -1626,12 +1626,9 @@ country_event = {
 planet_event = {
 	id = observation.1022
 	hide_window = yes
-
-	pre_triggers = {
-		has_owner = yes
-	}
 	
 	trigger = {
+		has_owner = yes
 		has_observation_outpost = yes
 		observation_outpost = { has_mission = specimen_collection }
 		observation_outpost_owner = { 
@@ -1947,13 +1944,10 @@ planet_event = {
 	id = observation.1034
 	hide_window = yes
 	
-	pre_triggers = {
-		has_owner = yes
-	}
-	
 	trigger = {
 		has_observation_outpost = yes
 		observation_outpost = { has_mission = specimen_collection }
+		has_owner = yes
 		owner = {
 			NOT = {
 				has_ethic = "ethic_fanatic_xenophobe"
@@ -2002,13 +1996,10 @@ planet_event = {
 	id = observation.1036
 	hide_window = yes
 	
-	pre_triggers = {
-		has_owner = yes
-	}
-	
 	trigger = {
 		has_observation_outpost = yes
 		observation_outpost = { has_mission = specimen_collection }
+		has_owner = yes
 		owner = {
 			NOT = {
 				has_ethic = "ethic_fanatic_spiritualist"
@@ -2067,17 +2058,21 @@ country_event = {
 	
 	immediate = {
 		FROMFROM = {
+			owner = { save_event_target_as = primitive_country }
 			observation_outpost_owner = {
 				# Xenoist Faction Enlightenment Demand
 				set_timed_country_flag = {
 					flag = recent_enlightenment_timed
 					days = 7200 # 20 years
 				}
+				add_intel = {
+					who = event_target:primitive_country
+					amount = 100
+				}
 			}
 			observation_outpost = {
 				dismantle = yes
 			}			
-			owner = { save_event_target_as = primitive_country }
 			solar_system = {
 				if = {
 					limit = {
@@ -2085,6 +2080,10 @@ country_event = {
 					}
 					starbase = {
 						set_owner = event_target:primitive_country
+						if = {
+							limit = { has_starbase_size = starbase_outpost }
+							set_starbase_size = starbase_starport
+						}
 					}						
 				}
 				every_system_planet = {
@@ -4480,7 +4479,7 @@ country_event = {
 				}
 			}
 			add_modifier = { modifier = infiltration_happiness days = 7300 }
-			random_pop = { save_event_target_as = prim_species }
+			random_owned_pop = { save_event_target_as = prim_species }
 			observation_outpost = { dismantle = yes }
 			set_owner = ROOT
 			remove_all_armies = yes
@@ -4503,21 +4502,44 @@ country_event = {
 			
 			if = {
 				limit = { NOT = { is_planet_class = pc_ringworld_habitable } }
-				add_district = district_city
-				add_district = district_city
-				add_district = district_city
-				add_district = district_city
-				add_district = district_farming
-				add_district = district_farming
-				add_district = district_farming
-				add_district = district_mining
-				add_district = district_mining
-				add_district = district_generator
-				add_district = district_generator
 
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_city
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 2
+					add_district = {
+						district_type = district_industrial
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_farming
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_mining
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_generator
+						ignore_cap = yes
+					}
+				}
 				add_building = building_research_lab_1
-				add_building = building_foundry_1
-				add_building = building_factory_1
+				add_building = building_commercial_forum
 			}
 						
 			event_target:primitive_civ = { destroy_country = yes }
@@ -5152,10 +5174,6 @@ planet_event = {
 	id = observation.3134
 	hide_window = yes
 	
-	pre_triggers = {
-		has_owner = yes
-	}
-	
 	trigger = {
 		has_observation_outpost = yes
 		exists = observation_outpost_owner
@@ -5169,6 +5187,7 @@ planet_event = {
 				has_ethic = ethic_gestalt_consciousness
 			}
 		}
+		has_owner = yes
 		owner = {
 			is_country_type = primitive
 			OR = {
@@ -5429,7 +5448,7 @@ country_event = {
 		custom_tooltip = observation.3136.a.tooltip
 		trigger = {
 			fromfrom = {
-				count_pops = {
+				count_owned_pop = {
 					count > 3
 				}
 			}
@@ -5442,10 +5461,10 @@ country_event = {
 					days = 720
 				}
 				add_building = building_great_pyramid
-				random_pop = {
+				random_owned_pop = {
 					kill_pop = yes
 				}
-				random_pop = {
+				random_owned_pop = {
 					kill_pop = yes
 				}
 			}
@@ -5457,10 +5476,10 @@ country_event = {
 		trigger = {
 			fromfrom = {
 				OR = {
-					count_pops = {
+					count_owned_pop = {
 						count = 3
 					}
-					count_pops = {
+					count_owned_pop = {
 						count = 2
 					}
 				}
@@ -5474,7 +5493,7 @@ country_event = {
 					days = 720
 				}
 				add_building = building_great_pyramid
-				random_pop = {
+				random_owned_pop = {
 					kill_pop = yes
 				}
 			}
@@ -5485,7 +5504,7 @@ country_event = {
 		custom_tooltip = observation.3136.c.tooltip
 		trigger = {
 			fromfrom = {
-				count_pops = {
+				count_owned_pop = {
 					count = 1
 				}
 			}
@@ -5587,7 +5606,7 @@ country_event = {
 			}		
 			OR = {
 				root = { NOT = { has_ethic = ethic_authoritarian } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_authoritarian }
 					count > 1
 				}				
@@ -5646,7 +5665,7 @@ country_event = {
 			}		
 			OR = {
 				root = { NOT = { has_ethic = ethic_egalitarian } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_egalitarian }
 					count > 1
 				}				
@@ -5705,7 +5724,7 @@ country_event = {
 			}	
 			OR = {
 				root = { NOT = { has_ethic = ethic_xenophobe } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_xenophobe }
 					count > 1
 				}				
@@ -5764,7 +5783,7 @@ country_event = {
 			}		
 			OR = {
 				root = { NOT = { has_ethic = ethic_xenophile } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_xenophile }
 					count > 1
 				}				
@@ -5823,7 +5842,7 @@ country_event = {
 			}	
 			OR = {
 				root = { NOT = { has_ethic = ethic_militarist } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_militarist }
 					count > 1
 				}				
@@ -5882,7 +5901,7 @@ country_event = {
 			}	
 			OR = {
 				root = { NOT = { has_ethic = ethic_pacifist } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_pacifist }
 					count > 1
 				}				
@@ -5941,7 +5960,7 @@ country_event = {
 			}	
 			OR = {
 				root = { NOT = { has_ethic = ethic_spiritualist } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_spiritualist }
 					count > 1
 				}				
@@ -6000,7 +6019,7 @@ country_event = {
 			}	
 			OR = {
 				root = { NOT = { has_ethic = ethic_materialist } }
-				count_pops = {
+				count_owned_pop = {
 					limit = { has_ethic = ethic_materialist }
 					count > 1
 				}				

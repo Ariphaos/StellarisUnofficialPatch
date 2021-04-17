@@ -136,6 +136,7 @@ country_event = {
 				create_species = {
 					name = "NAME_Unbidden"
 					class = EXD
+					namelist = Extradimensional
 					portrait = exd1
 					traits = random
 					effect = { save_event_target_as = extradimensional_species }
@@ -306,6 +307,24 @@ country_event = {
 		event_target:extradimensionals = {
 			random_owned_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
 		}
+
+		# Custodian/Emperor Announcements
+		event_target:extradimensionals = { save_event_target_as = crisis_country }
+		if = {
+			limit = { has_galactic_custodian = yes }
+			random_playable_country = {
+				limit = { is_galactic_custodian = yes }
+				country_event = { id = custodian.50 days = 30 }
+			}
+		}
+		if = {
+			limit = { has_galactic_emperor = yes }
+			random_playable_country = {
+				limit = { is_galactic_emperor = yes }
+				country_event = { id = emperor.90 days = 30 }
+			}
+		}
+		
 		every_country = {
 			limit = {
 				OR = {
@@ -547,7 +566,11 @@ country_event = {
 	option = {
 		name = crisis.18.e
 		trigger = {
-			has_government = gov_megacorporation
+			OR = {
+				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
+			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
 				has_ethic = "ethic_fanatic_authoritarian"
@@ -564,6 +587,8 @@ country_event = {
 				has_government = gov_enlightened_monarchy
 				has_government = gov_elective_monarchy
 				has_government = gov_hive_mind
+				has_government = gov_successor_khanate
+				has_government = gov_diadochi
 			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
@@ -613,6 +638,8 @@ country_event = {
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
 				has_generic_government = yes
 				has_government = gov_enlightened_monarchy
 				has_government = gov_elective_monarchy
@@ -740,7 +767,11 @@ country_event = {
 	option = {
 		name = crisis.18.e
 		trigger = {
-			has_government = gov_megacorporation
+			OR = {
+				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
+			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
 				has_ethic = "ethic_fanatic_authoritarian"
@@ -757,6 +788,9 @@ country_event = {
 				has_government = gov_enlightened_monarchy
 				has_government = gov_elective_monarchy
 				has_government = gov_hive_mind
+				has_government = gov_successor_khanate
+				has_government = gov_diadochi
+				is_fallen_empire = yes
 			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
@@ -806,6 +840,8 @@ country_event = {
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
 				has_generic_government = yes
 				has_government = gov_enlightened_monarchy
 				has_government = gov_elective_monarchy
@@ -924,6 +960,33 @@ planet_event = {
 					event_chain = "extradimensional_invasion_chain_3"
 					counter = "extradimensional_planets_3"
 					amount = 1
+				}
+			}
+		}
+
+		solar_system = {
+			if = { # Build starbase if no other colonies are left
+				limit = {
+					NOT = {
+						exists = starbase
+						any_system_planet = {
+							has_owner = yes
+							owner =  { 
+								NOT = { is_same_value = from }
+							}
+						}
+					}
+				}
+				create_starbase = {
+					size = starbase_exd_0
+					owner = from
+				}
+				random_ship_in_system = {
+					limit = { 
+						owner = { is_same_value = from }
+					}
+					ship_event = { id = crisis.1300 } # Check if starbase should be Anchor
+					ship_event = { id = crisis.1310 } # Create system effect
 				}
 			}
 		}
@@ -1300,8 +1363,7 @@ country_event = {
 		random_system = {
 			limit = {
 					NOT = { owner = { is_country_type = extradimensional } }
-					any_neighbor_system = { 
-						ignore_hyperlanes = yes
+					any_neighbor_system_euclidean = {
 						owner = { is_country_type = extradimensional }
 					}
 				}
@@ -1311,6 +1373,7 @@ country_event = {
 				create_species = {
 					name = "NAME_Aberrant"
 					class = EXD
+					namelist = Extradimensional
 					portrait = exd2
 					traits = random
 					effect = { save_event_target_as = extradimensional_hunters_species }
@@ -1907,8 +1970,7 @@ country_event = {
 				limit = {
 					NOT = { owner = { is_country_type = extradimensional_2 } }
 					NOT = { owner = { is_country_type = extradimensional } }
-					any_neighbor_system = { 
-						ignore_hyperlanes = yes
+					any_neighbor_system_euclidean = {
 						OR = {
 							owner = { is_country_type = extradimensional_2 }
 							owner = { is_country_type = extradimensional }
@@ -1921,6 +1983,7 @@ country_event = {
 					create_species = {
 						name = "NAME_Vehement"
 						class = EXD
+						namelist = Extradimensional
 						portrait = exd3
 						traits = random
 						effect = { save_event_target_as = extradimensional_trespassers_species }
@@ -3424,8 +3487,8 @@ country_event = {
 				country_event = { id = crisis.1271 }
 			}
 		}
-
 		set_global_flag = extradimensional_invasion_defeated
+		end_crisis = yes
 	}
 }
 
@@ -3434,7 +3497,7 @@ country_event = {
 	id = crisis.1271
 	title = "crisis.1271.name"
 	desc = "crisis.1271.desc"
-	picture = GFX_evt_metropolis
+	picture = GFX_evt_crisis_defeated
 	show_sound = event_celebration
 
 	is_triggered_only = yes
@@ -3488,7 +3551,11 @@ country_event = {
 	option = { # Corporate Response
 		name = crisis.1271.e
 		trigger = {
-			has_government = gov_megacorporation
+			OR = {
+				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
+			}
 			NOR = {
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
@@ -3504,6 +3571,8 @@ country_event = {
 				has_materialist_government = yes
 				has_pacifist_government = yes
 				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 			}
@@ -3864,7 +3933,6 @@ country_event = {
 	}
 }
 
-
 # Events to manage crisis sound loop
 country_event = {
 	id = crisis.1230
@@ -4202,6 +4270,10 @@ ship_event = {
 	hide_window = yes
 
 	is_triggered_only = yes
+
+	trigger = {
+		exists = solar_system
+	}
 	
 	immediate = {
 		solar_system = {
@@ -4221,17 +4293,24 @@ ship_event = {
 
 	immediate = {
 		solar_system = {
-			star = {
-				create_ambient_object = {
-					type = "extradimensional_1"
-					location = this
+			if = {
+				limit = {
+					NOT = {
+						any_system_ambient_object = { has_ambient_object_flag = extradimensional_system_effect }
+					}
 				}
-				last_created_ambient_object = {
-					set_ambient_object_flag = extradimensional_system_effect
-					set_location = {
-						target = prev
-						distance = 0
-						angle = random
+				star = {
+					create_ambient_object = {
+						type = "extradimensional_1"
+						location = this
+					}
+					last_created_ambient_object = {
+						set_ambient_object_flag = extradimensional_system_effect
+						set_location = {
+							target = prev
+							distance = 0
+							angle = random
+						}
 					}
 				}
 			}
@@ -4266,6 +4345,73 @@ country_event = {
 				random_system_ambient_object = {
 					limit = { has_ambient_object_flag = extradimensional_system_effect }
 					destroy_ambient_object = this
+				}
+			}
+		}
+	}
+}
+
+# Extradimensionals Destroyed Starbase
+starbase_event = {
+	id = crisis.1320
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from.owner = {
+			OR = {
+				is_country_type = extradimensional
+				is_country_type = extradimensional_2
+				is_country_type = extradimensional_3
+			}
+		}
+		NOT = {
+			solar_system = {
+				any_system_planet = { is_colony = yes } # For populated systems, they need to destroy the colonies
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = { save_event_target_as = starbase_system }
+		from.owner = { 
+			country_event = { id = crisis.1321 days = 5 } # Delay so that destroyed starbase is properly cleared out
+		}
+	}
+}
+
+# Extradimensionals Build New Starbase
+country_event = {
+	id = crisis.1321
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:starbase_system = {
+			solar_system = {
+				create_starbase = {
+					size = starbase_exd_0
+					owner = root
+				}
+				every_system_planet = {
+				    limit = { has_orbital_station = yes }
+				    orbital_station = { dismantle = yes }
+				}
+			}
+		}
+		if = {
+			limit = { exists = fromfrom }
+			fromfrom = {
+				if = {
+					limit = { #theoretically, it is possible that they may have jumped
+						exists = solar_system
+					}
+					random_owned_ship = {
+						ship_event = { id = crisis.1300 } # Check if starbase should be Anchor
+						ship_event = { id = crisis.1310 } # Create system effect
+					}
 				}
 			}
 		}

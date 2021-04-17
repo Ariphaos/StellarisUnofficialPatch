@@ -117,7 +117,7 @@ country_event = {
 			create_country = {
 				name = "NAME_Galactic_Nomads"
 				type = nomad
-				species = last_created
+				species = last_created_species
 				flag = {
 					icon = {
 						category = "spherical"
@@ -340,50 +340,10 @@ fleet_event = {
 							}
 							#country_event = { id = nomad.991 }
 						}
-						event_target:nomad_contact_country = {
-							begin_event_chain = {
-								event_chain = "nomads_observation_chain"
-								target = this
-							}
-							create_point_of_interest = {
-								id = nomads_observation_poi.1
-								name = "nomad_poi_1"
-								desc = "nomad_poi_1_desc"
-								event_chain = "nomads_observation_chain"
-								location = root
-							}
-						}
-					}
-				}
-				repeat = {
-					while = {
-						id = nomad.3.trigger.2
-						event_target:nomad_contact_country = {
-							NOT = { is_hostile = event_target:nomad_owner }
-						}
-						event_target:nomad_owner = {
-							check_variable = {
-								which = nomad_waited_days_translation
-								value < 99
-							}
-						}
-					}
-					wait = {
-						duration = 10
-					}
-					effect = {
-						id = nomad.3.update_translation_wait_time
-						event_target:nomad_owner = {
-							change_variable = {
-								which = nomad_waited_days_translation
-								value = 7
-							}
-						}
 					}
 				}
 				effect = {
 					id = "nomad.3.translation_time_out"
-					owner = { country_event = { id = nomad.33 } }
 					if = {
 						limit = {
 							event_target:nomad_contact_country = {
@@ -445,21 +405,6 @@ fleet_event = {
 			owner = {
 				#country_event = { id = nomad.994 }
 			}
-		}
-	}
-}
-
-# Passthrough for action.13 scopes
-country_event = {
-	id = nomad.33
-	hide_window = yes
-
-	is_triggered_only = yes
-
-	immediate = {
-		event_target:nomad_contact_country = {
-			country_event = { id = action.13 } #Nomads take contact which triggers nomad.10
-			establish_communications_no_message = event_target:nomad_owner
 		}
 	}
 }
@@ -922,31 +867,6 @@ fleet_event = {
 	}
 }
 
-# Country finds nomads and cannot contact #replaces action.10
-country_event = {
-	id = nomad.6
-	title = nomad.6.name
-	desc = nomad.6.desc
-	picture = GFX_evt_unknown_ships
-	location = FROMFROMFROM
-	
-	is_triggered_only = yes
-	
-	trigger = {
-		is_country_type = default
-		exists = capital_scope
-		FROM = {
-			OR = {
-				#is_country_type = default
-				is_country_type = nomad
-			}
-		}
-	}
-	
-	option = {
-		name = "action.10.a"
-	}
-}
 # Nomads reach mid point and set sails for next destination if not busy
 fleet_event = {
 	id = nomad.7
@@ -1064,19 +984,10 @@ country_event = {
 	diplomatic = yes
 	is_triggered_only = yes
 
-	trigger = {
-		exists = fromfrom
-		fromfrom = {
-			is_country_type = nomad
-		}
-		NOT = {
-			has_country_flag = nomad_ignores
-		}
-	}
-
 	immediate = {
-		fromfrom = {
+		from.contact_country = {
 			save_event_target_as = contact_speaker
+			save_event_target_as = contact_empire
 			random_owned_ship = {
 				fleet = {
 					leader = { save_event_target_as = contact_speaker_leader }
@@ -1089,492 +1000,599 @@ country_event = {
 		set_country_flag = nomads_contacted
 	}
 
-	option = {
-		name = action.1.a
-		default_hide_option = yes
+	option = { #friendly
+		name = {
+			text = action.1.e
+			trigger = {
+				NOT = { is_same_species = event_target:contact_empire }
+				is_xenophile = yes
+			}
+		}
+		name = {
+			text = action.1.c
+			trigger = {
+				NOT = { is_same_species = event_target:contact_empire }
+				is_xenophile = yes
+			}
+		}
+		name = {
+			text = action.1.h
+			trigger = {
+				is_egalitarian = yes
+			}
+		}
+		name = {
+			text = action.1.n
+			trigger = {
+				is_spiritualist = yes
+				event_target:contact_empire = { NOT = { has_authority = auth_machine_intelligence } }
+			}
+		}
+		name = {
+			text = action.1.ag
+			trigger = {
+				is_materialist = yes
+			}
+		}
+		name = {
+			text = action.1.ah
+			trigger = {
+				is_xenophile = yes
+			}
+		}
+		name = {
+			text = action.1.ai
+			trigger = {
+				is_xenophile = yes
+				is_egalitarian = yes
+			}
+		}
+		name = {
+			text = action.1.aj
+			trigger = {
+				is_xenophile = yes
+				is_authoritarian = yes
+			}
+		}
+		name = {
+			text = action.1.ak
+			trigger = {
+				OR = {
+					is_xenophile = yes
+					is_militarist = yes
+				}
+			}
+		}
+		name = {
+			text = action.1.al
+			trigger = {
+				is_egalitarian = yes
+			}
+		}
+		name = {
+			text = action.1.am
+			trigger = {
+				is_spiritualist = yes
+			}
+		}
+		name = {
+			text = action.1.j
+			trigger = {
+				is_militarist = yes
+			}
+		}
+		name = {
+			text = action.1.l
+			trigger = {
+				is_pacifist = yes
+			}
+		}
+		name = {
+			text = action.1.p
+			trigger = {
+				is_materialist = yes
+			}
+		}
+		name = {
+			text = action.1.av
+			trigger = {
+				is_spiritualist = yes
+			}
+		}
+		name = {
+			text = action.1.aag
+			trigger = {
+				has_origin = origin_lost_colony
+				event_target:contact_empire = {
+					has_country_flag = special_intro_for@root
+					has_country_flag = lost_colony_parent_of@root
+				}
+			}
+		}
+		name = {
+			text = action.1.hm
+			trigger = {
+				has_authority = auth_hive_mind
+				NOT = { has_valid_civic = civic_hive_devouring_swarm }
+			}
+		}
+		name = {
+			text = action.1.me
+			trigger = {
+				has_authority = auth_machine_intelligence
+				NOT = { has_valid_civic = civic_machine_terminator }
+			}
+		}
+		name = {
+			text = action.1.mtm
+			trigger = {
+				has_valid_civic = civic_machine_terminator
+				event_target:contact_empire = { has_authority = auth_machine_intelligence }
+			}
+		}
+		name = {
+			text = action.1.o
+			trigger = {
+				is_spiritualist = yes
+				event_target:contact_empire = { NOT = { has_authority = auth_machine_intelligence } }
+			}
+		}
+		name = {
+			text = action.1.as
+			trigger = {
+				is_pacifist = yes
+			}
+		}
+		name = {
+			text = action.1.af
+			trigger = {
+				is_xenophobe = yes
+			}
+		}
+
+		icon = {
+			icon = GFX_option_icon_friendly
+			text = seek_friends_tt
+		}
+
+		allow = {
+			custom_tooltip_fail = {
+				text = friendship_already_precluded
+				event_target:contact_empire = {
+					NOR = {
+						has_opinion_modifier = {
+							who = root
+							modifier = opinion_caught_hacking
+						}
+						has_opinion_modifier = {
+							who = root
+							modifier = opinion_hostile_first_contact
+						}
+						has_opinion_modifier = {
+							who = root
+							modifier = opinion_hostile_first_contact_vivisection
+						}
+						has_opinion_modifier = {
+							who = root
+							modifier = opinion_hostile_first_contact_hungry
+						}
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				OR = {
+					NOT = { is_country_type = default }
+					event_target:contact_empire = { is_country_type = fallen_empire }
+				}
+			}
+			custom_tooltip = action.1.fe_option
+		}
+		else = {
+			custom_tooltip = seek_friends_tt
+
+			event_target:contact_empire = {
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_friendly_first_comms_greeting
+				}
+			}
+		}
+
+		trigger = {
+			OR = {
+				is_homicidal = no
+				AND = {
+					has_valid_civic = civic_machine_terminator
+					event_target:contact_empire = { has_authority = auth_machine_intelligence }
+				}
+			}
+			NOT = { has_valid_civic = civic_inwards_perfection }
+			NAND = {
+				has_ethic = ethic_fanatic_spiritualist
+				event_target:contact_empire = { has_authority = auth_machine_intelligence }
+			}
+			OR = {
+				NOT = { has_ethic = ethic_fanatic_xenophobe }
+				event_target:contact_empire = { is_same_species = root }
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 2
+				is_xenophile = yes
+			}
+			modifier = {
+				factor = 0.5
+				OR = {
+					is_xenophobe = yes
+					is_gestalt = yes
+				}
+			}
+			modifier = {
+				factor = 4 #actually *2 as it is multiplied by *0.5 in the above modifier
+				OR = {
+					AND = {
+						is_machine_empire = yes
+						event_target:contact_empire = { is_machine_empire = yes }
+					}
+					AND = {
+						is_hive_empire = yes
+						event_target:contact_empire = { is_hive_empire = yes }
+					}
+				}
+			}
+			modifier = {
+				factor = 0.1
+				first_contact_custom_greeting = yes #basically, various hostility
+			}
+		}
+	}
+	option = { #hostile - isolationist
+		name = {
+			text = action.1.ac
+			trigger = {
+				is_xenophobe = yes
+			}
+		}
+		name = {
+			text = action.1.aab
+			trigger = {
+				OR = {
+					is_xenophobe = yes
+					is_materialist = yes
+				}
+				NOT = { is_same_species = event_target:contact_empire }
+			}
+		}
+		name = {
+			text = action.1.ad
+			trigger = {
+				is_authoritarian = yes
+			}
+		}
+		name = {
+			text = action.1.d
+			trigger = {
+				NOT = { is_same_species = event_target:contact_empire }
+				is_xenophobe = yes
+			}
+		}
+		name = {
+			text = action.1.i
+			trigger = {
+				is_egalitarian = yes
+			}
+		}
+		name = {
+			text = action.1.m
+			trigger = {
+				is_pacifist = yes
+			}
+		}
+		name = {
+			text = action.1.r
+			trigger = {
+				is_spiritualist = yes
+				event_target:contact_empire = { has_authority = auth_machine_intelligence }
+			}
+		}
+		name = {
+			text = action.1.aa
+			trigger = {
+				is_materialist = yes
+			}
+		}
+		name = {
+			text = action.1.ao
+			trigger = {
+				is_militarist = yes
+			}
+		}
+		name = {
+			text = action.1.aaa
+			trigger = {
+				is_authoritarian = yes
+			}
+		}
+		name = {
+			text = action.1.aae
+			trigger = {
+				is_authoritarian = yes
+			}
+		}
+		name = {
+			text = action.1.t1
+			trigger = {
+				is_xenophile = yes
+			}
+		}
+		name = {
+			text = action.1.t2
+			trigger = {
+				is_spiritualist = yes
+			}
+		}
+		name = {
+			text = action.1.t3
+			trigger = {
+				is_hive_empire = yes
+			}
+		}
+		name = {
+			text = action.1.t4
+			trigger = {
+				is_machine_empire = yes
+				NOR = {
+					has_valid_civic = civic_machine_assimilator
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		name = {
+			text = action.1.t5
+			trigger = {
+				has_valid_civic = civic_machine_assimilator
+			}
+		}
+		name = {
+			text = action.1.t6
+			trigger = {
+				has_valid_civic = civic_machine_terminator
+			}
+		}
+
+		icon = {
+			icon = GFX_option_icon_isolationist
+			text = seek_isolation_tt_short
+		}
+
+		if = {
+			limit = {
+				OR = {
+					NOT = { is_country_type = default }
+					event_target:contact_empire = { NOT = { is_country_type = default } }
+				}
+			}
+			custom_tooltip = action.1.fe_option
+		}
+		else = {
+			custom_tooltip = seek_isolation_tt
+
+			hidden_effect = {
+				event_target:contact_empire = {
+					random_spynetwork = {
+						limit = { target = { is_same_value = root } }
+						add_modifier = {
+							modifier = first_comms_defensive
+							years = 15
+						}
+					}
+				}
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 2
+				is_xenophobe = yes
+				is_militarist = no
+			}
+			modifier = {
+				factor = 2
+				has_valid_civic = civic_inwards_perfection
+			}
+		}
+	}
+	option = { #hostile - expansionist
+		name = {
+			text = action.1.ae
+			trigger = {
+				OR = {
+					is_xenophobe = yes
+					is_militarist = yes
+				}
+			}
+		}
+		name = {
+			text = action.1.ds
+			trigger = {
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+		name = {
+			text = action.1.mt
+			trigger = {
+				is_machine_empire = yes
+			}
+		}
+		name = {
+			text = action.1.aac
+			trigger = {
+				is_militarist = yes
+				OR = {
+					is_spiritualist = yes
+					is_authoritarian = yes
+				}
+			}
+		}
+		name = {
+			text = action.1.aad
+			trigger = {
+				is_spiritualist = yes
+				NOT = { is_same_species = event_target:contact_empire }
+			}
+		}
+		name = {
+			text = action.1.b
+			trigger = {
+				NOT = { is_same_species = event_target:contact_empire }
+				is_xenophobe = yes
+			}
+		}
+		name = {
+			text = action.1.s
+			trigger = {
+				is_spiritualist = yes
+				event_target:contact_empire = { has_authority = auth_machine_intelligence }
+			}
+		}
+		name = {
+			text = action.1.ab
+			trigger = {
+				is_spiritualist = yes
+				NOT = { is_same_species = event_target:contact_empire }
+			}
+		}
+		name = {
+			text = action.1.an
+			trigger = {
+				is_militarist = yes
+			}
+		}
+		name = {
+			text = action.1.at
+			trigger = {
+				is_militarist = yes
+			}
+		}
+		name = {
+			text = action.1.au
+			trigger = {
+				is_spiritualist = yes
+				is_militarist = yes
+			}
+		}
+		name = {
+			text = action.1.k
+			trigger = {
+				OR = {
+					is_militarist = yes
+					is_authoritarian = yes
+				}
+			}
+		}
+		name = {
+			text = action.1.ax
+			trigger = {
+				OR = {
+					is_materialist = yes
+					is_egalitarian = yes
+					is_pacifist = yes
+				}
+			}
+		}
+		name = {
+			text = action.1.u1
+			trigger = {
+				is_xenophile = yes
+			}
+		}
+		name = {
+			text = action.1.u2
+			trigger = {
+				is_authoritarian = yes
+			}
+		}
+		name = {
+			text = action.1.u3
+			trigger = {
+				is_gestalt = yes
+				NOT = { has_valid_civic = civic_hive_devouring_swarm }
+			}
+		}
+
+		icon = {
+			icon = GFX_option_icon_hostile
+			text = seek_enemies_tt_short
+		}
+
+		if = {
+			limit = {
+				OR = {
+					NOT = { is_country_type = default }
+					event_target:contact_empire = { NOT = { is_country_type = default } }
+				}
+			}
+			custom_tooltip = action.1.fe_option
+		}
+		else = {
+			custom_tooltip = seek_enemies_tt
+
+			event_target:contact_empire = {
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_hostile_first_comms_greeting
+				}
+			}
+			hidden_effect = {
+				random_spynetwork = {
+					limit = {
+						owner = { is_same_value = root }
+						target = { is_same_value = event_target:contact_empire }
+					}
+					add_modifier = {
+						modifier = first_comms_hostility_preparations
+						years = 15
+					}
+				}
+			}
+		}
+
 		trigger = {
 			NOR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-				has_ethic = ethic_pacifist
 				has_ethic = ethic_fanatic_pacifist
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
+				has_valid_civic = civic_inwards_perfection
 			}
 		}
-	}
-	option = {
-		name = action.1.b
-		trigger = {
-			has_ethic = ethic_xenophobe
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.d
-		trigger = {
-			has_ethic = ethic_fanatic_xenophobe
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.c
-		trigger = {
-			has_ethic = ethic_xenophile
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.e
-		trigger = {
-			has_ethic = ethic_fanatic_xenophile
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.f
-		trigger = {
-			has_ethic = ethic_authoritarian
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.g
-		trigger = {
-			has_ethic = ethic_fanatic_authoritarian
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.h
-		trigger = {
-			has_ethic = ethic_egalitarian
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.i
-		trigger = {
-			has_ethic = ethic_fanatic_egalitarian
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.j
-		trigger = {
-			has_ethic = ethic_militarist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.k
-		trigger = {
-			has_ethic = ethic_fanatic_militarist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.l
-		trigger = {
-			has_ethic = ethic_pacifist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.m
-		trigger = {
-			has_ethic = ethic_fanatic_pacifist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.n
-		trigger = {
-			has_ethic = ethic_spiritualist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.o
-		trigger = {
-			has_ethic = ethic_fanatic_spiritualist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.p
-		trigger = {
-			has_ethic = ethic_materialist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.q
-		trigger = {
-			has_ethic = ethic_fanatic_materialist
-			num_ethics < 3
-		}
-	}
-	option = {
-		name = action.1.aa
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 100
+				is_homicidal = yes
 			}
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
+			modifier = {
+				factor = 2
+				is_militarist = yes
 			}
-		}
-	}
-	option = {
-		name = action.1.ab
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
+			modifier = {
+				factor = 0.5
+				is_pacifist = yes
 			}
-			OR = {
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
+			modifier = {
+				factor = 2
+				first_contact_custom_greeting = yes #basically, various hostility
 			}
-		}
-	}
-	option = {
-		name = action.1.ac
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
+			modifier = {
+				factor = 0.1
+				is_in_federation_with = event_target:contact_empire #just in case
 			}
-			OR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
-		}
-	}
-	option = {
-		name = action.1.ad
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-			}
-			OR = {
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-			}
-		}
-	}
-	option = {
-		name = action.1.ae
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-			}
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-		}
-	}
-	option = {
-		name = action.1.af
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-			}
-			OR = {
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
-		}
-	}
-	option = {
-		name = action.1.ag
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-			}
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-		}
-	}
-	option = {
-		name = action.1.ah
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-			}
-			OR = {
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
-			}
-		}
-	}
-	option = {
-		name = action.1.ai
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-			}
-			OR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
-		}
-	}
-	option = {
-		name = action.1.aj
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-			}
-			OR = {
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-			}
-		}
-	}
-	option = {
-		name = action.1.ak
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-			}
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-		}
-	}
-	option = {
-		name = action.1.al
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-			}
-			OR = {
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
-		}
-	}
-	option = {
-		name = action.1.am
-		trigger = {
-			OR = {
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-			}
-			OR = {
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
-			}
-		}
-	}
-	option = {
-		name = action.1.an
-		trigger = {
-			OR = {
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-			}
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-		}
-	}
-	option = {
-		name = action.1.ao
-		trigger = {
-			OR = {
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-			}
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-		}
-	}
-	option = {
-		name = action.1.ap
-		trigger = {
-			OR = {
-				has_ethic = ethic_authoritarian
-				has_ethic = ethic_fanatic_authoritarian
-			}
-			OR = {
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
-		}
-	}
-	option = {
-		name = action.1.aq
-		trigger = {
-			OR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
-			OR = {
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
-			}
-		}
-	}
-	option = {
-		name = action.1.ar
-		trigger = {
-			OR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-		}
-	}
-	option = {
-		name = action.1.as
-		trigger = {
-			OR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
-			OR = {
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
-		}
-	}
-	option = {
-		name = action.1.at
-		trigger = {
-			OR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-		}
-	}
-	option = {
-		name = action.1.au
-		trigger = {
-			OR = {
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
-			}
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-		}
-	}
-	option = {
-		name = action.1.av
-		trigger = {
-			OR = {
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
-			}
-			OR = {
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
-		}
-	}
-	option = {
-		name = action.1.aw
-		trigger = {
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-		}
-	}
-	option = {
-		name = action.1.ax
-		trigger = {
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-			OR = {
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
-		}
-	}
-	option = {
-		name = action.1.aaa
-		trigger = {
-			has_ethic = ethic_xenophobe
-			has_ethic = ethic_authoritarian
-			has_ethic = ethic_militarist
-		}
-	}
-	option = {
-		name = action.1.aab
-		trigger = {
-			has_ethic = ethic_xenophobe
-			has_ethic = ethic_egalitarian
-			has_ethic = ethic_materialist
-		}
-	}
-	option = {
-		name = action.1.aac
-		trigger = {
-			has_ethic = ethic_xenophobe
-			has_ethic = ethic_egalitarian
-			has_ethic = ethic_spiritualist
-		}
-	}
-	option = {
-		name = action.1.aad
-		trigger = {
-			has_ethic = ethic_xenophobe
-			has_ethic = ethic_militarist
-			has_ethic = ethic_spiritualist
-		}
-	}
-	option = {
-		name = action.1.aae
-		trigger = {
-			has_ethic = ethic_xenophile
-			has_ethic = ethic_authoritarian
-			has_ethic = ethic_militarist
 		}
 	}
 
@@ -2204,7 +2222,7 @@ country_event = {
 			}
 			owner_species = { save_event_target_as = nomad_fleet_species }
 		}
-		random_planet = {
+		random_galaxy_planet = {
 			limit = {
 				has_planet_flag = nomad_mission_location
 			}
@@ -2389,7 +2407,7 @@ country_event = {
 				}
 
 				while = {
-					count = 2
+					count = 14
 					create_pop = {
 						species = owner_main_species
 						ethos = {
@@ -2406,8 +2424,8 @@ country_event = {
 						}
 					}
 				}
-				surveyed = {
-					set_surveyed = yes
+				set_surveyed = {
+					surveyed = yes
 					surveyor = root
 				}
 				solar_system = {

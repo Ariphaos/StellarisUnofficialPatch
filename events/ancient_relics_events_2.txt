@@ -38,6 +38,7 @@ ship_event = {
 			has_anomaly = no 
 			is_star = no
 			NOT = { exists = archaeological_site }
+			NOT = { has_planet_flag = suppress_archaeological_sites }
 			NOR = {
 				is_planet_class = pc_gas_giant
 				is_planet_class = pc_molten
@@ -123,6 +124,7 @@ fleet_event = {
 					is_planet_class = pc_barren 
 					has_anomaly = no
 					NOT = { exists = archaeological_site }
+					NOT = { has_planet_flag = suppress_archaeological_sites }
 				}
 			}
 			min_steps = 1
@@ -132,6 +134,7 @@ fleet_event = {
 					is_planet_class = pc_barren 
 					has_anomaly = no
 					NOT = { exists = archaeological_site }
+					NOT = { has_planet_flag = suppress_archaeological_sites }
 				}
 				save_event_target_as = baol_colony_1
 			}
@@ -266,6 +269,7 @@ fleet_event = {
 					is_planet_class = pc_asteroid 
 					has_anomaly = no
 					NOT = { exists = archaeological_site }
+					NOT = { has_planet_flag = suppress_archaeological_sites }
 				}
 			}
 			min_steps = 1
@@ -275,6 +279,7 @@ fleet_event = {
 					is_planet_class = pc_asteroid 
 					has_anomaly = no
 					NOT = { exists = archaeological_site }
+					NOT = { has_planet_flag = suppress_archaeological_sites }
 				}
 				save_event_target_as = baol_colony_2
 			}
@@ -415,6 +420,7 @@ fleet_event = {
 					NOT = { is_planet_class = pc_city }
 					has_anomaly = no
 					NOT = { exists = archaeological_site }
+					NOT = { has_planet_flag = suppress_archaeological_sites }
 					is_colony = no
 				}
 			}
@@ -426,6 +432,7 @@ fleet_event = {
 					NOT = { is_planet_class = pc_city }
 					has_anomaly = no
 					NOT = { exists = archaeological_site }
+					NOT = { has_planet_flag = suppress_archaeological_sites }
 					is_colony = no
 				} 
 				save_event_target_as = baol_colony_3
@@ -536,26 +543,32 @@ country_event = {
 			}
 			random_system_within_border = {
 				limit = { has_star_flag = precursor_baol_1 }
-				spawn_system = {
-					min_distance = 10
-					max_distance = 20
-					max_jumps = 0
-					initializer = "last_baol_system"
-				}
+				save_event_target_as = precursor_spawn_system
 			}
 		}
 		else = {
-			random_system = {
-				limit = { has_star_flag = precursor_baol_1 }
-				spawn_system = {
-					min_distance = 10
-					max_distance = 20
-					max_jumps = 0
-					initializer = "last_baol_system"
-				}
+			random_system_within_border = {
+				save_event_target_as = precursor_spawn_system
 			}
 		}
-		add_extra_hyperlane_to_spawned_system_effect = yes
+		event_target:precursor_spawn_system = {
+			spawn_system = {
+				min_distance = 10
+				max_distance = 20
+				max_jumps = 0
+				initializer = "last_baol_system"
+			}
+			if = {
+				limit = { last_created_system = { NOT = { has_hyperlane_to = prev } } }
+				add_hyperlane = {
+					from = this
+					to = last_created_system
+				}
+			}
+			else = {
+				add_extra_hyperlane_to_spawned_system_effect = yes
+			}
+		}
 		country_event = { id = ancrel.2015 days = 10 }
 	}
 }
@@ -1840,13 +1853,7 @@ fleet_event = {
 			IF = {
 				limit = {
 					NOT = { has_technology = tech_colonization_3 }
-					OR = {
-						is_machine_empire = no
-						OR = {
-							has_civic = civic_machine_servitor
-							has_civic = civic_machine_assimilator
-						}
-					}
+					can_research_technology = tech_colonization_3
 				}
 				give_technology = { tech = tech_colonization_3 }
 			}
@@ -1866,13 +1873,7 @@ fleet_event = {
 			IF = {
 				limit = {
 					NOT = { has_technology = tech_colonization_3 }
-					OR = {
-						is_machine_empire = no
-						OR = {
-							has_civic = civic_machine_servitor
-							has_civic = civic_machine_assimilator
-						}
-					}
+					can_research_technology = tech_colonization_3
 				}
 				give_technology = { tech = tech_colonization_3 }
 			}

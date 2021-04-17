@@ -370,7 +370,7 @@ can_take_hostile_actions = {
 	if = {
 		limit = {
 			ROOT = {
-				has_policy_flag = first_contact_attack_not_allowed
+				NOT = { has_policy_flag = first_contact_attack_allowed }
 			}
 			NOT = {
 				is_hostile = ROOT
@@ -676,8 +676,24 @@ can_species_procreate = {
 can_species_be_assembled = {
 	is_sapient = yes
 	OR = {
-		has_trait = trait_machine_unit
-		has_trait = trait_mechanical
+		AND = {
+			is_robotic = yes
+			root = {
+				check_modifier_value = {
+					modifier = planet_pop_assembly_add
+					value > 0
+				}
+			}
+		}
+		AND = {
+			is_organic_species = yes
+			root = {
+				check_modifier_value = {
+					modifier = planet_pop_assembly_organic_add
+					value > 0
+				}
+			}
+		}
 	}
 }
 
@@ -718,6 +734,10 @@ can_orbital_bombard = {
 				is_country_type = swarm
 				is_country_type = ai_empire
 				is_country_type = cybrex_empire
+				AND = {
+					is_country_type = awakened_marauders
+					ROOT.OWNER = { is_hostile = prev }
+				}
 			}
 		}
 		ROOT.OWNER = {
@@ -735,12 +755,7 @@ can_orbital_bombard = {
 				is_country_type = vol
 				AND = {
 					is_country_type = awakened_marauders
-					FROM.CONTROLLER = {
-						NAND = {
-							is_subject_type = satrapy
-							NOT = { has_country_flag = rebelling_satrapy }
-						}
-					}
+					FROM.CONTROLLER = { is_hostile = prev }
 				}
 			}
 		}
@@ -999,20 +1014,11 @@ ai_should_restrict_system = {
 					is_country_type = marauder_raiders
 				}
 			}
+			has_star_flag = guardian
 			any_fleet_in_system = {
 				exists = owner
 				owner = {
-					OR = {
-						is_country_type = guardian_dragon
-						is_country_type = guardian_stellarite
-						is_country_type = guardian_wraith
-						is_country_type = guardian_horror
-						is_country_type = guardian_fortress
-						is_country_type = guardian_dreadnought
-						is_country_type = guardian_elderly_tiyanki
-						is_country_type = guardian_hatchling
-						is_country_type = guardian_scavenger_bot
-					}
+					is_guardian_country = yes
 				}
 			}
 		}
@@ -1085,7 +1091,7 @@ system_blocks_sensors = {
 # This = system being targeted
 can_enter_system_by_jump = {
 	custom_tooltip = {
-		success_text = "debug: can jump"
+#		success_text = "debug: can jump"
 		fail_text = cannot_jump_to_system
 
 		# Sealed system
@@ -1105,6 +1111,11 @@ can_enter_system_by_jump = {
 
 # This = pop
 can_resettle_pop = {
+	# Self-modified Pops won't leave
+	custom_tooltip = {
+		fail_text = "self_modified_refuse"
+		NOT = { has_trait = trait_self_modified }
+	}
 	if = { #Done as an IF/ELSE so the tooltip isn't hideous and unreadable
 		limit = { is_shackled_robot = yes }
 		always = yes
@@ -1136,31 +1147,43 @@ can_resettle_pop = {
 			}
 		}
 	}
-	else = {
-		owner = {
-			OR = {
-				has_policy_flag = resettlement_allowed
+	else_if = {
+		limit = {
+			owner = {
 				is_gestalt = yes
+			}
+		}
+		always = yes
+	}
+	else = {
+		custom_tooltip = {
+			fail_text = RESETTLEMENT_POLICY_FAIL
+			owner = {
+				has_policy_flag = resettlement_allowed
 			}
 		}
 	}
 }
 
-can_country_resettle = 
-{
+can_country_resettle = {
 	OR = {
 		has_policy_flag = resettlement_allowed
 		is_gestalt = yes
-		any_owned_pop = {
-			is_shackled_robot = yes
+		custom_tooltip = {
+			text = owns_non_sapient_robots
+			any_owned_pop = {
+				is_shackled_robot = yes
+			}
 		}
-		any_owned_planet = {
-			OR = {
-				has_modifier = doomsday_1
-				has_modifier = doomsday_2
-				has_modifier = doomsday_3
-				has_modifier = doomsday_4
-				has_modifier = doomsday_5
+		hidden_trigger = { #don't need to show this as tooltip only shown when all game rule fails, and this is a special case
+			any_owned_planet = {
+				OR = {
+					has_modifier = doomsday_1
+					has_modifier = doomsday_2
+					has_modifier = doomsday_3
+					has_modifier = doomsday_4
+					has_modifier = doomsday_5
+				}
 			}
 		}
 	}
@@ -1209,7 +1232,7 @@ can_resettle_planet_no_owner_check = {
 
 # This = Planet
 should_spawn_deposits = {
-	habitable_structure = no
+	is_artificial = no
 }
 
 # This = Planet
@@ -1273,6 +1296,7 @@ can_force_grow_on_planet = {
 # This = planet
 # Root = country
 can_force_decline_on_planet = {
+	exists = owner
 	owner = { NOT = { has_policy_flag = population_controls_not_allowed } }
 	custom_tooltip = {
 		fail_text = FORCED_DECLINE_ALREADY_PURGING
@@ -1298,7 +1322,10 @@ can_force_decline_species = {
 can_build_branch_offices = {
 	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_MEGACORP
-		has_authority = auth_corporate
+		OR = {
+			has_authority = auth_corporate
+			has_civic = civic_galactic_sovereign_megacorp
+		}
 	}
 }
 
@@ -1311,8 +1338,17 @@ can_support_branch_offices = {
 			is_country_type = awakened_fallen_empire
 		}
 	}
-	is_regular_empire = yes
-	NOT = { has_authority = auth_corporate }
+	custom_tooltip = {
+		fail_text = BRANCH_OFFICE_NOT_ON_MEGACORP_PLANET
+		NOR = {
+			has_authority = auth_corporate
+			has_civic = civic_galactic_sovereign_megacorp
+		}
+	}
+	custom_tooltip = {
+		fail_text = BRANCH_OFFICE_NOT_REGULAR_EMPIRE
+		is_regular_empire = yes
+	}
 }
 
 # This = planet
@@ -1346,6 +1382,14 @@ can_build_branch_office_on_planet = {
 				is_subject = yes
 				is_subject_type = subsidiary
 				overlord = { is_same_value = root }
+			}
+			AND = {
+				root = { has_civic = civic_galactic_sovereign_megacorp }
+				owner = { is_galactic_community_member = yes }
+			}
+			AND = {
+				root = { has_modifier = imperial_charter }
+				owner = { is_galactic_community_member = yes }
 			}
 		}
 	}
@@ -1435,6 +1479,7 @@ can_use_galactic_market = {
 # ROOT = country
 # THIS = pop
 can_be_sold_on_slave_market = {
+	exists = owner
 	OR = {
 		is_enslaved = yes
 		is_non_sapient_robot = yes
@@ -1447,7 +1492,7 @@ can_be_sold_on_slave_market = {
 			is_unemployed = yes
 			is_being_assimilated = no
 			planet = {
-				count_pops = {
+				count_owned_pop = {
 					count > 2
 					limit = { is_unemployed = yes }
 				}
@@ -1474,11 +1519,57 @@ can_be_sold_on_slave_market = {
 
 # This = country
 can_be_part_of_galactic_community = {
-	is_country_type = default
-	NOR = {
-		has_civic = civic_fanatic_purifiers
-		has_civic = civic_hive_devouring_swarm
-		has_civic = civic_machine_terminator
+	custom_tooltip = {
+		fail_text = "community_default_failtext"
+		is_country_type = default
+	}
+	custom_tooltip = {
+		fail_text = "community_homicidal_failtext"
+		NOR = {
+			has_civic = civic_fanatic_purifiers
+			has_civic = civic_hive_devouring_swarm
+			has_civic = civic_machine_terminator
+		}
+	}
+	custom_tooltip = {
+		fail_text = "community_declared_crisis_failtext"
+		has_been_declared_crisis = no
+	}
+	custom_tooltip = {
+		fail_text = "community_declared_crisis_failtext"
+		#fail_text = "community_overlord_declared_crisis_failtext"
+		OR = {
+			NOT = { exists = overlord }
+			overlord = { has_been_declared_crisis = no }
+		}
+	}
+}
+
+# This = country
+can_be_part_of_galactic_empire = {
+	custom_tooltip = {
+		fail_text = "community_default_failtext"
+		is_country_type = default
+	}
+	custom_tooltip = {
+		fail_text = "community_homicidal_failtext"
+		NOR = {
+			has_civic = civic_fanatic_purifiers
+			has_civic = civic_hive_devouring_swarm
+			has_civic = civic_machine_terminator
+		}
+	}
+	custom_tooltip = {
+		fail_text = "community_declared_crisis_failtext"
+		has_been_declared_crisis = no
+	}
+	custom_tooltip = {
+		fail_text = "community_declared_crisis_failtext"
+		#fail_text = "community_overlord_declared_crisis_failtext"
+		OR = {
+			NOT = { exists = overlord }
+			overlord = { has_been_declared_crisis = no }
+		}
 	}
 }
 
@@ -1528,27 +1619,126 @@ has_enough_pops_for_necrophage_on_planet = {
 			}
 		}
 	}
+	else = {
+		NOT = { any_owned_pop = { would_work_job = necro_apprentice } }
+	}
+}
+
+# Root = current planet
+# This = pop
+# Migration Controls policy and target habitability is checked in code.
+can_pop_auto_migrate = {
+	planet = {
+		NOT = { has_modifier = planet_culture_shock }
+	}
+	is_sapient = yes
+	is_unemployed = yes
+	is_being_assimilated = no
+	is_enslaved = no
+	is_non_sapient_robot = no
+	is_shackled_robot = no
+}
+
+# This = country contacting
+# From = target country
+## Final check for whether there should be a first contact site spawned. Main check is via country type contact_rule, in code.
+can_have_first_contact = {
+	if = {
+		limit = { from = { is_amoeba_country_type = yes } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = { is_amoeba_country_type = yes }
+			}
+		}
+	}
 	else_if = {
-		limit = { has_building = building_necrophage_elevation_chamber }
-		count_owned_pop = {
-			count < 3
-			limit = {
-				species = { species_can_be_necrophaged = yes }
+		limit = { from = { is_tiyanki_country_type = yes } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = { is_tiyanki_country_type = yes }
+			}
+		}
+	}
+	else_if = {
+		limit = { from = { is_crystal_country_type = yes } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = {
+					is_crystal_country_type = yes
+					NOT = { has_country_flag = queued_to_destroy }
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { from = { is_drone_country_type = yes } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = {
+					is_drone_country_type = yes
+					NOT = { has_country_flag = queued_to_destroy }
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { from = { is_country_type = cloud } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = { is_country_type = cloud }
 			}
 		}
 	}
 	else_if = {
 		limit = {
-			has_building = building_necrophage_house_of_apotheosis
+			from = {
+				OR = {
+					is_country_type = caravaneer_fleet
+					is_country_type = caravaneer_home
+				}
+			}
 		}
-		count_owned_pop = {
-			count < 6
-			limit = {
-				species = { species_can_be_necrophaged = yes }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = {
+					OR = {
+						is_country_type = caravaneer_fleet
+						is_country_type = caravaneer_home
+					}
+				}
 			}
 		}
 	}
-	else = {
-		always = no
+}
+
+# Root = Country with envoys to send
+# This = Imperium leader country
+can_use_envoys_to_raise_imperial_authority = {
+	always = yes
+}
+
+# Root = Country with envoys to send
+# This = Imperium leader country
+can_use_envoys_to_lower_imperial_authority = {
+	custom_tooltip = {
+		fail_text = cannot_lower_authority_emperor
+		root = { is_galactic_emperor = no }
 	}
+	custom_tooltip = {
+		fail_text = cannot_lower_authority_espionage_operation
+		root = {
+			NOT = { has_modifier = undermining_efforts_stalled }
+		}
+	}
+}
+
+# Checks whether the game should try and build a building or district on a planet via scripts in common/colony_automation
+# Does not apply to "crisis building" (colony_automation_exceptions) or sector automation (sector_focuses)
+# this = planet
+should_planetary_automate = {
+	OR = {
+		free_jobs < 3
+		num_unemployed > 0
+	}
+	has_building_construction = no
 }

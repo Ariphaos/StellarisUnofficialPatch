@@ -98,6 +98,31 @@ action_improve_relation = {
 			}
 		}
 	}
+
+	proposable = {
+		custom_tooltip = {
+			fail_text = "requires_envoy_not_harming_relations"
+			NOT = { is_harming_relations_with = from }
+		}
+	}
+}
+
+# Build Spy Network
+action_build_spy_network = {
+	icon = "GFX_diplomacy_improve_relation"
+	auto_accepted = yes
+	require_envoy = yes
+	envoy_assignment = spy_network
+	requires_actor_independence = no
+	requires_recipient_independence = no
+	action_type = positive
+
+	potential = {
+		hidden_trigger = {
+			is_country_type = default
+			from = { is_country_type = default }
+		}
+	}
 }
 
 # Harm opinion
@@ -173,6 +198,13 @@ action_harm_relation = {
 					}
 				}
 			}
+		}
+	}
+
+	proposable = {
+		custom_tooltip = {
+			fail_text = "requires_envoy_not_improving_relations"
+			NOT = { is_improving_relations_with = from }
 		}
 	}
 }
@@ -689,8 +721,10 @@ action_form_research_agreement = {
 	AI_acceptance_base_value = -50
 	action_type = positive
 	potential = {
-		is_country_type = default
-		from = { is_country_type = default }
+		hidden_trigger = {
+			is_country_type = default
+			from = { is_country_type = default }
+		}
 	}
 
 	possible = {
@@ -820,8 +854,9 @@ action_break_research_agreement = {
 # Usable by regular empires only. Not possible while in a federation. Raises trust over time.
 action_guarantee_independence = {
 	icon = "GFX_diplomacy_status_guarantee"
-	auto_accepted = yes
-	should_show_auto_accept_message_recipient = yes
+	auto_accepted = no
+	diplo_view_acceptance_icon = yes
+	should_show_auto_accept_message_recipient = no
 	should_notify_all_communications = yes
 	requires_recipient_independence = yes
 	requires_actor_independence = yes
@@ -1227,8 +1262,17 @@ action_offer_federation_association_status = {
 			fail_text = "requires_good_or_better_opinion"
 
 			OR = {
+				from = { is_same_value = prevprev } # Bypass opinion check if we are proposing on behalf of recipient
 				opinion_level = { who = from level >= good }
 				is_improving_relations_with = from
+			}
+		}
+		# Members of the Galactic Empire can't associate with federations
+		custom_tooltip = {
+			fail_text = "requires_actor_recepient_not_in_galactic_empire_2"
+			NAND = {
+				has_galactic_emperor = yes
+				from = { is_galactic_community_member = yes }
 			}
 		}
 	}
@@ -1312,6 +1356,17 @@ action_ask_for_federation_association_status = {
 			OR = {
 				opinion_level = { who = from level >= good }
 				is_improving_relations_with = from
+			}
+		}
+		# Members of the Galactic Empire can't associate with federations
+		custom_tooltip = {
+			fail_text = "requires_actor_recepient_not_in_galactic_empire_2"
+			NAND = {
+				has_galactic_emperor = yes
+				OR = {
+					is_galactic_community_member = yes
+					from = { is_galactic_community_member = yes }
+				}
 			}
 		}
 	}
@@ -1441,6 +1496,17 @@ action_invite_to_federation = {
 				from = { is_same_value = prevprev } # Bypass opinion check if we are proposing on behalf of recipient
 				opinion_level = { who = from level >= excellent }
 				is_improving_relations_with = from
+			}
+		}
+		# Members of the Galactic Empire can't be in federations
+		custom_tooltip = {
+			fail_text = "requires_actor_recepient_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				OR = {
+					is_galactic_community_member = yes
+					from = { is_galactic_community_member = yes }
+				}
 			}
 		}
 	}
@@ -1596,6 +1662,19 @@ action_ask_to_join_federation = {
 			OR = {
 				opinion_level = { who = from level >= excellent }
 				is_improving_relations_with = from
+			}
+		}
+		custom_tooltip = {
+			fail_text = requires_actor_to_be_federation_leader
+			from = {
+				if = {
+					limit = {
+						federation = {
+							has_federation_law = invite_members_president_vote_hegemony
+						}
+					}
+					is_federation_leader = yes
+				}
 			}
 		}
 	}
@@ -1795,6 +1874,26 @@ action_demand_vassalization = {
 			fail_text = "requires_actor_not_inward_perfection"
 			NOT = { has_valid_civic = civic_inwards_perfection }
 		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = no
+				from = { is_galactic_community_member = yes }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			from = { is_galactic_custodian = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			from = { is_galactic_emperor = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
 	}
 
 	proposable = {
@@ -1893,6 +1992,26 @@ action_demand_protectorate = {
 			fail_text = "requires_actor_not_inward_perfection"
 			NOT = { has_valid_civic = civic_inwards_perfection }
 		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = no
+				from = { is_galactic_community_member = yes }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			from = { is_galactic_custodian = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			from = { is_galactic_emperor = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
 	}
 
 	proposable = {
@@ -1983,6 +2102,26 @@ action_demand_tributary = {
 			fail_text = "requires_actor_not_inward_perfection"
 			NOT = { has_valid_civic = civic_inwards_perfection }
 		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = no
+				from = { is_galactic_community_member = yes }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			from = { is_galactic_custodian = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			from = { is_galactic_emperor = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
 	}
 
 	proposable = {
@@ -2011,6 +2150,20 @@ action_demand_thrall = {
 	requires_recipient_independence = no
 	AI_acceptance_base_value = -50
 	action_type = aggressive
+
+	potential = {
+		NAND = {
+			has_galactic_emperor = yes
+			is_galactic_community_member = yes
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
+	}
 }
 
 # Turns another empire into a Dominion. Dominions pay 25% of mineral and energy income to overlord and have their ethics set to Fanatic Spiritualist/Authoritarian on creation.
@@ -2025,6 +2178,20 @@ action_demand_dominion = {
 	requires_recipient_independence = no
 	AI_acceptance_base_value = -50
 	action_type = aggressive
+
+	potential = {
+		NAND = {
+			has_galactic_emperor = yes
+			is_galactic_community_member = yes
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
+	}
 }
 
 # Turns another empire into a Satellite. Satellites pay 50% of research income to overlord and are required to ban artificial intelligence via policies.
@@ -2039,6 +2206,20 @@ action_demand_satellite = {
 	requires_recipient_independence = no
 	AI_acceptance_base_value = -50
 	action_type = aggressive
+
+	potential = {
+		NAND = {
+			has_galactic_emperor = yes
+			is_galactic_community_member = yes
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
+	}
 }
 
 # Turns another empire into a Signatory. Signatories are required to ban purging and slavery via policies.
@@ -2053,6 +2234,20 @@ action_demand_signatory = {
 	requires_recipient_independence = no
 	AI_acceptance_base_value = -50
 	action_type = aggressive
+
+	potential = {
+		NAND = {
+			has_galactic_emperor = yes
+			is_galactic_community_member = yes
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
+	}
 }
 
 # Turns another empire into a Subsidiary.
@@ -2069,6 +2264,29 @@ action_demand_subsidiary = {
 
 	potential = {
 		has_authority = auth_corporate
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = no
+				from = { is_galactic_community_member = yes }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			from = { is_galactic_custodian = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			from = { is_galactic_emperor = no }
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			from = { has_been_declared_crisis = no }
+		}
 	}
 
 	proposable = {
@@ -2182,6 +2400,33 @@ action_ask_to_become_vassalized = {
 				}
 			}
 		}
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			OR = {
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = no
+					from = { is_galactic_community_member = yes }
+				}
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = yes
+					from = { is_galactic_community_member = no }
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
 	}
 }
 
@@ -2280,6 +2525,33 @@ action_ask_to_become_protectorate = {
 				}
 			}
 		}
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			OR = {
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = no
+					from = { is_galactic_community_member = yes }
+				}
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = yes
+					from = { is_galactic_community_member = no }
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
 	}
 }
 
@@ -2374,6 +2646,33 @@ action_ask_to_become_tributary = {
 				}
 			}
 		}
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			OR = {
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = no
+					from = { is_galactic_community_member = yes }
+				}
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = yes
+					from = { is_galactic_community_member = no }
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
 	}
 }
 
@@ -2466,6 +2765,33 @@ action_ask_to_become_subsidiary = {
 				}
 			}
 		}
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			OR = {
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = no
+					from = { is_galactic_community_member = yes }
+				}
+				NAND = {
+					has_galactic_emperor = yes
+					is_galactic_community_member = yes
+					from = { is_galactic_community_member = no }
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
 	}
 }
 
@@ -2478,6 +2804,28 @@ action_ask_to_become_thrall = {
 	should_notify_all_communications = yes
 	AI_acceptance_base_value = -50
 	action_type = positive
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = yes
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
+	}
 }
 
 # Ask to become dominion, see above for description of this subject type.
@@ -2489,6 +2837,28 @@ action_ask_to_become_dominion = {
 	should_notify_all_communications = yes
 	AI_acceptance_base_value = -50
 	action_type = positive
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = yes
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
+	}
 }
 
 # Ask to become satellite, see above for description of this subject type.
@@ -2500,6 +2870,28 @@ action_ask_to_become_satellite = {
 	should_notify_all_communications = yes
 	AI_acceptance_base_value = -50
 	action_type = positive
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = yes
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
+	}
 }
 
 # Ask to become signatory, see above for description of this subject type.
@@ -2511,6 +2903,28 @@ action_ask_to_become_signatory = {
 	should_notify_all_communications = yes
 	AI_acceptance_base_value = -50
 	action_type = positive
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_not_in_galactic_empire"
+			NAND = {
+				has_galactic_emperor = yes
+				is_galactic_community_member = yes
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_gal_emperor"
+			is_galactic_emperor = no
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_btc"
+			has_been_declared_crisis = no
+		}
+	}
 }
 
 # Release a subject of any type. Hurts relations and sets a 10 year truce.
@@ -2573,4 +2987,136 @@ action_cancel_subject_integration = {
 	requires_recipient_independence = no
 	should_notify_all_communications = yes
 	action_type = neutral
+}
+
+action_ask_to_join_galactic_empire = {
+	icon = "GFX_diplomacy_status_join_galactic_empire"
+	auto_accepted = no
+	should_notify_all_communications = yes
+	action_type = neutral
+}
+
+action_add_imperial_council_member = {
+	icon = "GFX_diplomacy_status_add_imperial_council_member"
+	auto_accepted = yes
+	requires_recipient_independence = no
+	should_notify_all_communications = yes
+	action_type = positive
+
+	on_accept = {
+		hidden_effect = {
+			from = {
+				add_permanent_councillor = yes
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_emperor_gave_council_seat
+				}
+			}
+		}
+	}
+}
+
+action_remove_imperial_council_member = {
+	icon = "GFX_diplomacy_status_remove_imperial_council_member"
+	auto_accepted = yes
+	requires_recipient_independence = no
+	should_notify_all_communications = yes
+	action_type = negative
+
+	on_accept = {
+		hidden_effect = {
+			from = {
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_emperor_removed_council_seat 
+				}
+			}
+		}
+	}
+}
+
+# Create embassies in both of your capitals. Affects intel and improve relations
+action_embassy = {
+	icon = "GFX_embassy_our"
+	auto_accepted = no
+	diplo_view_acceptance_icon = yes
+	requires_recipient_independence = no
+	requires_actor_independence = no
+	should_notify_all_communications = no
+	action_type = positive
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "DIPLOMACY_STATUS_WAR"
+			NOT = { is_at_war_with = from }
+		}
+		custom_tooltip = {
+			fail_text = "requires_actor_not_fanatic_purifiers"
+			OR = {
+				is_same_species = from
+				NOT = { has_valid_civic = civic_fanatic_purifiers	}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_fanatic_purifiers"
+			OR = {
+				is_same_species = from
+				from = { NOT = { has_valid_civic = civic_fanatic_purifiers } }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_actor_not_devouring_swarm"
+			NOT = { has_valid_civic = civic_hive_devouring_swarm	}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_devouring_swarm"
+			from = { NOT = { has_valid_civic = civic_hive_devouring_swarm } }
+		}
+		custom_tooltip = {
+			fail_text = "requires_actor_not_machine_terminator"
+			OR = {
+				is_same_species = from
+				NOT = { has_civic = civic_machine_terminator }
+				AND = {
+					has_civic = civic_machine_terminator
+					from = {
+						OR = {
+							has_country_flag = synthetic_empire
+							has_authority = auth_machine_intelligence
+						}
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "requires_recipient_not_machine_terminator"
+			OR = {
+				is_same_species = from
+				from = { NOT = { has_civic = civic_machine_terminator } }
+				AND = {
+					from = { has_civic = civic_machine_terminator }
+					OR = {
+						has_country_flag = synthetic_empire
+						has_authority = auth_machine_intelligence
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "HAS_RIVALRY"
+			NOR = {
+				is_rival = from
+				from = { is_rival = prev }
+			}
+		}
+	}
+}
+
+action_recall_embassy = {
+	icon = "GFX_embassy_our"
+	auto_accepted = yes
+	requires_recipient_independence = no
+	requires_actor_independence = no
+	should_notify_all_communications = no
+	action_type = negative
 }

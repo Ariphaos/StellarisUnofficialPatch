@@ -72,6 +72,9 @@ event = {
 					"null"
 				}
 			}
+			effect = {
+				set_country_flag = suppress_first_contact_comms
+			}
 		}
 
 		### HANDLE EMPIRE RELATIONS
@@ -81,10 +84,7 @@ event = {
 			}
 			every_country = {
 				limit = {
-					OR = {
-						is_country_type = drone
-						has_country_flag = drone_country
-					}
+					is_drone_country_type = yes
 				}
 				set_faction_hostility = {
 					target = prev
@@ -97,21 +97,15 @@ event = {
 
 		every_country = {
 			limit = {
-				OR = {
-					is_country_type = tiyanki
-					is_country_type = tiyanki_garrison
-				}
+				is_tiyanki_country_type = yes
 			}
 			every_country = {
 				limit = {
 					OR = {
-						is_country_type = amoeba
-						is_country_type = amoeba_borderless
-						is_country_type = amoeba_garrison
-						is_country_type = crystal
+						is_amoeba_country_type = yes
+						is_drone_country_type = yes
+						is_crystal_country_type = yes
 						is_country_type = cloud
-						has_country_flag = crystal_country
-						has_country_flag = drone_country
 					}
 				}
 				set_faction_hostility = {
@@ -168,13 +162,38 @@ event = {
 			country_event = { id = origin.60 }
 		}
 
-		# Lost Colony
-		every_playable_country = {
-			limit = { 
-				has_origin = origin_lost_colony
-				NOT = { has_country_flag = human_2 }
+		## Lost Colony
+		# if advanced starts are enabled or a player has picked it, let it ride
+		if = {
+			limit = {
+				OR = {
+					any_playable_country = {
+						has_origin = origin_lost_colony
+						is_ai = no
+					}
+					check_galaxy_setup_value = { setting = num_advanced_empires value > 0 }
+				}
 			}
-			country_event = { id = origin.100 }
+			every_playable_country = {
+				limit = {
+					has_origin = origin_lost_colony
+					NOT = { has_country_flag = human_2 }
+				}
+				country_event = { id = origin.100 }
+			}
+		}
+		# if an AI has picked it and advanced starts are not enabled,
+		# give them default origin instead.
+		# also affects lost_colony_1 initializer
+		else = {
+			every_playable_country = {
+				limit = {
+					has_origin = origin_lost_colony
+					NOT = { has_country_flag = human_2 }
+				}
+				log = "REMOVED LOST COLONY"
+				set_origin = origin_default
+			}
 		}
 
 		# Galactic Doorstep

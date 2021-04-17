@@ -419,7 +419,7 @@ country_event = {
 				solar_system = {
 					if = {
 						limit = {
-							any_ship_in_system = {
+							any_fleet_in_system = {
 								is_ship_class = shipclass_starbase
 							}
 						}
@@ -703,7 +703,11 @@ country_event = {
 	option = {
 		name = crisis.18.e
 		trigger = {
-			has_government = gov_megacorporation
+			OR = {
+				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
+			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
 				has_ethic = "ethic_fanatic_authoritarian"
@@ -721,6 +725,8 @@ country_event = {
 				has_materialist_government = yes
 				has_pacifist_government = yes
 				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
 				has_ethic = "ethic_fanatic_egalitarian"
 				has_ethic = "ethic_fanatic_authoritarian"
 				has_ethic = "ethic_fanatic_xenophile"
@@ -779,6 +785,23 @@ country_event = {
 		every_country = {
 			limit = { is_country_type = default }
 			country_event = { id = crisis.20 }
+		}
+
+		# Custodian/Emperor Announcements
+		event_target:prethoryn = { save_event_target_as = crisis_country }
+		if = {
+			limit = { has_galactic_custodian = yes }
+			random_playable_country = {
+				limit = { is_galactic_custodian = yes }
+				country_event = { id = custodian.50 days = 30 }
+			}
+		}
+		if = {
+			limit = { has_galactic_emperor = yes }
+			random_playable_country = {
+				limit = { is_galactic_emperor = yes }
+				country_event = { id = emperor.90 days = 30 }
+			}
 		}
 
 		# Recreate Prethoryn if Vanguard was destroyed
@@ -865,7 +888,7 @@ country_event = {
 				}
 				random_fleet_in_system = {
 					limit = {
-						any_owned_ship = { is_ship_class = shipclass_starbase }
+						is_ship_class = shipclass_starbase
 					}
 					destroy_fleet = this
 				}
@@ -936,15 +959,13 @@ country_event = {
 				limit = { has_star_flag = swarm_invasion_target_2 }
 				if = {
 					limit = {
-						any_ship_in_system = {
+						any_fleet_in_system = {
 							is_ship_class = shipclass_starbase
 						}
 					}
 					random_fleet_in_system = {
 						limit = {
-							any_owned_ship = {
-								is_ship_class = shipclass_starbase
-							}
+							is_ship_class = shipclass_starbase
 						}
 						destroy_fleet = this
 					}
@@ -1014,15 +1035,13 @@ country_event = {
 				limit = { has_star_flag = swarm_invasion_target_3 }
 				if = {
 					limit = {
-						any_ship_in_system = {
+						any_fleet_in_system = {
 							is_ship_class = shipclass_starbase
 						}
 					}
 					random_fleet_in_system = {
 						limit = {
-							any_owned_ship = {
-								is_ship_class = shipclass_starbase
-							}
+							is_ship_class = shipclass_starbase
 						}
 						destroy_fleet = this
 					}
@@ -1113,15 +1132,13 @@ country_event = {
 				limit = { has_star_flag = swarm_invasion_target_4 }
 				if = {
 					limit = {
-						any_ship_in_system = {
+						any_fleet_in_system = {
 							is_ship_class = shipclass_starbase
 						}
 					}
 					random_fleet_in_system = {
 						limit = {
-							any_owned_ship = {
-								is_ship_class = shipclass_starbase
-							}
+							is_ship_class = shipclass_starbase
 						}
 						destroy_fleet = this
 					}
@@ -2266,7 +2283,7 @@ fleet_event = {
 	trigger = {
 		has_fleet_flag = pet_queen
 		num_ships < 30
-		any_owned_ship = { is_ship_size = queen_swarm }
+		is_ship_size = queen_swarm
 	}
 
 	mean_time_to_happen = {
@@ -2778,6 +2795,7 @@ planet_event = {
 	}
 
 	immediate = {
+		controller = { save_event_target_as = swarm }
 		if = {
 			limit = {
 				NOR = {
@@ -2786,7 +2804,7 @@ planet_event = {
 				}
 			}
 			change_pc = pc_infested
-			set_owner = controller
+			set_owner = event_target:swarm
 			planet_event = { id = crisis.215 }
 		}
 		else_if = {
@@ -2800,6 +2818,47 @@ planet_event = {
 		else_if = {
 			limit = { is_planet_class = pc_habitat }
 			ariphaos_patch_remove_habitat = yes
+		}
+
+		solar_system = {
+			if = { # Build starbase if no other colonies are left
+				limit = {
+					NOT = {
+						exists = starbase
+						any_system_planet = {
+							has_owner = yes
+							owner =  { 
+								NOT = { is_same_value = event_target:swarm }
+							}
+						}
+					}
+				}
+				create_starbase = {
+					size = starbase_swarm
+					owner = event_target:swarm
+				}
+				if = {
+					limit = {
+						NOT = {
+							any_system_ambient_object = { has_ambient_object_flag = swarm_system_effect }
+						}
+					}
+					star = {
+						create_ambient_object = {
+							type = "swarm_1"
+							location = this
+						}
+						last_created_ambient_object = {
+							set_ambient_object_flag = swarm_system_effect
+							set_location = {
+								target = prev
+								distance = 0
+								angle = random
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -3192,7 +3251,7 @@ country_event = {
 	id = crisis.211
 	title = "crisis.211.name"
 	desc = "crisis.211.desc"
-	picture = GFX_evt_metropolis
+	picture = GFX_evt_crisis_defeated
 	show_sound = event_celebration
 
 	is_triggered_only = yes
@@ -3240,7 +3299,11 @@ country_event = {
 	option = { # Corporate Response
 		name = crisis.211.e
 		trigger = {
-			has_government = gov_megacorporation
+			OR = {
+				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
+			}
 			NOR = {
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
@@ -3256,6 +3319,8 @@ country_event = {
 				has_materialist_government = yes
 				has_pacifist_government = yes
 				has_government = gov_megacorporation
+				has_government = gov_trade_league
+				has_authority = auth_corporate
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 			}
@@ -3670,6 +3735,10 @@ country_event = {
 
 	is_triggered_only = yes
 
+	immediate = {
+		set_country_flag = queen_captured
+	}
+
 	option = {
 		name = EXCELLENT
 		add_relic = "r_prethoryn_queen"
@@ -3721,6 +3790,67 @@ country_event = {
 				random_system_ambient_object = {
 					limit = { has_ambient_object_flag = swarm_system_effect }
 					destroy_ambient_object = this
+				}
+			}
+		}
+	}
+}
+
+# Swarm Destroyed Starbase
+starbase_event = {
+	id = crisis.265
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from.owner = { is_country_type = swarm }
+		NOT = {
+			solar_system = {
+				any_system_planet = { is_colony = yes } # For populated systems, they need to invade first
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = { save_event_target_as = starbase_system }
+		from.owner = { 
+			country_event = { id = crisis.266 days = 5 } # Delay so that destroyed starbase is properly cleared out
+		}
+	}
+}
+
+# Swarm Builds New Starbase
+country_event = {
+	id = crisis.266
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:starbase_system = {
+			solar_system = {
+				create_starbase = {
+					size = starbase_swarm
+					owner = root
+				}
+				star = {
+					create_ambient_object = {
+						type = "swarm_1"
+						location = this
+					}
+					last_created_ambient_object = {
+						set_ambient_object_flag = swarm_system_effect
+						set_location = {
+							target = prev
+							distance = 0
+							angle = random
+						}
+					}
+				}
+				every_system_planet = {
+				    limit = { has_orbital_station = yes }
+				    orbital_station = { dismantle = yes }
 				}
 			}
 		}

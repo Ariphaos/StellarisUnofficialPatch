@@ -31,6 +31,7 @@ ship_event = {
 		FROM = {
 			has_anomaly = no
 			NOT = { exists = archaeological_site }
+			NOT = { has_planet_flag = suppress_archaeological_sites }
 			habitable_planet = yes
 		}
 		owner = {
@@ -155,6 +156,7 @@ fleet_event = {
 					NOR = { 
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites #for modders
 					}
 				}
 				root.owner = {
@@ -174,6 +176,7 @@ fleet_event = {
 					NOR = { 
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				create_archaeological_site = zroni_digsite_2
@@ -212,6 +215,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 				}
@@ -227,6 +231,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 					create_archaeological_site = zroni_digsite_2
@@ -330,6 +335,7 @@ fleet_event = {
 					NOR = { 
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				root.owner = {
@@ -349,6 +355,7 @@ fleet_event = {
 					NOR = { 
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				create_archaeological_site = zroni_digsite_3
@@ -387,6 +394,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 				}
@@ -402,6 +410,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 					create_archaeological_site = zroni_digsite_3
@@ -473,6 +482,7 @@ fleet_event = {
 					NOR = {
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				root.owner = {
@@ -492,6 +502,7 @@ fleet_event = {
 					NOR = { 
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				create_archaeological_site = zroni_digsite_4
@@ -530,6 +541,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 				}
@@ -545,6 +557,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 					create_archaeological_site = zroni_digsite_4
@@ -623,6 +636,7 @@ fleet_event = {
 					NOR = {
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				root.owner = {
@@ -642,6 +656,7 @@ fleet_event = {
 					NOR = { 
 						exists = archaeological_site
 						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
 					}
 				}
 				create_archaeological_site = zroni_digsite_5
@@ -680,6 +695,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 				}
@@ -695,6 +711,7 @@ fleet_event = {
 						NOR = { 
 							exists = archaeological_site
 							has_planet_flag = hatchling_egg
+							has_planet_flag = suppress_archaeological_sites
 						}
 					}
 					create_archaeological_site = zroni_digsite_5
@@ -795,26 +812,32 @@ fleet_event = {
 				}
 				random_system_within_border = {
 					limit = { has_star_flag = precursor_zroni_1 }
-					spawn_system = {
-						min_distance = 10
-						max_distance = 20
-						max_jumps = 0
-						initializer = "Zrocursor_system"
-					}
+					save_event_target_as = precursor_spawn_system
 				}
 			}
 			else = {
-				random_system = {
-					limit = { has_star_flag = precursor_zroni_1 }
-					spawn_system = {
-						min_distance = 10
-						max_distance = 20
-						max_jumps = 0
-						initializer = "Zrocursor_system"
-					}
+				random_system_within_border = {
+					save_event_target_as = precursor_spawn_system
 				}
 			}
-			add_extra_hyperlane_to_spawned_system_effect = yes
+			event_target:precursor_spawn_system = {
+				spawn_system = {
+					min_distance = 10
+					max_distance = 20
+					max_jumps = 0
+					initializer = "Zrocursor_system"
+				}
+				if = {
+					limit = { last_created_system = { NOT = { has_hyperlane_to = prev } } }
+					add_hyperlane = {
+						from = this
+						to = last_created_system
+					}
+				}
+				else = {
+					add_extra_hyperlane_to_spawned_system_effect = yes
+				}
+			}
 		}
 	}
 }
@@ -1358,10 +1381,10 @@ ship_event = { #
 			FROM = { has_planet_flag = aliens_site_aliens }
 		}
 		owner = {
-			add_research_option = tech_sensors_4
-			add_tech_progress = {
-				tech = tech_sensors_4 #TODO David: What if they have this? give some points
-				progress = 0.5
+			add_tech_option_or_research_effect = {
+				TECH = tech_sensors_4
+				PROGRESS = 0.5
+				CATEGORY = physics_research
 			}
 		}
 		name = INTERESTING
@@ -1371,10 +1394,10 @@ ship_event = { #
 			FROM = { has_planet_flag = aliens_site_badaliens }
 		}
 		owner = {
-			add_research_option = tech_combat_training
-			add_tech_progress = {
-				tech = tech_combat_training #TODO David: What if they have this? give some points
-				progress = 0.75
+			add_tech_option_or_research_effect = {
+				TECH = tech_combat_training
+				PROGRESS = 0.75
+				CATEGORY = society_research
 			}
 		}
 		name = INTERESTING

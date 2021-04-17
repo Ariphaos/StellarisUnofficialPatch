@@ -69,6 +69,7 @@ country_event = {
 							}
 						}
 						save_event_target_as = malfunctioning_leader
+						fleet = { save_event_target_as = malfunctioning_leader_fleet }
 						root = {
 							if = {
 								limit = {
@@ -268,9 +269,7 @@ country_event = {
 					limit = {
 						any_owned_leader = {
 							leader_class = governor
-							#debug_break = yes
-							# TODO: Fix
-							#exists = sector
+							exists = sector
 							species = {
 								OR = {
 									has_trait = trait_machine_unit
@@ -282,8 +281,7 @@ country_event = {
 					random_owned_leader = {
 						limit = {
 							leader_class = governor
-							# TODO: Fix
-							#exists = sector
+							exists = sector
 							species = {
 								OR = {
 									has_trait = trait_machine_unit
@@ -1069,11 +1067,17 @@ country_event = {
 		random_planet_within_border = {
 			limit = {
 				habitable_planet = no
-				is_star = no
-				NOR = { 
+				is_artificial = no
+				NOR = {			
+					is_planet_class = pc_ringworld_habitable_damaged
+					is_planet_class = pc_ringworld_tech_damaged
+					is_planet_class = pc_ringworld_tech
+					is_planet_class = pc_ringworld_seam
+					is_planet_class = pc_ringworld_seam_damaged
 					has_modifier = "terraforming_candidate"
 					has_deposit_for = shipclass_research_station
 				}
+				is_star = no
 			}
 			save_event_target_as = target_planetoid
 
@@ -1084,8 +1088,8 @@ country_event = {
   						status = no 
   					}
 				}
-				surveyed = {
-					set_surveyed = yes
+				set_surveyed = {
+					surveyed = yes
 					surveyor = root
 				}
 			}
@@ -1176,7 +1180,10 @@ planet_event = {
 
 	is_triggered_only = yes
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		exists = owner
+	}
 
 	immediate = {
 		owner = {
@@ -1237,6 +1244,7 @@ planet_event = {
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
+		exists = owner
 		owner = { is_same_empire = event_target:syndaw_520_planet_owner }
 	}
 
@@ -1299,7 +1307,13 @@ country_event = {
 	location = event_target:target_planet
 	is_triggered_only = yes
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		any_owned_planet = {
+			is_occupied_flag = no
+			any_owned_pop = { has_trait = trait_mechanical }
+		}
+	}
 
 	immediate = {
 		set_country_flag = triggered_syndaw_525
@@ -1357,7 +1371,7 @@ country_event = {
 
 	immediate = {
 		event_target:target_planet = {
-			random_pop = {
+			random_owned_pop = {
 				limit = {
 					has_trait = trait_mechanical
 				}
@@ -1563,13 +1577,20 @@ planet_event = { # does this unit have a soul
 	location = root
 	is_triggered_only = yes
 
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		num_pops > 0
+		is_occupied_flag = no
+		any_owned_pop = {
+			has_trait = trait_mechanical
+		}
+	}
+
 	immediate = {
 		owner = {
 			set_country_flag = triggered_syndaw_545
 		}
 	}
-
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
 
 	option = { #decrements MachUp strength
 		name = syndaw.545.a
@@ -1856,13 +1877,10 @@ planet_event = { #uprising
 	picture = GFX_evt_machine_sapience
 	show_sound = event_ai_started
 	is_triggered_only = yes
-
-	pre_triggers = {
-		has_owner = yes
-	}
 	
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
+		has_owner = yes
 	}
 	
 	immediate = {
@@ -1933,7 +1951,7 @@ planet_event = { #uprising
 					create_country = {
 						name = random
 						type = default
-						species = last_created
+						species = last_created_species
 						ignore_initial_colony_error = yes
 						day_zero_contact = no
 						ethos = { ethic = ethic_gestalt_consciousness }
@@ -1961,7 +1979,7 @@ planet_event = { #uprising
 					create_country = {
 						name = random
 						type = default
-						species = last_created
+						species = last_created_species
 						ignore_initial_colony_error = yes
 						day_zero_contact = no
 						ethos = { ethic = ethic_gestalt_consciousness }
@@ -1989,7 +2007,7 @@ planet_event = { #uprising
 					create_country = {
 						name = random
 						type = default
-						species = last_created
+						species = last_created_species
 						ignore_initial_colony_error = yes
 						day_zero_contact = no
 						ethos = { ethic = ethic_gestalt_consciousness }
@@ -2184,14 +2202,14 @@ country_event = {
 			
 			if = {
 				limit = {
-					count_owned_pops = {
+					count_owned_pop = {
 						count < 5
 						limit = { is_exact_same_species = root }
 					}
 				}
 				while = {
 					limit = {
-						count_owned_pops = {
+						count_owned_pop = {
 							count < 5
 							limit = { is_exact_same_species = root }
 						}
@@ -2294,18 +2312,19 @@ country_event = {
 
 					if = {
 						limit = {
-							count_owned_pops = {
+							count_owned_pop = {
 								count < 5
 								limit = { is_exact_same_species = root }
 							}
 						}
 						while = {
 							limit = {
-								count_owned_pops = {
+								count_owned_pop = {
 									count < 5
 									limit = { is_exact_same_species = root }
 								}
 							}
+							count = 5
 							random_owned_pop = {
 								limit = { NOT = { is_exact_same_species = root } }
 								kill_pop = yes
@@ -2399,15 +2418,15 @@ country_event = {
 		}
 
 		# survey host's surveyed planets
-		every_planet = {
+		every_galaxy_planet = {
 			limit = {
 				is_surveyed = {
 					who = event_target:current_uprising_originator
 					status = yes
 				}
 			}
-			surveyed = {
-				set_surveyed = yes
+			set_surveyed = {
+				surveyed = yes
 				surveyor = root
 			}
 		}

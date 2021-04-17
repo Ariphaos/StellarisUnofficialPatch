@@ -1,4 +1,39 @@
-# ChangeLog
+## April 16th
+
+Beta for 3.0.1
+
+### Patched Bugs Stellaris Devs fixed in 3.0.1
+
+#### They finally fixed the Ringworld crash bug!
+
+* Shard dragon naming bug.
+* Starting pop ethea distribution is no longer random.
+* New leviathans now have proper POIs
+* Gave the Ketlings and Prikkiki-Ti bureaucratic buildings
+* Some any_ship scopes were changed to any_fleet (some we missed, even, but they stll missed others)
+* Fix for the Enigmatic Fortress chain
+* A crazy number of contact-related bugs.
+* Clash of the Titans achievement (Because)
+* Fixed one of the Limbo empires refusing to be destroyed, but not the other.
+* Fix for neutron sweep availability
+* Helpful drones no longer clobber deposits
+* Mass Extinction Through the Ages MP chain fixed
+* Queen breeding fix
+* The Galaxy knows when the Gray Goo crisis is over now
+* AI defense station economy
+* Partial Totalitarian faction fix
+* Syncretics more likely to default to normal slavery
+* Crystal Manufactory fixes
+
+### Some other bugs I noticed got fixed
+
+* You can now pacify the amoebas if you recruit Bubbles (something I fixed in my own personal mod, but wasn't sure if it would be appropriate).
+* Gave the Ketlings and Prikkiki-Ti adjectives (but they still don't get an origin)
+* A certain meme star has been removed.
+
+### New issues revealed
+
+* The has_owner planet pre_trigger is only sometimes functional, if ever. Am not certain if any pre_triggers actually function.
 
 ## April 2nd
 
@@ -27,7 +62,7 @@
 * Fix for fanatic purifier necrophage abductions (GhostWraith)
 
 * Thanks Anaphysik for these and following fixes - and apologies for getting them out so late:
-* Fixed the end of the Fall of the Shallarians chain.
+* Fixed the end of the Fall of the Shallarians chain. 
 * Fixed literally unplayable Atomic Clock timing.
 * Fixed a number of literally unplayable typos.
 * Fixed a small bug in the Oracle chain.
@@ -80,17 +115,15 @@
 * Paradox let droids be colonists again.
 
 ### Sep 11st
-
 * Fix location target Event: Dyson Sphere (utopia.30)
 * Add location to graygoo.181
 * Fix location rubricator_dragon_fleet (ancrel.40180)
 * Fix pre_triggers id = colony.1533
 * Merge needless (and conflicting?) double "allow" again (graygoo.503)
 * Use widely pre_triggers (performance)
-* remove widely unnecessary logical operators
+* remove widely unnecessary logical operators 
 
 ### Sep 6st
-
 * Merge needless and conflicting double "allow" (graygoo.503)
 ** minor scope/syntax fixes on Distars events.
 
@@ -98,3 +131,8 @@
 
 * Scope fix: any_ship to any_owned_ship.
 * Some more scope fixes.
+
+### August 31st
+
+* Only change from release in this upload is tweaking the purging script to be less aggressive for resource extraction, per feedback.
+

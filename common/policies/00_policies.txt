@@ -35,9 +35,11 @@ diplomatic_stance = {
 				is_country_type = default
 				is_country_type = awakened_fallen_empire
 			}
+		}
 
-			is_homicidal = no # They have their own variants of this
+		valid = {
 			NOT = { has_valid_civic = civic_inwards_perfection }
+			is_homicidal = no # They have their own variants of this
 		}
 
 		policy_flags = {
@@ -143,8 +145,11 @@ diplomatic_stance = {
 				is_country_type = default
 				is_country_type = awakened_fallen_empire
 			}
-			is_unfriendly = no # Not homicidal or barbaric despoilers
+		}
+
+		valid = {
 			NOT = { has_valid_civic = civic_inwards_perfection }
+			is_unfriendly = no # Not homicidal or barbaric despoilers
 		}
 
 		policy_flags = {
@@ -155,10 +160,17 @@ diplomatic_stance = {
 			diplo_weight_mult = 0.25
 			envoy_improve_relations_mult = 0.5
 			country_border_friction_mult = -0.5
+			operations_cost_mult = 0.25
+			operations_upkeep_mult = 0.25
 		}
 
 		ai_weight = {
 			weight = 10
+
+			modifier = {
+				factor = 0.01
+				has_ascension_perk = ap_become_the_crisis
+			}
 
 			modifier = {
 				factor = 0
@@ -239,8 +251,11 @@ diplomatic_stance = {
 				is_country_type = default
 				is_country_type = awakened_fallen_empire
 			}
-			is_homicidal = no # Homicidal variants below
+		}
+
+		valid = {
 			is_megacorp = no  # "NO! YOU CAN'T BUY OUR STUFF!" makes the shareholders sad
+			is_homicidal = no # Homicidal variants below
 		}
 
 		policy_flags = {
@@ -261,6 +276,11 @@ diplomatic_stance = {
 
 		ai_weight = {
 			weight = 10
+
+			modifier = {
+				factor = 0.01
+				has_ascension_perk = ap_become_the_crisis
+			}
 
 			modifier = {
 				factor = 0.25 # Let the isolationists start in this if they want
@@ -303,6 +323,9 @@ diplomatic_stance = {
 				is_country_type = default
 				is_country_type = awakened_fallen_empire
 			}
+		}
+
+		valid = {
 			is_homicidal = no
 		}
 
@@ -323,6 +346,11 @@ diplomatic_stance = {
 				factor = 2
 				NOT = { has_country_flag = has_encountered_other_empire }
 			}
+
+			modifier = {
+				factor = 0.01
+				has_ascension_perk = ap_become_the_crisis
+			}
 		}
 	}
 
@@ -335,12 +363,24 @@ diplomatic_stance = {
 				is_country_type = default
 				is_country_type = awakened_fallen_empire
 			}
-			OR = {
+		}
+
+		valid = {
+			NOT = { has_valid_civic = civic_inwards_perfection }
+			# some ugliness to preserve the
+			# auth/civic - potential/valid divide for tooltip
+			if = {
+				limit = {
+					has_megacorp = yes
+					is_megacorp = yes
+				}
 				is_megacorp = yes
-				has_civic = civic_corporate_dominion
+			}
+			else_if = {
+				limit = { has_megacorp = yes }
 				has_civic = civic_merchant_guilds
 			}
-			NOT = { has_valid_civic = civic_inwards_perfection }
+			else = { has_civic = civic_corporate_dominion }
 		}
 
 		policy_flags = {
@@ -356,6 +396,10 @@ diplomatic_stance = {
 		ai_weight = {
 			weight = 10
 
+			modifier = {
+				factor = 0.01
+				has_ascension_perk = ap_become_the_crisis
+			}
 			modifier = {
 				factor = 3.0
 				is_megacorp = yes # Megacorps should generally prefer this diplo stance unless their ethics get them to specialize differently
@@ -379,22 +423,28 @@ diplomatic_stance = {
 		icon = "GFX_diplomatic_stance_supremacy"
 
 		potential = {
-			is_homicidal = no
 			OR = {
 				is_country_type = awakened_fallen_empire
 				is_country_type = awakened_marauders
 				is_country_type = default
 			}
+		}
+		valid = {
 			NOT = { has_valid_civic = civic_inwards_perfection }
+			is_homicidal = no
 		}
 
 		valid = {
 			NOT = { has_modifier = humiliated }
 
-			OR = {
-				has_tradition = tr_supremacy_finish
-				NOT = { is_country_type = default }
+			custom_tooltip = {
+				fail_text = "requires_supremacy_traditions"
+				OR = {
+					has_tradition = tr_supremacy_finish
+					NOT = { is_country_type = default }
+				}
 			}
+
 			is_subject = no
 		}
 
@@ -512,6 +562,10 @@ diplomatic_stance = {
 		icon = "GFX_diplomatic_stance_rest"
 
 		potential = {
+			has_authority = auth_hive_mind
+		}
+
+		valid = {
 			has_valid_civic = civic_hive_devouring_swarm
 		}
 
@@ -532,6 +586,10 @@ diplomatic_stance = {
 		icon = "GFX_diplomatic_stance_recompiling"
 
 		potential = {
+			has_authority = auth_machine_intelligence
+		}
+
+		valid = {
 			has_valid_civic = civic_machine_terminator
 		}
 
@@ -552,6 +610,10 @@ diplomatic_stance = {
 		icon = "GFX_diplomatic_stance_withdrawn"
 
 		potential = {
+			has_utopia = yes
+		}
+
+		valid = {
 			has_valid_civic = civic_fanatic_purifiers
 		}
 
@@ -665,6 +727,10 @@ war_philosophy = {
 					has_ai_personality_behaviour = subjugator
 					has_ai_personality_behaviour = purger
 				}
+			}
+			modifier = {
+				factor = 10
+				has_ascension_perk = ap_become_the_crisis
 			}
 			modifier = {
 				factor = 0.1
@@ -968,6 +1034,10 @@ orbital_bombardment = {
 					has_valid_civic = civic_fanatic_purifiers
 					has_valid_civic = civic_machine_terminator
 				}
+			}
+			modifier = {
+				factor = 10
+				has_ascension_perk = ap_become_the_crisis
 			}
 		}
 	}
@@ -1358,21 +1428,62 @@ first_contact_protocol = {
 	}
 
 	option = {
-		name = "first_contact_attack_not_allowed"
+		name = "first_contact_proactive"
 
 		policy_flags = {
-			first_contact_attack_not_allowed
+			first_contact_proactive
+		}
+
+		modifier = {
+			first_contact_speed_mult = 0.1
 		}
 
 		on_enabled = {
-			# custom_tooltip = "policy_allow_slavery_effect_disable"
 		}
 
 		valid = {
-			NOR = {
-				has_valid_civic = "civic_fanatic_purifiers"
-				has_valid_civic = "civic_hive_devouring_swarm"
-				has_valid_civic = "civic_machine_terminator"
+			is_homicidal = no
+			is_xenophobe = no
+		}
+
+		AI_weight = {
+			modifier = {
+				factor = 2
+				is_pacifist = yes
+			}
+			modifier = {
+				factor = 2
+				is_xenophile = yes
+			}
+			modifier = {
+				factor = 2
+				has_valid_civic = civic_machine_servitor
+			}
+		}
+	}
+
+	option = {
+		name = "first_contact_cautious"
+
+		policy_flags = {
+			first_contact_cautious
+		}
+
+		modifier = {
+			first_contact_defense_add = 2
+		}
+
+		on_enabled = {
+		}
+
+		valid = {
+			is_homicidal = no
+		}
+
+		AI_weight = {
+			modifier = {
+				factor = 1.5
+				always = yes #Liu Cixin is right
 			}
 		}
 	}
@@ -1386,35 +1497,23 @@ first_contact_protocol = {
 		modifier = {}
 
 		valid = {
-			OR = {
-				has_ethic = ethic_gestalt_consciousness
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-			}
-			NOR = {
-				has_ethic = ethic_fanatic_xenophile
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-			}
+			is_pacifist = no
+			is_xenophile = no
 		}
 
 
 		AI_weight = {
 			modifier = {
 				factor = 2
-				OR = {
-					has_ethic = "ethic_militarist"
-					has_ethic = "ethic_fanatic_militarist"
-				}
+				is_militarist = yes
 			}
 			modifier = {
 				factor = 2
-				OR = {
-					has_ethic = "ethic_xenophobe"
-					has_ethic = "ethic_fanatic_xenophobe"
-				}
+				is_xenophobe = yes
+			}
+			modifier = {
+				factor = 2
+				is_gestalt = yes
 			}
 		}
 	}
@@ -1476,6 +1575,10 @@ border_policy = {
 					has_ethic = ethic_xenophobe
 					has_ethic = ethic_fanatic_xenophobe
 				}
+			}
+			modifier = {
+				factor = 10
+				has_crisis_level = crisis_level_5
 			}
 		}
 	}
@@ -1597,7 +1700,7 @@ economic_policy = {
 		name = "economic_policy_civilian"
 
 		modifier = {
-			planet_jobs_consumer_goods_produces_mult = 0.15
+			planet_jobs_consumer_goods_produces_mult = 0.25
 			planet_jobs_alloys_produces_mult = -0.25
 		}
 
@@ -1634,7 +1737,7 @@ economic_policy = {
 
 		modifier = {
 			planet_jobs_consumer_goods_produces_mult = -0.25
-			planet_jobs_alloys_produces_mult = 0.15
+			planet_jobs_alloys_produces_mult = 0.25
 		}
 
 		policy_flags = {
@@ -1646,6 +1749,7 @@ economic_policy = {
 			modifier = {
 				factor = 0
 				is_authoritarian = no
+				NOT = { has_ascension_perk = ap_become_the_crisis }
 			}
 		}
 	}
@@ -1892,8 +1996,12 @@ artificial_intelligence_policy = {
 
 		AI_weight = {
 			modifier = {
-				factor = 0
-				always = yes #TODO [MAW] we should make sure we can afford it here
+				factor = 0.5
+				is_materialist = no
+				NOR = {
+					is_synthetic_empire = yes
+					has_technology = tech_synthetic_workers
+				}
 			}
 			modifier = {
 				factor = 5
@@ -1982,7 +2090,7 @@ pre_sapients = {
 		OR = {
 			has_country_flag = found_presapients
 			any_planet_within_border = {
-				any_pop = {
+				any_owned_pop = {
 					is_sapient = no
 				}
 			}
@@ -2404,6 +2512,7 @@ purge = {
 				has_ethic = ethic_gestalt_consciousness
 				has_ethic = ethic_xenophobe
 				has_ethic = ethic_fanatic_xenophobe
+				has_menace_perk = menp_undertaker	# Unlocked with Crisis Level 1
 			}
 		}
 
@@ -2440,6 +2549,10 @@ purge = {
 					is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
 					is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
 				}
+			}
+			modifier = {
+				factor = 10
+				has_ascension_perk = ap_become_the_crisis
 			}
 		}
 	}

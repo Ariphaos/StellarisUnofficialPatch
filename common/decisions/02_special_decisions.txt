@@ -15,7 +15,7 @@ decision_prospect = {
 	}
 
 	potential = {
-		habitable_structure = no
+		is_artificial = no
 		NOT = { is_planet_class = pc_machine }
 		NOT = { is_planet_class = pc_hive }
 		NOT = { is_planet_class = pc_city }
@@ -58,6 +58,122 @@ decision_prospect = {
 	}
 }
 
+decision_prospect_void = {
+	owned_planets_only = yes
+
+	enactment_time = 180
+	resources = {
+		category = decisions
+		cost = {
+			influence = 25
+			energy = 500
+		}
+	}
+
+	potential = {
+		is_planet_class = pc_habitat
+		owner = {
+			has_swapped_tradition = tr_adaptability_void_finish
+		}
+		NOR = { 
+			has_planet_flag = energy_habitat
+			has_planet_flag = mining_habitat
+			has_planet_flag = research_habitat
+		}
+		exists = orbit
+		# no need for checking exactly what it is orbiting, because all planets can have resources
+	}
+
+	effect = {
+		custom_tooltip = decision_prospect_void_short
+		hidden_effect = {
+			random_list = {
+				33 = {
+					modifier = {
+						factor = 0
+						orbit = {
+							habitable_planet = no
+							can_have_energy_deposits = no
+						}
+					}
+					set_planet_flag = energy_habitat
+					create_message = {
+						type = MESSAGE_TYPE_HABITAT_PROSPECTED
+						localization = MESSAGE_HABITAT_PROSPECTED_ENERGY
+						days = 30
+						target = this
+						variable = {
+							type = name
+							localization = HABITAT
+							scope = this
+						}
+					}
+				}
+
+				33 = {
+					modifier = {
+						factor = 0
+						orbit = {
+							habitable_planet = no
+							can_have_mineral_deposits = no
+							OR = { #just in case, for careless mods or whatever
+								can_have_energy_deposits = yes
+								can_have_society_deposits = yes
+								can_have_physics_deposits = yes
+								can_have_engineering_deposits = yes
+							}
+						}
+					}
+					set_planet_flag = mining_habitat
+					create_message = {
+						type = MESSAGE_TYPE_HABITAT_PROSPECTED
+						localization = MESSAGE_HABITAT_PROSPECTED_MINERALS
+						days = 30
+						target = this
+						variable = {
+							type = name
+							localization = HABITAT
+							scope = this
+						}
+					}
+				}
+
+				33 = {
+					modifier = {
+						factor = 0
+						orbit = {
+							habitable_planet = no
+							can_have_society_deposits = no
+							can_have_physics_deposits = no
+							can_have_engineering_deposits = no	
+						}
+					}
+					set_planet_flag = research_habitat
+					create_message = {
+						type = MESSAGE_TYPE_HABITAT_PROSPECTED
+						localization = MESSAGE_HABITAT_PROSPECTED_SCIENCE
+						days = 30
+						target = this
+						variable = {
+							type = name
+							localization = HABITAT
+							scope = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 1
+		modifier = {
+			factor = 0
+			num_pops < 10
+		}
+	}
+}
+
 # Penal Colony
 decision_penal_colony = {
 	owned_planets_only = yes
@@ -80,7 +196,7 @@ decision_penal_colony = {
 		owner = {
 			is_regular_empire = yes
 		}
-		habitable_structure = no
+		is_artificial = no
 		NOT = {
 			owner = {
 				any_owned_planet = { has_modifier = penal_colony }
@@ -157,7 +273,7 @@ decision_slave_colony = {
 		owner = {
 			is_regular_empire = yes
 		}
-		habitable_structure = no
+		is_artificial = no
 		owner = {
 			is_ai = no
 		}
@@ -239,7 +355,7 @@ decision_resort_colony = {
 		owner = {
 			is_regular_empire = yes
 		}
-		habitable_structure = no
+		is_artificial = no
 		NOT = { 
 			owner = { 
 				any_owned_planet = { has_modifier = resort_colony }
@@ -327,7 +443,7 @@ decision_mastery_of_nature = {
 	}
 
 	potential = {
-		habitable_structure = no
+		is_artificial = no
 		owner = {
 			has_ascension_perk = ap_mastery_of_nature
 		}
@@ -361,12 +477,13 @@ decision_consecrated_worlds = {
 
 	potential = {
 		exists = space_owner
+		exists = from
 		space_owner = { is_same_empire = from }
 		from = {
 			has_ascension_perk = ap_consecrated_worlds
 		}
 		is_star = no
-		habitable_structure = no
+		is_artificial = no
 		is_ringworld = no
 		NOR = {
 			has_planet_flag = consecrated@from
@@ -728,6 +845,7 @@ decision_unconsecrated_worlds = {
 	}
 
 	potential = {
+		exists = from
 		from = {
 			has_ascension_perk = ap_consecrated_worlds
 		}
@@ -841,7 +959,7 @@ decision_arcology_project = {
 			has_modifier = slave_colony
 			has_modifier = pm_wenkwort_custodian
 		}
-		habitable_structure = no
+		is_artificial = no
 		exists = owner
 		owner = { has_ascension_perk = ap_arcology_project }
 	}
@@ -920,7 +1038,7 @@ decision_arcology_project_relic = {
 
 	potential = {
 		is_planet_class = pc_relic
-		habitable_structure = no
+		is_artificial = no
 		exists = owner
 		owner = { is_regular_empire = yes }
 	}
@@ -1567,7 +1685,7 @@ decision_lithoid_swarm_consume_world = {
 
 					if = {
 						limit = { owner = { is_ai = yes } }
-						random_pop = {
+						random_owned_pop = {
 							resettle_pop = {
 								pop = this
 								planet = owner.capital_scope
@@ -1680,9 +1798,8 @@ decision_lithoid_swarm_consume_world = {
 				}
 			}
 
-			# If I'm an AI, abandon the planet if we've finished consuming the planet
+			# Abandon the planet if we've finished consuming the planet
 			if = {
-				limit = { owner = { is_ai = yes } }
 				owner = { country_event = { id = colony.185 days = 1 } }
 			}
 		}
@@ -1712,7 +1829,7 @@ decision_project_cornucopia = {
 	}
 
 	potential = {
-		habitable_structure = no
+		is_artificial = no
 		NOT = { is_planet_class = pc_machine }
 		NOT = { is_planet_class = pc_hive }
 		NOT = { is_planet_class = pc_city }

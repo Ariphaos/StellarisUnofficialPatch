@@ -76,7 +76,14 @@ country_event = {
 	}
 
 	mean_time_to_happen = {
-		months = 60
+		months = 120
+		modifier = {
+			factor = 0.5
+			check_modifier_value = {
+				modifier = intel_decryption_add
+				value >= 4
+			}
+		}
 		modifier = {
 			factor = 2
 			has_ethic = ethic_fanatic_xenophobe
@@ -247,7 +254,14 @@ country_event = {
 		modifier = {
 			factor = 0.5
 			years_passed > 200
-		}			
+		}	
+		modifier = {
+			factor = 0.5
+			check_modifier_value = {
+				modifier = intel_decryption_add
+				value >= 4
+			}
+		}		
 	}
 
 	option = {
@@ -263,37 +277,50 @@ country_event = {
 }
 
 # Primitives gain comms with anyone that has surveyed their planet
-country_event = {
+# on_planet_surveyed
+# A country has gained a surveyed status on a planet. Happens after "on_survey" if a science ship surveyed a planet.
+# Root = Planet
+# From = Country
+# FromFrom = Fleet of the science ship that surveyed it, if any
+planet_event = {
 	id = communications_spread.4
 	hide_window = yes
+	is_triggered_only = yes
 	
 	trigger = {
-		is_country_type = primitive
-		any_playable_country = {
-			root = {
-				NOT = { has_communications = prev }
-				capital_scope = { 	
-					is_surveyed = { who = prevprev status = yes }
-				}				
-			}
+		exists = owner
+		owner = {
+			is_country_type = primitive
 		}
 	}
 	
-	mean_time_to_happen = {
-		months = 1
-	}
-	
 	immediate = {
-		every_playable_country = {
-			limit = { 
-				root = {
-					NOT = { has_communications = prev }
-					capital_scope = { 	
-						is_surveyed = { who = prevprev status = yes }
-					}				
+		from = { establish_communications_no_message = root.owner }
+	}
+}
+
+#When a system changes owner, establish contact with any faction controlling planets in the system. (Usually stuff like the Mechanocalibrator)
+country_event = {
+	id = communications_spread.5
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		from = {
+			every_system_planet = {
+				limit = {
+					exists = controller
+					controller = {
+						NOR = {
+							is_same_value = root
+							is_same_value = root.fromfrom
+						}
+					}
+				}
+				controller = {
+					establish_communications_no_message = root
 				}
 			}
-			establish_communications_no_message = root
-		}	
+		}
 	}
 }

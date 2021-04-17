@@ -25,7 +25,8 @@
 #	fail_effects = {} # effect to be applied if failed, scope is proposer unless there is a target country - then scope is target country, with proposer in from scope
 #	potential = {} # potential trigger, scope is country
 #	allow = {} # allow trigger, scope is country
-#	ai_weight = {} # ai weight modifiers, scope is country
+#	active = {} # Enacted sesolutions are cancelled if this trigger fails
+#	ai_weight = {} # ai weight modifiers, scope is country. from scope is the target country for targeted resolutions
 #	valid_target = {} # valid targets trigger, scope is country
 #}
 
@@ -4903,6 +4904,7 @@ resolution_mutualdefense_military_readiness_act = {
 
 	breach = {
 		used_naval_capacity_percent < 0.5
+		is_subject = no
 	}
 
 	ai_weight = {
@@ -5223,7 +5225,10 @@ resolution_council_denouncement = {
 	icon = "GFX_resolution_purges"
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 	}
 
 	resources = {
@@ -5264,6 +5269,100 @@ resolution_council_denouncement = {
 
 	ai_weight = {
 		weight = @resolution_weight_disliked
+
+		# weaklings are scared of BtC
+		modifier = {
+			factor = 5
+			has_nemesis = yes
+			any_playable_country = {
+				#has_crisis_level >= crisis_level_1
+				OR = {
+					has_crisis_level = crisis_level_1
+					has_crisis_level = crisis_level_2
+					has_crisis_level = crisis_level_3
+					has_crisis_level = crisis_level_4
+					has_crisis_level = crisis_level_5
+				}
+				NOT = { is_same_value = prev }
+				has_resource = {
+					type = menace
+					amount > 1000
+				}
+				relative_power = {
+					who = prev
+					category = all
+					value > equivalent
+				}
+			}
+		}
+
+		# everyone is scared of BtC
+		modifier = {
+			factor = 5
+			has_nemesis = yes
+			any_playable_country = {
+				#has_crisis_level >= crisis_level_1
+				OR = {
+					has_crisis_level = crisis_level_1
+					has_crisis_level = crisis_level_2
+					has_crisis_level = crisis_level_3
+					has_crisis_level = crisis_level_4
+					has_crisis_level = crisis_level_5
+				}
+				NOT = { is_same_value = prev }
+				has_resource = {
+					type = menace
+					amount > 2000
+				}
+			}
+		}
+
+		# imagine having a BtC empire next door
+		modifier = {
+			factor = 5
+			has_nemesis = yes
+			any_neighbor_country = {
+				#has_crisis_level >= crisis_level_1
+				OR = {
+					has_crisis_level = crisis_level_1
+					has_crisis_level = crisis_level_2
+					has_crisis_level = crisis_level_3
+					has_crisis_level = crisis_level_4
+					has_crisis_level = crisis_level_5
+				}
+			}
+		}
+
+		# imagine your rival having a (not too scary) BtC empire next door - that's good
+		modifier = {
+			factor = 0.01
+			has_nemesis = yes
+			NOT = {
+				any_neighbor_country = {
+					#has_crisis_level >= crisis_level_1
+					OR = {
+						has_crisis_level = crisis_level_1
+						has_crisis_level = crisis_level_2
+						has_crisis_level = crisis_level_3
+						has_crisis_level = crisis_level_4
+						has_crisis_level = crisis_level_5
+					}
+				}
+			}
+			any_rival_country = {
+				any_neighbor_country = {
+					#has_crisis_level >= crisis_level_1
+					#has_crisis_level < crisis_level_5
+					OR = {
+						has_crisis_level = crisis_level_1
+						has_crisis_level = crisis_level_2
+						has_crisis_level = crisis_level_3
+						has_crisis_level = crisis_level_4
+						#has_crisis_level = crisis_level_5
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -6982,8 +7081,12 @@ resolution_galacticreforms_abolish_council = {
 	}
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		has_global_flag = galactic_council_formed
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7049,8 +7152,12 @@ resolution_galacticreforms_form_council = {
 	icon = "GFX_resolution_create_council"
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		NOT = { has_global_flag = galactic_council_formed }
+		has_galactic_emperor = no
 	}
 
 	resources = {
@@ -7202,9 +7309,13 @@ resolution_galacticreforms_council_size_1 = {
 	}
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		has_global_flag = galactic_council_formed
 		num_council_positions = 2
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7279,12 +7390,16 @@ resolution_galacticreforms_council_size_2 = {
 	}
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		has_global_flag = galactic_council_formed
 		OR = {
 			num_council_positions = 1
 			num_council_positions = 3
 		}
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7428,12 +7543,16 @@ resolution_galacticreforms_council_size_3 = {
 	}
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		has_global_flag = galactic_council_formed
 		OR = {
 			num_council_positions = 2
 			num_council_positions = 4
 		}
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7577,12 +7696,16 @@ resolution_galacticreforms_council_size_4 = {
 	}
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		has_global_flag = galactic_council_formed
 		OR = {
 			num_council_positions = 3
 			num_council_positions = 5
 		}
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7727,9 +7850,13 @@ resolution_galacticreforms_council_size_5 = {
 	}
 
 	potential = {
-		has_federations_dlc = yes
+		OR = {
+			has_federations_dlc = yes
+			has_nemesis = yes
+		}
 		has_global_flag = galactic_council_formed
 		num_council_positions = 4
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7784,6 +7911,7 @@ resolution_galacticreforms_permanent_seat = {
 		is_galactic_community_member = yes
 		is_part_of_galactic_council = yes
 		is_permanent_councillor = no
+		is_galactic_custodian = no
 	}
 
 	effect = {
@@ -7793,6 +7921,7 @@ resolution_galacticreforms_permanent_seat = {
 	potential = {
 		has_federations_dlc = yes
 		is_galactic_council_established = yes
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7826,6 +7955,7 @@ resolution_galacticreforms_revoke_permanent_seat = {
 	potential = {
 		has_federations_dlc = yes
 		is_galactic_council_established = yes
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7871,6 +8001,7 @@ resolution_galacticreforms_enable_council_veto = {
 		has_federations_dlc = yes
 		has_global_flag = galactic_council_formed
 		NOT = { has_global_flag = galactic_council_veto }
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -7960,6 +8091,7 @@ resolution_galacticreforms_disable_council_veto = {
 		has_federations_dlc = yes
 		has_global_flag = galactic_council_formed
 		has_global_flag = galactic_council_veto
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -8035,6 +8167,7 @@ resolution_galacticreforms_enable_council_denouncement = {
 	potential = {
 		has_federations_dlc = yes
 		has_global_flag = resolution_council_denouncement_abolished
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -8111,6 +8244,7 @@ resolution_galacticreforms_disable_council_denouncement = {
 		has_federations_dlc = yes
 		has_global_flag = galactic_council_formed
 		NOT = { has_global_flag = resolution_council_denouncement_abolished }
+		has_galactic_emperor = no
 	}
 
 	ai_weight = {
@@ -8444,6 +8578,10 @@ resolution_sanctions_tech_1 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -8490,6 +8628,11 @@ resolution_sanctions_tech_1 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -8546,6 +8689,10 @@ resolution_sanctions_tech_2 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -8582,6 +8729,11 @@ resolution_sanctions_tech_2 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -8638,6 +8790,10 @@ resolution_sanctions_tech_3 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -8674,6 +8830,11 @@ resolution_sanctions_tech_3 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -8973,6 +9134,10 @@ resolution_sanctions_economic_1 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -9019,6 +9184,11 @@ resolution_sanctions_economic_1 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -9075,6 +9245,10 @@ resolution_sanctions_economic_2 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -9111,6 +9285,11 @@ resolution_sanctions_economic_2 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -9167,6 +9346,10 @@ resolution_sanctions_economic_3 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -9203,6 +9386,11 @@ resolution_sanctions_economic_3 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -9511,6 +9699,10 @@ resolution_sanctions_military_1 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -9557,6 +9749,11 @@ resolution_sanctions_military_1 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -9616,6 +9813,10 @@ resolution_sanctions_military_2 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -9652,6 +9853,11 @@ resolution_sanctions_military_2 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -9711,6 +9917,10 @@ resolution_sanctions_military_3 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -9747,6 +9957,11 @@ resolution_sanctions_military_3 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -10070,6 +10285,10 @@ resolution_sanctions_administrative_1 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -10116,6 +10335,11 @@ resolution_sanctions_administrative_1 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -10179,6 +10403,10 @@ resolution_sanctions_administrative_2 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -10215,6 +10443,11 @@ resolution_sanctions_administrative_2 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -10278,6 +10511,10 @@ resolution_sanctions_administrative_3 = {
 				modifier = resolution_passed_diplomatic_weight
 				days = 2200
 			}
+			set_timed_global_flag = {
+				flag = recent_galcom_sanctions_passed
+				years = 10
+			}
 		}
 	}
 
@@ -10314,6 +10551,11 @@ resolution_sanctions_administrative_3 = {
 		modifier = {
 			factor = 0
 			is_in_breach_of_any = yes
+		}
+
+		modifier = {
+			factor = 0.33
+			has_global_flag = recent_galcom_sanctions_passed
 		}
 
 		modifier = {
@@ -10368,13 +10610,9 @@ resolution_galactic_focus_crisis_prethoryn = {
 		custom_tooltip = resolution_galactic_focus_crisis_prethoryn_effect_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_crisis_prethoryn
 			set_global_flag = galactic_community_crisis_fighting
-
-			remove_global_flag = galactic_focus_crisis_unbidden
-			remove_global_flag = galactic_focus_crisis_contingency
-			remove_global_flag = galactic_focus_crisis_greatkhan
-			remove_global_flag = galactic_focus_crisis_nanites
 
 			set_global_flag = galactic_community_resolution_passed
 
@@ -10488,13 +10726,9 @@ resolution_galactic_focus_crisis_unbidden = {
 		custom_tooltip = resolution_galactic_focus_crisis_unbidden_effect_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_crisis_unbidden
 			set_global_flag = galactic_community_crisis_fighting
-
-			remove_global_flag = galactic_focus_crisis_prethoryn
-			remove_global_flag = galactic_focus_crisis_contingency
-			remove_global_flag = galactic_focus_crisis_greatkhan
-			remove_global_flag = galactic_focus_crisis_nanites
 
 			set_global_flag = galactic_community_resolution_passed
 
@@ -10628,13 +10862,9 @@ resolution_galactic_focus_crisis_contingency = {
 		custom_tooltip = resolution_galactic_focus_crisis_contingency_effect_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_crisis_contingency
 			set_global_flag = galactic_community_crisis_fighting
-
-			remove_global_flag = galactic_focus_crisis_unbidden
-			remove_global_flag = galactic_focus_crisis_prethoryn
-			remove_global_flag = galactic_focus_crisis_greatkhan
-			remove_global_flag = galactic_focus_crisis_nanites
 
 			set_global_flag = galactic_community_resolution_passed
 
@@ -10756,13 +10986,9 @@ resolution_galactic_focus_crisis_greatkhan = {
 		custom_tooltip = resolution_galactic_focus_crisis_greatkhan_effect_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_crisis_greatkhan
 			set_global_flag = galactic_community_crisis_fighting
-
-			remove_global_flag = galactic_focus_crisis_unbidden
-			remove_global_flag = galactic_focus_crisis_prethoryn
-			remove_global_flag = galactic_focus_crisis_contingency
-			remove_global_flag = galactic_focus_crisis_nanites
 
 			set_global_flag = galactic_community_resolution_passed
 
@@ -10869,13 +11095,9 @@ resolution_galactic_focus_crisis_nanites = {
 		custom_tooltip = resolution_galactic_focus_crisis_nanites_effect_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_crisis_nanites
 			set_global_flag = galactic_community_crisis_fighting
-
-			remove_global_flag = galactic_focus_crisis_unbidden
-			remove_global_flag = galactic_focus_crisis_prethoryn
-			remove_global_flag = galactic_focus_crisis_contingency
-			remove_global_flag = galactic_focus_crisis_greatkhan
 
 			set_global_flag = galactic_community_resolution_passed
 
@@ -11021,6 +11243,7 @@ resolution_galactic_focus_war_in_heaven_support_side_1 = {
 		custom_tooltip = resolution_galactic_focus_war_in_heaven_support_side_1_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_war_in_heaven
 			set_global_flag = galactic_community_resolution_passed
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
@@ -11043,6 +11266,7 @@ resolution_galactic_focus_war_in_heaven_support_side_1 = {
 
 	potential = {
 		has_global_flag = war_in_heaven_ongoing
+		has_galactic_emperor = no # Empire always at war with WiH sides
 		NOT = { has_global_flag = galactic_focus_war_in_heaven }
 		exists = event_target:SecondSleeper
 	}
@@ -11098,6 +11322,7 @@ resolution_galactic_focus_war_in_heaven_support_side_2 = {
 		custom_tooltip = resolution_galactic_focus_war_in_heaven_support_side_2_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_war_in_heaven
 			set_global_flag = galactic_community_resolution_passed
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
@@ -11120,6 +11345,7 @@ resolution_galactic_focus_war_in_heaven_support_side_2 = {
 
 	potential = {
 		has_global_flag = war_in_heaven_ongoing
+		has_galactic_emperor = no # Empire always at war with WiH sides
 		NOT = { has_global_flag = galactic_focus_war_in_heaven }
 		exists = event_target:FirstSleeper
 	}
@@ -11193,6 +11419,7 @@ resolution_galactic_focus_war_in_heaven_denounce_both = {
 		custom_tooltip = resolution_galactic_focus_war_in_heaven_denounce_both_success
 
 		hidden_effect = {
+			repeal_all_galactic_focus_resolutions = yes
 			set_global_flag = galactic_focus_war_in_heaven
 			set_global_flag = galactic_community_resolution_passed
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
@@ -11215,6 +11442,7 @@ resolution_galactic_focus_war_in_heaven_denounce_both = {
 
 	potential = {
 		has_global_flag = war_in_heaven_ongoing
+		has_galactic_emperor = no # Empire always at war with WiH sides
 		NOT = { has_global_flag = galactic_focus_war_in_heaven }
 		exists = event_target:FirstSleeper
 		exists = event_target:SecondSleeper
@@ -11825,7 +12053,7 @@ resolution_galactic_market_ban_sentient_organic_slave_trade = {
 }
 
 resolution_galactic_market_repeal_sentient_organic_slave_trade = {
-	icon = "GFX_repeal_yellow"
+	icon = "GFX_repeal_orange"
 
 	resources = {
 		category = resolutions
@@ -11978,7 +12206,7 @@ resolution_galactic_market_ban_sentient_slave_trade = {
 }
 
 resolution_galactic_market_allow_sentient_slave_trade = {
-	icon = "GFX_repeal_yellow"
+	icon = "GFX_repeal_orange"
 
 	resources = {
 		category = resolutions

@@ -476,14 +476,16 @@ country_event = {
 			# Available to spiritualists if Divine Enforcer is locked out
 			OR = {
 				is_spiritualist = no
-				AND = {
-					NOT = { host_has_dlc = "Utopia" }
-					NOT = { has_technology = tech_telepathy }
-				}
-				AND = {
-					host_has_dlc = "Utopia"
-					NOT = { has_ascension_perk = ap_mind_over_matter }
-				}
+				NOR = {
+					AND = {
+						NOT = { host_has_dlc = "Utopia" }
+						has_technology = tech_telepathy
+					}
+					AND = {
+						host_has_dlc = "Utopia"
+						has_ascension_perk = ap_mind_over_matter
+					}		
+				}	
 			}
 		}
 	}
@@ -546,51 +548,72 @@ country_event = {
 
 	is_triggered_only = yes
 
+	immediate = {
+		set_country_flag = colossus_project
+	}
+
 	option = {
 		name = OK
-		set_country_flag = colossus_project
 		give_technology = {
 			tech = tech_colossus
 			message = no
 		}
 		if = {
-			limit = { has_country_flag = pk_cracker }
+			limit = {
+				has_country_flag = pk_cracker
+				can_research_technology = tech_pk_cracker
+			}
 			give_technology = { tech = tech_pk_cracker message = no }
 		}
-		if = {
-			limit = { has_country_flag = pk_shielder }
+		else_if = {
+			limit = {
+				has_country_flag = pk_shielder
+				can_research_technology = tech_pk_shielder
+			}
 			give_technology = { tech = tech_pk_shielder message = no }
 		}
-		if = {
-			limit = { has_country_flag = pk_neutron }
+		else_if = {
+			limit = {
+				has_country_flag = pk_neutron
+				can_research_technology = tech_pk_neutron
+			}
 			give_technology = { tech = tech_pk_neutron message = no }
 		}
-		if = {
-			limit = { has_country_flag = pk_godray }
+		else_if = {
+			limit = {
+				has_country_flag = pk_godray
+				can_research_technology = tech_pk_godray
+			}
 			give_technology = { tech = tech_pk_godray message = no }
 		}
-		if = {
-			limit = { has_country_flag = pk_nanobots }
+		else_if = {
+			limit = {
+				has_country_flag = pk_nanobots
+				can_research_technology = tech_pk_nanobots
+			}
 			give_technology = { tech = tech_pk_nanobots message = no }
 		}
 		# fallback
-		if = {
-			limit = { 
-				NOR = {
-					has_country_flag = pk_cracker 
-					has_country_flag = pk_shielder
-					has_country_flag = pk_neutron
-					has_country_flag = pk_godray
-					has_country_flag = pk_nanobots
-				}
+		else = {
+			switch = {
+				trigger = can_research_technology
+				tech_pk_cracker = { give_technology = { tech = tech_pk_cracker message = no } }
+				tech_pk_shielder = { give_technology = { tech = tech_pk_shielder message = no } }
+				tech_pk_neutron = { give_technology = { tech = tech_pk_neutron message = no } }
+				tech_pk_godray = { give_technology = { tech = tech_pk_godray message = no } }
+				tech_pk_nanobots = { give_technology = { tech = tech_pk_nanobots message = no } }
 			}
-			give_technology = { tech = tech_pk_cracker message = no }
 		}		
 		hidden_effect = {
 			every_playable_country = {
 				limit = {
 					has_communications = root
 					NOT = { is_same_value = root }
+					has_intel_level = {
+						who = root
+						category = military
+						level >= 2
+					}
 				}
 				country_event = { id = apoc.130 } # colossus researched notification
 			}
