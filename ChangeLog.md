@@ -2,6 +2,7 @@
 ## Mai 24th
 
 * Fix not ending L-Gate event chain
+* Fix L-Cluster outcome randomizing (global bug on game start)
 
 ## April 16th
 
