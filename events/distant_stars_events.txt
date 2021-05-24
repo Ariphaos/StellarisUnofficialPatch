@@ -1396,7 +1396,7 @@ ship_event = {
 				country_event = { id = distar.304 days = 36500 }
 			}
 		}
-		owner = { 
+		owner = {
 			if = {
 				limit = { NOT = { has_country_flag = amoeba_encountered } }
 				capital_scope = {
@@ -1444,7 +1444,7 @@ ship_event = {
 				owner = root.owner
 			}
 		}
-		owner = { 
+		owner = {
 			if = {
 				limit = { NOT = { has_country_flag = amoeba_encountered } }
 				add_modifier = {
@@ -19940,15 +19940,23 @@ event = {
 	hide_window = yes
 	is_triggered_only = yes
 
+	trigger = {
+		NOT = { has_global_flag = l_cluster_opened }
+	}
+
 	immediate = {
+		remove_global_flag = gray_goo_empire_set
+		remove_global_flag = gray_goo_crisis_set
+		remove_global_flag = active_gray_goo
+		remove_global_flag = dragon_season
 		random_list = {
-			50 = {
+			5 = {
 				set_global_flag = gray_goo_crisis_set
 				set_global_flag = active_gray_goo
 			}
-			30 = {}
-			30 = { set_global_flag = dragon_season }
-			30 = { set_global_flag = gray_goo_empire_set }
+			3 = {}
+			3 = { set_global_flag = dragon_season }
+			3 = { set_global_flag = gray_goo_empire_set }
 		}
 	}
 }
@@ -20198,6 +20206,12 @@ country_event = {
 				set_megastructure_flag = lgate_activated
 			}
 		}
+
+		if = {
+			limit = { mid_game_years_passed < 0 }
+			# Must be re-run due strange bug in 3.0 at game start
+			country_event = { id = distar.8000 }
+		}
 		# outcome, to be determined at game start
 		if = {
 			limit = { has_global_flag = gray_goo_crisis_set }
@@ -20297,7 +20311,8 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		abort_special_project = { type = LCLUSTER_PROJECT }
+		# abort_special_project = { type = LCLUSTER_PROJECT }
+		liquidate_clues = yes # get compensation
 	}
 
 	option = {
@@ -20317,7 +20332,6 @@ country_event = {
 
 	immediate = {
 		liquidate_clues = yes
-		end_event_chain = "l_cluster_chain"
 	}
 
 	option = {
@@ -20966,7 +20980,18 @@ country_event = {
 				}
 			}
 		}
-		# notify those without l-gate systems
+		# Cancel project for others with compensation (vanilla fix)
+		every_playable_country = {
+			limit = {
+				NOT = { is_same_empire = root }
+				OR = {
+					has_event_chain = l_cluster_chain
+					has_special_project = LCLUSTER_PROJECT
+				}
+			}
+			liquidate_clues = yes
+		}
+		# Notify those without l-gate systems
 		every_playable_country = {
 			limit = {
 				NOT = { any_system_within_border = { has_star_flag = lgate } }

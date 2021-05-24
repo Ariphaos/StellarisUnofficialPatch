@@ -1,3 +1,8 @@
+
+## Mai 24th
+
+* Fix not ending L-Gate event chain
+
 ## April 16th
 
 Beta for 3.0.1
