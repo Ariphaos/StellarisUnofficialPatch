@@ -1,7 +1,9 @@
 # June 14th
 
-* Replaced one of Risa's fixes in on_actions to make it cleaner and more mod-friendly.
-* Fixed some merge bugs.
+* Replaced one of Risa's fixes in on_actions to make it cleaner and more mod-friendly. (FirePrince)
+* Fixed some merge bugs. (FirePrince)
+* Fix not ending L-Gate event chain (FirePrince)
+* Fix L-Cluster outcome randomizing (global bug on game start) (FirePrince)
 
 # June 3rd
 
