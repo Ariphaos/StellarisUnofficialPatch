@@ -10623,7 +10623,7 @@ assimilation_effect = {
 								which = assimilation_counter
 								value > 0
 							}
-							any_owned_species = {
+							any_owned_pop = {
 								is_same_value = event_target:old_species
 							}
 						}
@@ -12257,8 +12257,16 @@ can_build_crisis_star_eater = {
 }
 
 destroy_star_system = {
+	set_star_flag = star_cracked
 	set_star_class = sc_black_hole
 	every_system_ambient_object = {
+		limit = {
+			# Preserve Unbidden crisis effects
+			NOR = {
+				has_ambient_object_flag = extradimensional_system_effect
+				has_ambient_object_flag = extradimensional_system_effect_2
+			}
+		}
         destroy_ambient_object = this
     }
 	every_system_planet = {
@@ -12276,6 +12284,23 @@ destroy_star_system = {
 			}
 		}
 		change_pc = pc_black_hole
+	}
+	# Handle Contingency Machine Worlds
+	every_system_planet = {
+		limit = {
+			is_planet_class = pc_ai
+			NOT = { has_planet_flag = machine_lair }
+		}
+		destroy_machine_world = yes
+	}
+	random_system_planet = {
+		limit = {
+			is_planet_class = pc_ai
+			has_planet_flag = machine_lair
+		}
+		from.owner = { save_event_target_as = final_machine_world_destroyer }
+		stop_crisis_sound = yes
+		planet_event = { id = crisis.2046 }
 	}
     every_system_planet = {
         limit = { 
@@ -12358,7 +12383,21 @@ destroy_star_system = {
     }
     every_fleet_in_system = {
         limit = {
-			NOT = { is_same_value = from }
+			NOR = {
+				is_same_value = from
+				# except Extradimensionals
+				AND = {
+					exists = owner
+					owner = {
+						OR = {
+							is_country_type = portal_holder
+							is_country_type = extradimensional
+							is_country_type = extradimensional_2
+							is_country_type = extradimensional_3
+						}
+					}
+				}
+			}
 		}
 		if = {
 			limit = {
@@ -12529,6 +12568,25 @@ destroy_star_system = {
     		}
     		remove_megastructure = this
     	}
+		else_if = {
+			limit = { is_crisis_sphere = yes }
+			solar_system = {
+				spawn_megastructure = {
+					type = crisis_sphere_ruined
+					coords_from = prev
+					init_effect = {
+						random_country = {
+							limit = {
+								prevprev = { has_megastructure_flag = crisis_sphere_of@prev }
+							}
+							save_event_target_as = former_owner
+						}
+						set_megastructure_flag = crisis_sphere_of@event_target:former_owner
+					}
+				}
+			}
+    		remove_megastructure = this
+		}
     	else = {
     		remove_megastructure = this
     	}
@@ -12668,6 +12726,295 @@ give_tech_no_error_effect = {
 		give_technology = {
 			message = $MESSAGE$
 			tech = $TECH$
+		}
+	}
+}
+
+destroy_machine_world = {
+	log = "machine handling fired"
+	if = {
+		limit = { has_planet_flag = machine_world_1 }
+		every_playable_country = {
+			limit = { has_event_chain = "ai_crisis_chain" }
+			remove_point_of_interest = ai_crisis_poi.1
+		}
+	}
+	else_if = {
+		limit = { has_planet_flag = machine_world_2 }
+		every_playable_country = {
+			limit = { has_event_chain = "ai_crisis_chain" }
+			remove_point_of_interest = ai_crisis_poi.2
+		}
+	}
+	else_if = {
+		limit = { has_planet_flag = machine_world_3 }
+		every_playable_country = {
+			limit = { has_event_chain = "ai_crisis_chain" }
+			remove_point_of_interest = ai_crisis_poi.3
+		}
+	}
+	else_if = {
+		limit = { has_planet_flag = machine_world_4 }
+		every_playable_country = {
+			limit = { has_event_chain = "ai_crisis_chain" }
+			remove_point_of_interest = ai_crisis_poi.4
+		}
+	}
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_planet_flag = destroyed_by_colossus }
+				has_planet_flag = planet_godrayed
+			}
+		}
+		destroy_colony = yes
+		change_pc = pc_broken
+		reset_planet = yes
+		hidden_effect = { clear_deposits = yes }
+		add_deposit = d_living_metal_deposit
+		add_deposit = d_minerals_3
+		add_deposit = d_energy_3
+	}
+	every_playable_country = {
+		limit = { has_event_chain = "ai_crisis_chain" }
+		add_event_chain_counter = {
+			event_chain = "ai_crisis_chain"
+			counter = "active_machine_worlds"
+			amount = -1
+		}
+	}
+	random_country = {
+		limit = { is_country_type = "ai_empire" }
+		change_variable = {
+			which = "machine_worlds_destroyed"
+			value = 1
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = "machine_worlds_destroyed"
+					value = 1
+				}
+			}
+			remove_global_flag = ghost_signal_5_flag
+			set_global_flag = ghost_signal_4_flag
+			every_country = {
+				limit = { has_notification_modifier = ghost_signal_5 }
+				remove_notification_modifier = ghost_signal_5
+				add_notification_modifier = ghost_signal_4
+				every_owned_pop = {
+					limit = { has_modifier = pop_ghost_signal_5 }
+					remove_modifier = "pop_ghost_signal_5"
+					add_modifier = { modifier = "pop_ghost_signal_4" days = -1 }
+				}
+				every_owned_ship = {
+					limit = {
+						has_sapient_combat_computer = yes
+					}
+					remove_modifier = "ship_ghost_signal_5"
+					add_modifier = { modifier = "ship_ghost_signal_4" days = -1 }
+				}
+			}
+			every_country = {
+				limit = { has_notification_modifier = ghost_signal_5_machine }
+				remove_notification_modifier = ghost_signal_5_machine
+				add_notification_modifier = ghost_signal_4_machine
+				every_owned_pop = {
+					limit = { has_trait = trait_machine_unit }
+					remove_modifier = "pop_ghost_signal_5_machine"
+					add_modifier = { modifier = "pop_ghost_signal_4_machine" days = -1 }
+				}
+				every_owned_ship = {
+					limit = {
+						has_sapient_combat_computer = yes
+					}
+					remove_modifier = "ship_ghost_signal_5"
+					add_modifier = { modifier = "ship_ghost_signal_4" days = -1 }
+				}
+			}
+			observer_event = { id = observer.50 }
+			every_country = {
+				limit = { is_ai = no }
+				country_event = { id = crisis.2037 }
+			}
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = "machine_worlds_destroyed"
+					value = 2
+				}
+			}
+			set_global_flag = first_machine_world_destroyed
+			remove_global_flag = ghost_signal_4_flag
+			set_global_flag = ghost_signal_3_flag
+			every_country = {
+				limit = { has_notification_modifier = ghost_signal_4 }
+				remove_notification_modifier = ghost_signal_4
+				add_notification_modifier = ghost_signal_3
+				every_owned_pop = {
+					limit = { has_modifier = "pop_ghost_signal_4" }
+					remove_modifier = "pop_ghost_signal_4"
+					add_modifier = { modifier = "pop_ghost_signal_3" days = -1 }
+				}
+				every_owned_ship = {
+					limit = {
+						has_sapient_combat_computer = yes
+					}
+					remove_modifier = "ship_ghost_signal_4"
+					add_modifier = { modifier = "ship_ghost_signal_3" days = -1 }
+				}
+			}
+			every_country = {
+				limit = { has_notification_modifier = ghost_signal_4_machine }
+				remove_notification_modifier = ghost_signal_4_machine
+				every_owned_pop = {
+					limit = { has_trait = trait_machine_unit }
+					remove_modifier = "pop_ghost_signal_4_machine"
+				}
+				every_owned_ship = {
+					limit = {
+						has_sapient_combat_computer = yes
+					}
+					remove_modifier = "ship_ghost_signal_4"
+				}
+			}
+			every_country = {
+				limit = { has_special_project = AI_CRISIS_PROJECT }
+				abort_special_project = { type = AI_CRISIS_PROJECT }
+			}
+			observer_event = { id = observer.50 }
+			every_country = {
+				limit = { is_ai = no }
+				country_event = { id = crisis.2037 }
+			}
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = "machine_worlds_destroyed"
+					value = 3
+				}
+			}
+			remove_global_flag = ghost_signal_3_flag
+			set_global_flag = ghost_signal_2_flag
+			every_country = {
+				limit = { has_notification_modifier = ghost_signal_3 }
+				remove_notification_modifier = ghost_signal_3
+				add_notification_modifier = ghost_signal_2
+				every_owned_pop = {
+					limit = { has_modifier = pop_ghost_signal_3 }
+					remove_modifier = "pop_ghost_signal_3"
+					add_modifier = { modifier = "pop_ghost_signal_2" days = -1 }
+				}
+				every_owned_ship = {
+					limit = {
+						has_sapient_combat_computer = yes
+					}
+					remove_modifier = "ship_ghost_signal_3"
+					add_modifier = { modifier = "ship_ghost_signal_2" days = -1 }
+				}
+			}
+			observer_event = { id = observer.50 }
+			every_country = {
+				limit = { is_ai = no }
+				country_event = { id = crisis.2037 }
+			}
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = "machine_worlds_destroyed"
+					value = 4
+				}
+			}
+			remove_global_flag = ghost_signal_2_flag
+			every_country = {
+				limit = { has_notification_modifier = ghost_signal_2 }
+				remove_notification_modifier = ghost_signal_2
+				add_notification_modifier = ghost_signal_1
+				every_owned_pop = {
+					limit = { has_modifier = pop_ghost_signal_2 }
+					remove_modifier = "pop_ghost_signal_2"
+					add_modifier = { modifier = "pop_ghost_signal_1" days = -1 }
+				}
+				every_owned_ship = {
+					limit = {
+						has_sapient_combat_computer = yes
+					}
+					remove_modifier = "ship_ghost_signal_2"
+					add_modifier = { modifier = "ship_ghost_signal_1" days = -1 }
+				}
+			}
+			observer_event = { id = observer.50 }
+			country_event = { id = crisis.2035 }
+		}
+	}
+}
+
+# Called from galcom resolutions. Needs event_target:new_crisis and event_target:community_war_leader
+declare_crisis_war_effect = {
+	# community opens internal borders and ceases pre-existing wars with the Crisis
+	every_playable_country = {
+		limit = {
+			is_galactic_community_member = yes
+			NOR = {
+				has_country_flag = declared_crisis
+				is_in_federation_with = event_target:new_crisis
+			}
+		}
+		if = {
+			limit = {
+				any_war = { 
+					any_war_participant = {
+						is_same_value = event_target:new_crisis
+					}
+				}
+			}
+			every_war = {
+				limit = {
+					any_war_participant = {
+						is_same_value = event_target:new_crisis
+					}
+				}
+				remove_war_participant = event_target:new_crisis
+			}
+		}
+		every_playable_country = {
+			limit = {
+				is_galactic_community_member = yes
+				NOR = {
+					is_same_value = prev
+					has_country_flag = declared_crisis
+					is_in_federation_with = event_target:new_crisis
+				}
+			}
+			set_closed_borders = {
+				who = prev
+				status = no
+			}
+		}
+	}
+	event_target:community_war_leader = {
+		declare_war = {
+			target = event_target:new_crisis
+			name = "NAME_Declared_Crisis_War"
+			attacker_war_goal = "wg_declared_crisis"
+			effect = { save_event_target_as = crisis_war }
+		}
+	}
+	every_playable_country = {
+		limit = { 
+			is_galactic_community_member = yes
+			NOR = {
+				is_same_value = event_target:community_war_leader
+				is_in_federation_with = event_target:new_crisis
+			}
+		}
+
+		join_war_on_side = {
+			war = event_target:crisis_war
+			side = event_target:community_war_leader
 		}
 	}
 }

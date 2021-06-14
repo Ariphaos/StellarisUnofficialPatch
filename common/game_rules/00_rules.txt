@@ -270,6 +270,16 @@ can_generate_leader_from_species = {
 	}
 }
 
+#Checks whether this species can become espionage assets (note that some checks are also done in code)
+#Root = country
+#This = species
+can_create_espionage_asset_from_species = {
+	OR = {
+		NOT = { has_trait = "trait_mechanical" }
+		root = { has_technology = "tech_droid_workers" }
+	}
+}
+
 #Root = country
 #This = pop
 can_generate_military_leader_from_pop = {
@@ -694,6 +704,10 @@ can_species_be_assembled = {
 				}
 			}
 		}
+	}
+	has_population_control = {
+		value = no
+		country = root.owner
 	}
 }
 
@@ -1626,17 +1640,41 @@ has_enough_pops_for_necrophage_on_planet = {
 
 # Root = current planet
 # This = pop
-# Migration Controls policy and target habitability is checked in code.
+# Purge, Sapience, Migration Controls policy (ignored by Gestalts and Synths), and target habitability are checked in code.
 can_pop_auto_migrate = {
-	planet = {
-		NOT = { has_modifier = planet_culture_shock }
-	}
-	is_sapient = yes
 	is_unemployed = yes
 	is_being_assimilated = no
-	is_enslaved = no
-	is_non_sapient_robot = no
-	is_shackled_robot = no
+	OR = {
+		AND = {
+			is_shackled_robot = no
+			is_enslaved = no
+		}
+		planet = {
+			has_building = building_slave_processing
+		}
+	}
+}
+
+# This = planet
+# Checked before can_pop_auto_migrate to save performance
+can_planet_auto_migrate = {
+	NOT = { has_modifier = planet_culture_shock }
+	OR = {
+		colony_age > 60
+		is_capital = yes # Don't break Doomsday!
+	}
+}
+
+can_planet_receive_auto_migration = {
+	NOR = {
+		planet_devastation >= 10
+		has_modifier = planet_culture_shock
+		has_modifier = doomsday_1
+		has_modifier = doomsday_2
+		has_modifier = doomsday_3
+		has_modifier = doomsday_4
+		has_modifier = doomsday_5
+	}
 }
 
 # This = country contacting
