@@ -203,9 +203,6 @@ country_event = {
 						set_formation_scale = 1.6
 						fleet_event = { id = nomad.2 days = 1 } #Nomads fly towards current destination
 						save_event_target_as = CustomCapital
-						prev = {
-							set_custom_capital_location = event_target:CustomCapital
-						}
 					}
 				}
 			}
@@ -261,6 +258,7 @@ fleet_event = {
 	}
 }
 
+# on_entering_system_fleet:
 #Check if there's anyone to take contact with in new system, otherwise go check other stuff
 fleet_event = {
 	id = nomad.3
@@ -352,11 +350,12 @@ fleet_event = {
 							from = {
 								NOT = { has_star_flag = hostile_system }
 							}
+							exists = space_owner
 						}
 						fleet_event = { id = nomad.4 days = 1 } #Take action inside system
 					}
 					else = {
-						fleet_event = { id = nomad.2 days = 1 } #Take action inside system
+						fleet_event = { id = nomad.2 days = 1 } #Fly somewhere else
 					}
 				}
 			}
@@ -420,7 +419,7 @@ fleet_event = {
 		owner = {
 			is_country_type = nomad
 			NOT = {
-				has_relation_flag = { flag = nomad_relation_hate who = event_target:space_owner_target }
+				reverse_has_relation_flag = { flag = nomad_relation_hate who = root.space_owner }
 			}
 		}
 		solar_system = {
@@ -432,11 +431,6 @@ fleet_event = {
 	}
 
 	immediate = {
-		solar_system = {
-			space_owner = {
-				save_event_target_as = space_owner_target
-			}
-		}
 		clear_fleet_actions = this
 		owner = {
 			save_event_target_as = nomad_country
@@ -2165,12 +2159,10 @@ fleet_event = {
 							duration = 7
 						}
 						effect = {
+							# Try to establish communications
 							id = nomad.40.orbit_colony_planet
-							event_target:nomad_contact_country = {
-								country_event = { id = nomad.41 }
-							}
-							solar_system = {
-								remove_star_flag = nomad_mission_waypoint
+							root = {
+								fleet_event = { id = nomad.50 }
 							}
 						}
 					}
@@ -2471,6 +2463,68 @@ country_event = {
 		is_dialog_only = yes
 	}
 }
+
+
+# Orbiting planet, try to make contact for up to a year before giving up.
+fleet_event = {
+	id = nomad.50
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		queue_actions = {
+			# Wait up to 1 year for Communications to be established.
+			repeat = {
+				while = {
+					id = nomad.50.wait_for_communication
+					exists = space_owner
+					space_owner = {
+						OR = {
+							is_country_type = default
+							is_country_type = fallen_empire
+							is_country_type = awakened_fallen_empire
+						}
+						NOR = {
+							is_hostile = root.owner
+							has_communications = root.owner
+						}
+					}
+				}
+				max_iterations = 30
+				wait = {
+					duration = 12
+				}
+			}
+			effect = {
+				id = nomad.50.stopped_waiting
+				solar_system = {
+					remove_star_flag = nomad_mission_waypoint
+				}
+				if = {
+					# Are communications established?
+					limit = {
+						space_owner = {
+							has_communications = root.owner
+							NOT = {
+								is_hostile = root.owner
+							}
+						}
+					}
+					# Start talking
+					space_owner = {
+						country_event = { id = nomad.41 }
+					}
+				}
+				else = {
+					# Give up and try something else
+					remove_fleet_flag = nomad_on_mission
+					fleet_event = { id = nomad.2 } #Nomads fly towards current destination
+				}
+			}
+		}
+	}
+}
+
 
 ### Nomads have many ships destroyed and change fleet stance ###
 country_event = {

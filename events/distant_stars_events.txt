@@ -1377,11 +1377,10 @@ ship_event = {
 		}
 	}
 
-	option = {
+	option = { #Pacify/adopt it
 		name = distar.50.a
-		# Antifriendly folks don't get these options.
 		trigger = {
-			root.owner = { is_homicidal = no }
+			owner = { is_homicidal = no }
 		}
 		event_target:lost_amoeba_fleet = {
 			set_owner = root.owner
@@ -1396,39 +1395,40 @@ ship_event = {
 				country_event = { id = distar.304 days = 36500 }
 			}
 		}
-		owner = {
+		root.owner = { 
 			if = {
-				limit = { NOT = { has_country_flag = amoeba_encountered } }
-				capital_scope = {
-					enable_special_project = {
-						name = "AMOEBAS_PACIFICATION_PROJECT"
-						location = this
-						owner = root.owner
-					}
+				limit = { 
+					NOR = { 
+						has_modifier = pacified_amoebas
+						has_special_project = AMOEBAS_PACIFICATION_PROJECT
+					} 
+				}
+				enable_special_project = {
+					name = "AMOEBAS_PACIFICATION_PROJECT"
+					location = capital_scope
+					owner = root.owner
 				}
 			}
 		}
 	}
 
-	option = {
+	option = { #
 		name = distar.50.b
 		custom_tooltip = distar.50.b.tooltip
-		trigger = {
-			root.owner = { is_homicidal = no }
-		}
 		hidden_effect = {
 			owner = {
 				country_event = { id = distar.52 days = 90 }
 				IF = {
 					limit = {
-						NOT = { has_country_flag = amoeba_encountered }
-					}
-					capital_scope = {
-						enable_special_project = {
-							name = "AMOEBAS_PROJECT"
-							location = this
-							owner = root.owner
+						NOR = { 
+							has_special_project = AMOEBAS_PROJECT
+							has_modifier = flagellating_movement
 						}
+					}
+					enable_special_project = {
+						name = "AMOEBAS_PROJECT"
+						location = capital_scope
+						owner = root.owner
 					}
 				}
 			}
@@ -5425,8 +5425,10 @@ country_event = { #Cohabitants of Brainslugged pops generate initial Unrest
 				limit = {
 					OR = {
 						any_owned_pop = { has_trait = trait_brainslug }
-						leader = {
-							has_trait = leader_trait_governor_brainslug
+						AND = {
+							exists = sector
+							sector = { exists = leader }
+							sector.leader = { has_trait = leader_trait_governor_brainslug }
 						}
 					}
 				}
@@ -20239,14 +20241,6 @@ country_event = {
 		if = {
 			limit = { has_global_flag = gray_goo_crisis_set }
 			country_event = { id = graygoo.1 }
-			every_megastructure = {
-				limit = {
-					is_megastructure_type = lgate_base
-					NOT = { has_megastructure_flag = lgate_activated }
-				}
-				activate_gateway = this
-				set_megastructure_flag = lgate_activated
-			}
 		}
 		else_if = {
 			limit = { has_global_flag = dragon_season }
@@ -20486,11 +20480,13 @@ country_event = {
 	}
 }
 
-# Spawn l-cluster (bit optimized by FirePrince)
+# spawn l-cluster
 country_event = {
 	id = distar.11000
 	hide_window = yes
+
 	is_triggered_only = yes
+
 	fire_only_once = yes
 
 	immediate = {
@@ -20507,10 +20503,7 @@ country_event = {
 				max_orientation_angle = 46
 				initializer = distantstars_init_01
 				hyperlane = no
-			}
-			if = { limit = { NOT = { exists = event_target:lcluster1 } }
-				random_system = {
-					limit = { has_star_flag = lcluster1 }
+				effect = {
 					save_global_event_target_as = lcluster1
 				}
 			}
@@ -20521,8 +20514,11 @@ country_event = {
 					min_orientation_angle = 24
 					max_orientation_angle = 66
 					initializer = distantstars_init_02
-					hyperlane = no
 					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster2
+					}
 				}
 				spawn_system = {
 					min_distance >= 29
@@ -20530,8 +20526,11 @@ country_event = {
 					min_orientation_angle = 114
 					max_orientation_angle = 156
 					initializer = distantstars_init_03
-					hyperlane = no
 					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster3
+					}
 				}
 				spawn_system = {
 					min_distance >= 30
@@ -20539,14 +20538,11 @@ country_event = {
 					min_orientation_angle = 340
 					max_orientation_angle = 20
 					initializer = distantstars_init_01b
-					hyperlane = no
 					is_discovered = no
-				}
-			}
-			if = { limit = { NOT = { exists = event_target:lcluster2 } }
-				random_system = {
-					limit = { has_star_flag = lcluster2 }
-					save_global_event_target_as = lcluster2
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster1b
+					}
 				}
 			}
 			event_target:lcluster2 = {
@@ -20556,14 +20552,11 @@ country_event = {
 					min_orientation_angle = 0
 					max_orientation_angle = 40
 					initializer = distantstars_init_02b
-					hyperlane = no
 					is_discovered = no
-				}
-			}
-			if = { limit = { NOT = { exists = event_target:lcluster3 } }
-				random_system = {
-					limit = { has_star_flag = lcluster3 }
-					save_global_event_target_as = lcluster3
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster2b
+					}
 				}
 			}
 			event_target:lcluster3 = {
@@ -20573,8 +20566,11 @@ country_event = {
 					min_orientation_angle = 24
 					max_orientation_angle = 66
 					initializer = distantstars_init_04
-					hyperlane = no
 					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster4
+					}
 				}
 				spawn_system = {
 					min_distance >= 10
@@ -20582,17 +20578,13 @@ country_event = {
 					min_orientation_angle = 250
 					max_orientation_angle = 290
 					initializer = distantstars_init_03b
-					hyperlane = no
 					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster3b
+					}
 				}
 			}
-			if = { limit = { NOT = { exists = event_target:lcluster4 } }
-				random_system = {
-					limit = { has_star_flag = lcluster4 }
-					save_global_event_target_as = lcluster4
-				}
-			}
-
 			event_target:lcluster4 = {
 				spawn_system = {
 					min_distance >= 5
@@ -20600,8 +20592,12 @@ country_event = {
 					min_orientation_angle = 250
 					max_orientation_angle = 290
 					initializer = distantstars_init_05
-					hyperlane = no
 					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster5
+						save_global_event_target_as = graygoo_factory_system
+					}
 				}
 				spawn_system = {
 					min_distance >= 30
@@ -20609,52 +20605,17 @@ country_event = {
 					min_orientation_angle = 20
 					max_orientation_angle = 160
 					initializer = distantstars_init_04b
-					hyperlane = no
 					is_discovered = no
-				}
-			}
-			# We need only one target for the same issue, so take the better instead of "lcluster5"
-			if = { limit = { NOT = { exists = event_target:lcluster_factory_system } }
-				random_system = {
-					limit = { has_star_flag = lcluster5 }
-					save_global_event_target_as = lcluster_factory_system
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster4b
+					}
 				}
 			}
 		}
 
-		if = { limit = { NOT = { exists = event_target:lcluster1b } }
-			random_system = {
-				limit = { has_star_flag = lcluster1b }
-				save_global_event_target_as = lcluster1b
-			}
-		}
-		if = { limit = { NOT = { exists = event_target:lcluster2b } }
-			random_system = {
-				limit = { has_star_flag = lcluster2b }
-				save_global_event_target_as = lcluster2b
-			}
-		}
-		if = { limit = { NOT = { exists = event_target:lcluster3b } }
-			random_system = {
-				limit = { has_star_flag = lcluster3b }
-				save_global_event_target_as = lcluster3b
-			}
-		}
-		if = { limit = { NOT = { exists = event_target:lcluster4b } }
-			random_system = {
-				limit = { has_star_flag = lcluster4b }
-				save_global_event_target_as = lcluster4b
-			}
-		}
-
-		## Clear all hyperlanes to and within the cluster
-		every_system = {
-			limit = { has_star_flag = lcluster }
-			isolate_system = yes
-		}
-
-		## Add hyperlanes
-		event_target:lcluster_factory_system = {
+		# add hyperlanes
+		event_target:lcluster5 = {
 			add_hyperlane = {
 				from = event_target:lcluster_factory_system
 				to = event_target:lcluster4
@@ -20967,39 +20928,31 @@ country_event = {
 		}
 		while = {
 			limit = {
-				any_system = {
-					any_system_megastructure = {
-						is_megastructure_type = lgate_base
-						NOT = { has_megastructure_flag = lgate_activated }
-					}
+				any_megastructure = {
+					is_megastructure_type = lgate_base
+					NOT = { has_megastructure_flag = lgate_activated }
 				}
 			}
-			random_system = {
+			random_megastructure = {
 				limit = {
-					any_system_megastructure = {
-						is_megastructure_type = lgate_base
-						NOT = { has_megastructure_flag = lgate_activated }
-					}
+					is_megastructure_type = lgate_base
+					NOT = { has_megastructure_flag = lgate_activated }
 				}
 				# flip L-Gates
-				random_system_megastructure = {
-					limit = {
-						is_megastructure_type = lgate_base
-						NOT = { has_megastructure_flag = lgate_activated }
-					}
-					activate_gateway = this
-					set_megastructure_flag = lgate_activated
-				}
-				# set dragon spawning grounds
-				closest_system = {
-					min_steps = 3
-					limit = {
-						NOR = {
-							has_star_flag = dragon_point
-							any_system_planet = { is_colony = yes }
+				activate_gateway = this
+				set_megastructure_flag = lgate_activated
+				solar_system = {
+					# set dragon spawning grounds
+					closest_system = {
+						min_steps = 3
+						limit = {
+							NOR = {
+								has_star_flag = dragon_point
+								any_system_planet = { is_colony = yes }
+							}
 						}
+						set_star_flag = dragon_point
 					}
-					set_star_flag = dragon_point
 				}
 			}
 		}

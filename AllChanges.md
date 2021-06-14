@@ -2,13 +2,9 @@
 
 As of the 2.8 release this should include all substantive changes. I may have missed some. 
 
-## Crashes
-
-* events/utopia_megastructure_events: Crash fix for utopia.1
-
 ## Exploits
 
-* Purging rework. Past a certain population, pops being purged have a 'half life'. Currently some issues with this but should work them out alright in 2.8.1.
+* Purging rework. Past a certain population, pops being purged have a 'half life'. Currently some issues with this but should work them out alright in 2.8.1. As of the 3.0.1 patch this threshold is over 20 pops.
 
 * megastructures/00_ring_world: Don't allow construction in AI hubs. A better solution would be to move the hubs to binary / trinary systems.
 

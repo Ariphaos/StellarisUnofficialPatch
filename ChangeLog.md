@@ -1,8 +1,48 @@
+# June 14th
 
-## Mai 24th
+* Replaced one of Risa's fixes in on_actions to make it cleaner and more mod-friendly. (FirePrince)
+* Fixed some merge bugs. (FirePrince)
+* Fix not ending L-Gate event chain (FirePrince)
+* Fix L-Cluster outcome randomizing (global bug on game start) (FirePrince)
 
-* Fix not ending L-Gate event chain
-* Fix L-Cluster outcome randomizing (global bug on game start)
+# June 3rd
+
+* Fixed a colony event that got broken somewhere (Thanks Keukotis)
+* The Emperor won't kneel before an awakened empire.
+* Small AI improvements.
+* Prevent imperial legion counter being decremented multiple times when slain - Tsundere Saph (Definitely a Hat)
+* Removed some on_action changes to be more compatible with mods that alter leader generation
+
+## April 29th
+
+* Increased job weight of unemployed pops on the same strata. (Dr. Seldon)
+* Resort complex capital upgrade only needs 10 pops (to reflect similar changes in 3.0.3)
+
+### Patch bugs fixed by Paradox
+
+* Necrophage Purge Fix
+* AI Lithoid Tree of Life not budgeting for colonies
+* Dragon armor is now in the autoupgrade path.
+* Perdition Beam and Titan Lance now are energy weapons.
+* Starbase power insufficient.
+* Massive performance boost for L-Cluster generation
+* Homicidals don't get to adopt Bubbles
+
+### Paradox fixes superceded by patch
+
+* First colony event now checks for relic and tomb worlds (keeping my fix because I wrote descriptions for them).
+
+## April 23rd
+
+* Galactic Custodian/Emperor can explore and use wormholes of community members, even with closed borders.
+
+* Bugfix for bombardment error. (FireGolem)
+
+## April 17th
+
+* FORCED_SPECIES_GROWTH_PENALTY set to .1, the same as the penalty to growth rate. The way pop growth currently works, .5 is simply too punishing in the late game.
+
+* From Beyond ship has fleet stance set to evasive.
 
 ## April 16th
 
@@ -30,6 +70,7 @@ Beta for 3.0.1
 * Partial Totalitarian faction fix
 * Syncretics more likely to default to normal slavery
 * Crystal Manufactory fixes
+* Species modding ui fix
 
 ### Some other bugs I noticed got fixed
 

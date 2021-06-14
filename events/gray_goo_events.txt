@@ -16,6 +16,7 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		set_update_modifiers_batch = begin
 		awaken_guardians_of_the_galaxy = yes
 		set_global_flag = gray_goo_crisis_active
 		every_megastructure = {
@@ -23,8 +24,9 @@ country_event = {
 				is_megastructure_type = lgate_base
 			}
 			activate_gateway = this
+			set_megastructure_flag = lgate_activated
 		}
-		event_target:lcluster_factory_system = {
+		event_target:graygoo_factory_system = {
 			random_system_planet = {
 				limit = { has_planet_flag = main_star }
 				save_event_target_as = main_star
@@ -195,7 +197,7 @@ country_event = {
 					save_event_target_as = start_4
 				}
 			}
-			event_target:lcluster_factory_system = {
+			event_target:lcluster5 = {
 				random_system_planet = {
 					limit = { is_planet_class = pc_gray_goo }
 					save_event_target_as = start_5
@@ -218,38 +220,34 @@ country_event = {
 		event_target:graygoo_country = {
 			country_event = { id = graygoo.3 days = 3600 }
 		}
-		every_system = {
+		every_megastructure = {
 			limit = {
-				NOR = {
-					has_star_flag = lcluster_lgate
-					has_star_flag = lgate_originating_system
-				}
-				any_system_megastructure = {
-					is_megastructure_type = lgate_base
+				is_megastructure_type = lgate_base
+				solar_system = {
+					NOR = {
+						has_star_flag = lcluster_lgate
+						has_star_flag = lgate_originating_system
+					}
 				}
 			}
-			random_system_megastructure = {
-				limit = {
-					is_megastructure_type = lgate_base
-				}
-				create_fleet = {
-					name = "NAME_Tempest_Fleet"
-					effect = {
-						set_owner = event_target:graygoo_country
-						create_graygoo_ships_1 = yes
-						set_formation_scale = 2
-						set_fleet_stance = aggressive
-						set_aggro_range_measure_from = self
-						set_aggro_range = 250
-						set_location = {
-							target = prev
-							distance = 0
-							angle = 0
-						}
+			create_fleet = {
+				name = "NAME_Tempest_Fleet"
+				effect = {
+					set_owner = event_target:graygoo_country
+					create_graygoo_ships_1 = yes
+					set_formation_scale = 2
+					set_fleet_stance = aggressive
+					set_aggro_range_measure_from = self
+					set_aggro_range = 250
+					set_location = {
+						target = prev
+						distance = 0
+						angle = 0
 					}
 				}
 			}
 		}
+		set_update_modifiers_batch = end
 		country_event = { id = graygoo.10 }
 		every_playable_country = {
 			limit = {
@@ -329,8 +327,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		any_system = {
-			has_star_flag = graygoo_factory_system
+		event_target:graygoo_factory_system = {
 			any_fleet_in_system = { is_ship_size = graygoo_factory }
 		}
 	}
@@ -352,40 +349,35 @@ country_event = {
 			# Else spawn reinforcements...
 		}
 		else = {
-			every_system = {
+			every_megastructure = {
 				limit = {
-					NOR = {
-						has_star_flag = lcluster_lgate
-						has_star_flag = lgate_originating_system
-					}
-					any_system_megastructure = {
-						is_megastructure_type = lgate_base
+					is_megastructure_type = lgate_base
+					solar_system = {
+						NOR = {
+							has_star_flag = lcluster_lgate
+							has_star_flag = lgate_originating_system
+						}
 					}
 				}
-				random_system_megastructure = {
-					limit = {
-						is_megastructure_type = lgate_base
-					}
-					create_ambient_object = {
-						type = "horror_spawn_object"
-						location = THIS
-						use_3d_location = yes
-						duration = 10
-					}
-					create_fleet = {
-						name = "NAME_Tempest_Fleet"
-						effect = {
-							set_owner = event_target:graygoo_country
-							create_graygoo_ships_1 = yes
-							set_formation_scale = 2
-							set_fleet_stance = aggressive
-							set_aggro_range_measure_from = self
-							set_aggro_range = 250
-							set_location = {
-								target = prev
-								distance = 0
-								angle = 0
-							}
+				create_ambient_object = {
+					type = "horror_spawn_object"
+					location = THIS
+					use_3d_location = yes
+					duration = 10
+				}
+				create_fleet = {
+					name = "NAME_Tempest_Fleet"
+					effect = {
+						set_owner = event_target:graygoo_country
+						create_graygoo_ships_1 = yes
+						set_formation_scale = 2
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_aggro_range = 250
+						set_location = {
+							target = prev
+							distance = 0
+							angle = 0
 						}
 					}
 				}
@@ -763,10 +755,10 @@ country_event = {
 				is_megastructure_type = lgate_base
 			}
 			activate_gateway = this
+			set_megastructure_flag = lgate_activated
 		}
-
-		event_target:lcluster_factory_system = {
-			# limit = { has_star_flag = graygoo_factory_system }
+		set_update_modifiers_batch = begin
+		event_target:graygoo_factory_system = {
 			random_system_planet = {
 				limit = { has_planet_flag = main_star }
 				save_event_target_as = main_star
@@ -821,6 +813,7 @@ country_event = {
 				}
 			}
 			every_country = { establish_communications_no_message = event_target:graygoo_country }
+
 
 			event_target:graygoo_country = {
 				create_ship_design = { design = "NAME_Gatebuilder_Starbase" }
@@ -960,7 +953,46 @@ country_event = {
 					uses_naval_capacity = no
 				}
 			}
-
+			every_system = {
+				limit = { has_star_flag = lcluster }
+				every_system_planet = {
+					limit = { is_planet_class = pc_gray_goo }
+					event_target:graygoo_country = {
+						create_leader = {
+							class = admiral
+							species = owner_main_species
+							name = random
+							skill = 3
+							leader_age_min = 25
+							leader_age_max = 45
+							traits = {
+								trait = random_trait
+							}
+						}
+					}
+					create_fleet = {
+						name = "NAME_Dessanu_Fleet"
+						effect = {
+							set_owner = event_target:graygoo_country
+							create_dessanu_ships_1 = yes
+							set_formation_scale = 2
+							set_fleet_stance = aggressive
+							set_aggro_range_measure_from = self
+							set_aggro_range = 250
+							set_location = {
+								target = prev
+								distance = 15
+								angle = random
+							}
+							assign_leader = last_created_leader
+						}
+						settings = {
+							garrison = yes
+							uses_naval_capacity = no
+						}
+					}
+				}
+			}
 			event_target:lcluster1 = {
 				random_system_planet = {
 					limit = { is_planet_class = pc_gray_goo }
@@ -983,6 +1015,12 @@ country_event = {
 				random_system_planet = {
 					limit = { is_planet_class = pc_gray_goo }
 					save_event_target_as = start_4
+				}
+			}
+			event_target:lcluster5 = {
+				random_system_planet = {
+					limit = { is_planet_class = pc_gray_goo }
+					save_event_target_as = start_5
 				}
 			}
 			event_target:lcluster1b = {
@@ -1024,40 +1062,6 @@ country_event = {
 					set_planet_flag = hidden_nanite_world
 					prevent_anomaly = yes
 					set_owner = event_target:graygoo_country
-					event_target:graygoo_country = {
-						create_leader = {
-							class = admiral
-							species = owner_main_species
-							name = random
-							skill = 3
-							leader_age_min = 25
-							leader_age_max = 45
-							traits = {
-								trait = random_trait
-							}
-						}
-					}
-					create_fleet = {
-						name = "NAME_Dessanu_Fleet"
-						effect = {
-							set_owner = event_target:graygoo_country
-							create_dessanu_ships_1 = yes
-							set_formation_scale = 2
-							set_fleet_stance = aggressive
-							set_aggro_range_measure_from = self
-							set_aggro_range = 250
-							set_location = {
-								target = prev
-								distance = 15
-								angle = random
-							}
-							assign_leader = last_created_leader
-						}
-						settings = {
-							garrison = yes
-							uses_naval_capacity = no
-						}
-					}
 					while = {
 						count = 30
 						create_pop = {
@@ -1116,6 +1120,7 @@ country_event = {
 				}
 			}
 		}
+		set_update_modifiers_batch = end
 		country_event = { id = graygoo.110 }
 		observer_event = { id = observer.66 }
 	}
@@ -2047,7 +2052,7 @@ country_event = {
 	desc = "graygoo.181.desc"
 	picture = GFX_evt_large_explosion
 	show_sound = event_ship_explosion
-	location = event_target:lcluster_factory_system
+	location = event_target:lcluster5
 
 	is_triggered_only = yes
 
@@ -2148,8 +2153,8 @@ ship_event = {
 		text = "graygoo.400.a.desc"
 	}
 	desc = {
-		trigger = {
-			owner = { is_synthetic_empire = yes }
+		trigger = { 
+			owner = { is_synthetic_empire = yes } 
 		}
 		text = "graygoo.400.b.desc"
 	}
