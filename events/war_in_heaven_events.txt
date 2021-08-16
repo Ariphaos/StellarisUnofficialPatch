@@ -38,8 +38,10 @@ country_event = {
 		random_country = {
 			limit = {
 				is_country_type = fallen_empire
-				NOT = { has_ethic = ethic_gestalt_consciousness }
-				NOT = { has_country_flag = sleepers_awake_first }
+				NOR = {
+					has_ethic = ethic_gestalt_consciousness
+					has_country_flag = sleepers_awake_first
+				}
 			}
 			set_country_flag = sleepers_awake_ancient_rival
 			set_timed_country_flag = { flag = timed_ancient_rival days = 3650 }
@@ -356,48 +358,13 @@ country_event = {
 			}
 		}
 		hidden_effect = { set_country_flag = war_in_heaven_picked_side }
-		if = {
-			limit = {
-				event_target:FirstSleeper = {
-					has_ethic = ethic_fanatic_xenophobe
-				}
-			}
-			set_subject_of = {
-				who = event_target:FirstSleeper
-				subject_type = thrall
-			}
-		}
-		if = {
-			limit = {
-				event_target:FirstSleeper = {
-					has_ethic = ethic_fanatic_xenophile
-				}
-			}
-			set_subject_of = {
-				who = event_target:FirstSleeper
-				subject_type = signatory
-			}
-		}
-		if = {
-			limit = {
-				event_target:FirstSleeper = {
-					has_ethic = ethic_fanatic_spiritualist
-				}
-			}
-			set_subject_of = {
-				who = event_target:FirstSleeper
-				subject_type = dominion
-			}
-		}
-		if = {
-			limit = {
-				event_target:FirstSleeper = {
-					has_ethic = ethic_fanatic_materialist
-				}
-			}
-			set_subject_of = {
-				who = event_target:FirstSleeper
-				subject_type = satellite
+		event_target:FirstSleeper = {
+			switch = {
+				trigger = has_ethic
+				ethic_fanatic_xenophobe = { prev = { set_subject_of = { who = prev subject_type = thrall } } }
+				ethic_fanatic_xenophile = { prev = { set_subject_of = { who = prev subject_type = signatory } } }
+				ethic_fanatic_spiritualist = { prev = { set_subject_of = { who = prev subject_type = dominion } } }
+				ethic_fanatic_materialist = { prev = { set_subject_of = { who = prev subject_type = satellite } } }
 			}
 		}
 		hidden_effect = {
@@ -525,48 +492,13 @@ country_event = {
 			}
 		}
 		hidden_effect = { set_country_flag = war_in_heaven_picked_side }
-		if = {
-			limit = {
-				from = {
-					has_ethic = ethic_fanatic_xenophobe
-				}
-			}
-			set_subject_of = {
-				who = from
-				subject_type = thrall
-			}
-		}
-		if = {
-			limit = {
-				from = {
-					has_ethic = ethic_fanatic_xenophile
-				}
-			}
-			set_subject_of = {
-				who = from
-				subject_type = signatory
-			}
-		}
-		if = {
-			limit = {
-				from = {
-					has_ethic = ethic_fanatic_spiritualist
-				}
-			}
-			set_subject_of = {
-				who = from
-				subject_type = dominion
-			}
-		}
-		if = {
-			limit = {
-				from = {
-					has_ethic = ethic_fanatic_materialist
-				}
-			}
-			set_subject_of = {
-				who = from
-				subject_type = satellite
+		from = {
+			switch = {
+				trigger = has_ethic
+				ethic_fanatic_xenophobe = { prev = { set_subject_of = { who = prev subject_type = thrall } } }
+				ethic_fanatic_xenophile = { prev = { set_subject_of = { who = prev subject_type = signatory } } }
+				ethic_fanatic_spiritualist = { prev = { set_subject_of = { who = prev subject_type = dominion } } }
+				ethic_fanatic_materialist = { prev = { set_subject_of = { who = prev subject_type = satellite } } }
 			}
 		}
 		hidden_effect = {
@@ -636,23 +568,13 @@ country_event = {
 	}
 	option = {
 		name = war_in_heaven.4.d
-		trigger = {
-			is_subject = yes
-		}
+		trigger = { is_subject = yes overlord = { is_country_type = awakened_fallen_empire } }
 		if = {
-			limit = { overlord = { is_country_type = awakened_fallen_empire } }
-			if = {
-				limit = {
-					overlord = { is_same_value = event_target:FirstSleeper }
-				}
-				join_war = event_target:FirstSleeper
-			}
-			if = {
-				limit = {
-					overlord = { is_same_value = from }
-				}
-				join_war = from
-			}
+			limit = { overlord = { is_same_empire = event_target:FirstSleeper } }
+			join_war = event_target:FirstSleeper
+		} else_if = {
+			limit = { overlord = { is_same_empire = from } }
+			join_war = from
 		}
 	}
 }
@@ -902,10 +824,13 @@ country_event = {
 		is_country_type = awakened_fallen_empire
 		has_country_flag = sleepers_awake_first_sleeper
 		has_global_flag = war_in_heaven_ongoing
-		NOT = { has_global_flag = war_in_heaven_nonaligned_league }
-		NOT = { has_global_flag = war_in_heaven_seeking_league_leader }
+		NOR = {
+			has_global_flag = war_in_heaven_nonaligned_league
+			has_global_flag = war_in_heaven_seeking_league_leader
+		}
 		has_galactic_emperor = no # Galactic Empire serves this purpose
-		any_country = {
+		any_playable_country = {
+			# is_country_type = default
 			is_subject = no
 			NOT = {
 				any_country = {
@@ -913,20 +838,18 @@ country_event = {
 					is_at_war_with = prev
 				}
 			}
-			is_country_type = default
-
-			any_country = {
-				is_subject = no
-				NOT = {
+			any_playable_country = {
+				# is_country_type = default
+				NOR = {
+					is_subject = yes
 					any_country = {
 						is_country_type = awakened_fallen_empire
 						is_at_war_with = prev
 					}
+					is_homicidal = yes
+					has_country_flag = war_in_heaven_league_leader_declined
+					is_same_value = prev
 				}
-				is_country_type = default
-				is_homicidal = no
-				NOT = { has_country_flag = war_in_heaven_league_leader_declined }
-				NOT = { is_same_value = prev }
 			}
 		}
 	}
@@ -1062,8 +985,8 @@ country_event = {
 		else = {
 			random_playable_country = {
 				limit = {
-					is_subject = no
 					# is_country_type = default
+					is_subject = no
 					is_homicidal = no
 					NOR = {
 						# has_global_flag = war_in_heaven_seeking_league_leader
@@ -1073,8 +996,8 @@ country_event = {
 							is_at_war_with = prev
 						}
 						any_playable_country = {
-							is_subject = no
 							# is_country_type = default
+							is_subject = no
 							relative_power = {
 								who = prev
 								value > equivalent
@@ -1513,15 +1436,15 @@ country_event = {
 	location = root
 
 	trigger = {
+		has_global_flag = war_in_heaven_nonaligned_league
 		has_federation = yes
 		is_federation_leader = yes
 		federation = {
 			has_federation_flag = non_aligned_league
 		}
-		has_global_flag = war_in_heaven_nonaligned_league
-		NOT = { has_global_flag = war_in_heaven_nonaligned_league_war }
-		NOT = { has_country_flag = war_in_heaven_nonaligned_league_timer }
-		NOT = {
+		NOR = {
+			has_global_flag = war_in_heaven_nonaligned_league_war
+			has_country_flag = war_in_heaven_nonaligned_league_timer
 			any_country = {
 				is_country_type = awakened_fallen_empire
 				is_at_war_with = prev
