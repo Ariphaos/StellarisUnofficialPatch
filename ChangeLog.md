@@ -1,5 +1,9 @@
 # ChangeLog
 
+## August 25th
+
+- Minor fix bombardment stance raiding ai_weight scope. (FirePrince)
+
 ## August 16th
 
 - Minor performance fix for distar.10955 (monthly event). (FirePrince)
