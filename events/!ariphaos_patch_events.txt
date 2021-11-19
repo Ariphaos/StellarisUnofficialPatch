@@ -7,7 +7,8 @@ event = {
 	is_triggered_only = yes
 
 	immediate = {
-		set_global_flag = ariphaos_unofficial_patch_28
+		set_global_flag = ariphaos_unofficial_patch_installed
+		set_global_flag = ariphaos_unofficial_patch_31
 	}
 }
 
@@ -54,13 +55,57 @@ country_event = {
 			has_technology = tech_mine_living_metal
 			has_tech_option = tech_mine_living_metal
 		}
-		OR = {
-			any_planet_within_border = { has_deposit = d_living_metal_deposit }
-		}
+		any_planet_within_border = { has_deposit = d_living_metal_deposit }
 	}
 
 	immediate = {
 		add_research_option = tech_mine_living_metal
+	}
+
+}
+
+# Pacify Amoebas and Crystals for Caravaneers
+country_event = {
+	id = ariphaos_patch.7
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = crystal_nonhostile_approach }
+		OR = {
+			AND = {
+				is_fallen_empire = yes
+				is_xenophile = yes
+			}
+			is_country_type = caravaneer_fleet
+			is_country_type = caravaneer_home
+		}
+	}
+
+	immediate = {
+		set_country_flag = crystal_nonhostile_approach
+		
+		every_country = {
+			limit = {
+				is_amoeba_country_type = yes
+			}
+			set_faction_hostility = {
+				set_hostile = no
+				set_neutral = yes
+				target = root
+			}
+		}
+		
+		every_country = {
+			limit = {
+				is_crystal_country_type = yes
+			}
+			set_faction_hostility = {
+				set_hostile = no
+				set_neutral = yes
+				target = root
+			}
+		}
 	}
 
 }
@@ -128,6 +173,161 @@ event = {
 				modifier = "terraforming_candidate"
 				days = -1
 			}
+		}
+	}
+}
+
+# De-increment variable for counting Azizian armies
+country_event = {
+	id = ariphaos_patch.450
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = { army_type = titanic_azizian_assault_army }
+	}
+
+	immediate = {
+		change_variable = {
+			which = titanic_azizian_soldier_count
+			value = -1
+		}
+	}
+}
+
+# De-increment variable for counting Titanic armies
+country_event = {
+	id = ariphaos_patch.451
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = { army_type = titanic_assault_army }
+	}
+
+	immediate = {
+		change_variable = {
+			which = titanic_life_soldier_count
+			value = -1
+		}
+	}
+}
+
+# triggered by on_fleet_disbanded
+# ROOT = owner
+# FROM = fleet
+country_event = {
+	id = ariphaos_patch.456
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		exists = FROM
+		FROM = { is_ship_class = shipclass_transport }
+	}
+	immediate = {
+		every_owned_army = {
+			limit = {
+				OR = {
+					army_type = titanic_assault_army
+					army_type = titanic_azizian_assault_army
+					army_type = imperial_legion
+				}
+			}
+			if = {
+				limit = {
+					exists = fleet
+					fleet = { is_same_value = FROM }
+				}
+				save_event_target_as = removed_army
+				switch = {
+					trigger = army_type
+					titanic_assault_army = { PREV = {
+						change_variable = {
+							which = titanic_life_soldier_count
+							value = -1
+						}
+					} }
+					titanic_azizian_assault_army = { PREV = {
+						change_variable = {
+							which = titanic_azizian_soldier_count
+							value = -1
+						}
+					} }
+					imperial_legion = { PREV = {
+						change_variable = {
+							which = imperial_legion_soldier_count
+							value = -1
+						}
+					} }
+				}
+			}
+		}
+	}
+}
+
+# triggered by on_single_player_save_game_load and on_yearly_pulse - multiplayer can manually fire this event if needed
+# ensure accurate army counters because we can't detect disbanded armies or lost worlds that had the relevant flag
+event = {
+	id = ariphaos_patch.459
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		every_playable_country = {
+			set_variable = {
+				which = titanic_life_soldier_count
+				value = 0
+			}
+			set_variable = {
+				which = titanic_azizian_soldier_count
+				value = 0
+			}
+			set_variable = {
+				which = imperial_legion_soldier_count
+				value = 0
+			}
+			every_owned_army = {
+				limit = {
+					OR = {
+						army_type = titanic_assault_army
+						army_type = titanic_azizian_assault_army
+						army_type = imperial_legion
+					}
+				}
+				switch = {
+					trigger = army_type
+					titanic_assault_army = { PREV = {
+						change_variable = {
+							which = titanic_life_soldier_count
+							value = 1
+						}
+					} }
+					titanic_azizian_assault_army = { PREV = {
+						change_variable = {
+							which = titanic_azizian_soldier_count
+							value = 1
+						}
+					} }
+					imperial_legion = { PREV = {
+						change_variable = {
+							which = imperial_legion_soldier_count
+							value = 1
+						}
+					} }
+				}
+			}
+#			set_variable = {
+#				which = titanic_life_soldier_maximum
+#				value = 0
+#			}
+#			every_owned_planet = {
+#				limit = { has_planet_flag = titanic_life_can_build }
+#				PREV = {
+#					change_variable = {
+#						which = titanic_life_soldier_maximum
+#						value = @titanic_life_soldier_per_planet_maximum
+#					}
+#				}
+#			}
 		}
 	}
 }
@@ -259,6 +459,66 @@ event = {
 			country_event = { id = ariphaos_patch.31010 days = 1 }
 		}
 	}
+}
+
+event = {
+	id = ariphaos_patch.5063
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = event_target:enigmatic_cache_country
+		any_playable_country = {
+			is_country_type = default
+			OR = {
+				has_country_flag = applied_enigmatic_intelligence_failed
+				has_country_flag = applied_enigmatic_intelligence_poor
+				has_country_flag = applied_enigmatic_intelligence
+			}
+		}
+	}
+	
+	immediate = {
+		event_target:enigmatic_cache_country = { 
+			country_event = {
+				id = ariphaos_patch.5068
+				days = 30
+				random = 360
+			}
+		}
+	}
+}
+
+country_event = {
+	id = ariphaos_patch.5068
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_owned_fleet = {
+			destroy_fleet = this
+		}
+		destroy_country = yes
+		
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				is_country_type = default
+			}
+			country_event = {
+				id = ariphaos_patch.5073
+				days = 1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = ariphaos_patch.5073
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = { }
 }
 
 country_event = {

@@ -880,8 +880,8 @@ country_event = {
 			if = {
 				limit = {
 					event_target:prethoryn = {
-						NOT = { 
-							any_owned_ship = { is_ship_class = shipclass_starbase } 
+						NOT = {
+							any_owned_ship = { is_ship_class = shipclass_starbase }
 						}
 					}
 					any_fleet_in_system = { is_ship_class = shipclass_starbase }
@@ -1648,6 +1648,9 @@ fleet_event = {
 		owner = { is_country_type = sentinels }
 		owner = { num_ships < 200 }
 		is_same_value = event_target:sentinel_alpha
+		any_country = {
+			is_country_type = default
+		}
 	}
 
 	mean_time_to_happen = {
@@ -2791,6 +2794,7 @@ planet_event = {
 
 	trigger = {
 		num_pops = 1 # Last Pop is still alive when this event is fired
+		exists = controller
 		controller = { is_country_type = "swarm" }
 	}
 
@@ -3482,6 +3486,38 @@ country_event = {
 	}
 }
 
+#Star Eater destroying Infested world
+system_event = {
+	id = crisis.220
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		any_system_planet = {
+			is_planet_class = pc_infested
+		}
+	}
+
+	immediate = {
+		every_system_planet = {
+		limit = { is_planet_class = pc_infested }
+			every_country = {
+				limit = { has_event_chain = "prethoryn_scourge_chain" }
+				add_event_chain_counter = {
+					event_chain = "prethoryn_scourge_chain"
+					counter = "infested_worlds"
+					amount = -1
+				}
+				add_event_chain_counter = {
+					event_chain = "prethoryn_scourge_chain"
+					counter = "infested_worlds_cleansed"
+					amount = 1
+				}
+			}
+		}
+	}
+}
+
 # Events to manage crisis sound loop
 country_event = {
 	id = crisis.230
@@ -3815,7 +3851,7 @@ starbase_event = {
 
 	immediate = {
 		solar_system = { save_event_target_as = starbase_system }
-		from.owner = { 
+		from.owner = {
 			country_event = { id = crisis.266 days = 5 } # Delay so that destroyed starbase is properly cleared out
 		}
 	}
@@ -3850,8 +3886,8 @@ country_event = {
 					}
 				}
 				every_system_planet = {
-				    limit = { has_orbital_station = yes }
-				    orbital_station = { dismantle = yes }
+					limit = { has_orbital_station = yes }
+					orbital_station = { dismantle = yes }
 				}
 			}
 		}

@@ -47,13 +47,23 @@ ap_become_the_crisis = {
 		factor = 7.5
 		modifier = {
 			factor = 0
-			is_militarist = no
-			is_xenophobe = no
-			is_gestalt = no
+			nor = {
+				is_militarist = yes
+				is_xenophobe = yes
+				is_gestalt = yes
+				and = {
+					is_authoritarian = yes
+					is_spiritualist = yes
+				}
+			}
 		}
 		modifier = {
 			factor = 10
 			is_homicidal = yes
+		}
+		modifier = {
+			factor = 0
+			fleet_power < 100000
 		}
 		modifier = {
 			factor = 2
@@ -61,20 +71,36 @@ ap_become_the_crisis = {
 		}
 		modifier = {
 			factor = 0
-			galaxy_percentage < 0.1
+			galaxy_percentage < 0.05
 		}
 		modifier = {
-			factor = 2
+			factor = 5
 			galaxy_percentage > 0.2
 		}
 		modifier = {
-			factor = 0
-			num_ascension_perks >= 5
+			factor = 5
+			resource_income_compare = {
+				resource = alloys
+				value > 500
+			}
+		}
+		modifier = {
+			factor = 5
+			num_ascension_perks > 3
+		}
+		modifier = {
+			factor = 0.1
+			count_country = {
+				count > 1
+				limit = {
+					has_ascension_perk = ap_become_the_crisis
+				}
+			}
 		}
 		modifier = {
 			factor = 0
 			count_country = {
-				count > 1
+				count > 2
 				limit = {
 					has_ascension_perk = ap_become_the_crisis
 				}
@@ -113,6 +139,12 @@ ap_enigmatic_engineering = {
 	ai_weight = {
 		factor = 10
 		modifier = {
+			factor = 0.1
+			not = {
+				has_ascension_perk = ap_executive_vigor
+			}
+		}
+		modifier = {
 			factor = 2
 			has_ethic = ethic_materialist
 		}
@@ -146,6 +178,12 @@ ap_nihilistic_acquisition = {
 
 	ai_weight = {
 		factor = 10
+		modifier = {
+			factor = 0.1
+			not = {
+				has_ascension_perk = ap_executive_vigor
+			}
+		}
 		modifier = {
 			factor = 0
 			NOT = { has_ai_personality_behaviour = slaver }
@@ -223,6 +261,16 @@ ap_colossus = {
 ap_engineered_evolution = {
 	on_enabled = {
 		add_research_option = tech_gene_seed_purification
+		if = {
+			limit = {
+				has_origin = origin_clone_army
+				OR = {
+					has_trait = trait_clone_soldier_infertile
+					has_trait = trait_clone_soldier_infertile_full_potential
+				}
+			}
+			custom_tooltip = clone_soldier_locked_genes
+		}
 		hidden_effect = {
 			country_event = { id = utopia.2700 }
 		}
@@ -273,6 +321,14 @@ ap_engineered_evolution = {
 
 	ai_weight = {
 		factor = 100
+		modifier = {
+			factor = 0.1
+			num_ascension_perks < 3
+		}
+		modifier = {
+			factor = 10
+			is_gestalt = yes
+		}
 	}
 }
 
@@ -281,6 +337,16 @@ ap_engineered_evolution = {
 ap_evolutionary_mastery = {
 	on_enabled = {
 		add_research_option = tech_genetic_resequencing
+		if = {
+			limit = {
+				has_origin = origin_clone_army
+				OR = {
+					has_trait = trait_clone_soldier_infertile
+					has_trait = trait_clone_soldier_infertile_full_potential
+				}
+			}
+			custom_tooltip = clone_soldier_locked_genes
+		}
 		hidden_effect = {
 			country_event = { id = utopia.2703 }
 		}
@@ -326,7 +392,7 @@ ap_evolutionary_mastery = {
 	}
 
 	ai_weight = {
-		factor = 1000
+		factor = 10000
 	}
 }
 
@@ -388,6 +454,10 @@ ap_the_flesh_is_weak = {
 		}
 		modifier = {
 			factor = 0.1
+			num_ascension_perks < 3
+		}
+		modifier = {
+			factor = 0.1
 			has_origin = origin_necrophage
 		}
 	}
@@ -402,6 +472,26 @@ ap_synthetic_evolution = {
 				has_trait = trait_necrophage
 			}
 			custom_tooltip = disables_necrophage_features
+		}
+		if = {
+			limit = {
+				has_origin = origin_clone_army
+				OR = {
+					has_trait = trait_clone_soldier_infertile
+					has_trait = trait_clone_soldier_infertile_full_potential
+					has_trait = trait_clone_soldier_fertile
+				}
+			}
+			custom_tooltip = disables_clone_army_origin_features
+		}
+		if = {
+			limit = {
+				OR = {
+					has_valid_civic = civic_idyllic_bloom
+					has_valid_civic = civic_hive_idyllic_bloom
+				}
+			}
+			custom_tooltip = disables_idyllic_bloom
 		}
 		hidden_effect = {
 			country_event = { id = utopia.2550 }
@@ -519,6 +609,10 @@ ap_mind_over_matter = {
 				has_ethic = ethic_fanatic_spiritualist
 			}
 		}
+		modifier = {
+			factor = 0.1
+			num_ascension_perks < 3
+		}
 	}
 }
 
@@ -605,7 +699,12 @@ ap_world_shaper = {
 	}
 
 	ai_weight = {
-		factor = 5
+		factor = 50
+		modifier = {
+			factor = 0.1
+			has_ascension_perk = ap_machine_worlds
+			has_ascension_perk = ap_hive_worlds
+		}
 	}
 }
 
@@ -698,12 +797,51 @@ ap_defender_of_the_galaxy = {
 	}
 
 	ai_weight = {
-		factor = 20
+		factor = 5
+		modifier = {
+			factor = 5
+			has_global_flag = galactic_crisis_happened
+		}
 		modifier = {
 			factor = 0
 			NOR = {
 				has_global_flag = galactic_crisis_happened
 				has_global_flag = gray_goo_crisis_active
+				any_country = {
+					relative_power = {
+						who = prev
+						value > equivalent
+					}
+					has_ascension_perk = ap_become_the_crisis
+				}
+			}
+		}
+		modifier = {
+			factor = 10
+			has_global_flag = galactic_crisis_happened
+			fleet_power < 200000
+		}
+		modifier = {
+			factor = 10
+			any_country = {
+				has_ascension_perk = ap_become_the_crisis
+				or = {
+					relative_power = {
+						who = prev
+						category = technology
+						value > equivalent
+						}
+					relative_power = {
+						who = prev
+						category = economy
+						value > equivalent
+						}
+					relative_power = {
+						who = prev
+						category = fleet
+						value > equivalent
+					}
+				}
 			}
 		}
 	}
@@ -841,11 +979,11 @@ ap_galactic_contender = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 5
 		modifier = {
 			factor = 0
 			NOR = {
-				any_neighbor_country = {
+				any_country = {
 					is_country_type = awakened_fallen_empire
 				}
 				any_country = {
@@ -854,7 +992,7 @@ ap_galactic_contender = {
 			}
 		}
 		modifier = {
-			factor = 2
+			factor = 5
 			any_country = {
 				is_country_type = awakened_fallen_empire
 			}
@@ -879,6 +1017,12 @@ ap_technological_ascendancy = {
 
 	ai_weight = {
 		factor = 20
+		modifier = {
+			factor = 0.5
+			not = {
+				has_ascension_perk = ap_executive_vigor
+			}
+		}
 		modifier = {
 			factor = 2
 			has_ethic = ethic_materialist
@@ -905,7 +1049,7 @@ ap_one_vision = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 5
 		modifier = {
 			factor = 2
 			has_ethic = ethic_authoritarian
@@ -921,6 +1065,11 @@ ap_one_vision = {
 		modifier = {
 			factor = 3
 			has_ethic = ethic_fanatic_spiritualist
+		}
+		modifier = {
+			factor = 3
+			is_spiritualist = yes
+			is_authoritarian = yes
 		}
 	}
 }
@@ -942,7 +1091,11 @@ ap_consecrated_worlds = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 5
+		modifier = {
+			factor = 3
+			has_ethic = ethic_fanatic_spiritualist
+		}
 	}
 }
 
@@ -987,7 +1140,7 @@ ap_imperial_prerogative = {
 	}
 
 	ai_weight = {
-		factor = 0
+		factor = 5
 	}
 
 	on_enabled = {
@@ -1028,10 +1181,16 @@ ap_transcendent_learning = {
 	}
 
 	ai_weight = {
-		factor = 20
+		factor = 10
 		modifier = {
-			factor = 0
+			factor = 0.5
 			is_machine_empire = no
+		}
+		modifier = {
+			factor = 0.1
+			not = {
+				has_ascension_perk = ap_executive_vigor
+			}
 		}
 	}
 }
@@ -1057,7 +1216,7 @@ ap_shared_destiny = {
 	}
 
 	ai_weight = {
-		factor = 0
+		factor = 1
 		modifier = {
 			factor = 0
 			NOT = {
@@ -1065,6 +1224,10 @@ ap_shared_destiny = {
 					is_subject_type = vassal
 				}
 			}
+		}
+		modifier = {
+			factor = 0
+			is_homicidal = yes
 		}
 	}
 }
@@ -1118,6 +1281,14 @@ ap_voidborn = {
 	ai_weight = {
 		factor = 10
 		modifier = {
+			factor = 0.1
+			NOR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+				has_origin = origin_void_dwellers
+			}
+		}
+		modifier = {
 			factor = 2
 			has_ethic = ethic_pacifist
 		}
@@ -1156,6 +1327,14 @@ ap_master_builders = {
 
 	ai_weight = {
 		factor = 10
+		modifier = {
+			factor = 0.5
+			nor = {
+				has_ascension_perk = ap_galactic_wonders_megacorp
+				has_ascension_perk = ap_galactic_wonders_utopia
+				has_ascension_perk = ap_galactic_wonders_utopia_and_megacorp
+			}
+		}
 		modifier = {
 			factor = 2
 			has_ethic = ethic_pacifist
@@ -1206,7 +1385,7 @@ ap_galactic_wonders_utopia = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 20
 		modifier = {
 			factor = 2
 			has_ethic = ethic_pacifist
@@ -1248,7 +1427,7 @@ ap_galactic_wonders_megacorp = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 20
 		modifier = {
 			factor = 2
 			has_ethic = ethic_pacifist
@@ -1306,7 +1485,7 @@ ap_galactic_wonders_utopia_and_megacorp = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 20
 		modifier = {
 			factor = 2
 			has_ethic = ethic_pacifist
@@ -1351,7 +1530,7 @@ ap_synthetic_age = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 50
 	}
 }
 
@@ -1435,7 +1614,10 @@ ap_hive_worlds = {
 ap_arcology_project = {
 	potential = {
 		host_has_dlc = "Megacorp"
-		is_regular_empire = yes
+		OR = {
+			is_regular_empire = yes
+			has_valid_civic = civic_machine_servitor
+		}
 		NOT = { has_valid_civic = civic_agrarian_idyll }
 		NOT = {
 			has_ascension_perk = ap_arcology_project
@@ -1514,11 +1696,11 @@ ap_xeno_compatibility = {
 	ai_weight = {
 		factor = 10
 		modifier = {
-			factor = 2
-			has_ethic = ethic_xenophile
+			factor = 0
+			NOT = { has_ethic = ethic_fanatic_xenophile }
 		}
 		modifier = {
-			factor = 3
+			factor = 2
 			has_ethic = ethic_fanatic_xenophile
 		}
 	}

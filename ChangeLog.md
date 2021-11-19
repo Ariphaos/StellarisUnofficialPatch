@@ -1,5 +1,50 @@
 # ChangeLog
 
+## November 18th
+
+- Fixed Nomad hostility (FireGolem)
+- Restricted Gray goo planet events (FireGolem - performance fix included in 3.2)
+- AI checks no longer applied to fortress upgrades.
+- Can again see city district slots on unowned worlds (this was always a cosmetic issue)
+
+## October 7th
+
+- Reduced or implemented opinion maximums for declining war and voting against proposals. (Ariphaos)
+- Prevent the Great Khan from leaving his fleet. (FireGolem)
+- Fixed privateer sabotage for empires with >= 200000 fleet power. (Ariphaos)
+- Blocked bureaucratic buildings on slave/resort colonies. (Ariphaos)
+- Lowered weight for decadent pops to take soldier jobs (ends up being a high enough priority for them to ignore 'respectable' work). (Ariphaos)
+- Ecumenopoli add 36 building slots, instead (for people with mods adding more building slots). (Ariphaos)
+- Fixed some bugs in my AI work.
+
+## September 29th
+
+- end_war_effect fix (FireGolem)
+- Fix for auto-surveying on station destruction (FireGolem)
+-- Excluded dormant marauders from this effect.
+- Caravaneers and Xenophile FEs treat amoebas and crystals as pacified (there were situations caravaneer pathfinding couldn't resolve). (Ariphaos)
+- Stop AI from filling the planet with city districts. (Ariphaos)
+- More AI improvements (some from StarNet, some of mine)
+- Shine Divine would spare bugged robots (Ariphaos)
+- Bombardment policy fix (FireGolem and Inny)
+
+## September 22nd
+
+- Some more AI improvements from StarNet (Salvor)
+- More of my own AI improvements (Ariphaos - mostly to resolutions)
+-- Notably, the AI takes into account how much it likes someone for targeted resolutions. Could probably use a bit more nuance but should suffice for consistency.
+- Fixes for killed/disbanded limited troops (corsairmarks)
+- Manifesti Autonomous Munitions demand fix (corsairmarks)
+- Moon sky fix (corsairmarks)
+
+## September 18th
+
+Lem release.
+
+### Patch bugs fixed by Paradox
+
+- Gestalt crime reduction fix.
+
 ## August 25th
 
 - Minor fix bombardment stance raiding ai_weight scope. (FirePrince)

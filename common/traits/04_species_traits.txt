@@ -145,7 +145,7 @@ trait_nonadaptive = {
 trait_rapid_breeders = {
 	cost = 2
 	potential_crossbreeding_chance = 1.0
-	opposites = { "trait_slow_breeders" "trait_fertile" "trait_rapid_breeders_lithoid" }
+	opposites = { "trait_slow_breeders" "trait_fertile" "trait_rapid_breeders_lithoid" "trait_plantoid_budding" }
 	allowed_archetypes = { BIOLOGICAL }
 	modifier = {
 		pop_growth_speed = 0.10
@@ -162,7 +162,7 @@ trait_rapid_breeders_lithoid = {
 	randomized = no
 	advanced_trait = yes
 	potential_crossbreeding_chance = 0.5
-	opposites = { "trait_slow_breeders" "trait_rapid_breeders" "trait_fertile" }
+	opposites = { "trait_slow_breeders" "trait_rapid_breeders" "trait_fertile" "trait_plantoid_budding" }
 	allowed_archetypes = { LITHOID }
 	modifier = {
 		pop_growth_speed = 0.10
@@ -175,7 +175,7 @@ trait_rapid_breeders_lithoid = {
 trait_slow_breeders = {
 	cost = -2
 	potential_crossbreeding_chance = 1.0
-	opposites = { "trait_rapid_breeders" "trait_fertile" "trait_rapid_breeders_lithoid" }
+	opposites = { "trait_rapid_breeders" "trait_fertile" "trait_rapid_breeders_lithoid" "trait_plantoid_budding" }
 	allowed_archetypes = { BIOLOGICAL }
 	modifier = {
 		pop_growth_speed = -0.10
@@ -860,9 +860,18 @@ trait_void_dweller_1 = {
 	allowed_archetypes = { BIOLOGICAL LITHOID }
 	sorting_priority = 30
 	potential_crossbreeding_chance = 0.33
+	custom_tooltip_with_modifiers = void_dweller_trait_tooltip #unlike custom_tooltip, this shows in addition to the modifiers
+	triggered_pop_modifier = { #won't show in trait tooltips, use custom_tooltip/custom_tooltip_with_modifiers
+		potential = {
+			exists = planet
+			planet = { is_artificial = no }
+		}
+		pop_happiness = -0.3
+	}
+
 	modifier = {
-		planet_jobs_specialist_produces_mult = 0.15
-		planet_jobs_worker_produces_mult = 0.15
+		habitat_jobs_produces_mult = 0.15
+		non_artificial_planet_jobs_produces_mult = -0.15
 		pop_growth_speed = -0.1
 	}
 	ai_weight = {
@@ -870,18 +879,71 @@ trait_void_dweller_1 = {
 	}
 }
 
-trait_void_dweller_2 = {
-	icon = "gfx/interface/icons/traits/trait_void_dweller.dds"
-	initial = no
-	modification = no
-	randomized = no
-	allowed_archetypes = { BIOLOGICAL LITHOID }
+#trait_void_dweller_2 = {
+#	icon = "gfx/interface/icons/traits/trait_void_dweller.dds"
+#	initial = no
+#	modification = no
+#	randomized = no
+#	allowed_archetypes = { BIOLOGICAL LITHOID }
+#	sorting_priority = 30
+#	potential_crossbreeding_chance = 0.33
+#	modifier = {
+#		pop_growth_speed = -0.6
+#	}
+#	ai_weight = {
+#		weight = 0
+#	}
+#}
+
+# Plantoid traits
+trait_plantoid_phototrophic = {
+	host_has_dlc = "Plantoids Species Pack"
+	cost = 1
+	potential_crossbreeding_chance = 1.0
+	opposites = { "trait_plantoid_radiotrophic" }
+	allowed_archetypes = { BIOLOGICAL }
+	species_class = { PLANT FUN }
 	sorting_priority = 30
-	potential_crossbreeding_chance = 0.33
-	modifier = {
-		pop_growth_speed = -0.6
+	custom_tooltip = TRAIT_PLANTOID_PHOTOTROPHIC_EFFECT
+
+	slave_cost = {
+		energy = 100
 	}
-	ai_weight = {
-		weight = 0
+}
+
+trait_plantoid_radiotrophic = {
+	host_has_dlc = "Plantoids Species Pack"
+	cost = 2
+	potential_crossbreeding_chance = 1.0
+	opposites = { "trait_plantoid_phototrophic"}
+	allowed_archetypes = { BIOLOGICAL }
+	species_class = { PLANT FUN }
+	custom_tooltip = TRAIT_PLANTOID_RADIOTROPHIC_EFFECT
+	modifier = {
+		pc_nuked_habitability = 0.1
+	}
+	triggered_planet_growth_modifier = {
+		potential = {
+			exists = planet
+			planet = { is_planet_class = pc_nuked }
+		}
+		pop_growth_speed = 0.10
+	}
+	slave_cost = {
+		energy = 150
+	}
+}
+
+trait_plantoid_budding = {
+	host_has_dlc = "Plantoids Species Pack"
+	cost = 2
+	potential_crossbreeding_chance = 0.5
+	opposites = { "trait_slow_breeders" "trait_rapid_breeders" "trait_rapid_breeders_lithoid" "trait_necrophage" "trait_clone_soldier_infertile" "trait_clone_soldier_infertile_full_potential" }
+	allowed_archetypes = { BIOLOGICAL }
+	species_class = { PLANT FUN }
+	custom_tooltip = TRAIT_PLANTOID_BUDDING_EFFECT
+	# Organic Pop Assembly set by plantoid_budding_rate in \pop_categories\ and 00_scripted_variables
+	slave_cost = {
+		energy = 250
 	}
 }

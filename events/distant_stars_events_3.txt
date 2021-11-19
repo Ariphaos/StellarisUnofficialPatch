@@ -1,0 +1,2586 @@
+namespace = distar
+
+#################################
+#
+# Distant Stars Events
+# by Miranda van den Brink
+#
+#################################
+
+####### VOIDSPAWN/HATCHLING EVENTS #######
+
+# Gatekeeper Egg Planet Owner
+
+planet_event = {
+	id = distar.5000
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_planet_flag = hatchling_egg
+		NOR = {
+			has_global_flag = hatchling_triggered
+			has_planet_flag = hatchling_planet_owner_triggered
+			owner = {
+				is_at_war = yes
+			}
+		}
+	}
+
+	immediate = {
+		planet_event = { id = distar.5010 days = 200 random = 100 }
+		#planet_event = { id = distar.5010 days = 3 random = 1 }
+		set_planet_flag = hatchling_planet_owner_triggered
+	}
+}
+
+# Gatekeeper Egg Space Owner
+event = {
+	id = distar.5001
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		#any_system = {
+			exists = event_target:hatchling_egg
+			event_target:hatchling_egg = {
+				NOR = {
+					has_planet_flag = space_owner_triggered
+					has_planet_flag = hatchling_planet_owner_triggered
+					has_global_flag = hatchling_triggered
+				}
+				is_colony = no
+				is_under_colonization = no
+				solar_system = {
+					exists = space_owner
+				}
+				# exists = starbase
+			}
+		#}
+	}
+
+	immediate = {
+		event_target:hatchling_egg = {
+			planet_event = { id = distar.5002 days = 200 random = 100 }
+			#planet_event = { id = distar.5002 days = 2 random = 1 }
+			set_planet_flag = space_owner_triggered
+		}
+	}
+}
+
+# EGG is pulsating
+
+planet_event = {
+	id = distar.5010
+	title = distar.5010.name
+	desc = distar.5010.desc
+	picture = GFX_evt_animal_wildlife
+	show_sound = event_radio_chatter
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = hatchling_triggered
+		}
+		OR = {
+			has_owner = yes
+			solar_system = {
+				exists = space_owner
+			}
+		}
+	}
+	immediate = {
+		planet_event = { id = distar.5002 days = 100 random = 50 } # Triggers Next Stage
+		#planet_event = { id = distar.5002 days = 2 random = 1 } # Triggers Next Stage
+		set_timed_planet_flag = { # So that egg changes can't trigger right after egg puslating
+			flag = pulse_triggered
+			days = 95
+			#days = 1
+		}
+	}
+	option = {
+		name = PECULIAR
+	}
+}
+
+
+# EGG changes stage 1
+
+planet_event = {
+	id = distar.5002
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOR = {
+			has_global_flag = hatchling_triggered
+			has_planet_flag = pulse_triggered
+		}
+		is_under_colonization = no
+		OR = {
+			has_owner = yes
+			solar_system = {
+				exists = space_owner
+			}
+		}
+	}
+	immediate = {
+		set_planet_entity = {
+			entity = infected_planet_01_stage_1_entity
+		}
+		add_deposit = d_egg_cracking
+		add_deposit = d_egg_cracking
+		add_deposit = d_egg_cracking
+		add_planet_devastation = 30
+		if = {
+			limit = {
+				has_owner = yes
+			}
+			owner = { country_event = { id = distar.5003 } } # Triggers Notification
+		}
+		else_if = {
+			limit = {
+				solar_system = {
+					has_owner = yes
+				}
+			}
+			solar_system = { owner = { country_event = { id = distar.5003 } } } # Triggers Notification
+		}
+
+		if = {
+			limit = { has_planet_flag = hatchling_will_trigger}
+			planet_event = { id = distar.5004 days = 60 random = 100 } # Triggers Next Stage
+			#planet_event = { id = distar.5004 days = 2 random = 1 } # Triggers Next Stage
+		}
+		else_if = {
+			limit = {
+				has_owner = yes
+			}
+			owner = { country_event = { id = distar.5013 days = 30 random = 60 } } # Triggers Next Stage if no hatchling
+			#owner = { country_event = { id = distar.5013 days = 3 random = 1 } } # Triggers Next Stage if no hatchling
+		}
+		else_if = {
+			limit = {
+				solar_system = {
+					has_owner = yes
+				}
+			}
+			solar_system = { owner = { country_event = { id = distar.5013 days = 30 random = 60 } } } # Triggers Next Stage
+			#solar_system = { owner = { country_event = { id = distar.5013 days = 3 random = 1 } } } # Triggers Next Stage
+		}
+		set_global_flag = hatchling_triggered
+		add_modifier = {
+			modifier = seismological_phenomena
+			days = -1
+		}
+	}
+}
+# EGG Changes Notification
+country_event = {
+	id = distar.5003
+	title = distar.5001.name
+	desc = {
+		text = distar.5001.desc.a
+		trigger = {
+			event_target:hatchling_egg = {
+				is_owned_by = root
+				is_under_colonization = no
+			}
+		}
+	}
+	desc = {
+		text = distar.5001.desc.b
+		trigger = {
+			event_target:hatchling_egg = {
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+			NOT = {
+				event_target:hatchling_egg = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+	picture = GFX_evt_news_room
+	show_sound = event_radio_chatter
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	trigger = {
+		event_target:hatchling_egg = {
+			OR = {
+				is_owned_by = root
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+
+	option = {
+		name = distar.5001.a
+		custom_tooltip = distar.5001.a.tooltip
+	}
+}
+
+# Egg changes stage 2
+planet_event = {
+	id = distar.5004
+	hide_window = yes
+
+	is_triggered_only = yes
+	immediate = {
+		set_planet_entity = {
+			entity = infected_planet_01_stage_2_entity
+		}
+		add_deposit = d_egg_cracking
+		add_deposit = d_egg_cracking
+		add_deposit = d_egg_cracking
+		add_planet_devastation = 30
+
+		remove_modifier = seismological_phenomena
+		add_modifier = {
+			modifier = seismological_phenomena_2
+			days = -1
+		}
+		if = {
+			limit = {
+				has_owner = yes
+			}
+			owner = { country_event = { id = distar.5005 } } # Triggers Notification
+		}
+		else_if = {
+			limit = {
+				solar_system = {
+					has_owner = yes
+				}
+			}
+			solar_system = { owner = { country_event = { id = distar.5005 } } } # Triggers Notification
+		}
+		planet_event = { id = distar.50041 days = 20 random = 10 } # Silent entity change
+		planet_event = { id = distar.5006 days = 60 random = 90 } # Triggers Next Stage
+		#planet_event = { id = distar.5006 days = 3 random = 1 } # Triggers Next Stage
+	}
+}
+
+planet_event = {
+	id = distar.50041
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_planet_entity = {
+			entity = infected_planet_01_stage_3_entity
+		}
+	}
+}
+
+# Egg changes stage 2 Notification
+country_event = {
+	id = distar.5005
+	title = distar.5002.name
+	desc = {
+		text = distar.5002.desc.a
+		trigger = {
+			event_target:hatchling_egg = {
+				is_owned_by = root
+				is_under_colonization = no
+			}
+		}
+	}
+	desc = {
+		text = distar.5002.desc.b
+		trigger = {
+			event_target:hatchling_egg = {
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+			NOT = {
+				event_target:hatchling_egg = {
+				is_owned_by = root
+				}
+			}
+		}
+	}
+	picture = GFX_evt_news_room
+	show_sound = event_radio_chatter
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	trigger = {
+		event_target:hatchling_egg = {
+			OR = {
+				is_owned_by = root
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+
+	option = {
+		name = distar.5002.a
+		custom_tooltip = distar.5001.a.tooltip
+	}
+}
+
+# Egg Hatches
+planet_event = {
+	id = distar.5006
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = { exists = owner }
+			owner = { save_global_event_target_as = egg_owner }
+		}
+		change_pc = pc_egg_cracked
+		# spawn animation
+		create_ambient_object = {
+			type = voidspawn_spawn_animation_object
+			entity_face_object = root.star
+		}
+		last_created_ambient_object = {
+			set_location = {
+				target = root
+				distance = 2.2
+				direction = in_system
+			}
+			save_event_target_as = voidspawn_spawn
+		}
+		destroy_colony = yes
+		clear_deposits = yes
+		add_deposit = d_society_10
+		add_deposit = d_society_10
+
+		remove_modifier = seismological_phenomena_2
+		solar_system = {
+			random_system_planet = {
+				limit = { is_star = no }
+				save_event_target_as = new_location
+			}
+		}
+		# fleet spawn timing
+		planet_event = { id = distar.50061 days = 70 }
+		if = {
+			limit = {
+				exists = event_target:egg_owner
+			}
+			event_target:egg_owner = {
+				country_event = { id = distar.5007 }
+			} # Triggers Notification
+		}
+		else_if = {
+			limit = {
+				solar_system = {
+					has_owner = yes
+				}
+			}
+			solar_system = { owner = { country_event = { id = distar.5007 } } } # Triggers Notification
+		}
+	}
+}
+
+planet_event = {
+	id = distar.50061
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		create_country = {
+			name = "NAME_Voidspawn"
+			type = guardian_hatchling
+			flag = {
+				icon = {
+					category = "spherical"
+					file = "flag_spherical_6.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"red"
+					"red"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				if = {
+					limit = {
+						NOT = {
+							has_modifier = hatchling_power
+						}
+					}
+					add_modifier = {
+						modifier = hatchling_power
+						days = -1
+					}
+				}
+				save_global_event_target_as = hatchling_country
+				set_country_flag = hatchling_country
+				every_playable_country = {
+					establish_communications_no_message = event_target:hatchling_country
+				}
+				create_fleet = {
+					name = "NAME_Voidspawn"
+					settings = {
+						spawn_debris = no
+						is_boss = yes
+					}
+					effect = {
+						#set_owner = event_target:hatchling_country
+						set_owner = prev
+						create_ship = {
+							name = "NAME_Voidspawn"
+							design = "NAME_Voidspawn"
+							effect = {
+								set_ship_flag = hatchling_ship
+								save_global_event_target_as = hatchling
+								set_disabled = no
+							}
+						}
+						save_global_event_target_as = hatchling_fleet
+						set_location = {
+							target = root
+							distance = 0
+							angle = 90
+							direction = in_system
+						}
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self #or return_point
+						set_aggro_range = 300
+						auto_move_to_planet = {
+							target = event_target:new_location
+							clear_auto_move_on_arrival = no	# distar.5008 sets a new auto move target
+						}
+					}
+				}
+			}
+		}
+		event_target:voidspawn_spawn = { destroy_ambient_object = this }
+	}
+}
+
+
+
+# Egg Hatches Notification
+country_event = {
+	id = distar.5007
+	title = distar.5003.name
+	desc = {
+		text = distar.5003.desc.a
+		trigger = {
+			event_target:hatchling_egg = {
+				is_under_colonization = no
+			}
+			exists = event_target:egg_owner
+			root = {
+				is_same_value = event_target:egg_owner
+			}
+		}
+	}
+	desc = {
+		text = distar.5003.desc.b
+		trigger = {
+			event_target:hatchling_egg = {
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+			NOT = {
+				event_target:hatchling_egg = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+	picture = GFX_evt_voidspawn
+	show_sound = event_radio_chatter
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	trigger = {
+		event_target:hatchling_egg = {
+			OR = {
+				AND = {
+					exists = event_target:egg_owner
+					root = {
+						is_same_value = event_target:egg_owner
+					}
+				}
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = encountered_hatchling
+	}
+
+	option = {
+		name = distar.5003.a
+	}
+}
+
+# Egg Interrupted: End Chain
+country_event = {
+	id = distar.5013
+	title = distar.5013.name
+	desc = {
+		text = distar.5013.desc.a
+		trigger = {
+			event_target:hatchling_egg = {
+				is_under_colonization = no
+				is_owned_by = root
+			}
+		}
+	}
+	desc = {
+		text = distar.5013.desc.b
+		trigger = {
+			event_target:hatchling_egg = {
+				solar_system = {
+					is_owned_by = root
+				}
+				NOT = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+	picture = GFX_evt_news_room
+	show_sound = event_radio_chatter
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	trigger = {
+		event_target:hatchling_egg = {
+			OR = {
+				AND = {
+					exists = event_target:egg_owner
+					root = {
+						is_same_value = event_target:egg_owner
+					}
+				}
+				solar_system = {
+					is_owned_by = root
+				}
+			}
+		}
+	}
+
+	immediate = {
+		event_target:hatchling_egg = {
+			if = {
+				limit = {
+					has_modifier = seismological_phenomena
+				}
+				remove_modifier = seismological_phenomena
+			}
+			else_if = {
+				limit = {
+					has_modifier = seismological_phenomena_2
+				}
+				remove_modifier = seismological_phenomena_2
+			}
+			if = {
+				limit = {
+					has_deposit = d_egg_cracking
+				}
+				add_modifier = {
+					modifier = egg_rifts
+					days = -1
+				}
+				set_planet_flag = egg_interrupted
+			}
+		}
+	}
+
+	option = {
+		name = distar.5013.a
+		trigger = {
+			event_target:hatchling_egg = {
+				solar_system = {
+					is_owned_by = root
+				}
+				NOT = {
+					is_owned_by = root
+				}
+			}
+		}
+		tooltip = {
+			event_target:hatchling_egg = {
+				if = {
+					limit = {
+						has_modifier = seismological_phenomena
+					}
+					remove_modifier = seismological_phenomena
+				}
+				else_if = {
+					limit = {
+						has_modifier = seismological_phenomena_2
+					}
+					remove_modifier = seismological_phenomena_2
+				}
+			}
+		}
+	}
+
+	option = {
+		name = distar.5013.b
+		trigger = {
+			event_target:hatchling_egg = {
+				is_under_colonization = no
+				is_owned_by = root
+			}
+		}
+		tooltip = {
+			event_target:hatchling_egg = {
+				if = {
+					limit = {
+						has_modifier = seismological_phenomena
+					}
+					remove_modifier = seismological_phenomena
+				}
+				else_if = {
+					limit = {
+						has_modifier = seismological_phenomena_2
+					}
+					remove_modifier = seismological_phenomena_2
+				}
+			}
+		}
+	}
+}
+
+# All Rifts Removed
+event = {
+	id = distar.5014
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:hatchling_egg
+		event_target:hatchling_egg = {
+			has_planet_flag = egg_interrupted
+			NOR = {
+				has_planet_flag = rifts_removed
+				has_deposit = d_egg_cracking
+			}
+		}
+	}
+	immediate = {
+		event_target:hatchling_egg = {
+			switch = {
+				trigger = is_planet_class
+				pc_savannah = { set_planet_entity = { entity = pc_savannah } }
+				pc_desert = { set_planet_entity = { entity = pc_desert } }
+			}
+			if = {
+				limit = { exists = owner }
+				owner = { country_event = { id = distar.5015 } }
+			}
+			else_if = {
+				limit = { exists = space_owner }
+				space_owner = { country_event = { id = distar.5015 } }
+			}
+			set_planet_flag = rifts_removed
+			remove_modifier = egg_rifts
+		}
+	}
+}
+
+# All Rifts Removed Notification
+country_event = {
+	id = distar.5015
+	title = distar.5014.name
+	desc = distar.5014.desc
+	picture = GFX_evt_news_room
+	show_sound = event_radio_chatter
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+# Hatchling Moves
+country_event = {
+	id = distar.5008
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:hatchling_country
+		exists = event_target:hatchling
+		is_same_value = event_target:hatchling_country
+		from = {
+			is_same_value = event_target:hatchling_fleet
+		}
+	}
+
+	immediate = {
+		from.solar_system = {
+			random_system_planet = {
+				limit = {
+					NOT = { is_same_value = root.from.orbit }
+				}
+				save_event_target_as = new_location
+			}
+		}
+		from = {
+			auto_move_to_planet = {
+				target = event_target:new_location
+				clear_auto_move_on_arrival = no		# distar.5008 sets a new auto move target
+			}
+		}
+	}
+}
+
+# Fleet Enters Hatchling System
+# Entering System
+fleet_event = {
+	id = distar.5011
+	title = "distar.5011.name"
+	desc = "distar.5011.desc"
+	picture = GFX_evt_voidspawn
+	show_sound = event_activating_unknown_technology
+	location = solar_system
+
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = encountered_hatchling }
+		}
+		FROM = {
+			any_fleet_in_system = {
+				exists = owner
+				owner = {
+					is_country_type = guardian_hatchling
+				}
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = encountered_hatchling
+			establish_communications_no_message = event_target:hatchling_country
+			country_event = { id = story.8 days = 15 }
+		}
+	}
+	option = {
+		name = distar.5011.a
+	}
+	option = {
+		name = distar.5011.b
+	}
+}
+
+
+# Killed Hatchling
+country_event = {
+	id = distar.5009
+	title = distar.5009.name
+	desc = distar.5009.desc
+	picture = GFX_evt_voidspawn
+	show_sound = event_space_whale
+	location = event_target:slain_guardian_system
+	trackable = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = { has_country_flag = hatchling_country }
+	}
+
+	immediate = {
+		set_country_flag = hatchling_killed # Achievement flag
+		set_country_flag = killed_hatchling
+		fromfrom.solar_system = {
+			save_event_target_as = slain_guardian_system
+		}
+		every_playable_country = {
+			limit = {
+				has_event_chain = curator_poi_chain
+				event_target:slain_guardian_system = {
+					is_point_of_interest = {
+						id = curator_poi_hatchling
+						event_chain = curator_poi_chain
+						owner = prev
+					}
+				}
+			}
+			remove_point_of_interest = curator_poi_hatchling
+			end_curator_chain = yes
+		}
+	}
+
+	option = {
+		name = distar.5009.a
+		event_target:hatchling_egg = {
+			enable_special_project = {
+				name = SHATTERED_EGG
+				location = this
+				owner = root
+			}
+		}
+		if = {
+			limit = {
+				exists = event_target:egg_owner
+				is_same_value = event_target:egg_owner
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 72
+				min = 600
+				max = 6000
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					NOT = {
+						exists = event_target:egg_owner
+					}
+					AND = {
+						exists = event_target:egg_owner
+						is_same_value = event_target:egg_owner
+					}
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2unityreward
+				min = @tier2unitymin
+				max = @tier2unitymax
+			}
+		}
+		ai_chance = {
+			factor = 1
+		}
+	}
+
+	option = {
+		name = distar.5009.b
+		if = {
+			limit = {
+				exists = event_target:egg_owner
+				is_same_value = event_target:egg_owner
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 72
+				min = 600
+				max = 6000
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					NOT = {
+						exists = event_target:egg_owner
+					}
+					AND = {
+						exists = event_target:egg_owner
+						is_same_value = event_target:egg_owner
+					}
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2unityreward
+				min = @tier2unitymin
+				max = @tier2unitymax
+			}
+		}
+		ai_chance = {
+			factor = 0
+		}
+	}
+	# Reanimate it!
+	option = {
+		ai_chance = {
+			factor = 100
+		}
+
+		name = galactic_features.385.reanimated
+
+		trigger = {
+			has_civic = civic_reanimated_armies
+		}
+
+		event_target:hatchling_egg = {
+			enable_special_project = {
+				name = "REANIMATE_VOIDSPAWN"
+				location = this
+				owner = root.owner
+			}
+		}
+	}
+}
+
+# Reanimated Voidspawn
+country_event = {
+	id = distar.5016
+	title = "distar.218.name"
+	desc = "distar.5016.desc"
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_voidspawn
+	show_sound = event_space_whale
+
+	option = {
+		name = "it_hungers"
+
+		create_fleet = {
+			name = "NAME_Voidspawn"
+			effect = {
+				set_owner = root
+				create_ship = {
+					name = "NAME_Voidspawn"
+					design = "NAME_Voidspawn"
+					prefix = no
+					upgradable = no
+				}
+				set_location = {
+					target = event_target:hatchling_egg
+					distance = 0
+					angle = random
+				}
+				set_fleet_stance = passive
+			}
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				uses_naval_capacity = no
+				spawn_debris = no
+			}
+		}
+	}
+}
+
+country_event = {
+	id = distar.5012
+	title = distar.5012.name
+	desc = distar.5012.desc
+	picture = GFX_evt_voidspawn
+	show_sound = event_laboratory_sound
+	location = event_target:hatchling_egg
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_research_option = tech_gargantuan_evolution
+		add_tech_progress = {
+			tech = tech_gargantuan_evolution
+			progress = 0.3
+		}
+	}
+}
+
+#################################
+#
+# Distant Stars events
+#
+# distar.8000 - distar.19999
+#
+#################################
+
+# Randomize L-Cluster outcome on_game_start
+event = {
+	id = distar.8000
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		random_list = {
+			50 = {
+				set_global_flag = gray_goo_crisis_set
+				set_global_flag = active_gray_goo
+			}
+			30 = {}
+			30 = { set_global_flag = dragon_season }
+			30 = { set_global_flag = gray_goo_empire_set }
+		}
+		event_target:global_event_country = {
+			country_event = { id = distar.8001 days = 30 } # Workaround Fix
+		}
+	}
+}
+
+# Workaround (temp vanilla fix)
+country_event = {
+	id = distar.8001
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		is_country_type = global_event
+		NOT = { has_global_flag = l_cluster_opened }
+	}
+	immediate = {
+		remove_global_flag = gray_goo_empire_set
+		remove_global_flag = gray_goo_crisis_set
+		remove_global_flag = active_gray_goo
+		remove_global_flag = dragon_season
+		# Again copy of distar.8000
+		random_list = {
+			50 = {
+				set_global_flag = gray_goo_crisis_set
+				set_global_flag = active_gray_goo
+			}
+			30 = {}
+			30 = { set_global_flag = dragon_season }
+			30 = { set_global_flag = gray_goo_empire_set }
+		}
+	}
+}
+
+# Injected cluenomaly followup
+country_event = {
+	id = distar.9000
+	title = distar.9000.name
+	desc = {
+		trigger = {
+			has_country_flag = lcluster_clue_sonic
+		}
+		text = distar.9000.lcluster_clue_sonic
+	}
+	desc = {
+		trigger = {
+			has_country_flag = lcluster_clue_desc_1
+		}
+		text = distar.9000.lcluster_clue_desc_1
+	}
+	desc = {
+		trigger = {
+			has_country_flag = lcluster_clue_desc_2
+		}
+		text = distar.9000.lcluster_clue_desc_2
+	}
+	desc = {
+		trigger = {
+			has_country_flag = lcluster_clue_desc_3
+		}
+		text = distar.9000.lcluster_clue_desc_3
+	}
+	desc = distar.9000.fallback
+	picture = GFX_evt_drifting_gateway
+	location = capital_scope
+
+	is_triggered_only = yes
+
+	# immediate is run before window is drawn,
+	# might be safest to remove flags in AFTER?
+
+	after = {
+		hidden_effect = {
+			switch = {
+				trigger = has_country_flag
+				lcluster_clue_sonic = { remove_country_flag = lcluster_clue_sonic }
+				lcluster_clue_desc_1 = { remove_country_flag = lcluster_clue_desc_1 }
+				lcluster_clue_desc_2 = { remove_country_flag = lcluster_clue_desc_2 }
+				lcluster_clue_desc_3 = { remove_country_flag = lcluster_clue_desc_3 }
+			}
+		}
+	}
+
+	option = {
+		name = FORTUITOUS
+		generate_lcluster_clue = yes
+	}
+}
+
+# check for gateway within borders
+country_event = {
+	id = distar.10900
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_owned_megastructure = {
+					is_megastructure_type = lgate_base
+				}
+			}
+			random_owned_megastructure = {
+				limit = {
+					is_megastructure_type = lgate_base
+				}
+				save_event_target_as = candidate_gateway
+			}
+			country_event = { id = distar.10905 } # enable project
+		}
+		else = {
+			country_event = { id = distar.10901 } # looping check
+		}
+	}
+}
+
+# does not have gateway
+country_event = {
+	id = distar.10901
+	title = "distar.10901.title"
+	desc = "distar.10901.desc"
+	picture = GFX_evt_binary_stars
+	show_sound = event_mystic_reveal
+
+	is_triggered_only = yes
+
+	option = {
+		name = "distar.10901.a"
+		hidden_effect = {
+			set_country_flag = candiate_gateway_looping_check
+			country_event = { id = distar.10902 days = 60 }
+		}
+	}
+
+	option = {
+		name = "distar.10901.b"
+		liquidate_clues = yes
+	}
+}
+
+# looping check for owning gateway, once every two months
+country_event = {
+	id = distar.10902
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = l_cluster_opened }
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_owned_megastructure = {
+					is_megastructure_type = lgate_base
+				}
+				has_technology = tech_lgate_activation
+			}
+			random_owned_megastructure = {
+				limit = {
+					is_megastructure_type = lgate_base
+				}
+				save_event_target_as = candidate_gateway
+			}
+			country_event = { id = distar.10905 } # enable project
+		}
+		else = {
+			country_event = { id = distar.10902 days = 60 } # *THIS* looping check
+		}
+	}
+}
+
+# Researched L-Gate tech
+country_event = {
+	id = distar.10903
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		last_increased_tech = tech_lgate_activation
+		NOT = { has_global_flag = l_cluster_opened }
+	}
+
+	immediate = {
+		country_event = { id = distar.10900 }
+	}
+}
+
+# Technology available upon gaining all insights
+country_event = {
+	id = distar.10904
+	title = "distar.10904.name"
+	desc = "distar.10904.desc"
+	picture = GFX_evt_drifting_gateway
+	show_sound = event_mystic_reveal
+
+	is_triggered_only = yes
+
+	immediate = {
+		observer_event = { id = observer.61 }
+	}
+
+	option = {
+		name = GOOD
+		if = { #You can only research to open it if it has not been opened already
+			limit = { can_research_technology = tech_lgate_activation }
+			add_research_option = tech_lgate_activation
+		}
+	}
+}
+
+# Project available
+country_event = {
+	id = distar.10905
+	title = "distar.10905.name"
+	desc = "distar.10905.desc"
+	picture = GFX_evt_l-gateway
+	show_sound = event_mystic_reveal
+	location = event_target:candidate_gateway
+
+	is_triggered_only = yes
+
+	immediate = {
+		end_event_chain = "l_cluster_chain"
+		event_target:candidate_gateway = {
+			solar_system = { save_event_target_as = candidate_gateway_system }
+		}
+	}
+
+	option = {
+		name = "distar.10905.a"
+		event_target:candidate_gateway = {
+			enable_special_project = {
+				name = LCLUSTER_PROJECT
+				location = this
+			}
+		}
+	}
+}
+
+country_event = {
+	id = distar.10950
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = lcluster_opener
+		set_global_flag = l_cluster_opened
+		# spawn L-Cluster
+		country_event = { id = distar.11000 }
+		# enable L-Gate
+		from.solar_system = {
+			if = {
+				# flag prevents the Tempest from using this gate,
+				# do not set the flag if there's only one l-gate system
+				limit = {
+					any_system = {
+						has_star_flag = lgate
+						NOT = { is_same_value = prev }
+					}
+				}
+				set_star_flag = lgate_originating_system
+			}
+			else = {
+				root = { set_country_flag = only_one_lgate }
+			}
+			random_system_megastructure = {
+				limit = {
+					is_megastructure_type = lgate_base
+					NOT = { has_megastructure_flag = lgate_activated }
+				}
+				activate_gateway = this
+				set_megastructure_flag = lgate_activated
+			}
+		}
+
+		# if = { limit = { mid_game_years_passed < 0 }
+		# Save game workaround fix: must be re-run due strange bug in 3.0 at game_start
+		if = { limit = { has_global_flag = dragon_season } # only if bug default
+			event_target:global_event_country = {
+				country_event = { id = distar.8001 }
+			}
+		}
+		# outcome, to be determined at game start
+		if = {
+			limit = { has_global_flag = gray_goo_crisis_set }
+			country_event = { id = graygoo.1 }
+		}
+		else_if = {
+			limit = { has_global_flag = dragon_season }
+			country_event = { id = distar.13000 }
+		}
+		else_if = {
+			limit = { has_global_flag = gray_goo_empire_set }
+			country_event = { id = graygoo.100 }
+		}
+		else = {
+			country_event = { id = distar.10951 }
+			# enable other L-Gates over time
+			random_country = {
+				limit = { is_country_type = global_event }
+				country_event = { id = distar.10960 days = 200 random = 500 }
+			}
+		}
+		# activate terminal egress l-gate
+		event_target:lcluster1 = {
+			random_system_megastructure = {
+				activate_gateway = this
+				set_megastructure_flag = lgate_activated
+			}
+		}
+		set_global_flag = lgates_activated_globally
+		# centralized handling of chain and project clean-up
+		every_playable_country = {
+			limit = {
+				has_special_project = LCLUSTER_PROJECT
+				NOT = { is_same_value = root }
+			}
+			country_event = { id = distar.10952 days = 1 }
+		}
+		every_playable_country = {
+			limit = {
+				NOR = {
+					has_event_chain = l_cluster_chain
+					has_special_project = LCLUSTER_PROJECT
+					is_same_value = root
+				}
+			}
+			country_event = { id = distar.10954 days = 1 }
+		}
+		every_playable_country = {
+			limit = {
+				NOR = {
+					has_special_project = LCLUSTER_PROJECT
+					is_same_value = root
+				}
+				has_event_chain = l_cluster_chain
+			}
+			country_event = { id = distar.10953 days = 1 }
+		}
+		observer_event = { id = observer.62 }
+	}
+}
+
+# Abandoned Cluster Found
+country_event = {
+	id = distar.10951
+	title = "distar.10951.name"
+	desc = "distar.10951.desc"
+	picture = GFX_evt_l-gateway
+	show_sound = event_activating_unknown_technology
+	location = event_target:candidate_gateway
+
+	is_triggered_only = yes
+
+	option = {
+		name = "distar.10951.a"
+	}
+}
+
+# Research Project Aborted
+country_event = {
+	id = distar.10952
+	title = "distar.10952.name"
+	desc = "distar.10952.desc"
+	picture = GFX_evt_glitchy_matrix
+	show_sound = event_alien_signal
+
+	is_triggered_only = yes
+
+	immediate = {
+		# abort_special_project = { type = LCLUSTER_PROJECT }
+		liquidate_clues = yes # get compensation
+	}
+
+	option = {
+		name = "distar.10952.a"
+	}
+}
+
+# Other Country Informed (has chain)
+country_event = {
+	id = distar.10953
+	title = "distar.10953.name"
+	desc = "distar.10953.desc"
+	picture = GFX_evt_surreal_visions
+	show_sound = event_alien_signal
+
+	is_triggered_only = yes
+
+	immediate = {
+		liquidate_clues = yes
+	}
+
+	option = {
+		name = "distar.10953.a"
+	}
+}
+
+# Other Country Informed (has nothing)
+country_event = {
+	id = distar.10954
+	title = "distar.10953.name"
+	desc = "distar.10954.desc"
+	picture = GFX_evt_surreal_visions
+	show_sound = event_alien_signal
+
+	is_triggered_only = yes
+
+	option = {
+		name = FASCINATING
+	}
+}
+
+# Informed about AI being close to opening L-Gate (HIDDEN)
+event = {
+	id = distar.10955
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = l_cluster_opened }
+		any_playable_country = {
+			is_ai = no
+			OR = {
+				has_event_chain = l_cluster_chain
+				has_special_project = LCLUSTER_PROJECT
+			}
+			any_relation = {
+				is_country_type = default
+				has_communications = prev
+				has_event_chain = l_cluster_chain
+				NOT = { has_country_flag = lgate_warned@prev }
+				check_variable = {
+					which = num_lcluster_clues
+					value > 5
+				}
+				any_owned_megastructure = { is_megastructure_type = lgate_base }
+			}
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				is_ai = no
+				OR = {
+					has_event_chain = l_cluster_chain
+					has_special_project = LCLUSTER_PROJECT
+				}
+				any_relation = {
+					is_country_type = default
+					has_communications = prev
+					has_event_chain = l_cluster_chain
+					NOT = { has_country_flag = lgate_warned@prev }
+					check_variable = {
+						which = num_lcluster_clues
+						value > 5
+					}
+					any_owned_megastructure = { is_megastructure_type = lgate_base }
+				}
+			}
+			random_relation = {
+				limit = {
+					is_country_type = default
+					has_communications = prev
+					has_event_chain = l_cluster_chain
+					NOT = { has_country_flag = lgate_warned@prev }
+					check_variable = {
+						which = num_lcluster_clues
+						value > 5
+					}
+					any_owned_megastructure = { is_megastructure_type = lgate_base }
+				}
+				save_event_target_as = lgate_warning_country
+				set_country_flag = lgate_warned@prev
+			}
+			country_event = { id = distar.10956 }
+		}
+	}
+}
+
+# Informed about AI being close to opening L-Gate
+country_event = {
+	id = distar.10956
+	title = "distar.10956.name"
+	desc = "distar.10956.desc"
+	picture = GFX_evt_l-gateway
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	option = {
+		name = distar.10956.a
+	}
+}
+
+# Enable L-Gates over time
+country_event = {
+	id = distar.10960
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_megastructure = {
+			is_megastructure_type = lgate_base
+		}
+	}
+
+	immediate = {
+		random_megastructure = {
+			limit = {
+				is_megastructure_type = lgate_base
+				NOT = { has_megastructure_flag = lgate_activated }
+			}
+			activate_gateway = this
+			set_megastructure_flag = lgate_activated
+		}
+		country_event = { id = distar.10960 days = 200 random = 500 }
+	}
+}
+
+# spawn l-cluster
+country_event = {
+	id = distar.11000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	immediate = {
+		set_spawn_system_batch = begin
+		# batch-processes the spawn_system effects between "begin" and "end",
+		# so caches are recalculated only once rather than for every system spawned
+		# can also be used when removing and adding hyperlanes
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 550
+				max_distance <= 560
+				min_orientation_angle = 44
+				max_orientation_angle = 46
+				initializer = distantstars_init_01
+				hyperlane = no
+				effect = {
+					save_global_event_target_as = lcluster1
+				}
+			}
+			event_target:lcluster1 = {
+				spawn_system = {
+					min_distance >= 29
+					max_distance <= 31
+					min_orientation_angle = 24
+					max_orientation_angle = 66
+					initializer = distantstars_init_02
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster2
+					}
+				}
+				spawn_system = {
+					min_distance >= 29
+					max_distance <= 31
+					min_orientation_angle = 114
+					max_orientation_angle = 156
+					initializer = distantstars_init_03
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster3
+					}
+				}
+				spawn_system = {
+					min_distance >= 30
+					max_distance <= 60
+					min_orientation_angle = 340
+					max_orientation_angle = 20
+					initializer = distantstars_init_01b
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster1b
+					}
+				}
+			}
+			event_target:lcluster2 = {
+				spawn_system = {
+					min_distance >= 30
+					max_distance <= 60
+					min_orientation_angle = 0
+					max_orientation_angle = 40
+					initializer = distantstars_init_02b
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster2b
+					}
+				}
+			}
+			event_target:lcluster3 = {
+				spawn_system = {
+					min_distance >= 20
+					max_distance <= 30
+					min_orientation_angle = 24
+					max_orientation_angle = 66
+					initializer = distantstars_init_04
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster4
+					}
+				}
+				spawn_system = {
+					min_distance >= 10
+					max_distance <= 50
+					min_orientation_angle = 250
+					max_orientation_angle = 290
+					initializer = distantstars_init_03b
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster3b
+					}
+				}
+			}
+			event_target:lcluster4 = {
+				spawn_system = {
+					min_distance >= 5
+					max_distance <= 10
+					min_orientation_angle = 250
+					max_orientation_angle = 290
+					initializer = distantstars_init_05
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster5
+						save_global_event_target_as = graygoo_factory_system
+					}
+				}
+				spawn_system = {
+					min_distance >= 30
+					max_distance <= 60
+					min_orientation_angle = 20
+					max_orientation_angle = 160
+					initializer = distantstars_init_04b
+					is_discovered = no
+					hyperlane = no
+					effect = {
+						save_global_event_target_as = lcluster4b
+					}
+				}
+			}
+		}
+
+		# add hyperlanes
+		event_target:lcluster5 = {
+			add_hyperlane = {
+				from = event_target:lcluster_factory_system
+				to = event_target:lcluster4
+			}
+		}
+		event_target:lcluster4 = {
+			add_hyperlane = {
+				from = event_target:lcluster4
+				to = event_target:lcluster3
+			}
+			add_hyperlane = {
+				from = event_target:lcluster4
+				to = event_target:lcluster2
+			}
+			add_hyperlane = {
+				from = event_target:lcluster4
+				to = event_target:lcluster4b
+			}
+		}
+		event_target:lcluster3 = {
+			add_hyperlane = {
+				from = event_target:lcluster3
+				to = event_target:lcluster1
+			}
+			add_hyperlane = {
+				from = event_target:lcluster3
+				to = event_target:lcluster3b
+			}
+		}
+		event_target:lcluster2 = {
+			add_hyperlane = {
+				from = event_target:lcluster2
+				to = event_target:lcluster1
+			}
+			add_hyperlane = {
+				from = event_target:lcluster2
+				to = event_target:lcluster3
+			}
+			add_hyperlane = {
+				from = event_target:lcluster2
+				to = event_target:lcluster2b
+			}
+		}
+
+		event_target:lcluster1 = {
+			add_hyperlane = {
+				from = event_target:lcluster1
+				to = event_target:lcluster1b
+			}
+		}
+		event_target:lcluster1b = {
+			add_hyperlane = {
+				from = event_target:lcluster1b
+				to = event_target:lcluster2b
+			}
+		}
+		set_spawn_system_batch = end
+	}
+}
+
+#hip_event = {
+#	id = distar.11002
+#	title = action.92.name
+#	desc = {
+#		trigger = {
+#			success_text = {
+#				text =							 distar.11002.nanodust
+#				hidden:from = { has_resource = { type = sr_distar_nanodust amount > 0 } }
+#			}
+#			success_text = {
+#				text =							 distar.11002.nanocrystal
+#				hidden:from = { has_resource = { type = sr_distar_nanocrystal amount > 0 } }
+#			}
+#			success_text = {
+#				text =							 distar.11002.nanoscale
+#				hidden:from = { has_resource = { type = sr_distar_nanoscale amount > 0 } }
+#			}
+#			success_text = {
+#				text =							 distar.11002.nanoactuator
+#				hidden:from = { has_resource = { type = sr_distar_nanoactuator amount > 0 } }
+#			}
+#		}
+#	}
+#	picture = GFX_evt_surreal_visions
+#	show_sound = event_default
+#	location = from
+#
+#	is_triggered_only = yes
+#
+#	trigger = {
+#		from = { has_strategic_resource = yes } # basically a pre-trigger
+#		owner = {
+#			OR = {
+#				AND = {
+#					root.from = {
+#						has_resource = {
+#							amount > 0
+#									type =	sr_distar_nanodust
+#						}
+#					}
+#					NOT = {
+#						has_country_flag =		distar_nanodust_found
+#					}
+#				}
+#				AND = {
+#					root.from = {
+#						has_resource = {
+#							amount > 0
+#									type =	sr_distar_nanocrystal
+#						}
+#					}
+#					NOT = {
+#						has_country_flag =		distar_nanocrystal_found
+#					}
+#				}
+#				AND = {
+#					root.from = {
+#						has_resource = {
+#							amount > 0
+#									type =	sr_distar_nanoscale
+#						}
+#					}
+#					NOT = {
+#						has_country_flag =		distar_nanoscale_found
+#					}
+#				}
+#				AND = {
+#					root.from = {
+#						has_resource = {
+#							amount > 0
+#									type =	sr_distar_nanoactuator
+#						}
+#					}
+#					NOT = {
+#						has_country_flag =		distar_nanoactuator_found
+#					}
+#				}
+#			}
+#		}
+#	}
+#
+#	immediate = {
+#		from = {
+#			if = {
+#				limit = { has_resource = { type = sr_distar_nanodust amount > 0 } }
+#				root.owner = { set_country_flag =	distar_nanodust_found }
+#			}
+#			else_if = {
+#				limit = { has_resource = { type = sr_distar_nanocrystal amount > 0 } }
+#				root.owner = { set_country_flag =	distar_nanocrystal_found }
+#			}
+#			else_if = {
+#				limit = { has_resource = { type = sr_distar_nanoscale amount > 0 } }
+#				root.owner = { set_country_flag =	distar_nanoscale_found }
+#			}
+#			else_if = {
+#				limit = { has_resource = { type = sr_distar_nanoactuator amount > 0 } }
+#				root.owner = { set_country_flag =	distar_nanoactuator_found }
+#			}
+#		}
+#	}
+#
+#	option = {
+#		name = OK
+#		from = {
+#			hidden_effect = {
+#				if = {
+#					limit = { has_resource = { type = sr_distar_nanodust amount > 0 } }
+#					custom_tooltip = distar.11002.nanodust.tooltip
+#				}
+#				else_if = {
+#					limit = { has_resource = { type = sr_distar_nanocrystal amount > 0 } }
+#					custom_tooltip = distar.11002.nanocrystal.tooltip
+#				}
+#				else_if = {
+#					limit = { has_resource = { type = sr_distar_nanoscale amount > 0 } }
+#					custom_tooltip = distar.11002.nanoscale.tooltip
+#				}
+#				else_if = {
+#					limit = { has_resource = { type = sr_distar_nanoactuator amount > 0 } }
+#					custom_tooltip = distar.11002.nanoactuator.tooltip
+#				}
+#			}
+#		}
+#	}
+#}
+
+# Curator Buy Clue Menu
+country_event = {
+	id = distar.11501
+	title = distar.11501.name
+	desc = distar.11501.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+
+	picture_event_data = {
+		portrait = event_target:curators
+		room = enclave_curator_room
+	}
+
+	immediate = {
+		set_country_flag = curator_enclave_diplomacy_engaged
+		event_target:curators = {
+			owner_species = { save_event_target_as = curator_species }
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = curator_enclave_diplomacy_engaged
+		}
+	}
+
+	option = {
+		name = distar.11501.a
+		custom_gui = "enclave_curator_option"
+		allow = {
+			resource_stockpile_compare = { resource = energy value >= 5000 }
+			hidden_trigger = {
+				NOR = {
+					has_completed_event_chain_counter = {
+						event_chain = l_cluster_chain
+						counter = clues
+					}
+					has_country_flag = curator_clue_purchased
+				}
+			}
+		}
+		add_resource = { energy = -5000 }
+		custom_tooltip = opinion20
+		generate_lcluster_clue = yes
+		hidden_effect = {
+			event_target:curators = {
+				add_trust = {
+					who = root
+					amount = 20
+				}
+			}
+			random_list = {
+				1 = {
+					set_timed_country_flag = {
+						flag = curator_clue_purchased
+						days = 4680 # 13 years
+					}
+				}
+				1 = {
+					set_timed_country_flag = {
+						flag = curator_clue_purchased
+						days = 3600 # 10 years
+					}
+				}
+				1 = {
+					set_timed_country_flag = {
+						flag = curator_clue_purchased
+						days = 2520 # 7 years
+					}
+				}
+			}
+		}
+	}
+	option = { # Back
+		name = leviathans.506.d
+		custom_gui = "enclave_curator_option"
+		hidden_effect = {
+			country_event = { id = leviathans.505 }
+		}
+	}
+	option = { # Sign Off
+		name = leviathans.506.e
+		custom_gui = "enclave_curator_option"
+		default_hide_option = yes
+	}
+}
+
+# researched clue
+country_event = {
+	id = distar.12000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		last_increased_tech = tech_repeatable_lcluster_clue
+	}
+
+	immediate = {
+		generate_lcluster_clue = yes
+	}
+}
+
+# Dragons!
+# fired from opening event
+country_event = {
+	id = distar.13000
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		create_country = {
+			name = "NAME_Spawning_Dragons"
+			type = ldragon_country
+			effect = {
+				save_global_event_target_as = spawning_dragons
+				every_playable_country = {
+					establish_communications_no_message = prev
+				}
+			}
+		}
+		while = {
+			limit = {
+				any_megastructure = {
+					is_megastructure_type = lgate_base
+					NOT = { has_megastructure_flag = lgate_activated }
+				}
+			}
+			random_megastructure = {
+				limit = {
+					is_megastructure_type = lgate_base
+					NOT = { has_megastructure_flag = lgate_activated }
+				}
+				# flip L-Gates
+				activate_gateway = this
+				set_megastructure_flag = lgate_activated
+				solar_system = {
+					# set dragon spawning grounds
+					closest_system = {
+						min_steps = 3
+						limit = {
+							NOR = {
+								has_star_flag = dragon_point
+								any_system_planet = { is_colony = yes }
+							}
+						}
+						set_star_flag = dragon_point
+					}
+				}
+			}
+		}
+		# Cancel project for others with compensation (vanilla fix)
+		every_playable_country = {
+			limit = {
+				NOT = { is_same_value = root }
+				OR = {
+					has_event_chain = l_cluster_chain
+					has_special_project = LCLUSTER_PROJECT
+				}
+			}
+			liquidate_clues = yes
+		}
+		# Notify those without l-gate systems
+		every_playable_country = {
+			limit = {
+				NOT = { any_system_within_border = { has_star_flag = lgate } }
+			}
+			country_event = { id = distar.13011 }
+		}
+		while = {
+			limit = {
+				any_system = {
+					has_star_flag = lgate
+					NOT = { has_star_flag = young_dragon_spawned }
+				}
+			}
+			random_system = {
+				limit = {
+					has_star_flag = lgate
+					NOT = { has_star_flag = young_dragon_spawned }
+				}
+				set_star_flag = young_dragon_spawned
+				random_system_megastructure = {
+					closest_system = {
+						min_steps = 3
+						limit = {
+							has_star_flag = dragon_point
+							NOT = { has_star_flag = dragon_point_picked }
+						}
+						set_star_flag = dragon_point_picked
+						# notify re: destination
+						if = {
+							limit = {
+								prevprev = {
+									exists = owner
+								}
+							}
+							save_event_target_as = dragons_target
+							prevprev = {
+								save_event_target_as = dragons_current_system
+								owner = {
+									if = {
+										limit = { NOT = { is_same_value = root } }
+										set_country_flag = knows_ldragon
+										country_event = { id = distar.13010 }
+									}
+									else = {
+										root = { country_event = { id = distar.13010 } }
+									}
+								}
+							}
+						}
+						star = {
+							create_fleet = {
+								name = "NAME_Young_Dragon"
+								settings = {
+									is_boss = yes
+									spawn_debris = no
+									can_upgrade = no
+									can_disband = yes
+									can_change_composition = no
+									can_change_leader = no
+									uses_naval_capacity = no
+								}
+								effect = {
+									set_owner = event_target:spawning_dragons
+									create_ship = {
+										design = "NAME_Nanite_Dragon"
+										name = "NAME_Young_Dragon"
+										prefix = no
+										upgradable = no
+									}
+									set_location = prevprevprev # megastructure
+									set_fleet_stance = passive
+									set_aggro_range_measure_from = self
+									#set_aggro_range = 10
+									auto_move_to_planet = {
+										target = prev # dragon_point star
+										clear_auto_move_on_arrival = yes # hang around
+									}
+								}
+							}
+						}
+					}
+					create_ambient_object = {
+						location = this
+						type = horror_spawn_object
+					}
+				}
+			}
+		}
+	}
+}
+
+# Notification telling you where dragons are headed
+country_event = {
+	id = distar.13010
+	title = distar.13010.name
+	desc = {
+		text = distar.13010.desc.IOpened
+		trigger = { has_country_flag = lcluster_opener }
+	}
+	desc = {
+		text = distar.13010.desc.OtherOpened
+		trigger = { NOT = { is_same_value = from } }
+	}
+	picture = GFX_evt_space_dragon
+	location = event_target:dragons_current_system.star
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = ldragon_known
+		observer_event = { id = observer.63 }
+	}
+
+	option = {
+		name = distar.13010.a.homicidal
+		exclusive_trigger = {
+			is_homicidal = yes
+		}
+	}
+
+	option = {
+		name = ALARMING
+	}
+}
+
+country_event = {
+	id = distar.13011
+	title = distar.13011.name
+	desc = distar.13011.desc
+	picture = GFX_evt_space_dragon
+
+	is_triggered_only = yes
+
+	trigger = { NOT = { has_country_flag = knows_ldragon } }
+
+	immediate = {
+		capital_scope = {
+			closest_system = {
+				limit = { has_star_flag = lgate }
+				save_event_target_as = disturbance_system
+			}
+		}
+	}
+
+	option = {
+		name = distar.13011.a
+	}
+}
+
+# Killed dragon
+country_event = {
+	id = distar.13020
+	title = distar.13020.name
+	desc = {
+		text = distar.13020.desc.LDragonKnown
+		trigger = { has_country_flag = ldragon_known }
+	}
+	desc = {
+		text = distar.13020.desc.LDragonUnknown
+		trigger = { NOT = { has_country_flag = ldragon_known } }
+	}
+	picture = GFX_evt_space_dragon
+	location = fromfrom
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		from = { is_country_type = ldragon_country }
+	}
+
+	option = {
+		name = distar.13020.a
+		trigger = {
+			NOT = { has_country_flag = ldragon_known }
+		}
+		add_monthly_resource_mult = {
+			resource = influence
+			value = @tier4materialreward
+			min = @tier4materialmin
+			max = @tier4materialmax
+		}
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier4materialreward
+			min = @tier4materialmin
+			max = @tier4materialmax
+		}
+	}
+
+	option = {
+		name = distar.13020.a
+		trigger = {
+			has_country_flag = ldragon_known
+		}
+		add_monthly_resource_mult = {
+			resource = influence
+			value = @tier4materialreward
+			min = @tier4materialmin
+			max = @tier4materialmax
+		}
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier4materialreward
+			min = @tier4materialmin
+			max = @tier4materialmax
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+	}
+}
+
+# Science Ship enters dragon system
+fleet_event = {
+	id = distar.13030
+	title = distar.13030.name
+	desc = distar.13030.desc
+	picture = GFX_evt_space_dragon
+	location = from.star
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_ship_class = shipclass_science_ship
+		from = {
+			has_star_flag = dragon_point
+			NOT = { has_star_flag = visited_dragon_point@root.owner }
+			any_fleet_in_system = {
+				is_ship_size = nanite_space_dragon_baby
+			}
+		}
+	}
+
+	immediate = {
+		from = { set_star_flag = visited_dragon_point@root.owner }
+	}
+
+	option = {
+		# enable special project
+		name = distar.13030.a
+		trigger = {
+			owner = {
+				NOR = {
+					is_homicidal = yes
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		solar_system.star = {
+			enable_special_project = {
+				name = TAME_LDRAGON_PROJECT
+				location = this
+				owner = root.owner
+			}
+		}
+	}
+
+	option = {
+		name = distar.13030.b
+	}
+}
+
+# special project complete
+country_event = {
+	id = distar.13035
+	title = distar.13035.name
+	desc = distar.13035.desc
+	picture = GFX_evt_space_dragon
+	location = event_target:new_dragon
+
+	is_triggered_only = yes
+
+	immediate = {
+		from.solar_system = {
+			random_fleet_in_system = {
+				limit = {
+					exists = owner
+					owner = { is_country_type = ldragon_country }
+				}
+				save_event_target_as = new_dragon
+				set_owner = root
+			}
+		}
+	}
+
+	option = {
+		name = INTERESTING
+		fromfrom.solar_system = {
+			custom_tooltip = distar.13035.a.tooltip
+		}
+	}
+}
+
+# Root = Planet
+# From = Country
+# FromFrom = Fleet of the science ship that surveyed it, if any
+planet_event = {
+	id = distar.13050
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = space_owner
+		NOT = { exists = fromfrom } # not surveyed by science ship
+
+		OR = {
+			AND = {
+				has_resource = {
+					amount > 0
+					type =	exotic_gases
+				}
+				NOT = {
+					from = { has_country_flag =		exotic_gases_found }
+				}
+			}
+			AND = {
+				has_resource = {
+					amount > 0
+					type =	rare_crystals
+				}
+				NOT = {
+					from = { has_country_flag =		rare_crystals_found }
+				}
+			}
+			AND = {
+				has_resource = {
+					amount > 0
+					type =	volatile_motes
+				}
+				NOT = {
+					from = { has_country_flag =		volatile_motes_found }
+				}
+			}
+			AND = {
+				has_resource = {
+					amount > 0
+					type =	sr_living_metal
+				}
+				NOT = {
+					from = { has_country_flag =		living_metal_found }
+				}
+			}
+			AND = {
+				has_resource = {
+					amount > 0
+					type =	sr_zro
+				}
+				NOT = {
+					from = { has_country_flag =		zro_found }
+				}
+			}
+			AND = {
+				has_resource = {
+					amount > 0
+					type =	sr_dark_matter
+				}
+				NOT = {
+					from = { has_country_flag =		dark_matter_found }
+				}
+			}
+		}
+	}
+
+	immediate = {
+
+		from = {
+			save_event_target_as = finder
+			create_message = {
+				type = MESSAGE_TYPE_SR_INFORMED
+				localization = MESSAGE_SR_INFORMED
+				days = 30
+				target = root.solar_system # the Go To
+				variable = {
+					type = name
+					localization = PLANET
+					scope = root
+				}
+				variable = {
+					type = name
+					localization = COUNTRY
+					scope = root.space_owner
+				}
+			}
+		}
+
+		if = {
+			limit = { has_resource = { type = volatile_motes amount > 0 } }
+			from = { set_country_flag =	volatile_motes_found }
+		}
+		else_if = {
+			limit = { has_resource = { type = exotic_gases amount > 0 } }
+			from = { set_country_flag =	exotic_gases_found }
+		}
+		else_if = {
+			limit = { has_resource = { type = rare_crystals amount > 0 } }
+			from = { set_country_flag =	rare_crystals_found }
+		}
+		else_if = {
+			limit = { has_resource = { type = sr_zro amount > 0 } }
+			from = { set_country_flag =	zro_found }
+		}
+		else_if = {
+			limit = { has_resource = { type = sr_dark_matter amount > 0 } }
+			from = { set_country_flag =	dark_matter_found }
+		}
+		else_if = {
+			limit = { has_resource = { type = sr_living_metal amount > 0 } }
+			from = { set_country_flag =	living_metal_found }
+		}
+	}
+}
+
+country_event = {
+	id = distar.13060
+	title = apoc.5.name
+	desc = "apoc.5.desc"
+	picture = GFX_evt_wormhole
+	show_sound = event_radio_chatter
+	location = FROM
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = encountered_first_wormhole }
+		FROM = {
+			has_natural_wormhole = yes
+		}
+	}
+
+	immediate = {
+		FROM = { save_event_target_as = wormhole_system }
+		set_country_flag = encountered_first_wormhole
+		add_seen_bypass_type = wormhole
+	}
+
+	option = {
+		name = apoc.5.a
+	}
+}
+
+country_event = {
+	id = distar.13070
+	title = "apoc.1.name"
+	desc = {
+		text = apoc.1.desc
+		trigger = {
+			NOT = {
+				has_country_flag = encountered_first_lgate
+			}
+		}
+	}
+	desc = {
+		text = apoc.1.b.desc
+		trigger = {
+			has_country_flag = encountered_first_lgate
+		}
+	}
+	picture = GFX_evt_drifting_gateway
+	show_sound = event_radio_chatter
+	location = FROM
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { exists = fromfrom } # not surveyed by ship
+		NOT = { has_country_flag = encountered_first_gateway }
+		FROM = {
+			has_star_flag = abandoned_gateway
+			any_system_megastructure = { is_megastructure_type = gateway_ruined }
+		}
+	}
+
+	immediate = {
+		FROM = { save_event_target_as = gateway_system }
+		set_country_flag = encountered_first_gateway
+		add_seen_bypass_type = gateway
+	}
+
+	option = {
+		name = INTRIGUING
+	}
+}
+
+country_event = {
+	id = distar.13080
+	title = "apoc.1.name"
+	desc = {
+		text = apoc.3.desc
+		trigger = {
+			NOT = {
+				has_country_flag = encountered_first_gateway
+			}
+		}
+	}
+	desc = {
+		text = apoc.3.b.desc
+		trigger = {
+			has_country_flag = encountered_first_gateway
+		}
+	}
+	picture = GFX_evt_drifting_gateway
+	show_sound = event_radio_chatter
+	location = FROM
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type_with_subjects = yes # not bother any country with this
+		NOR = {
+			exists = fromfrom  # not surveyed by ship
+			has_country_flag = encountered_first_lgate
+			has_event_chain = "l_cluster_chain"
+		}
+		FROM = {
+			has_star_flag = lgate
+			any_system_megastructure = { is_megastructure_type = lgate_base }
+		}
+	}
+
+	immediate = {
+		FROM = { save_event_target_as = gateway_system }
+		set_country_flag = encountered_first_lgate
+	}
+
+	option = {
+		name = INTRIGUING
+		start_lcluster_chain = yes
+	}
+}

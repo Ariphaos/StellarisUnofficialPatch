@@ -1,0 +1,2180 @@
+#########################################
+#
+# on_action_events
+#
+#########################################
+
+namespace = action
+
+## Founding the galactic market
+## on_yearly_pulse
+#event = {
+#	id = action.95
+#	hide_window = yes
+#	is_triggered_only = yes
+#
+#	trigger = {
+#		years_passed >= 50
+#		NOR = {
+#			has_global_flag = galactic_market_founded
+#			has_global_flag = ongoing_market_nomination
+#		}
+#		count_country = { # minimum 3 countries
+#			limit = { is_country_type = default }
+#			count >= 3
+#		}
+#		any_playable_country = {
+#			perc_communications_with_playable >= 0.5
+#			is_homicidal = no
+#			is_gestalt = no
+#			# gestalts can use but not found the market
+#		}
+#	}
+#
+#	immediate = {
+#		random_playable_country = {
+#			limit = {
+#				perc_communications_with_playable >= 0.5
+#				is_homicidal = no
+#				is_gestalt = no
+#			}
+#			country_event = { id = action.96 }
+#		}
+#	}
+#}
+
+# Market Founder event
+country_event = {
+	id = action.96
+	title = action.96.name
+	desc = {
+		text = action.96.desc
+		trigger = { is_xenophobe = no }
+	}
+	desc = {
+		text = action.96.desc.phobe
+		trigger = { is_xenophobe = yes }
+	}
+	picture = GFX_evt_financial_instruments
+	show_sound = event_galactic_market
+
+	is_triggered_only = yes
+
+	fire_only_once = yes # failsafe
+
+	immediate = {
+		set_global_flag = ongoing_market_nomination
+		set_country_flag = market_nomination_eligible
+		event_target:global_event_country = {
+			country_event = { id = action.98 days = 1800 }
+		}
+		begin_event_chain = {
+			event_chain = market_founding_chain
+			target = this
+		}
+		every_playable_country = {
+			limit = {
+				NOT = { is_same_value = root }
+				is_galactic_community_member = yes
+			}
+			begin_event_chain = {
+				event_chain = market_founding_chain
+				target = this
+			}
+			country_event = { id = action.97 }
+		}
+	}
+
+	after = {
+		custom_tooltip = enable_decision_market_nomination
+		# Notification
+		tooltip = {
+			begin_event_chain = {
+				event_chain = market_founding_chain
+				target = this
+			}
+		}
+	}
+
+	option = {
+		name = action.96.a
+		trigger = { has_authority = auth_corporate }
+	}
+
+	option = {
+		name = action.96.b
+		trigger = { NOT = { has_authority = auth_corporate } }
+	}
+}
+
+# Market Nomination started notification event
+country_event = {
+	id = action.97
+	title = action.97.name
+	desc = {
+		text = action.97.desc
+		trigger = {
+			NOR = {
+				is_xenophobe = yes
+				has_authority = auth_corporate
+			}
+		}
+	}
+	desc = {
+		text = action.97.desc.phobe
+		trigger = { is_xenophobe = yes }
+	}
+	desc = {
+		text = action.97.desc.corp
+		trigger = { has_authority = auth_corporate }
+	}
+	picture = GFX_evt_financial_instruments
+	show_sound = event_galactic_market
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = market_nomination_eligible
+	}
+
+	after = {
+		tooltip = {
+			begin_event_chain = {
+				event_chain = market_founding_chain
+				target = this
+			}
+		}
+	}
+
+	option = {
+		name = action.96.a
+		trigger = { has_authority = auth_corporate }
+		custom_tooltip = enable_decision_market_nomination
+	}
+
+	option = {
+		name = action.96.b
+		trigger = { NOT = { has_authority = auth_corporate } }
+		custom_tooltip = enable_decision_market_nomination
+	}
+}
+
+
+# Market Founder luck-of-the-draw
+country_event = {
+	id = action.98
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		every_playable_country = {
+			limit = { has_event_chain = market_founding_chain }
+			end_event_chain = market_founding_chain
+		}
+		remove_global_flag = ongoing_market_nomination
+		# nominees start equal, modifiers improve chances
+		random_country = {
+			limit = {
+				is_country_type = default
+				has_country_flag = market_nomination_eligible
+			}
+			weights = {
+				# can use add or mult
+				base = 1
+				modifier = {
+					add = 400
+					check_variable = {
+						which = market_rating
+						value = 5
+					}
+				}
+				modifier = {
+					add = 75
+					check_variable = {
+						which = market_rating
+						value = 4
+					}
+				}
+				modifier = {
+					add = 20
+					check_variable = {
+						which = market_rating
+						value = 3
+					}
+				}
+				modifier = {
+					add = 4
+					check_variable = {
+						which = market_rating
+						value = 2
+					}
+				}
+				modifier = {
+					add = 1
+					check_variable = {
+						which = market_rating
+						value = 1
+					}
+				}
+				modifier = {
+					factor = 0.2
+					NOT = {
+						any_owned_planet = {
+							OR = {
+								has_modifier = market_nominee_level_1
+								has_modifier = market_nominee_level_2
+								has_modifier = market_nominee_level_3
+								has_modifier = market_nominee_level_4
+								has_modifier = market_nominee_level_5
+							}
+						}
+					}
+				}
+			}
+			save_global_event_target_as = market_founder
+			random_owned_planet = {
+				weights = {
+					base = 1
+					modifier = {
+						factor = 9999
+						OR = {
+							has_modifier = market_nominee_level_1
+							has_modifier = market_nominee_level_2
+							has_modifier = market_nominee_level_3
+							has_modifier = market_nominee_level_4
+							has_modifier = market_nominee_level_5
+						}
+					}
+				}
+				save_global_event_target_as = market_founder_planet
+			}
+			country_event = { id = action.99 }
+		}
+		every_playable_country = {
+			limit = { has_country_flag = market_nomination_eligible }
+			every_owned_planet = {
+				limit = {
+					OR = {
+						has_modifier = market_nominee_level_1
+						has_modifier = market_nominee_level_2
+						has_modifier = market_nominee_level_3
+						has_modifier = market_nominee_level_4
+						has_modifier = market_nominee_level_5
+					}
+				}
+				# remove boosted flags
+				if = {
+					limit = { has_planet_flag = boosted_once }
+					remove_planet_flag = boosted_once
+				}
+				if = {
+					limit = { has_planet_flag = boosted_twice }
+					remove_planet_flag = boosted_twice
+				}
+				# remove modifiers
+				if = {
+					limit = { has_modifier = market_nominee_level_1 }
+					remove_modifier = market_nominee_level_1
+				}
+				else_if = {
+					limit = { has_modifier = market_nominee_level_2 }
+					remove_modifier = market_nominee_level_2
+				}
+				else_if = {
+					limit = { has_modifier = market_nominee_level_3 }
+					remove_modifier = market_nominee_level_3
+				}
+				else_if = {
+					limit = { has_modifier = market_nominee_level_4 }
+					remove_modifier = market_nominee_level_4
+				}
+				else_if = {
+					limit = { has_modifier = market_nominee_level_5 }
+					remove_modifier = market_nominee_level_5
+				}
+			}
+			set_variable = {
+				which = market_rating
+				value = 0
+			}
+		}
+	}
+}
+
+# Founder selected port
+country_event = {
+	id = action.99
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		set_global_flag = galactic_market_founded
+		# code listens for this flag to create market
+		country_event = { id = action.104 days = 5 }
+	}
+}
+
+country_event = {
+	id = action.104
+	title = action.99.name
+	desc = {
+		text = action.99.desc
+		trigger = { is_xenophobe = no }
+	}
+	desc = {
+		text = action.99.desc.phobe
+		trigger = { is_xenophobe = yes }
+	}
+	picture = GFX_evt_financial_instruments
+	location = event_target:galactic_market_station
+	show_sound = event_galactic_market
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = has_market_access
+		enable_galactic_market = yes
+		enable_on_market = energy
+		enable_on_market = minerals
+		enable_on_market = food
+		enable_on_market = consumer_goods
+		enable_on_market = alloys
+		if = {
+			limit = {
+				any_country = {
+					is_galactic_community_member = yes
+					resource_income_compare = {
+						resource = volatile_motes
+						value > 0
+					}
+				}
+			}
+			enable_on_market = volatile_motes
+		}
+		if = {
+			limit = {
+				any_country = {
+					is_galactic_community_member = yes
+					resource_income_compare = {
+						resource = rare_crystals
+						value > 0
+					}
+				}
+			}
+			enable_on_market = rare_crystals
+		}
+		if = {
+			limit = {
+				any_country = {
+					is_galactic_community_member = yes
+					resource_income_compare = {
+						resource = exotic_gases
+						value > 0
+					}
+				}
+			}
+			enable_on_market = exotic_gases
+		}
+		if = {
+			limit = {
+				any_country = {
+					is_galactic_community_member = yes
+					resource_income_compare = {
+						resource = sr_dark_matter
+						value > 0
+					}
+				}
+			}
+			enable_on_market = sr_dark_matter
+		}
+		if = {
+			limit = {
+				any_country = {
+					is_galactic_community_member = yes
+					resource_income_compare = {
+						resource = sr_zro
+						value > 0
+					}
+				}
+			}
+			enable_on_market = sr_zro
+		}
+		if = {
+			limit = {
+				any_country = {
+					is_galactic_community_member = yes
+					resource_income_compare = {
+						resource = sr_living_metal
+						value > 0
+					}
+				}
+			}
+			enable_on_market = sr_living_metal
+		}
+		add_modifier = {
+			modifier = galactic_market_founder
+			days = -1
+		}
+		set_market_leader = yes # Update who owns the market station
+
+		set_timed_global_flag = { flag = resolution_galactic_market_relocated_recently days = 18000 }
+
+		event_target:market_founder_planet.solar_system.star = {
+			create_ambient_object = {
+				type = galactic_market_station
+				location = this
+			}
+			last_created_ambient_object = {
+				save_global_event_target_as = galactic_market_station
+				set_ambient_object_flag = galactic_market_station_flag
+				set_location = {
+					target = event_target:market_founder_planet.solar_system.star
+					angle = random
+					distance = 40
+				}
+			}
+		}
+		every_playable_country = {
+			limit = {
+				is_galactic_community_member = yes
+				NOT = { is_same_value = root }
+			}
+			country_event = { id = action.101 }
+		}
+	}
+
+	option = {
+		name = OK
+		custom_tooltip = established_galactic_market_station
+		tooltip = {
+			end_event_chain = market_founding_chain
+			add_modifier = {
+				modifier = galactic_market_founder
+				days = -1
+			}
+		}
+	}
+}
+
+# Founder selected notification
+country_event = {
+	id = action.101
+	title = action.101.name
+	desc = {
+		text = action.101.desc
+		trigger = {
+			NOT = { is_xenophobe = yes }
+		}
+	}
+	desc = {
+		text = action.101.desc.phobe
+		trigger = { is_xenophobe = yes }
+	}
+	picture = GFX_evt_financial_instruments
+	location = event_target:galactic_market_station
+
+	immediate = {
+		set_country_flag = has_market_access
+		enable_galactic_market = yes
+		event_target:galactic_market_station.solar_system = {
+			every_system_planet = {
+				set_surveyed = {
+					surveyed = yes
+					surveyor = root
+				}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+		tooltip = { end_event_chain = market_founding_chain }
+	}
+}
+
+# Market station lost, is conquered or moved
+country_event = {
+	id = action.102
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:galactic_market_station
+		from = {
+			any_system_ambient_object = {
+				is_same_value = event_target:galactic_market_station
+			}
+		}
+	}
+
+	immediate = {
+		if = { # no new owner or homicidal empire
+			limit = {
+				OR = {
+					NOT = { exists = fromfrom }
+					AND = {
+						exists = fromfrom
+						fromfrom = {
+							OR = {
+								is_homicidal = yes
+								is_galactic_community_member = yes
+							}
+						}
+					}
+				}
+			}
+			# transfer to contact
+			event_target:galactic_market_station = {
+				destroy_ambient_object = this
+			}
+			clear_global_event_target = galactic_market_station
+			clear_global_event_target = market_founder_planet
+			remove_modifier = galactic_market_founder
+
+			random_playable_country = {
+				limit = {
+					is_homicidal = no
+					is_galactic_community_member = yes
+				}
+				weights = {
+					base = 1
+					modifier = {
+						factor = 999
+						has_communications = root
+						has_country_flag = market_nomination_eligible
+					}
+					modifier = {
+						factor = 20
+						capital_scope = {
+							is_planet_class = pc_city
+						}
+					}
+					modifier = {
+						factor = 9
+						has_authority = auth_corporate
+					}
+					modifier = {
+						factor = 2
+						trade_income >= 120
+					}
+					modifier = {
+						factor = 0.5
+						trade_income <= 50
+					}
+					modifier = {
+						factor = 0.75
+						has_ethic = ethic_gestalt_consciousness
+					}
+				}
+				capital_scope = {
+					create_ambient_object = {
+						type = "galactic_market_station"
+						location = this
+					}
+					save_global_event_target_as = market_founder_planet
+					last_created_ambient_object = {
+						save_global_event_target_as = galactic_market_station
+						set_ambient_object_flag = galactic_market_station_flag
+						set_location = {
+							target = event_target:market_founder_planet.solar_system.star
+							angle = random
+							distance = 40
+						}
+					}
+				}
+				add_modifier = {
+					modifier = galactic_market_founder
+					days = -1
+				}
+				set_market_leader = yes
+
+				country_event = { id = action.103 }
+			}
+			create_message = {
+				type = MESSAGE_TYPE_LOST_MARKET_STATION
+				localization = MESSAGE_LOST_MARKET_STATION
+				days = 30
+				target = root.from # the Go To
+				variable = {
+					type = name
+					localization = SYSTEM
+					scope = root.from
+				}
+			}
+		}
+		else_if = { # lost to valid empire without market access (somehow)
+			limit = {
+				exists = fromfrom
+				fromfrom = {
+					is_country_type = default
+					NOT = { has_country_flag = has_market_access }
+				}
+			}
+			fromfrom = {
+				set_country_flag = has_market_access
+				enable_galactic_market = yes
+				add_modifier = {
+					modifier = galactic_market_founder
+					days = -1
+				}
+				set_market_leader = yes
+			}
+			remove_modifier = galactic_market_founder
+			create_message = {
+				type = MESSAGE_TYPE_LOST_MARKET_STATION
+				localization = MESSAGE_LOST_MARKET_STATION
+				days = 30
+				target = root.from # the Go To
+				variable = {
+					type = name
+					localization = SYSTEM
+					scope = root.from
+				}
+			}
+		}
+		else = {
+			remove_modifier = galactic_market_founder
+			fromfrom = {
+				add_modifier = {
+					modifier = galactic_market_founder
+					days = -1
+				}
+				set_market_leader = yes
+			}
+			create_message = {
+				type = MESSAGE_TYPE_LOST_MARKET_STATION
+				localization = MESSAGE_LOST_MARKET_STATION
+				days = 30
+				target = root.from # the Go To
+				variable = {
+					type = name
+					localization = SYSTEM
+					scope = root.from
+				}
+			}
+		}
+	}
+}
+
+# Market station moved to my system
+country_event = {
+	id = action.103
+	title = action.103.name
+	desc = action.103.desc
+	picture = GFX_evt_financial_instruments
+	location = event_target:galactic_market_station
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+		custom_tooltip = established_galactic_market_station
+		tooltip = {
+			add_modifier = {
+				modifier = galactic_market_founder
+				days = -1
+			}
+		}
+	}
+}
+
+# Catch non-standard comms ending up outside the Market, on yearly pulse
+event = {
+	id = action.105
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = galactic_market_founded
+		any_playable_country = {
+			is_homicidal = no
+			NOT = { has_country_flag = has_market_access }
+		}
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				is_homicidal = no
+				is_galactic_community_member = yes
+				NOT = { has_country_flag = has_market_access }
+				any_playable_country = {
+					has_communications = prev
+					has_country_flag = has_market_access
+				}
+			}
+			country_event = { id = action.115 random = 40 }
+		}
+	}
+}
+
+country_event = {
+	id = action.110
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		from = { is_country_type = default }
+		OR = {
+			AND = {
+				is_galactic_community_member = yes
+				from = {
+					is_galactic_community_member = no
+					NOT = { has_country_flag = galcom_form_nay }
+				}
+			}
+			AND = {
+				NOT = { has_country_flag = galcom_form_nay }
+				is_galactic_community_member = no
+				from = { is_galactic_community_member = yes }
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_country_flag = galcom_form_nay }
+				is_galactic_community_member = no
+				from = { is_galactic_community_member = yes }
+			}
+			country_event = { id = galcom.16 days = 15 }
+		}
+		else_if = {
+			limit = {
+				is_galactic_community_member = yes
+				from = {
+					is_galactic_community_member = no
+					NOT = { has_country_flag = galcom_form_nay }
+				}
+			}
+			from = { country_event = { id = galcom.16 days = 15 } }
+		}
+	}
+}
+
+# Enable market when having comms with market participant
+country_event = {
+	id = action.115
+	title = action.106.name
+	desc = {
+		text = action.106.desc
+		trigger = { is_xenophobe = no }
+	}
+	desc = {
+		text = action.106.desc.phobe
+		trigger = { is_xenophobe = yes }
+	}
+	picture = GFX_evt_financial_instruments
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = has_market_access }
+	}
+
+	immediate = {
+		enable_galactic_market = yes
+		set_country_flag = has_market_access
+	}
+
+	option = {
+		name = OK
+	}
+}
+
+# Enable resources for Galactic Market
+event = {
+	id = action.116
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = galactic_market_founded
+
+		OR = {
+			NOT = { is_on_market = volatile_motes }
+			NOT = { is_on_market = exotic_gases }
+			NOT = { is_on_market = rare_crystals }
+			NOT = { is_on_market = sr_living_metal }
+			NOT = { is_on_market = sr_zro }
+			NOT = { is_on_market = sr_dark_matter }
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { is_on_market = volatile_motes }
+				any_playable_country = {
+					is_galactic_community_member = yes
+					resource_stockpile_compare = { resource = volatile_motes value >= 1 }
+				}
+			}
+			enable_on_market = volatile_motes
+		}
+		else_if = {
+			limit = {
+				NOT = { is_on_market = exotic_gases }
+				any_playable_country = {
+					is_galactic_community_member = yes
+					resource_stockpile_compare = { resource = exotic_gases value >= 1 }
+				}
+			}
+			enable_on_market = exotic_gases
+		}
+		else_if = {
+			limit = {
+				NOT = { is_on_market = rare_crystals }
+				any_playable_country = {
+					is_galactic_community_member = yes
+					resource_stockpile_compare = { resource = rare_crystals value >= 1 }
+				}
+			}
+			enable_on_market = rare_crystals
+		}
+		else_if = {
+			limit = {
+				NOT = { is_on_market = sr_living_metal }
+				any_playable_country = {
+					is_galactic_community_member = yes
+					resource_stockpile_compare = { resource = sr_living_metal value >= 1 }
+				}
+			}
+			enable_on_market = sr_living_metal
+		}
+		else_if = {
+			limit = {
+				NOT = { is_on_market = sr_zro }
+				any_playable_country = {
+					is_galactic_community_member = yes
+					resource_stockpile_compare = { resource = sr_zro value >= 1 }
+				}
+			}
+			enable_on_market = sr_zro
+		}
+		else_if = {
+			limit = {
+				NOT = { is_on_market = sr_dark_matter }
+				any_playable_country = {
+					is_galactic_community_member = yes
+					resource_stockpile_compare = { resource = sr_dark_matter value >= 1 }
+				}
+			}
+			enable_on_market = sr_dark_matter
+		}
+	}
+}
+
+# Megastructure completed notification for contacts
+country_event = {
+	id = action.120
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			OR = {
+				is_megastructure_type = dyson_sphere_5
+				is_megastructure_type = dyson_sphere_restored
+				is_megastructure_type = spy_orb_4
+				is_megastructure_type = spy_orb_restored
+				is_megastructure_type = think_tank_3
+				is_megastructure_type = think_tank_restored
+				is_megastructure_type = gateway_final
+				is_megastructure_type = gateway_restored
+				is_megastructure_type = matter_decompressor_4
+				is_megastructure_type = strategic_coordination_center_3
+				is_megastructure_type = mega_art_installation_3
+				is_megastructure_type = interstellar_assembly_4
+			}
+		}
+	}
+
+	immediate = {
+		every_relation = {
+			limit = {
+				is_country_type = default
+				OR = {
+					has_intel_level = {
+						who = root
+						category = economy
+						level >= 1
+					}
+					has_intel_level = {
+						who = root
+						category = technology
+						level >= 1
+					}
+				}
+			}
+			create_message = {
+				type = ALIEN_MEGASTRUCTURE_BUILT
+				localization = MESSAGE_ALIEN_MEGASTRUCTURE_BUILT
+				days = 30
+				target = root.from # the Go To
+				variable = {
+					type = name
+					localization = COUNTRY
+					scope = root
+				}
+				variable = {
+					type = name
+					localization = MEGASTRUCTURE
+					scope = root.from
+				}
+				variable = {
+					type = name
+					localization = SYSTEM
+					scope = root.fromfrom
+				}
+			}
+		}
+	}
+}
+
+# Pop Abducted
+pop_event = {
+	id = action.121
+	title = OK
+	desc = OK
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_TYPE_POP_ABDUCTED
+			localization = MESSAGE_POP_ABDUCTED
+			days = 30
+			target = from
+			variable = {
+				type = name
+				localization = SPECIES
+				scope = root.species
+			}
+			variable = {
+				type = name
+				localization = TARGET_PLANET
+				scope = root.planet
+			}
+			variable = {
+				type = name
+				localization = PLANET
+				scope = from
+			}
+		}
+		if = {
+			limit = {
+				exists = from.owner
+			}
+			from.owner = {
+				create_message = {
+					type = MESSAGE_TYPE_POP_ABDUCTED_FROM_US
+					localization = MESSAGE_POP_ABDUCTED_FROM_US
+					days = 30
+					target = from
+					variable = {
+						type = name
+						localization = SPECIES
+						scope = root.species
+					}
+					variable = {
+						type = name
+						localization = ABDUCTER
+						scope = root.planet.owner
+					}
+					variable = {
+						type = name
+						localization = PLANET
+						scope = from
+					}
+				}
+			}
+		}
+	}
+}
+
+# Last Primitive Pop Abducted (HIDDEN)
+pop_event = {
+	id = action.122
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = { num_pops = 0 }
+	}
+
+	immediate = {
+		from = {
+			if = {
+				limit = { has_observation_outpost = yes }
+				observation_outpost = {
+					owner = {
+						save_event_target_as = obsv_post_owner
+						country_event = { id = action.123 }
+					}
+					dismantle = yes
+				}
+			}
+		}
+		owner = {
+			if = {
+				limit = {
+					OR = {
+						NOT = { exists = event_target:obsv_post_owner }
+						NOT = { is_same_value = event_target:obsv_post_owner }
+					}
+				}
+				save_event_target_as = abductor
+				country_event = { id = action.123 }
+			}
+		}
+		from = {
+			solar_system = {
+				if = {
+					limit = { exists = space_owner }
+					space_owner = {
+						if = {
+							limit = {
+								NOT = { is_same_value = event_target:abductor }
+								OR = {
+									NOT = { exists = event_target:obsv_post_owner }
+									NOT = { is_same_value = event_target:obsv_post_owner }
+								}
+							}
+							country_event = { id = action.123 }
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Last Primitive Pop Abducted
+country_event = {
+	id = action.123
+	title = "action.123.name"
+	desc = "action.123.desc"
+	picture = GFX_evt_surrender
+	show_sound = event_screams
+	location = fromfrom
+
+	is_triggered_only = yes
+
+	option = {
+		trigger = {
+			NOT = {
+				from = {
+					owner = { is_same_value = root }
+				}
+			}
+		}
+		name = DISCONCERTING
+	}
+	option = {
+		trigger = {
+			from = {
+				owner = { is_same_value = root }
+			}
+		}
+		name = action.123.a
+	}
+}
+
+# Won War (Imperial Crusade)
+country_event = {
+	id = action.150
+	title = action.37.name
+	message_desc = action.37.message
+
+	desc = {
+		trigger = { is_gestalt = no }
+		text = action.150.1.desc
+		text = action.150.2.desc
+		text = action.150.3.desc
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = action.150.gestalt.1.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			using_war_goal = {
+				type = wg_imperial_crusade
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = action.37.a
+	}
+}
+
+# Lost War (Imperial Crusade)
+country_event = {
+	id = action.151
+	title = action.38.name
+	message_desc = action.38.message
+
+	desc = {
+		text = action.151.1.desc
+		text = action.151.2.desc
+		text = action.151.3.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			using_war_goal = {
+				type = wg_imperial_crusade
+				owner = root.from
+			}
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = { is_galactic_emperor = yes }
+			save_event_target_as = gal_emperor
+		}
+	}
+
+	option = {
+		name = action.38.a
+	}
+}
+
+# Loyalists Won Civil War (Emperor)
+country_event = {
+	id = action.152
+	title = action.37.name
+	message_desc = action.37.message
+
+	desc = {
+		trigger = { is_gestalt = no }
+		text = action.152.1.desc
+		text = action.152.2.desc
+		text = action.152.3.desc
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = action.152.gestalt.1.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			using_war_goal = {
+				type = wg_galactic_civil_war_loyalists
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = action.37.a
+	}
+}
+
+# Loyalists Won Civil War (Rebels)
+country_event = {
+	id = action.153
+	title = action.38.name
+	message_desc = action.38.message
+
+	desc = {
+		trigger = { is_gestalt = no }
+		text = action.153.1.desc
+		text = action.153.2.desc
+		text = action.153.3.desc
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = action.153.gestalt.1.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			using_war_goal = {
+				type = wg_galactic_civil_war_loyalists
+				owner = root.from
+			}
+		}
+	}
+
+	option = {
+		name = action.38.a
+	}
+}
+
+# Rebels Won Civil War (Rebels)
+country_event = {
+	id = action.154
+	title = action.37.name
+	message_desc = action.37.message
+
+	desc = {
+		trigger = { is_gestalt = no }
+		text = action.154.1.desc
+		text = action.154.2.desc
+		text = action.154.3.desc
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = action.154.gestalt.1.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			using_war_goal = {
+				type = wg_galactic_civil_war_rebels
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = action.37.a
+	}
+}
+
+# Rebels Won Civil War & Dissolve Empire (Emperor)
+country_event = {
+	id = action.155
+	title = action.38.name
+	message_desc = action.38.message
+
+	desc = {
+		trigger = { is_gestalt = no }
+		text = action.155.1.desc
+		text = action.155.2.desc
+		text = action.155.3.desc
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = action.155.gestalt.1.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			OR = {
+				using_war_goal = {
+					type = wg_galactic_civil_war_rebels
+					owner = root.from
+				}
+				using_war_goal = {
+					type = wg_restore_the_community
+					owner = root.from
+				}
+			}
+		}
+	}
+
+	option = {
+		name = action.38.a
+	}
+}
+
+## Seize Throne (Usurper)
+#country_event = {
+#	id = action.156
+#	title = action.37.name
+#	message_desc = action.37.message
+#
+#	desc = {
+#		trigger = { is_gestalt = no }
+#		text = action.156.1.desc
+#		text = action.156.2.desc
+#		text = action.156.3.desc
+#	}
+#	desc = {
+#		trigger = { is_gestalt = yes }
+#		text = action.156.gestalt.1.desc
+#	}
+#
+#	picture_event_data = {
+#		portrait = FROM
+#		planet_background = FROM
+#		graphical_culture = FROM
+#		city_level = FROM
+#		room = FROM.ruler
+#	}
+#
+#	diplomatic = yes
+#	is_triggered_only = yes
+#
+#	trigger = {
+#		is_ai = no
+#		fromfrom = {
+#			using_war_goal = {
+#				type = wg_seize_imperial_throne
+#				owner = root
+#			}
+#		}
+#	}
+#
+#	option = {
+#		name = action.37.a
+#	}
+#}
+#
+## Seize Throne (Former Emperor)
+#country_event = {
+#	id = action.157
+#	title = action.38.name
+#	message_desc = action.38.message
+#
+#	desc = {
+#		trigger = { is_gestalt = no }
+#		text = action.157.1.desc
+#		text = action.157.2.desc
+#		text = action.157.3.desc
+#	}
+#	desc = {
+#		trigger = { is_gestalt = yes }
+#		text = action.157.gestalt.1.desc
+#	}
+#
+#	picture_event_data = {
+#		portrait = FROM
+#		planet_background = FROM
+#		graphical_culture = FROM
+#		city_level = FROM
+#		room = FROM.ruler
+#	}
+#
+#	diplomatic = yes
+#	is_triggered_only = yes
+#
+#	trigger = {
+#		is_ai = no
+#		fromfrom = {
+#			using_war_goal = {
+#				type = wg_seize_imperial_throne
+#				owner = root.from
+#			}
+#		}
+#	}
+#
+#	option = {
+#		name = action.38.a
+#	}
+#}
+
+# Dissolve Empire (Dissolver)
+country_event = {
+	id = action.158
+	title = action.37.name
+	message_desc = action.37.message
+
+	desc = {
+		trigger = { is_gestalt = no }
+		text = action.158.1.desc
+		text = action.158.2.desc
+		text = action.158.3.desc
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = action.158.gestalt.1.desc
+	}
+
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM.ruler
+	}
+
+	diplomatic = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		fromfrom = {
+			using_war_goal = {
+				type = wg_restore_the_community
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = action.37.a
+	}
+}
+
+
+
+# Recalculate strategic data for attack/defense ( chokepoints etc. )
+country_event = {
+	id = action.200
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		from = { #So you don't have to survey a system you just lost again
+			set_surveyed = {
+				surveyor = root
+				surveyed = yes
+			}
+		}
+		run_ai_strategic_war_data = yes
+	}
+}
+
+# Left a federation
+country_event = {
+	id = action.201
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_country_flag = whatever_it_is_im_against_it_left_federation
+		}
+	}
+}
+
+# Hegemony Member's Request to Leave was Rejected
+country_event = {
+	id = action.205
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = asked_to_leave_hegemony
+			days = 3600
+		}
+		add_opinion_modifier = {
+			who = from
+			modifier = opinion_denied_to_leave_hegemony
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_wanted_to_leave_hegemony
+			}
+		}
+	}
+}
+
+# Federation On Subjects Can Join Law Change
+country_event = {
+	id = action.212
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		federation = {
+			any_member = {
+				is_overlord = yes
+				any_subject = {
+					NOT = { is_in_federation_with = prev }
+				}
+			}
+		}
+	}
+
+	immediate = {
+		federation = {
+			every_member = {
+				limit = {
+					is_overlord = yes
+					any_subject = {
+						NOT = { is_in_federation_with = prev }
+					}
+				}
+				every_subject = {
+					limit = {
+						NOT = { is_in_federation_with = prev }
+					}
+					join_alliance = { who = root override_requirements = yes }
+				}
+			}
+		}
+	}
+}
+
+# Federation On Subjects Can NOT Join Law Change
+country_event = {
+	id = action.213
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		federation = {
+			any_member = {
+				is_overlord = yes
+				any_subject = { is_in_federation_with = prev }
+			}
+		}
+	}
+
+	immediate = {
+		federation = {
+			every_member = {
+				limit = {
+					is_overlord = yes
+					any_subject = { is_in_federation_with = prev }
+				}
+				every_subject = {
+					limit = { is_in_federation_with = prev }
+					leave_alliance = { override_requirements = yes }
+				}
+			}
+		}
+	}
+}
+
+# Federation Member Gains Subject
+country_event = {
+	id = action.214
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_federation = yes
+			federation = { has_federation_law = allow_subjects_to_join_yes }
+		}
+	}
+
+	immediate = {
+		join_alliance = { who = from override_requirements = yes }
+	}
+}
+
+# Federation Clear Outside Treaties
+country_event = {
+	id = action.215
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		every_country = {
+			limit = {
+				has_communications = root
+				NOT = { is_in_federation_with = root }
+			}
+			end_all_treaties_with = root
+		}
+	}
+}
+
+# Random pulse (set up the delay) - on_five_year_pulse_country
+country_event = {
+	id = action.220
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		country_event = { id = action.221 random = 360 }
+	}
+}
+
+# Random pulse part 2 (fire the on action) - on_five_year_pulse_country
+country_event = {
+	id = action.221
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		fire_on_action = { on_action = on_five_year_random_pulse_country }
+	}
+}
+
+# Random pulse part 3 (fire the on action for negative events) - on_five_year_random_pulse_country
+country_event = {
+	id = action.2211
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		fire_on_action = { on_action = on_five_year_random_pulse_country_negative_list }
+	}
+}
+
+# Random pulse part 4 - null effect event if fired via espionage operation
+country_event = {
+	id = action.2212
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			NOT = { exists = from }
+			from = {
+				NOT = { is_scope_type = espionage_operation }
+			}
+		}
+	}
+}
+
+
+# on_colony_5_year_pulse
+planet_event = {
+	id = action.222
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = { #save the AI from doomsday if it manages to colonise
+			limit = {
+				exists = owner
+				owner = {
+					has_origin = origin_doomsday
+					is_ai = yes
+					any_owned_planet = {
+						has_planet_flag = doomed_planet_origin
+					}
+				}
+				NOT = { has_planet_flag = doomed_planet_origin }
+			}
+			owner = {
+				random_owned_planet = {
+					limit = {
+						has_planet_flag = doomed_planet_origin
+						num_pops > 3
+					}
+					while = {
+						count = 3
+						random_owned_pop = {
+							limit = {
+								OR = {
+									prev = { has_modifier = doomsday_5 }
+									root = {
+										habitability = {
+											who = prev.species
+											value > 0.3
+										}
+									}
+								}
+							}
+							resettle_pop = {
+								pop = this
+								planet = root
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+# Called when a Starbase changes owner
+# THIS = Ship (Starbase)
+# FROM = Former Owner (Country)
+ship_event = {
+	id = action.223
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = starbase
+	}
+
+	immediate = {
+		starbase = {
+			if = {
+				limit = {
+					owner = {
+						is_gestalt = yes
+					}
+				}
+				remove_starbase_building = {
+					building = offworld_trading_company
+				}
+				remove_starbase_module = {
+					module = trading_hub
+				}
+			}
+		}
+	}
+}
+
+# This = starbase being destroyed
+# From = fleet that destroyed the starbase
+starbase_event = {
+	id = action.225
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			NOT = { exists = root.owner }
+			AND = {
+				exists = root.owner
+				NOT = { root.owner = { is_country_type = dormant_marauders } }
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = { exists = root.owner }
+			solar_system = {
+				set_surveyed = {
+					surveyed = yes
+					surveyor = root.owner
+				}
+			}
+		}
+		solar_system = {
+			set_surveyed = {
+				surveyed = yes
+				surveyor = root.from.owner
+			}
+		}
+		#remove leftovers
+		solar_system = {
+			every_fleet_in_system = {
+				limit = {
+					is_owned_by = root.owner
+					OR = {
+						is_ship_size = mining_station
+						is_ship_size = research_station
+						is_ship_size = observation_station
+					}
+				}
+				destroy_fleet = this
+			}
+		}
+	}
+}
+
+
+# on_released_as_vassal
+# This = released vassal
+# From = overlord
+country_event = {
+	id = action.229
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				has_trait = trait_necrophage
+			}
+			set_origin = origin_necrophage
+		}
+		else = {
+			set_origin = origin_default
+		}
+		if = {
+			limit = {
+				has_civic = civic_galactic_sovereign
+			}
+			force_remove_civic = civic_galactic_sovereign
+		}
+		if = {
+			limit = {
+				has_civic = civic_galactic_sovereign_megacorp
+			}
+			force_remove_civic = civic_galactic_sovereign_megacorp
+		}
+	}
+}
+
+# Convert sectors released as subjects by megacorps into oligarchies
+country_event = {
+	id = action.230
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_authority = auth_corporate
+		from = { has_authority = auth_corporate }
+	}
+
+	immediate = {
+		if = {
+			limit = { has_technology = tech_galactic_administration }
+			change_government = {
+				authority = auth_oligarchic
+				cooldown = no
+				remove_invalid_civics = yes
+				civics = { civic = civic_merchant_guilds civic = random civic = random }
+			}
+		}
+		else = {
+			change_government = {
+				authority = auth_oligarchic
+				cooldown = no
+				remove_invalid_civics = yes
+				civics = { civic = civic_merchant_guilds civic = random }
+			}
+		}
+	}
+}
+
+# on_decade_pulse_country
+# Event for misc error logging of broken gamestates that probably can't be done better in code
+country_event = {
+	id = action.240
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		if = {
+			limit = {
+				is_country_type = default
+			}
+			every_country = {
+				limit = {
+					NOR = {
+						is_same_value = root
+						has_communications = root
+						has_country_flag = suppress_first_contact_comms
+					}
+					root = {
+						has_established_contact = prev
+						NOR = {
+							has_active_first_contact_with = prev
+							has_relation_flag = {
+								who = prev
+								flag = has_logged_first_contact_error
+							}
+							has_relation_flag = {
+								who = prev
+								flag = just_encountered
+							}
+						}
+						#matches game rule can_have_first_contact
+						if = {
+							limit = { prev = { is_amoeba_country_type = yes } }
+							NOT = {
+								any_active_first_contact = {
+									contact_country = { is_amoeba_country_type = yes }
+								}
+							}
+						}
+						else_if = {
+							limit = { prev = { is_tiyanki_country_type = yes } }
+							NOT = {
+								any_active_first_contact = {
+									contact_country = { is_tiyanki_country_type = yes }
+								}
+							}
+						}
+						else_if = {
+							limit = { prev = { is_crystal_country_type = yes } }
+							NOT = {
+								any_active_first_contact = {
+									contact_country = { is_crystal_country_type = yes }
+								}
+							}
+						}
+						else_if = {
+							limit = { prev = { is_drone_country_type = yes } }
+							NOT = {
+								any_active_first_contact = {
+									contact_country = { is_drone_country_type = yes }
+								}
+							}
+						}
+						else_if = {
+							limit = { prev = { is_country_type = cloud } }
+							NOT = {
+								any_active_first_contact = {
+									contact_country = { is_country_type = cloud }
+								}
+							}
+						}
+						else_if = {
+							limit = {
+								prev = {
+									OR = {
+										is_country_type = caravaneer_fleet
+										is_country_type = caravaneer_home
+									}
+								}
+							}
+							NOT = {
+								any_active_first_contact = {
+									contact_country = {
+										OR = {
+											is_country_type = caravaneer_fleet
+											is_country_type = caravaneer_home
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				log_error = "[Root.GetRealName] has encountered [This.GetRealName] (country type: [This.GetCountryType]) but has neither communications with them nor an active First Contact site to do so."
+				root = {
+					set_relation_flag = {
+						who = prev
+						flag = has_logged_first_contact_error
+					}
+					establish_communications_no_message = prev
+				}
+			}
+		}
+	}
+}
+
+system_event = {
+	id=action.301
+	is_triggered_only=yes
+	hide_window=yes
+	immediate = {
+		every_system_megastructure = {
+			limit = {
+				OR = {
+					is_megastructure_type = gateway_ruined
+					is_megastructure_type = gateway_restored
+					is_megastructure_type = gateway_final
+				}
+			}
+			set_owner = FROM
+		}
+	}
+}
+
+system_event = {
+	id=action.300
+	is_triggered_only=yes
+	hide_window=yes
+	immediate = {
+		every_system_megastructure = {
+			limit = {
+				OR = {
+					is_megastructure_type = gateway_ruined
+					is_megastructure_type = gateway_restored
+					is_megastructure_type = gateway_final
+				}
+			}
+			set_owner = FROM
+		}
+	}
+}
+
+
+country_event = {
+	id = action.310
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		federation = {
+			every_member = {
+				create_message = {
+					type = MESSAGE_NEW_FEDERATION_PRESIDENT_CHOSEN
+					localization = NEW_FEDERATION_PRESIDENT_CHOSEN
+					days = 60
+					target = root.capital_scope
+					variable = {
+						type = name
+						localization = PRESIDENT
+						scope = root
+					}
+					variable = {
+						type = name
+						localization = FEDERATION
+						scope = root.federation
+					}
+				}
+			}
+		}
+	}
+}
+
+# on_country_released_in_war
+# Root = new country
+# From = country forcing the release
+# FromFrom = country they are released from
+# FromFromFrom = war
+country_event = {
+	id = action.320
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		if = {
+			limit = {
+				has_civic = civic_galactic_sovereign
+			}
+			force_remove_civic = civic_galactic_sovereign
+		}
+		if = {
+			limit = {
+				has_civic = civic_galactic_sovereign_megacorp
+			}
+			force_remove_civic = civic_galactic_sovereign_megacorp
+		}
+	}
+}
+
+#on_monthly_pulse_country: give favours for envoys
+country_event = {
+	id = action.325
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		has_active_tradition = tr_diplomacy_eminent_diplomats
+	}
+
+	immediate = {
+		every_envoy = {
+			limit = {
+				has_envoy_task = { task = improve_relations }
+				root = {
+					num_favors = {
+						target = prev.envoy_location_country
+						value < 10
+					}
+				}
+			}
+			random_list = {
+				1 = {
+					root = {
+						add_favors = {
+							target = prev.envoy_location_country
+							value = 1
+						}
+						create_message = {
+							type = MESSAGE_FAVOR_GAINED_TRADITION
+							localization = MESSAGE_FAVOR_GAINED_TRADITION_DESC
+							days = 30
+							target = prev.envoy_location_country.capital_scope
+							variable = {
+								type = name
+								localization = WHO
+								scope = prev.envoy_location_country
+							}
+						}
+					}
+				}
+				99 = {}
+			}
+		}
+	}
+}
+
+#on_operation_cancelled: if you have the right tradition, they get some intel
+espionage_operation_event = {
+	id = action.330
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		exists = spynetwork.target
+		spynetwork.target = {
+			has_active_tradition = tr_subterfuge_double_agents
+		}
+	}
+
+	immediate = {
+		spynetwork.target = {
+			add_intel = {
+				who = root.owner
+				amount = 10
+			}
+			create_message = {
+				type = ESPIONAGE_INTEL_GAINED
+				localization = ESPIONAGE_INTEL_GAINED_DESC
+				variable = {
+					type = name
+					localization = COUNTRY
+					scope = root.owner
+				}
+				days = 30
+				target = root.owner.capital_scope
+			}
+		}
+	}
+}

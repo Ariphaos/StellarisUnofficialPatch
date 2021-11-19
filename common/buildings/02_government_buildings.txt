@@ -61,6 +61,8 @@ building_bureaucratic_1 = {
 		exists = owner
 		building_relaxed_basic_income_check = yes
 		owner = { is_regular_empire = yes }
+		NOT = { has_modifier = resort_colony }
+		NOT = { has_modifier = slave_colony }
 	}
 
 	destroy_trigger = {
@@ -96,12 +98,6 @@ building_bureaucratic_1 = {
 
 	triggered_desc = {
 		text = job_bureaucrat_effect_desc
-	}
-
-	on_queued = {
-		planet = {
-			set_timed_planet_flag = { flag = recent_admin_building_built days = 720 }
-		}
 	}
 }
 
@@ -159,12 +155,6 @@ building_bureaucratic_2 = {
 	triggered_desc = {
 		text = job_bureaucrat_effect_desc
 	}
-
-	on_queued = {
-		planet = {
-			set_timed_planet_flag = { flag = recent_admin_building_built days = 720 }
-		}
-	}
 }
 
 # T3 Admin Cap buildings intentionally removed for regular empires, left in a partial state to not break existing games
@@ -218,11 +208,6 @@ building_bureaucratic_3 = {
 	triggered_desc = {
 		text = job_bureaucrat_effect_desc
 	}
-	on_queued = {
-		planet = {
-			set_timed_planet_flag = { flag = recent_admin_building_built days = 720 }
-		}
-	}
 }
 
 building_uplink_node = {
@@ -270,12 +255,6 @@ building_uplink_node = {
 
 	triggered_desc = {
 		text = job_coordinator_effect_desc
-	}
-
-	on_queued = {
-		planet = {
-			set_timed_planet_flag = { flag = recent_admin_building_built days = 720 }
-		}
 	}
 }
 
@@ -334,11 +313,6 @@ building_network_junction = {
 	triggered_desc = {
 		text = job_coordinator_effect_desc
 	}
-	on_queued = {
-		planet = {
-			set_timed_planet_flag = { flag = recent_admin_building_built days = 720 }
-		}
-	}
 }
 
 building_system_conflux = {
@@ -391,11 +365,6 @@ building_system_conflux = {
 
 	triggered_desc = {
 		text = job_coordinator_effect_desc
-	}
-	on_queued = {
-		planet = {
-			set_timed_planet_flag = { flag = recent_admin_building_built days = 720 }
-		}
 	}
 }
 
@@ -683,7 +652,7 @@ building_psi_corps = {
 building_clone_vats = {
 	base_buildtime = @b1_time
 
-	category = government
+	category = pop_assembly
 
 	base_cap_amount = 1
 
@@ -717,13 +686,45 @@ building_clone_vats = {
 
 	resources = {
 		category = planet_buildings
+
+		# Base cost
 		cost = {
 			minerals = 500
+		}
+		# Org/Lith cost
+		cost = {
+			trigger = {
+				exists = owner
+				owner = { is_lithoid_empire = no }
+			}
 			food = 500
 		}
+		cost = {
+			trigger = {
+				exists = owner
+				owner = { is_lithoid_empire = yes }
+			}
+			energy = 500
+		}
+
+		# Base upkeep
 		upkeep = {
 			energy = 2
+		}
+		# Org/Lith upkeep
+		upkeep = {
+			trigger = {
+				exists = owner
+				owner = { is_lithoid_empire = no }
+			}
 			food = 30
+		}
+		upkeep = {
+			trigger = {
+				exists = owner
+				owner = { is_lithoid_empire = yes }
+			}
+			minerals = 30
 		}
 	}
 
@@ -849,5 +850,206 @@ building_grand_embassy = {
 
 	show_tech_unlock_if = {
 		is_regular_empire = yes
+	}
+}
+
+building_gaiaseeders_1 = {
+	base_buildtime = @b2_time
+	base_cap_amount = 1
+	category = government
+	can_be_disabled = no
+	upgrades = { "building_gaiaseeders_2" }
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = default
+			OR = {
+				has_valid_civic = civic_idyllic_bloom
+				has_valid_civic = civic_hive_idyllic_bloom
+			}
+		}
+		building_basic_income_check = yes
+		NOR = {
+			is_planet_class = pc_gaia
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+		}
+		is_artificial = no
+	}
+
+	allow = {
+		is_ideal_planet_class = {
+			who = owner
+			status = yes
+		}
+		has_upgraded_capital = yes
+	}
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_gaia	# No double bonuses if player uses other tools to turn it into a Gaia world.
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				NOR = {
+					has_valid_civic = civic_idyllic_bloom
+					has_valid_civic = civic_hive_idyllic_bloom
+				}
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+		}
+		upkeep = {
+			energy = 20
+		}
+	}
+
+	planet_modifier = {
+		pop_growth_speed = 0.1
+	}
+}
+
+building_gaiaseeders_2 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = government
+	can_be_disabled = no
+	upgrades = { "building_gaiaseeders_3" }
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			exotic_gases = @b2_rare_cost
+		}
+		upkeep = {
+			energy = 20
+			exotic_gases = @b2_rare_upkeep
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_gaia
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				NOR = {
+					has_valid_civic = civic_idyllic_bloom
+					has_valid_civic = civic_hive_idyllic_bloom
+				}
+			}
+		}
+	}
+
+	allow = {
+		is_ideal_planet_class = {
+			who = owner
+			status = yes
+		}
+	}
+
+	planet_modifier = {
+		pop_growth_speed = 0.05
+		pop_environment_tolerance = 0.1
+	}
+}
+
+building_gaiaseeders_3 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = government
+	can_be_disabled = no
+	upgrades = { "building_gaiaseeders_4" }
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			exotic_gases = @b3_rare_cost
+		}
+		upkeep = {
+			energy = 20
+			exotic_gases = @b3_rare_upkeep
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_gaia
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				NOR = {
+					has_valid_civic = civic_idyllic_bloom
+					has_valid_civic = civic_hive_idyllic_bloom
+				}
+			}
+		}
+	}
+
+	allow = {
+		is_ideal_planet_class = {
+			who = owner
+			status = yes
+		}
+	}
+
+	planet_modifier = {
+		pop_environment_tolerance = 0.2
+	}
+}
+
+building_gaiaseeders_4 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = government
+	can_be_disabled = no
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				NOR = {
+					has_valid_civic = civic_idyllic_bloom
+					has_valid_civic = civic_hive_idyllic_bloom
+				}
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			exotic_gases = @b4_rare_cost
+		}
+	}
+
+	allow = {
+		is_ideal_planet_class = {
+			who = owner
+			status = yes
+		}
+	}
+
+	triggered_desc = {
+		text = building_gaiaseeders_4_effect_desc
 	}
 }

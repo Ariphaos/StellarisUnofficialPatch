@@ -20,7 +20,7 @@ decision_prospect = {
 		NOT = { is_planet_class = pc_hive }
 		NOT = { is_planet_class = pc_city }
 		owner = {
-			has_swapped_tradition = tr_adaptability_finish
+			has_active_tradition = tr_adaptability_finish
 		}
 		NOT = { has_planet_flag = planet_prospected }
 	}
@@ -73,9 +73,9 @@ decision_prospect_void = {
 	potential = {
 		is_planet_class = pc_habitat
 		owner = {
-			has_swapped_tradition = tr_adaptability_void_finish
+			has_active_tradition = tr_adaptability_void_finish
 		}
-		NOR = { 
+		NOR = {
 			has_planet_flag = energy_habitat
 			has_planet_flag = mining_habitat
 			has_planet_flag = research_habitat
@@ -145,7 +145,7 @@ decision_prospect_void = {
 							habitable_planet = no
 							can_have_society_deposits = no
 							can_have_physics_deposits = no
-							can_have_engineering_deposits = no	
+							can_have_engineering_deposits = no
 						}
 					}
 					set_planet_flag = research_habitat
@@ -421,6 +421,10 @@ decision_abolish_resort_colony = {
 
 	effect = {
 		remove_modifier = resort_colony
+		hidden_effect = {
+			remove_building = building_resort_capital
+			add_building = building_colony_shelter
+		}
 		hidden_effect = { validate_planet_buildings_and_districts = yes }
 	}
 
@@ -478,7 +482,7 @@ decision_consecrated_worlds = {
 	potential = {
 		exists = space_owner
 		exists = from
-		space_owner = { is_same_empire = from }
+		space_owner = { is_same_value = from }
 		from = {
 			has_ascension_perk = ap_consecrated_worlds
 		}
@@ -980,7 +984,17 @@ decision_arcology_project = {
 		custom_tooltip = decision_arcology_project_effects
 		hidden_effect = {
 			clear_deposits = yes
+			set_industrial_focus_flags = yes
 			change_pc = pc_city
+			relic_world_conversion_effect = {
+				DISTRICT = district_arcology_housing
+				VARIABLE = num_housing_districts
+			}
+			relic_world_conversion_effect = {
+				DISTRICT = district_arcology_arms_industry
+				VARIABLE = num_industrial_districts
+			}
+			set_ecu_industrial_districts_effect = yes
 			set_planet_entity = {
 				entity = "city_planet_entity"
 				graphical_culture = owner
@@ -1040,7 +1054,12 @@ decision_arcology_project_relic = {
 		is_planet_class = pc_relic
 		is_artificial = no
 		exists = owner
-		owner = { is_regular_empire = yes }
+		owner = {
+			OR = {
+				is_regular_empire = yes
+				has_valid_civic = civic_machine_servitor
+			}
+		}
 	}
 
 	allow = {
@@ -1053,7 +1072,17 @@ decision_arcology_project_relic = {
 		custom_tooltip = decision_arcology_project_effects
 		hidden_effect = {
 			clear_deposits = yes
+			set_industrial_focus_flags = yes
 			change_pc = pc_city
+			relic_world_conversion_effect = {
+				DISTRICT = district_arcology_housing
+				VARIABLE = num_housing_districts
+			}
+			relic_world_conversion_effect = {
+				DISTRICT = district_arcology_arms_industry
+				VARIABLE = num_industrial_districts
+			}
+			set_ecu_industrial_districts_effect = yes
 			set_planet_entity = {
 				entity = "city_planet_entity"
 				graphical_culture = owner
@@ -1073,7 +1102,7 @@ decision_arcology_project_relic = {
 					}
 					else = { add_deposit = d_portal_research_zone }
 			}
-			planet_event = { id =  mega.201 }
+			planet_event = { id = mega.201 }
 			while = {
 				count = 4
 				solar_system = {
@@ -1392,7 +1421,10 @@ decision_revoke_market_nomination = {
 
 	potential = {
 		owner = { is_ai = no }
-		has_global_flag = ongoing_market_nomination
+		OR = {
+			has_global_flag = ongoing_market_nomination
+			has_global_flag = ongoing_market_relocation_nomination
+		}
 		OR = {
 			has_modifier = market_nominee_level_1
 			has_modifier = market_nominee_level_2
@@ -1475,7 +1507,7 @@ decision_study_the_sea = {
 }
 
 # Divine Algorithm
-decision_divine_algorithm  = {
+decision_divine_algorithm = {
 	icon = decision_divine_algorithm
 
 	owned_planets_only = yes
@@ -1504,9 +1536,8 @@ decision_divine_algorithm  = {
 }
 
 # Artisan Troupe Art Monument
-decision_art_monument  = {
+decision_art_monument = {
 	icon = decision_art_monument
-	enactment_time = 15
 
 	owned_planets_only = yes
 
@@ -1574,7 +1605,7 @@ decision_art_monument  = {
 }
 
 # Artisan Troupe Art Monument
-decision_demolish_art_monument  = {
+decision_demolish_art_monument = {
 	icon = decision_art_monument
 	enactment_time = 15
 
@@ -1968,5 +1999,211 @@ decision_upgrade_habitat_2 = {
 
 	ai_weight = {
 		weight = 1
+	}
+}
+
+# Crystalline Empire decision
+decision_crystalline_refugees = {
+	owned_planets_only = yes
+	icon = decision_deal
+
+	resources = {
+		category = decisions
+		cost = {
+			influence = 10
+		}
+	}
+
+	potential = {
+		is_planet_class = pc_habitat
+		exists = owner
+		exists = event_target:central_crystal_empire
+		owner = {
+			has_country_flag = crystalline_refugees_flag
+		}
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = crystalline_hostility_trigger_tt
+			event_target:central_crystal_empire = {
+				NOT = { is_hostile = root.owner }
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = decision_crystalling_refugees_effect_tt
+		hidden_effect = {
+			while = {
+				count = 5
+				create_pop = {
+					species = event_target:crystalline_empire_species
+				}
+			}
+			owner = {
+				remove_country_flag = crystalline_refugees_flag
+			}
+			event_target:central_crystal_empire = {
+				add_opinion_modifier = {
+					who = root.owner
+					modifier = opinion_small_boon_crystal_empire
+				}
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 1
+	}
+}
+
+decision_crystalline_architecture = {
+	owned_planets_only = yes
+	icon = decision_deal
+
+	resources = {
+		category = decisions
+		cost = {
+			influence = 10
+		}
+	}
+
+	potential = {
+		is_planet_class = pc_habitat
+		exists = owner
+		exists = event_target:central_crystal_empire
+		owner = {
+			has_country_flag = crystalline_architecture_flag
+		}
+		NOT = { has_modifier = crystalline_architecture_mod }
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = crystalline_hostility_trigger_tt
+			event_target:central_crystal_empire = {
+				NOT = { is_hostile = root.owner }
+			}
+		}
+	}
+
+	effect = {
+		add_modifier = {
+			modifier = crystalline_architecture_mod
+			days = -1
+		}
+		hidden_effect = {
+			owner = {
+				remove_country_flag = crystalline_architecture_flag
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 1
+	}
+}
+
+# Repair Shattered Ring
+decision_shattered_ring_project = {
+	owned_planets_only = yes
+	icon = decision_arcology_project
+
+	enactment_time = 3600
+	resources = {
+		category = decisions
+		cost = {
+			alloys = 10000
+		}
+	}
+
+	potential = {
+		is_planet_class = pc_shattered_ring_habitable
+		exists = owner
+	}
+
+	allow = {
+		num_uncleared_blockers < 1
+		owner = { has_technology = tech_mega_engineering }
+	}
+
+	effect = {
+		# Make ringworld
+		custom_tooltip = decision_shattered_ring_project_effects
+		hidden_effect = {
+			clear_deposits = yes
+			change_pc = pc_ringworld_habitable
+			
+			# Remove Scrap Processing Buildings
+			if = {
+				limit = { has_building = building_mineral_purification_plant }
+				remove_building = building_mineral_purification_plant
+			}
+
+			if = {
+				limit = { has_building = building_mineral_purification_hub }
+				remove_building = building_mineral_purification_hub
+			}
+
+			# This removes the extra districts when fixing the ring world.
+			if = {
+				limit = {
+					owner = { is_regular_empire = yes }
+				}
+				shattered_ring_world_conversion_effect = {
+					DISTRICT = district_rw_city
+					VARIABLE = num_housing_districts
+				}
+				shattered_ring_world_conversion_effect = {
+					DISTRICT = district_rw_commercial
+					VARIABLE = num_commercial_districts
+				}
+			}
+
+			if = {
+				limit = {
+					owner = { is_hive_empire = yes }
+				}
+				shattered_ring_world_conversion_effect = {
+					DISTRICT = district_rw_hive
+					VARIABLE = num_housing_districts
+				}
+				shattered_ring_world_conversion_effect = {
+					DISTRICT = district_rw_generator
+					VARIABLE = num_generator_districts
+				}
+			}
+
+			if = {
+				limit = {
+					owner = { is_machine_empire = yes }
+				}
+				shattered_ring_world_conversion_effect = {
+					DISTRICT = district_rw_nexus
+					VARIABLE = num_housing_districts
+				}
+				shattered_ring_world_conversion_effect = {
+					DISTRICT = district_rw_generator
+					VARIABLE = num_generator_districts
+				}
+			}
+
+			# All empire types get farming and industrial districts
+			shattered_ring_world_conversion_effect = {
+				DISTRICT = district_rw_farming
+				VARIABLE = num_farming_districts
+			}
+			shattered_ring_world_conversion_effect = {
+				DISTRICT = district_rw_industrial
+				VARIABLE = num_industrial_districts
+			}
+			# Finally, bring it in line with ringworld sizes
+			set_planet_size = 10
+		}
+	}
+
+	ai_weight = {
+		weight = 0
 	}
 }

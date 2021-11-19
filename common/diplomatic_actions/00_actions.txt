@@ -1,24 +1,24 @@
 # Variables:
-#  is_listed, boolean, decides if this diplomactic action type is listed in diplomatic view.
-#  prerequisites, list, the technologies required to enable the player to send this diplomatic action.
-#  requires_actor_peace, boolean, false by default, will require the actor to be at peace for this action to pass the possible check.
-#  requires_alliance_vote, boolean, false by default, will require the alliance of the actor to vote for this action before passing it on to the recipient.
-#  requires_actor_independence, boolean, true by default, will require the actor to be independent.
-#  requires_recipient_independence, boolean, true by default, will require the recipient to be independent.
-#  requires_actor_federation_leader, boolean, false by default, if the actor is in a federation, he has to be the leader of it.
-#  requires_recipient_federation_leader, boolean, true by default, if the recipient is in a federation, he has to be the leader of it.
-#  show_decline_to_alliance_members, boolean, false by default, will show your alliance members when you decline a proposal of this type.
-#  should_show_accept_message, decides whether actor gets a response on acceptance (otherwise just on decline)
-#  should_remove_response_message_when_not_possible, boolean, decides if diplomatic response messages should be removed when the 'possible' check fails.
-#  should_show_auto_accept_message_recipient, boolean, decides if the recipient gets a message showing the diplomatic action.
-#  should_open_auto_accept_message_recipient, boolean, decides if the recipient automatically opens this message.
-#  should_notify_auto_recipient_on_vote_fail, boolean, decides if recipient is notified of vote failure if action was auto accepted.
-#  should_show_auto_accept_message_actor, boolean, decides if the actor gets a reply showing the diplomatic action.
-#  should_notify_all_communications, boolean, decides if a message notification is sent to all countries who have communications with actor or recipient
-#  AI_acceptance_base_value, default = 0
-#  potential, trigger, root is actor, from is recipient, decides if the action is shown
-#  possible, trigger, root is actor, from is recipient, prev is either requester (if action is done in response to an ask_xxx counterpart) or same as root, decides if the action is still possible
-#  proposable, trigger, root is actor, from is recipient, decides if the action is proposable
+# is_listed, boolean, decides if this diplomactic action type is listed in diplomatic view.
+# prerequisites, list, the technologies required to enable the player to send this diplomatic action.
+# requires_actor_peace, boolean, false by default, will require the actor to be at peace for this action to pass the possible check.
+# requires_alliance_vote, boolean, false by default, will require the alliance of the actor to vote for this action before passing it on to the recipient.
+# requires_actor_independence, boolean, true by default, will require the actor to be independent.
+# requires_recipient_independence, boolean, true by default, will require the recipient to be independent.
+# requires_actor_federation_leader, boolean, false by default, if the actor is in a federation, he has to be the leader of it.
+# requires_recipient_federation_leader, boolean, true by default, if the recipient is in a federation, he has to be the leader of it.
+# show_decline_to_alliance_members, boolean, false by default, will show your alliance members when you decline a proposal of this type.
+# should_show_accept_message, decides whether actor gets a response on acceptance (otherwise just on decline)
+# should_remove_response_message_when_not_possible, boolean, decides if diplomatic response messages should be removed when the 'possible' check fails.
+# should_show_auto_accept_message_recipient, boolean, decides if the recipient gets a message showing the diplomatic action.
+# should_open_auto_accept_message_recipient, boolean, decides if the recipient automatically opens this message.
+# should_notify_auto_recipient_on_vote_fail, boolean, decides if recipient is notified of vote failure if action was auto accepted.
+# should_show_auto_accept_message_actor, boolean, decides if the actor gets a reply showing the diplomatic action.
+# should_notify_all_communications, boolean, decides if a message notification is sent to all countries who have communications with actor or recipient
+# AI_acceptance_base_value, default = 0
+# potential, trigger, root is actor, from is recipient, decides if the action is shown
+# possible, trigger, root is actor, from is recipient, prev is either requester (if action is done in response to an ask_xxx counterpart) or same as root, decides if the action is still possible
+# proposable, trigger, root is actor, from is recipient, decides if the action is proposable
 
 
 
@@ -525,7 +525,7 @@ action_form_defensive_pact = {
 		custom_tooltip = {
 			fail_text = "requires_excellent_or_better_opinion"
 			OR = {
-				opinion_level =  { who = from level >= excellent }
+				opinion_level = { who = from level >= excellent }
 				is_improving_relations_with = from
 			}
 		}
@@ -1148,11 +1148,6 @@ action_form_migration_pact = {
 	AI_acceptance_base_value = -100
 	action_type = positive
 	possible = {
-		#custom_tooltip = {
-		#	fail_text = "ariphaos_patch_requires_neighbor"
-		#	is_neighbor_of = from
-		#	from = { is_neighbor_of = root }
-		#}
 		custom_tooltip = {
 			fail_text = "requires_actor_not_fanatic_purifiers"
 			OR = {
@@ -1516,20 +1511,9 @@ action_invite_to_federation = {
 				has_federation = no
 				is_country_type = default
 			}
-			if = {
-				limit = {
-					has_authority = auth_machine_intelligence
-				}
-				custom_tooltip = {
-					fail_text = requires_tradition_universal_compatibility
-					has_swapped_tradition = tr_versatility_universal_compatibility
-				}
-			}
-			else = {
-				custom_tooltip = {
-					fail_text = requires_tradition_the_federation
-					has_non_swapped_tradition = tr_diplomacy_the_federation
-				}
+			custom_tooltip = {
+				fail_text = requires_tradition_the_federation
+				has_tradition = tr_diplomacy_the_federation
 			}
 		}
 		custom_tooltip = {
@@ -1548,11 +1532,17 @@ action_invite_to_federation = {
 		}
 		custom_tooltip = {
 			fail_text = "requires_actor_not_devouring_swarm"
-			NOT = { has_valid_civic = civic_hive_devouring_swarm	}
+			OR = {
+				from = { has_valid_civic = civic_hive_devouring_swarm }
+				NOT = { has_valid_civic = civic_hive_devouring_swarm }
+			}
 		}
 		custom_tooltip = {
 			fail_text = "requires_recipient_not_devouring_swarm"
-			from = { NOT = { has_valid_civic = civic_hive_devouring_swarm } }
+			OR = {
+				from = { NOT = { has_valid_civic = civic_hive_devouring_swarm } }
+				has_valid_civic = civic_hive_devouring_swarm
+			}
 		}
 
 		# When actor is terminator, requires target machine empire/synth
@@ -1736,11 +1726,17 @@ action_ask_to_join_federation = {
 		}
 		custom_tooltip = {
 			fail_text = "requires_actor_not_devouring_swarm"
-			NOT = { has_valid_civic = civic_hive_devouring_swarm	}
+			OR = {
+				from = { has_valid_civic = civic_hive_devouring_swarm }
+				NOT = { has_valid_civic = civic_hive_devouring_swarm	}
+			}
 		}
 		custom_tooltip = {
 			fail_text = "requires_recipient_not_devouring_swarm"
-			from = { NOT = { has_valid_civic = civic_hive_devouring_swarm } }
+			OR = {
+				has_valid_civic = civic_hive_devouring_swarm
+				from = { NOT = { has_valid_civic = civic_hive_devouring_swarm } }
+			}
 		}
 		custom_tooltip = {
 			fail_text = "requires_actor_not_machine_terminator"
@@ -3220,7 +3216,7 @@ action_remove_imperial_council_member = {
 			from = {
 				add_opinion_modifier = {
 					who = root
-					modifier = opinion_emperor_removed_council_seat 
+					modifier = opinion_emperor_removed_council_seat
 				}
 			}
 		}
@@ -3312,3 +3308,4 @@ action_recall_embassy = {
 	should_notify_all_communications = no
 	action_type = negative
 }
+

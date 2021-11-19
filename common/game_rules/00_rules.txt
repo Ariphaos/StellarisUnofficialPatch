@@ -217,9 +217,21 @@ species_can_live_on_planet = {
 			}
 		}
 	}
-	NAND = {
-		root = { is_planet_class = pc_hive }
-		NOT = { has_trait = trait_hive_mind }
+	if = {
+		limit = {
+			root = { is_planet_class = pc_hive }
+		}
+		OR = {
+			has_trait = trait_hive_mind
+			AND = { #Necrophage Hive Mind can have Necrophytes
+				exists = root.owner
+				root.owner = {
+					is_hive_empire = yes
+					has_origin = origin_necrophage
+					prev = { species_can_be_necrophaged = yes }
+				}
+			}
+		}
 	}
 }
 
@@ -241,9 +253,13 @@ can_generate_leader_from_pop = {
 	NOT = { has_trait = trait_nerve_stapled }
 	OR = {
 		is_robot_pop = no
-		root = { has_technology = tech_synthetic_leaders }
-		root = { has_authority = auth_machine_intelligence }
-		root = { is_mechanical_empire = yes }
+		root = {
+			OR = {
+				has_technology = tech_synthetic_leaders
+				has_authority = auth_machine_intelligence
+				is_mechanical_empire = yes
+			}
+		}
 	}
 	OR = {
 		is_same_species = root
@@ -286,9 +302,13 @@ can_generate_military_leader_from_pop = {
 	can_be_military_leader = yes
 	OR = {
 		is_robot_pop = no
-		root = { has_technology = tech_synthetic_leaders }
-		root = { has_authority = auth_machine_intelligence }
-		root = { is_mechanical_empire = yes }
+		root = {
+			OR = {
+				has_technology = tech_synthetic_leaders
+				has_authority = auth_machine_intelligence
+				is_mechanical_empire = yes
+			}
+		}
 	}
 	OR = {
 		is_same_species = root
@@ -302,9 +322,9 @@ can_generate_military_leader_from_pop = {
 }
 
 #Root = species
-#This = country
+#This = planet
 can_generate_army_from_planet = {
-	any_owned_pop = {
+	any_owned_species = {
 		is_same_species = root
 		can_be_soldier = yes
 	}
@@ -395,7 +415,7 @@ can_take_hostile_actions = {
 	else_if = {
 		limit = {
 			AND = {
-				NOT = { has_country_flag = hostile_to_nomads }
+				NOT = { is_hostile = root }
 				ROOT = {
 					is_country_type = nomad
 				}
@@ -541,7 +561,7 @@ can_colonize_outside_borders = {
 can_terraform_planet = {
 	NAND = {
 		root = { has_policy_flag = pre_sapients_protect }
-		any_owned_pop = { is_sapient = no }
+		any_owned_species = { is_sapient = no }
 	}
 	custom_tooltip = {
 		fail_text = "requires_actor_not_devouring_swarm_lithoid"
@@ -591,6 +611,14 @@ can_colonize_with_species = {
 		custom_tooltip = {
 			always = no
 		}
+	}
+	else_if = {
+		limit = { has_trait = trait_hive_mind }
+		root = { is_hive_empire = yes }
+	}
+	else_if = {
+		limit = { has_trait = trait_machine_unit }
+		root = { is_machine_empire = yes }
 	}
 	else = {
 		always = yes
@@ -673,6 +701,7 @@ can_species_procreate = {
 		NOT = {
 			root = {
 				any_owned_species = {
+					has_population_control = { country = root.owner value = no }
 					species_can_be_necrophaged = yes
 				}
 			}
@@ -697,11 +726,38 @@ can_species_be_assembled = {
 		}
 		AND = {
 			is_organic_species = yes
-			root = {
-				check_modifier_value = {
-					modifier = planet_pop_assembly_organic_add
-					value > 0
+			if = {
+				limit = {
+					root.owner = { is_hive_empire = yes }
 				}
+				has_trait = trait_hive_mind
+			}
+			else_if = {
+				limit = { has_trait = trait_plantoid_budding }
+				root = {
+					any_owned_species = { is_exact_same_species = prevprev }
+				}
+			}
+			else_if = {
+				limit = {
+					OR = {
+						has_trait = trait_clone_soldier_infertile
+						has_trait = trait_clone_soldier_infertile_full_potential
+					}
+				}
+				root = {
+					# Event 'clones.3' should cover this, but extra safety check.
+					has_building = building_clone_army_clone_vat
+					NOT = {
+						check_variable = {
+							which = clone_pops_missing
+							value = 0
+						}
+					}
+				}
+			}
+			else = {
+				root = { has_building = building_clone_vats }
 			}
 		}
 	}
@@ -774,13 +830,13 @@ can_orbital_bombard = {
 			}
 		}
 		AND = {
-    	    from.controller = {
-    	        is_country_type = faction
-    	        NOT = { is_same_value = root.owner }
-    	    }
-    	    from.owner = {
-    	        is_same_value = root.owner
-    	    }
+			from.controller = {
+				is_country_type = faction
+				NOT = { is_same_value = root.owner }
+			}
+			from.owner = {
+				is_same_value = root.owner
+			}
 		}
 	}
 }
@@ -819,11 +875,8 @@ show_notification_for_ground_combat = {
 # Determines if the "per_neighbor_rival" static modifier should be applied to an empire
 # this: country
 should_apply_neighbor_rival_modifier = {
-	OR = {
-		has_non_swapped_tradition = tr_supremacy_great_game
-		has_swapped_tradition = tr_supremacy_great_game_machine
-		has_swapped_tradition = tr_supremacy_great_game_hive
-	}
+	#has_tradition = tr_supremacy_great_game
+	always = no
 }
 
 #Root: Rebelling against country
@@ -843,7 +896,7 @@ should_colony_be_destroyed_on_pc_change = {
 is_extradimensional_portal = { # is this portal mine
 	is_ship_size = dimensional_portal_ed
 	OR = {
-		owner = { is_same_empire = root } # owner is me
+		owner = { is_same_value = root } # owner is me
 		OR = {
 			AND = { # portal is unbidden and I am unbidden
 				root = { is_country_type = extradimensional }
@@ -873,7 +926,7 @@ is_extradimensional_anchor = {
 		}
 	}
 	any_owned_ship = { is_ship_size = starbase_exd }
-	owner = { is_same_empire = root }
+	owner = { is_same_value = root }
 }
 
 # Will colonizing this planet tick off a fallen empire?
@@ -1001,7 +1054,12 @@ can_spawn_debris = {
 ai_should_restrict_system = {
 	OR = {
 		AND = {
-			root = { is_country_type = fallen_empire }
+			root = {
+				OR = {
+					is_country_type = caravaneer_fleet
+					is_country_type = fallen_empire
+				}
+			}
 			exists = owner
 			owner = { 
 				OR = {
@@ -1013,6 +1071,7 @@ ai_should_restrict_system = {
 		AND = {
 			root = { 
 				OR = {
+					is_country_type = caravaneer_fleet
 					is_country_type = awakened_marauders 
 					is_country_type = marauder_raiders # Doesn't actually work but I register my protest anyway.
 				}
@@ -1026,6 +1085,7 @@ ai_should_restrict_system = {
 					is_country_type = fallen_empire
 					is_country_type = awakened_marauders
 					is_country_type = marauder_raiders
+					is_country_type = caravaneer_fleet
 				}
 			}
 			has_star_flag = guardian
@@ -1042,6 +1102,7 @@ ai_should_restrict_system = {
 					is_country_type = fallen_empire
 					is_country_type = awakened_marauders
 					is_country_type = marauder_raiders
+					is_country_type = caravaneer_fleet
 				}
 			}
 			OR = {
@@ -1185,9 +1246,7 @@ can_country_resettle = {
 		is_gestalt = yes
 		custom_tooltip = {
 			text = owns_non_sapient_robots
-			any_owned_pop = {
-				is_shackled_robot = yes
-			}
+			country_has_shackled_robots = yes
 		}
 		hidden_trigger = { #don't need to show this as tooltip only shown when all game rule fails, and this is a special case
 			any_owned_planet = {
@@ -1209,9 +1268,7 @@ can_resettle_planet = {
 		OR = {
 			has_policy_flag = resettlement_allowed
 			is_gestalt = yes
-			any_owned_pop = {
-				is_shackled_robot = yes
-			}
+			country_has_shackled_robots = yes
 			any_owned_planet = {
 				OR = {
 					has_modifier = doomsday_1
@@ -1251,7 +1308,8 @@ should_spawn_deposits = {
 
 # This = Planet
 is_new_colony = {
-	has_building = building_colony_shelter
+	colony_age < 15
+	num_pops < 10
 }
 
 # This = pop
@@ -1303,8 +1361,11 @@ can_pops_decline_on_planet = {
 # This = planet
 # Root = country
 can_force_grow_on_planet = {
-	exists = owner
-	owner = { NOT = { has_policy_flag = population_controls_not_allowed } }
+	custom_tooltip = {
+		fail_text = FORCE_GROWTH_NEEDS_POP_CONTROLS
+		exists = owner
+		owner = { NOT = { has_policy_flag = population_controls_not_allowed } }
+	}
 }
 
 # This = planet
@@ -1315,8 +1376,8 @@ can_force_decline_on_planet = {
 	custom_tooltip = {
 		fail_text = FORCED_DECLINE_ALREADY_PURGING
 		NOT = {
-			any_owned_pop = {
-				has_citizenship_type = { type = citizenship_purge }
+			any_owned_species = {
+				has_citizenship_type = { type = citizenship_purge country = from }
 				NOT = { has_purge_type = { country = from type = purge_neutering } }
 			}
 		}
@@ -1329,6 +1390,30 @@ can_force_decline_species = {
 	OR = {
 		has_citizenship_type = { country = root type = citizenship_slavery }
 		has_citizenship_type = { country = root type = citizenship_robot_servitude }
+	}
+}
+
+## If this returns true, the species will be set to decline even if it is not being purged
+# This = species
+# From = planet
+## Note: success text tooltips are shown in alert_pops_declining alert.
+should_force_decline_species = {
+	# Infertile Clone Army pops should decline if in foreign country or Vat shortage.
+	custom_tooltip = {
+		success_text = CLONE_ARMY_FORCE_DECLINE
+		OR = {
+			has_trait = trait_clone_soldier_infertile
+			has_trait = trait_clone_soldier_infertile_full_potential
+		}
+		from = {
+			OR = {
+				AND = {
+					exists = owner
+					owner = { NOT = { has_origin = origin_clone_army } }
+				}
+				check_variable = { which = clone_pops_missing value < 0 }
+			}
+		}
 	}
 }
 
@@ -1390,7 +1475,7 @@ can_build_branch_office_on_planet = {
 			root = {
 				is_subject = yes
 				is_subject_type = subsidiary
-				overlord = { is_same_value = owner }
+				overlord = { is_same_value = prevprev.owner }
 			}
 			owner = {
 				is_subject = yes
@@ -1506,10 +1591,7 @@ can_be_sold_on_slave_market = {
 			is_unemployed = yes
 			is_being_assimilated = no
 			planet = {
-				count_owned_pop = {
-					count > 2
-					limit = { is_unemployed = yes }
-				}
+				num_unemployed > 2
 			}
 			OR = {
 				NOT = { has_trait = trait_syncretic_proles }
@@ -1528,6 +1610,11 @@ can_be_sold_on_slave_market = {
 			has_global_flag = sentient_slave_trade_banned_flag
 		}
 		is_sapient = no
+	}
+	NOR = {
+		# Since they can't reproduce, they die out too fast for anyone to want to buy them.
+		has_trait = trait_clone_soldier_infertile
+		has_trait = trait_clone_soldier_infertile_full_potential
 	}
 }
 
@@ -1626,11 +1713,9 @@ has_enough_pops_for_necrophage_on_planet = {
 		limit = {
 			has_planet_flag = necrophage_alert_timer
 		}
-		count_owned_pop = {
+		count_owned_species = {
 			count = 0
-			limit = {
-				species = { species_can_be_necrophaged = yes }
-			}
+			limit = { species_can_be_necrophaged = yes }
 		}
 	}
 	else = {
@@ -1662,6 +1747,13 @@ can_planet_auto_migrate = {
 	OR = {
 		colony_age > 60
 		is_capital = yes # Don't break Doomsday!
+	}
+	exists = owner
+	owner = {
+		OR = {
+			is_country_type = default
+			is_country_type = awakened_fallen_empire
+		}
 	}
 }
 

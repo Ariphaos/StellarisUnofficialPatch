@@ -20,13 +20,18 @@
 #	target = yes/no # if this resolution requires a target country
 #	harmful = yes/no # if the AI should consider this harmful when choosing target
 #	modifier = {} # modifier to be applied to all community members if passed
+#	fire_and_forget = yes/no # if "yes", the resolution will not be added to the list of active/passed resolutions. Mainly used for repeal resolutions. Default: no
 #	triggered_modifier = {} # triggered modifier to be applied, scope is country
 #	effect = {} # effect to be applied if passed, scope is proposer unless there is a target country - then scope is target country, with proposer in from scope
 #	fail_effects = {} # effect to be applied if failed, scope is proposer unless there is a target country - then scope is target country, with proposer in from scope
 #	potential = {} # potential trigger, scope is country
 #	allow = {} # allow trigger, scope is country
-#	active = {} # Enacted sesolutions are cancelled if this trigger fails
+#	active = {} # Enacted resolutions are cancelled if this trigger fails
+#
 #	ai_weight = {} # ai weight modifiers, scope is country. from scope is the target country for targeted resolutions
+#	NOTE: all ai_weight modifiers are multiplicative. The end result is also multiplied with a factor based on the opinion towards the proposer and/or target,
+#	see RESOLUTION_TARGET_OPINION_MIN_FACTOR etc. in 00_defines.txt. Also see RESOLUTION_VOTE_SUPPORT_THRESHOLD etc. for balancing the values.
+#
 #	valid_target = {} # valid targets trigger, scope is country
 #}
 
@@ -83,7 +88,7 @@ resolution_galactic_market_form = {
 
 		is_gestalt = no
 		is_homicidal = no
-		count_diplo_ties = {
+		count_relation = {
 			limit = {
 				is_country_type = default
 				is_homicidal = no
@@ -117,10 +122,15 @@ resolution_galactic_market_form = {
 			factor = 0.8
 			is_xenophobe = yes
 		}
+		
+		modifier = {
+			factor = 0.1
+			NOT = { has_global_flag = galactic_focus_pass_a_resolution_completed }
+		}
 
 		modifier = {
 			factor = 2
-			years_passed > 50
+			mid_game_years_passed >= 0
 		}
 
 		modifier = {
@@ -131,6 +141,11 @@ resolution_galactic_market_form = {
 		modifier = {
 			factor = 2
 			years_passed > 150
+		}
+		
+		modifier = {
+			factor = 2
+			end_game_years_passed >= 0
 		}
 	}
 }
@@ -147,11 +162,13 @@ resolution_ecology_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_ecology_repeal_1_effect_success
 
 		hidden_effect = {
+			cancel_resolution = "resolution_ecology_recycling_initiatives"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -217,11 +234,12 @@ resolution_ecology_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_ecology_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_ecology_recycling_initiatives"
+			cancel_resolution = "resolution_ecology_natural_sanctuaries"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -291,11 +309,12 @@ resolution_ecology_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_ecology_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_ecology_natural_sanctuaries"
+			cancel_resolution = "resolution_ecology_integrated_gardens"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -366,11 +385,12 @@ resolution_ecology_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_ecology_repeal_4_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_ecology_integrated_gardens"
+			cancel_resolution = "resolution_ecology_environmental_control_board"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -448,11 +468,12 @@ resolution_ecology_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_ecology_repeal_5_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_ecology_environmental_control_board"
+			cancel_resolution = "resolution_ecology_paradise_initiative"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -591,6 +612,10 @@ resolution_ecology_recycling_initiatives = {
 		modifier = {
 			factor = 0.8
 			country_uses_food = no
+		}
+		modifier = {
+			factor = 0.4
+			country_uses_consumer_goods = no
 		}
 	}
 }
@@ -920,10 +945,12 @@ resolution_galacticstudies_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_galacticstudies_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = resolution_galacticstudies_cooperative_research_channels
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_galacticstudies_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -972,12 +999,13 @@ resolution_galacticstudies_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_galacticstudies_repeal_2_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_galacticstudies_cooperative_research_channels"
+			cancel_resolution = "resolution_galacticstudies_astral_studies_network"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_galacticstudies_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1028,12 +1056,13 @@ resolution_galacticstudies_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_galacticstudies_repeal_3_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_galacticstudies_astral_studies_network"
+			cancel_resolution = "resolution_galacticstudies_advanced_xenostudies"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_galacticstudies_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1096,12 +1125,13 @@ resolution_galacticstudies_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_galacticstudies_repeal_4_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_galacticstudies_advanced_xenostudies"
+			cancel_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_galacticstudies_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1168,12 +1198,13 @@ resolution_galacticstudies_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_galacticstudies_repeal_5_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+			cancel_resolution = "resolution_galacticstudies_extradimensional_experimentation"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_galacticstudies_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1652,10 +1683,12 @@ resolution_commerce_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_commerce_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_commerce_buzzword_standardization"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_commerce_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1716,12 +1749,13 @@ resolution_commerce_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_commerce_repeal_2_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_commerce_buzzword_standardization"
+			cancel_resolution = "resolution_commerce_leveraged_privateering"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_commerce_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1784,12 +1818,13 @@ resolution_commerce_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_commerce_repeal_3_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_commerce_leveraged_privateering"
+			cancel_resolution = "resolution_commerce_underdeveloped_system_utilization"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_commerce_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1853,12 +1888,13 @@ resolution_commerce_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_commerce_repeal_4_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_commerce_underdeveloped_system_utilization"
+			cancel_resolution = "resolution_commerce_holistic_asset_coordination"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_commerce_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -1926,12 +1962,13 @@ resolution_commerce_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_commerce_repeal_5_effect_success
 
 		hidden_effect = {
-			pass_resolution = "resolution_commerce_holistic_asset_coordination"
+			cancel_resolution = "resolution_commerce_profit_maximization_engines"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_commerce_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -2351,10 +2388,12 @@ resolution_industry_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_industry_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_industry_regulatory_facilitation"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_industry_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -2427,11 +2466,12 @@ resolution_industry_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_industry_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_industry_regulatory_facilitation"
+			cancel_resolution = "resolution_industry_collective_waste_management"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_industry_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -2508,11 +2548,12 @@ resolution_industry_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_industry_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_industry_collective_waste_management"
+			cancel_resolution = "resolution_industry_building_a_better_tomorrow"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_industry_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -2590,11 +2631,12 @@ resolution_industry_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_industry_repeal_4_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_industry_building_a_better_tomorrow"
+			cancel_resolution = "resolution_industry_environmental_ordinance_waivers"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_industry_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -2676,11 +2718,12 @@ resolution_industry_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_industry_repeal_5_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_industry_environmental_ordinance_waivers"
+			cancel_resolution = "resolution_industry_project_cornucopia"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_industry_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -3306,10 +3349,12 @@ resolution_greatergood_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_greatergood_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_greatergood_workers_rights"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_greatergood_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -3377,11 +3422,12 @@ resolution_greatergood_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_greatergood_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_greatergood_workers_rights"
+			cancel_resolution = "resolution_greatergood_five_year_plans"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_greatergood_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -3458,11 +3504,12 @@ resolution_greatergood_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_greatergood_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_greatergood_five_year_plans"
+			cancel_resolution = "resolution_greatergood_greater_than_ourselves"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_greatergood_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -3541,11 +3588,12 @@ resolution_greatergood_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_greatergood_repeal_4_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_greatergood_greater_than_ourselves"
+			cancel_resolution = "resolution_greatergood_balance_in_the_middle"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_greatergood_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -3626,11 +3674,12 @@ resolution_greatergood_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_greatergood_repeal_5_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_greatergood_balance_in_the_middle"
+			cancel_resolution = "resolution_greatergood_universal_prosperity_mandate"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_greatergood_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -3985,7 +4034,7 @@ resolution_greatergood_greater_than_ourselves = {
 						any_enslaved_species = {
 							is_sapient = yes
 							OR = {
-								has_slavery_type = { type = slavery_normal country = prev  }
+								has_slavery_type = { type = slavery_normal country = prev }
 								has_slavery_type = { type = slavery_livestock country = prev }
 								has_slavery_type = { type = slavery_matrix country = prev }
 							}
@@ -4368,6 +4417,7 @@ resolution_greatergood_universal_prosperity_mandate = {
 									has_living_standard = { type = living_standard_normal country = prev }
 									has_living_standard = { type = living_standard_academic_privilege country = prev }
 									has_living_standard = { type = living_standard_good country = prev }
+									has_living_standard = { type = living_standard_decadent country = prev }
 								}
 							}
 						}
@@ -4415,6 +4465,7 @@ resolution_greatergood_universal_prosperity_mandate = {
 						has_living_standard = { type = living_standard_normal country = prev }
 						has_living_standard = { type = living_standard_academic_privilege country = prev }
 						has_living_standard = { type = living_standard_good country = prev }
+						has_living_standard = { type = living_standard_decadent country = prev }
 					}
 				}
 			}
@@ -4497,10 +4548,12 @@ resolution_mutualdefense_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_mutualdefense_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_mutualdefense_the_readied_shield"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_mutualdefense_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -4550,11 +4603,12 @@ resolution_mutualdefense_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_mutualdefense_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_mutualdefense_the_readied_shield"
+			cancel_resolution = "resolution_mutualdefense_military_readiness_act"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_mutualdefense_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -4611,11 +4665,12 @@ resolution_mutualdefense_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_mutualdefense_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_mutualdefense_military_readiness_act"
+			cancel_resolution = "resolution_mutualdefense_enemy_of_my_enemy"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_mutualdefense_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -4670,11 +4725,12 @@ resolution_mutualdefense_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_mutualdefense_repeal_4_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_mutualdefense_enemy_of_my_enemy"
+			cancel_resolution = "resolution_mutualdefense_castigation_proclamation"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_mutualdefense_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -4730,11 +4786,12 @@ resolution_mutualdefense_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_mutualdefense_repeal_5_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_mutualdefense_castigation_proclamation"
+			cancel_resolution = "resolution_mutualdefense_renegade_containment"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_mutualdefense_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -5189,10 +5246,7 @@ resolution_mutualdefense_castigation_denouncement = {
 	harmful = yes
 	valid_target = {
 		is_country_type = default
-		NOR = { 
-			is_same_value = from # don't denounce yourself.
-			has_modifier = resolution_denounced # Give them a break.
-		} 
+		NOT = { is_same_value = from } # don't denounce yourself.
 		OR = {
 			is_galactic_community_member = no
 			is_in_breach_of_any = yes
@@ -5201,6 +5255,14 @@ resolution_mutualdefense_castigation_denouncement = {
 			opinion_level = { who = from level < neutral }
 			from = { is_rival = prev }
 			is_in_breach_of_any = yes
+		}
+		OR = {
+			has_crisis_level = crisis_level_1
+			has_crisis_level = crisis_level_2
+			has_crisis_level = crisis_level_3
+			has_crisis_level = crisis_level_4
+			has_crisis_level = crisis_level_5
+			NOT = { has_modifier = resolution_denounced } # Give them a break.
 		}
 	}
 
@@ -5218,6 +5280,34 @@ resolution_mutualdefense_castigation_denouncement = {
 
 	ai_weight = {
 		weight = @resolution_weight_normal
+		
+		# More likely to declare on rivals
+		modifier = {
+			factor = 2
+			is_rival = from
+		}
+
+		# Never on yourself
+		modifier = {
+			factor = 0
+			is_same_value = from
+		}
+		
+		# Never on your federation
+		modifier = {
+			factor = 0
+			is_in_federation_with = from
+		}
+		
+		# Do we like them?
+		modifier = {
+			factor = 5
+			opinion_level = { who = from level < neutral }
+		}
+		modifier = {
+			factor = 0.2
+			opinion_level = { who = from level > neutral }
+		}
 	}
 }
 
@@ -5243,14 +5333,19 @@ resolution_council_denouncement = {
 	valid_target = {
 		is_country_type = default
 		is_galactic_community_member = yes
-		NOR = { 
-			is_same_value = from # don't denounce yourself.
-			has_modifier = resolution_denounced # Give them a break.
-		} 
+		NOT = { is_same_value = from } # don't denounce yourself.
 		OR = {
 			opinion_level = { who = from level < neutral }
 			from = { is_rival = prev }
 			is_in_breach_of_any = yes
+		}
+		OR = {
+			has_crisis_level = crisis_level_1
+			has_crisis_level = crisis_level_2
+			has_crisis_level = crisis_level_3
+			has_crisis_level = crisis_level_4
+			has_crisis_level = crisis_level_5
+			NOT = { has_modifier = resolution_denounced } # Give them a break.
 		}
 	}
 
@@ -5269,12 +5364,40 @@ resolution_council_denouncement = {
 
 	ai_weight = {
 		weight = @resolution_weight_disliked
+		
+		# More likely to declare on rivals
+		modifier = {
+			factor = 2
+			is_rival = from
+		}
+
+		# Never on yourself
+		modifier = {
+			factor = 0
+			is_same_value = from
+		}
+		
+		# Never on your federation
+		modifier = {
+			factor = 0
+			is_in_federation_with = from
+		}
+		
+		# Do we like them?
+		modifier = {
+			factor = 5
+			opinion_level = { who = from level < neutral }
+		}
+		modifier = {
+			factor = 0.2
+			opinion_level = { who = from level > neutral }
+		}
 
 		# weaklings are scared of BtC
 		modifier = {
 			factor = 5
 			has_nemesis = yes
-			any_playable_country = {
+			from = {
 				#has_crisis_level >= crisis_level_1
 				OR = {
 					has_crisis_level = crisis_level_1
@@ -5300,7 +5423,7 @@ resolution_council_denouncement = {
 		modifier = {
 			factor = 5
 			has_nemesis = yes
-			any_playable_country = {
+			from = {
 				#has_crisis_level >= crisis_level_1
 				OR = {
 					has_crisis_level = crisis_level_1
@@ -5321,7 +5444,7 @@ resolution_council_denouncement = {
 		modifier = {
 			factor = 5
 			has_nemesis = yes
-			any_neighbor_country = {
+			from = {
 				#has_crisis_level >= crisis_level_1
 				OR = {
 					has_crisis_level = crisis_level_1
@@ -5338,7 +5461,7 @@ resolution_council_denouncement = {
 			factor = 0.01
 			has_nemesis = yes
 			NOT = {
-				any_neighbor_country = {
+				from = {
 					#has_crisis_level >= crisis_level_1
 					OR = {
 						has_crisis_level = crisis_level_1
@@ -5350,7 +5473,7 @@ resolution_council_denouncement = {
 				}
 			}
 			any_rival_country = {
-				any_neighbor_country = {
+				from = {
 					#has_crisis_level >= crisis_level_1
 					#has_crisis_level < crisis_level_5
 					OR = {
@@ -5379,10 +5502,12 @@ resolution_rulesofwar_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_rulesofwar_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_rulesofwar_guardian_angels"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_rulesofwar_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -5430,11 +5555,12 @@ resolution_rulesofwar_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_rulesofwar_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_rulesofwar_guardian_angels"
+			cancel_resolution = "resolution_rulesofwar_reverence_for_life"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_rulesofwar_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -5496,11 +5622,12 @@ resolution_rulesofwar_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_rulesofwar_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_rulesofwar_reverence_for_life"
+			cancel_resolution = "resolution_rulesofwar_independent_tribunals"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_rulesofwar_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -5564,11 +5691,12 @@ resolution_rulesofwar_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_rulesofwar_repeal_4_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_rulesofwar_independent_tribunals"
+			cancel_resolution = "resolution_rulesofwar_last_resort_doctrine"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_rulesofwar_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -5636,11 +5764,12 @@ resolution_rulesofwar_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_rulesofwar_repeal_5_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_rulesofwar_last_resort_doctrine"
+			cancel_resolution = "resolution_rulesofwar_demobilization_initiative"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_rulesofwar_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -6151,10 +6280,12 @@ resolution_divinity_repeal_1 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_divinity_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_divinity_comfort_the_fallen"
 			remove_global_flag = galactic_community_resolution_divinity_comfort_the_fallen
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_divinity_repeal days = @resolution_flag_timer }
 			add_modifier = {
@@ -6235,11 +6366,12 @@ resolution_divinity_repeal_2 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_divinity_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_divinity_comfort_the_fallen"
+			cancel_resolution = "resolution_divinity_tithe_on_the_soulless"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_divinity_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -6314,11 +6446,12 @@ resolution_divinity_repeal_3 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_divinity_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_divinity_tithe_on_the_soulless"
+			cancel_resolution = "resolution_divinity_right_to_work"
 			remove_global_flag = galactic_community_resolution_divinity_right_to_work
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_divinity_repeal days = @resolution_flag_timer }
 			add_modifier = {
@@ -6397,11 +6530,12 @@ resolution_divinity_repeal_4 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_divinity_repeal_4_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_divinity_right_to_work"
+			cancel_resolution = "resolution_divinity_silence_the_soulless"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_divinity_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -6480,11 +6614,12 @@ resolution_divinity_repeal_5 = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_divinity_repeal_5_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_divinity_silence_the_soulless"
+			cancel_resolution = "resolution_divinity_a_defined_purpose"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_divinity_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -7926,6 +8061,25 @@ resolution_galacticreforms_permanent_seat = {
 
 	ai_weight = {
 		weight = @resolution_weight_disliked
+		
+		# Do we like them?
+		modifier = {
+			factor = 0.1
+			opinion_level = { who = from level < neutral }
+		}
+		modifier = {
+			factor = 5
+			opinion_level = { who = from level > neutral }
+		}
+		
+		modifier = {
+			factor = 0
+			is_rival = from
+		}
+		modifier = {
+			factor = 2
+			is_in_federation_with = from
+		}
 	}
 }
 
@@ -7961,6 +8115,25 @@ resolution_galacticreforms_revoke_permanent_seat = {
 
 	ai_weight = {
 		weight = @resolution_weight_disliked
+		
+		# Do we like them?
+		modifier = {
+			factor = 10
+			opinion_level = { who = from level < neutral }
+		}
+		modifier = {
+			factor = 0.5
+			opinion_level = { who = from level > neutral }
+		}
+		
+		modifier = {
+			factor = 20
+			is_rival = from
+		}
+		modifier = {
+			factor = 0.5
+			is_in_federation_with = from
+		}
 	}
 }
 
@@ -8321,10 +8494,12 @@ resolution_sanctions_tech_repeal_1 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_tech_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_sanctions_tech_1"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -8394,11 +8569,12 @@ resolution_sanctions_tech_repeal_2 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_tech_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_tech_1"
+			cancel_resolution = "resolution_sanctions_tech_2"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -8481,11 +8657,12 @@ resolution_sanctions_tech_repeal_3 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_tech_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_tech_2"
+			cancel_resolution = "resolution_sanctions_tech_3"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -8800,7 +8977,7 @@ resolution_sanctions_tech_3 = {
 
 	fail_effects = {
 		hidden_effect = {
-			set_timed_country_flag = { flag = galactic_community_resolution_failed_general days = 	@resolution_flag_timer }
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_general days =	@resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_failed_diplomatic_weight
 				days = 2200
@@ -8877,10 +9054,12 @@ resolution_sanctions_economic_repeal_1 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_economic_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_sanctions_economic_1"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -8950,11 +9129,12 @@ resolution_sanctions_economic_repeal_2 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_economic_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_economic_1"
+			cancel_resolution = "resolution_sanctions_economic_2"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -9037,11 +9217,12 @@ resolution_sanctions_economic_repeal_3 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_economic_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_economic_2"
+			cancel_resolution = "resolution_sanctions_economic_3"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -9433,10 +9614,12 @@ resolution_sanctions_military_repeal_1 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_military_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_sanctions_military_1"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -9509,11 +9692,12 @@ resolution_sanctions_military_repeal_2 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_military_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_military_1"
+			cancel_resolution = "resolution_sanctions_military_2"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -9599,11 +9783,12 @@ resolution_sanctions_military_repeal_3 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_military_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_military_2"
+			cancel_resolution = "resolution_sanctions_military_3"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -10007,10 +10192,12 @@ resolution_sanctions_administrative_repeal_1 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_administrative_repeal_1_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_sanctions_administrative_1"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -10087,11 +10274,12 @@ resolution_sanctions_administrative_repeal_2 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_administrative_repeal_2_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_administrative_1"
+			cancel_resolution = "resolution_sanctions_administrative_2"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -10181,11 +10369,12 @@ resolution_sanctions_administrative_repeal_3 = {
 	}
 	target = no
 	sanction = yes
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_sanctions_administrative_repeal_3_effect_success
 		hidden_effect = {
-			pass_resolution = "resolution_sanctions_administrative_2"
+			cancel_resolution = "resolution_sanctions_administrative_3"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -11293,7 +11482,7 @@ resolution_galactic_focus_war_in_heaven_support_side_1 = {
 			exists = overlord
 			has_overlord = event_target:FirstAwakened
 		}
-		
+
 		modifier = {
 			factor = 0
 			has_federation = yes
@@ -11372,7 +11561,7 @@ resolution_galactic_focus_war_in_heaven_support_side_2 = {
 			exists = overlord
 			NOT = { has_overlord = event_target:SecondAwakened }
 		}
-		
+
 		modifier = {
 			factor = 0
 			has_federation = yes
@@ -11499,6 +11688,7 @@ resolution_tiyanki_conservation_act = {
 	effect = {
 		custom_tooltip = resolution_tiyanki_conservation_act_tooltip
 		hidden_effect = {
+			set_global_flag = galactic_community_resolution_passed
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -11528,7 +11718,10 @@ resolution_tiyanki_conservation_act = {
 	allow = {
 		custom_tooltip = {
 			fail_text = "resolution_already_active"
-			NOT = { is_active_resolution = "resolution_tiyanki_conservation_act" }
+			NOR = {
+				is_active_resolution = "resolution_tiyanki_conservation_act"
+				is_active_resolution = "resolution_amoeba_conservation_act"
+			}
 		}
 	}
 
@@ -11557,6 +11750,10 @@ resolution_tiyanki_conservation_act = {
 			factor = 0.75
 			is_militarist = yes
 		}
+		modifier = {
+			factor = 0.75
+			is_xenophobe = yes
+		}
 
 		modifier = {
 			factor = 1.5
@@ -11583,10 +11780,12 @@ resolution_repeal_tiyanki_conservation_act = {
 		}
 	}
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_repeal_tiyanki_conservation_act_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_tiyanki_conservation_act"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -11626,6 +11825,10 @@ resolution_repeal_tiyanki_conservation_act = {
 			factor = 1.5
 			is_militarist = yes
 		}
+		modifier = {
+			factor = 0.5
+			is_xenophile = yes
+		}
 
 		modifier = {
 			factor = 0.5
@@ -11664,6 +11867,7 @@ resolution_tiyanki_pest_control = {
 	effect = {
 		custom_tooltip = resolution_tiyanki_pest_control_tooltip
 		hidden_effect = {
+			set_global_flag = galactic_community_resolution_passed
 			country_event = { id = galcom.103 }
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_general days = @resolution_flag_timer }
 			add_modifier = {
@@ -11718,6 +11922,10 @@ resolution_tiyanki_pest_control = {
 			factor = 0.5
 			is_pacifist = yes
 		}
+		modifier = {
+			factor = 0.25
+			is_xenophile = yes
+		}
 
 		modifier = {
 			factor = 1.25
@@ -11750,10 +11958,12 @@ resolution_repeal_tiyanki_pest_control = {
 	}
 
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_repeal_tiyanki_pest_control_effect_success
 		hidden_effect = {
+			cancel_resolution = "resolution_tiyanki_pest_control"
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
@@ -11780,7 +11990,7 @@ resolution_repeal_tiyanki_pest_control = {
 		weight = @resolution_weight_disliked
 
 		modifier = {
-			factor = 1.5
+			factor = 4
 			is_xenophile = yes
 		}
 
@@ -11792,6 +12002,10 @@ resolution_repeal_tiyanki_pest_control = {
 		modifier = {
 			factor = 0.75
 			is_militarist = yes
+		}
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
 		}
 
 		modifier = {
@@ -11914,11 +12128,12 @@ resolution_repeal_amoeba_conservation_act = {
 	}
 
 	target = no
+	fire_and_forget = yes
 
 	effect = {
 		custom_tooltip = resolution_repeal_amoeba_conservation_act_effect_success
 		hidden_effect = {
-			pass_resolution = resolution_tiyanki_conservation_act
+			cancel_resolution = resolution_amoeba_conservation_act
 			set_timed_country_flag = { flag = galactic_community_resolution_passed_ecology_repeal days = @resolution_flag_timer }
 			add_modifier = {
 				modifier = resolution_passed_diplomatic_weight
