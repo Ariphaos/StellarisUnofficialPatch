@@ -1,5 +1,8 @@
 # ChangeLog
 
+## December 23th
+- Fixed Pirate Thalassocracy spawn point find (FireGolem)
+
 ## November 18th
 
 - Fixed Nomad hostility (FireGolem)
