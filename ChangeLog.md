@@ -1,5 +1,8 @@
 # ChangeLog
 
+## January 18th
+- All starbases marked as shipyards (SirBlackAxe)
+
 ## December 23th
 - Fixed Pirate Thalassocracy spawn point find (FireGolem)
 
