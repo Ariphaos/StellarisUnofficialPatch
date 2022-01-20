@@ -466,6 +466,7 @@ decision_mastery_of_nature = {
 		modifier = {
 			factor = 0
 			free_district_slots > 0
+			num_pops < 50 #carrying capacity bonus always good at that stage
 		}
 	}
 }
@@ -969,12 +970,15 @@ decision_arcology_project = {
 	}
 
 	allow = {
-		custom_tooltip = {
-			fail_text = decision_arcology_project_requirements
-			free_district_slots < 1
-			num_districts = { type = district_farming value < 1 }
-			num_districts = { type = district_mining value < 1 }
-			num_districts = { type = district_generator value < 1 }
+		if = {
+			limit = { owner = { is_ai = no } }
+			custom_tooltip = {
+				fail_text = decision_arcology_project_requirements
+				free_district_slots < 1
+				num_districts = { type = district_farming value < 1 }
+				num_districts = { type = district_mining value < 1 }
+				num_districts = { type = district_generator value < 1 }
+			}
 		}
 		num_uncleared_blockers < 1
 	}
@@ -1032,7 +1036,15 @@ decision_arcology_project = {
 	}
 
 	ai_weight = {
-		weight = 0
+		weight = 1
+		modifier = {
+			factor = 100
+			exists = owner
+			OR = {
+				num_pops >= 70
+				is_capital = yes
+			}
+		}
 	}
 }
 
@@ -1127,7 +1139,7 @@ decision_arcology_project_relic = {
 	}
 
 	ai_weight = {
-		weight = 0
+		weight = 100
 	}
 }
 
@@ -1632,7 +1644,7 @@ decision_demolish_art_monument = {
 	}
 
 	ai_weight = {
-		weight = 1
+		weight = 0
 	}
 }
 
@@ -2134,7 +2146,7 @@ decision_shattered_ring_project = {
 		hidden_effect = {
 			clear_deposits = yes
 			change_pc = pc_ringworld_habitable
-			
+
 			# Remove Scrap Processing Buildings
 			if = {
 				limit = { has_building = building_mineral_purification_plant }
@@ -2204,6 +2216,271 @@ decision_shattered_ring_project = {
 	}
 
 	ai_weight = {
-		weight = 0
+		weight = 100
+	}
+}
+
+@expand_planetary_sea_length = 720
+
+decision_expand_planetary_sea = {
+	owned_planets_only = yes
+	icon = decision_arctic_planet
+
+	enactment_time = @expand_planetary_sea_length
+
+	potential = {
+		is_planet_class = pc_ocean
+		exists = owner
+		owner = {
+			has_ascension_perk = ap_hydrocentric
+		}
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = requires_free_ice_mining_station
+			owner = {
+				any_owned_starbase = {
+					has_starbase_building = ice_mining_station
+					solar_system = {
+						NOT = { has_star_flag = ice_mining_in_progress }
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_variable_set = ice_dumping_happened
+			}
+			custom_tooltip = {
+				fail_text = requires_max_3_times_fail_simple
+				success_text = requires_max_3_times_ice_dumping
+				check_variable = {
+					which = ice_dumping_happened
+					value < 3
+				}
+			}
+		}
+		else = {
+			custom_tooltip = {
+				text = requires_max_3_times_pass_simple
+				always = yes
+			}
+		}
+	}
+
+	resources = {
+		category = decisions
+		cost = {
+			influence = 50
+			energy = 1000
+		}
+	}
+
+	on_queued = {
+		set_variable = {
+			which = decision_length
+			value = @expand_planetary_sea_length
+		}
+		export_modifier_to_variable = {
+			modifier = planet_decision_enact_speed_mult
+			variable = decision_mult_var
+		}
+		change_variable = {
+			which = decision_mult_var
+			value = 1
+		}
+		divide_variable = {
+			which = decision_length
+			value = decision_mult_var
+		}
+		change_variable = { #ideally, may as well refer to this in the final effect
+			which = decision_length
+			value = 1
+		}
+
+		owner = {
+			random_owned_starbase = {
+				limit = {
+					has_starbase_building = ice_mining_station
+					solar_system = {
+						NOT = { has_star_flag = ice_mining_in_progress }
+					}
+				}
+				solar_system = {
+					set_timed_star_flag = {
+						flag = ice_mining_in_progress
+						days = root.decision_length
+					}
+					set_timed_star_flag = {
+						flag = ice_mining@root
+						days = root.decision_length
+					}
+				}
+			}
+		}
+		clear_variable = decision_length
+		clear_variable = decision_mult_var
+	}
+
+	abort_trigger = {
+		NOT = {
+			owner = {
+				any_owned_starbase = {
+					has_starbase_building = ice_mining_station
+				}
+			}
+		}
+	}
+
+	on_unqueued = {
+		owner = {
+			random_owned_starbase = {
+				limit = {
+					solar_system = {
+						has_star_flag = ice_mining@root
+					}
+				}
+				solar_system = {
+					remove_star_flag = ice_mining@root
+					remove_star_flag = ice_mining_in_progress
+				}
+			}
+		}
+	}
+
+	abort_effect = {
+		owner = {
+			random_owned_starbase = {
+				limit = {
+					solar_system = {
+						has_star_flag = ice_mining@root
+					}
+				}
+				solar_system = {
+					remove_star_flag = ice_mining@root
+					remove_star_flag = ice_mining_in_progress
+				}
+			}
+		}
+		create_message = {
+			type = ICE_MINING_INTERRUPTED
+			localization = ICE_MINING_INTERRUPTED_DESC
+			days = 20
+			target = root
+		}
+	}
+
+	effect = {
+		change_planet_size = 1
+
+		custom_tooltip = decision_expand_planetary_sea_tooltip
+		hidden_effect = {
+			ice_mining_depletion_effect = yes
+
+			if = {
+				limit = {
+					has_planet_flag = temp_ice_mine_exhausted_flag
+				}
+				event_target:mined_system.starbase = {
+					remove_starbase_building = {
+						building = ice_mining_station
+					}
+				}
+				create_message = {
+					type = ICE_MINING_SUCCESS
+					localization = ICE_MINING_SUCCESS_BUT_EXHAUSTED_DESC
+					days = 20
+					target = root
+					variable = {
+						type = name
+						localization = SYSTEM
+						scope = event_target:mined_system
+					}
+				}
+			}
+			else = {
+				create_message = {
+					type = ICE_MINING_SUCCESS
+					localization = ICE_MINING_SUCCESS_DESC
+					days = 20
+					target = root
+					variable = {
+						type = name
+						localization = SYSTEM
+						scope = event_target:mined_system
+					}
+				}
+			}
+			change_variable = {
+				which = ice_dumping_happened
+				value = 1
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 1
+		modifier = {
+			factor = 2
+			num_pops > 25
+		}
+		modifier = {
+			factor = 3
+			num_pops > 50
+		}
+	}
+}
+
+decision_expand_dayside = {
+	owned_planets_only = yes
+	icon = decision_divine_algorithm
+
+	enactment_time = 3600
+	resources = {
+		category = decisions
+		cost = {
+			minerals = 1000
+			energy = 500
+		}
+	}
+	potential = {
+		has_planet_flag = tidally_locked_world
+		NOT = { has_deposit = d_dayside_farm }
+	}
+
+	effect = {
+		add_deposit = d_dayside_farm
+		remove_planet_flag = tidally_locked_world
+	}
+	ai_weight = {
+		weight = 1
+	}
+}
+
+decision_introduce_chaos = {
+	owned_planets_only = yes
+	icon = decision_victorious_army
+
+	enactment_time = 1800
+	resources = {
+		category = decisions
+		cost = {
+			energy = 500
+		}
+	}
+	potential = {
+		has_planet_flag = perfect_organization
+		exists = owner
+		owner = { is_gestalt = no }
+	}
+
+	effect = {
+		remove_modifier = perfect_organization_modifier
+		add_modifier = { modifier = imperfect_organization_modifier }
+		remove_planet_flag = perfect_organization
+	}
+	ai_weight = {
+		weight = 1
 	}
 }

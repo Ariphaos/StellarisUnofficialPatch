@@ -126,6 +126,21 @@ can_destroy_planet_with_PLANET_KILLER_SHIELDER = {
 			}
 		}
 	}
+	if = {
+		limit = {
+			exists = owner
+			owner = { is_country_type = primitive }
+		}
+		custom_tooltip = {
+			fail_text = primitives_not_active_or_full_interference
+			from.owner = {
+				OR = {
+					has_policy_flag = interference_active
+					has_policy_flag = interference_full
+				}
+			}
+		}
+	}
 	custom_tooltip = {
 		fail_text = is_shielded
 		NOR = {
@@ -225,6 +240,21 @@ can_destroy_planet_with_PLANET_KILLER_GODRAY = {
 			}
 		}
 	}
+	if = {
+		limit = {
+			exists = owner
+			owner = { is_country_type = primitive }
+		}
+		custom_tooltip = {
+			fail_text = primitives_not_active_or_full_interference
+			from.owner = {
+				OR = {
+					has_policy_flag = interference_active
+					has_policy_flag = interference_full
+				}
+			}
+		}
+	}
 	# target own colony
 	if = {
 		limit = {
@@ -285,11 +315,97 @@ can_destroy_planet_with_PLANET_KILLER_NANOBOTS = {
 			exists = space_owner
 			space_owner = { is_same_value = from.owner }
 		}
+		custom_tooltip = {
+			fail_text = primitives_not_full_interference
+			from.owner = {
+				has_policy_flag = interference_full
+			}
+		}
 	}
 	custom_tooltip = {
 		fail_text = no_assimilatable_pops
 		any_owned_pop = {
 			is_valid_pop_for_PLANET_KILLER_NANOBOTS = yes
+		}
+	}
+}
+
+can_destroy_planet_with_PLANET_KILLER_DELUGE = {
+	# custom_tooltip = { #feedback suggests this isn't fun, but leaving it here in case we need it
+	# 	fail_text = requires_free_ice_mining_station
+	# 	from.owner = {
+	# 		any_owned_starbase = {
+	# 			has_starbase_building = ice_mining_station
+	# 			solar_system = {
+	# 				OR = {
+	# 					NOT = { has_star_flag = ice_mining_in_progress }
+	# 					has_star_flag = ice_mining@root.from
+	# 				}
+	# 			}
+	# 		}
+	# 	}
+	# }
+	custom_tooltip = {
+		fail_text = is_habitable_non_artificial
+		OR = {
+			is_colonizable = yes
+			is_colony = yes
+		}
+		is_artificial = no
+	}
+	custom_tooltip = {
+		fail_text = is_not_oceanic
+		NOT = { is_planet_class = pc_ocean }
+	}
+	if = {
+		limit = { is_inside_border = from.owner }
+		if = {
+			limit = { #Uninhabited and primitive planets are always fine, if own colony then check if pops would be purged
+				exists = owner
+				owner = { is_same_value = from.owner }
+				any_owned_species = {
+					NOT = { has_trait = trait_aquatic }
+				}
+			}
+			custom_tooltip = {
+				fail_text = requires_purge_allowed
+				success_text = will_purge_non_aquatic_pops
+				from.owner = {
+					is_ai = no
+					has_policy_flag = purge_allowed
+				}
+			}
+		}
+	}
+	else = {
+		custom_tooltip = {
+			fail_text = is_not_hostile_or_primitive_or_ours
+			OR = {
+				planet_is_hostile = yes
+				AND = {
+					exists = owner
+					owner = {
+						is_country_type = primitive
+					}
+				}
+			}
+		}
+	}
+	if = {
+		limit = {
+			exists = owner
+			owner = { is_country_type = primitive }
+		}
+		custom_tooltip = {
+			fail_text = primitives_not_in_borders
+			exists = space_owner
+			space_owner = { is_same_value = from.owner }
+		}
+		custom_tooltip = {
+			fail_text = primitives_not_full_interference
+			from.owner = {
+				has_policy_flag = interference_full
+			}
 		}
 	}
 }

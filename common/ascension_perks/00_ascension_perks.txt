@@ -90,7 +90,7 @@ ap_become_the_crisis = {
 		}
 		modifier = {
 			factor = 0.1
-			count_country = {
+			count_playable_country = {
 				count > 1
 				limit = {
 					has_ascension_perk = ap_become_the_crisis
@@ -105,6 +105,58 @@ ap_become_the_crisis = {
 					has_ascension_perk = ap_become_the_crisis
 				}
 			}
+		}
+	}
+}
+
+#################
+# AQUATICS ASCENSION PERKS
+#################
+
+ap_hydrocentric = {
+	potential = {
+		has_aquatics = yes
+		NOT = { has_ascension_perk = ap_hydrocentric }
+		has_trait = trait_pc_ocean_preference
+	}
+	possible = {
+		has_trait = trait_aquatic
+		has_technology = tech_terrestrial_sculpting
+	}
+
+	on_enabled = {
+		custom_tooltip = ap_hydrocentric_tooltip
+		if = {
+			limit = {
+				host_has_dlc = "Apocalypse"
+			}
+			if = {
+				limit = { has_ascension_perk = ap_colossus }
+				custom_tooltip = ap_hydrocentric_deluge_tooltip
+			}
+			else = {
+				custom_tooltip = ap_hydrocentric_deluge_pre_unlock_tooltip
+			}
+		}
+		hidden_effect = {
+			country_event = { id = aquatics.1 }
+		}
+	}
+
+	modifier = {
+		terraforming_ocean_cost_mult = -0.25
+	}
+
+	ai_weight = {
+		factor = 80 #it really is quite good for Aquatic species
+		modifier = {
+			factor = 0.5
+			is_xenophobe = no
+			is_hive_empire = no
+		}
+		modifier = {
+			factor = 5
+			has_origin = origin_ocean_paradise
 		}
 	}
 }
@@ -137,16 +189,15 @@ ap_enigmatic_engineering = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 2
 		modifier = {
-			factor = 0.1
-			not = {
-				has_ascension_perk = ap_executive_vigor
-			}
+			factor = 10
+			has_valid_civic = civic_inwards_perfection
 		}
 		modifier = {
 			factor = 2
-			has_ethic = ethic_materialist
+			is_materialist = yes
+			is_xenophobe = yes
 		}
 		modifier = {
 			factor = 3
@@ -249,6 +300,18 @@ ap_colossus = {
 			factor = 2
 			is_militarist = yes
 		}
+		modifier = {
+			factor = 2
+			has_authority = auth_machine_intelligence #just because
+		}
+		modifier = {
+			factor = 2
+			has_ascension_perk = ap_become_the_crisis
+		}
+		modifier = {
+			factor = 0
+			has_crisis_level = crisis_level_5
+		}
 	}
 }
 
@@ -320,14 +383,14 @@ ap_engineered_evolution = {
 	}
 
 	ai_weight = {
-		factor = 100
+		factor = 50
 		modifier = {
 			factor = 0.1
 			num_ascension_perks < 3
 		}
 		modifier = {
-			factor = 10
-			is_gestalt = yes
+			factor = 3
+			has_authority = auth_hive_mind
 		}
 	}
 }
@@ -444,7 +507,7 @@ ap_the_flesh_is_weak = {
 	}
 
 	ai_weight = {
-		factor = 100
+		factor = 50
 		modifier = {
 			factor = 0.1
 			NOR = {
@@ -601,7 +664,7 @@ ap_mind_over_matter = {
 	}
 
 	ai_weight = {
-		factor = 100
+		factor = 50
 		modifier = {
 			factor = 0.1
 			NOR = {
@@ -612,6 +675,10 @@ ap_mind_over_matter = {
 		modifier = {
 			factor = 0.1
 			num_ascension_perks < 3
+		}
+		modifier = {
+			factor = 10
+			has_ascension_perk = ap_become_the_crisis
 		}
 	}
 }
@@ -704,6 +771,14 @@ ap_world_shaper = {
 			factor = 0.1
 			has_ascension_perk = ap_machine_worlds
 			has_ascension_perk = ap_hive_worlds
+		}
+		modifier = {
+			factor = 0
+			OR = {
+				has_origin = origin_void_dwellers
+				has_origin = origin_shattered_ring
+				has_trait = trait_aquatic
+			}
 		}
 	}
 }
@@ -805,8 +880,20 @@ ap_defender_of_the_galaxy = {
 		modifier = {
 			factor = 0
 			NOR = {
-				has_global_flag = galactic_crisis_happened
-				has_global_flag = gray_goo_crisis_active
+				is_xenophile = yes
+				is_galactic_custodian = yes
+				is_galactic_emperor = yes
+				any_country = {
+					OR = {
+						has_crisis_level = crisis_level_5
+						is_country_type = swarm
+						is_country_type = extradimensional
+						is_country_type = extradimensional_2
+						is_country_type = extradimensional_3
+						is_country_type = ai_empire
+						is_country_type = gray_goo
+					}
+				}
 				any_country = {
 					relative_power = {
 						who = prev
@@ -876,11 +963,11 @@ ap_interstellar_dominion = {
 		}
 		modifier = {
 			factor = 0
-			OR = {
-				has_civic = civic_fanatic_purifiers
-				has_civic = civic_hive_devouring_swarm
-				has_civic = civic_machine_terminator
-				has_civic = civic_machine_assimilator
+			OR = { #useless, total war CBs
+				is_homicidal = yes
+				has_valid_civic = civic_machine_assimilator
+				has_ascension_perk = ap_become_the_crisis
+				any_owned_fleet = { is_ship_size = colossus }
 			}
 		}
 	}
@@ -905,9 +992,9 @@ ap_grasp_the_void = {
 	}
 
 	ai_weight = {
-		factor = 20
+		factor = 3
 		modifier = {
-			factor = 4
+			factor = 5
 			has_civic = civic_inwards_perfection
 		}
 		modifier = {
@@ -986,7 +1073,7 @@ ap_galactic_contender = {
 				any_country = {
 					is_country_type = awakened_fallen_empire
 				}
-				any_country = {
+				any_neighbor_country = {
 					is_country_type = fallen_empire
 				}
 			}
@@ -1016,13 +1103,7 @@ ap_technological_ascendancy = {
 	}
 
 	ai_weight = {
-		factor = 20
-		modifier = {
-			factor = 0.5
-			not = {
-				has_ascension_perk = ap_executive_vigor
-			}
-		}
+		factor = 30 #it's better than average
 		modifier = {
 			factor = 2
 			has_ethic = ethic_materialist
@@ -1124,6 +1205,14 @@ ap_mastery_of_nature = {
 			factor = 0.1
 			num_ascension_perks > 1
 		}
+		modifier = {
+			factor = 0
+			has_origin = origin_void_dwellers
+		}
+		modifier = {
+			factor = 2
+			num_owned_planets < 9
+		}
 	}
 }
 
@@ -1160,9 +1249,9 @@ ap_executive_vigor = {
 	}
 
 	ai_weight = {
-		factor = 5
+		factor = 30
 		modifier = {
-			factor = 100
+			factor = 2
 			has_technology = tech_ascension_theory
 		}
 	}
@@ -1183,14 +1272,8 @@ ap_transcendent_learning = {
 	ai_weight = {
 		factor = 10
 		modifier = {
-			factor = 0.5
+			factor = 0.2
 			is_machine_empire = no
-		}
-		modifier = {
-			factor = 0.1
-			not = {
-				has_ascension_perk = ap_executive_vigor
-			}
 		}
 	}
 }
@@ -1216,13 +1299,19 @@ ap_shared_destiny = {
 	}
 
 	ai_weight = {
-		factor = 1
+		factor = 2
 		modifier = {
 			factor = 0
 			NOT = {
 				any_subject = {
 					is_subject_type = vassal
 				}
+			}
+		}
+		modifier = {
+			factor = 3
+			count_envoy = {
+				count < 3
 			}
 		}
 		modifier = {
@@ -1252,12 +1341,7 @@ ap_voidborn = {
 	}
 
 	on_enabled = {
-		if = {
-			limit = {
-				is_gestalt = no
-			}
-			custom_tooltip = "ap_voidborn_habitat_effect"
-		}
+		custom_tooltip = "ap_voidborn_habitat_effect"
 		if = {
 			limit = {
 				NOT = { has_technology = tech_habitat_2 }
@@ -1297,6 +1381,15 @@ ap_voidborn = {
 			OR = {
 				has_ethic = ethic_fanatic_pacifist
 				has_origin = origin_void_dwellers
+			}
+		}
+		modifier = {
+			factor = 2
+			count_owned_planet = {
+				count > 2
+				limit = {
+					is_planet_class = pc_habitat
+				}
 			}
 		}
 	}
@@ -1567,7 +1660,11 @@ ap_machine_worlds = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 20
+		modifier = {
+			factor = 0
+			has_valid_civic = civic_machine_servitor
+		}
 	}
 }
 
@@ -1603,7 +1700,7 @@ ap_hive_worlds = {
 	}
 
 	ai_weight = {
-		factor = 10
+		factor = 20
 	}
 }
 
@@ -1700,7 +1797,7 @@ ap_xeno_compatibility = {
 			NOT = { has_ethic = ethic_fanatic_xenophile }
 		}
 		modifier = {
-			factor = 2
+			factor = 3
 			has_ethic = ethic_fanatic_xenophile
 		}
 	}
