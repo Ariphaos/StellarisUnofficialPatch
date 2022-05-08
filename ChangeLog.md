@@ -1,5 +1,26 @@
 # ChangeLog
 
+## May 8th
+
+- Performance fix for slaver AI empires with chemical bliss when certain galactic policies are active.
+
+## March 31st
+
+- Make AI less aggressive about destroying military academies and shield generators.
+- Don't spawn hyperlanes to the sealed system.
+
+## March 16th
+
+- 3.3.3 update. Will work with 3.3.2 saves - some bugfixes and a few AI enhancements.
+- Re-implemented market nomination fix.
+
+## February 26th
+
+- Version 3.3.2 updates
+- Removed some fixes that no longer properly functioned.
+- Amoeba will now attack Tiyanki as originally. Buffed Tiyanki fleet count slightly to compensate.
+- Can't tame dragon multiple times. (FireGolem)
+
 ## January 18th
 - All starbases marked as shipyards (SirBlackAxe)
 

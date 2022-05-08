@@ -2107,7 +2107,7 @@ ship_event = { #Disabled event for Reanimators
 		if = {
 			limit = {
 				owner = {
-					has_civic = civic_reanimated_armies
+					is_reanimator = yes
 				}
 				#exists = event_target:amoeba_finding_scientist
 				NOT = { has_ship_flag = resurrected_once }
@@ -2152,7 +2152,7 @@ ship_event = {
 		name = "distar.340.a"
 
 		trigger = {
-			owner = { has_civic = civic_reanimated_armies }
+			owner = { is_reanimator = yes }
 		}
 		if = {
 			limit = { exists = event_target:amoeba_finding_scientist }
@@ -2346,6 +2346,33 @@ ship_event = { #Ouroboros
 		}
 		solar_system = { save_global_event_target_as = ouroboros_system }
 		from = { set_planet_flag = ouroboros_pulsar_flag }
+	}
+
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+		hidden_effect = { owner = { country_event = { id = distar.61 days = 360 } } }
+	}
+}
+
+country_event = {
+	id = distar.61
+	title = "distar.61.name"
+	desc = "distar.61.desc"
+	picture = GFX_evt_ship_in_orbit_2
+	show_sound = event_sensor_ping
+	location = event_target:kohtalo_second_fleet
+
+	is_triggered_only = yes
+
+	immediate = {
 		create_country = {
 			name = "NAME_Kohtalo"
 			type = faction
@@ -2375,33 +2402,6 @@ ship_event = { #Ouroboros
 				save_event_target_as = kohtalo_country
 			}
 		}
-	}
-
-	option = {
-		name = UNFORTUNATE
-		owner = {
-			add_monthly_resource_mult = {
-				resource = society_research
-				value = @tier3researchreward
-				min = @tier3researchmin
-				max = @tier3researchmax
-			}
-		}
-		hidden_effect = { owner = { country_event = { id = distar.61 days = 360 } } }
-	}
-}
-
-country_event = {
-	id = distar.61
-	title = "distar.61.name"
-	desc = "distar.61.desc"
-	picture = GFX_evt_ship_in_orbit_2
-	show_sound = event_sensor_ping
-	location = event_target:kohtalo_second_fleet
-
-	is_triggered_only = yes
-
-	immediate = {
 		random_planet_within_border = {
 			limit = {
 				is_star = yes
@@ -4248,6 +4248,23 @@ country_event = { #Death of Scavenger Bot
 		}
 		give_technology = { tech = tech_nanite_repair_system }
 	}
+	after = {
+		if = {
+			limit = {
+				situations_feature_is_ready = yes
+				is_gestalt = no
+			}
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_scavenger_bot
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
+	}
 }
 
 ship_event = {
@@ -5709,7 +5726,7 @@ ship_event = {
 			save_global_event_target_as = living_planet_scientist
 		}
 		from = {
-			save_event_target_as = living_planet_tar
+			save_global_event_target_as = living_planet_tar
 		}
 	}
 
@@ -5717,6 +5734,32 @@ ship_event = {
 		name = distar.190.a
 		trigger = {
 			owner = { is_regular_empire = yes }
+		}
+		if = {
+			limit = {
+				from = {
+					exists = space_owner
+					space_owner = { is_same_value = root.owner }
+				}
+			}
+			event_target:living_planet_tar = {
+				enable_special_project = {
+					name = "STUDY_LIVING_SEA"
+					location = from
+					owner = root
+				}
+			}
+		}
+		else = {
+			owner = {
+				create_point_of_interest = {
+					id = living_sea.1
+					name = "living_sea_poi"
+					desc = living_sea_poi_desc
+					event_chain = living_planet_chain
+					location = from
+				}
+			}
 		}
 		owner = {
 			begin_event_chain = {
@@ -5731,13 +5774,6 @@ ship_event = {
 			}
 			hidden_effect = {
 				set_country_flag = living_planet_started
-				create_point_of_interest = {
-					id = living_sea.1
-					name = "living_sea_poi"
-					desc = living_sea_poi_desc
-					event_chain = living_planet_chain
-					location = from
-				}
 			}
 		}
 	}
@@ -5765,7 +5801,7 @@ ship_event = {
 	}
 }
 
-country_event = { #On enacting Study The Sea Decision
+country_event = { #On enacting Study The Sea Special Project
 	id = distar.191
 	title = "distar.191.name"
 	desc = {
@@ -5792,15 +5828,23 @@ country_event = { #On enacting Study The Sea Decision
 	}
 
 	immediate = {
-		random_planet_within_border = {
-			limit = { has_modifier = living_sea }
-			save_event_target_as = living_planet_tar
+		if = {
+			limit = { NOT = { exists = event_target:living_planet_tar } }
+			random_planet_within_border = {
+				limit = { has_modifier = living_sea }
+				save_global_event_target_as = living_planet_tar
+			}
 		}
-		end_event_chain = "living_planet_chain"
 	}
 
 	option = {
 		name = "distar.191.a"
+		event_target:living_planet_tar = {
+			add_modifier = {
+				modifier = pm_study_the_sea
+				days = -1
+			}
+		}
 		hidden_effect = {
 			country_event = { id = distar.192 days = 180 random = 30 } #Scientist is alive
 			country_event = { id = distar.193 days = 3650 } #Scientist is dead
@@ -5879,6 +5923,9 @@ country_event = { #Scientist is alive
 			}
 			remove_country_flag = strange_calling_fired
 		}
+		end_event_chain = "living_planet_chain"
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 	}
 }
 
@@ -5935,6 +5982,9 @@ country_event = { #Scientist dies
 				max = @tier4researchmax
 			}
 		}
+		end_event_chain = "living_planet_chain"
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 		hidden_effect = {
 			event_target:living_planet_tar = {
 				remove_modifier = pm_study_the_sea
@@ -5990,6 +6040,9 @@ country_event = {
 			min = @tier2researchmin
 			max = @tier2researchmax
 		}
+		end_event_chain = "living_planet_chain"
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 		hidden_effect = {
 			event_target:living_planet_tar = {
 				remove_modifier = pm_study_the_sea
@@ -6053,6 +6106,78 @@ country_event = {
 		}
 	}
 }
+
+starbase_event = {
+	id = distar.1999 #198 exists. It is below 199 in the file. :(
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		exists = solar_system
+		solar_system = {
+			has_star_flag = living_planet_system
+		}
+		#that narrows it down enough, the rest is covered in the trigger of distar.199
+	}
+
+	immediate = {
+		fleet = {
+			random_owned_ship = {
+				limit = {
+					is_ship_class = shipclass_starbase
+				}
+				ship_event = { id = distar.199 }
+			}
+		}
+	}
+}
+
+ship_event = { #Special Project Gatekeeper (on_starbase_transfer, on_building_starbase_outpost)
+	id = distar.199
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = solar_system
+		solar_system = {
+			has_star_flag = living_planet_system
+		}
+		owner = {
+			NOT = { has_special_project = STUDY_LIVING_SEA }
+			has_country_flag = living_planet_started
+			has_event_chain = "living_planet_chain"
+		}
+	}
+
+	immediate = {
+		owner = {
+			enable_special_project = {
+				name = "STUDY_LIVING_SEA"
+				location = event_target:living_planet_tar
+				owner = root
+			}
+			remove_point_of_interest = living_sea.1
+		}
+		every_country = {
+			limit = {
+				has_special_project = STUDY_LIVING_SEA
+				NOT = {
+					is_same_value = root.owner
+				}
+			}
+			abort_special_project = { type = STUDY_LIVING_SEA }
+			create_point_of_interest = {
+				id = living_sea.1
+				name = "living_sea_poi"
+				desc = living_sea_poi_desc
+				event_chain = living_planet_chain
+				location = event_target:living_planet_tar
+			}
+		}
+	}
+}
+
 
 # living planet port from ecumenopolis
 country_event = {
@@ -6322,7 +6447,7 @@ country_event = { #Death of the Matriarch
 		name = galactic_features.385.reanimated
 
 		trigger = {
-			has_civic = civic_reanimated_armies
+			is_reanimator = yes
 		}
 
 		event_target:dead_matriarch = {
@@ -6336,6 +6461,24 @@ country_event = { #Death of the Matriarch
 		hidden_effect = {
 			country_event = { id = distar.213 }
 			country_event = { id = galcom.110 days = 60 }
+		}
+	}
+	after = {
+		if = {
+			limit = {
+				situations_feature_is_ready = yes
+				is_robot_empire = no
+				is_gestalt = no
+			}
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_shard
+					set_situation_flag = standard_unity_reward
+				}
+			}
 		}
 	}
 }
@@ -6975,19 +7118,6 @@ country_event = { #Spawn Ratlings #Root = Global Event Country
 	}
 
 	immediate = {
-		IF = { #If another empire claimed Ratling capital, or it's shattered
-			LIMIT = {
-				event_target:ratling_capital = {
-					OR = {
-						is_colony = yes
-						is_under_colonization = yes
-						exists = space_owner
-						is_planet_class = "pc_broken"
-						is_planet_class = "pc_shattered"
-					}
-				}
-			}
-		}
 		create_species = {
 			name = "NAME_Ketling"
 			plural = "NAME_Ketlings"

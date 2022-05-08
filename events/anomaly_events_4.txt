@@ -330,6 +330,10 @@ country_event = {
 					hidden_effect = {
 						set_planet_flag = new_baldarak@root
 						clear_deposits = yes
+						if = {
+							limit = { exists = orbital_station }
+							orbital_station = { delete_fleet = this }
+						}
 						save_event_target_as = NewBaldarak
 					}
 					enable_special_project = {
@@ -1927,8 +1931,134 @@ country_event = {
 
 ###########################
 #
-# Early Game 
-# Anomaly Events Initative
+# Anomaly Events
+# LOST SOUL by Brian Campbell
+#
+###########################
+
+ship_event = {
+	id = anomaly.6786
+	title = anomaly.6786.name
+	desc = anomaly.6786.desc
+	picture = GFX_evt_star_neutron
+	show_sound = event_ship_bridge
+	location = FROM
+	trackable = yes
+	
+	is_triggered_only = yes
+    
+	immediate = {
+		from = { clear_deposits = yes }
+	}
+
+	option = {
+		name = anomaly.6786.a
+		FROM = {
+			set_deposit = d_minerals_3
+			custom_tooltip = anomaly.6786.a.tooltip 
+		}
+		hidden_effect = {
+			ship_event = { id = anomaly.6787 days = 5 }	
+		}
+	}
+
+	option = { 
+		name = anomaly.6786.b 
+		custom_tooltip = anomaly.6786.b.tooltip 
+	}
+}
+
+ship_event = {
+	id = anomaly.6787
+	title = anomaly.6787.name 
+	desc = anomaly.6787.desc
+	picture = GFX_evt_star_neutron
+	show_sound = event_ship_bridge
+	location = FROM	
+	is_triggered_only = yes
+	trackable = yes
+
+	option = {
+		name = "FASCINATING"
+	}
+}
+
+# TEMPORAL PRISM
+
+ship_event = {
+	id = anomaly.6788
+	title = "anomaly.6788.name"
+	desc = "anomaly.6788.desc"
+	picture = GFX_evt_clocks
+	show_sound = event_ship_bridge
+	location = FROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { clear_deposits = yes }
+	}
+	
+	option = {
+		name = FASCINATING
+		FROM = {
+			set_deposit = d_physics_3
+		}	
+	}
+}
+
+## Ghost Ship ##
+
+ship_event = {
+	id = "anomaly.6791"
+	title = "anomaly.6791.name"
+	desc = "anomaly.6791.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_default
+	location = FROM
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = "anomaly.6791.a"
+		from = {
+			enable_special_project = {
+				name = "GHOST_SHIP_PROJECT"
+				location = this
+				owner = root.owner
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = "anomaly.6792"
+	title = "anomaly.6792.name"
+	desc = "anomaly.6792.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_default
+	location = FROM
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = "anomaly.6792.a"
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+###########################
+#
+# Anomaly Events
 # By Victor Haeggman
 #
 ###########################
@@ -2632,7 +2762,6 @@ ship_event = {
 
 country_event = {
 	id = anomaly.6870
-	id = anomaly.6870
 	title = "anomaly.6870.name"
 	desc = "anomaly.6870.desc"
 	picture = GFX_evt_wormhole
@@ -3075,6 +3204,213 @@ ship_event = {
 		name = UNFORTUNATE
 		fromfromfrom = {
 			set_deposit = d_society_6
+		}
+	}
+}
+
+##########################
+#
+# Anomaly Events
+# ANCIENT VENDING MACHINE
+#
+##########################
+
+ship_event = {
+	id = anomaly.7000
+	title = "anomaly.7000.name"
+	desc = "anomaly.7000.desc"
+	picture = GFX_evt_asteroid_field
+	location = FROM
+
+	is_triggered_only = yes
+
+	option = {
+		name = "anomaly.7000.a"
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 200
+				}
+			}
+		}
+
+		owner = {
+			add_resource = { energy = -200 }
+		}
+		
+		hidden_effect = { 
+			owner = {
+				country_event = { id = anomaly.7010 }
+			}
+		}
+	}
+
+	option = {
+		name = "anomaly.7000.b"
+	}
+}
+
+# get something from the vending machine
+country_event = {
+	id = anomaly.7010
+	title = "anomaly.7010.name"
+
+	desc = {
+		trigger = { 
+			has_country_flag = vending_machine_contents_full
+			is_megacorp = yes 
+		}
+		text = anomaly.7010.desc.full.megacorp
+	}
+	desc = {
+		trigger = { 
+			has_country_flag = vending_machine_contents_full
+			OR = {
+				is_robot_empire = yes
+				is_lithoid_empire = yes 
+			}
+		}
+		text = anomaly.7010.desc.full.nonbio
+	}
+	desc = {
+		trigger = { 
+			has_country_flag = vending_machine_contents_full
+			NOR = {
+				is_robot_empire = yes
+				is_lithoid_empire = yes
+				is_megacorp = yes
+			}
+		}
+		text = anomaly.7010.desc.full.bio
+	}
+	desc = {
+		trigger = { 
+			has_country_flag = vending_machine_contents_empty 
+		}
+		text = anomaly.7010.desc.empty
+	}
+	desc = {
+		trigger = { 
+			has_country_flag = vending_machine_contents_rot
+			OR = {
+				is_robot_empire = yes
+				is_lithoid_empire = yes 
+			}
+		}	
+		text = anomaly.7010.desc.rot.nonbio		
+	}
+	desc = {
+		trigger = { 
+			has_country_flag = vending_machine_contents_rot 
+			NOR = {
+				is_robot_empire = yes
+				is_lithoid_empire = yes 
+			}
+		}	
+		text = anomaly.7010.desc.rot.bio					
+	}
+	
+	picture = GFX_evt_enigmatic_cache
+	show_sound = event_activating_unknown_technology
+	location = FROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_list = {
+			10 = { set_country_flag = vending_machine_contents_full }
+			60 = { set_country_flag = vending_machine_contents_empty }
+			30 = { set_country_flag = vending_machine_contents_rot }
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = vending_machine_contents_full
+			remove_country_flag = vending_machine_contents_empty
+			remove_country_flag = vending_machine_contents_rot
+		}
+	}
+
+	option = {
+		name = anomaly.7010.a
+		trigger = {
+			has_country_flag = vending_machine_contents_full
+			is_megacorp = yes
+		}
+
+		add_monthly_resource_mult = {
+			resource = energy
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
+	}
+
+	option = {
+		name = FASCINATING
+		switch = {
+			trigger = has_country_flag
+			vending_machine_contents_full = {
+				if = {
+					limit = { 
+						NOR = {
+						is_robot_empire = yes
+						is_lithoid_empire = yes 
+						} 
+					}
+					
+					add_modifier = {
+						modifier = taste_the_stars
+						days = 7200
+					}
+				} 
+				else = { 
+					add_resource = { exotic_gases = 100 }
+				}
+			}
+			vending_machine_contents_empty = {
+				if = {
+					limit = { has_ancrel = yes }
+					custom_tooltip = minor_artifacts_found
+					add_resource = { minor_artifacts = 1 }
+				}
+				else = { 
+					add_resource = { alloys = 200 } 
+				}
+			}
+			vending_machine_contents_rot = {
+				give_next_tech_society_option_effect = yes
+			}
+		}
+	}
+}
+
+# rage sage anomaly trigger 
+
+ship_event = {
+	id = anomaly.7030
+	title = anomaly.7030.name
+	desc = anomaly.7030.desc
+	picture = GFX_evt_star_neutron
+	show_sound = event_ship_bridge
+	location = FROM
+	trackable = yes
+	
+	is_triggered_only = yes
+    
+	immediate = {
+		from = { clear_deposits = yes }
+	}
+
+	option = {
+		name = anomaly.7030.desc.a
+		if = {
+			limit = {
+				owner = { is_regular_empire = yes }
+			}
+			from = { create_archaeological_site = site_rage_sage_dig }
 		}
 	}
 }
