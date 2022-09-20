@@ -838,17 +838,15 @@ fleet_event = {
 					max_jumps = 0
 					initializer = "Zrocursor_system"
 				}
-				hidden_effect = {
-					if = {
-						limit = { last_created_system = { NOT = { has_hyperlane_to = prev } } }
-						add_hyperlane = {
-							from = this
-							to = last_created_system
-						}
+				if = {
+					limit = { last_created_system = { NOT = { has_hyperlane_to = prev } } }
+					add_hyperlane = {
+						from = this
+						to = last_created_system
 					}
-					else = {
-						add_extra_hyperlane_to_spawned_system_effect = yes
-					}
+				}
+				else = {
+					add_extra_hyperlane_to_spawned_system_effect = yes
 				}
 			}
 		}
@@ -1652,7 +1650,6 @@ fleet_event = {
 					is_same_value = root.solar_system
 					has_star_flag = first_grunur_site@root.owner
 					has_star_flag = sol_system
-					has_star_flag = hostile_system
 				}
 				OR = {
 					has_owner = no
@@ -1950,7 +1947,6 @@ fleet_event = {
 					is_same_value = root.solar_system
 					has_star_flag = first_grunur_site@root.owner
 					has_star_flag = sol_system
-					has_star_flag = hostile_system
 				}
 				OR = {
 					has_owner = no
@@ -4352,177 +4348,7 @@ country_event = {
 	}
 }
 
-### On Dragon destroyed
-# If destroyed by a default empire, give Rubricator to Shard's destroyer in ancrel.4020
-# Else keep Rubricator in a special project in ancrel.4122
-country_event = {
-	id = ancrel.4120
-	hide_window = yes
-	location = FromFromFrom
-	is_triggered_only = yes
-
-	trigger = {
-		from = { has_country_flag = rubricator_dragon_country }
-	}
-
-	immediate = {
-		if = {
-			limit = {
-				is_country_type = default
-			}
-			country_event = { id = ancrel.4020 } # Give killer the Rubricator
-			if = {
-				limit = {
-					any_country = {
-						OR = {
-							has_event_chain = rubricator_chain
-							has_event_chain = rubricator_chain_2
-						}
-					}
-				}
-				every_playable_country = {
-					limit = {
-						OR = {
-							has_event_chain = rubricator_chain
-							has_event_chain = rubricator_chain_2
-						}
-					}
-					country_event = { id = ancrel.4121 } # Inform chain owner
-				}
-			}
-		}
-		else = {
-			if = {
-				limit = {
-					any_country = {
-						OR = {
-							has_event_chain = rubricator_chain
-							has_event_chain = rubricator_chain_2
-						}
-					}
-				}
-				every_playable_country = {
-					limit = {
-						OR = {
-							has_event_chain = rubricator_chain
-							has_event_chain = rubricator_chain_2
-						}
-					}
-					country_event = { id = ancrel.4122 } # Keep Rubricator in special project
-				}
-			}
-		}
-
-		# Remove rubricator chains and pois
-		if = {
-			limit = {
-				any_country = {
-					has_event_chain = rubricator_chain_2
-				}
-			}
-			every_playable_country = {
-				limit = {
-					has_event_chain = rubricator_chain_2
-				}
-				end_event_chain = rubricator_chain_2
-				remove_point_of_interest = rubricator_dragon_poi
-			}
-		}
-		if = {
-			limit = {
-				any_country = {
-					has_event_chain = rubricator_chain
-				}
-			}
-			every_playable_country = {
-				limit = {
-					has_event_chain = rubricator_chain
-				}
-				end_event_chain = rubricator_chain
-				remove_point_of_interest = rubricator_coordinates_poi
-			}
-		}
-	}
-}
-
-country_event = {
-	id = ancrel.4121
-	title = "ancrel.4020.name" # Reusing
-	desc = "ancrel.4121.desc"
-	picture = GFX_evt_space_dragon_blue
-	show_sound = event_dangerous_animals
-	location = FromFromFrom
-	trackable = yes
-
-	is_triggered_only = yes
-
-	option = {
-		name = UNFORTUNATE
-	}
-}
-
-country_event = {
-	id = ancrel.4122
-	title = "ancrel.4020.name" # Reusing
-	desc = "ancrel.4122.desc"
-	picture = GFX_evt_space_dragon_blue
-	show_sound = event_dangerous_animals
-	location = event_target:rubricator_planet
-	trackable = yes
-
-	is_triggered_only = yes
-
-	trigger = {
-		exists = event_target:rubricator_planet
-	}
-
-	option = {
-		name = OK
-		trigger = {
-			exists = event_target:rubricator_planet
-		}
-		enable_special_project = {
-			name = "SHARD_DESTROYED_BY_NON_DEFAULT_EMPIRE"
-			location = event_target:rubricator_planet
-			owner = root.owner
-		}
-	}
-	option = {
-		name = OK
-		trigger = {
-			NOT = { exists = event_target:rubricator_planet }
-		}
-		enable_special_project = {
-			name = "SHARD_DESTROYED_BY_NON_DEFAULT_EMPIRE"
-			location = fromfromfrom.solar_system.star
-			owner = root.owner
-		}
-	}
-}
-
-ship_event = {
-	id = ancrel.4123
-	title = "ancrel.4123.name"
-	desc = "ancrel.4123.desc"
-	picture = GFX_evt_space_dragon_blue
-	show_sound = event_mystic_reveal
-	location = this
-	trackable = yes
-
-	is_triggered_only = yes
-
-	option = {
-		name = "ancrel.4020.a" # Reused
-		owner = {
-			add_relic = r_rubricator
-			add_resource = {
-				minerals = 1000
-				rare_crystals = 100
-			}
-		}
-	}
-}
-
+# On Dragon destroyed
 country_event = {
 	id = ancrel.4020
 	title = "ancrel.4020.name"
@@ -4534,43 +4360,87 @@ country_event = {
 
 	is_triggered_only = yes
 
-	option = {
-		name = "ancrel.4020.a"
-		add_relic = r_rubricator
+	trigger = {
+		from = { has_country_flag = rubricator_dragon_country }
 	}
 
+	option = {
+		name = "ancrel.4020.a"
+		hidden_effect = {
+			if = {
+				limit = {
+					any_country = {
+						has_event_chain = rubricator_chain_2
+					}
+				}
+				every_playable_country = {
+					limit = {
+						has_event_chain = rubricator_chain_2
+					}
+					end_event_chain = rubricator_chain_2
+					remove_point_of_interest = rubricator_dragon_poi
+				}
+			}
+			if = {
+				limit = {
+					any_country = {
+						has_event_chain = rubricator_chain
+					}
+				}
+				every_playable_country = {
+					limit = {
+						has_event_chain = rubricator_chain
+					}
+					end_event_chain = rubricator_chain
+					remove_point_of_interest = rubricator_coordinates_poi
+				}
+			}
+		}
+		add_relic = r_rubricator
+	}
 	option = {
 		name = galactic_features.385.reanimated
 
 		trigger = {
-			is_reanimator = yes
+			has_civic = civic_reanimated_armies
 		}
 
 		enable_special_project = {
 			name = "REANIMATE_SHARD_DRAGON"
-			location = fromfromfrom.solar_system.star
+			location = fromfrom.solar_system.star
 			owner = root.owner
 		}
-
-		add_relic = r_rubricator
-	}
-
-	after = {
-		if = {
-			limit = {
-				situations_feature_is_ready = yes
-				is_gestalt = no
+		hidden_effect = {
+			if = {
+				limit = {
+					any_country = {
+						has_event_chain = rubricator_chain_2
+					}
+				}
+				every_playable_country = {
+					limit = {
+						has_event_chain = rubricator_chain_2
+					}
+					end_event_chain = rubricator_chain_2
+					remove_point_of_interest = rubricator_dragon_poi
+				}
 			}
-			generate_parade_city = yes
-			start_situation = {
-				type = leviathan_celebration_opportunity
-				target = event_target:parade_city
-				effect = {
-					set_situation_flag = celebration_shard
-					set_situation_flag = standard_unity_reward
+			if = {
+				limit = {
+					any_country = {
+						has_event_chain = rubricator_chain
+					}
+				}
+				every_playable_country = {
+					limit = {
+						has_event_chain = rubricator_chain
+					}
+					end_event_chain = rubricator_chain
+					remove_point_of_interest = rubricator_coordinates_poi
 				}
 			}
 		}
+		add_relic = r_rubricator
 	}
 }
 
@@ -5708,13 +5578,8 @@ fleet_event = {
 		small_artifact_reward = yes
 		owner = {
 			add_resource = {
+				influence = 500
 				alloys = 3500
-			}
-			add_monthly_resource_mult = {
-				resource = unity
-				value = @tier4unityreward
-				min = @tier4unitymin
-				max = @tier4unitymax
 			}
 		}
 	}

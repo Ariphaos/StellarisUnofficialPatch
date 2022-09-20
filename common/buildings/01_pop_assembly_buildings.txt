@@ -12,8 +12,11 @@ building_robot_assembly_plant = {
 		exists = owner
 		OR = {
 			owner = { is_ai = no }
-			NOT = { exists = assembling_species }
-			assembling_species = { is_robotic_species = yes }
+			and = {
+				free_building_slots > 0
+				owner = { num_pops < 2000 }
+				owner = { has_technology = tech_droid_workers }
+			}
 		}
 		owner = {
 			is_regular_empire = yes
@@ -35,11 +38,9 @@ building_robot_assembly_plant = {
 		hidden_trigger = {
 			OR = {
 				owner = { is_ai = no }
-				NAND = {
-					free_district_slots = 0
-					free_building_slots <= 1
-					free_housing <= 0
-					free_jobs <= 0
+				AND = {
+					num_buildings = { type = any value <= 14 }
+					NOT = { is_planet_class = pc_habitat }
 				}
 			}
 		}
@@ -57,10 +58,14 @@ building_robot_assembly_plant = {
 			has_modifier = slave_colony
 			AND = {
 				owner = { is_ai = yes }
-				free_district_slots = 0
-				free_building_slots = 0
-				free_housing <= 0
-				free_jobs <= 0
+				free_jobs < 1
+				OR = {
+					num_buildings = {
+						type = any
+						value = 16
+					}
+					is_planet_class = pc_habitat
+				}
 			}
 			owner = {
 				is_ai = yes
@@ -93,15 +98,7 @@ building_robot_assembly_plant = {
 	}
 	triggered_desc = {
 		trigger = {
-			OR = {
-				has_building = building_clone_vats
-				has_building = building_clone_army_clone_vat
-				has_building = building_posthumous_employment_center
-				AND = {
-					exists = assembling_species
-					assembling_species = { is_organic_species = yes }
-				}
-			}
+			has_building = building_clone_vats
 		}
 		text = tooltip_organic_and_artificial_assembly_warning
 	}
@@ -135,11 +132,9 @@ building_machine_assembly_plant = {
 		hidden_trigger = {
 			OR = {
 				owner = { is_ai = no }
-				NAND = {
-					free_district_slots = 0
-					free_building_slots <= 1
-					free_housing <= 0
-					free_jobs <= 0
+				AND = {
+					num_buildings = { type = any value <= 14 }
+					NOT = { is_planet_class = pc_habitat }
 				}
 			}
 		}
@@ -148,13 +143,16 @@ building_machine_assembly_plant = {
 	destroy_trigger = {
 		exists = owner
 		OR = {
-			owner = { is_robot_empire = no }
+			owner = {
+				is_robot_empire = no
+			}
 			AND = {
 				owner = { is_ai = yes }
-				free_district_slots = 0
-				free_building_slots = 0
-				free_housing <= 0
-				free_jobs <= 0
+				free_jobs < 1
+				OR = {
+					num_buildings = { type = any value = 16 }
+					is_planet_class = pc_habitat
+				}
 			}
 		}
 	}
@@ -201,6 +199,18 @@ building_machine_assembly_complex = {
 		building_robot_assembly_plant
 	}
 
+	allow = {
+		hidden_trigger = {
+			OR = {
+				owner = { is_ai = no }
+				AND = {
+					num_buildings = { type = any value <= 14 }
+					NOT = { is_planet_class = pc_habitat }
+				}
+			}
+		}
+	}
+
 	destroy_trigger = {
 		exists = owner
 		OR = {
@@ -210,10 +220,11 @@ building_machine_assembly_complex = {
 			}
 			AND = {
 				owner = { is_ai = yes }
-				free_district_slots = 0
-				free_building_slots = 0
-				free_housing <= 0
-				free_jobs <= 0
+				free_jobs < 1
+				OR = {
+					num_buildings = { type = any value = 16 }
+					is_planet_class = pc_habitat
+				}
 			}
 		}
 	}
@@ -414,15 +425,30 @@ building_necrophage_elevation_chamber = {
 	}
 
 	#this tells the AI that building the building will give it this in a way it doesn't understand. Made the number nice and high to try and force the AI to build this.
+	ai_resource_production = {
+		trigger = {
+			owner = {
+				OR = {
+					is_xenophobe = yes
+					is_gestalt = yes
+				}
+			}
+		}
+		alloys = 7
+		consumer_goods = 7
+		society_research = 9
+		engineering_research = 9
+		physics_research = 9
+	}
 	ai_resource_production = { #always good because of traits
 		trigger = {
 			always = yes
 		}
-		alloys = 8
-		consumer_goods = 8
-		society_research = 10
-		engineering_research = 10
-		physics_research = 10
+		alloys = 1
+		consumer_goods = 1
+		society_research = 1
+		engineering_research = 1
+		physics_research = 1
 	}
 }
 
@@ -601,18 +627,6 @@ building_clone_army_clone_vat = {
 				has_country_flag = clone_army_fertility_unlocked
 			}
 		}
-		if = {
-			limit = {
-				owner = { is_ai = yes }
-			}
-			NOR = {
-				has_building = building_clone_army_clone_vat
-				AND = {
-					exists = assembling_species
-					assembling_species = { is_robotic_species = yes }
-				}
-			}
-		}
 	}
 
 	destroy_trigger = {
@@ -693,100 +707,5 @@ building_clone_army_clone_vat = {
 
 	triggered_desc = {
 		text = building_clone_army_clone_vat_effect_desc
-	}
-	triggered_desc = {
-		trigger = {
-			OR = {
-				has_building = building_robot_assembly_plant
-				AND = {
-					exists = assembling_species
-					assembling_species = { is_robotic_species = yes }
-				}
-			}
-		}
-		text = tooltip_organic_and_artificial_assembly_warning
-	}
-
-	is_essential = yes
-}
-
-### Permanent Employment Building
-
-building_posthumous_employment_center = {
-	base_buildtime = @b1_time
-	base_cap_amount = 1
-
-	category = pop_assembly
-
-	potential = {
-		exists = owner
-		OR = {
-			owner = { is_ai = no }
-			NOT = { exists = assembling_species }
-			assembling_species = { is_organic_species = yes }
-		}
-		OR = {
-			owner = { is_ai = no }
-			NAND = {
-				free_district_slots = 0
-				free_building_slots <= 1
-				free_housing <= 0
-				free_jobs <= 0
-			}
-		}
-		owner = {
-			is_regular_empire = yes
-			has_valid_civic = civic_permanent_employment
-		}
-	}
-
-	allow = {
-		has_upgraded_capital = yes
-	}
-
-	destroy_trigger = {
-		exists = owner
-		OR = {
-			owner = {
-				NOT = { has_valid_civic = civic_permanent_employment }
-			}
-			AND = {
-				owner = { is_ai = yes }
-				free_district_slots = 0
-				free_building_slots = 0
-				free_housing <= 0
-				free_jobs <= 0
-			}
-		}
-	}
-
-	planet_modifier = {
-		job_reassigner_add = 1
-	}
-
-	resources = {
-		category = planet_buildings
-		cost = {
-			minerals = @b1_minerals
-		}
-		upkeep = {
-			energy = @b1_upkeep
-		}
-	}
-
-	triggered_desc = {
-		text = job_reassigner_effect_desc
-	}
-	triggered_desc = {
-		trigger = {
-			OR = {
-				has_building = building_robot_assembly_plant
-				AND = {
-					exists = assembling_species
-					assembling_species = { is_robotic_species = yes }
-				}
-			}
-		}
-		text = tooltip_organic_and_artificial_assembly_warning
 	}
 }

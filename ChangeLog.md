@@ -1,5 +1,45 @@
 # ChangeLog
 
+## September 19th
+
+- Final 3.4 release.
+- Fixed some improper keywords.
+
+## July 8th
+
+- 3.4.5 release
+- Fix for nanite swam event (FirePrince)
+
+
+## June 22nd
+
+- Incorporated some missing exists = owner lines. That this is necessary is a bug but also shouldn't cause future problems.
+- Disabled the Dragon Season fix as I think it should function properly now. Some code has been left behind in case it needs to be reimplemented.
+
+## May 21st
+
+- Forwarded a 3.4.4 fix
+- Reduced subjugation attractiveness.
+
+## May 19th
+
+- 3.4.3 release
+- Restored some previous AI fixes that got clobbered.
+
+
+Patch fixes now applied by Paradox:
+
+- Non-standard colony ships were not being tracked under colony economy.
+
+## May 12th
+
+- 3.4.2 release
+
+Fixes Paradox fixed in 3.4
+
+- You no longer get multiples of the same tech result from the Shroud once you already have the option
+- A handful of resolution fixes.
+
 ## May 8th
 
 - Performance fix for slaver AI empires with chemical bliss when certain galactic policies are active.

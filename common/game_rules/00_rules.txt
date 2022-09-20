@@ -252,7 +252,6 @@ can_generate_leader_from_pop = {
 	has_citizenship_rights = yes
 	NOT = { has_trait = trait_syncretic_proles }
 	NOT = { has_trait = trait_nerve_stapled }
-	NOT = { has_trait = trait_zombie }
 	OR = {
 		is_robot_pop = no
 		root = {
@@ -363,7 +362,6 @@ can_release_vassal_from_species = {
 			has_trait = trait_hive_mind
 			has_trait = trait_mechanical
 			has_trait = trait_nerve_stapled
-			has_trait = trait_zombie
 		}
 	}
 }
@@ -492,17 +490,6 @@ can_take_hostile_actions = {
 			always = no
 		}
 	}
-	else_if = {
-		limit = {
-			exists = overlord
-			overlord = { is_same_value = root }
-			is_subject_type = satrapy
-		}
-		custom_tooltip = {
-			text = "CAN_TAKE_HOSTILE_ACTION_OVERLORD"
-			always = no
-		}
-	}
 	else = {
 		always = yes
 	}
@@ -599,10 +586,7 @@ can_colonize_with_pop = {
 	}
 	if = {
 		limit = {
-			OR = {
-				is_sapient = no
-				has_trait = trait_zombie
-			}
+			is_sapient = no
 		}
 		custom_tooltip = {
 			always = no
@@ -661,7 +645,6 @@ species_has_happiness = {
 		has_trait = trait_machine_unit
 		has_trait = trait_hive_mind
 		has_trait = trait_nerve_stapled
-		has_trait = trait_zombie
 		AND = {
 			has_trait = trait_mechanical
 			OR = {
@@ -776,14 +759,6 @@ can_species_be_assembled = {
 							value = 0
 						}
 					}
-				}
-			}
-			else_if = {
-				limit = {
-					root.owner = { has_civic = civic_permanent_employment }
-				}
-				root = {
-					has_building = building_posthumous_employment_center
 				}
 			}
 			else = {
@@ -1410,8 +1385,8 @@ can_force_decline_on_planet = {
 		fail_text = FORCED_DECLINE_ALREADY_PURGING
 		NOT = {
 			any_owned_species = {
-				has_citizenship_type = { type = citizenship_purge country = root }
-				NOT = { has_purge_type = { country = root type = purge_neutering } }
+				has_citizenship_type = { type = citizenship_purge country = from }
+				NOT = { has_purge_type = { country = from type = purge_neutering } }
 			}
 		}
 	}
@@ -1562,10 +1537,7 @@ can_build_branch_office_on_planet = {
 # This = country
 # Checked by is_criminal_syndicate trigger
 is_criminal_syndicate_rule = {
-	OR = {
-		has_authority = auth_corporate
-		has_valid_civic = civic_galactic_sovereign_megacorp
-	}
+	has_authority = auth_corporate
 	has_valid_civic = civic_criminal_heritage
 }
 
@@ -1763,7 +1735,7 @@ has_enough_pops_for_necrophage_on_planet = {
 		}
 	}
 	else = {
-		NOT = { any_owned_pop = { can_work_specific_job = necro_apprentice } }
+		NOT = { any_owned_pop = { would_work_job = necro_apprentice } }
 	}
 }
 
@@ -1957,7 +1929,33 @@ can_fill_worker_job = {
 
 #this/root = pop
 #checked if job's possible_precalc = can_fill_specialist_job
-can_fill_specialist_job = { can_fill_specialist_job = yes }
+can_fill_specialist_job = {
+	custom_tooltip = SPECIALIST_JOB_TRIGGER
+	hidden_trigger = {
+		NOT = { has_ethic = ethic_gestalt_consciousness }
+		exists = owner
+		OR = {
+			is_enslaved = no
+			has_slavery_type = { type = slavery_indentured }
+		}
+		is_being_purged = no
+		is_being_assimilated = no
+		NOT = { has_trait = trait_syncretic_proles }
+		NOT = { has_trait = trait_nerve_stapled }
+		OR = {
+			NOT = { has_trait = trait_mechanical }
+			owner = { has_technology = tech_droid_workers }
+		}
+		NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+		if = {
+			limit = {
+				divinity_right_to_work_job_check_trigger_exempt = no
+			}
+			divinity_right_to_work_job_check_trigger_specialist = yes
+		}
+	}
+}
+
 #this/root = pop
 #checked if job's possible_precalc = can_fill_ruler_job
 can_fill_ruler_job = {
@@ -1987,7 +1985,6 @@ can_fill_ruler_job = {
 			is_being_assimilated = no
 			NOT = { has_trait = trait_syncretic_proles }
 			NOT = { has_trait = trait_nerve_stapled }
-			NOT = { has_trait = trait_zombie }
 			OR = {
 				NOT = { has_trait = trait_mechanical }
 				AND = {
@@ -2015,15 +2012,4 @@ should_planetary_automate = {
 		num_unemployed > 0
 	}
 	has_building_construction = no
-}
-
-# this = leader
-can_dismiss_leader = {
-	custom_tooltip = {
-		fail_text = "requires_actor_not_feudal_society"
-		exists = owner
-		owner = {
-			NOT = { has_valid_civic = civic_feudal_realm }
-		}
-	}
 }
