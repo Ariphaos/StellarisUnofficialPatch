@@ -193,7 +193,7 @@ planet_event = {
 					}
 				}
 				if = {
-					limit = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+					limit = { is_gestalt = no }
 					add_modifier = {
 						modifier = colossus_victim
 						days = 10800 # 30 years
@@ -273,6 +273,12 @@ planet_event = {
 		every_owned_pop = {
 			kill_pop = yes
 		}
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			destroy_fleet = orbital_defence
+		}
 		remove_all_buildings = yes
 		# destroy habitats and ringworlds
 		if = {
@@ -316,6 +322,7 @@ planet_event = {
 		}
 	}
 }
+
 
 country_event = {
 	id = planet_destruction.101
@@ -423,7 +430,9 @@ planet_event = {
 
 	trigger = {
 		solar_system = { has_star_flag = sol }
-		from.owner = { NOT = { species_portrait = human } }
+		from.owner = {
+			is_human_species = no
+		}
 		OR = {
 			has_planet_flag = planet_earth
 			has_planet_flag = nuked_earth
@@ -431,7 +440,7 @@ planet_event = {
 				exists = owner
 				owner = {
 					is_primitive = yes
-					species_portrait = human
+					is_human_species = yes
 				}
 			}
 		}
@@ -624,7 +633,7 @@ planet_event = {
 					who = from.owner
 				}
 				if = {
-					limit = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+					limit = { is_gestalt = no }
 					add_modifier = {
 						modifier = colossus_victim
 						days = 10800 # 30 years
@@ -635,6 +644,12 @@ planet_event = {
 		# Pandora's World Achievement
 		from.owner = { country_event = { id = achievement.3 } }
 		# Add war exhaustion to planet owner
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			destroy_fleet = orbital_defence
+		}
 		owner = {
 			if = {
 				limit = { #isn't the case when the crisis bombards planets, for instance
@@ -872,7 +887,7 @@ planet_event = {
 					who = from.owner
 				}
 				if = {
-					limit = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+					limit = { is_gestalt = no }
 					add_modifier = {
 						modifier = colossus_victim
 						days = 10800 # 30 years
@@ -946,6 +961,8 @@ planet_event = {
 					complete_crisis_objective = crisobj_purge_pops
 				}
 			}
+			unemploy_pop = yes
+			kill_pop = yes
 		}
 		destroy_colony = yes
 		add_modifier = {
@@ -1198,7 +1215,7 @@ planet_event = {
 							OR = {
 								is_materialist = yes
 								is_egalitarian = yes
-								has_authority = auth_machine_intelligence
+								is_machine_empire = yes
 							}
 						}
 					}
@@ -1215,7 +1232,7 @@ planet_event = {
 					who = from.owner
 				}
 				if = {
-					limit = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+					limit = { is_gestalt = no }
 					add_modifier = {
 						modifier = colossus_victim
 						days = 10800 # 30 years
@@ -1242,8 +1259,7 @@ planet_event = {
 					has_trait = trait_mechanical
 					has_trait = trait_machine_unit
 					has_trait = trait_hive_mind
-					is_species_class = ROBOT
-					is_species_class = MACHINE
+					is_robotic_species = yes
 					has_living_standard = { # Bio-trophies die without care
 						country = root.owner
 						type = living_standard_organic_trophy
@@ -1420,7 +1436,7 @@ planet_event = {
 					who = from.owner
 				}
 				if = {
-					limit = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+					limit = { is_gestalt = no }
 					add_modifier = {
 						modifier = colossus_victim
 						days = 10800 # 30 years
@@ -1620,6 +1636,67 @@ planet_event = {
 	}
 }
 
+planet_event = {
+	id = planet_destruction.605
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = holy_planet
+		any_country = {
+			has_ai_personality_behaviour = holy_planets # not awakened
+			NOT = { is_at_war_with = from.from.owner }
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_ai_personality_behaviour = holy_planets # not awakened
+				NOT = { is_at_war_with = from.from.owner }
+			}
+			save_event_target_as = outraged_FE
+		}
+		from.from.owner = {
+			save_event_target_as = FE_outrager
+			country_event = { id = planet_destruction.610 days = 5 }
+		}
+	}
+}
+
+# Deluged a holy world
+planet_event = {
+	id = planet_destruction.607
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = holy_planet
+		any_country = {
+			has_ai_personality_behaviour = holy_planets # not awakened
+			NOT = { is_at_war_with = from.owner }
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_ai_personality_behaviour = holy_planets # not awakened
+				NOT = { is_at_war_with = from.owner }
+			}
+			save_event_target_as = outraged_FE
+		}
+		from.owner = {
+			set_country_flag = holy_water_achievement
+			save_event_target_as = FE_outrager
+			country_event = { id = planet_destruction.615 days = 5 }
+		}
+		remove_modifier = holy_planet
+	}
+}
+
 country_event = {
 	id = planet_destruction.610
 	title = planet_destruction.610.name
@@ -1740,7 +1817,7 @@ country_event = {
 	option = {
 		name = planet_destruction.610.gesta # What is a single planet?
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 	}
 
@@ -1775,9 +1852,28 @@ country_event = {
 	immediate = {
 		declare_war = {
 			target = event_target:FE_outrager
-			name = "NAME_Holy_World_War"
+			name = {
+				key = "NAME_Holy_World_War"
+				variable_string = "This.MainAttacker.GetAdj"
+			}
 			# "[This.MainAttacker.GetAdj] Holy World War"
 			attacker_war_goal = wg_subjugation
+		}
+	}
+}
+
+country_event = {
+	id = planet_destruction.615
+	base = planet_destruction.610
+	option_clear = yes
+
+	option = {
+		name = planet_destruction.615.A
+		name = {
+			text = planet_destruction.615.spir
+			exclusive_trigger = {
+				owner = { is_spiritualist = yes }
+			}
 		}
 	}
 }
@@ -1792,7 +1888,94 @@ planet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		from.owner = { country_event = { id = planet_destruction.701 } }
+		if = {
+			limit = {
+				NOT = { is_planet_class = pc_ai }
+			}
+			from.owner = { country_event = { id = planet_destruction.701 } }
+		}
+
+		#Dismantle observation post
+		if = {
+			limit = {
+				has_observation_outpost = yes
+			}
+			observation_outpost_owner = {
+				country_event = { id = planet_destruction.1000 days = 1 }
+			}
+		}
+		if = {
+			limit = {
+				is_planet_class = pc_ai
+				NOT = { has_planet_flag = machine_lair }
+			}
+			#set_planet_flag = destroyed_by_colossus
+			set_planet_flag = planet_drenched
+			planet_event = { id = crisis.2040 }
+			create_ambient_object = {
+				location = this
+				type = habitat_cracker_object
+				duration = 5
+
+				use_3d_location = yes
+				base_angle_towards = star
+				entity_face_object = star
+
+				entity_offset = { min = 0 max = 0 }
+
+				entity_scale_to_size = yes
+				scale = 0.5
+			}
+		}
+
+		# Contingency Final Machine World
+		if = {
+			limit = {
+				is_planet_class = pc_ai
+				has_planet_flag = machine_lair
+			}
+			#set_planet_flag = destroyed_by_colossus
+			set_planet_flag = planet_drenched
+			from.owner = { save_event_target_as = final_machine_world_destroyer }
+			stop_crisis_sound = yes
+			planet_event = { id = crisis.2046 }
+			create_ambient_object = {
+				location = this
+				type = habitat_cracker_object
+				duration = 5
+
+				use_3d_location = yes
+				base_angle_towards = star
+				entity_face_object = star
+
+				entity_offset = { min = 0 max = 0 }
+
+				entity_scale_to_size = yes
+				scale = 0.5
+			}
+		}
+
+		# Swarm Situation Log counter
+		if = {
+			limit = {
+				exists = owner
+				owner = { is_country_type = swarm }
+			}
+			every_country = {
+				limit = { has_event_chain = "prethoryn_scourge_chain" }
+				add_event_chain_counter = {
+					event_chain = "prethoryn_scourge_chain"
+					counter = "infested_worlds"
+					amount = -1
+				}
+				add_event_chain_counter = {
+					event_chain = "prethoryn_scourge_chain"
+					counter = "infested_worlds_cleansed"
+					amount = 1
+				}
+			}
+			destroy_colony = yes
+		}
 
 		if = {
 			limit = {
@@ -1872,7 +2055,7 @@ planet_event = {
 					who = from.owner
 				}
 				if = {
-					limit = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+					limit = { is_gestalt = no }
 					add_modifier = {
 						modifier = colossus_victim
 						days = 10800 # 30 years
@@ -1970,7 +2153,12 @@ planet_event = {
 			}
 			set_owner = from.owner
 		}
-		change_pc = pc_ocean
+		if = {
+			limit = {
+				NOT = { is_planet_class = pc_broken }
+			}
+			change_pc = pc_ocean
+		}
 
 		# from = { #feedback suggests this isn't fun, but leaving it here in case we need it
 		# 	ice_mining_depletion_effect = yes
@@ -2074,6 +2262,323 @@ country_event = {
 # 		}
 # 	}
 # }
+
+
+# Toxified
+planet_event = {
+	id = planet_destruction.800
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		if = {
+			limit = {
+				colonizable_planet = yes
+				is_artificial = no
+			}
+			set_planet_flag = toxic_candidate
+		}
+		if = {
+			limit = {
+				NOT = { is_planet_class = pc_ai }
+			}
+			from.owner = { country_event = { id = planet_destruction.801 } }
+		}
+
+		#Dismantle observation post
+		if = {
+			limit = {
+				has_observation_outpost = yes
+			}
+			observation_outpost_owner = {
+				country_event = { id = planet_destruction.1000 days = 1 }
+			}
+		}
+
+		# Contingency Machine World
+		if = {
+			limit = {
+				is_planet_class = pc_ai
+				NOT = { has_planet_flag = machine_lair }
+			}
+			set_planet_flag = destroyed_by_colossus
+			set_planet_flag = planet_cracked #doesn't matter
+			planet_event = { id = crisis.2040 }
+		}
+
+		# Contingency Final Machine World
+		if = {
+			limit = {
+				is_planet_class = pc_ai
+				has_planet_flag = machine_lair
+			}
+			set_planet_flag = destroyed_by_colossus
+			set_planet_flag = planet_cracked
+			from.owner = { save_event_target_as = final_machine_world_destroyer }
+			stop_crisis_sound = yes
+			planet_event = { id = crisis.2046 }
+		}
+
+		# Swarm Situation Log counter
+		if = {
+			limit = {
+				exists = owner
+				owner = { is_country_type = swarm }
+			}
+			every_country = {
+				limit = { has_event_chain = "prethoryn_scourge_chain" }
+				add_event_chain_counter = {
+					event_chain = "prethoryn_scourge_chain"
+					counter = "infested_worlds"
+					amount = -1
+				}
+				add_event_chain_counter = {
+					event_chain = "prethoryn_scourge_chain"
+					counter = "infested_worlds_cleansed"
+					amount = 1
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				exists = owner
+				owner = {
+					NOT = { is_same_value = from.owner }
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+				}
+			}
+			# Generate threat
+			if = {
+				limit = {
+					is_colony = yes
+				}
+				add_threat = { who = from.owner amount = 3 }
+				# modifier for allies + those upset by genocide
+				every_country = {
+					limit = {
+						NOR = {
+							is_same_value = from.owner
+							is_same_value = root.owner
+							AND = {
+								has_federation = yes
+								is_in_federation_with = from.owner
+							}
+						}
+						OR = {
+							has_communications = from.owner
+							has_communications = root.owner
+						}
+						OR = {
+							AND = {
+								has_federation = yes
+								is_in_federation_with = root.owner
+							}
+							has_ai_personality = awakened_fallen_empire_xenophile
+							AND = {
+								is_country_type = default
+								OR = {
+									is_egalitarian = yes
+									is_xenophile = yes
+								}
+							}
+						}
+					}
+					if = {
+						limit = { root = { is_colony = no } }
+						add_opinion_modifier = {
+							modifier = opinion_toxified_an_uninhabited_world
+							who = from.owner
+						}
+					}
+					else = {
+						add_opinion_modifier = {
+							modifier = opinion_toxified_a_world
+							who = from.owner
+						}
+					}
+				}
+			}
+			else = {
+				add_threat = { who = from.owner amount = 1 }
+			}
+			# modifiers for victim
+			owner = {
+				if = {
+					limit = { root = { is_colony = no } }
+					add_opinion_modifier = {
+						modifier = opinion_toxified_my_uninhabited_world
+						who = from.owner
+					}
+				}
+				else = {
+					add_opinion_modifier = {
+						modifier = opinion_toxified_my_world
+						who = from.owner
+					}
+				}
+				if = {
+					limit = { is_gestalt = no }
+					add_modifier = {
+						modifier = colossus_victim
+						days = 10800 # 30 years
+					}
+				}
+			}
+			if = {
+				limit = {
+					exists = owner
+					owner = { is_country_type = primitive }
+				}
+				# modifier for allies + those upset by genocide
+				every_country = {
+					limit = {
+						NOT = { is_same_value = from.owner }
+						OR = {
+							has_communications = from.owner
+							has_communications = root.owner
+						}
+						OR = {
+							has_ai_personality = awakened_fallen_empire_xenophile
+							AND = {
+								is_country_type = default
+								NOR = {
+									is_xenophobe = yes
+									is_homicidal = yes
+									is_xenophile = yes
+								}
+							}
+						}
+					}
+					add_opinion_modifier = {
+						modifier = opinion_toxified_a_primitive_world
+						who = from.owner
+					}
+				}
+				every_country = {
+					limit = {
+						NOT = { is_same_value = from.owner }
+						OR = {
+							has_communications = from.owner
+							has_communications = root.owner
+						}
+						OR = {
+							has_ai_personality = awakened_fallen_empire_xenophile
+							AND = {
+								is_country_type = default
+								is_xenophile = yes
+							}
+						}
+					}
+					add_opinion_modifier = {
+						modifier = opinion_toxified_a_primitive_world_phile
+						who = from.owner
+					}
+				}
+			}
+		}
+		# Add war exhaustion to planet owner
+		if = {
+			limit = {
+				exists = owner
+			}
+			owner = {
+				if = {
+					limit = { #isn't the case when the crisis bombards planets, for instance
+						is_at_war_with = from.fleet.owner
+					}
+					add_static_war_exhaustion = {
+						attacker = from.fleet.owner
+						location = root
+						value_for_planet_destruction = 1.0
+					}
+				}
+			}
+		}
+		every_owned_pop = {
+			kill_pop = yes
+		}
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			destroy_fleet = orbital_defence
+		}
+		remove_all_buildings = yes
+
+		change_pc = pc_toxic
+		clear_deposits = yes
+
+		if = {
+			limit = { has_modifier = holy_planet }
+			remove_modifier = holy_planet
+		}
+
+		if = {
+			limit = {
+				has_planet_flag = toxic_candidate
+			}
+			add_modifier = { modifier = toxic_terraforming_candidate }
+			remove_planet_flag = toxic_candidate
+		}
+	}
+}
+
+country_event = {
+	id = planet_destruction.801
+	title = planet_destruction.801.name
+	desc = planet_destruction.801.desc
+	picture = GFX_evt_toxic_god
+	show_sound = event_super_explosion
+	location = from
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = fired_toxifier }
+		FROM = {
+			NOR = {
+				is_planet_class = pc_habitat
+				is_planet_class = pc_ringworld_habitable
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = fired_toxifier
+	}
+
+	option = {
+		name = OK
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+			}
+		}
+	}
+
+	option = {
+		name = planet_destruction.101.a.purifexter
+		trigger = {
+			OR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 60
+			min = 600
+			max = 3000
+		}
+	}
+}
+
 
 
 #Notification for dismantled outpost

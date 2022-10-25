@@ -12,15 +12,12 @@ totalitarian = {
 	resources = {
 		category = pop_factions
 		produces = {
-			influence = 2
+			unity = 0.5
 		}
 	}
 
 	is_potential = {
-		years_passed > 10
-		has_encountered_other_species = yes
-		NOT = { has_ethic = ethic_gestalt_consciousness }
-		NOT = { has_country_flag = suppress_vanilla_factions }
+		is_faction_allowed = yes
 	}
 
 	parameters = {
@@ -32,11 +29,13 @@ totalitarian = {
 		}
 	}
 
-	can_join_faction = {
+	can_join_pre_triggers = {
 		is_enslaved = no
-		is_shackled_robot = no
 		is_being_purged = no
-		NOT = { has_trait = trait_nerve_stapled }
+	}
+	can_join_faction = {
+		is_shackled_robot = no
+		can_think = yes
 	}
 
 	attraction = {
@@ -58,11 +57,16 @@ totalitarian = {
 				NOT = { exists = leader }
 			}
 		}
+		
+		modifier = {
+			factor = 0.8
+			NOT = { is_same_species = owner_species }
+		}
 
-		# Should really check for citizenship instead
+		# Checking for citizenship instead
 		modifier = {
 			factor = 0.25
-			NOT = { is_same_species = owner_species }
+			has_citizenship_rights = no
 		}
 	}
 
@@ -73,6 +77,21 @@ totalitarian = {
 			factor = 0.0
 			is_event_leader = yes
 		}
+		
+		modifier = {
+			factor = 0.5
+			leader_class = scientist
+		}
+		
+		modifier = {
+			factor = 2
+			leader_class = governor
+		}
+		
+		modifier = {
+			factor = 5
+			leader_class = ruler
+		}
 	}
 
 	demand = {
@@ -81,7 +100,7 @@ totalitarian = {
 		desc = "FACTION_OUTRAGED_GC_DESC"
 
 		fulfilled_effect = -20
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0.001
 
 		potential = {
 			exists = owner
@@ -103,7 +122,7 @@ totalitarian = {
 		desc = "TOTALITARIAN_AUTOCRACY_DESC"
 
 		fulfilled_effect = 10
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
@@ -183,6 +202,7 @@ totalitarian = {
 						}
 					}
 					has_civic = civic_slaver_guilds
+					has_civic = civic_indentured_assets
 				}
 			}
 		}
@@ -222,7 +242,7 @@ totalitarian = {
 		desc = "TOTALITARIAN_EXTRANATIONAL_AUTHORITY_DESC"
 
 		fulfilled_effect = 10
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
@@ -233,7 +253,10 @@ totalitarian = {
 
 		trigger = {
 			owner = {
-				is_overlord = yes
+				OR = {
+					is_overlord = yes
+					is_galactic_emperor = yes
+				}
 			}
 		}
 	}
@@ -255,7 +278,53 @@ totalitarian = {
 
 		trigger = {
 			owner = {
-				is_subject = yes
+				is_subject = no
+			}
+		}
+	}
+
+	demand = {
+		title = "TOTALITARIAN_BENEVOLENT_SUBJUGATION_POLICY"
+		unfulfilled_title = "TOTALITARIAN_NO_BENEVOLENT_SUBJUGATION_POLICY"
+		desc = "TOTALITARIAN_BENEVOLENT_SUBJUGATION_POLICY_DESC"
+
+		unfulfilled_effect = -10
+		fulfilled_effect = 0.001
+
+		potential = {
+			exists = owner
+			owner = {
+			is_subject = no
+				has_policy_flag = benevolent_terms
+			}
+		}
+
+		trigger = {
+			owner = {
+				NOT = { has_policy_flag = benevolent_terms }
+			}
+		}
+	}
+
+	demand = {
+		title = "TOTALITARIAN_OPPRESSIVE_SUBJUGATION_POLICY"
+		unfulfilled_title = "TOTALITARIAN_ADOPT_OPPRESSIVE_SUBJUGATION_POLICY"
+		desc = "TOTALITARIAN_OPPRESSIVE_SUBJUGATION_POLICY_DESC"
+
+		fulfilled_effect = 10
+		unfulfilled_effect = 0
+
+		potential = {
+			exists = owner
+			owner = {
+				is_subject = no
+				NOT = { has_policy_flag = benevolent_terms }
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_policy_flag = oppressive_terms
 			}
 		}
 	}
@@ -285,7 +354,7 @@ totalitarian = {
 			description = "EMBRACE_FACTION_DESC"
 
 			cost = {
-				influence = 500
+				unity = 5000
 			}
 
 			potential = {
@@ -293,7 +362,7 @@ totalitarian = {
 				owner = {
 					OR = {
 						is_subject = no
-						NOT = { is_subject_type = dominion }
+						NOT = { any_agreement = { agreement_preset = preset_dominion } }
 					}
 				}
 			}
@@ -420,6 +489,19 @@ totalitarian = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support > 0.3
+				}
+				modifier = {
+					add = 1000
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 200
+						}
+					}
+				}
 			}
 		}
 		suppress_faction = {
@@ -467,6 +549,19 @@ totalitarian = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support < 0.04
+				}
+				modifier = {
+					add = 1000
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 200
+						}
+					}
+				}
 			}
 		}
 	}

@@ -1,5 +1,106 @@
 # ChangeLog
 
+- AI is more likely to comply with galactic law regarding Amoebas, and gives more weight to the strength of its convictions.
+- Should have removed the last of the legacy AI economic code.
+- Purging fix now fires fire_on_action appropriately.
+- Corrected a bunch of is_robotic_species entries.
+- Handled is_robotic/lithoid/organic species checks in a more robust fashion.
+- Spiritualist FE is no longer isolationist.
+- AI will promote/suppress factions to maintain or regain unmodifiable civics. A few ascension perks also modify this.
+- Fanatic purifiers get 30 support for the supremacist faction instead of 10 because that's what they lose out on.
+- Successor khanates are not ignored for TECHNOLOGIST_TECH_LEAP.
+
+- More logic for resolutions. (Some inspired from SirBlackAxe)
+- Tomb world result of abandoned terraforming equipment won't kill radiotrophic or other nuke-loving species. (SirBlackAxe)
+- Fixed some logical oddities with the Wasteland Radiation and Pacifist Movement colony events. (SirBlackAxe)
+- AI is smarter about military applications of minor artifacts. (SirBlackAxe)
+- Zombies and Nerve Stapled pops have -1000% demotion time from specialist or ruler. (SirBlackAxe)
+- Apline habitability for AI preference. (SirBlackAxe)
+- Expel corporation functions for all war allies. (SirBlackAxe)
+- LGate activation tech marked as dangerous. (SirBlackAxe)
+- Allow single-planet empires to research colonial and galactic bureaucracy if they have sufficient pops. (SirBlackAxe)
+- Blocker techs no longer require multiple planets, so single-planet AI can clear their own blockers if needed. (SirBlackAxe)
+- Hive mind AI more likely to research terraforming techs. (SirBlackAxe)
+- Restrict zombies from full military service. (SirBlackAxe)
+- Prevent precursor initializers from clobbering resources. (SirBlackAxe)
+- Block gestalts from solar sails and crashed ship anomalies they cannot use. (SirBlackAxe)
+- Replaced is_regular_empire checks with is_gestalt checks in buildings, deposits, and districts for increased robustness. (SirBlackAxe)
+- Fixed industrial ecumenopolis colony designation. (SirBlackAxe)
+- Attempt to make sure leaders don't begin with slave optimization agendas unless appropriate. (SirBlackAxe)
+- Allow gestalts to sell artifacts to private collectors if they have galactic market access. (SirBlackAxe)
+- Further triggers to make the AI smarter about handling minor artifacts. (SirBlackAxe)
+- More logic for automation exceptions. (SirBlackAxe)
+- Disable robot assembly control if you can't actually assemble robots. (SirBlackAxe)
+- Add some AI logic to strip mining decision. (SirBlackAxe)
+- Fix for shattered ring world scrap miner job descriptions. (SirBlackAxe)
+- Catalytic machine empires only get artisan drones from industrial ringworld segments if they are servitors. (SirBlackAxe)
+- Sanity checks for agricultural jobs on habitats. (SirBlackAxe)
+- Living metal construction also requires mega-engineering. (SirBlackAxe)
+- Planets require at least 2 pops for auto-migration. (SirBlackAxe)
+- Weaker empires will avoid the lgates and l-cluster while the nanite crisis is active. (SirBlackAxe)
+- More thorough rules regarding bypass access. (SirBlackAxe)
+- Corporations won't become metalheads without criminal heritage. (SirBlackAxe)
+- Made some AI personalities be more flexible with traits. (SirBlackAxe)
+- Allow tomb worlds to be generated with high/low gravity. (SirBlackAxe)
+- Hive empath AIs will have gentler first contact policies. More militaristic gestalts less so. (SirBlackAxe)
+- Corrupt drones no longer produce trade value. (SirBlackAxe)
+- Criminals generate trade value from decadent lifestyle. (SirBlackAxe)
+- Corrupt and Deviant drones no longer check for living standards, and use pop_amenities_usage_no_happiness_base instead. (SirBlackAxe)
+- Factions no longer give -.001 approval for anything. It is either 0 (if the other option is positive) or +.001 (otherwise). (SirBlackAxe)
+- Increased visibility of faction demands that are normally hidden. (SirBlackAxe)
+- Moved is_enslaved and is_being_purged from can_join_faction to can_join_pre_triggers for totalitarians. (SirBlackAxe)
+- civic_indentured_assets now fulfills TOTALITARIAN_STRATIFICATION. (SirBlackAxe)
+- TOTALITARIAN_EXTRANATIONAL_AUTHORITY now fulfilled by being galactic emperor. (SirBlackAxe)
+- Attraction x0.25 for being a different species now for not being a citizen, as recommended by dev comment. (SirBlackAxe)
+- Giant massacre no longer goes away if you kill the last leviathan. (SirBlackAxe)
+- Scholariums count towards TECHNOLOGIST_RESEARCH_TREATIES. (SirBlackAxe)
+- Fallen Empires won't trigger synth envy. (SirBlackAxe)
+- Subjects can fulfill TECHNOLOGIST_TECH_LEAP. (SirBlackAxe)
+- Imperialists won't whine if you have no rivals just because you don't have anyone who you can rival. (SirBlackAxe)
+- Added weights to bias leaders to certain classes. (SirBlackAxe)
+- Fixed economic categories for fallen empire pop jobs. (SirBlackAxe)
+- Stop job bouncing because some jobs give high weight to not having the job. (SirBlackAxe)
+- Diadochi get a second random civic to start, and have better starting placement for their starbases. (SirBlackAxe)
+- Marauder mercenary general trait actually gets used. (SirBlackAxe)
+- Fallen empire humiliation also clears subject claims. (SirBlackAxe)
+- Communications jammer won't block unrelated starbase buildings. (SirBlackAxe)
+- AI won't build transit hubs unless a planet in the system could use them. (SirBlackAxe)
+- AI less likely to build shroud beacons if they already encompass them. (SirBlackAxe)
+- Don't allow disruption fields in pulsar systems. (SirBlackAxe)
+- Fixed check for oligarchic government. (SirBlackAxe)
+- Made sure military leaders can think. (SirBlackAxe)
+- Rogue Servitors can accept refugees too. (SirBlackAxe)
+- Added some missing checks for good food planets. (SirBlackAxe)
+- Excluded Wenkwort from being considered a good mineral planet if it is under custodianship. (SirBlackAxe)
+- Modified some events to prevent the creation of ghost pops. (SirBlackAxe)
+- More refinement in AI starbase handling. (SirBlackAxe)
+
+## October 11th
+
+- Fixed First League homeworld description as it is now habitable. (www)
+- Exempted Erudite from 'enigmatically unlucky'. (www)
+- Fixed crime/deviency error spam. (Inny)
+
+Paradox fixes:
+
+- They fixed the toxoid traits.
+- Fix for anomaly.3040, though they left the base chance in.
+
+## October 9th
+
+- (Patch bug) Fixed inappropriate removal of Military Academies.
+- (Patch bug) Fixed some incorrect things in economic categories.
+- (Patch bug) Replaced is_robotic with is_robotic_species so modders can interrupt.
+- Corrected missing is_phototrophic = no from some drone job triggers. (Inny)
+- Added cooldown to Brood Queen activation. This was commented out intentionally for some reason but I cannot fathom why. (Inny)
+
+## September 20th
+
+- 3.5 release
+
+- Fixed some scope errors.
+- Paradox has implemented something similar to my own terraforming fix, so that can go away.
+
 ## September 19th
 
 - Final 3.4 release.

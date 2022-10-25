@@ -5,12 +5,16 @@ buffer = {
 
 country = {
 	hidden = yes
+	use_for_ai_budget = yes
 	generate_mult_modifiers = {
 		produces
+		cost
 	}
+	#modifier category: economic_unit is fine
 
 	generate_add_modifiers = {
 		produces
+		cost
 	}
 }
 
@@ -19,17 +23,25 @@ country_base = {
 	parent = country
 	generate_add_modifiers = {
 		produces
+		upkeep
 	}
     generate_mult_modifiers = {
 		produces
+		upkeep
 	}
+	modifier_category = country
 }
 
 trade = {
+	use_for_ai_budget = yes
 }
 
 trade_routes = {
 	parent = trade
+}
+
+situations = {
+	parent = country
 }
 
 resolutions = {
@@ -40,29 +52,37 @@ resolutions = {
 edicts = {
 	use_for_ai_budget = yes
 	parent = country
+	ai_use_parent_for_resources_upkeep = {
+		energy
+		food
+	}
 	generate_mult_modifiers = {
 		cost
+		upkeep
 	}
+	modifier_category = country
 }
 
 rare_edicts = {
-	use_for_ai_budget = yes
+	use_for_ai_budget = no
 	parent = edicts
 	generate_mult_modifiers = {
 		cost
+		upkeep
 	}
 }
 
 ship_edicts = {
 	parent = rare_edicts
-	use_for_ai_budget = yes
+	use_for_ai_budget = no
 }
 
 campaigns = {
-	use_for_ai_budget = yes
+	use_for_ai_budget = no
 	parent = edicts
 	generate_mult_modifiers = {
 		cost
+		upkeep
 	}
 }
 
@@ -71,6 +91,7 @@ decisions = {
 	parent = country
 	 generate_mult_modifiers = {
 		cost
+		upkeep
 	}
 }
 
@@ -81,6 +102,8 @@ megastructures = {
 		consumer_goods
 	}
 	parent = country
+	modifier_category = megastructure
+
 	generate_mult_modifiers = {
 		cost
 		produces
@@ -106,6 +129,25 @@ megastructures_habitat = {
 		produces
 		upkeep
 	}
+	modifier_category = megastructure
+}
+
+megastructures_hyper_relay = {
+	parent = megastructures
+	use_for_ai_budget = yes
+	ai_use_parent_for_resources_upkeep = {
+		energy
+		consumer_goods
+	}
+	generate_add_modifiers = {
+		upkeep
+		cost
+	}
+	generate_mult_modifiers = {
+		upkeep
+		cost
+	}
+	modifier_category = megastructure
 }
 
 ships = {
@@ -125,6 +167,7 @@ ships = {
 	}
 
 	parent = country
+	modifier_category = ship
 
 	triggered_cost_modifier = {
 		key = starbase_shipyard_build
@@ -145,7 +188,7 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
+			is_scope_valid = yes
 			has_ship_owner_type = galactic_community
 		}
 	}
@@ -159,8 +202,11 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = corvette
+			is_scope_valid = yes
+			OR = {
+				is_ship_size = corvette
+				is_ship_size = offspring_corvette
+			}
 		}
 	}
 	
@@ -174,7 +220,10 @@ ships = {
 
 		trigger = {
 			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = corvette
+			OR = {
+				is_ship_size = corvette
+				is_ship_size = offspring_corvette
+			}
 		}
 	}
 
@@ -187,8 +236,11 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = destroyer
+			is_scope_valid = yes
+			OR = {
+				is_ship_size = destroyer
+				is_ship_size = offspring_destroyer
+			}
 		}
 	}
 	
@@ -202,7 +254,10 @@ ships = {
 
 		trigger = {
 			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = destroyer
+			OR = {
+				is_ship_size = destroyer
+				is_ship_size = offspring_destroyer
+			}
 		}
 	}
 	
@@ -215,8 +270,11 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = cruiser
+			is_scope_valid = yes
+			OR = {
+				is_ship_size = cruiser
+				is_ship_size = offspring_cruiser
+			}
 		}
 	}
 	
@@ -230,7 +288,10 @@ ships = {
 
 		trigger = {
 			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = cruiser
+			OR = {
+				is_ship_size = cruiser
+				is_ship_size = offspring_cruiser
+			}
 		}
 	}
 	
@@ -243,8 +304,11 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = battleship
+			is_scope_valid = yes
+			OR = {
+				is_ship_size = battleship
+				is_ship_size = offspring_battleship
+			}
 		}
 	}
 	
@@ -258,7 +322,10 @@ ships = {
 
 		trigger = {
 			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = battleship
+			OR = {
+				is_ship_size = battleship
+				is_ship_size = offspring_battleship
+			}
 		}
 	}
 	
@@ -298,13 +365,13 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
+			is_scope_valid = yes
 			is_ship_size = military_station_small
 		}
 	}
-	
+
 	triggered_upkeep_modifier = {
-		key = ship_military_station_small
+		key = shipsize_military_station_small
 		use_parent_icon = yes
 		modifier_types = {
 			mult
@@ -312,11 +379,11 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
+			is_scope_valid = yes
 			is_ship_size = military_station_small
 		}
 	}
-	
+
 	triggered_cost_modifier = {
 		key = ship_science
 		use_parent_icon = yes
@@ -326,11 +393,45 @@ ships = {
 		}
 
 		trigger = {
-			is_scope_valid = yes #When called from ship designer the design is not valid yet.
+			is_scope_valid = yes
 			is_ship_class = shipclass_science_ship
 		}
 	}
-	
+
+	triggered_cost_modifier = {
+		key = ship_military
+		use_parent_icon = yes
+		modifier_types = {
+			mult
+			add
+		}
+
+		trigger = {
+			is_scope_valid = yes
+			OR = {
+				is_ship_class = shipclass_military
+				is_ship_class = shipclass_military_special
+			}
+		}
+	}
+
+	triggered_upkeep_modifier = {
+		key = ship_military
+		use_parent_icon = yes
+		modifier_types = {
+			mult
+			add
+		}
+
+		trigger = {
+			is_scope_valid = yes
+			OR = {
+				is_ship_class = shipclass_military
+				is_ship_class = shipclass_military_special
+			}
+		}
+	}
+
 	triggered_upkeep_modifier = {
 		key = ship_science
 		use_parent_icon = yes
@@ -518,6 +619,7 @@ colonies = {
 	ai_use_parent_for_resources_upkeep = {
 		energy
 	}
+	modifier_category = ship
 
 	triggered_cost_modifier = {
 		key = ship_colonizer
@@ -616,6 +718,7 @@ stations = {
 	}
 
 	parent = country
+	modifier_category = deposit #it applies to the planet
 }
 
 station_gatherers = {
@@ -631,6 +734,7 @@ station_gatherers = {
 		cost
 		upkeep
 	}
+	modifier_category = deposit #it applies to the planet
 }
 
 station_researchers = {
@@ -646,6 +750,7 @@ station_researchers = {
 		cost
 		upkeep
 	}
+	modifier_category = deposit #it applies to the planet
 }
 
 station_observers = {
@@ -690,10 +795,12 @@ starbases = {
 	}
 
 	parent = country
+	modifier_category = starbase
 }
 
 starbase_stations = {
 	parent = starbases
+	modifier_category = starbase
 
 	triggered_cost_modifier = {
 		key = starbase_outpost
@@ -704,7 +811,10 @@ starbase_stations = {
 
 		trigger = {
 			is_scope_valid = yes #When called from ship designer the design is not valid yet.
-			is_ship_size = starbase_outpost
+			OR = {
+				is_ship_size = starbase_outpost
+				is_ship_size = orbital_ring_tier_1 #TODOJM: Remove?
+			}
 		}
 	}
 	
@@ -752,6 +862,7 @@ starbase_constructions = {
 		upkeep
 		produces
 	}
+	modifier_category = starbase
 }
 
 starbase_buildings = {
@@ -767,33 +878,7 @@ starbase_buildings = {
 		upkeep
 		produces
 	}
-}
-
-terraforming = {
-	parent = country
-	use_for_ai_budget = yes
-
-	generate_mult_modifiers = {
-		cost
-		upkeep
-	}
-	generate_add_modifiers = {
-		cost
-		upkeep
-	}
-}
-
-terraforming_ocean = {
-	parent = terraforming
-
-	generate_mult_modifiers = {
-		cost
-		upkeep
-	}
-	generate_add_modifiers = {
-		cost
-		upkeep
-	}
+	modifier_category = starbase
 }
 
 starbase_modules = {
@@ -809,6 +894,36 @@ starbase_modules = {
 		upkeep
 		produces
 	}
+	modifier_category = starbase
+}
+
+terraforming = {
+	parent = country
+	use_for_ai_budget = yes
+
+	generate_mult_modifiers = {
+		cost
+		upkeep
+	}
+	generate_add_modifiers = {
+		cost
+		upkeep
+	}
+	modifier_category = planet
+}
+
+terraforming_ocean = {
+	parent = terraforming
+
+	generate_mult_modifiers = {
+		cost
+		upkeep
+	}
+	generate_add_modifiers = {
+		cost
+		upkeep
+	}
+	modifier_category = planet
 }
 
 planets = {
@@ -817,6 +932,7 @@ planets = {
 	ai_use_parent_for_resources_upkeep = {
 		energy
 	}
+
 	generate_mult_modifiers = {
 		upkeep
 		produces
@@ -842,6 +958,7 @@ planet_structures = {
 		upkeep
 		produces
 	}
+	modifier_category = planet
 }
 
 planet_buildings = {
@@ -857,6 +974,7 @@ planet_buildings = {
 		upkeep
 		produces
 	}
+	modifier_category = planet
 }
 
 planet_buildings_strongholds = {
@@ -886,6 +1004,24 @@ planet_branch_offices = {
 		upkeep
 		produces
 	}
+	modifier_category = planet
+}
+
+planet_buildings_hab_capital = {
+	parent = planet_buildings
+
+	generate_mult_modifiers = {
+		cost
+		upkeep
+		produces
+	}
+
+	generate_add_modifiers = {
+		cost
+		upkeep
+		produces
+	}
+	modifier_category = planet
 }
 
 planet_branch_office_buildings = {
@@ -894,11 +1030,29 @@ planet_branch_office_buildings = {
 	generate_mult_modifiers = {
 		cost
 		upkeep
+		produces
 	}
 
 	generate_add_modifiers = {
 		cost
 		upkeep
+		produces
+	}
+}
+
+planet_holdings = {
+	parent = planets
+	
+	generate_mult_modifiers = {
+		cost
+		upkeep
+		produces
+	}
+
+	generate_add_modifiers = {
+		cost
+		upkeep
+		produces
 	}
 }
 
@@ -1094,6 +1248,10 @@ planet_districts_hab_leisure = {
 	}
 }
 
+planet_districts_orders_demesne = {
+	parent = planet_districts
+}
+
 planet_jobs = {
 	parent = planets
 
@@ -1101,6 +1259,7 @@ planet_jobs = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 	
 	generate_add_modifiers = {
 		produces
@@ -1187,7 +1346,7 @@ planet_jobs = {
 			}
 		}
 	}
-	
+
 	triggered_produces_modifier = { #use this one if deliberately excluding worker drones
 		key = planet_jobs_worker_only
 		modifier_types = {
@@ -1214,7 +1373,7 @@ planet_jobs = {
 		trigger = {
 			OR = {
 				is_pop_category = specialist
-				is_pop_category = complex_drone #should use planet_jobs_complex_drone wherever possible, this is just for cases like species traits
+				is_pop_category = complex_drone #planet_jobs_complex_drone is preferable for stuff visible during galaxy setup
 				AND = {
 					is_pop_category = slave
 					has_job_category = specialist
@@ -1222,7 +1381,7 @@ planet_jobs = {
 			}
 		}
 	}
-	
+
 	triggered_upkeep_modifier = {
 		key = planet_jobs_specialist
 		modifier_types = {
@@ -1253,7 +1412,7 @@ planet_jobs = {
 			}
 		}
 	}
-	
+
 	triggered_upkeep_modifier = {
 		key = planet_jobs_ruler
 		modifier_types = {
@@ -1286,7 +1445,7 @@ planet_jobs = {
 			is_pop_category = simple_drone
 		}
 	}
-	
+
 	triggered_upkeep_modifier = {
 		key = planet_jobs_simple_drone
 		modifier_types = {
@@ -1319,6 +1478,21 @@ planet_jobs = {
 			is_pop_category = complex_drone
 		}
 	}		
+
+	triggered_produces_modifier = {
+		key = planet_jobs_complex_and_simple_drone
+		modifier_types = {
+			mult
+			add
+		}
+		trigger = {
+			OR = {
+				is_pop_category = complex_drone
+				is_pop_category = simple_drone
+			}
+
+		}
+	}
 
 	triggered_produces_modifier = {
 		key = planet_jobs_robotic
@@ -1526,6 +1700,7 @@ planet_jobs_productive = { #this should contain all categories that primarily pr
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_bio_trophies = {
@@ -1538,6 +1713,7 @@ planet_bio_trophies = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_pop_assemblers = {
@@ -1550,6 +1726,7 @@ planet_pop_assemblers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_farmers = {
@@ -1563,6 +1740,7 @@ planet_farmers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_miners = {
@@ -1576,6 +1754,7 @@ planet_miners = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_sr_miners = { #added because we don't want miners_minerals_produces_add to apply to these
@@ -1584,6 +1763,11 @@ planet_sr_miners = { #added because we don't want miners_minerals_produces_add t
 		produces
 		upkeep
 	}
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
 }
 planet_livestock = {
 	parent = planet_jobs_productive
@@ -1595,6 +1779,7 @@ planet_livestock = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_technician = {
@@ -1607,47 +1792,38 @@ planet_technician = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
-planet_executives = {
-	parent = planet_jobs
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
+planet_politicians = {
+	parent = planet_jobs_productive
 	generate_mult_modifiers = {
 		produces
 		upkeep
 	}
-}
-
-planet_managers = {
-	parent = planet_jobs
 	generate_add_modifiers = {
 		produces
 		upkeep
 	}
-	generate_mult_modifiers = {
-		produces
-		upkeep
-	}
+	modifier_category = pop
 }
 
 planet_administrators = {
-	parent = planet_jobs
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
+	icon = "job_bureaucrat"
+	parent = planet_jobs_productive
 	generate_mult_modifiers = {
 		produces
 		upkeep
 	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
 }
 
-planet_bureaucrats = {
-	icon = "job_bureaucrat"
-	parent = planet_jobs
+planet_executives = {
+	parent = planet_politicians
 	generate_add_modifiers = {
 		produces
 		upkeep
@@ -1656,6 +1832,20 @@ planet_bureaucrats = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
+}
+
+planet_managers = {
+	parent = planet_administrators
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
 }
 
 planet_researchers = {
@@ -1669,6 +1859,7 @@ planet_researchers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_metallurgists = {
@@ -1682,10 +1873,11 @@ planet_metallurgists = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_culture_workers = {
-	parent = planet_jobs_productive
+	parent = planet_administrators
 	generate_add_modifiers = {
 		produces
 		upkeep
@@ -1694,10 +1886,11 @@ planet_culture_workers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_evaluators = {
-	parent = planet_jobs_productive
+	parent = planet_administrators
 	generate_add_modifiers = {
 		produces
         upkeep
@@ -1706,10 +1899,11 @@ planet_evaluators = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_synapse_drones = {
-	parent = planet_jobs_productive
+	parent = planet_administrators
 	generate_add_modifiers = {
 		produces
         upkeep
@@ -1718,10 +1912,11 @@ planet_synapse_drones = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_nobles = {
-	parent = planet_jobs
+	parent = planet_politicians
 	generate_add_modifiers = {
 		produces
 		upkeep
@@ -1730,6 +1925,7 @@ planet_nobles = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_necro_apprentices = {
@@ -1742,6 +1938,7 @@ planet_necro_apprentices = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_merchants = {
@@ -1754,6 +1951,7 @@ planet_merchants = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_entertainers = {
@@ -1766,6 +1964,7 @@ planet_entertainers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_soldiers = {
@@ -1778,10 +1977,11 @@ planet_soldiers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
-planet_necromancers = {
-	parent = planet_researchers
+planet_squires = {
+	parent = planet_jobs
 	generate_add_modifiers = {
 		produces
 		upkeep
@@ -1790,18 +1990,20 @@ planet_necromancers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_priests = {
-	parent = planet_jobs_productive
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
+	parent = planet_administrators
 	generate_mult_modifiers = {
 		produces
 		upkeep
 	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
 }
 
 planet_enforcers = {
@@ -1814,10 +2016,11 @@ planet_enforcers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_telepaths = {
-	parent = planet_enforcers
+	parent = planet_administrators
 	generate_add_modifiers = {
 		produces
 		upkeep
@@ -1826,6 +2029,7 @@ planet_telepaths = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_doctors = {
@@ -1838,6 +2042,7 @@ planet_doctors = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_refiners = {
@@ -1850,6 +2055,7 @@ planet_refiners = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_translucers = {
@@ -1862,6 +2068,7 @@ planet_translucers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_chemists = {
@@ -1874,11 +2081,68 @@ planet_chemists = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_artisans = {
 	icon = "job_artisan"
 	parent = planet_jobs_productive
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
+}
+
+planet_bath_attendants = {
+	icon = "job_bath_attendant"
+	parent = planet_jobs
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
+}
+
+planet_bath_attendants_hive = {
+	icon = "job_bath_attendant"
+	parent = planet_jobs
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
+}
+
+planet_bath_attendants_machine = {
+	icon = "job_bath_attendant"
+	parent = planet_jobs
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = pop
+}
+
+#DO NOT ASSIGN A PARENT TO THIS.
+#It is a special hack. The normal job modifiers apply via knights_unity/research_output_modifier script values in the jobs
+knights_independent_category = {
 	generate_mult_modifiers = {
 		produces
 		upkeep
@@ -1894,6 +2158,7 @@ planet_pops = {
 	generate_mult_modifiers = {
 		upkeep
 	}
+	modifier_category = pop
 
 	triggered_upkeep_modifier = {
 		key = planet_pops_robotics
@@ -1932,11 +2197,14 @@ planet_pops = {
 unemployment_resources = {
 	parent = planet_pops
 	generate_add_modifiers = {
+		produces
 		upkeep
 	}
 	generate_mult_modifiers = {
+		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_precursor = {
@@ -1949,6 +2217,7 @@ pop_category_precursor = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_xeno_ward = {
@@ -1961,6 +2230,7 @@ pop_category_xeno_ward = {
         produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_pre_sapients = {
@@ -1973,6 +2243,7 @@ pop_category_pre_sapients = {
         produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_purge = {
@@ -1985,11 +2256,12 @@ pop_category_purge = {
         produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_bio_trophy = {
 	parent = planet_pops
-    generate_add_modifiers = {
+	generate_add_modifiers = {
     	produces
 		upkeep
 	}
@@ -1997,6 +2269,7 @@ pop_category_bio_trophy = {
         produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_slave = {
@@ -2009,6 +2282,7 @@ pop_category_slave = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_robot = {
@@ -2021,6 +2295,7 @@ pop_category_robot = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_drones = {
@@ -2033,6 +2308,7 @@ pop_category_drones = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_workers = {
@@ -2045,6 +2321,7 @@ pop_category_workers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_specialists = {
@@ -2057,6 +2334,7 @@ pop_category_specialists = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_rulers = {
@@ -2069,6 +2347,7 @@ pop_category_rulers = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 pop_category_assimilation = {
@@ -2081,6 +2360,7 @@ pop_category_assimilation = {
 		produces
 		upkeep
 	}
+	modifier_category = pop
 }
 
 planet_deposits = {
@@ -2117,10 +2397,13 @@ deposit_blockers = {
 	use_for_ai_budget = yes
 	generate_add_modifiers = {
 		cost
+		produces
 	}
 	generate_mult_modifiers = {
 		cost
+		produces
 	}
+	modifier_category = deposit
 
 	ai_use_parent_for_resources_upkeep = {
 		energy
@@ -2129,8 +2412,23 @@ deposit_blockers = {
 	parent = country
 }
 
+deposit_blockers_natural = {
+	generate_add_modifiers = {
+		cost
+		produces
+	}
+	generate_mult_modifiers = {
+		cost
+		produces
+	}
+	modifier_category = deposit
+
+	parent = deposit_blockers
+}
+
 armies = {
 	use_for_ai_budget = yes
+
 	generate_add_modifiers = {
 		cost
 		upkeep
@@ -2139,6 +2437,7 @@ armies = {
 		cost
 		upkeep
 	}
+	modifier_category = army
 
 	ai_use_parent_for_resources_upkeep = {
 		energy
@@ -2157,6 +2456,7 @@ leaders = {
 		cost
 		upkeep
 	}
+	modifier_category = leader
 
 	ai_use_parent_for_resources_upkeep = {
 		energy
@@ -2229,36 +2529,13 @@ diplomacy = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 # Country wide modifier collection
 country_container = {
 	hidden = yes
 	parent = country
-}
-
-country_suppression = {
-	parent = country_container
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
-	generate_mult_modifiers = {
-		produces
-		upkeep
-	}
-}
-
-country_promotion = {
-	parent = country_container
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
-	generate_mult_modifiers = {
-		produces
-		upkeep
-	}
 }
 
 country_monuments = {
@@ -2271,6 +2548,7 @@ country_monuments = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_ambition = {
@@ -2283,6 +2561,7 @@ country_ambition = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_federation_perks = {
@@ -2295,6 +2574,7 @@ country_federation_perks = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_civics = {
@@ -2307,6 +2587,7 @@ country_civics = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_ai_uprising = {
@@ -2319,6 +2600,7 @@ country_ai_uprising = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_covenant = {
@@ -2331,6 +2613,7 @@ country_covenant = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_dessanu = {
@@ -2343,6 +2626,7 @@ country_dessanu = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_extended_payout = {
@@ -2355,6 +2639,7 @@ country_extended_payout = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_shoulders = {
@@ -2367,6 +2652,7 @@ country_shoulders = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_galactic_standard = {
@@ -2379,6 +2665,7 @@ country_galactic_standard = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_concessions = {
@@ -2391,6 +2678,7 @@ country_concessions = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_first_contact = {
@@ -2403,6 +2691,7 @@ country_first_contact = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_custodian = {
@@ -2415,6 +2704,7 @@ country_custodian = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_tech = {
@@ -2427,6 +2717,7 @@ country_tech = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_traditions = {
@@ -2439,6 +2730,7 @@ country_traditions = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_ruler = {
@@ -2451,6 +2743,7 @@ country_ruler = {
 		produces
 		upkeep
 	}
+	modifier_category = country
 }
 
 country_ethic = {
@@ -2463,17 +2756,47 @@ country_ethic = {
 		produces
 		upkeep
 	}
+	modifier_category = country
+}
+
+country_first_league_homeworld = {
+	parent = country_container
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = country
+}
+
+country_power_projection = {
+	parent = country_container
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = country
 }
 
 pop_factions = {
 	parent = country
 	generate_mult_modifiers = {
 		produces
+		upkeep
 	}
 
 	generate_add_modifiers = {
 		produces
+		upkeep
 	}
+	modifier_category = country #pop factions category currently unused
 }
 
 subjects = {
@@ -2485,6 +2808,10 @@ federation = {
 	generate_add_modifiers = {
 		produces
 	}
+	generate_mult_modifiers = {
+		produces
+	}
+	modifier_category = country
 }
 
 rivalries = {
@@ -2501,10 +2828,24 @@ rivalries = {
 
 non_aggression_pacts = {
 	parent = diplomacy
+	generate_mult_modifiers = {
+		upkeep
+	}
+
+	generate_add_modifiers = {
+		upkeep
+	}
 }
 
 migration_pacts = {
 	parent = diplomacy
+	generate_mult_modifiers = {
+		upkeep
+	}
+
+	generate_add_modifiers = {
+		upkeep
+	}
 }
 
 research_agreements = {
@@ -2558,6 +2899,7 @@ monthly_trades = {
 	generate_mult_modifiers = {
 		produces
 	}
+	modifier_category = country
 }
 
 claims = {
@@ -2565,8 +2907,12 @@ claims = {
 	parent = country
 }
 
-subject_tax = {
+agreement_proposals = {
+	use_for_ai_budget = yes
 	parent = diplomacy
+}
+
+subject_tax = {
 }
 
 envoy_costs = {
@@ -2582,6 +2928,12 @@ diplomatic_networking = {
 }
 
 subject_integration = {
+}
+
+overlord_subsidy = {
+}
+
+specialist_subject_conversion = {
 }
 
 relics = {
@@ -2612,6 +2964,11 @@ sector = {
 menace = {
 }
 
+traditions = {
+		use_for_ai_budget = yes
+		parent = country
+}
+
 operations = {
 	use_for_ai_budget = yes
 	ai_use_parent_for_resources_upkeep = {
@@ -2626,4 +2983,17 @@ operations = {
 		upkeep
 	}
 	parent = country
+	modifier_category = espionage
+}
+
+country_situations = {
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	modifier_category = country
 }

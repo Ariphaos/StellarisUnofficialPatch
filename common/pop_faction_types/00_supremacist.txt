@@ -12,15 +12,12 @@ supremacist = {
 	resources = {
 		category = pop_factions
 		produces = {
-			influence = 2
+			unity = 0.5
 		}
 	}
 
 	is_potential = {
-		years_passed > 10
-		has_encountered_other_species = yes
-		NOT = { has_ethic = ethic_gestalt_consciousness }
-		NOT = { has_country_flag = suppress_vanilla_factions }
+		is_faction_allowed = yes
 	}
 
 	parameters = {
@@ -39,7 +36,7 @@ supremacist = {
 
 	can_join_faction = {
 		is_shackled_robot = no
-		NOT = { has_trait = trait_nerve_stapled }
+		can_think = yes
 		owner = {
 			NOR = {
 				has_ethic = ethic_pacifist
@@ -77,6 +74,11 @@ supremacist = {
 			factor = 0.5
 			leader_class = scientist
 		}
+		
+		modifier = {
+			factor = 2
+			leader_class = governor
+		}
 
 		modifier = {
 			factor = 0
@@ -102,7 +104,7 @@ supremacist = {
 		desc = "FACTION_OUTRAGED_GC_DESC"
 
 		fulfilled_effect = -20
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0.001
 
 		potential = {
 			exists = owner
@@ -278,7 +280,7 @@ supremacist = {
 		unfulfilled_title = "SUPREMACIST_NO_DOMINATION"
 
 		fulfilled_effect = 10
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
@@ -287,8 +289,9 @@ supremacist = {
 				any_relation = {
 					is_country_type = default
 					has_communications = root.owner
-					NOT = {
+					NOR = {
 						is_in_federation_with = root.owner
+						has_defensive_pact = root.owner
 					}
 				}
 			}
@@ -306,8 +309,8 @@ supremacist = {
 		unfulfilled_title = "SUPREMACIST_NOT_FANATIC_PURIFIERS"
 		desc = "SUPREMACIST_FANATIC_PURIFIERS_DESC"
 
-		fulfilled_effect = 10
-		unfulfilled_effect = -0.001
+		fulfilled_effect = 30
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
@@ -329,15 +332,18 @@ supremacist = {
 		desc = "SUPREMACIST_GIANT_MASSACRE_DESC"
 
 		fulfilled_effect = 10
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
 			owner = {
 				host_has_dlc = "Leviathans Story Pack"
-				any_country = {
-					is_guardian_country = yes
-					has_communications = prev
+				OR = {
+					has_country_flag = killed_guardian
+					any_country = {
+						is_guardian_country = yes
+						has_communications = prev
+					}
 				}
 			}
 		}
@@ -355,12 +361,22 @@ supremacist = {
 		desc = "SUPREMACIST_PROCLAIM_SUPREMACY_DESC"
 
 		fulfilled_effect = 5
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
 			owner = {
 				has_modifier = proclaim_superiority
+				OR = {
+					has_modifier = proclaim_superiority
+					AND = {
+						is_xenophobe = yes
+						resource_stockpile_compare = {
+							resource = minor_artifacts
+							value >= 1
+						}
+					}
+				}
 			}
 		}
 
@@ -399,7 +415,7 @@ supremacist = {
 		desc = "STRONG_DIPLO_STANCE_DESC"
 
 		fulfilled_effect = 10
-		unfulfilled_effect = -0.001
+		unfulfilled_effect = 0
 
 		potential = {
 			exists = owner
@@ -428,7 +444,7 @@ supremacist = {
 		unfulfilled_title = "WEAK_DIPLO_STANCE"
 		desc = "WEAK_DIPLO_STANCE_DESC"
 
-		fulfilled_effect = 0.01
+		fulfilled_effect = 0.001
 		unfulfilled_effect = -10
 
 		potential = {
@@ -472,6 +488,28 @@ supremacist = {
 		}
 	}
 
+	demand = {
+		title = "SUPREMACIST_OPPRESSIVE_SUBJUGATION_POLICY"
+		unfulfilled_title = "SUPREMACIST_NO_OPPRESSIVE_SUBJUGATION_POLICY"
+		desc = "SUPREMACIST_NO_OPPRESSIVE_SUBJUGATION_POLICY_DESC"
+
+		unfulfilled_effect = -5
+		fulfilled_effect = 10
+
+		potential = {
+			exists = owner
+			owner = {
+				is_subject = no
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_policy_flag = oppressive_terms
+			}
+		}
+	}
+
 	on_create = {
 		pop_faction_event = { id = factions.1 }
 	}
@@ -497,7 +535,7 @@ supremacist = {
 			description = "EMBRACE_FACTION_DESC"
 
 			cost = {
-				influence = 500
+				unity = 5000
 			}
 
 			potential = {
@@ -505,7 +543,7 @@ supremacist = {
 				owner = {
 					OR = {
 						is_subject = no
-						NOT = { is_subject_type = dominion }
+						NOT = { any_agreement = { agreement_preset = preset_dominion } }
 					}
 				}
 			}
@@ -574,12 +612,13 @@ supremacist = {
 					}
 				}
 				modifier = {
-					factor = 0
-					owner = { has_valid_civic = civic_fanatic_purifiers }
+					factor = 1000
+					owner = { has_invalid_civic = civic_fanatic_purifiers }
 				}
 				modifier = {
 					factor = 0
-					NOT = {
+					NOR = {
+						owner = { has_invalid_civic = civic_fanatic_purifiers }
 						owner = {
 							exists = ruler
 							ruler = {
@@ -620,6 +659,20 @@ supremacist = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support < 0.50
+					owner = { has_civic = civic_fanatic_purifiers }
+				}
+				modifier = {
+					factor = 0
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 800
+						}
+					}
+				}
 			}
 		}
 		cancel_promote_faction = {
@@ -639,6 +692,24 @@ supremacist = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support > 0.50
+				}
+				modifier = {
+					add = 1000
+					support > 0.30
+					NOT = { owner = { has_civic = civic_fanatic_purifiers } }
+				}
+				modifier = {
+					add = 1000
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 200
+						}
+					}
+				}
 			}
 		}
 		suppress_faction = {
@@ -696,6 +767,19 @@ supremacist = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support < 0.04
+				}
+				modifier = {
+					add = 1000
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 200
+						}
+					}
+				}
 			}
 		}
 	}

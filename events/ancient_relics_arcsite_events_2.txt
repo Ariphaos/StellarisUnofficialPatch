@@ -1,11 +1,7 @@
 ################################
 #
 # Ancient Relics Events
-#
-# Written by Henrik Thyrwall, Douglas Furen,
-# Stephen Muray, Joachim Holmsen,
-# Pierre du Plessis, Victor Haeggman
-# and Hadrien Buytaers
+# Written by Henrik Thyrwall et al
 #
 ################################
 
@@ -157,6 +153,15 @@ country_event = {
 					}
 				}
 			}
+			if = {
+				limit = {
+					is_hive_empire = yes
+				}
+				modify_species = {
+					species = event_target:omnicodex_species
+					add_trait = trait_hive_mind
+				}
+			}
 		}
 		custom_tooltip = ancrel.6000.a.tooltip
 	}
@@ -182,6 +187,15 @@ country_event = {
 					create_pop = {
 						species = event_target:omnicodex_species
 					}
+				}
+			}
+			if = {
+				limit = {
+					is_hive_empire = yes
+				}
+				modify_species = {
+					species = event_target:omnicodex_species
+					add_trait = trait_hive_mind
 				}
 			}
 		}
@@ -211,6 +225,15 @@ country_event = {
 					}
 				}
 			}
+			if = {
+				limit = {
+					is_hive_empire = yes
+				}
+				modify_species = {
+					species = event_target:omnicodex_species
+					add_trait = trait_hive_mind
+				}
+			}
 		}
 		custom_tooltip = ancrel.6000.c.tooltip
 	}
@@ -238,6 +261,15 @@ country_event = {
 					}
 				}
 			}
+			if = {
+				limit = {
+					is_hive_empire = yes
+				}
+				modify_species = {
+					species = event_target:omnicodex_species
+					add_trait = trait_hive_mind
+				}
+			}
 		}
 		custom_tooltip = ancrel.6000.d.tooltip
 	}
@@ -263,6 +295,15 @@ country_event = {
 					create_pop = {
 						species = event_target:omnicodex_species
 					}
+				}
+			}
+			if = {
+				limit = {
+					is_hive_empire = yes
+				}
+				modify_species = {
+					species = event_target:omnicodex_species
+					add_trait = trait_hive_mind
 				}
 			}
 		}
@@ -591,6 +632,23 @@ event = {
 	}
 
 	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_global_flag = player_gets_zarqlan
+					has_global_flag = ai_gets_zarqlan
+				}
+			}
+			random_list = {
+				75 = {
+					set_global_flag = player_gets_zarqlan
+				}
+				25 = {
+					set_global_flag = ai_gets_zarqlan
+				}
+			}
+		}
+
 		random_list = {
 			100 = {}
 			5 = {
@@ -605,12 +663,26 @@ event = {
 					}
 					save_event_target_as = spiritualist_fallen_empire
 				}
-				random_playable_country = {
+				if = {
 					limit = {
-						is_ai = no
-						has_communications = event_target:spiritualist_fallen_empire
+						has_global_flag = player_gets_zarqlan
 					}
-					country_event = { id = ancrel.6099 days = 1 random = 350 }
+					random_playable_country = {
+						limit = {
+							is_ai = no
+							has_communications = event_target:spiritualist_fallen_empire
+						}
+						country_event = { id = ancrel.6099 days = 1 random = 350 }
+					}
+				}
+				else = {
+					random_playable_country = {
+						limit = {
+							is_ai = yes
+							has_communications = event_target:spiritualist_fallen_empire
+						}
+						country_event = { id = ancrel.6099 days = 1 random = 350 }
+					}
 				}
 			}
 		}
@@ -879,6 +951,15 @@ country_event = {
 	immediate = {
 		if = {
 			limit = {
+				NOT = { is_variable_set = zarqlan_fervor }
+			}
+			set_variable = {
+				which = zarqlan_fervor
+				value = 1
+			}
+		}
+		if = {
+			limit = {
 				any_country = {
 					OR = {
 						is_country_type = fallen_empire
@@ -932,11 +1013,11 @@ country_event = {
 					effect = {
 						set_owner = event_target:spiritualist_fallen_empire # For ship names
 						while = {
-							count = 1
+							count = root.zarqlan_fervor
 							create_fallen_empire_large_ship = yes
 						}
 						while = {
-							count = 3
+							count = root.value:zarqlan_fervor_three
 							create_fallen_empire_small_ship = yes
 						}
 						set_location = {
@@ -946,6 +1027,18 @@ country_event = {
 						}
 						set_owner = root
 					}
+				}
+			}
+			if = {
+				limit = {
+					check_variable = {
+						which = zarqlan_fervor
+						value <= 4
+					}
+				}
+				change_variable = {
+					which = zarqlan_fervor
+					value = 1
 				}
 			}
 		}
@@ -971,7 +1064,7 @@ country_event = {
 					effect = {
 						set_owner = root
 						while = {
-							count = 4
+							count = root.value:zarqlan_fervor_three
 							create_ship = {
 								name = random
 								design = "NAME_Zealot"
@@ -984,6 +1077,18 @@ country_event = {
 							angle = random
 						}
 					}
+				}
+			}
+			if = {
+				limit = {
+					check_variable = {
+						which = zarqlan_fervor
+						value <= 4
+					}
+				}
+				change_variable = {
+					which = zarqlan_fervor
+					value = 1
 				}
 			}
 		}
@@ -1658,8 +1763,19 @@ country_event = {
 			90 = {}
 			10 = {
 				modifier = {
-					factor = 1.5
+					factor = 15
 					has_valid_civic = civic_barbaric_despoilers
+				}
+				modifier = {
+					factor = 6.67 # 50% chance of success
+					any_war = {
+						any_attacker = { is_same_value = root }
+						any_defender = { is_same_value = from }
+						using_war_goal = {
+							type = wg_plunder
+							owner = attacker
+						}
+					}
 				}
 				country_event = { id = ancrel.6500 }
 			}
@@ -1682,6 +1798,24 @@ country_event = {
 		steal_relic = {
 			target = event_target:victim
 			relic = random
+		}
+		if = {
+			limit = {
+				has_relic = r_war_forge
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = {
+							is_variable_set = cybrex_count
+						}
+					}
+					set_variable = {
+						which = cybrex_count
+						value = 1
+					}
+				}
+			}
 		}
 	}
 
@@ -3238,7 +3372,7 @@ fleet_event = {
 		owner = {
 			if = {
 				limit = {
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 				}
 				add_modifier = {
 					modifier = debug_subroutine
@@ -3247,7 +3381,7 @@ fleet_event = {
 			}
 			else_if = {
 				limit = {
-					has_authority = auth_hive_mind
+					is_hive_empire = yes
 				}
 				add_modifier = {
 					modifier = glory_to_the_many
@@ -3317,7 +3451,7 @@ fleet_event = {
 		owner = {
 			if = {
 				limit = {
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 				}
 				add_modifier = {
 					modifier = debug_subroutine
@@ -3326,7 +3460,7 @@ fleet_event = {
 			}
 			else_if = {
 				limit = {
-					has_authority = auth_hive_mind
+					is_hive_empire = yes
 				}
 				add_modifier = {
 					modifier = glory_to_the_many
@@ -3730,7 +3864,7 @@ fleet_event = {
 		owner = {
 			if = {
 				limit = {
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 				}
 				if = {
 					limit = {
@@ -3762,7 +3896,7 @@ fleet_event = {
 			}
 			else_if = {
 				limit = {
-					has_authority = auth_hive_mind
+					is_hive_empire = yes
 				}
 				if = {
 					limit = {
@@ -5466,14 +5600,14 @@ country_event = {
 					factor = 0
 					country_uses_consumer_goods = no
 				}
-				country_event = { id = ancrel.10007 } 
+				country_event = { id = ancrel.10007 }
 			}
 			1 = {
 				modifier = {
 					factor = 0
 					country_uses_food = no
 				}
-				country_event = { id = ancrel.10008 } 
+				country_event = { id = ancrel.10008 }
 			}
 			1 = { country_event = { id = ancrel.10009 } }
 		}
@@ -5744,6 +5878,19 @@ country_event = {
 			modifier = "artifact_find_military_application_shield_damage"
 			days = 1800
 		}
+		# Added
+		ai_chance = {
+			factor = 5
+			modifier = {
+				factor = 2
+				is_preferred_weapons = weapon_type_energy
+			}
+			modifier = {
+				factor = 10
+				has_global_flag = extradimensional_invasion_happened
+				NOT = { has_global_flag = extradimensional_invasion_defeated }
+			}
+		}
 	}
 	option = {
 		name = "artifact_find_military_application_armor_damage"
@@ -5751,6 +5898,19 @@ country_event = {
 		add_modifier = {
 			modifier = "artifact_find_military_application_armor_damage"
 			days = 1800
+		}
+		# Added
+		ai_chance = {
+			factor = 5
+			modifier = {
+				factor = 2
+				NOT = { is_preferred_weapons = weapon_type_energy }
+			}
+			modifier = {
+				factor = 10
+				has_global_flag = prethoryn_invasion_happened
+				NOT = { has_global_flag = prethoryn_invasion_defeated }
+			}
 		}
 	}
 	option = {
@@ -5949,7 +6109,7 @@ country_event = {
 			if = {
 				limit = {
 					OR = {
-						NOT = { has_authority = auth_machine_intelligence }
+						is_machine_empire = no
 						has_civic = civic_machine_assimilator
 						has_civic = civic_machine_servitor
 					}
@@ -5974,7 +6134,7 @@ country_event = {
 			else_if = {
 				limit = {
 					OR = {
-						NOT = { has_authority = auth_machine_intelligence }
+						is_machine_empire = no
 						has_civic = civic_machine_assimilator
 						has_civic = civic_machine_servitor
 					}
@@ -6929,7 +7089,7 @@ country_event = {
 			if = {
 				limit = {
 					NOT = { has_technology = tech_psionic_theory } # Psionic Theory
-					NOT = { has_ethic = ethic_gestalt_consciousness }
+					is_gestalt = no
 				}
 				add_research_option = tech_psionic_theory
 				add_tech_progress = {
@@ -7343,6 +7503,26 @@ country_event = {
 			}
 		}
 	}
+	after = {
+		from = {
+			if = {
+				limit = {
+					num_owned_planets > 0
+					NOT = { has_country_flag = horrific_celebration }
+				}
+				set_country_flag = horrific_celebration
+				generate_parade_city = yes
+				start_situation = {
+					type = leviathan_celebration_opportunity
+					target = event_target:parade_city
+					effect = {
+						set_situation_flag = celebration_elder_one
+						set_situation_flag = standard_unity_reward
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -7737,6 +7917,532 @@ fleet_event = {
 	}
 }
 
+
+### Surveillance Supercomputer
+#Spawn event
+event = {
+	id = ancrel.12050
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		random_list = {
+			4 = { } # nothing
+			1 = {
+				random_rim_system = {
+					system_event = { id = ancrel.12055 }
+				}
+			}
+		}
+	}
+}
+
+system_event = {
+	id = ancrel.12055
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		spawn_system = {
+			min_distance >= 50
+			max_distance <= 100
+			direction = rimwards
+			initializer = surveillance_supercomputer_system
+			hyperlane = no
+		}
+	}
+}
+
+# First enter system (on_entering_system_first_time)
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = ancrel.12060
+	title = ancrel.12060.name
+	desc = ancrel.12060.desc
+	picture = GFX_evt_machine_space_battle
+	show_sound = event_red_alert
+	location = from
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = surveillance_supercomputer_system
+			any_fleet_in_system = {
+				owner = { has_country_flag = surveillance_bots }
+			}
+		}
+	}
+
+	option = {
+		name = BATTLESTATIONS
+	}
+}
+
+# Defeat them (on_fleet_destroyed_perp)
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = ancrel.12065
+	title = ancrel.12065.name
+	desc = ancrel.12065.desc
+	picture = GFX_evt_ship_in_orbit_3
+	show_sound = event_space_battle
+	location = fromfrom
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_country_flag = surveillance_bots
+			count_owned_fleet = {
+				limit = {
+					NOT = { is_same_value = root.fromfromfrom }
+				}
+				count = 0
+			}
+		}
+	}
+
+	option = { name = SPLENDID }
+}
+
+# Surveillance Supercomputer event 1
+fleet_event = {
+	id = ancrel.12070
+	title = ancrel.12070.name
+	desc = ancrel.12070.desc
+	picture = GFX_evt_busy_spaceport
+	show_sound = event_ghost_town
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = INTERESTING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.12075
+	title = ancrel.12075.name
+	desc = ancrel.12075.desc
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_laboratory_sound
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = PECULIAR
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.12080
+	title = ancrel.12080.name
+	desc = ancrel.12080.desc
+	picture = GFX_evt_robot_assembly_plant
+	show_sound = event_scanner
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = DISTURBING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.12085
+	title = ancrel.12085.name
+	desc = ancrel.12085.desc
+	picture = GFX_evt_spy_orb
+	show_sound = event_activating_unknown_technology
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = KEEP_SEARCHING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.12090
+	title = ancrel.12090.name
+	desc = ancrel.12090.desc
+	picture = GFX_evt_ai_planet
+	show_sound = event_mystic_reveal
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+		large_artifact_reward = yes
+	}
+
+	option = {
+		name = ancrel.12090.A
+		trigger = {
+			owner = { is_machine_empire = yes }
+		}
+		from.planet = {
+			change_pc = pc_machine
+			hidden_effect = {
+				set_owner = root.owner
+				create_species = {
+					class = MACHINE
+					name = NAME_Surveillance_Bots
+					portrait = random
+					traits = {
+						trait = trait_machine_unit
+						trait = trait_robot_logic_engines
+						trait = trait_robot_double_jointed
+						trait = trait_robot_enhanced_memory
+						trait = trait_robot_durable
+						trait = trait_robot_custom_made
+						trait = trait_robot_repurposed_hardware
+					}
+					effect = {
+						save_event_target_as = new_robots
+					}
+				}
+				add_building = building_machine_major_capital
+				add_building = building_machine_assembly_complex
+				while = {
+					count = 10
+					add_district = district_nexus
+				}
+				while = {
+					count = 5
+					add_district = district_industrial
+					add_district = district_generator_uncapped
+					add_district = district_mining_uncapped
+				}
+				while = {
+					count = 80
+					create_pop = {
+						species = event_target:new_robots
+					}
+				}
+			}
+		}
+
+		hidden_effect = {
+			owner = {
+				random = {
+					chance = 50
+					country_event = { id = ancrel.12095 days = 30 }
+				}
+			}
+		}
+	}
+	option = {
+		name = ancrel.12090.B
+		solar_system = {
+			spawn_megastructure = {
+				type = spy_orb_restored
+				planet = from.planet
+				graphical_culture = root.owner
+			}
+		}
+	}
+	option = {
+		name = ancrel.12090.C
+		allow = {
+			owner = { has_policy_flag = robots_allowed }
+		}
+		custom_tooltip = ancrel.12090.C.tooltip
+		hidden_effect = {
+			if = {
+				limit = {
+					owner = {
+						is_machine_empire = yes
+					}
+				}
+				create_species = {
+					class = MACHINE
+					name = NAME_Surveillance_Bots
+					portrait = random
+					traits = {
+						trait = trait_machine_unit
+						trait = trait_robot_logic_engines
+						trait = trait_robot_double_jointed
+						trait = trait_robot_enhanced_memory
+						trait = trait_robot_durable
+						trait = trait_robot_custom_made
+						trait = trait_robot_repurposed_hardware
+					}
+					effect = {
+						save_event_target_as = new_robots
+					}
+				}
+			}
+			else = {
+				create_species = {
+					class = ROBOT
+					name = NAME_Surveillance_Bots
+					portrait = random
+					traits = {
+						trait = trait_mechanical
+						trait = trait_robot_logic_engines
+						trait = trait_robot_double_jointed
+						trait = trait_robot_enhanced_memory
+						trait = trait_robot_durable
+						trait = trait_robot_custom_made
+						trait = trait_robot_repurposed_hardware
+					}
+					effect = {
+						save_event_target_as = new_robots
+					}
+				}
+			}
+			owner = {
+				while = {
+					count = 80
+					random_owned_planet = {
+						create_pop = {
+							species = event_target:new_robots
+						}
+						weights = {
+							base = 10
+							modifier = {
+								factor = 0.5
+								free_housing <= 0
+								num_free_districts = {
+									type = any
+									value <= 1
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		hidden_effect = {
+			owner = {
+				random = {
+					chance = 50
+					country_event = { id = ancrel.12095 days = 30 }
+				}
+			}
+		}
+	}
+	option = {
+		name = ancrel.12090.D
+		trigger = {
+			owner = { is_spiritualist = yes }
+		}
+		from.planet = {
+			add_deposit = d_alloys_25
+		}
+		hidden_effect = {
+			owner = {
+				random = {
+					chance = 50
+					country_event = { id = ancrel.12095 days = 30 }
+				}
+			}
+		}
+	}
+	option = {
+		name = ancrel.12090.E
+		custom_tooltip = ancrel.12090.E.tooltip
+		allow = {
+			owner = { is_spiritualist = no }
+		}
+		hidden_effect = {
+			from.planet = {
+				create_species = {
+					class = MACHINE
+					name = NAME_Surveillance_Bots
+					portrait = random
+					traits = {
+						trait = trait_robot_logic_engines
+						trait = trait_robot_double_jointed
+						trait = trait_robot_enhanced_memory
+						trait = trait_robot_durable
+						trait = trait_robot_custom_made
+						trait = trait_robot_repurposed_hardware
+					}
+					effect = {
+						save_event_target_as = new_robots
+					}
+				}
+				create_country = {
+					type = default
+					name = "NAME_Repurposed_Surveillance_Network"
+					species = event_target:new_robots
+					ethos = {
+						ethic = ethic_gestalt_consciousness
+					}
+					authority = auth_machine_intelligence
+					civics = random
+
+					effect = {
+						prev.solar_system.starbase = {
+							set_owner = prev
+						}
+						give_starting_resources_effect = yes
+						add_resource = {
+							unity = 1000000
+						}
+						copy_techs_from = { target = root.owner }
+						set_subject_of = {
+							who = root.owner
+						}
+					}
+				}
+				change_pc = pc_machine
+				while = {
+					count = 80
+					create_pop = {
+						species = event_target:new_robots
+					}
+				}
+				while = {
+					count = 10
+					add_district = district_nexus
+				}
+				while = {
+					count = 5
+					add_district = district_industrial
+					add_district = district_generator_uncapped
+					add_district = district_mining_uncapped
+				}
+				add_building = building_machine_major_capital
+				add_building = building_machine_assembly_complex
+				solar_system = {
+					if = {
+						limit = {
+							NOR = {
+								has_megastructure = gateway_0
+								has_megastructure = gateway_final
+							}
+						}
+						spawn_megastructure = { #a bit weird, but otherwise they will probably be trapped here forever
+							type = gateway_ruined
+							random_pos = yes
+							orbit_angle = 360
+						}
+					}
+				}
+			}
+			owner = {
+				random = {
+					chance = 50
+					country_event = { id = ancrel.12095 days = 30 }
+				}
+			}
+		}
+	}
+}
+
+# Follow-up, sometimes
+country_event = {
+	id = ancrel.12095
+	diplomatic_title = BLANK_STRING
+	title = TRANSMISSION
+	desc = ancrel.12095.desc
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = ancrel.12095.A
+	}
+	option = {
+		name = ancrel.12095.B
+	}
+	after = {
+		custom_tooltip = ancrel.12095.tooltip
+		hidden_effect = {
+			set_global_flag = endgame_crisis_early_start
+			every_playable_country = {
+				limit = {
+					NOT = { is_same_value = root }
+				}
+				country_event = { id = ancrel.12100 }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = ancrel.12100
+	diplomatic_title = BLANK_STRING
+	title = TRANSMISSION
+	desc = ancrel.12095.desc
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = ancrel.12100.A
+		custom_tooltip = ancrel.12095.tooltip
+	}
+}
+
+
 #Cool Reception
 country_event = {
 	id = ancrel.13000
@@ -8011,7 +8717,20 @@ fleet_event = {
 
 	option = {
 		name = CURIOUS
-		small_artifact_reward = yes
+		if = {
+			limit = { has_ancrel = yes }
+			small_artifact_reward = yes
+		}
+		else = {
+			owner = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = @tier1materialreward
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+			}
+		}
 	}
 }
 
@@ -8037,7 +8756,20 @@ fleet_event = {
 
 	option = {
 		name = INTRIGUING
-		small_artifact_reward = yes
+		if = {
+			limit = { has_ancrel = yes }
+			small_artifact_reward = yes
+		}
+		else = {
+			owner = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = @tier1materialreward
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+			}
+		}
 	}
 }
 
@@ -8063,7 +8795,20 @@ fleet_event = {
 
 	option = {
 		name = INTERESTING
-		small_artifact_reward = yes
+		if = {
+			limit = { has_ancrel = yes }
+			small_artifact_reward = yes
+		}
+		else = {
+			owner = {
+				add_monthly_resource_mult = {
+					resource = physics_research
+					value = @tier1materialreward
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+			}
+		}
 	}
 }
 
@@ -8089,7 +8834,20 @@ fleet_event = {
 
 	option = {
 		name = REMARKABLE
-		small_artifact_reward = yes
+		if = {
+			limit = { has_ancrel = yes }
+			small_artifact_reward = yes
+		}
+		else = {
+			owner = {
+				add_monthly_resource_mult = {
+					resource = physics_research
+					value = @tier1materialreward
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+			}
+		}
 	}
 }
 
@@ -8234,6 +8992,938 @@ country_event = {
 			set_global_flag = fumongus_dismantled
 			set_global_flag = fumongus_resolved
 			set_country_flag = fumongus_ours
+		}
+	}
+}
+
+# Rage Sage
+
+fleet_event = {
+	id = ancrel.14001
+	title = "ancrel.14001.name"
+	desc = "ancrel.14001.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = INTRIGUING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.14002
+	title = "ancrel.14002.name"
+	desc = "ancrel.14002.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = INTRIGUING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.14003
+	title = "ancrel.14003.name"
+	desc = "ancrel.14003.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.14003.a
+		small_artifact_reward = yes
+		hidden_effect = {
+			random_list = {
+				10 = { fleet_event = { id = ancrel.14004 } }
+				10 = { fleet_event = { id = ancrel.14005 } }
+			}
+		}
+	}
+
+	option = {
+		name = ancrel.14003.b
+		small_artifact_reward = yes
+		hidden_effect = {
+			random_list = {
+				10 = { fleet_event = { id = ancrel.14004 } }
+				10 = { fleet_event = { id = ancrel.14005 } }
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = ancrel.14004
+	title = "ancrel.14004.name"
+	desc = "ancrel.14004.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = ancrel.14004.a
+		small_artifact_reward = no
+		# small_influence_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.14005
+	title = "ancrel.14005.name"
+	desc = "ancrel.14005.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = ancrel.14005.a
+		small_artifact_reward = no
+		# small_influence_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.14006
+	title = "ancrel.14006.name"
+	desc = "ancrel.14006.desc"
+	picture = GFX_evt_derelict_interior
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	option = {
+		name = ancrel.14006.a
+		custom_tooltip = ancrel.14006.a.tooltip
+		small_artifact_reward = yes
+		owner = {
+			add_modifier = {
+				modifier = rage_sage_soldiers
+				days = -1
+			}
+		}
+	}
+
+	option = {
+		name = ancrel.14006.b
+		custom_tooltip = ancrel.14006.b.tooltip
+		owner = {
+			small_artifact_reward = yes
+			add_resource = { influence = 100 }
+		}
+	}
+}
+
+### Tiyanki Space Graveyard ###
+
+# Stage 1
+fleet_event = {
+	id = ancrel.14100
+	title = "ancrel.14100.name"
+	desc = {
+		trigger = {
+			owner = {
+				NOT = { has_civic = civic_reanimated_armies }
+			}
+		}
+		text = "ancrel.14100.desc"
+	}
+	desc = {
+		trigger = {
+			owner = {
+				has_civic = civic_reanimated_armies
+			}
+		}
+		text = "ancrel.14100.necro.desc"
+	}
+	picture = GFX_evt_gray_goo
+	show_sound = event_whispering
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = DIG
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 2
+fleet_event = {
+	id = ancrel.14200
+	title = "ancrel.14200.name"
+	desc = "ancrel.14200.desc"
+	picture = GFX_evt_genetic_modification
+	show_sound = event_laboratory_sound
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = INTRIGUING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 3
+fleet_event = {
+	id = ancrel.14300
+	title = "ancrel.14300.name"
+	desc = "ancrel.14300.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_dig_site
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = DIG
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 4
+fleet_event = {
+	id = ancrel.14400
+	title = "ancrel.14400.name"
+	desc = {
+		trigger = {
+			owner = {
+				NOT = { has_country_flag = encountered_elderly_tiyanki }
+			}
+		}
+		text = "ancrel.14400.desc"
+	}
+	desc = {
+		trigger = {
+			owner = {
+				has_country_flag = encountered_elderly_tiyanki
+			}
+		}
+		text = "ancrel.14400.matriarch.desc"
+	}
+	picture = GFX_evt_unspeakable_horror
+	show_sound = event_dig_site
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = FASCINATING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 4: the Core - alternate endings
+fleet_event = {
+	id = ancrel.14500
+	hide_window = yes
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	immediate = {
+		random_list = {
+			5 = { fleet_event = { id = ancrel.14510 } } #core intact
+			2 = {
+				modifier = {
+					factor = 2
+					owner = {
+						OR = { # higher chances of having smashed the core by accident if owner is aggressive
+							is_militarist = yes
+							is_homicidal = yes
+							is_xenophobe = yes
+						}
+					}
+				}
+				fleet_event = { id = ancrel.14520 } #core destroyed
+			}
+		}
+	}
+
+	after = {
+		from = { expire_site_event = ancrel.14500 }
+	}
+}
+
+# Stage 4a: intact core
+fleet_event = {
+	id = ancrel.14510
+	title = "ancrel.14510.name"
+	desc = {
+		trigger = {
+			owner = {
+				NOT = { has_country_flag = encountered_elderly_tiyanki }
+			}
+		}
+		text = "ancrel.14510.desc"
+	}
+	desc = {
+		trigger = {
+			owner = {
+				has_country_flag = encountered_elderly_tiyanki
+			}
+		}
+		text = "ancrel.14510.matriarch.desc"
+	}
+	picture = GFX_evt_ancient_tiyanki
+	show_sound = event_space_whale
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		fromfrom = { set_site_progress_locked = no }
+	}
+
+	option = { # Dissect
+		name = ancrel.14510.a
+		trigger = {
+			owner = {
+				is_xenophile = no
+			}
+		}
+		owner = {
+			add_modifier = {
+				modifier = tiyanki_butcher
+				days = -1
+			}
+		}
+	}
+
+	option = { # Study
+		name = ancrel.14510.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier5researchreward
+				min = @tier5researchmin
+				max = @tier5researchmax
+			}
+		}
+	}
+
+	option = { # Leave
+		name = ancrel.14510.c
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier4unityreward
+				min = @tier4unitymin
+				max = @tier4unitymax
+			}
+		}
+	}
+
+	option = { # Sell
+		name = ancrel.14510.d
+		trigger = {
+			owner = {
+				has_country_flag = curator_intro
+			}
+		}
+		owner = {
+			add_resource = { energy = 5000 }
+		}
+	}
+}
+
+# Stage 4b: ruined core
+fleet_event = {
+	id = ancrel.14520
+	title = "ancrel.14520.name"
+	desc = "ancrel.14520.desc"
+	picture = GFX_evt_ancient_tiyanki
+	show_sound = event_whispering
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		fromfrom = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+# Random event: Environmental Contamination
+fleet_event = {
+	id = ancrel.14910
+	title = "ancrel.14910.name"
+	desc = "ancrel.14910.desc"
+	picture = GFX_evt_zro_5
+	show_sound = event_screams
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		fromfrom = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = site_setback
+		fromfrom = { add_stage_clues = -1 }
+		leader = {
+			add_trait = leader_trait_paranoid
+		}
+	}
+}
+
+# The Mask of Transformation
+
+# Spawn Site
+planet_event = {
+	id = ancrel.15010
+	title = "ancrel.15010.name"
+	desc = "ancrel.15010.desc"
+	picture = GFX_evt_archaeology_camp
+	show_sound = event_dig_site
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		num_pops > 0
+		OR = {
+			is_planet_class = pc_tropical
+			is_planet_class = pc_gaia
+			is_planet_class = pc_continental
+		}
+		NOT = { exists = archaeological_site }
+		NOR = {
+			has_global_flag = arc_transformation
+			has_planet_flag = colony_event
+			has_planet_flag = suppress_archaeological_sites
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_global_flag = arc_transformation
+		set_planet_flag = colony_event
+	}
+
+	option = {
+		name = CURIOUS
+		create_archaeological_site = site_transformation_dig
+	}
+}
+
+# Stage 1 - Welcome to the Jungle
+
+fleet_event = {
+	id = ancrel.15000
+	title = "ancrel.15000.name"
+	desc = "ancrel.15000.desc"
+	picture = GFX_evt_tropical
+	show_sound = event_alien_nature
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15000.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 2 - Psionic Metamorphosis
+
+fleet_event = {
+	id = ancrel.15001
+	title = "ancrel.15001.name"
+	desc = "ancrel.15001.desc"
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15001.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 3 - The Cave
+
+fleet_event = {
+	id = ancrel.15002
+	title = "ancrel.15002.name"
+	desc = "ancrel.15002.desc"
+	picture = GFX_evt_hidden_door
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15002.a
+		owner = {
+			if = {
+				limit = { has_ancrel = yes }
+				custom_tooltip = minor_artifacts_found
+				add_resource = { minor_artifacts = 1 }
+			}
+			else = {
+				add_resource = { minerals = 200 }
+			}
+		}
+	}
+}
+
+# Stage 4 - The Pillar
+
+fleet_event = {
+	id = ancrel.15003
+	title = "ancrel.15003.name"
+	desc = "ancrel.15003.desc"
+	picture = GFX_evt_ancient_records
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15003.a
+		owner = {
+			if = {
+				limit = { has_ancrel = yes }
+				custom_tooltip = minor_artifacts_found
+				add_resource = { minor_artifacts = 2 }
+			}
+			else = {
+				add_resource = { alloys = 200 }
+			}
+		}
+		hidden_effect = {
+			fleet_event = {
+				id = ancrel.15005
+				days = 30
+				random = 20
+			}
+		}
+	}
+
+	option = {
+		name = ancrel.15003.b
+		owner = {
+			if = {
+				limit = { has_ancrel = yes }
+				custom_tooltip = minor_artifacts_found
+				add_resource = { minor_artifacts = 1 }
+			}
+			else = {
+				add_resource = { alloys = 400 }
+			}
+		}
+		hidden_effect = {
+			fleet_event = {
+				id = ancrel.15004
+				days = 30
+				random = 20
+			}
+		}
+	}
+}
+
+# Epilogue A - Shattered!
+
+fleet_event = {
+	id = ancrel.15004
+	title = "ancrel.15005.name"
+	desc = "ancrel.15005.desc"
+	picture = GFX_evt_ice_asteroids
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		fromfrom = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15005.a
+		owner = {
+			add_resource = { minerals = 1000 }
+			add_resource = { rare_crystals = 200 }
+		}
+	}
+}
+
+# Epilogue B - The Mask of Transformation
+
+fleet_event = {
+	id = ancrel.15005
+	title = "ancrel.15004.name"
+	desc = "ancrel.15004.desc"
+	picture = GFX_evt_ancient_artifact
+	show_sound = event_mystic_reveal
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		fromfrom = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15004.a
+		owner = {
+			add_modifier = {
+				modifier = mask_of_transformation
+			}
+		}
+	}
+}
+
+# Space Shanty
+
+fleet_event = {
+	id = ancrel.15021
+	title = "ancrel.15021.name"
+	desc = "ancrel.15021.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = INTRIGUING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.15022
+	title = "ancrel.15022.name"
+	desc = "ancrel.15022.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15022.a
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = ancrel.15023
+	title = "ancrel.15023.name"
+	desc = "ancrel.15023.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15023.a
+		small_artifact_reward = no
+	}
+}
+
+fleet_event = {
+	id = ancrel.15024
+	title = "ancrel.15024.name"
+	desc = "ancrel.15024.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = ancrel.15024.a
+		small_artifact_reward = no
+	}
+}
+
+fleet_event = {
+	id = ancrel.15025
+	title = "ancrel.15025.name"
+	desc = "ancrel.15025.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_metal_fatigue
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	option = {
+		name = ancrel.15025.a
+		small_artifact_reward = no
+		owner = {
+			add_modifier = {
+				modifier = harmonious_crew
+				days = -1
+			}
 		}
 	}
 }

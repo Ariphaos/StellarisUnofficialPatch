@@ -102,7 +102,7 @@ event = {
 			every_country = {
 				limit = {
 					OR = {
-						is_amoeba_country_type = yes
+						#is_amoeba_country_type = yes
 						is_drone_country_type = yes
 						is_crystal_country_type = yes
 						is_country_type = cloud
@@ -162,6 +162,12 @@ event = {
 			country_event = { id = origin.60 }
 		}
 
+		# Slingshot to the Stars
+		every_playable_country = {
+			limit = { has_origin = origin_star_slingshot }
+			country_event = { id = origin.3500 }
+		}
+
 		## Lost Colony
 		# if advanced starts are enabled or a player has picked it, let it ride
 		if = {
@@ -218,6 +224,22 @@ event = {
 		every_playable_country = {
 			limit = { has_origin = origin_ocean_paradise }
 			country_event = { id = aquatics.1000 }
+		}
+
+		# Teachers of the Shroud
+		every_playable_country = {
+			limit = { has_origin = origin_shroudwalker_apprentice }
+			country_event = { id = origin.5600 }
+		}
+
+		# Imperial Vassal
+		if = {
+			limit = {
+				any_playable_country = {
+					has_origin = origin_imperial_vassal
+				}
+			}
+			imperial_origin_start_effect = yes
 		}
 	}
 }
@@ -340,6 +362,106 @@ event = {
 					}
 				}
 			}
+		}
+		every_system = {
+			limit = {
+				NOR = {
+					is_star_class = sc_black_hole
+					is_star_class = sc_neutron_star
+					is_star_class = sc_pulsar
+				}
+			}
+			every_system_planet = {
+				limit = {
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+					}
+					NOR = {
+						has_deposit = d_nanites_deposit
+						has_anomaly = yes
+						has_modifier = terraforming_candidate
+					}
+					planet_size > 9
+					planet_size < 31
+				}
+				random_list = {
+					100 = {}
+					1 = { #about 20 on a huge galaxy with default settings.
+						add_modifier = { modifier = terraforming_candidate }
+						complex_trigger_modifier = {
+							trigger = check_galaxy_setup_value
+							parameters = {
+								setting = habitable_worlds_scale
+							}
+							mode = factor
+						}
+					}
+				}
+			}
+			if = {
+				limit = { host_has_dlc = "Aquatics Species Pack" }
+				every_system_planet = {
+					limit = {
+						is_planet_class = pc_frozen
+						NOR = {
+							has_deposit = d_nanites_deposit
+							has_anomaly = yes
+							has_modifier = frozen_terraforming_candidate
+						}
+						planet_size > 9
+						planet_size < 31
+					}
+					random_list = {
+						100 = {}
+						1 = { #Not very common, Hydrocentric gives you lots of other things
+							add_modifier = { modifier = frozen_terraforming_candidate }
+							complex_trigger_modifier = {
+								trigger = check_galaxy_setup_value
+								parameters = {
+									setting = habitable_worlds_scale
+								}
+								mode = factor
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = { host_has_dlc = "Toxoids Species Pack" }
+				every_system_planet = {
+					limit = {
+						is_planet_class = pc_toxic
+						NOR = {
+							has_deposit = d_nanites_deposit
+							has_anomaly = yes
+							has_modifier = toxic_terraforming_candidate
+						}
+						planet_size > 9
+						planet_size < 31
+					}
+					random_list = {
+						100 = {}
+						15 = { #Detox only gives you this. About 50 planets in a huge galaxy
+							add_modifier = { modifier = toxic_terraforming_candidate }
+							set_planet_flag = toxic_terraforming_candidate
+							complex_trigger_modifier = {
+								trigger = check_galaxy_setup_value
+								parameters = {
+									setting = habitable_worlds_scale
+								}
+								mode = factor
+							}
+						}
+					}
+				}
+			}
+		}
+		every_galaxy_planet = {
+			limit = {
+				is_planet_class = pc_nuked
+			}
+			set_planet_flag = ancient_history_planet
 		}
 	}
 }
@@ -464,6 +586,16 @@ country_event = {
 		}
 		if = {
 			limit = {
+				has_origin = origin_overtuned
+			}
+			give_technology = { message = no tech = tech_gene_tailoring }
+			country_event = {
+				id = tutorial.64
+				days = 5
+			}
+		}
+		if = {
+			limit = {
 				has_civic = civic_corporate_dominion
 			}
 			give_technology = { message = no tech = tech_space_trading }
@@ -522,21 +654,36 @@ country_event = {
 			}
 		}
 
-		#military
-		create_fleet = {
-			set_take_point = yes
-			effect = {
-				set_owner = prev
+		if = {
+			create_fleet = {
+				set_take_point = yes
+				effect = {
+					set_owner = prev
 
-				while = {
-					count = 3
-					create_ship = {
-						name = random
-						random_existing_design = corvette
+					while = {
+						count = 2
+						create_ship = {
+							name = random
+							random_existing_design = corvette
+						}
 					}
+					if = {
+						limit = {
+							root = { has_origin = origin_progenitor_hive }
+						}
+						create_ship = {
+							name = random
+							random_existing_design = offspring_corvette
+						}
+					}
+					else = {
+						create_ship = {
+							name = random
+							random_existing_design = corvette
+						}
+					}
+					set_location = prev.capital_star
 				}
-
-				set_location = prev.capital_star
 			}
 		}
 	}
@@ -574,7 +721,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 			random_list = {
 				66 = { set_country_flag = fallen_machine_empire_awaken_1 }	# Custodian
@@ -583,7 +730,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				NOT = { has_authority = auth_machine_intelligence }
+				is_machine_empire = no
 			}
 			every_owned_pop = {
 				set_pop_flag = organic_fallen_empire_pop
@@ -665,6 +812,13 @@ planet_event = {
 			limit = { has_planet_flag = void_dweller_habitat_1 }
 			void_dweller_home_planet_setup = yes
 		}
+
+
+		if = {
+			limit = { has_planet_flag = toxic_knights_homeworld }
+			toxic_knights_order_habitat_setup = yes
+		}
+
 	}
 }
 
@@ -730,12 +884,12 @@ planet_event = {
 			add_district_and_planet_size_if_needed_effect = { district = district_generator }
 
 			if = {
-				limit = { owner = { has_authority = auth_machine_intelligence } }
+				limit = { owner = { is_machine_empire = yes } }
 				add_district_and_planet_size_if_needed_effect = { district = district_nexus }
 				add_district_and_planet_size_if_needed_effect = { district = district_nexus }
 			}
 			else_if = {
-				limit = { owner = { has_authority = auth_hive_mind } }
+				limit = { owner = { is_hive_empire = yes } }
 				add_district_and_planet_size_if_needed_effect = { district = district_hive }
 				add_district_and_planet_size_if_needed_effect = { district = district_hive }
 			}
@@ -747,7 +901,7 @@ planet_event = {
 			if = {
 				limit = {
 					owner = {
-						NOT = { has_authority = auth_machine_intelligence }
+						is_machine_empire = no
 						is_anglers_empire = yes
 					}
 					is_planet_class = pc_ocean
@@ -757,14 +911,14 @@ planet_event = {
 			}
 			else_if = {
 				limit = {
-					owner = { NOT = { has_authority = auth_machine_intelligence } }
+					owner = { is_machine_empire = no }
 				}
 				add_district_and_planet_size_if_needed_effect = { district = district_farming }
 				add_district_and_planet_size_if_needed_effect = { district = district_farming }
 			}
 			if = {
 				limit = {
-					owner = { has_authority = auth_machine_intelligence }
+					owner = { is_machine_empire = yes }
 				}
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
@@ -775,12 +929,79 @@ planet_event = {
 				add_building = building_factory_1
 				add_building = building_commercial_zone
 			}
+			if = {
+				limit = {
+					owner = { is_subterranean_empire = yes }
+				}
+				add_district_and_planet_size_if_needed_effect = { district = district_mining_uncapped }
+				add_district_and_planet_size_if_needed_effect = { district = district_mining_uncapped }
+			}
 		}
 		else_if = {
 			limit = {
 				is_capital = yes
 				owner = { has_origin = origin_shattered_ring }
 			}
+
+			random_deposit = {
+				limit = { is_deposit_type = d_decrepit_tunnels_2 }
+				clear_blocker = yes
+			}
+			random_deposit = {
+				limit = { is_deposit_type = d_decrepit_tunnels_3 }
+				clear_blocker = yes
+			}
+			random_deposit = {
+				limit = { is_deposit_type = d_segment_rubble_4 }
+				clear_blocker = yes
+			}
+			while = {
+				count = 2
+				add_district = district_industrial
+			}
+			while = {
+				count = 2
+				add_district = district_mining_uncapped
+			}
+			if = {
+				limit = {
+					owner = { is_gestalt = no }
+				}
+				while = {
+					count = 2
+					add_district = district_city
+				}
+				if = {
+					limit = {
+						owner = { is_lithoid_empire = yes }
+					}
+					add_district = district_srw_commercial
+				}
+				else = { add_district = district_farming_uncapped }
+			}
+			else_if = {
+				limit = {
+					owner = { is_hive_empire = yes }
+				}
+				while = {
+					count = 2
+					add_district = district_hive
+				}
+				if = {
+					limit = {
+						owner = { is_lithoid_empire = yes }
+					}
+					add_district = district_hive
+				}
+				else = { add_district = district_farming_uncapped }
+			}
+			else = {
+				while = {
+					count = 3
+					add_district = district_nexus
+				}
+			}
+
 			add_building = building_foundry_1
 			add_building = building_factory_1
 			if = {
@@ -791,7 +1012,7 @@ planet_event = {
 						is_gestalt = no
 					}
 				}
-				add_building = building_autochthon_monument
+				add_building = building_bureaucratic_1
 			}
 			else_if = {
 				limit = {
@@ -824,16 +1045,7 @@ planet_event = {
 				limit = {
 					owner = { is_gestalt = no }
 				}
-				add_district = district_rw_commercial
-			}
-			else_if = {
-				limit = {
-					owner = { is_hive_empire = yes }
-				}
-				add_district = district_rw_hive
-			}
-			else = {
-				add_district = district_rw_nexus
+				add_building = building_holo_theatres
 			}
 		}
 		else = {
@@ -841,13 +1053,13 @@ planet_event = {
 			add_district_and_planet_size_if_needed_effect = { district = district_mining }
 
 			if = {
-				limit = { owner = { has_authority = auth_machine_intelligence } }
+				limit = { owner = { is_machine_empire = yes } }
 				add_district_and_planet_size_if_needed_effect = { district = district_nexus }
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
 			}
 			else_if = {
-				limit = { owner = { has_authority = auth_hive_mind } }
+				limit = { owner = { is_hive_empire = yes } }
 				add_district_and_planet_size_if_needed_effect = { district = district_hive }
 				add_district_and_planet_size_if_needed_effect = { district = district_farming }
 			}
@@ -894,14 +1106,14 @@ planet_event = {
 			limit = { is_capital = yes }
 
 			if = {
-				limit = { owner = { has_authority = auth_machine_intelligence } }
+				limit = { owner = { is_machine_empire = yes } }
 				while = {
 					count = 13
 					create_pop = { species = owner_main_species }
 				}
 			}
 			else_if = {
-				limit = { owner = { has_authority = auth_hive_mind } }
+				limit = { owner = { is_hive_empire = yes } }
 				while = {
 					count = 16
 					create_pop = { species = owner_main_species }
@@ -959,14 +1171,14 @@ planet_event = {
 		}
 		else = {
 			if = {
-				limit = { owner = { has_authority = auth_machine_intelligence } }
+				limit = { owner = { is_machine_empire = yes } }
 				while = {
 					count = 15
 					create_pop = { species = owner_main_species }
 				}
 			}
 			else_if = {
-				limit = { owner = { has_authority = auth_hive_mind } }
+				limit = { owner = { is_hive_empire = yes } }
 				while = {
 					count = 18
 					create_pop = { species = owner_main_species }
@@ -1068,7 +1280,7 @@ event = {
 						}
 					}
 					prev = { # done this way to ensure we don't spawn "orphan" wormholes (wormholes that aren't linked to anything)
-							spawn_natural_wormhole = {
+						spawn_natural_wormhole = {
 							bypass_type = wormhole
 							random_pos = yes
 							orbit_angle = 360
@@ -1306,26 +1518,29 @@ country_event = {
 			}
 			add_research_option = tech_planetary_unification
 		}
-		every_planet_within_border = {
-			limit = {
-				has_deposit_for = shipclass_mining_station
-				has_planet_flag = starting_mining_target
-				has_mining_station = no
+		if = {
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_mining_station
+					has_planet_flag = starting_mining_target
+					has_mining_station = no
+				}
+				create_mining_station = {
+					owner = ROOT
+				}
 			}
-			create_mining_station = {
-				owner = ROOT
+			every_planet_within_border = {
+				limit = {
+					has_deposit_for = shipclass_research_station
+					has_planet_flag = starting_research_target
+					has_research_station = no
+				}
+				create_research_station = {
+					owner = ROOT
+				}
 			}
 		}
-		every_planet_within_border = {
-			limit = {
-				has_deposit_for = shipclass_research_station
-				has_planet_flag = starting_research_target
-				has_research_station = no
-			}
-			create_research_station = {
-				owner = ROOT
-			}
-		}
+
 		if = {
 			limit = {
 				has_origin = origin_necrophage

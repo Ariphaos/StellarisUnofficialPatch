@@ -555,7 +555,7 @@ planet_event = {
 			is_ai = no
 			NOR = {
 				has_country_flag = pheromone_country
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 		}
 		NOR = {
@@ -1113,6 +1113,10 @@ planet_event = {
 	auto_opens = yes
 
 	immediate = {
+		every_owned_pop = {
+			unemploy_pop = yes
+			kill_pop = yes
+		}
 		if = {
 			limit = { has_modifier = pheromoned_1 }
 			remove_modifier = pheromoned_1
@@ -1272,7 +1276,7 @@ planet_event = {
 			}
 			NOR = {
 				has_country_flag = colony_event_ethic_diverge
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 		}
 		num_pops > 0
@@ -1519,15 +1523,12 @@ planet_event = {
 		set_planet_flag = colony_event
 		owner = { set_country_flag = colony_submerged_cruiser }
 	}
-
+	# Salvage the Ship
 	option = {
 		name = colony.2005.a
 		trigger = {
 			owner = {
-				OR = {
-					has_ethic = ethic_fanatic_materialist
-					has_ethic = ethic_materialist
-				}
+				is_scavenger = no
 			}
 		}
 		enable_special_project = {
@@ -1536,31 +1537,15 @@ planet_event = {
 			location = root
 		}
 	}
-	option = {
-		name = colony.2005.a
-		trigger = {
-			owner = {
-				NOR = {
-					has_ethic = ethic_fanatic_materialist
-					has_ethic = ethic_materialist
-				}
-			}
-		}
-		enable_special_project = {
-			name = "ANCIENT_OCEAN_SHIP"
-			owner = root
-			location = root
-		}
-	}
+	# Scrap the Ship to get tech
 	option = {
 		name = colony.2005.b
 		trigger = {
 			owner = {
-				OR = {
-					has_ethic = ethic_fanatic_spiritualist
-					has_ethic = ethic_spiritualist
+				NOR = {
+					is_scavenger = yes
+					has_technology = tech_destroyers
 				}
-				NOT = { has_technology = tech_destroyers }
 			}
 		}
 		owner = {
@@ -1586,12 +1571,11 @@ planet_event = {
 		name = colony.2005.b
 		trigger = {
 			owner = {
-				OR = {
-					has_ethic = ethic_fanatic_spiritualist
-					has_ethic = ethic_spiritualist
-				}
 				has_technology = tech_destroyers
-				NOT = { has_technology = tech_cruisers }
+				NOR = {
+					is_scavenger = yes
+					has_technology = tech_cruisers
+				}
 			}
 		}
 		owner = {
@@ -1613,18 +1597,23 @@ planet_event = {
 			}
 		}
 	}
+	# Scavengers get both
 	option = {
-		name = colony.2005.b
+		name = colony.2005.a
 		trigger = {
 			owner = {
-				NOR = {
-					has_ethic = ethic_fanatic_spiritualist
-					has_ethic = ethic_spiritualist
+				is_scavenger = yes
+				NOT = {
+					has_technology = tech_destroyers
 				}
-				NOT = { has_technology = tech_destroyers }
 			}
 		}
 		owner = {
+			enable_special_project = {
+				name = "ANCIENT_OCEAN_SHIP"
+				owner = root
+				location = root
+			}
 			if = {
 				limit = {
 					has_tech_option = tech_destroyers
@@ -1644,18 +1633,22 @@ planet_event = {
 		}
 	}
 	option = {
-		name = colony.2005.b
+		name = colony.2005.a
 		trigger = {
 			owner = {
-				NOR = {
-					has_ethic = ethic_fanatic_spiritualist
-					has_ethic = ethic_spiritualist
-				}
+				is_scavenger = yes
 				has_technology = tech_destroyers
-				NOT = { has_technology = tech_cruisers }
+				NOT = {
+					has_technology = tech_cruisers
+				}
 			}
 		}
 		owner = {
+			enable_special_project = {
+				name = "ANCIENT_OCEAN_SHIP"
+				owner = root
+				location = root
+			}
 			if = {
 				limit = {
 					has_tech_option = tech_cruisers
@@ -1671,6 +1664,28 @@ planet_event = {
 					tech = tech_cruisers
 					progress = 0.20
 				}
+			}
+		}
+	}
+	option = {
+		name = colony.2005.a
+		trigger = {
+			owner = {
+				is_scavenger = yes
+				has_technology = tech_cruisers
+			}
+		}
+		enable_special_project = {
+			name = "ANCIENT_OCEAN_SHIP"
+			owner = root
+			location = root
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
 			}
 		}
 	}
@@ -2504,7 +2519,7 @@ planet_event = {
 			is_ai = no
 			NOR = {
 				has_country_flag = colony_odd_factory
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 		num_pops > 0
@@ -2569,7 +2584,6 @@ planet_event = {
 		owner = { set_country_flag = odd_factory_pause }
 		random_owned_pop = {
 			limit = { has_job = odd_factory_worker }
-			unemploy_pop = yes
 			kill_pop = yes
 		}
 	}
@@ -2630,7 +2644,6 @@ planet_event = {
 		owner = { set_country_flag = odd_factory_pause }
 		random_owned_pop = {
 			limit = { has_job = odd_factory_worker }
-			unemploy_pop = yes
 			kill_pop = yes
 		}
 	}
@@ -2800,7 +2813,7 @@ planet_event = {
 	trigger = {
 		owner = {
 			is_ai = no
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 		num_pops > 0
 		NOR = {
@@ -3063,7 +3076,7 @@ planet_event = {
 #		owner = {
 #			NOT = {
 #				has_country_flag = colony_assassin
-#				has_authority = auth_machine_intelligence
+#				is_machine_empire = yes
 #			}
 #			is_ai = no
 #			any_country = {
@@ -3234,7 +3247,7 @@ planet_event = {
 #			is_ai = no
 #			NOR = {
 #				has_country_flag = colony_infected
-#				has_ethic = ethic_gestalt_consciousness
+#				is_gestalt = yes
 #			}
 #		}
 #		count_owned_pop = {
@@ -4545,7 +4558,7 @@ planet_event = {
 		}
 		owner = {
 			is_ai = no
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 	}
 
@@ -4860,7 +4873,7 @@ planet_event = {
 		trigger = {
 			owner = {
 				has_global_flag = fumongus_active
-				NOT = { has_ethic = ethic_gestalt_consciousness }
+				is_gestalt = no
 			}
 		}
 		name = colony.2080.b

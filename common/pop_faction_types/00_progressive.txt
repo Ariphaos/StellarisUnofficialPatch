@@ -1,11 +1,10 @@
 ##############################
-# Manifesti Faction
+# Progressive Faction
 ##############################
 
-manifesti = {
+progressive = {
 	election_header = "GFX_faction_header_yellow"
 	guiding_ethic = ethic_egalitarian
-	use_guiding_ethic_as_pop_filter = no #this means that the faction will let pops that aren't egalitarian in too
 
 	unique = yes
 	support_multiplier = 1
@@ -13,23 +12,21 @@ manifesti = {
 	resources = {
 		category = pop_factions
 		produces = {
-			influence = 1
+			unity = 0.5
+		}
+
+		produces = {
+			trigger = { 
+				FROM = { 
+					has_valid_civic = civic_shared_burden 
+				}
+			}
+			unity = 0.5
 		}
 	}
 
 	is_potential = {
-		years_passed > 10
-		is_ai = no
-		has_country_flag = manifesti_faction
-		is_regular_empire = yes
-		has_encountered_other_species = yes
-		is_at_war = no
-		NOR = {
-			is_homicidal = yes
-			is_fanatic = yes
-			has_valid_civic = civic_warrior_culture
-			has_country_flag = manifesti_decline #Applied if/when the faction is suppressed
-		}
+		is_faction_allowed = yes
 	}
 
 	parameters = {
@@ -47,20 +44,12 @@ manifesti = {
 	}
 
 	can_join_faction = {
-		OR = {
-			has_ethic = ethic_egalitarian
-			has_ethic = ethic_xenophile
-			has_ethic = ethic_pacifist
-		}
 		is_shackled_robot = no
-		NOR = {
-			has_trait = trait_nerve_stapled
-			has_pop_flag = manifesti_bored
-		}
+		can_think = yes
 	}
 
 	attraction = {
-		base = 160
+		base = 150
 
 		modifier = {
 			factor = 1.25
@@ -70,6 +59,7 @@ manifesti = {
 				leader = { leader_class = ruler }
 			}
 		}
+
 		modifier = {
 			factor = 0.75
 			exists = from
@@ -77,124 +67,129 @@ manifesti = {
 				NOT = { exists = leader }
 			}
 		}
+
+		# Should really check for citizenship instead
 		modifier = {
 			factor = 0.25
-			OR = {
-				has_trait = trait_conformists
-				has_trait = trait_thrifty
-				has_trait = trait_traditional
-			}
-		}
-		modifier = { #Outcasts and radicals
-			factor = 1.5
-			OR = {
-				NOT = { is_same_species = owner_species }
-				NOT = { has_citizenship_type = { type = citizenship_full } }
-				has_trait = trait_unruly
-			}
+			has_citizenship_rights = no
 		}
 	}
 
 	leader = {
 		base = 100
+
 		modifier = {
 			factor = 0
 			leader_class = ruler
+			owner = { has_authority = auth_imperial }
+		}
+
+		modifier = {
+			factor = 0.0
+			is_event_leader = yes
+		}
+	}
+
+	demand = {
+		title = "FACTION_OUTRAGED_GC"
+		unfulfilled_title = "FACTION_OUTRAGED_GC"
+		desc = "FACTION_OUTRAGED_GC_DESC"
+
+		fulfilled_effect = -20
+		unfulfilled_effect = 0.001
+
+		potential = {
+			exists = owner
 			owner = {
-				OR = {
+				has_country_flag = faction_egalitarian_outraged_gc
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_country_flag = faction_egalitarian_outraged_gc
+			}
+		}
+	}
+
+	demand = {
+		title = "PROGRESSIVE_NO_AUTO"
+		unfulfilled_title = "PROGRESSIVE_AUTO"
+		desc = "PROGRESSIVE_DEMOCRATIC_GOVERNMENT_DESC"
+
+		fulfilled_effect = 10
+		unfulfilled_effect = -15
+
+		potential = {
+			exists = owner
+		}
+
+		trigger = {
+			owner = {
+				NOR = {
 					has_authority = auth_imperial
 					has_authority = auth_dictatorial
 				}
 			}
 		}
-		modifier = {
-			factor = 0
-			is_event_leader = yes
-		}
 	}
 
-	#By design, the following include demands which are technically possible, but unrealistic/unreasonable for moderate empires
 	demand = {
-		title = "MANIFESTI_RIVERS_MOVEMENT"
-		unfulfilled_title = "MANIFESTI_RIVERS_RESTRAINED"
-		desc = "MANIFESTI_RIVERS_DESC"
+		title = "PROGRESSIVE_FREE_MOVEMENT"
+		unfulfilled_title = "PROGRESSIVE_NO_FREE_MOVEMENT"
+		desc = "PROGRESSIVE_FREE_MOVEMENT_DESC"
 
 		fulfilled_effect = 10
 		unfulfilled_effect = -10
 
 		potential = {
 			exists = owner
-			owner = {
-				has_technology = tech_colonization_2
-				NOT = { has_origin = origin_void_dwellers }
-			}
+			owner = { has_encountered_other_species = yes }
 		}
 
 		trigger = {
 			owner = {
-				OR = {
-					AND = {
-						has_technology = tech_massive_glacier
-						any_owned_planet = { has_deposit = d_massive_glacier }
-					}
-					AND = {
-						has_technology = tech_noxious_swamp
-						any_owned_planet = { has_deposit = d_noxious_swamp }
-					}
-					any_owned_planet = {
-						has_planet_flag = planet_earth
-						NOT = { has_deposit = d_great_pacific_garbage_patch }
+				NOR = {
+					has_policy_flag = resettlement_allowed
+					any_owned_pop = {
+						has_migration_control = { value = yes }
+						is_sapient = yes
+						is_enslaved = no
+						is_being_purged = no
+						is_shackled_robot = no
+						is_robot_pop = no
 					}
 				}
 			}
 		}
 	}
-	demand = {
-		title = "MANIFESTI_MUNITIONS_AUTO"
-		unfulfilled_title = "MANIFESTI_MUNITIONS_OPPRESSED"
-		desc = "MANIFESTI_MUNITIONS_DESC"
 
-		fulfilled_effect = 20
+	demand = {
+		title = "PROGRESSIVE_REPRODUCTIVE_FREEDOM"
+		unfulfilled_title = "PROGRESSIVE_NO_REPRODUCTIVE_FREEDOM"
+		desc = "PROGRESSIVE_REPRODUCTIVE_FREEDOM_DESC"
+
+		fulfilled_effect = 5
 		unfulfilled_effect = -20
 
 		potential = {
 			exists = owner
-			owner = {
-				has_technology = tech_combat_computers_2 #Prerequisite for Autonomous
-				NOT = { has_policy_flag = robots_outlawed }
-			}
 		}
 
 		trigger = {
-			owner = {
-				has_technology = tech_combat_computers_3
-				any_owned_ship = {
-					OR = {
-						has_component = COMBAT_COMPUTER_SWARM_AUTONOMOUS
-						has_component = COMBAT_COMPUTER_PICKET_AUTONOMOUS
-						has_component = COMBAT_COMPUTER_LINE_AUTONOMOUS
-						has_component = COMBAT_COMPUTER_ARTILLERY_AUTONOMOUS
-						has_component = COMBAT_COMPUTER_CARRIER_AUTONOMOUS
-					}
-				}
-				count_owned_army = {
-					limit = { army_type = slave_army }
-					count < 1
-				}
-				count_owned_army = {
-					limit = { army_type = undead_army }
-					count < 1
-				}
+			NOT = {
+				owner = { has_policy_flag = population_controls_allowed }
 			}
 		}
 	}
-	demand = {
-		title = "MANIFESTI_CAREFREE_SCIENCE"
-		unfulfilled_title = "MANIFESTI_CAREFREE_SCIENCE_OPPRESSED"
-		desc = "MANIFESTI_CAREFREE_SCIENCE_DESC"
 
-		fulfilled_effect = 10
-		unfulfilled_effect = -10
+	demand = {
+		title = "PROGRESSIVE_NO_STRATIFIED"
+		unfulfilled_title = "PROGRESSIVE_STRATIFIED"
+		desc = "PROGRESSIVE_NO_STRATIFIED_DESC"
+
+		unfulfilled_effect = -25
+		fulfilled_effect = 0.001
 
 		potential = {
 			exists = owner
@@ -202,55 +197,19 @@ manifesti = {
 
 		trigger = {
 			owner = {
-				any_owned_leader = {
-					is_researching_area = physics
-					OR = {
-						has_trait = leader_trait_roamer
-						has_trait = leader_trait_carefree
-					}
-				}
-				any_owned_leader = {
-					is_researching_area = engineering
-					OR = {
-						has_trait = leader_trait_roamer
-						has_trait = leader_trait_carefree
-					}
-				}
-				any_owned_leader = {
-					is_researching_area = society
-					OR = {
-						has_trait = leader_trait_roamer
-						has_trait = leader_trait_carefree
+				NOT = {
+					any_owned_species = {
+						has_living_standard = { type = living_standard_stratified country = prev }
 					}
 				}
 			}
 		}
 	}
+
 	demand = {
-		title = "MANIFESTI_RETINAL_FOCUS"
-		unfulfilled_title = "MANIFESTI_RETINAL_FOCUS_OPPRESSED"
-		desc = "MANIFESTI_RETINAL_FOCUS_DESC"
-
-		fulfilled_effect = 5
-		unfulfilled_effect = -10
-
-		potential = {
-			exists = owner
-		}
-
-		trigger = {
-			owner = {
-				has_monthly_income = {
-					resource = consumer_goods
-					value < 1
-				}
-			}
-		}
-	}
-	demand = {
-		title = "MANIFESTI_SILENT_PARTNER"
-		unfulfilled_title = "MANIFESTI_SILENT_PARTNER_OPPRESSED"
-		desc = "MANIFESTI_SILENT_PARTNER_DESC"
+		title = "PROGRESSIVE_NO_ELITISM"
+		unfulfilled_title = "PROGRESSIVE_ELITISM"
+		desc = "PROGRESSIVE_NO_ELITISM_DESC"
 
 		fulfilled_effect = 5
 		unfulfilled_effect = -5
@@ -259,43 +218,69 @@ manifesti = {
 			exists = owner
 			owner = {
 				OR = {
-					has_federation = yes
-					is_galactic_community_member = yes
+					has_technology = tech_vitality_boosters # t2 prereq
+					has_technology = tech_selected_lineages
+					has_technology = tech_capacity_boosters
 				}
 			}
 		}
 
 		trigger = {
 			owner = {
-				if = {
-					limit = {
-						has_federation = yes
-						is_federation_leader = yes
-					}
-					NOT = {
-						any_envoy = {
-							has_envoy_task = { task = federation }
-						}
-					}
+				NOR = {
+					has_policy_flag = leader_enhancement_selected_lineages
+					has_policy_flag = leader_enhancement_capacity_boosters
 				}
-				if = {
-					limit = {
-						is_galactic_community_member = yes
-					}
-					NOT = {
-						any_envoy = {
-							has_envoy_task = { task = galactic_community }
-						}
-						is_proposing_resolution = any
-					}
-				}
+			}
+		}
+	}
+
+	demand = {
+		title = "COOPERATIVE_DIPLO_STANCE"
+		unfulfilled_title = "COOPERATIVE_DIPLO_STANCE"
+		desc = "COOPERATIVE_DIPLO_STANCE_DESC"
+
+		fulfilled_effect = 5
+		unfulfilled_effect = -0.001
+
+		potential = {
+			exists = owner
+			owner = {
+				is_homicidal = no
+				is_country_type = default
+				has_policy_flag = diplo_stance_cooperative
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_policy_flag = diplo_stance_cooperative
+			}
+		}
+	}
+
+	demand = {
+		title = "PROGRESSIVE_BENEVOLENT_SUBJUGATION_POLICY"
+		unfulfilled_title = "PROGRESSIVE_BENEVOLENT_NO_OPPRESSIVE_SUBJUGATION_POLICY"
+		desc = "PROGRESSIVE_BENEVOLENT_NO_OPPRESSIVE_SUBJUGATION_POLICY_DESC"
+
+		unfulfilled_effect = 0
+		fulfilled_effect = 5
+
+		potential = {
+			exists = owner
+			owner = { is_subject = no }
+		}
+
+		trigger = {
+			owner = {
+				has_policy_flag = benevolent_terms
 			}
 		}
 	}
 
 	on_create = {
 		pop_faction_event = { id = factions.1 }
-		owner = { country_event = { id = manifesti.30 days = 940 } }
 	}
 
 	on_destroy = {
@@ -311,7 +296,6 @@ manifesti = {
 			}
 			remove_modifier = suppressed_egalitarian
 		}
-		country_event = { id = manifesti.30 }
 	}
 
 	actions = {
@@ -320,7 +304,7 @@ manifesti = {
 			description = "EMBRACE_FACTION_DESC"
 
 			cost = {
-				influence = 500
+				unity = 5000
 			}
 
 			potential = {
@@ -328,7 +312,7 @@ manifesti = {
 				owner = {
 					OR = {
 						is_subject = no
-						NOT = { is_subject_type = dominion }
+						NOT = { any_agreement = { agreement_preset = preset_dominion } }
 					}
 				}
 			}
@@ -455,6 +439,19 @@ manifesti = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support > 0.3
+				}
+				modifier = {
+					add = 1000
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 200
+						}
+					}
+				}
 			}
 		}
 		suppress_faction = {
@@ -502,6 +499,19 @@ manifesti = {
 
 			ai_weight = {
 				base = 0
+				modifier = {
+					add = 1000
+					support < 0.04
+				}
+				modifier = {
+					add = 1000
+					owner = {
+						resource_stockpile_compare = {
+							resource = influence
+							value < 200
+						}
+					}
+				}
 			}
 		}
 	}

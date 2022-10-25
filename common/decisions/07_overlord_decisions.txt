@@ -1,0 +1,194 @@
+######################
+# OVERLORD DECISIONS #
+######################
+
+decision_strip_mining = {
+	owned_planets_only = yes
+	sound = event_administrative_work
+	icon = decision_strip_mining
+
+	enactment_time = 180
+
+	resources = {
+		category = decisions
+		cost = {
+			influence = 15
+		}
+	}
+
+	potential = {
+		owner = {
+			is_specialist_subject_tier = {
+				TYPE = prospectorium
+				TIER = 3
+			}
+		}
+		any_deposit = {
+			has_deposit_category = deposit_cat_food
+		}
+		# No need to strip mine worlds with access to uncapped mining districts
+		NOT = { has_district = district_mining_uncapped }
+		num_free_districts = { type = district_mining_uncapped value = 0 }
+	}
+
+	allow = {
+		# Don't allow on wenkwort, in if to avoid showing when modifier not present
+		if = {
+			limit = { has_modifier = pm_wenkwort_custodian }
+			NOT = { has_modifier = pm_wenkwort_custodian }
+		}
+	}
+
+	effect = {
+		custom_tooltip = decision_strip_mining_tt
+		hidden_effect = {
+			random_deposit = {
+				limit = { has_deposit_category = deposit_cat_food }
+				remove_deposit = yes
+			}
+		}
+		add_deposit = d_prospectorium_strip_mine
+	}
+
+	ai_weight = {
+		weight = 1
+
+		modifier = {
+			factor = 0
+			OR = {
+				has_designation = col_farming
+				AND = {
+					has_district = district_farming
+					num_free_districts = { type = district_farming value < 3 }
+				}
+				AND = {
+					has_district = district_farming_uncapped
+					num_free_districts = { type = district_farming_uncapped value < 3 }
+				}
+			}
+		}
+		modifier = { # More useful on mining worlds
+			factor = 0.5
+			NOR = {
+				has_designation = col_mining
+				has_designation = col_rural
+				has_designation = col_rural_gestalt
+				has_active_building = building_mineral_purification_plant
+				has_active_building = building_mineral_purification_hub
+			}
+		}
+		modifier = {
+			factor = 0.5
+			owner = {
+				has_valid_civic = civic_environmentalist
+			}
+		}
+		# free_district_slots
+		# less useful on worlds that want to use industrial districts, and also generator districts if they haven't all been built yet
+	}
+}
+
+#Grow new Progenitor
+decision_grow_progenitor = {
+	owned_planets_only = yes
+	icon = descision_progenitor_empty
+
+	enactment_time = 800
+
+	resources = {
+		category = decisions
+		cost = {
+			trigger = { 
+				owner = { is_lithoid_empire = no } 
+			}
+			food = 400
+		}
+		cost = {
+			trigger = { 
+				owner = { is_lithoid_empire = yes } 
+			}
+			minerals = 400
+		}
+	}
+
+	potential = {
+		has_deposit = d_progenitor_empty
+		exists = owner
+		owner = { has_origin = origin_progenitor_hive }
+	}
+
+	effect = {
+		remove_deposit = d_progenitor_empty
+		add_deposit = d_progenitor
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = { has_modifier = missing_progenitor_modifier }
+					remove_modifier = missing_progenitor_modifier
+				}
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 100
+	}
+}
+
+decision_shroudwalker_teacher = {
+	owned_planets_only = yes
+	icon = decision_surreal_visions
+
+	enactment_time = 360
+
+	potential = {
+		exists = event_target:shroudwalker_enclave_country
+		NOT = { owner = { is_hostile = event_target:shroudwalker_enclave_country } }
+		owner = { has_country_flag = shroudwalker_teacher_acquired }
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = shroudwalker_teacher_already_exists
+			NOT = { has_modifier = pm_shroudwalker_teacher }
+		}
+	}
+
+	on_queued = {
+		hidden_effect = {
+			owner = { remove_country_flag = shroudwalker_teacher_acquired }
+		}
+	}
+
+	on_unqueued = {
+		hidden_effect = {
+			owner = { set_country_flag = shroudwalker_teacher_acquired }
+		}
+	}
+
+	effect = {
+		owner = {
+			if = {
+				limit = {
+					any_owned_planet = {
+						has_modifier = pm_shroudwalker_teacher
+					}
+				}
+				custom_tooltip = decision_shroudwalker_teacher_losing_modifier
+				hidden_effect = {
+					every_owned_planet = {
+						limit = {
+							has_modifier = pm_shroudwalker_teacher
+						}
+						remove_modifier = pm_shroudwalker_teacher
+					}
+				}
+			}
+		}
+		add_modifier = { modifier = pm_shroudwalker_teacher }
+	}
+
+	ai_weight = {
+		weight = 1
+	}
+}

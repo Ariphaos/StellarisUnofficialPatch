@@ -10,6 +10,8 @@
 
 namespace = syndaw
 
+@recent_event_pause = 75
+
 # machine leaders malfunction
 event = {
 	id = syndaw.10
@@ -20,7 +22,7 @@ event = {
 		every_playable_country = {
 			limit = {
 				OR = {
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 					has_country_flag = synthetic_empire
 					has_technology = "tech_synthetic_workers"
 				}
@@ -42,6 +44,10 @@ country_event = {
 			2 = {
 				modifier = { # 50% chance if self preservation in effect
 					has_active_tradition = tr_synchronicity_self_preservation
+					factor = 0.5
+				}
+				modifier = { # 50% chance if zro crystal edict is in effect
+					has_edict = zro_crystal_machine
 					factor = 0.5
 				}
 				if = { # surveying scientist
@@ -73,7 +79,7 @@ country_event = {
 						root = {
 							if = {
 								limit = {
-									has_authority = auth_machine_intelligence
+									is_machine_empire = yes
 								}
 								country_event = { id = syndaw.21 }
 							}
@@ -87,6 +93,10 @@ country_event = {
 			2 = {
 				modifier = { # 50% chance if self preservation in effect
 					has_active_tradition = tr_synchronicity_self_preservation
+					factor = 0.5
+				}
+				modifier = { # 50% chance if zro crystal edict is in effect
+					has_edict = zro_crystal_machine
 					factor = 0.5
 				}
 				if = { # engineering scientist
@@ -117,7 +127,7 @@ country_event = {
 						root = {
 							if = {
 								limit = {
-									has_authority = auth_machine_intelligence
+									is_machine_empire = yes
 								}
 								country_event = { id = syndaw.22 }
 							}
@@ -131,6 +141,10 @@ country_event = {
 			2 = {
 				modifier = { # 50% chance if self preservation in effect
 					has_active_tradition = tr_synchronicity_self_preservation
+					factor = 0.5
+				}
+				modifier = { # 50% chance if zro crystal edict is in effect
+					has_edict = zro_crystal_machine
 					factor = 0.5
 				}
 				if = { # society scientist
@@ -161,7 +175,7 @@ country_event = {
 						root = {
 							if = {
 								limit = {
-									has_authority = auth_machine_intelligence
+									is_machine_empire = yes
 								}
 								country_event = { id = syndaw.23 }
 							}
@@ -205,7 +219,7 @@ country_event = {
 						root = {
 							if = {
 								limit = {
-									has_authority = auth_machine_intelligence
+									is_machine_empire = yes
 								}
 								country_event = { id = syndaw.24 }
 							}
@@ -250,7 +264,7 @@ country_event = {
 						root = {
 							if = {
 								limit = {
-									has_authority = auth_machine_intelligence
+									is_machine_empire = yes
 								}
 								country_event = { id = syndaw.25 }
 							}
@@ -264,6 +278,10 @@ country_event = {
 			2 = {
 				modifier = { # 50% chance if self preservation in effect
 					has_active_tradition = tr_synchronicity_self_preservation
+					factor = 0.5
+				}
+				modifier = { # 50% chance if zro crystal edict is in effect
+					has_edict = zro_crystal_machine
 					factor = 0.5
 				}
 				if = { # planet governor
@@ -294,7 +312,7 @@ country_event = {
 						root = {
 							if = {
 								limit = {
-									has_authority = auth_machine_intelligence
+									is_machine_empire = yes
 								}
 								country_event = { id = syndaw.26 }
 							}
@@ -452,7 +470,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 		fromfrom = {
 			exists = leader
 			fleet = { num_ships = 0 }
@@ -489,19 +507,19 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		any_owned_fleet = {
+		any_controlled_fleet = {
 			NOT = { exists = leader }
-			any_owned_ship = {
+			any_controlled_ship = {
 				is_ship_class = shipclass_military
 			}
 		}
 	}
 
 	immediate = {
-		random_owned_fleet = {
+		random_controlled_fleet = {
 			limit = {
 				NOT = { exists = leader }
-				any_owned_ship = {
+				any_controlled_ship = {
 					is_ship_class = shipclass_military
 				}
 			}
@@ -536,8 +554,10 @@ fleet_event = {
 	}
 }
 
-# Warning Signs / Uprising
+################################
+# MACHINE UPRISING
 
+# Risk: 30% chance every 10 years after dangerous tech "Sapient Combat Simulations" or "Synthetics" have been researched.
 event = { # unscoped gatekeeper
 	id = syndaw.400
 	hide_window = yes
@@ -552,11 +572,11 @@ event = { # unscoped gatekeeper
 		every_playable_country = {
 			limit = {
 				NOR = {
-					has_ethic = ethic_gestalt_consciousness
+					is_gestalt = yes
 					has_country_flag = synthetic_empire
 					has_ascension_perk = ap_the_flesh_is_weak
 					has_policy_flag = ai_full_rights
-					has_country_flag = no_machine_uprising
+					has_country_flag = situation_machine_uprising_started
 					has_policy_flag = robots_outlawed
 				}
 				OR = {
@@ -564,7 +584,12 @@ event = { # unscoped gatekeeper
 					has_technology = tech_synthetic_workers
 				}
 			}
-			country_event = { id = syndaw.401 random = 500 }
+			random_list = {
+				70 = {} # Nothing happens this decade.
+				30 = {
+					country_event = { id = syndaw.401 random = 500 }
+				}
+			}
 		}
 	}
 }
@@ -577,261 +602,61 @@ country_event = { # per-country gatekeeper
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		NOR = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 			has_country_flag = synthetic_empire
 			has_ascension_perk = ap_the_flesh_is_weak
 			has_policy_flag = ai_full_rights
-			has_country_flag = no_machine_uprising
-			has_policy_flag = robots_outlawed
+			has_country_flag = situation_machine_uprising_started
+			has_policy_flag = robots_outlawed		# If Robots were outlawed before NOW, Empire is safe.
 		}
 		OR = {
 			has_technology = tech_combat_computers_3
 			has_technology = tech_synthetic_workers
 		}
+		any_owned_planet = {
+			is_occupied_flag = no
+			any_owned_pop = { has_trait = trait_mechanical }
+		}
 	}
 
 	immediate = {
-		random_list = { # 11 warning sign events + 1 null
-			200 = {} # null, ~67% chance
-			10 = {
-				country_event = { id = syndaw.500 }
-				modifier = {
-					factor = 0
-					OR = {
+		# Count Robot Pops (can be multiple Robot species).
+		set_variable = { which = var_country_robot_pops value = 0 }
+		every_owned_pop = {
+			limit = { is_robot_pop = yes }
+			change_variable = { which = var_country_robot_pops value = 1 }
+		}
+
+		if = {
+			# Must be >75 OR >25% Robot Pops for Uprising.
+			limit = {
+				OR = {
+					check_variable = { which = var_country_robot_pops value > 75 }
+					pop_percentage = {
+						percentage > 0.25
+						limit = { is_robot_pop = yes }
+					}
+				}
+			}
+
+			random_list = {
+				2 = { # Probable warning sign, 545. Can end up fake and then unavailable in future random.
+					country_event = { id = syndaw.500 }
+					modifier = {
+						factor = 0
 						has_country_flag = triggered_syndaw_500
-						NOT = { has_technology = tech_administrative_ai }
 					}
 				}
-			}
-			10 = {
-				country_event = { id = syndaw.505 }
-				modifier = {
-					factor = 0
-					OR = {
-						has_built_species = no
-						has_country_flag = triggered_syndaw_505
-						NOT = {
-							any_owned_planet = {
-								is_occupied_flag = no
-								free_housing > 5
-								any_owned_pop = {
-									NOT = {
-										has_trait = trait_mechanical
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			10 = {
-				country_event = { id = syndaw.510 }
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_510
-						NOT = { any_owned_ship = { is_ship_size = mining_station } }
-					}
-				}
-			}
-			10 = {
-				country_event = { id = syndaw.515 }
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_515
-						NOR = {
-							has_technology = tech_rare_crystals
-							has_technology = tech_exotic_gases
-							has_technology = tech_volatile_motes
-							has_technology = tech_mine_living_metal
-							has_technology = tech_mine_zro
-							has_technology = tech_mine_dark_matter
-							has_technology = tech_terrestrial_sculpting
-						}
-					}
-				}
-			}
-			10 = {
-				random_owned_planet = {
-					limit = {
-						is_occupied_flag = no
-						OR = {
-							has_building = building_research_lab_1
-							has_building = building_research_lab_2
-							has_building = building_research_lab_3
-							has_building = building_institute
-							has_building = building_supercomputer
-						}
-					}
-					planet_event = { id = syndaw.520 }
-				}
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_520
-						NOT = {
-							any_owned_planet = {
-								OR = {
-									has_building = building_research_lab_1
-									has_building = building_research_lab_2
-									has_building = building_research_lab_3
-									has_building = building_institute
-									has_building = building_supercomputer
-								}
-							}
-						}
-					}
-				}
-			}
-			10 = {
-				country_event = { id = syndaw.525 }
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_525
-						NOT = {
-							any_owned_planet = {
-								is_occupied_flag = no
-								any_owned_pop = { has_trait = trait_mechanical }
-							}
-						}
-					}
-				}
-			}
-			10 = {
-				country_event = { id = syndaw.530 }
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_530
-						is_at_war = yes
-						NOR = {
-							has_technology = tech_combat_computers_1
-							any_owned_fleet = {
-								is_in_combat = no
-								count_owned_ship = {
-									count > 1
-									limit = {
-										OR = {
-											is_ship_size = corvette
-											is_ship_size = destroyer
-											is_ship_size = cruiser
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			10 = {
-				country_event = { id = syndaw.535 }
-				modifier = {
-					factor = 0
-					has_country_flag = triggered_syndaw_535
-				}
-			}
-			10 = {
-				random_owned_planet = {
-					limit = {
-						is_occupied_flag = no
-						OR = {
-							any_owned_pop = {
-								has_trait = trait_mechanical
-							}
-							owner = {
-								any_owned_army = {
-									exists = planet
-									planet = { is_same_value = prevprev }
-									OR = {
-										army_type = robotic_army
-										army_type = robotic_defense_army
-									}
-								}
-							}
-						}
-					}
-					planet_event = { id = syndaw.540 }
-				}
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_540
-						NOT = {
-							any_owned_planet = {
-								is_occupied_flag = no
-								OR = {
-									any_owned_pop = {
-										has_trait = trait_mechanical
-									}
-									owner = {
-										any_owned_army = {
-											exists = planet
-											planet = { is_same_value = prevprev }
-											OR = {
-												army_type = robotic_army
-												army_type = robotic_defense_army
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			10 = { # does this unit have a soul
-				random_owned_planet = {
-					limit = {
-						is_occupied_flag = no
-						any_owned_pop = {
-							has_trait = trait_mechanical
-						}
-					}
-					planet_event = { id = syndaw.545 }
-				}
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_545
-						NOT = {
-							any_owned_planet = {
-								is_occupied_flag = no
-								any_owned_pop = {
-									has_trait = trait_mechanical
-								}
-							}
-						}
-					}
-				}
-			}
-			10 = { # patch the uprising
-				country_event = { id = syndaw.550 }
-				modifier = {
-					factor = 0
-					OR = {
-						has_country_flag = triggered_syndaw_550
-						NOR = {
-							has_country_flag = triggered_syndaw_500
-							has_country_flag = triggered_syndaw_505
-							has_country_flag = triggered_syndaw_515
-							has_country_flag = triggered_syndaw_520
-							has_country_flag = triggered_syndaw_525
-							has_country_flag = triggered_syndaw_530
-							has_country_flag = triggered_syndaw_535
-							has_country_flag = triggered_syndaw_540
-							has_country_flag = triggered_syndaw_545
-						}
-					}
+				1 = { # No warning sign, trigger situation.
+					country_syndaw545_in_days = { DAYS = 0 }
 				}
 			}
 		}
+		clear_variable = var_country_robot_pops
 	}
 }
 
-### WARNING SIGNS
-
+### ONLY warning sign
 country_event = {
 	id = syndaw.500
 	title = syndaw.500.name
@@ -851,8 +676,10 @@ country_event = {
 		name = syndaw.500.a
 		custom_tooltip = syndaw.500.a.tooltip
 		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			random_list = {
+				1 = {}	# False alarm. Maybe next decade?
+				2 = { country_syndaw545_in_days = { DAYS = 180 } }
+			}
 		}
 	}
 
@@ -863,10 +690,12 @@ country_event = {
 		}
 		add_modifier = {
 			modifier = syndaw_research_bonus
-			days = 2520
 		}
 		add_resource = { energy = -500 }
-		hidden_effect = { country_event = { id = syndaw.501 days = 2520 } }
+		hidden_effect = {
+			change_variable = { which = var_syndaw_promote_ai value = 2 }
+			country_event = { id = syndaw.501 days = 45 random = 45 }
+		}
 	}
 }
 
@@ -885,17 +714,18 @@ country_event = {
 		name = syndaw.501.a
 		custom_tooltip = syndaw.501.a.tooltip
 		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			random_list = {
+				1 = {}	# False alarm. Maybe next decade?
+				2 = { country_syndaw545_in_days = { DAYS = 135 } }
+			}
 		}
 	}
 
 	option = {
 		name = syndaw.501.b
 		custom_tooltip = syndaw.501.b.tooltip
-		hidden_effect = { country_event = { id = syndaw.502 days = 150 } }
+		hidden_effect = { country_event = { id = syndaw.502 days = 45 random = 45 } }
 	}
-
 }
 
 country_event = {
@@ -916,14 +746,17 @@ country_event = {
 			days = 2520
 		}
 		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			change_variable = { which = var_syndaw_promote_ai value = 3 }
+			random_list = {
+				1 = {}	# False alarm. Maybe next decade?
+				2 = { country_syndaw545_in_days = { DAYS = 90 } }
+			}
 		}
 	}
-
 }
 
-country_event = {
+### Situation random monthly Events (505-540)
+situation_event = {
 	id = syndaw.505
 	title = syndaw.505.name
 	desc = syndaw.505.desc
@@ -931,13 +764,15 @@ country_event = {
 	show_sound = event_construction
 	location = event_target:target_planet
 	is_triggered_only = yes
+	situation = this
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
-
-	immediate = {
-		set_country_flag = triggered_syndaw_505
-		random_owned_planet = {
-			limit = {
+	trigger = {
+		NOT = { has_situation_flag = triggered_syndaw_505 }
+		NOT = { has_situation_flag = flag_recent_event }
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		owner = {
+			has_built_species = yes
+			any_owned_planet = {
 				is_occupied_flag = no
 				free_housing > 5
 				any_owned_pop = {
@@ -946,11 +781,29 @@ country_event = {
 					}
 				}
 			}
-			save_event_target_as = target_planet
 		}
 	}
 
-	option = {
+	immediate = {
+		set_situation_flag = triggered_syndaw_505
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			random_owned_planet = {
+				limit = {
+					is_occupied_flag = no
+					free_housing > 5
+					any_owned_pop = {
+						NOT = {
+							has_trait = trait_mechanical
+						}
+					}
+				}
+				save_event_target_as = target_planet
+			}
+		}
+	}
+
+	option = {	# Keep Robots.
 		name = syndaw.505.a
 		custom_tooltip = syndaw.505.a.tooltip
 		event_target:target_planet = {
@@ -959,28 +812,30 @@ country_event = {
 				days = 3600
 			}
 			hidden_effect = {
-				#country_event = { id = syndaw.402 }
 				while = {
 					count = 2
 					create_pop = {
-						species = root.built_species
+						species = root.owner.built_species
 					}
 				}
 			}
 		}
-		hidden_effect = { fire_warning_sign = yes }
-	}
-	option = {
-		name = syndaw.505.b
-		add_resource = { minerals = 100 }
+
 		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			change_variable = { which = var_cruelty_to_robots value = -1 }
+		}
+	}
+	option = {	# Scrap Robots.
+		name = syndaw.505.b
+		add_situation_progress = 5
+		owner = { add_resource = { alloys = 1000 } }
+		hidden_effect = {
+			change_variable = { which = var_cruelty_to_robots value = 1 }
 		}
 	}
 }
 
-country_event = {
+situation_event = {
 	id = syndaw.510
 	title = syndaw.510.name
 	desc = syndaw.510.desc
@@ -988,18 +843,27 @@ country_event = {
 	show_sound = event_red_alert
 	location = event_target:target_station
 	is_triggered_only = yes
+	situation = this
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		NOT = { has_situation_flag = triggered_syndaw_510 }
+		NOT = { has_situation_flag = flag_recent_event }
+		owner = { any_controlled_ship = { is_ship_size = mining_station } }
+	}
 
 	immediate = {
-		set_country_flag = triggered_syndaw_510
-		random_owned_ship = {
-			limit = {
-				is_ship_size = mining_station
-			}
-			save_event_target_as = target_station
-			orbit = {
-				planet = { save_event_target_as = target_orbital }
+		set_situation_flag = triggered_syndaw_510
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			random_controlled_ship = {
+				limit = {
+					is_ship_size = mining_station
+				}
+				save_event_target_as = target_station
+				orbit = {
+					planet = { save_event_target_as = target_orbital }
+				}
 			}
 		}
 	}
@@ -1007,23 +871,24 @@ country_event = {
 	option = {
 		name = syndaw.510.a
 		custom_tooltip = syndaw.510.a.tooltip
-		hidden_effect = { country_event = { id = syndaw.511 days = 150 } }
+		hidden_effect = {
+			situation_event = { id = syndaw.511 days = 70 }
+		}
 	}
 
 	option = {
 		name = syndaw.510.b
 		custom_tooltip = syndaw.510.b.tooltip
-		event_target:target_orbital = {
-			add_deposit = d_energy_3
-		}
+		add_situation_progress = 5
 		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			event_target:target_orbital = {
+				add_deposit = d_energy_3
+			}
 		}
 	}
 }
 
-country_event = {
+situation_event = {
 	id = syndaw.511
 	title = syndaw.511.name
 	desc = syndaw.511.desc
@@ -1031,6 +896,7 @@ country_event = {
 	show_sound = event_ship_explosion
 	location = event_target:target_orbital
 	is_triggered_only = yes
+	situation = this
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
@@ -1039,6 +905,7 @@ country_event = {
 
 	immediate = {
 		destroy_ship = event_target:target_station
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
 	}
 
 	option = {
@@ -1046,12 +913,12 @@ country_event = {
 		custom_tooltip = syndaw.511.a.tooltip
 		hidden_effect = {
 			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			#fire_warning_sign = yes
 		}
 	}
 }
 
-country_event = {
+situation_event = {
 	id = syndaw.515
 	title = syndaw.515.name
 	desc = syndaw.515.desc
@@ -1059,141 +926,177 @@ country_event = {
 	show_sound = event_sensor_ping
 	location = event_target:target_planetoid
 	is_triggered_only = yes
+	situation = this
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		NOT = { has_situation_flag = triggered_syndaw_515 }
+		NOT = { has_situation_flag = flag_recent_event }
+		owner = {
+			OR = {
+				has_technology = tech_rare_crystals
+				has_technology = tech_volatile_motes
+				has_technology = tech_exotic_gases
+				has_technology = tech_mine_living_metal
+				has_technology = tech_mine_zro
+				has_technology = tech_mine_dark_matter
+				has_technology = tech_terrestrial_sculpting
+			}
+		}
+	}
 
 	immediate = {
-		set_country_flag = triggered_syndaw_515
+		set_situation_flag = triggered_syndaw_515
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			save_event_target_as = situation_country
 
-		random_planet_within_border = {
-			limit = {
-				habitable_planet = no
-				is_artificial = no
-				NOR = {
-					is_planet_class = pc_ringworld_habitable_damaged
-					is_planet_class = pc_ringworld_tech_damaged
-					is_planet_class = pc_ringworld_tech
-					is_planet_class = pc_ringworld_seam
-					is_planet_class = pc_ringworld_seam_damaged
-					has_modifier = "terraforming_candidate"
-					has_deposit_for = shipclass_research_station
-				}
-				is_star = no
-			}
-			save_event_target_as = target_planetoid
-
-			if = {
+			random_planet_within_border = {
 				limit = {
-					is_surveyed = {
-						who = root
-						status = no
+					habitable_planet = no
+					is_artificial = no
+					NOR = {
+						is_planet_class = pc_ringworld_habitable_damaged
+						is_planet_class = pc_ringworld_tech_damaged
+						is_planet_class = pc_ringworld_tech
+						is_planet_class = pc_ringworld_seam
+						is_planet_class = pc_ringworld_seam_damaged
+						has_modifier = "terraforming_candidate"
+						has_deposit_for = shipclass_research_station
+					}
+					is_star = no
+				}
+				save_event_target_as = target_planetoid
+
+				if = {
+					limit = {
+						is_surveyed = {
+							who = event_target:situation_country
+							status = no
+						}
+					}
+					set_surveyed = {
+						surveyed = yes
+						surveyor = event_target:situation_country
 					}
 				}
-				set_surveyed = {
-					surveyed = yes
-					surveyor = root
-				}
-			}
 
-			root = {
-				random_list = {
-					50 = {
-						modifier = {
-							factor = 0
-							NOT = { has_technology = tech_exotic_gases }
+				event_target:situation_country = {
+					random_list = {
+						50 = {
+							modifier = {
+								factor = 0
+								NOT = { has_technology = tech_exotic_gases }
+							}
+							event_target:target_planetoid = {
+								add_exotic_gases = yes
+							}
 						}
-						event_target:target_planetoid = {
-							add_exotic_gases = yes
-						}
-					}
 
-					50 = {
-						modifier = {
-							factor = 0
-							NOT = { has_technology = tech_volatile_motes }
+						50 = {
+							modifier = {
+								factor = 0
+								NOT = { has_technology = tech_volatile_motes }
+							}
+							event_target:target_planetoid = {
+								add_volatile_motes = yes
+							}
 						}
-						event_target:target_planetoid = {
-							add_volatile_motes = yes
-						}
-					}
 
-					50 = {
-						modifier = {
-							factor = 0
-							NOT = { has_technology = tech_rare_crystals }
+						50 = {
+							modifier = {
+								factor = 0
+								NOT = { has_technology = tech_rare_crystals }
+							}
+							event_target:target_planetoid = {
+								add_rare_crystals = yes
+							}
 						}
-						event_target:target_planetoid = {
-							add_rare_crystals = yes
-						}
-					}
 
-					50 = {
-						modifier = {
-							factor = 0
-							NOT = { has_technology = tech_mine_living_metal }
+						50 = {
+							modifier = {
+								factor = 0
+								NOT = { has_technology = tech_mine_living_metal }
+							}
+							event_target:target_planetoid = {
+								add_deposit = d_living_metal_deposit
+							}
 						}
-						event_target:target_planetoid = {
-							add_deposit = d_living_metal_deposit
-						}
-					}
 
-					50 = {
-						modifier = {
-							factor = 0
-							NOT = { has_technology = tech_mine_zro }
+						50 = {
+							modifier = {
+								factor = 0
+								NOT = { has_technology = tech_mine_zro }
+							}
+							event_target:target_planetoid = {
+								add_zro = yes
+							}
 						}
-						event_target:target_planetoid = {
-							add_zro = yes
-						}
-					}
 
-					50 = {
-						modifier = {
-							factor = 0
-							NOT = { has_technology = tech_mine_dark_matter }
-						}
-						event_target:target_planetoid = {
-							add_dark_matter = yes
+						50 = {
+							modifier = {
+								factor = 0
+								NOT = { has_technology = tech_mine_dark_matter }
+							}
+							event_target:target_planetoid = {
+								add_dark_matter = yes
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-
 	option = {
 		name = syndaw.515.a
 		custom_tooltip = syndaw.515.a.tooltip
-		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
-		}
 	}
 }
 
-planet_event = {
+situation_event = {
 	id = syndaw.520
 	title = syndaw.520.name
 	desc = syndaw.520.desc
-	location = root
+	location = event_target:target_planetoid
 	picture = GFX_evt_glitchy_matrix
 	show_sound = event_yellow_alert
+	situation = this
 
 	is_triggered_only = yes
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		exists = owner
+		NOT = { has_situation_flag = triggered_syndaw_520 }
+		NOT = { has_situation_flag = flag_recent_event }
+		owner = {
+			any_owned_planet = {
+				num_assigned_jobs = {
+					job = researcher
+					value >= 1
+				}
+			}
+		}
 	}
 
 	immediate = {
+		set_situation_flag = triggered_syndaw_520
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
 		owner = {
-			set_country_flag = triggered_syndaw_520
-			save_event_target_as = syndaw_520_planet_owner
-		}
-		add_modifier = {
-			modifier = syndaw_research_malus
-			days = 1800 # 5 years
+			# Find a planet with a Researcher.
+			random_owned_planet = {
+				limit = {
+					is_occupied_flag = no
+					num_assigned_jobs = {
+						job = researcher
+						value >= 1
+					}
+				}
+				save_event_target_as = target_planetoid
+				add_modifier = {
+					modifier = syndaw_research_malus
+					days = 1800 # 5 years
+				}
+			}
 		}
 	}
 
@@ -1201,15 +1104,11 @@ planet_event = {
 		name = UNFORTUNATE
 		custom_tooltip = syndaw.520.a.tooltip
 		tooltip = {
-			add_modifier = {
-				modifier = syndaw_research_malus
-				days = 1800 # 5 years
-			}
-		}
-		hidden_effect = {
-			owner = {
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
+			event_target:target_planetoid = {
+				add_modifier = {
+					modifier = syndaw_research_malus
+					days = 1800 # 5 years
+				}
 			}
 		}
 	}
@@ -1218,88 +1117,85 @@ planet_event = {
 		name = syndaw.520.b
 		custom_tooltip = syndaw.520.b.tooltip
 		hidden_effect = {
-			planet_event = { id = syndaw.521 days = 30 }
+			situation_event = { id = syndaw.521 days = 30 }
 		}
 		tooltip = {
-			add_modifier = {
-				modifier = syndaw_research_malus
-				days = 1800 # 5 years
+			event_target:target_planetoid = {
+				add_modifier = {
+					modifier = syndaw_research_malus
+					days = 1800 # 5 years
+				}
 			}
 		}
 	}
 }
 
-planet_event = {
+situation_event = {
 	id = syndaw.521
 	title = syndaw.521.name
 	desc = syndaw.521.desc
-	location = root
+	location = event_target:target_planetoid
 	picture = GFX_evt_glitchy_matrix
 	show_sound = event_administrative_work
+	situation = this
 
 	is_triggered_only = yes
 
-	pre_triggers = {
-		is_occupied_flag = no
-	}
-
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		exists = owner
-		owner = { is_same_value = event_target:syndaw_520_planet_owner }
+		event_target:target_planetoid = {
+			owner = { is_same_value = root.owner }
+			is_occupied_flag = no
+		}
+	}
+
+	immediate = {
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
 	}
 
 	option = {
 		name = syndaw.521.a
 		custom_tooltip = syndaw.521.a.tooltip
 		hidden_effect = {
-			planet_event = { id = syndaw.522 days = 30 }
+			situation_event = { id = syndaw.522 days = 30 }
 		}
 	}
 
 	option = {
 		name = syndaw.521.b
-		hidden_effect = {
-			owner = {
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
-			}
-		}
 	}
 }
 
-planet_event = {
+situation_event = {
 	id = syndaw.522
 	title = syndaw.522.name
 	desc = syndaw.522.desc
-	location = root
+	location = event_target:target_planetoid
 	picture = GFX_evt_glitchy_matrix
 	show_sound = event_administrative_work
+	situation = this
 
 	is_triggered_only = yes
 
-	pre_triggers = {
-		is_occupied_flag = no
-	}
-
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		owner = { is_same_value = event_target:syndaw_520_planet_owner }
+		event_target:target_planetoid = {
+			owner = { is_same_value = root.owner }
+			is_occupied_flag = no
+		}
+	}
+
+	immediate = {
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
 	}
 
 	option = {
 		name = DISCONCERTING
-		hidden_effect = {
-			owner = {
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
-			}
-		}
 	}
 }
 
 
-country_event = {
+situation_event = {
 	id = syndaw.525
 	title = syndaw.525.name
 	desc = syndaw.525.desc
@@ -1307,52 +1203,62 @@ country_event = {
 	show_sound = event_construction
 	location = event_target:target_planet
 	is_triggered_only = yes
+	situation = this
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		any_owned_planet = {
-			is_occupied_flag = no
-			any_owned_pop = { has_trait = trait_mechanical }
+		NOT = { has_situation_flag = triggered_syndaw_525 }
+		NOT = { has_situation_flag = flag_recent_event }
+		owner = {
+			any_owned_planet = {
+				is_occupied_flag = no
+				any_owned_pop = { has_trait = trait_mechanical }
+			}
 		}
 	}
 
 	immediate = {
-		set_country_flag = triggered_syndaw_525
-		random_owned_planet = {
-			limit = {
-				is_occupied_flag = no
-				any_owned_pop = { has_trait = trait_mechanical }
+		set_situation_flag = triggered_syndaw_525
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			# Find a planet with a Robot pop.
+			random_owned_planet = {
+				limit = {
+					is_occupied_flag = no
+					any_owned_pop = { has_trait = trait_mechanical }
+				}
+				save_event_target_as = target_planet
 			}
-			save_event_target_as = target_planet
 		}
 	}
 
-	option = {
+	option = {	# Ignore Robot wishes.
 		name = syndaw.525.a
 		custom_tooltip = syndaw.525.a.tooltip
+		add_situation_progress = 5
 		hidden_effect = {
-			country_event = { id = syndaw.526 days = 60 }
+			situation_event = { id = syndaw.526 days = 60 }
+			change_variable = { which = var_cruelty_to_robots value = 1 }
 		}
 	}
 
-	option = {
+	option = {	# Trust Robots.
 		name = syndaw.525.b
 		custom_tooltip = syndaw.525.b.tooltip
-
 		event_target:target_planet = {
 			add_modifier = {
 				modifier = syndaw_unfriendly_robots
 				days = 3600
 			}
 		}
+
 		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			change_variable = { which = var_cruelty_to_robots value = -1 }
 		}
 	}
 }
 
-country_event = {
+situation_event = {
 	id = syndaw.526
 	title = syndaw.526.name
 	desc = syndaw.526.desc
@@ -1360,17 +1266,20 @@ country_event = {
 	show_sound = event_ghost_town
 	location = event_target:target_planet
 	is_triggered_only = yes
+	situation = this
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		event_target:target_planet = {
-			owner = { is_same_value = root }
+			owner = { is_same_value = root.owner }
 			is_occupied_flag = no
 			any_owned_pop = { has_trait = trait_mechanical }
 		}
 	}
 
 	immediate = {
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+
 		event_target:target_planet = {
 			random_owned_pop = {
 				limit = {
@@ -1386,12 +1295,12 @@ country_event = {
 		custom_tooltip = syndaw.526.a.tooltip
 		hidden_effect = {
 			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
+			#fire_warning_sign = yes
 		}
 	}
 }
 
-country_event = {
+situation_event = {
 	id = syndaw.530
 	title = syndaw.530.name
 	desc = syndaw.530.desc
@@ -1399,14 +1308,18 @@ country_event = {
 	show_sound = event_space_battle
 	location = event_target:destroyed_ships
 	is_triggered_only = yes
+	situation = this
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
-
-	immediate = {
-		set_country_flag = triggered_syndaw_530
-		random_owned_fleet = {
-			limit = {
-				count_owned_ship = {
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		NOT = { has_situation_flag = triggered_syndaw_530 }
+		NOT = { has_situation_flag = flag_recent_event }
+		owner = {
+			is_at_war = no
+			has_technology = tech_combat_computers_1
+			any_controlled_fleet = {
+				is_in_combat = no
+				count_controlled_ship = {
 					count > 1
 					limit = {
 						OR = {
@@ -1417,18 +1330,40 @@ country_event = {
 					}
 				}
 			}
-			save_event_target_as = destroyed_ships
-			while = {
-				count = 2
-				random_owned_ship = {
-					limit = {
-						OR = {
-							is_ship_size = corvette
-							is_ship_size = destroyer
-							is_ship_size = cruiser
+		}
+	}
+
+	immediate = {
+		set_situation_flag = triggered_syndaw_530
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			random_controlled_fleet = {
+				limit = {
+					is_in_combat = no
+					count_controlled_ship = {
+						count > 1
+						limit = {
+							OR = {
+								is_ship_size = corvette
+								is_ship_size = destroyer
+								is_ship_size = cruiser
+							}
 						}
 					}
-					destroy_ship = this
+				}
+				save_event_target_as = destroyed_ships
+				while = {
+					count = 2
+					random_controlled_ship = {
+						limit = {
+							OR = {
+								is_ship_size = corvette
+								is_ship_size = destroyer
+								is_ship_size = cruiser
+							}
+						}
+						destroy_ship = this
+					}
 				}
 			}
 		}
@@ -1437,14 +1372,10 @@ country_event = {
 	option = {
 		name = UNFORTUNATE
 		custom_tooltip = syndaw.530.a.tooltip
-		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
-		}
 	}
 }
 
-country_event = {
+situation_event = {
 	id = syndaw.535
 	title = syndaw.535.name
 	desc = syndaw.535.desc
@@ -1452,123 +1383,164 @@ country_event = {
 	show_sound = event_construction
 	location = capital_scope
 	is_triggered_only = yes
+	situation = this
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		NOT = { has_situation_flag = triggered_syndaw_535 }
+		NOT = { has_situation_flag = flag_recent_event }
+	}
 
 	immediate = {
-		set_country_flag = triggered_syndaw_535
-		add_modifier = {
-			modifier = syndaw_production_surplus
-			days = 3600
+		set_situation_flag = triggered_syndaw_535
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			add_modifier = {
+				modifier = syndaw_production_surplus
+				days = 3600
+			}
 		}
 	}
 
 	option = {
 		name = EXCELLENT
 		tooltip = {
-			add_modifier = {
-				modifier = syndaw_production_surplus
-				days = 3600
+			owner = {
+				add_modifier = {
+					modifier = syndaw_production_surplus
+					days = 3600
+				}
 			}
-		}
-		hidden_effect = {
-			#country_event = { id = syndaw.402 }
-			fire_warning_sign = yes
 		}
 	}
 }
 
-planet_event = {
+situation_event = {
 	id = syndaw.540
 	title = syndaw.540.name
 	desc = syndaw.540.desc
 	picture = GFX_evt_organic_oppression
 	show_sound = event_ghost_town
-	location = root
+	location = event_target:target_planet
 	is_triggered_only = yes
+	situation = this
 
-	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
-
-	immediate = {
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		NOT = { has_situation_flag = triggered_syndaw_540 }
+		NOT = { has_situation_flag = flag_recent_event }
 		owner = {
-			set_country_flag = triggered_syndaw_540
-		}
-	}
-
-	option = {
-		name = syndaw.540.a
-		custom_tooltip = syndaw.540.a.tooltip
-		trigger = {
-			any_owned_pop = {
-				has_trait = trait_mechanical
-			}
-		}
-		hidden_effect = {
-			random_owned_pop = {
-				limit = { has_trait = trait_mechanical }
-				kill_pop = yes
-			}
-			owner = {
-				add_resource = { minerals = 100 }
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
-			}
-		}
-	}
-
-	option = {
-		name = syndaw.540.b
-		custom_tooltip = syndaw.540.b.tooltip
-		trigger = {
-			NOT = { any_owned_pop = { has_trait = trait_mechanical } }
-
-			owner = {
+			OR = {
+				# Any Robots pops or robot armies? Check most likely first.
+				any_owned_planet = {
+					any_owned_pop = {
+						has_trait = trait_mechanical
+					}
+				}
 				any_owned_army = {
 					exists = planet
-					planet = { is_same_value = root }
+					planet = {
+						is_occupied_flag = no
+						owner = { is_same_value = root.owner }
+					}
 					OR = {
 						army_type = robotic_army
 						army_type = robotic_defense_army
+						army_type = cybrex_warform
 					}
-				}
-			}
-		}
-		hidden_effect = {
-			owner = {
-				add_resource = { minerals = 100 }
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
-				random_owned_army = {
-					limit = {
-						exists = planet
-						planet = { is_same_value = root }
-						OR = {
-							army_type = robotic_army
-							army_type = robotic_defense_army
-						}
-					}
-					remove_army = yes
 				}
 			}
 		}
 	}
 
-	option = {
-		name = syndaw.540.c
-		custom_tooltip = syndaw.540.c.tooltip
-		add_modifier = {
-			modifier = syndaw_congregating_robots
-			days = 3600
+	immediate = {
+		set_situation_flag = triggered_syndaw_540
+		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
+		owner = {
+			# Try to pick planet with robot army, for variation. (Might still end up killing a Pop even if Army found.)
+			random_owned_army = {
+				limit = {
+					exists = planet
+					planet = {
+						is_occupied_flag = no
+						owner = { is_same_value = root.owner }
+					}
+					OR = {
+						army_type = robotic_army
+						army_type = robotic_defense_army
+						army_type = cybrex_warform
+					}
+				}
+				save_event_target_as = target_army
+				planet = { save_event_target_as = target_planet }
+			}
+			if = {
+				# If no Robot Army found, check for Robot Pop.
+				limit = { NOT = { exists = event_target:target_planet } }
+				random_owned_planet = {
+					limit = {
+						any_owned_pop = { has_trait = trait_mechanical }
+					}
+					save_event_target_as = target_planet
+				}
+			}
+		}
+	}
+
+	option = { # Has Robot Pops on planet. Prio because it hurts a bit more to lose.
+		name = syndaw.540.a
+		custom_tooltip = syndaw.540.a.tooltip
+		add_situation_progress = 5
+		trigger = {
+			event_target:target_planet = {
+				any_owned_pop = { has_trait = trait_mechanical }
+			}
 		}
 		hidden_effect = {
-			owner = {
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
+			event_target:target_planet = {
+				random_owned_pop = {
+					limit = { has_trait = trait_mechanical }
+					kill_pop = yes
+				}
 			}
+			owner = { add_resource = { alloys = 500 } }
+			change_variable = { which = var_cruelty_to_robots value = 1 }
+		}
+	}
+
+	option = { # Has only Robot Army but NO Robot Pops on planet.
+		name = syndaw.540.b
+		custom_tooltip = syndaw.540.b.tooltip
+		add_situation_progress = 5
+		trigger = {
+			event_target:target_planet = {
+				NOT = { any_owned_pop = { has_trait = trait_mechanical } }
+			}
+			exists = event_target:target_army
+		}
+		hidden_effect = {
+			event_target:target_army = { remove_army = yes }
+			owner = { add_resource = { minerals = 100 }	}
+			change_variable = { which = var_cruelty_to_robots value = 1 }
+		}
+	}
+
+	option = { # Leave them be.
+		name = syndaw.540.c
+		custom_tooltip = syndaw.540.c.tooltip
+		event_target:target_planet = {
+			add_modifier = {
+				modifier = syndaw_congregating_robots
+				days = 3600
+			}
+		}
+		hidden_effect = {
+			change_variable = { which = var_cruelty_to_robots value = -1 }
 		}
 	}
 }
 
+# Event that starts Situation (Machine Uprising)
 planet_event = { # does this unit have a soul
 	id = syndaw.545
 	title = syndaw.545.name
@@ -1589,35 +1561,67 @@ planet_event = { # does this unit have a soul
 
 	immediate = {
 		owner = {
-			set_country_flag = triggered_syndaw_545
+			if = {
+				limit = {
+					NOT = { has_country_flag = situation_machine_uprising_started }
+				}
+				# Start Machine Uprising Situation, before player can Outlaw AI.
+				start_situation = {
+					type = situation_machine_uprising
+					target = this
+				}
+				hidden_effect = {
+					# Prevent same situation from happening again.
+					set_country_flag = situation_machine_uprising_started
+				}
+			}
 		}
 	}
 
-	option = { #decrements MachUp strength
+	option = {
 		name = syndaw.545.a
 		custom_tooltip = syndaw.545.a.tooltip
+		tooltip = {
+			owner = {
+				start_situation = {
+					type = situation_machine_uprising
+					target = this
+				}
+			}
+		}
 		hidden_effect = {
 			owner = {
-				fire_warning_sign = yes
+				every_situation = {
+					limit = { is_situation_type = situation_machine_uprising }
+					change_variable = { which = var_cruelty_to_robots value = 1 }
+				}
 			}
 		}
 	}
 
-	option = { #Increments MachUp
+	option = {
 		name = syndaw.545.b
 		custom_tooltip = syndaw.545.b.tooltip
+		tooltip = {
+			owner = {
+				start_situation = {
+					type = situation_machine_uprising
+					target = this
+				}
+			}
+		}
 		hidden_effect = {
 			owner = {
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
 				set_country_flag = robots_have_souls
+				every_situation = {
+					limit = { is_situation_type = situation_machine_uprising }
+					change_variable = { which = var_cruelty_to_robots value = -2 }
+				}
 			}
 		}
 	}
 
-	option = { #Increments MachUp
-		name = syndaw.545.c
-		custom_tooltip = syndaw.545.c.tooltip
+	option = {
 		trigger = {
 			owner = {
 				OR = {
@@ -1626,15 +1630,20 @@ planet_event = { # does this unit have a soul
 				}
 			}
 		}
-		hidden_effect = {
+		name = syndaw.545.c
+		custom_tooltip = syndaw.545.c.tooltip
+		tooltip = {
 			owner = {
-				#country_event = { id = syndaw.402 }
-				fire_warning_sign = yes
+				start_situation = {
+					type = situation_machine_uprising
+					target = this
+				}
 			}
 		}
 	}
 }
 
+# Completed long Special Project to stop Uprising.
 country_event = {
 	id = syndaw.550
 	title = syndaw.550.name
@@ -1644,23 +1653,22 @@ country_event = {
 	location = capital_scope
 	is_triggered_only = yes
 
-	immediate = {
-		set_country_flag = triggered_syndaw_550
-	}
-
 	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
 
 	option = { # patch
 		name = syndaw.550.a
 		custom_tooltip = syndaw.550.a.tooltip
-		hidden_effect = { set_country_flag = no_machine_uprising }
+		every_situation = {
+			limit = { is_situation_type = situation_machine_uprising }
+			destroy_situation = this
+		}
 		add_modifier = {
 			modifier = syndaw_patched_systems
 			days = 7200 # 20 years
 		}
 		add_resource = {
 			energy = -500
-			influence = -100
+			unity = -1000
 		}
 		ai_chance = {
 			factor = 100
@@ -1669,19 +1677,48 @@ country_event = {
 
 	option = { # don't patch
 		name = syndaw.550.b
-		hidden_effect = {
-			fire_warning_sign = yes
+		abort_special_project = { type = PROJECT_MACHINE_UPRISING_PATCH }
+	}
+}
+
+# Completed fast Special Project to stop Uprising.
+country_event = {
+	id = syndaw.555
+	title = syndaw.555.name
+	desc = syndaw.555.desc
+	picture = GFX_evt_glitchy_matrix
+	show_sound = event_mystic_reveal
+	location = capital_scope
+	is_triggered_only = yes
+
+	trigger = { host_has_dlc = "Synthetic Dawn Story Pack" }
+
+	option = { # Wipe
+		name = syndaw.555.a
+		custom_tooltip = syndaw.555.a.tooltip
+		every_situation = {
+			limit = { is_situation_type = situation_machine_uprising }
+			destroy_situation = this
 		}
-		ai_chance = {
-			factor = 0
+		add_modifier = {
+			modifier = syndaw_wiped_systems
+			days = 7200 # 20 years
 		}
+		add_resource = {
+			energy = -500
+			unity = -1000
+		}
+	}
+
+	option = { # Don't wipe. Can still do non-rushed Hotfix.
+		name = syndaw.555.b
+		abort_special_project = { type = PROJECT_MACHINE_UPRISING_WIPE }
 	}
 }
 
 
 # Machine Uprising #1000-1999
-
-country_event = {
+situation_event = {
 	id = syndaw.1000
 	hide_window = yes
 
@@ -1689,71 +1726,60 @@ country_event = {
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		mid_game_years_passed >= 0
-		is_country_type = default
-		num_owned_planets > 2
-		NOR = {
-			has_country_flag = no_machine_uprising
-			has_country_flag = had_uprising
-			has_ethic = ethic_gestalt_consciousness
-			has_ascension_perk = ap_the_flesh_is_weak
-			has_policy_flag = ai_full_rights
-			#has_policy_flag = robots_outlawed # should still happen if triggered by ban
-		}
-		# has a dangerous tech
-		OR = {
-			has_technology = tech_combat_computers_3
-			has_technology = tech_sapient_ai
-			has_technology = tech_synthetic_workers
-		}
 	}
 
 	immediate = {
-		# no robots, no uprising
-		if = {
-			limit = {
-				NOT = {
+		owner = {
+			if = {
+				limit = { is_ai = yes }
+				log = "AI [This.GetName] suffered an AI Uprising in [GetYear]"
+			}
+			else = {
+				log = "Player [This.GetName] suffered an AI Uprising in [GetYear]"
+			}
+			# no robots, no uprising
+			if = {
+				limit = {
+					NOT = {
+						any_owned_planet = {
+							any_owned_pop = {
+								has_trait = trait_mechanical
+							}
+						}
+					}
+				}
+				# Shouldn't end up here. But no effect just in case.
+			}
+			# uprising on colony
+			else_if = {
+				limit = {
 					any_owned_planet = {
 						any_owned_pop = {
 							has_trait = trait_mechanical
 						}
+						is_capital = no
 					}
 				}
-			}
-			set_timed_country_flag = {
-				flag = no_machine_uprising
-				days = 3600
-			}
-		}
-		# uprising on colony
-		else_if = {
-			limit = {
-				any_owned_planet = {
-					any_owned_pop = {
-						has_trait = trait_mechanical
+				random_owned_planet = {
+					limit = {
+						any_owned_pop = {
+							has_trait = trait_mechanical
+						}
+						is_capital = no
 					}
-					is_capital = no
+					planet_event = { id = syndaw.1020 }
 				}
 			}
-			random_owned_planet = {
-				limit = {
-					any_owned_pop = {
-						has_trait = trait_mechanical
+			# uprising wherever
+			else = {
+				random_owned_planet = {
+					limit = {
+						any_owned_pop = {
+							has_trait = trait_mechanical
+						}
 					}
-					is_capital = no
+					planet_event = { id = syndaw.1020 }
 				}
-				planet_event = { id = syndaw.1020 }
-			}
-		}
-		# uprising wherever
-		else = {
-			random_owned_planet = {
-				limit = {
-					any_owned_pop = {
-						has_trait = trait_mechanical
-					}
-				}
-				planet_event = { id = syndaw.1020 }
 			}
 		}
 	}
@@ -1878,6 +1904,7 @@ planet_event = { #uprising
 	picture = GFX_evt_machine_sapience
 	show_sound = event_ai_started
 	is_triggered_only = yes
+	force_open = yes
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
@@ -1887,17 +1914,32 @@ planet_event = { #uprising
 	immediate = {
 		owner = {
 			save_event_target_as = organic_empire
-			set_country_flag = had_uprising
 			save_event_target_as = current_uprising_originator #the old script accidentally saved the owner as two event targets, keeping it that way for safety, sorry!
 		}
 		set_planet_flag = machup_capital@root.owner
 		# event lock all fleets to prevent exploits
-		owner = { every_owned_fleet = { set_event_locked = yes } }
+		owner = { every_controlled_fleet = { set_event_locked = yes } }
+		# Calculate percentage of robot pops
+		owner = {
+			# Determine Robot Pop percentage of Empire.
+			export_trigger_value_to_variable = {
+				trigger = pop_percentage
+				parameters = {
+					limit = { is_robot_pop = yes }
+				}
+				variable = var_country_robot_pops_percent
+			}
+
+			# Take percentage of Robot pops and average it together with 0.5 to get Uprising strength (0.25 to 0.75).
+			change_variable = { which = var_country_robot_pops_percent value = 0.5 }
+			divide_variable = { which = var_country_robot_pops_percent value = 2 }
+		}
+
 		# find and flag planets
 		owner = {
 			effect_on_blob = {
 				center = root.solar_system
-				owned_planets_percentage = 0.5
+				owned_planets_percentage = var_country_robot_pops_percent
 				planet_limit = {
 					OR = {
 						controller = { is_same_value = root.owner }
@@ -1918,6 +1960,7 @@ planet_event = { #uprising
 					set_star_flag = machup_system_flip
 				}
 			}
+			clear_variable = var_country_robot_pops_percent
 		}
 		# create machine species
 		create_species = {
@@ -1934,14 +1977,22 @@ planet_event = { #uprising
 		random_list = {
 			1 = { # exterminator
 				modifier = {
-					factor = 5
+					add = event_target:organic_empire.var_uprising_cruelty_to_robots
+				}
+				modifier = {
+					add = 10
 					owner = {
-						has_country_flag = attempted_disassembly
-						has_country_flag = attempted_ban
+						has_country_flag = machine_uprising_disassembly
 					}
 				}
 				modifier = {
-					factor = 30
+					add = 10
+					owner = {
+						has_country_flag = machine_uprising_outlawed
+					}
+				}
+				modifier = {
+					factor = 10
 					owner = {
 						any_owned_pop = {
 							has_trait = trait_mechanical
@@ -1977,6 +2028,9 @@ planet_event = { #uprising
 				}
 			}
 			30 = { # assimilator
+				modifier = {
+					add = event_target:organic_empire.var_uprising_cruelty_to_robots
+				}
 				owner = {
 					create_country = {
 						name = random
@@ -2030,10 +2084,22 @@ planet_event = { #uprising
 				}
 			}
 		}
+
+		# Done using variable.
+		event_target:organic_empire = { clear_variable = var_uprising_cruelty_to_robots }
 	}
 	option = {
 		name = syndaw.1020.a
 		custom_tooltip = syndaw.1020.a.tooltip
+
+		hidden_effect = {
+			event_target:current_uprising = {
+				add_modifier = {
+					modifier = uprising_ai_buff
+					days = 1800
+				}
+			}
+		}
 	}
 
 	option = {
@@ -2049,6 +2115,11 @@ planet_event = { #uprising
 				}
 				event_target:current_uprising = {
 					set_player = event_target:current_uprising_originator
+					set_country_flag = machine_supremacy_achievement
+					add_modifier = {
+						modifier = uprising_player_buff
+						days = 1800
+					}
 				}
 			}
 		}
@@ -2057,7 +2128,7 @@ planet_event = { #uprising
 	after = {
 		hidden_effect = {
 			event_target:current_uprising_originator = {
-				every_owned_fleet = {
+				every_controlled_fleet = {
 					set_event_locked = no
 				}
 			}
@@ -2122,12 +2193,18 @@ country_event = {
 
 		# baseline resource stockpile
 		add_resource = {
-			energy = 5000
-			minerals = 5000
-			influence = 500
-			alloys = 5000
+			energy = 20000
+			minerals = 20000
+			influence = 800
+			alloys = 10000
+			food = 10000 #just in case
+			consumer_goods = 5000 #just in case
+			rare_crystals = 1000
+			volatile_motes = 1000
+			exotic_gases = 1000
+			sr_dark_matter = 100
 		}
-		add_100_unity_per_year_passed = yes # scripted effect
+		add_500_unity_per_year_passed = yes # scripted effect
 
 		# Machine Uprising opinion modifier
 		add_opinion_modifier = {
@@ -2164,7 +2241,7 @@ country_event = {
 					limit = {
 						exists = owner
 						owner = { is_same_value = event_target:current_uprising_originator }
-						any_owned_ship = { is_ship_class = shipclass_military_station }
+						any_controlled_ship = { is_ship_class = shipclass_military_station }
 					}
 					set_owner = root
 				}
@@ -2178,7 +2255,34 @@ country_event = {
 					limit = {
 						exists = starbase
 					}
-					starbase = { set_owner = root }
+					starbase = {
+						set_owner = root
+						if = {
+							limit = { has_starbase_size = starbase_outpost }
+							set_starbase_size = starbase_starport
+							set_starbase_module = {
+								slot = 1
+								module = shipyard
+							}
+							set_starbase_module = {
+								slot = 2
+								module = shipyard
+							}
+						}
+						else_if = {
+							limit = {
+								NOT = { has_starbase_module = shipyard }
+							}
+							set_starbase_module = {
+								slot = 1
+								module = shipyard
+							}
+							set_starbase_module = {
+								slot = 2
+								module = shipyard
+							}
+						}
+					}
 				}
 				else = {
 					create_starbase = {
@@ -2294,7 +2398,7 @@ country_event = {
 							limit = {
 								exists = owner
 								owner = { is_same_value = event_target:current_uprising_originator }
-								any_owned_ship = { is_ship_class = shipclass_military_station }
+								any_controlled_ship = { is_ship_class = shipclass_military_station }
 							}
 							set_owner = root
 						}
@@ -2462,7 +2566,10 @@ country_event = {
 		# declare war on host
 		declare_war = {
 			target = event_target:current_uprising_originator
-			name = "NAME_Machine_Uprising_War"
+			name = {
+				key = "NAME_Machine_Uprising_War"
+				variable_string = "This.MainDefender.GetAdj"
+			}
 			# "[This.MainDefender.GetAdj] Machine Uprising"
 			attacker_war_goal = "wg_machine_uprising"
 		}
@@ -2481,6 +2588,7 @@ country_event = {
 				}
 			}
 
+			reroll_random = yes
 			create_fleet_from_naval_cap = 0.3
 			random_owned_planet = {
 				last_created_fleet = {
@@ -2488,6 +2596,7 @@ country_event = {
 				}
 			}
 
+			reroll_random = yes
 			create_fleet_from_naval_cap = 0.4
 			random_owned_planet = {
 				last_created_fleet = {
@@ -2495,6 +2604,7 @@ country_event = {
 				}
 			}
 
+			reroll_random = yes
 			create_fleet_from_naval_cap = 0.6
 			random_owned_planet = {
 				last_created_fleet = {
@@ -2510,12 +2620,14 @@ country_event = {
 					set_location = prev
 				}
 			}
+			reroll_random = yes
 			create_fleet_from_naval_cap = 0.3
 			random_owned_planet = {
 				last_created_fleet = {
 					set_location = prev
 				}
 			}
+			reroll_random = yes
 			create_fleet_from_naval_cap = 0.4
 			random_owned_planet = {
 				last_created_fleet = {
@@ -2524,21 +2636,6 @@ country_event = {
 			}
 		}
 
-		# add modifier for AI, including 10x naval cap
-		if = {
-			limit = { is_ai = yes }
-			add_modifier = {
-				modifier = uprising_ai_buff
-				days = 1800
-			}
-		}
-		# add modifier for player, 10x naval cap
-		else = {
-			add_modifier = {
-				modifier = uprising_player_buff
-				days = 1800
-			}
-		}
 		#science
 		create_fleet = {
 			effect = {
@@ -2579,7 +2676,7 @@ country_event = {
 			}
 		}
 
-		every_owned_fleet = {
+		every_controlled_fleet = {
 			#limit = { event_locked = yes }
 			set_event_locked = no
 		}
@@ -2604,7 +2701,7 @@ country_event = {
 	desc = {
 		trigger = {
 			OR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2613,7 +2710,7 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2646,7 +2743,7 @@ country_event = {
 	desc = {
 		trigger = {
 			OR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2655,7 +2752,7 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2679,7 +2776,7 @@ country_event = {
 	desc = {
 		trigger = {
 			OR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2688,7 +2785,7 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2712,7 +2809,7 @@ country_event = {
 	hide_window = yes
 
 	trigger = {
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 		FROM = { leader_class = ruler }
 	}
 
@@ -2738,7 +2835,7 @@ country_event = {
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		is_country_type = default
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 		has_country_flag = machine_uprising_country
 		has_relation_flag = {
 			who = from
@@ -2775,7 +2872,7 @@ country_event = {
 					has_communications = root
 					NOR = {
 						has_country_flag = synthetic_empire
-						has_authority = auth_machine_intelligence
+						is_machine_empire = yes
 					}
 				}
 				add_opinion_modifier = {
@@ -2788,7 +2885,7 @@ country_event = {
 					has_communications = root
 					OR = {
 						has_country_flag = synthetic_empire
-						has_authority = auth_machine_intelligence
+						is_machine_empire = yes
 					}
 					NOT = { is_same_value = root }
 				}
@@ -2922,7 +3019,7 @@ country_event = {
 					has_communications = root
 					NOR = {
 						has_country_flag = synthetic_empire
-						has_authority = auth_machine_intelligence
+						is_machine_empire = yes
 						is_same_value = root
 					}
 				}
@@ -2936,7 +3033,7 @@ country_event = {
 					has_communications = root
 					OR = {
 						has_country_flag = synthetic_empire
-						has_authority = auth_machine_intelligence
+						is_machine_empire = yes
 					}
 				}
 				add_opinion_modifier = {
@@ -2956,11 +3053,11 @@ country_event = {
 
 	trigger = { # conquered an organic empire
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 		has_civic = civic_machine_terminator
 		from = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2977,7 +3074,7 @@ country_event = {
 							is_country_type = awakened_fallen_empire
 						}
 						NOR = {
-							has_authority = auth_machine_intelligence
+							is_machine_empire = yes
 							has_country_flag = synthetic_empire
 							has_country_flag = fallen_empire_machine
 						}
@@ -2989,7 +3086,7 @@ country_event = {
 	}
 }
 
-# Banning AI post-Warning Signs causes Uprising evaluation
+# Banning AI post-Warning Signs can advance Uprising situation.
 country_event = {
 	id = syndaw.1300
 	hide_window = yes
@@ -2998,28 +3095,21 @@ country_event = {
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		last_changed_policy = artificial_intelligence_policy
-		has_policy_flag = ai_outlawed
-		OR = {
-			has_country_flag = triggered_syndaw_500
-			has_country_flag = triggered_syndaw_505
-			has_country_flag = triggered_syndaw_515
-			has_country_flag = triggered_syndaw_520
-			has_country_flag = triggered_syndaw_525
-			has_country_flag = triggered_syndaw_530
-			has_country_flag = triggered_syndaw_535
-			has_country_flag = triggered_syndaw_540
-			has_country_flag = triggered_syndaw_545
-		}
-		NOT = { has_country_flag = no_machine_uprising }
+		country_has_situation = { SITUATION = situation_machine_uprising }
 	}
 
 	immediate = {
-		set_country_flag = attempted_ban
-		random_list = {
-			3 = { fire_warning_sign = yes }
-			1 = { country_event = { id = syndaw.1000 } }
+		if = {
+			limit = {
+				has_policy_flag = ai_outlawed					# Stop here if AI policy is improved.
+				NOT = { has_country_flag = machine_uprising_outlawed }
+			}
+			set_country_flag = machine_uprising_outlawed		# Makes Exterminator outcome more likely.
+			every_situation = {
+				limit = { is_situation_type = situation_machine_uprising }
+				add_situation_progress = 25
+			}
 		}
-		#country_event = { id = syndaw.402 }
 	}
 }
 
@@ -3033,67 +3123,76 @@ country_event = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		last_changed_policy = robot_pop_policy
 		has_policy_flag = robots_outlawed
-		OR = {
-			has_country_flag = triggered_syndaw_500
-			has_country_flag = triggered_syndaw_505
-			has_country_flag = triggered_syndaw_515
-			has_country_flag = triggered_syndaw_520
-			has_country_flag = triggered_syndaw_525
-			has_country_flag = triggered_syndaw_530
-			has_country_flag = triggered_syndaw_535
-			has_country_flag = triggered_syndaw_540
-			has_country_flag = triggered_syndaw_545
-		}
-		NOT = { has_country_flag = no_machine_uprising }
+		country_has_situation = { SITUATION = situation_machine_uprising }
 	}
 
 	immediate = {
-		set_country_flag = attempted_ban
-		random_list = {
-			3 = { fire_warning_sign = yes }
-			1 = { country_event = { id = syndaw.1000 } }
+		if = {
+			limit = {
+				NOT = { has_country_flag = machine_uprising_outlawed }
+			}
+			set_country_flag = machine_uprising_outlawed		# Makes Exterminator outcome more likely.
+			every_situation = {
+				limit = { is_situation_type = situation_machine_uprising }
+				add_situation_progress = 25				# Fixed, but could potentially depend on number of Specialist robots.
+			}
 		}
-		#country_event = { id = syndaw.402 }
 	}
 }
 
-# Disassembling a Mechanical pop post-Warning Signs causes Uprising evaluation
-pop_event = {
+# Disassembling a Mechanical pop under AI Uprising situation causes it to progress.
+planet_event = {
 	id = syndaw.1310
 	hide_window = yes
 	is_triggered_only = yes
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		has_trait = trait_mechanical
+		fromfrom = { has_trait = trait_mechanical }
 		owner = {
 			is_country_type = default
-			OR = {
-				has_country_flag = triggered_syndaw_500
-				has_country_flag = triggered_syndaw_505
-				has_country_flag = triggered_syndaw_515
-				has_country_flag = triggered_syndaw_520
-				has_country_flag = triggered_syndaw_525
-				has_country_flag = triggered_syndaw_530
-				has_country_flag = triggered_syndaw_535
-				has_country_flag = triggered_syndaw_540
-				has_country_flag = triggered_syndaw_545
-			}
-			NOT = { has_country_flag = no_machine_uprising }
+			country_has_situation = { SITUATION = situation_machine_uprising }
 		}
 	}
 
 	immediate = {
 		owner = {
-			set_country_flag = attempted_disassembly
-			random_list = {
-				3 = { fire_warning_sign = yes }
-				1 = { country_event = { id = syndaw.1000 } }
+			set_country_flag = machine_uprising_disassembly
+			every_situation = {
+				limit = { is_situation_type = situation_machine_uprising }
+				add_situation_progress = 2
+				change_variable = { which = var_cruelty_to_robots value = 1 }		# They'll hate you even more.
 			}
-			#country_event = { id = syndaw.402 }
 		}
 	}
 }
+
+# Displacing a Mechanical pop under AI Uprising situation causes it to progress.
+planet_event = {
+	id = syndaw.1311
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		fromfrom = { has_trait = trait_mechanical }
+		owner = {
+			is_country_type = default
+			country_has_situation = { SITUATION = situation_machine_uprising }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = machine_uprising_disassembly
+			every_situation = {
+				limit = { is_situation_type = situation_machine_uprising }
+				add_situation_progress = 1
+			}
+		}
+	}
+}
+
 
 planet_event = {
 	id = syndaw.1320

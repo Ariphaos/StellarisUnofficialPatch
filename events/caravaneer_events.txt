@@ -163,20 +163,16 @@ country_event = {
 			factor = 10
 			modifier = {
 				factor = 0
-				check_variable = {
-					which = owned_cc_var
-					value < 7000
+				OR = {
+					check_variable = {
+						which = owned_cc_var
+						value < 7000
+					}
+					has_country_flag = buying_boxes #Lets stop the AI from funneling its entire economy into boxes
 				}
 			}
 		}
 		allow = {
-			custom_tooltip = {
-				fail_text = too_many_lootboxes
-				check_variable = {
-					which = num_lootboxes
-					value < 6
-				}
-			}
 			custom_tooltip = {
 				fail_text = too_recently_lootboxed
 				NOT = { has_country_flag = lootboxed_recently }
@@ -184,51 +180,6 @@ country_event = {
 		}
 		hidden_effect = {
 			country_event = { id = cara.300 }
-			if = {
-				limit = {
-					check_variable = {
-						which = num_lootboxes
-						value = 1
-					}
-				}
-				custom_tooltip = 5_lootboxes_remaining
-			}
-			else_if = {
-				limit = {
-					check_variable = {
-						which = num_lootboxes
-						value = 2
-					}
-				}
-				custom_tooltip = 4_lootboxes_remaining
-			}
-			else_if = {
-				limit = {
-					check_variable = {
-						which = num_lootboxes
-						value = 3
-					}
-				}
-				custom_tooltip = 3_lootboxes_remaining
-			}
-			else_if = {
-				limit = {
-					check_variable = {
-						which = num_lootboxes
-						value = 4
-					}
-				}
-				custom_tooltip = 2_lootboxes_remaining
-			}
-			else_if = {
-				limit = {
-					check_variable = {
-						which = num_lootboxes
-						value = 5
-					}
-				}
-				custom_tooltip = 1_lootboxes_remaining
-			}
 		}
 	}
 
@@ -778,6 +729,9 @@ country_event = {
 		custom_gui = "enclave_caravaneer_option"
 		name = cara_home_lootbox_buy
 		custom_tooltip = cara_home_lootbox_buy.tooltip
+		trigger = {
+			NOT = { has_country_flag = buying_boxes }
+		}
 		allow = {
 			custom_tooltip = {
 				fail_text = lootbox_buy_allow_fail
@@ -792,6 +746,32 @@ country_event = {
 			change_variable = {
 				which = owned_cc_var
 				value = -6194.21
+			}
+		}
+	}
+
+	option = {
+		custom_gui = "enclave_caravaneer_option"
+		name = cara_home_lootbox_buy_energy
+		custom_tooltip = cara_home_lootbox_buy_energy.tooltip
+		trigger = {
+			has_country_flag = buying_boxes
+		}
+		allow = {
+			resource_stockpile_compare = {
+				resource = energy
+				value >= box_cost
+			}
+		}
+		add_resource = {
+			energy = -1
+			multiplier = box_cost
+		}
+		hidden_effect = {
+			country_event = { id = cara.310 }
+			multiply_variable = { 
+				which = box_cost
+				value = 1.05
 			}
 		}
 	}
@@ -828,6 +808,13 @@ country_event = {
 	id = cara.310
 	title = cara_home_lootbox.title
 	desc = {
+		trigger = {
+			has_country_flag = buying_boxes_desc
+			NOT = { has_country_flag = recent_galatron }
+		}
+		text = buying_boxes_desc
+	}
+	desc = {
 		trigger = { has_country_flag = recent_empty_lootbox }
 		text = openedlootboxdesc1
 	}
@@ -840,59 +827,59 @@ country_event = {
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_a }
-								text = lootbox_contents_a
+		text = lootbox_contents_a
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_b }
-								text = lootbox_contents_b
+		text = lootbox_contents_b
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_c }
-								text = lootbox_contents_c
+		text = lootbox_contents_c
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_d }
-								text = lootbox_contents_d
+		text = lootbox_contents_d
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_e }
-								text = lootbox_contents_e
+		text = lootbox_contents_e
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_f }
-								text = lootbox_contents_f
+		text = lootbox_contents_f
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_g }
-								text = lootbox_contents_g
+		text = lootbox_contents_g
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_h }
-								text = lootbox_contents_h
+		text = lootbox_contents_h
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_i }
-								text = lootbox_contents_i
+		text = lootbox_contents_i
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_j }
-								text = lootbox_contents_j
+		text = lootbox_contents_j
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_k }
-								text = lootbox_contents_k
+		text = lootbox_contents_k
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_l }
-								text = lootbox_contents_l
+		text = lootbox_contents_l
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_m }
-								text = lootbox_contents_m
+		text = lootbox_contents_m
 	}
 	desc = {
 		trigger = { has_country_flag = lootbox_contents_n }
-								text = lootbox_contents_n
+		text = lootbox_contents_n
 	}
 	diplomatic = yes
 	is_triggered_only = yes
@@ -906,6 +893,15 @@ country_event = {
 	}
 
 	immediate = {
+		if = {
+			limit = {
+				check_variable = {
+					which = num_lootboxes
+					value = 5
+				}
+			}
+			set_country_flag = buying_boxes_desc
+		}
 		random_list = {
 			# Galatron
 			1 = {
@@ -957,6 +953,10 @@ country_event = {
 							exists = ruler
 							ruler = { has_trait = leader_trait_ruler_psionic }
 						}
+						modifier = {
+							factor = 0
+							is_gestalt = yes
+						}
 						set_country_flag = lootbox_contents_l
 					}
 					100 = { set_country_flag = lootbox_contents_m }
@@ -1006,6 +1006,17 @@ country_event = {
 			}
 			if = {
 				limit = {
+					has_country_flag = buying_boxes_desc
+				}
+				remove_country_flag = buying_boxes_desc
+				set_country_flag = buying_boxes
+				set_variable = {
+					which = box_cost
+					value = 8450
+				}
+			}
+			if = {
+				limit = {
 					has_country_flag = recent_galatron
 					NOT = { has_modifier = galatron_modifier }
 				}
@@ -1023,10 +1034,16 @@ country_event = {
 		name = OK
 
 		hidden_effect = {
-			set_timed_country_flag = {
-				flag = lootboxed_recently
-				days = 500
+			if = {
+				limit = {
+					NOT = { has_country_flag = buying_boxes }
+				}
+				set_timed_country_flag = {
+					flag = lootboxed_recently
+					days = 500
+				}
 			}
+
 			if = {
 				limit = {
 					has_country_flag = recent_galatron
@@ -3322,11 +3339,11 @@ country_event = {
 		text = fleet3dealdesc2 #Selling Racket leader
 	}
 	desc = {
-		trigger = { has_country_flag = fleet3deal3 has_authority = auth_machine_intelligence }
+		trigger = { has_country_flag = fleet3deal3 is_machine_empire = yes }
 		text = fleet3dealdesc3machi #Selling pops, MI
 	}
 	desc = {
-		trigger = { has_country_flag = fleet3deal3 NOT = { has_authority = auth_machine_intelligence } }
+		trigger = { has_country_flag = fleet3deal3 is_machine_empire = no }
 		text = fleet3dealdesc3 #Selling pops, regular
 	}
 	desc = {
@@ -3334,11 +3351,11 @@ country_event = {
 		text = fleet3dealdesc4 #Selling alloy/gas/living metal
 	}
 	desc = {
-		trigger = { has_country_flag = fleet3deal5 NOT = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { has_country_flag = fleet3deal5 is_gestalt = no }
 		text = fleet3dealdesc5 #Selling unique building
 	}
 	desc = {
-		trigger = { has_country_flag = fleet3deal5 has_ethic = ethic_gestalt_consciousness }
+		trigger = { has_country_flag = fleet3deal5 is_gestalt = yes }
 		text = fleet3dealdesc5_gesta #Selling unique building GC
 	}
 	desc = {
@@ -3477,11 +3494,11 @@ country_event = {
 		text = fleet3dealdesc2 #Selling Racket leader
 	}
 	desc = {
-		trigger = { has_country_flag = fleet3deal3 has_authority = auth_machine_intelligence }
+		trigger = { has_country_flag = fleet3deal3 is_machine_empire = yes }
 		text = fleet3dealdesc3machi #Selling pops, MI
 	}
 	desc = {
-		trigger = { has_country_flag = fleet3deal3 NOT = { has_authority = auth_machine_intelligence } }
+		trigger = { has_country_flag = fleet3deal3 is_machine_empire = no }
 		text = fleet3dealdesc3 #Selling pops, regular
 	}
 	desc = {
@@ -4222,7 +4239,7 @@ country_event = {
 	mean_time_to_happen = { years = 2 }
 
 	trigger = {
-		NOT = { has_ethic = ethic_gestalt_consciousness }
+		is_gestalt = no
 		NOT = { has_country_flag = pops_join_caravan_recent }
 		NOT = { has_country_flag = caravan_recent_event }
 		caravaneer_fleet_events_valid = yes
@@ -4310,7 +4327,7 @@ country_event = {
 	trigger = {
 		caravaneer_fleet_events_valid = yes
 		NOR = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 			has_country_flag = caravan_pops_join_recent
 			has_country_flag = caravan_recent_event
 		}
@@ -4451,7 +4468,7 @@ country_event = {
 	option = {
 		name = cara.4020.c
 		trigger = {
-			has_authority = auth_corporate
+			is_megacorp = yes
 		}
 		custom_tooltip = cara.4020.c.tooltip
 		add_monthly_resource_mult = {
@@ -4753,7 +4770,11 @@ country_event = {
 		}
 
 		event_target:pleased_planet = {
-			create_half_species = { species_one = event_target:party_host species_two = event_target:party_goer.species }
+			create_half_species = {
+				species_one = event_target:party_host
+				species_two = event_target:party_goer.species
+				country = root
+			}
 			while = {
 				count = 2
 				create_pop = {
@@ -4789,7 +4810,11 @@ country_event = {
 	after = {
 		tooltip = {
 			event_target:pleased_planet = {
-				create_half_species = { species_one = event_target:party_host species_two = event_target:party_goer.species }
+				create_half_species = {
+					species_one = event_target:party_host
+					species_two = event_target:party_goer.species
+					country = root
+				}
 				hidden_effect = {
 					while = {
 						count = 3

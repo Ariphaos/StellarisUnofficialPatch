@@ -54,7 +54,7 @@ country_event = {
 		#}
 		random_country = {
 			limit = { is_country_type = portal_holder }
-			random_owned_ship = { set_ship_flag = unbidden_portal }
+			random_controlled_ship = { set_ship_flag = unbidden_portal }
 		}
 	}
 }
@@ -67,7 +67,7 @@ country_event = {
 	immediate = {
 		random_country = {
 			limit = { is_country_type = portal_holder }
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = { is_ship_size = dimensional_portal_ed }
 				set_ship_flag = unbidden_portal
 			}
@@ -118,14 +118,16 @@ country_event = {
 		set_global_flag = galactic_crisis_happened
 		random_system = {
 			limit = {
-				NOT = {
-					any_country = {
-						OR = {
-							is_country_type = fallen_empire
-							is_country_type = awakened_fallen_empire
-						}
-						any_system_within_border = {
-							is_same_value = prev
+				NOR = {
+					is_star_class = sc_pulsar
+					is_star_class = sc_binary_1
+					AND = {
+						exists = owner
+						owner = {
+							OR = {
+								is_country_type = fallen_empire
+								is_country_type = awakened_fallen_empire
+							}
 						}
 					}
 				}
@@ -305,7 +307,7 @@ country_event = {
 		observer_event = { id = observer.34 }
 		# make portal invincible
 		event_target:extradimensionals = {
-			random_owned_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
+			random_controlled_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
 		}
 
 		# Custodian/Emperor Announcements
@@ -324,7 +326,7 @@ country_event = {
 				country_event = { id = emperor.90 days = 30 }
 			}
 		}
-		
+
 		every_country = {
 			limit = {
 				OR = {
@@ -569,7 +571,7 @@ country_event = {
 			OR = {
 				has_government = gov_megacorporation
 				has_government = gov_trade_league
-				has_authority = auth_corporate
+				is_megacorp = yes
 			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
@@ -625,21 +627,21 @@ country_event = {
 	option = {
 		name = crisis.18.h
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 	}
 	option = { # DEFAULT
 		name = crisis.18.b
 		trigger = {
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_ethic = "ethic_fanatic_egalitarian"
 				has_ethic = "ethic_fanatic_authoritarian"
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 				has_government = gov_megacorporation
 				has_government = gov_trade_league
-				has_authority = auth_corporate
+				is_megacorp = yes
 				has_generic_government = yes
 				has_government = gov_enlightened_monarchy
 				has_government = gov_elective_monarchy
@@ -678,6 +680,8 @@ country_event = {
 	desc = "crisis.1009.desc"
 	picture = GFX_evt_wormhole
 	show_sound = event_ex_started
+
+	location = event_target:extradimensional_system
 
 	is_triggered_only = yes
 
@@ -770,7 +774,7 @@ country_event = {
 			OR = {
 				has_government = gov_megacorporation
 				has_government = gov_trade_league
-				has_authority = auth_corporate
+				is_megacorp = yes
 			}
 			NOR = {
 				has_ethic = "ethic_fanatic_egalitarian"
@@ -827,21 +831,21 @@ country_event = {
 	option = {
 		name = crisis.18.h
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 	}
 	option = { # DEFAULT
 		name = crisis.18.b
 		trigger = {
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_ethic = "ethic_fanatic_egalitarian"
 				has_ethic = "ethic_fanatic_authoritarian"
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 				has_government = gov_megacorporation
 				has_government = gov_trade_league
-				has_authority = auth_corporate
+				is_megacorp = yes
 				has_generic_government = yes
 				has_government = gov_enlightened_monarchy
 				has_government = gov_elective_monarchy
@@ -903,6 +907,10 @@ planet_event = {
 
 	immediate = {
 		add_threat = { who = from amount = 2 }
+		every_owned_pop = {
+				unemploy_pop = yes
+				kill_pop = yes
+			}
 		destroy_colony = yes
 		if = {
 			limit = {
@@ -1033,6 +1041,7 @@ country_event = {
 				if = {
 					limit = { is_ai = no }
 					country_event = { id = crisis.1250 days = 10 random = 10 }
+					set_country_flag = with_great_power_achievement
 				}
 			}
 			observer_event = { id = observer.35 }
@@ -1122,7 +1131,7 @@ country_event = {
 	desc = {
 		text = crisis.1050.desc_01
 		trigger = {
-			NOR = { owner_species = { has_trait = trait_psionic has_trait = trait_mechanical } has_authority = auth_machine_intelligence }
+			NOR = { owner_species = { has_trait = trait_psionic has_trait = trait_mechanical } is_machine_empire = yes }
 		}
 	}
 	desc = {
@@ -1134,7 +1143,7 @@ country_event = {
 	desc = {
 		text = crisis.1050.desc_03
 		trigger = {
-			NOR = { owner_species = { has_trait = trait_psionic has_trait = trait_mechanical } has_authority = auth_machine_intelligence }
+			NOR = { owner_species = { has_trait = trait_psionic has_trait = trait_mechanical } is_machine_empire = yes }
 		}
 	}
 	desc = {
@@ -1160,7 +1169,7 @@ country_event = {
 		trigger = {
 			OR = {
 				owner_species = { has_trait = trait_mechanical }
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 	}
@@ -1186,7 +1195,7 @@ country_event = {
 		response_text = crisis.1050.a.response
 		trigger = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				owner_species = { has_trait = trait_mechanical }
 			}
 		}
@@ -1207,7 +1216,7 @@ country_event = {
 			OR = {
 				has_ethic = "ethic_militarist"
 				has_ethic = "ethic_fanatic_militarist"
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 		response_text = crisis.1050.c.response
@@ -1256,7 +1265,7 @@ country_event = {
 		response_text = crisis.1050.a.b.response
 		trigger = {
 			OR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				owner_species = { has_trait = trait_mechanical }
 			}
 		}
@@ -1361,9 +1370,11 @@ country_event = {
 		set_global_flag = extradimensional_second_portal
 		random_system = {
 			limit = {
-					NOT = { owner = { is_country_type = extradimensional } }
-					any_neighbor_system_euclidean = {
+					NOR = {
 						owner = { is_country_type = extradimensional }
+						is_star_class = sc_pulsar
+						is_star_class = sc_binary_1
+						has_star_flag = extradimensional_origin_system
 					}
 				}
 			set_star_flag = extradimensional_second_portal_system
@@ -1562,7 +1573,7 @@ country_event = {
 		observer_event = { id = observer.36 }
 		# make portal invincible
 		event_target:extradimensionals2 = {
-			random_owned_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
+			random_controlled_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
 		}
 		every_country = {
 			limit = {
@@ -1852,6 +1863,7 @@ country_event = {
 					from = { is_ai = no }
 				}
 				country_event = { id = crisis.1250 days = 10 random = 10 }
+				set_country_flag = with_great_power_achievement
 			}
 			every_country = {
 				limit = {
@@ -1969,11 +1981,11 @@ country_event = {
 				limit = {
 					NOT = { owner = { is_country_type = extradimensional_2 } }
 					NOT = { owner = { is_country_type = extradimensional } }
-					any_neighbor_system_euclidean = {
-						OR = {
-							owner = { is_country_type = extradimensional_2 }
-							owner = { is_country_type = extradimensional }
-						}
+					NOR = {
+						is_star_class = sc_pulsar
+						is_star_class = sc_binary_1
+						has_star_flag = extradimensional_origin_system
+						has_star_flag = extradimensional_second_portal_system
 					}
 				}
 				set_star_flag = extradimensional_third_portal_system
@@ -2174,7 +2186,7 @@ country_event = {
 		observer_event = { id = observer.38 }
 		# make portal invincible
 		event_target:extradimensionals3 = {
-			random_owned_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
+			random_controlled_ship = { limit = { not = { is_ship_size = dimensional_portal_ed } } ship_event = { id = crisis.1280 } }
 		}
 		every_country = {
 			limit = {
@@ -2412,6 +2424,7 @@ country_event = {
 					from = { is_ai = no }
 				}
 				country_event = { id = crisis.1250 days = 10 random = 10 }
+				set_country_flag = with_great_power_achievement
 			}
 			every_country = {
 				limit = {
@@ -2550,7 +2563,7 @@ event = {
 					num_ships < 6
 
 					NOR = {
-						any_owned_ship = { is_ship_size = dimensional_portal_ed }
+						any_controlled_ship = { is_ship_size = dimensional_portal_ed }
 						any_country = {
 							is_country_type = portal_holder
 							any_owned_ship = { is_ship_size = dimensional_portal_ed }
@@ -2615,13 +2628,13 @@ country_event = {
 			is_country_type = extradimensional_3
 		}
 		OR = {
-			count_owned_ship = {
+			count_controlled_ship = {
 				limit = { is_ship_size = dimensional_portal_ed }
 				count > 0
 			}
 			any_country = {
 				is_country_type = portal_holder
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = {
 						is_ship_size = dimensional_portal_ed
 						is_within_borders_of = root
@@ -2646,7 +2659,7 @@ country_event = {
 		# If no Anchors
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count < 1
 				}
@@ -2655,7 +2668,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 1
 				}
@@ -2664,7 +2677,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 2
 				}
@@ -2673,7 +2686,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 3
 				}
@@ -2682,7 +2695,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 4
 				}
@@ -2691,7 +2704,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 5
 				}
@@ -2700,7 +2713,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 6
 				}
@@ -2709,7 +2722,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 7
 				}
@@ -2718,7 +2731,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 8
 				}
@@ -2727,7 +2740,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count = 9
 				}
@@ -2736,7 +2749,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count > 9
 				}
@@ -2756,14 +2769,14 @@ country_event = {
 	trigger = {
 		# Must only trigger if portal is still alive
 		OR = {
-			count_owned_ship = {
+			count_controlled_ship = {
 				limit = { is_ship_size = dimensional_portal_ed }
 				count > 0
 			}
 			any_country = {
 				AND = {
 					is_country_type = portal_holder
-					count_owned_ship = {
+					count_controlled_ship = {
 						limit = {
 							is_ship_size = dimensional_portal_ed
 							is_within_borders_of = root
@@ -3051,14 +3064,14 @@ country_event = {
 		}
 		# Must only trigger if portal is still alive
 		OR = {
-			count_owned_ship = {
+			count_controlled_ship = {
 				limit = { is_ship_size = dimensional_portal_ed }
 				count > 0
 			}
 			any_country = {
 				AND = {
 					is_country_type = portal_holder
-					count_owned_ship = {
+					count_controlled_ship = {
 						limit = { is_ship_size = dimensional_portal_ed }
 						count > 0
 					}
@@ -3066,7 +3079,7 @@ country_event = {
 			}
 		}
 
-		count_owned_ship = {
+		count_controlled_ship = {
 			limit = { is_ship_size = construction_ship_ed }
 			count < 6
 		}
@@ -3164,14 +3177,14 @@ ship_event = {
 			}
 			# Must only trigger if portal is still alive
 			OR = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = dimensional_portal_ed }
 					count > 0
 				}
 				any_country = {
 					AND = {
 						is_country_type = portal_holder
-						count_owned_ship = {
+						count_controlled_ship = {
 							limit = {
 								is_ship_size = dimensional_portal_ed
 								is_within_borders_of = root.owner
@@ -3482,18 +3495,14 @@ country_event = {
 
 	immediate = {
 		observer_event = { id = observer.40 }
-		# Crisis reward is handled through Galactic Focus if the community exists
-		if = {
-			limit = { NOT = { has_global_flag = galactic_community_formed } }
-			every_country = {
-				limit = {
-					OR = {
-						is_country_type = default
-						is_country_type = fallen_empire
-					}
+		every_country = {
+			limit = {
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
 				}
-				country_event = { id = crisis.1271 }
 			}
+			country_event = { id = crisis.1271 }
 		}
 		set_global_flag = extradimensional_invasion_defeated
 		end_crisis = yes
@@ -3562,7 +3571,7 @@ country_event = {
 			OR = {
 				has_government = gov_megacorporation
 				has_government = gov_trade_league
-				has_authority = auth_corporate
+				is_megacorp = yes
 			}
 			NOR = {
 				has_ethic = "ethic_fanatic_xenophile"
@@ -3580,7 +3589,7 @@ country_event = {
 				has_pacifist_government = yes
 				has_government = gov_megacorporation
 				has_government = gov_trade_league
-				has_authority = auth_corporate
+				is_megacorp = yes
 				has_ethic = "ethic_fanatic_xenophile"
 				has_ethic = "ethic_fanatic_xenophobe"
 			}
@@ -3632,7 +3641,7 @@ ship_event = {
 			#	limit = { is_country_type = portal_holder }
 			#	save_event_target_as = portal_holder_1
 			#}
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = { is_ship_size = dimensional_portal_ed }
 				fleet = {
 					set_event_locked = yes
@@ -3692,7 +3701,7 @@ country_event = {
 		log = "anchor destroyed event crisis.1281 triggered"
 		if = {
 			limit = {
-				count_owned_ship = {
+				count_controlled_ship = {
 					limit = { is_ship_size = starbase_exd }
 					count < 1
 				}
@@ -3704,7 +3713,7 @@ country_event = {
 						limit = {
 							is_country_type = portal_holder
 						}
-						random_owned_ship = {
+						random_controlled_ship = {
 							limit = {
 								is_ship_size = dimensional_portal_ed
 								has_ship_flag = unbidden_portal
@@ -3719,7 +3728,7 @@ country_event = {
 						limit = {
 							is_country_type = portal_holder
 						}
-						random_owned_ship = {
+						random_controlled_ship = {
 							limit = {
 								is_ship_size = dimensional_portal_ed
 								has_ship_flag = aberrant_portal
@@ -3734,7 +3743,7 @@ country_event = {
 						limit = {
 							is_country_type = portal_holder
 						}
-						random_owned_ship = {
+						random_controlled_ship = {
 							limit = {
 								is_ship_size = dimensional_portal_ed
 								has_ship_flag = vehement_portal
@@ -4416,7 +4425,7 @@ country_event = {
 					limit = { #theoretically, it is possible that they may have jumped
 						exists = solar_system
 					}
-					random_owned_ship = {
+					random_controlled_ship = {
 						ship_event = { id = crisis.1300 } # Check if starbase should be Anchor
 						ship_event = { id = crisis.1310 } # Create system effect
 					}

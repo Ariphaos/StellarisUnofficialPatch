@@ -993,11 +993,11 @@ country_event = {
 		hidden_effect = {
 			closest_system = {
 				spawn_system = {
-					min_distance >= 29
-					max_distance <= 31
+					min_distance >= 20
+					max_distance <= 30
 					# 45
-					min_orientation_angle = 24
-					max_orientation_angle = 66
+					# min_orientation_angle = 24
+					# max_orientation_angle = 66
 					initializer = vechtar_zavonia_system
 				}
 			}
@@ -1008,20 +1008,8 @@ country_event = {
 			target = this
 		}
 		hidden_effect = {
-			random_system = {
-				limit = {
-					has_owner = no
-					NOT = {
-						any_fleet_in_system = {
-							owner = {
-								is_hostile = root
-							}
-						}
-					}
-				}
-			}
 			create_point_of_interest = {
-				id = hidden_planet
+				id = utopian_hidden_planet
 				name = "hidden_planet_poi"
 				desc = hidden_planet_desc
 				event_chain = generation_ship_chain
@@ -1053,6 +1041,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			has_event_chain = generation_ship_chain
 			NOT = {
@@ -2367,7 +2356,12 @@ ship_event = {
 			owner = { pop_lcluster_event = yes }
 		}
 		owner = {
-			add_resource = { influence = 200 }
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier4unityreward
+				min = @tier4unitymin
+				max = @tier4unitymax
+			}
 		}
 	}
 }
@@ -2457,7 +2451,7 @@ ship_event = {
 				NOR = {
 					is_same_value = root.owner
 					has_country_flag = lost_colony_parent
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 					is_synthetic_empire = yes
 					owner_species = {
 						has_trait = trait_mechanical
@@ -2839,7 +2833,7 @@ ship_event = {
 	trigger = {
 		owner = {
 			NOT = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 		}
 	}
@@ -2923,7 +2917,14 @@ ship_event = {
 
 	option = {
 		name = distar.1070.b
-		owner = { add_resource = { influence = 25 } }
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
 	}
 }
 
@@ -2982,6 +2983,12 @@ country_event = {
 			add_experience = 200
 		}
 		event_target:anomalous_star = {
+			hidden_effect = {
+				if = {
+					limit = { NOT = { has_deposit_for = shipclass_mining_station } }
+					clear_deposits = yes
+				}
+			}
 			add_deposit = d_energy_8
 		}
 	}
@@ -3114,6 +3121,12 @@ country_event = {
 		#	}
 		#}
 		random_owned_planet = {
+			limit = {
+				num_buildings = {
+					type = any
+					value > 0
+				}
+			}
 			weights = {
 				base = 1
 				modifier = {
@@ -3127,7 +3140,7 @@ country_event = {
 			}
 			hidden_effect = {
 				create_species = {
-					name = "Azizians"
+					name = "NAME_Azizians"
 					class = MOL
 					portrait = mol8
 					traits = {
@@ -3149,7 +3162,7 @@ country_event = {
 					}
 				}
 				set_planet_flag = azizian_pops_planet
-				planet_event = { id = distar.1082 days = 90 random = 30 }
+				planet_event = { id = distar.10820 days = 90 random = 30 }
 			}
 			custom_tooltip = distar.1081.a.tooltip
 		}
@@ -3162,7 +3175,7 @@ country_event = {
 			add_deposit = d_alien_pets_deposit
 			hidden_effect = {
 				set_planet_flag = azizian_pet_planet
-				planet_event = { id = distar.1082 days = 90 random = 30 }
+				planet_event = { id = distar.10820 days = 90 random = 30 }
 			}
 		}
 	}
@@ -3188,10 +3201,17 @@ country_event = {
 	}
 }
 
+# Null this event from on_actions
+event = {
+	id = distar.1082
+	hide_window = yes
+	is_triggered_only = yes
+}
+
 # Followup for pops and pets
 # Rewrite to make this a looping event.
 planet_event = {
-	id = distar.1082
+	id = distar.10820
 	hide_window = yes
 	is_triggered_only = yes
 
@@ -3208,7 +3228,7 @@ planet_event = {
 					planet_event = { id = distar.1083 }
 					set_planet_flag = azizians_escape_zoo
 				}
-				80 = { planet_event = { id = distar.1082 days = 30 random = 30 } }
+				80 = { planet_event = { id = distar.10820 days = 30 random = 30 } }
 			}
 		}
 		# pops
@@ -3227,7 +3247,7 @@ planet_event = {
 					planet_event = { id = distar.1084 }
 					set_planet_flag = azizians_burrow
 				}
-				80 = { planet_event = { id = distar.1082 days = 30 random = 30 } }
+				80 = { planet_event = { id = distar.10820 days = 30 random = 30 } }
 			}
 		}
 	}
@@ -3439,7 +3459,7 @@ ship_event = {
 	option = {
 		name = FASCINATING
 		From = {
-			add_deposit = d_minerals_3
+			add_deposit = d_minerals_5
 		}
 	}
 }
@@ -3747,7 +3767,8 @@ ship_event = {
 		name = distar.2015.A.machine
 		trigger = {
 			owner = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
+				NOT = { has_civic = civic_machine_servitor }
 			}
 		}
 		owner = {
@@ -3766,7 +3787,7 @@ ship_event = {
 	desc = {
 		trigger = {
 			owner = {
-				NOT = { has_authority = auth_hive_mind }
+				is_hive_empire = no
 			}
 		}
 		text = "distar.2020.desc"
@@ -3774,7 +3795,7 @@ ship_event = {
 	desc = {
 		trigger = {
 			owner = {
-				has_authority = auth_hive_mind
+				is_hive_empire = yes
 			}
 		}
 		text = "distar.2020.desc.hive"
@@ -3818,18 +3839,18 @@ ship_event = {
 		owner = { country_event = { id = story.5 days = 30 } }
 		from = {
 			clear_deposits = yes
-			solar_system = {
-				random_system_planet = {
-					limit = {
-						has_moon = yes
-						any_moon = {
-							is_same_value = from
-						}
-					}
+			#solar_system = {
+			#	random_system_planet = {
+			#		limit = {
+			#			has_moon = yes
+			#			any_moon = {
+			#				is_same_value = from
+			#			}
+			#		}
 					# I guess there were plans for this that never came to fruition.
 					#save_event_target_as = artificial_moon_planet
-				}
-			}
+			#	}
+			#}
 		}
 	}
 	option = {
@@ -3914,7 +3935,7 @@ ship_event = {
 		hidden_effect = {
 			owner = {
 				country_event = {
-					id = distar.2038 days = 1800 random = 3600
+					id = distar.2038 days = 3600 random = 3600
 				}
 			}
 		}
@@ -3936,7 +3957,7 @@ country_event = {
 		event_target:time_loop_world = {
 			clear_deposits = yes
 			set_planet_flag = repaired_time_loop_shield
-			planet_event = { id = distar.2034 days = 7200 random = 14400 }
+			planet_event = { id = distar.2034 days = 14400 random = 14400 }
 		}
 	}
 	option = {
@@ -4128,7 +4149,7 @@ country_event = {
 				}
 			}
 			create_country = {
-				name = "NAME_Prikkiki-Ti"
+				name = "NAME_Prikkiki_Ti"
 				adjective = "NAME_Prikki"
 				authority = random
 				civics = {
@@ -4534,7 +4555,7 @@ country_event = {
 				homeworld = this
 			}
 			create_country = {
-				name = "NAME_Prikkiki-Ti"
+				name = "NAME_Prikkiki_Ti"
 				authority = random
 				civics = {
 					civic = civic_fanatic_purifiers
@@ -5160,7 +5181,7 @@ country_event = {
 	trigger = {
 		NOR = {
 			has_global_flag = cache_returned
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = enigmatic_cache_ship
 				exists = orbit
 				exists = orbit.owner
@@ -5173,7 +5194,7 @@ country_event = {
 
 	immediate = {
 	# Runs check to remove enigmatic_cache_in_orbit modifier
-		random_owned_ship = {
+		random_controlled_ship = {
 			limit = {
 				has_ship_flag = enigmatic_cache_ship
 				exists = orbit
@@ -5214,7 +5235,7 @@ country_event = {
 					}
 				}
 			}
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = {
 					has_ship_flag = enigmatic_cache_ship
 				}
@@ -5272,7 +5293,7 @@ country_event = {
 					}
 				}
 			}
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = {
 					has_ship_flag = enigmatic_cache_ship
 				}
@@ -5667,7 +5688,7 @@ country_event = {
 	trigger = {
 	# Shouldn't trigger if the enigmatic cache country already has an enigmatic cache in rotation
 		NOT = {
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = enigmatic_cache_ship
 			}
 		}
@@ -6100,6 +6121,7 @@ country_event = {
 					owner_species = {
 						OR = {
 							has_trait = trait_intelligent
+							has_trait = trait_erudite
 							has_trait = trait_quick_learners
 						}
 					}
@@ -7453,7 +7475,7 @@ country_event = { # First words
 			NOR = {
 				has_ethic = ethic_xenophile
 				has_ethic = ethic_fanatic_xenophile
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 		}
 
@@ -7496,9 +7518,6 @@ country_event = { # First words
 
 		hidden_effect = {
 			create_nivlac_effect = yes
-			event_target:nivlac_species = {
-				remove_species_flag = nivlac_no_procreation # checked in can_species_procreate game rule
-			}
 			event_target:nivlac_joint_planet = {
 				while = {
 					count = new_pops
@@ -7528,7 +7547,7 @@ country_event = { # First words
 		hidden_effect = {
 			create_nivlac_effect = yes
 			event_target:nivlac_species = {
-				remove_species_flag = nivlac_no_procreation # checked in can_species_procreate game rule
+				set_species_flag = nivlac_no_procreation # checked in can_species_procreate game rule
 			}
 			event_target:nivlac_joint_planet = {
 				while = {
@@ -8576,7 +8595,10 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		NOT = { has_country_flag = encountered_first_wormhole }
+		NOT = {
+			has_origin = origin_shroudwalker_apprentice
+			has_country_flag = encountered_first_wormhole
+		}
 	}
 
 	immediate = {

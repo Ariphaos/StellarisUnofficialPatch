@@ -8,11 +8,11 @@ planet_event = { #Irradiated
 	id = colony_mod.1
 	title = "colony_mod.1.name"
 	desc = {
-		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		trigger = { owner = { is_machine_empire = no } }
 		text = "colony_mod.1.desc"
 	}
 	desc = {
-		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		trigger = { owner = { is_machine_empire = yes } }
 		text = "colony_mod.1.desc_mach"
 	}
 	picture = GFX_evt_alien_city
@@ -46,9 +46,9 @@ planet_event = { #Irradiated
 		hidden_effect = {
 			random_list = {
 				20 = { planet_event = { id = colony_mod.6 days = 40 random = 20 } }
-				20 = { planet_event = { id = colony_mod.7 days = 40 random = 20} }
-				20 = { planet_event = { id = colony_mod.8 days = 40 random = 20} }
-				40 = { planet_event = { id = colony_mod.9 days = 40 random = 20} }
+				20 = { planet_event = { id = colony_mod.7 days = 40 random = 20 } }
+				20 = { planet_event = { id = colony_mod.8 days = 40 random = 20 } }
+				40 = { planet_event = { id = colony_mod.9 days = 40 random = 20 } }
 			}
 		}
 	}
@@ -212,7 +212,7 @@ planet_event = { #titanic life
 				OR = {
 					has_ethic = ethic_xenophobe
 					has_ethic = ethic_fanatic_xenophobe
-					has_authority = auth_hive_mind
+					is_hive_empire = yes
 				} #mean, for xenophobe
 			}
 		}
@@ -477,7 +477,7 @@ planet_event = {
 
 	trigger = {
 		owner = { is_ai = no }
-		owner = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		owner = { is_gestalt = no }
 		has_modifier = "atmospheric_hallucinogen"
 		NOT = { has_planet_flag = atmospheric_hallucinogen_colony_flag }
 		num_pops > 0
@@ -500,6 +500,9 @@ planet_event = {
 
 	option = {
 		name = colony_mod.5.b
+		owner = {
+			add_resource = { unity = -200 }
+		}
 	}
 
 }
@@ -550,11 +553,11 @@ planet_event = {
 #	title = "colony_mod.12.name"
 #	desc = {
 #		text = "colony_mod.12.desc"
-#		trigger = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
+#		trigger = { NOT = { owner = { is_gestalt = yes } } }
 #	}
 #	desc = {
 #		text = colony_mod.12.desc_gestalt
-#		trigger = { owner = { has_ethic = ethic_gestalt_consciousness } }
+#		trigger = { owner = { is_gestalt = yes } }
 #	}
 #	picture = GFX_evt_asteroid_approaching_planet
 #	show_sound = event_air_raid_siren
@@ -582,7 +585,7 @@ planet_event = {
 #	option = {
 #		name = colony_mod.12.a #eh
 #		if = {
-#			limit = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
+#			limit = { NOT = { owner = { is_gestalt = yes } } }
 #			add_modifier = {
 #				modifier = "recent_impact"
 #				days = 1800
@@ -598,7 +601,7 @@ planet_event = {
 #			owner = root
 #		}
 #		if = {
-#			limit = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
+#			limit = { NOT = { owner = { is_gestalt = yes } } }
 #			add_modifier = {
 #				modifier = "recent_impact"
 #				days = 1800
@@ -906,7 +909,7 @@ planet_event = {
 				has_modifier = titanic_life
 				NOR = {
 					has_planet_flag = titanic_life_colony_flag
-					owner = { has_ethic = ethic_gestalt_consciousness }
+					owner = { is_gestalt = yes }
 				}
 			}
 			planet_event = { id = colony_mod.2 days = 30 random = 90 }
@@ -927,7 +930,7 @@ planet_event = {
 				has_modifier = "asteroid_belt"
 				NOR = {
 					has_modifier = "recent_comet"
-					owner = { has_ethic = ethic_gestalt_consciousness }
+					owner = { is_gestalt = yes }
 				}
 			}
 			planet_event = { id = colony_mod.4 days = 30 random = 90 }
@@ -939,7 +942,7 @@ planet_event = {
 				has_modifier = atmospheric_hallucinogen
 				NOR = {
 					has_planet_flag = atmospheric_hallucinogen_colony_flag
-					owner = { has_ethic = ethic_gestalt_consciousness }
+					owner = { is_gestalt = yes }
 				}
 			}
 			planet_event = { id = colony_mod.5 days = 30 random = 90 }
@@ -1092,6 +1095,7 @@ planet_event = { #Dimensional portal
 	desc = "colony.3005.desc"
 	picture = GFX_evt_wormhole
 	location = ROOT
+	situation = from #only does something if from is actually a situation
 	trackable = yes
 
 	pre_triggers = {
@@ -1151,15 +1155,27 @@ planet_event = { #hell
 	id = colony.3006
 	title = "colony.3006.name"
 	desc = {
+		text = colony.3006.knight.desc
+		trigger = {
+			owner = { has_origin = origin_toxic_knights }
+		}
+	}
+	desc = {
 		text = colony.3006.spir.desc
 		trigger = {
-			owner = { is_spiritualist = yes }
+			owner = {
+				is_spiritualist = yes
+				NOT = { has_origin = origin_toxic_knights }
+			}
 		}
 	}
 	desc = {
 		text = colony.3006.desc
 		trigger = {
-			owner = { is_spiritualist = no }
+			owner = {
+				is_spiritualist = no
+				NOT = { has_origin = origin_toxic_knights }
+			}
 		}
 	}
 	picture = GFX_evt_space_funeral
@@ -1230,8 +1246,43 @@ planet_event = { #hell
 	}
 
 	option = {
+		name = colony.3006.knights
+		trigger = {
+			owner = {
+				has_origin = origin_toxic_knights
+			}
+		}
+		hidden_effect = {
+			owner = {
+				create_leader = {
+					class = general
+					species = owner_main_species
+					name = random
+					traits = {
+						trait = leader_trait_general_chosen
+						trait = leader_trait_butcher
+					}
+				}
+				last_created_leader = {
+					exile_leader_as = doomslayer_knight
+					save_event_target_as = doomslayer_knight
+					set_immortal = yes
+					save_global_event_target_as = doomslayer_knight@prev
+				}
+			}
+			reroll_random = yes
+			random_list = {
+				15 = { }
+				25 = { planet_event = { id = colony.3050 days = 3600 random = 900 } }
+				20 = { planet_event = { id = colony.3060 days = 3600 random = 900 } }
+				40 = { planet_event = { id = colony.3055 days = 3600 random = 900 } }
+			}
+		}
+	}
+
+	option = {
 		name = colony.3006.keep
-		#add_deposit = d_portal_research_zone
+		add_deposit = d_portal_research_zone
 		custom_tooltip = portal_zone_tooltip
 	}
 }
@@ -1598,13 +1649,13 @@ planet_event = { #message 1
 	desc = {
 		text = colony.3020.desc
 		trigger = {
-			 owner = { is_machine_empire = no }
+			owner = { is_machine_empire = no }
 		}
 	}
 	desc = {
 		text = colony.3020.desc.robot
 		trigger = {
-			 owner = { is_machine_empire = yes }
+			owner = { is_machine_empire = yes }
 		}
 	}
 
@@ -2270,6 +2321,401 @@ planet_event = { #the end of dportal_empire
 	}
 }
 
+#Knight Doom Slayer
+
+planet_event = { #Corrupted Knight
+	id = colony.3050
+	title = "colony.3050.name"
+	desc = "colony.3050.desc"
+	picture = GFX_evt_open_revolt
+	location = ROOT
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	option = {
+		name = colony.3050.a
+		custom_tooltip = portal_closed_tooltip
+		custom_tooltip = demonic_armies_tooltip
+		hidden_effect = {
+			set_planet_flag = dportal_closed
+			save_global_event_target_as = demonic_incursion_planet
+			create_country = {
+				name = "NAME_Demonic_Creatures"
+				type = faction
+				effect = {
+					establish_communications_no_message = root.owner
+					save_global_event_target_as = demonic_incursion_armies
+				}
+			}
+			create_army = {
+				name = "NAME_Deformed_Creatures"
+				owner = last_created_country
+				type = "mutant_army"
+			}
+			create_army = {
+				name = "NAME_Twisted_Beasts"
+				owner = last_created_country
+				type = "mutant_army"
+			}
+			create_army = {
+				name = "NAME_Mutated_Horrors"
+				owner = last_created_country
+				type = "mutant_army"
+				leader = event_target:doomslayer_knight
+			}
+		}
+	}
+}
+
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+country_event = {
+	id = colony.3051
+	title = "colony.3051.name"
+	desc = "colony.3051.desc"
+	picture = GFX_evt_open_revolt
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:demonic_incursion_armies
+		from = { is_same_empire = event_target:demonic_incursion_armies }
+	}
+
+	immediate = {
+
+		# Exile the Corrupted Knight
+		event_target:doomslayer_knight@root = {
+			exile_leader_as = doomslayer_knight
+			save_event_target_as = doomslayer_knight
+		}
+
+		# Create the demonic incursion species and country
+		create_demon_species_effect = yes
+		create_country = {
+			name = "NAME_Demon_Incursion"
+			adjective = "NAME_Demon_Refugees"
+			authority = auth_dictatorial
+			ignore_initial_colony_error = yes
+			civics = {
+				civic = civic_fanatic_purifiers
+				civic = civic_scavengers
+			}
+			species = last_created_species
+			ethos = {
+				ethic = ethic_fanatic_xenophobe
+				ethic = ethic_militarist
+			}
+			flag = {
+				icon = {
+					category = "toxoid"
+					file = "toxoid_03.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "flag_BG_24.dds"
+				}
+				colors = {
+					"shadow_purple"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			type = default
+			effect = {
+				save_global_event_target_as = demonic_incursion_country
+				species = {
+					save_global_event_target_as = demonic_incursion_species
+				}
+				establish_communications_no_message = root
+
+				# Corrupted Knight becomes their leader
+				set_leader = doomslayer_knight
+				event_target:doomslayer_knight@root  = {
+					set_skill = 5
+					add_trait = leader_trait_ruler_chosen
+					add_trait = trait_ruler_warlike
+					remove_trait = leader_trait_general_chosen
+					remove_trait = leader_trait_butcher
+				}
+
+				##Copy technology
+				copy_techs_from = {
+					target = root
+					except = {
+						# Horizon Signal
+						tech_akx_worm_1
+						tech_akx_worm_2
+						tech_akx_worm_3
+					}
+				}
+
+				##Add resources
+				add_resource = { minerals = 10000 }
+				add_resource = { energy = 10000 }
+				add_resource = { food = 3000 }
+				add_resource = { consumer_goods = 3000 }
+				add_resource = { alloys = 7000 }
+				add_resource = { influence = 1000 }
+				add_resource = { unity = 27000 }
+
+				##Create fleets
+				if = {
+					limit = {
+						has_technology = tech_destroyers
+					}
+					create_fleet = {
+						effect = {
+							set_owner = event_target:demonic_incursion_country
+							while = {
+								count = 8
+								create_ship = {
+									name = random
+									random_existing_design = destroyer
+									graphical_culture = "toxoid_01"
+								}
+							}
+							set_location = {
+								target = event_target:demonic_incursion_planet
+								distance = 10
+								angle = random
+							}
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_technology = tech_cruisers
+					}
+					create_fleet = {
+						effect = {
+							set_owner = event_target:demonic_incursion_country
+							while = {
+								count = 6
+								create_ship = {
+									name = random
+									random_existing_design = cruiser
+									graphical_culture = "toxoid_01"
+								}
+							}
+							set_location = {
+								target = event_target:demonic_incursion_planet
+								distance = 10
+								angle = random
+							}
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_technology = tech_battleships
+					}
+					create_fleet = {
+						effect = {
+							set_owner = event_target:demonic_incursion_country
+							while = {
+								count = 2
+								create_ship = {
+									name = random
+									random_existing_design = battleship
+									graphical_culture = "toxoid_01"
+								}
+							}
+							set_location = {
+								target = event_target:demonic_incursion_planet
+								distance = 10
+								angle = random
+							}
+						}
+					}
+				}
+				create_fleet = {
+					effect = {
+						set_owner = event_target:demonic_incursion_country
+						while = {
+							count = 10
+							create_ship = {
+								name = random
+								random_existing_design = corvette
+								graphical_culture = "toxoid_01"
+							}
+						}
+					}
+				}
+			}
+		}
+
+		fromfrom = {
+			set_owner = event_target:demonic_incursion_country
+			set_capital = yes
+			while = {
+				count = 28
+				create_pop = {
+					species = event_target:demonic_incursion_species
+				}
+			}
+
+			# Reformat the planet
+			remove_all_districts = yes
+			remove_all_buildings = yes
+			generate_start_buildings_and_districts = yes
+			remove_building = building_commercial_zone
+			add_building = building_holo_theatres
+
+			event_target:demonic_incursion_armies = {
+				every_owned_army = {
+					remove_army = yes
+				}
+			}
+
+			# Flip control of the solar system
+			solar_system = {
+				if = {
+					limit = { exists = starbase }
+					starbase = {
+						if = {
+							limit = {
+								is_owned_by = root
+							}
+							set_owner = event_target:demonic_incursion_country
+							if = {
+								limit = { has_starbase_size = starbase_outpost }
+								set_starbase_size = starbase_starport
+								set_starbase_module = {
+									slot = 1
+									module = shipyard
+								}
+								set_starbase_module = {
+									slot = 2
+									module = shipyard
+								}
+							}
+							else_if = {
+								limit = {
+									NOT = { has_starbase_module = shipyard }
+								}
+								set_starbase_module = {
+									slot = 1
+									module = shipyard
+								}
+								set_starbase_module = {
+									slot = 2
+									module = shipyard
+								}
+							}
+						}
+					}
+				}
+				else = {
+					create_starbase = {
+						size = starbase_starport
+						module = shipyard
+						module = shipyard
+						owner = event_target:demonic_incursion_country
+					}
+				}
+				add_claims = {
+					who = root
+					show_notification = no
+				}
+				every_system_planet = {
+					limit = {
+						is_colony = yes
+						NOT = { is_same_value = event_target:demonic_incursion_planet }
+						is_owned_by = root
+					}
+					set_owner = event_target:demonic_incursion_country
+				}
+				every_fleet_in_system = {
+					limit = { is_owned_by = root }
+					set_mia = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = colony.3051.a
+		custom_tooltip = demonic_incursion_tooltip
+	}
+
+	after = {
+		hidden_effect = {
+			fromfrom = {
+				remove_deposit = d_portal_research_zone
+			}
+		}
+	}
+}
+
+planet_event = { #Demonic Refugees
+	id = colony.3055
+	title = "colony.3055.name"
+	desc = "colony.3055.desc"
+	picture = GFX_evt_cover_blown
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = { #Kill the demons!
+		name = colony.3055.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 12
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+		}
+		custom_tooltip = portal_closed_tooltip
+		hidden_effect = { set_planet_flag = dportal_closed }
+	}
+
+	option = { #Welcome the refugees
+		name = colony.3055.b
+		custom_tooltip = portal_closed_tooltip
+		custom_tooltip = demon_refugees_tooltip
+		hidden_effect = {
+			set_planet_flag = dportal_closed
+			owner = {
+				create_demon_species_effect = yes
+			}
+			while = {
+				count = 4
+				create_pop = {
+					species = last_created_species
+				}
+			}
+		}
+	}
+}
+
+planet_event = { #Quest Complete!
+	id = colony.3060
+	title = "colony.3060.name"
+	desc = "colony.3060.desc"
+	picture = GFX_evt_zro_3
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.3060.a
+		hidden_effect = { set_planet_flag = dportal_closed }
+		owner = {
+			add_modifier = {
+				modifier = doomslayer_quest_complete
+				days = -1
+			}
+		}
+	}
+}
+
 
 ##############################
 #
@@ -2575,7 +3021,7 @@ planet_event = {
 		owner = {
 			is_ai = no
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_country_flag = feral_overload_flag
 			}
 		}
@@ -2938,7 +3384,6 @@ planet_event = {
 		}
 		random_owned_pop = {
 			limit = { has_job = alloy_drone }
-			unemploy_pop = yes
 			kill_pop = yes
 		}
 		hidden_effect = {
@@ -3096,7 +3541,6 @@ planet_event = {
 	immediate = {
 		random_owned_pop = {
 			limit = { has_job = bluelotus_technician }
-			unemploy_pop = yes
 			kill_pop = yes
 		}
 	}
@@ -3108,6 +3552,8 @@ planet_event = {
 		add_deposit = d_crater_bluelotus
 	}
 }
+
+### Nemma by Victor Haeggman
 
 #Nemma World
 planet_event = {
@@ -3137,9 +3583,7 @@ planet_event = {
 			is_planet_class = pc_ocean
 		}
 		NOR = {
-			any_country = {
-				NOT = { has_country_flag = turtle_world_spawned }
-			}
+			any_country = { has_country_flag = turtle_world_spawned }
 			has_planet_flag = colony_event
 		}
 	}
@@ -3443,7 +3887,7 @@ planet_event = {
 			random_list = {
 				3 = {
 					planet_event = {
-						id = colony.9020 days = 10 random = 1
+						id = colony.9020 days = 3600 random = 100
 					}
 					change_variable = {
 						which = turtle_amount
@@ -3452,7 +3896,7 @@ planet_event = {
 				}
 				1 = {
 					planet_event = {
-						id = colony.9025 days = 10 random = 1
+						id = colony.9025 days = 3600 random = 100
 					}
 					modifier = {
 						factor = turtle_amount
@@ -3488,7 +3932,7 @@ planet_event = {
 				limit = {
 					owner = {
 						NOR = {
-							has_ethic = ethic_gestalt_consciousness
+							is_gestalt = yes
 							has_ethic = ethic_authoritarian
 							has_ethic = ethic_fanatic_authoritarian
 						}
@@ -3589,5 +4033,2431 @@ planet_event = {
 		name = colony.9045.a
 		remove_modifier = "turtle_world_modifier"
 		add_deposit = d_turtle_corpse
+	}
+}
+
+############################
+#
+# Colony Events: "Insidious Ophidians"
+#
+# Designed by Brian Campbell
+#
+############################
+
+planet_event = {
+	id = colony.8099
+	title = colony.8099.name
+	desc = colony.8099.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_air_raid_siren
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+	}
+
+	trigger = {
+		habitable_planet = yes
+		owner = {
+			NOR = {
+				is_gestalt = yes
+				has_country_flag = snake_infestation_fired
+			}
+		}
+		NOR = {
+			has_planet_flag = colony_event
+			has_planet_flag = snake_infestation_fired
+		}
+		num_pops > 0
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_planet_flag = snake_infestation_fired
+		set_planet_flag = colony_event
+		owner = { set_country_flag = snake_infestation_fired }
+	}
+
+	option = {
+		name = colony.8099.a
+		hidden_effect = {
+			planet_event = { id = colony.9100 days = 200 random = 200 }
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9100
+	title = colony.9100.name
+	desc = colony.9100.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_air_raid_siren
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+	}
+
+	option = {
+		name = colony.9100.a
+		enable_special_project = {
+			name = SNEK_SCIENCE_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+
+	option = {
+		name = colony.9100.b
+		enable_special_project = {
+			name = SNEK_WAR_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9101
+	title = "PROJECT_COMPLETE"
+	desc = "colony.9101.desc"
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+	}
+
+	option = {
+		name = UNDERSTOOD
+		add_modifier = {
+			modifier = energy_poor
+			months = 120
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9103 days = 200 random = 200 }
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9102
+	title = "PROJECT_COMPLETE"
+	desc = "colony.9102.desc"
+	picture = GFX_evt_alien_planet
+	show_sound = event_alien_nature
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+	}
+
+	option = {
+		name = UNDERSTOOD
+		add_modifier = {
+			modifier = snake_infestation
+			days = 200
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9103 days = 200 random = 200 }
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9103
+	title = colony.9103.name
+	desc = {
+		trigger = { has_planet_flag = snake_peace }
+		text = "colony.9103.desc.science"
+	}
+	desc = {
+		trigger = { has_planet_flag = snake_war }
+		text = "colony.9103.desc.soldier"
+	}
+	picture = GFX_evt_alien_nature
+	show_sound = event_air_raid_siren
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+	}
+
+	option = {
+		name = colony.9103.a
+		add_modifier = {
+			modifier = energy_poor
+			days = 200
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9104 days = 200 random = 200 }
+		}
+	}
+
+	option = {
+		name = colony.9103.b
+		if = {
+			limit = {
+				has_modifier = snake_infestation
+			}
+			remove_modifier = snake_infestation
+		}
+		add_modifier = {
+			modifier = snake_infestation
+			days = 200
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9104 days = 200 random = 200 }
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9104
+	title = colony.9104.name
+	desc = {
+		trigger = { has_planet_flag = snake_peace }
+		text = "colony.9104.desc.science"
+	}
+	desc = {
+		trigger = { has_planet_flag = snake_war }
+		text = "colony.9104.desc.soldier"
+    }
+	picture = GFX_evt_alien_nature
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+		num_pops > 0
+	}
+
+	option = {
+		name = colony.9104.a
+		add_modifier = {
+			modifier = "mining_equipment_offline"
+			days = 240
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9106 days = 200 random = 200 }
+		}
+	}
+
+	option = {
+		name = colony.9104.b
+		if = {
+			limit = {
+				has_modifier = snake_infestation
+			}
+			remove_modifier = snake_infestation
+		}
+		add_modifier = {
+			modifier = snake_infestation
+			days = 200
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9106 days = 200 random = 200 }
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9106
+	title = colony.9106.name
+	desc = {
+		trigger = { has_planet_flag = snake_war }
+		text = "colony.9106.desc"
+	}
+	desc = colony.9106.desc
+    desc = {
+		trigger = { has_planet_flag = snake_peace }
+		text = "colony.9106.desc.science"
+	}
+	picture = GFX_evt_alien_nature
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+    	original_owner = yes
+    }
+
+	option = {
+		name = colony.9106.a
+		# custom_tooltip = colony.9016.a.tooltip
+		owner = {
+			add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier1materialreward
+			min = @tier1materialmin
+			max = @tier1materialmax
+		}
+	}
+	hidden_effect = {
+		planet_event = {
+			id = colony.9107
+			days = 200
+			random = 200
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9107
+	title = colony.9107.name
+	desc = colony.9107.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+
+	trigger = {
+    	original_owner = yes
+	}
+
+	is_triggered_only = yes
+
+    immediate = {
+    }
+
+	option = {
+		name = colony.9107.a
+		custom_tooltip = colony.9107.a.tooltip
+		hidden_effect = {
+			planet_event = { id = colony.9108 days = 40	random = 20 }
+		}
+	}
+
+	option = {
+		name = colony.9107.b
+		custom_tooltip = colony.9107.b.tooltip
+		hidden_effect = {
+			planet_event = { id = colony.9109 days = 40	random = 20	}
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9108
+	title = colony.9108.name
+	desc = colony.9108.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+	}
+
+	option = {
+		name = colony.9108.a
+		if = {
+			limit = {
+				has_modifier = "mining_equipment_offline"
+			}
+			remove_modifier = "mining_equipment_offline"
+		}
+		if = {
+			limit = {
+				has_modifier = snake_infestation
+			}
+			remove_modifier = snake_infestation
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9109
+	title = colony.9109.name
+	desc = colony.9109.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		original_owner = yes
+	}
+
+	option = {
+		name = colony.9109.a
+		if = {
+			limit = {
+				has_modifier = energy_poor
+			}
+			remove_modifier = energy_poor
+		}
+		if = {
+			limit = {
+				has_modifier = snake_infestation
+			}
+			remove_modifier = snake_infestation
+		}
+	}
+}
+
+### Greed is Bad by Hadrien Buytaers
+
+#We found more minerals
+planet_event = {
+	id = colony.9050
+	title = "colony.9050.name"
+	desc = "colony.9050.desc"
+	picture = GFX_evt_mining_operations
+	show_sound = event_scanner
+	location = ROOT
+	trackable = yes
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		habitable_planet = yes
+		NOR = {
+			has_global_flag = crystal_colony
+			has_planet_flag = colony_event
+			has_modifier = mineral_rich
+			has_modifier = ultra_rich
+			has_modifier = mineral_poor
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_global_flag = crystal_colony
+		set_planet_flag = colony_event
+	}
+	#Opt: Start digging
+	option = {
+		name = colony.9050.a
+		add_deposit = d_ore_rich_caverns
+	}
+	#Opt: Probe for more
+	option = {
+		name = colony.9050.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = energy value >= 1000 }
+			}
+		}
+		owner = {
+			add_resource = { energy = -1000 }
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9055 days = 90 random = 20
+			}
+		}
+	}
+}
+
+#Deep Veins
+planet_event = {
+	id = colony.9055
+	title = "colony.9055.name"
+	desc = "colony.9055.desc"
+	picture = GFX_evt_mining_operations
+	show_sound = event_scanner
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: Start Digging
+	option = {
+		name = colony.9055.a
+		add_modifier = {
+			modifier = mineral_rich
+			days = -1
+		}
+	}
+	#Opt: More? (non subterranean)
+	option = {
+		name = colony.9055.b
+		trigger = {
+			owner = {
+				NOT = { has_origin = origin_subterranean }
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = energy value >= 1500 }
+			}
+		}
+		owner = {
+			add_resource = { energy = -1500 }
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9060 days = 120 random = 20
+			}
+		}
+	}
+	#Opt: Keep probing (subterranean)
+	option = {
+		name = colony.9055.b
+		trigger = {
+			owner = {
+				has_origin = origin_subterranean
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = energy value >= 1500 }
+			}
+		}
+		owner = {
+			add_resource = { energy = -1500 }
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9065 days = 90 random = 20
+			}
+		}
+	}
+}
+
+#Too Deep For Us
+planet_event = {
+	id = colony.9060
+	title = "colony.9060.name"
+	desc = "colony.9060.desc"
+	picture = GFX_evt_mining_operations
+	show_sound = event_drilling
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: Start Digging
+	option = {
+		name = colony.9060.a
+		add_deposit = d_ore_rich_caverns
+		add_modifier = {
+			modifier = ultra_rich
+			days = -1
+		}
+	}
+}
+
+#More Ore
+planet_event = {
+	id = colony.9065
+	title = "colony.9065.name"
+	desc = "colony.9065.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_drilling
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: Start Digging
+	option = {
+		name = colony.9065.a
+		add_deposit = d_ore_rich_caverns
+		add_modifier = {
+			modifier = mineral_rich
+			days = -1
+		}
+	}
+	#Opt: More?!
+	option = {
+		name = colony.9065.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = energy value >= 2000 }
+			}
+		}
+		owner = {
+			add_resource = { energy = -2000 }
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9070 days = 90 random = 20
+			}
+		}
+	}
+}
+
+#Fiery Crystals
+planet_event = {
+	id = colony.9070
+	title = "colony.9070.name"
+	desc = "colony.9070.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_drilling
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: Start Digging
+	option = {
+		name = colony.9070.a
+		add_deposit = d_crystalline_caverns
+		add_modifier = {
+			modifier = ultra_rich
+			days = -1
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9085 days = 3000 random = 600
+			}
+		}
+	}
+	#Opt: MORE?!
+	option = {
+		name = colony.9070.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = energy value >= 2500 }
+			}
+		}
+		owner = {
+			add_resource = { energy = -2500 }
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9075 days = 90 random = 20
+			}
+		}
+	}
+}
+
+#TOO MANY CRYSTALS
+planet_event = {
+	id = colony.9075
+	title = "colony.9075.name"
+	desc = {
+		trigger = {
+			owner = { has_modifier = pacified_crystals }
+		}
+		text = colony.9075.desc.a
+	}
+	desc = "colony.9075.desc.b"
+	picture = GFX_evt_crystal_kraken
+	show_sound = evn_ove_crystal_kraken
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: We dug too deep
+	option = {
+		name = BATTLESTATIONS
+		add_deposit = d_ore_rich_caverns
+		add_deposit = d_crystalline_caverns
+		add_deposit = d_crystalline_caverns
+		add_modifier = {
+			modifier = ultra_rich
+			days = -1
+		}
+		#Spawn Crystal Kraken
+		hidden_effect = {
+			root = {
+				save_global_event_target_as = crystal_kraken_planet
+			}
+			create_country = {
+				name = "NAME_Crystal_Kraken"
+				type = faction
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"light_orange"
+						"light_orange"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					establish_communications_no_message = root.owner
+					save_global_event_target_as = crystal_kraken
+				}
+			}
+		}
+		create_army = {
+			name = "NAME_Crystal_Kraken"
+			owner = event_target:crystal_kraken
+			type = "crystal_kraken_army"
+		}
+	}
+}
+
+#Crystal Kraken Defeat trigger
+country_event = {
+	id = colony.9080
+	location = ROOT
+
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = { army_type = crystal_kraken_army }
+	}
+
+	immediate = {
+		fromfrom = {
+			country_event = {
+				id = colony.9081 days = 1
+			}
+			if = {
+				limit = {
+					has_origin = origin_subterranean
+				}
+				set_country_flag = underlord_achievement
+			}
+		}
+	}
+}
+
+#Crystal Kraken Defeated
+country_event = {
+	id = colony.9081
+	title = "colony.9080.name"
+	desc = "colony.9080.desc"
+	picture = GFX_evt_victorious_army
+	show_sound = event_celebration
+	location = ROOT
+
+	is_triggered_only = yes
+
+	#Opt: Victory!
+	option = {
+		name = colony.9080.a
+		event_target:crystal_kraken_planet = {
+			add_deposit = d_crystal_kraken_body
+			hidden_effect = {
+				remove_modifier = "crystal_kraken"
+				every_owned_pop = {
+					remove_pop_flag = event_purge
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 120
+				min = 240
+				max = 99999
+			}
+		}
+	}
+}
+
+# This = country
+# From = army
+#Crystal Kraken destroyed by other means
+country_event = {
+	id = colony.9082
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = { army_type = crystal_kraken_army }
+	}
+
+	immediate = {
+		from.planet = {
+			add_deposit = d_crystal_kraken_body_bombed
+			hidden_effect = {
+				remove_modifier = "crystal_kraken"
+				every_owned_pop = {
+					remove_pop_flag = event_purge
+				}
+			}
+		}
+	}
+}
+
+#Too Deep?
+planet_event = {
+	id = colony.9085
+	title = "colony.9085.name"
+	desc = "colony.9085.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_drilling
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: It's fine
+	option = {
+		name = colony.9085.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9090 days = 1000 random = 200
+			}
+		}
+	}
+	#Opt: Restrict Digging Operations
+	option = {
+		name = colony.9085.b
+		remove_modifier = ultra_rich
+		remove_deposit = d_crystalline_caverns
+	}
+}
+
+#RELEASE THE CRYSTAL KRAKEN
+planet_event = {
+	id = colony.9090
+	title = "colony.9075.name"
+	desc = {
+		trigger = {
+			owner = { has_modifier = pacified_crystals }
+		}
+		text = colony.9075.desc.a
+	}
+	desc = "colony.9075.desc.b"
+	picture = GFX_evt_crystal_kraken
+	show_sound = evn_ove_crystal_kraken
+	location = ROOT
+
+	is_triggered_only = yes
+	#Opt: We did dig too deep
+	option = {
+		name = BATTLESTATIONS
+		#Spawn Crystal Kraken
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Crystal_Kraken"
+				type = faction
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"light_orange"
+						"light_orange"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					establish_communications_no_message = root.owner
+					save_global_event_target_as = crystal_kraken
+				}
+			}
+		}
+		create_army = {
+			name = "NAME_Crystal_Kraken"
+			owner = event_target:crystal_kraken
+			type = "crystal_kraken_army"
+		}
+	}
+}
+
+#Kraken destroys colony
+planet_event = {
+	id = colony.9095
+	location = ROOT
+
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:crystal_kraken
+		FromFrom = { is_same_empire = event_target:crystal_kraken }
+	}
+
+	immediate = {
+		while = {
+			limit = {
+				num_pops > 1
+			}
+			random_owned_pop = {
+				kill_pop = yes
+			}
+		}
+		add_modifier = {
+			modifier = "crystal_kraken"
+			days = -1
+		}
+		FromFrom = {
+			set_policy = {
+				policy = purge
+				option = purge_not_allowed
+			}
+			set_policy = {
+				policy = population_controls
+				option = population_controls_not_allowed
+			}
+		}
+	}
+}
+
+############################
+#
+#
+#
+# Colony Event: "Ancient Manufactorium"
+#
+#
+#
+############################
+
+planet_event = { # starting event - finding the ancient vaults
+	id = colony.9200
+	title = "colony.9200.name"
+	desc = "colony.9200.desc"
+	picture = GFX_evt_discovered_hidden_door
+	show_sound = event_wind_ruins
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		habitable_planet = yes
+		NOR = {
+			owner = { has_country_flag = ancient_manufactorium }
+			has_planet_flag = colony_event
+			is_planet_class = pc_habitat
+			is_planet_class = pc_ringworld_habitable
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_planet_flag = colony_event
+		owner = { set_country_flag = ancient_manufactorium }
+	}
+
+	option = { # find your way into the vault
+		name = colony.9200.a
+		custom_tooltip = colony.9200.a.desc
+		hidden_effect = {
+			planet_event = {
+				id = colony.9201
+				days = 30
+				random = 30
+			}
+		}
+	}
+}
+
+planet_event = { # entry result
+	id = colony.9201
+	title = "colony.9201.name"
+	desc = "colony.9201.desc"
+	picture = GFX_evt_hidden_door
+	show_sound = event_wind_ruins
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9201.a
+		custom_tooltip = colony.9201.a.desc
+		add_deposit = d_ancient_manufactorium_vaultexploration
+		hidden_effect = {
+			planet_event = {
+				id = colony.9210
+				days = 180
+				random = 360
+			}
+		}
+	}
+	option = { # opt out
+		name = colony.9201.b
+		custom_tooltip = colony.9201.b.desc
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		hidden_effect = {
+			planet_event = {
+				id = colony.9202
+				days = 60
+				random = 60
+			}
+		}
+	}
+}
+
+planet_event = { # opting out - explosion, add crater
+	id = colony.9202
+	title = "colony.9202.name"
+	desc = "colony.9202.desc"
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_ship_explosion
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # add weak deposit - end the chain
+		name = colony.9202.a
+		add_deposit = d_ancient_manufactorium_crater
+	}
+}
+
+planet_event = { # first problem - pop death potential
+	id = colony.9210
+	title = "colony.9210.name"
+	desc = "colony.9210.desc"
+	picture = GFX_evt_engineering_bay
+	show_sound = event_screams
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual
+		name = colony.9210.a
+		custom_tooltip = colony.9210.a.desc
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9211
+				days = 180
+				random = 360
+			}
+		}
+	}
+	option = { # egalitarian
+		name = colony.9210.b
+		custom_tooltip = colony.9210.b.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_egalitarian
+					has_ethic = ethic_fanatic_egalitarian
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9212
+				days = 120
+				random = 180
+			}
+		}
+	}
+	option = { # authoritarian
+		name = colony.9210.c
+		custom_tooltip = colony.9210.c.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9213
+				days = 120
+				random = 180
+			}
+		}
+	}
+	option = { # gestalt - pop dies
+		name = colony.9210.d
+		custom_tooltip = colony.9210.d.desc
+		trigger = {
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9214
+				days = 100
+				random = 100
+			}
+		}
+	}
+}
+
+planet_event = { # first problem - casual result - pop died, bad modifier
+	id = colony.9211
+	title = "colony.9211.name"
+	desc = "colony.9211.desc"
+	picture = GFX_evt_emergency_workers
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9211.a
+		random_owned_pop = {
+			kill_pop = yes
+		}
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_negative_medium
+				days = 360
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9220
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # first problem - egalitarian result - pop rescued, bad modifier
+	id = colony.9212
+	title = "colony.9212.name"
+	desc = "colony.9212.desc"
+	picture = GFX_evt_emergency_workers
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9212.a
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_negative_low
+				days = 360
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9220
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # first problem - authoritarian result - pop died, no modifier
+	id = colony.9213
+	title = "colony.9213.name"
+	desc = "colony.9213.desc"
+	picture = GFX_evt_emergency_workers
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9213.a
+		random_owned_pop = {
+			kill_pop = yes
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9220
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # first problem - gestalt result - pop died, no modifier
+	id = colony.9214
+	title = "colony.9214.name"
+	desc = "colony.9214.desc"
+	picture = GFX_evt_emergency_workers
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9214.a
+		random_owned_pop = {
+			kill_pop = yes
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9220
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # first opportunity - might add unity to the pop job
+	id = colony.9220
+	title = "colony.9220.name"
+	desc = "colony.9220.desc"
+	picture = GFX_evt_ancient_records
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual - opportunity wasted
+		name = colony.9220.a
+		custom_tooltip = colony.9220.a.desc
+		hidden_effect = {
+			planet_event = {
+				id = colony.9230
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # masterful crafters + unity output
+		name = colony.9220.b
+		custom_tooltip = colony.9220.b.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_corporate_crafters
+					has_civic = civic_crafters
+				}
+			}
+		}
+		set_planet_flag = manufactorium_crafters
+		hidden_effect = {
+			planet_event = {
+				id = colony.9230
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # subterranean + unity output
+		name = colony.9220.c
+		custom_tooltip = colony.9220.c.desc
+		trigger = {
+			owner = {
+				has_origin = origin_subterranean
+			}
+		}
+		set_planet_flag = manufactorium_subterranean
+		hidden_effect = {
+			planet_event = {
+				id = colony.9230
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # subterranean AND masterful crafters + unity output
+		name = colony.9220.d
+		custom_tooltip = colony.9220.d.desc
+		trigger = {
+			owner = {
+				OR = {
+					AND = {
+						has_civic = civic_crafters
+						has_origin = origin_subterranean
+					}
+					AND = {
+						has_civic = civic_corporate_crafters
+						has_origin = origin_subterranean
+					}
+				}
+			}
+		}
+		set_planet_flag = manufactorium_dwarven_craft
+		hidden_effect = {
+			planet_event = {
+				id = colony.9230
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # second problem - earthquake - more upkeep or less production in the end of the chain
+	id = colony.9230
+	title = "colony.9230.name"
+	desc = "colony.9230.desc"
+	picture = GFX_evt_collapsing_roof
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual1 - more upkeep
+		name = colony.9230.a
+		set_planet_flag = manufactorium_earthquake_upkeep
+		hidden_effect = {
+			planet_event = {
+				id = colony.9231
+				days = 36
+				random = 36
+			}
+		}
+	}
+	option = { # casual2 - produce less
+		name = colony.9230.b
+		set_planet_flag = manufactorium_earthquake_production
+		hidden_effect = {
+			planet_event = {
+				id = colony.9232
+				days = 36
+				random = 36
+			}
+		}
+	}
+	option = { # managed to maintain everything intactc - bad thing averted
+		name = colony.9230.c
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_functional_architecture
+					has_civic = civic_machine_builder
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9233
+				days = 36
+				random = 36
+			}
+		}
+	}
+	option = { # managed to maintain everything intactc - bad thing averted
+		name = colony.9230.d
+		trigger = {
+			owner = {
+				has_civic = civic_hive_divided_attention
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9234
+				days = 36
+				random = 36
+			}
+		}
+	}
+}
+
+planet_event = { # second problem - eatherquake - more upkeep
+	id = colony.9231
+	title = "colony.9231.name"
+	desc = "colony.9231.desc"
+	picture = GFX_evt_collapsing_roof
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9231.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9240
+				days = 720
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # second problem - eatherquake - less produce
+	id = colony.9232
+	title = "colony.9232.name"
+	desc = "colony.9232.desc"
+	picture = GFX_evt_collapsing_roof
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9232.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9240
+				days = 720
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # second problem - eatherquake (building civics) - bad outcome averted
+	id = colony.9233
+	title = "colony.9233.name"
+	desc = "colony.9233.desc"
+	picture = GFX_evt_collapsing_roof
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9233.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9240
+				days = 720
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # second problem - eatherquake (divided attention civic) - bad outcome averted
+	id = colony.9234
+	title = "colony.9234.name"
+	desc = "colony.9234.desc"
+	picture = GFX_evt_collapsing_roof
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9234.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9240
+				days = 720
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # third problem - guardians - potential pop death or less produce
+	id = colony.9240
+	title = "colony.9240.name"
+	desc = "colony.9240.desc"
+	picture = GFX_evt_generator_powerup
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual1 - pop death
+		name = colony.9240.a
+		custom_tooltip = colony.9240.a.desc
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9241
+				days = 60
+				random = 60
+			}
+		}
+	}
+	option = { # casual2 - less produce
+		name = colony.9240.b
+		custom_tooltip = colony.9240.b.desc
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		set_planet_flag = manufactorium_guardians_produce
+		hidden_effect = {
+			planet_event = {
+				id = colony.9242
+				days = 30
+				random = 30
+			}
+		}
+	}
+	option = { # spiritualist ethic - managed to avert the bad situation
+		name = colony.9240.c
+		custom_tooltip = colony.9240.c.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9243
+				days = 180
+				random = 360
+			}
+		}
+	}
+	option = { # meritocracy civic - managed to avert the bad situation
+		name = colony.9240.d
+		custom_tooltip = colony.9240.d.desc
+		trigger = {
+			owner = {
+				has_civic = civic_meritocracy
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9244
+				days = 180
+				random = 360
+			}
+		}
+	}
+	option = { #gestalt - managed to avert the bad situation
+		name = colony.9240.e
+		custom_tooltip = colony.9240.e.desc
+		trigger = {
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9245
+				days = 60
+				random = 60
+			}
+		}
+	}
+}
+
+planet_event = { # third problem - casual 1 pop death
+	id = colony.9241
+	title = "colony.9241.name"
+	desc = "colony.9241.desc"
+	picture = GFX_evt_generator_powerup
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = CURSES
+		random_owned_pop = {
+			kill_pop = yes
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9250
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # third problem - casual 1 lowered production
+	id = colony.9242
+	title = "colony.9242.name"
+	desc = "colony.9242.desc"
+	picture = GFX_evt_generator_powerup
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = CURSES
+		hidden_effect = {
+			planet_event = {
+				id = colony.9250
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # third problem - spiritualist averted
+	id = colony.9243
+	title = "colony.9243.name"
+	desc = "colony.9243.desc"
+	picture = GFX_evt_generator_powerup
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9243.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9250
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # third problem - meritocracy averted
+	id = colony.9244
+	title = "colony.9244.name"
+	desc = "colony.9244.desc"
+	picture = GFX_evt_generator_powerup
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9244.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9250
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # third problem - gestalt averted
+	id = colony.9245
+	title = "colony.9245.name"
+	desc = "colony.9245.desc"
+	picture = GFX_evt_generator_powerup
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9245.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9250
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # second opportunity - project starting
+	id = colony.9250
+	title = "colony.9250.name"
+	desc = "colony.9250.desc"
+	picture = GFX_evt_black_market
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual - opportunity wasted - start the project
+		name = colony.9250.a
+		custom_tooltip = colony.9250.a.desc
+		enable_special_project = {
+			name = ANCIENT_MANUFACTORIUM_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+	option = { # technocracy +1 engineering research job output - start the project
+		name = colony.9250.b
+		custom_tooltip = colony.9250.b.desc
+		trigger = {
+			owner = {
+				has_civic = civic_technocracy
+			}
+		}
+		set_planet_flag = manufactorium_engineering
+		enable_special_project = {
+			name = ANCIENT_MANUFACTORIUM_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+	option = { # philosopher king +1 society research job output - start the project
+		name = colony.9250.c
+		custom_tooltip = colony.9250.c.desc
+		trigger = {
+			owner = {
+				has_civic = civic_philosopher_king
+			}
+		}
+		set_planet_flag = manufactorium_society
+		enable_special_project = {
+			name = ANCIENT_MANUFACTORIUM_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+	option = { # natural neural network +1 society research job output - start the project
+		name = colony.9250.d
+		custom_tooltip = colony.9250.d.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_hive_natural_neural_network
+					has_civic = civic_hive_empath
+				}
+			}
+		}
+		set_planet_flag = manufactorium_society
+		enable_special_project = {
+			name = ANCIENT_MANUFACTORIUM_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+	option = { # introspective +1 engineering research job output - start the project
+		name = colony.9250.e
+		custom_tooltip = colony.9250.e.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_machine_introspective
+					has_civic = civic_machine_predictive_analysis
+				}
+			}
+		}
+		set_planet_flag = manufactorium_engineering
+		enable_special_project = {
+			name = ANCIENT_MANUFACTORIUM_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+	option = { # oputing out - no special project, instead gain scrapyard - ending the chain
+		name = colony.9250.f
+		custom_tooltip = colony.9250.f.desc
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		add_deposit = d_ancient_manufactorium_scrapyard
+	}
+}
+
+planet_event = { # special project finished
+	id = colony.9251
+	title = "colony.9251.name"
+	desc = "colony.9251.desc"
+	picture = GFX_evt_black_market
+	show_sound = event_construction
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # proceed
+		name = colony.9251.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9260
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # fourth problem - working conditions - bad modifier to pop happiness or lowered production
+	id = colony.9260
+	title = "colony.9260.name"
+	desc = "colony.9260.desc"
+	picture = GFX_evt_board_meeting
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual1 - bad outcome, lowered happiness
+		name = colony.9260.a
+		custom_tooltip = colony.9260.a.desc
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		set_planet_flag = manufactorium_work_hapipiness
+		hidden_effect = {
+			planet_event = {
+				id = colony.9270
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # casual2 - bad outcome, lowered production
+		name = colony.9260.b
+		custom_tooltip = colony.9260.b.desc
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		set_planet_flag = manufactorium_work_production
+		hidden_effect = {
+			planet_event = {
+				id = colony.9270
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # slaver guilds - bad outcome averted
+		name = colony.9260.c
+		custom_tooltip = colony.9260.c.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_slaver_guilds
+					has_civic = civic_indentured_assets
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9270
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # shared burdens - bad outcome averted
+		name = colony.9260.d
+		custom_tooltip = colony.9260.d.desc
+		trigger = {
+			owner = {
+				has_civic = civic_shared_burden
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9270
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # gestalt - bad outcome only - increased amenities usage
+		name = colony.9260.e
+		custom_tooltip = colony.9260.e.desc
+		trigger = {
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		set_planet_flag = manufactorium_work_gestalt
+		hidden_effect = {
+			planet_event = {
+				id = colony.9270
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # third opportunity - green care - can lower the upkeep or increase production
+	id = colony.9270
+	title = "colony.9270.name"
+	desc = "colony.9270.desc"
+	picture = GFX_evt_decryption
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual - opportunity random
+		name = colony.9270.a
+		custom_tooltip = colony.9270.a.desc
+		hidden_effect = {
+			random_list = {
+				34 = {
+					set_planet_flag = manufactorium_random_good
+				}
+				66 = {
+				}
+			}
+			planet_event = {
+				id = colony.9280
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # Environmentalist - lowered upkeep
+		name = colony.9270.b
+		custom_tooltip = colony.9270.b.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_environmentalist
+					has_civic = civic_machine_zero_waste_protocols
+					has_civic = civic_hive_ascetic
+				}
+			}
+		}
+		set_planet_flag = manufactorium_environmentalists
+		hidden_effect = {
+			planet_event = {
+				id = colony.9280
+				days = 360
+				random = 360
+			}
+		}
+	}
+	option = { # Barbaric Despoilers - increased production
+		name = colony.9270.c
+		custom_tooltip = colony.9270.c.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_barbaric_despoilers
+					has_civic = civic_fanatic_purifiers
+					has_civic = civic_machine_terminator
+					has_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+		set_planet_flag = manufactorium_despoilers
+		hidden_effect = {
+			planet_event = {
+				id = colony.9280
+				days = 360
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # fourth opportunity/problem - can increase production by increasing upkeep
+	id = colony.9280
+	title = "colony.9280.name"
+	desc = "colony.9280.desc"
+	picture = GFX_evt_sapient_AI
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # dont use the opportunity
+		name = colony.9280.a
+		custom_tooltip = colony.9280.a.desc
+		hidden_effect = {
+			planet_event = {
+				id = colony.9290
+				days = 60
+				random = 60
+			}
+		}
+	}
+	option = { # use the opportunity - upkeep + production
+		name = colony.9280.b
+		custom_tooltip = colony.9280.b.desc
+		hidden_effect = {
+			random_list = {
+				34 = {
+					set_planet_flag = manufactorium_took_opportunity
+				}
+				26 = {
+					set_planet_flag = manufactorium_took_opportunity_bad
+				}
+				40 = {
+				}
+			}
+			planet_event = {
+				id = colony.9290
+				days = 180
+				random = 360
+			}
+		}
+	}
+	option = { # Catalytic Processing - increase production, add food upkeep (better than casual 1:2 ratio)
+		name = colony.9280.c
+		custom_tooltip = colony.9280.c.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_catalytic_processing
+					has_civic = civic_hive_catalytic_processing
+					has_civic = civic_machine_catalytic_processing
+					has_civic = civic_corporate_catalytic_processing
+					has_origin = origin_tree_of_life
+				}
+			}
+		}
+		set_planet_flag = manufactorium_catalytic
+		hidden_effect = {
+			planet_event = {
+				id = colony.9290
+				days = 180
+				random = 360
+			}
+		}
+	}
+	option = { # remnants origin - upgrades casual option from taking the opportunity
+		name = colony.9280.d
+		custom_tooltip = colony.9280.d.desc
+		trigger = {
+			owner = {
+				has_origin = origin_remnants
+			}
+		}
+		set_planet_flag = manufactorium_remnants
+		hidden_effect = {
+			planet_event = {
+				id = colony.9290
+				days = 180
+				random = 360
+			}
+		}
+	}
+}
+
+planet_event = { # Ending - grand opening and the last opportunity
+	id = colony.9290
+	title = "colony.9290.name"
+	desc = "colony.9290.desc"
+	picture = GFX_evt_announcement
+	show_sound = event_celebration
+	location = ROOT
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		original_owner = yes
+		is_occupied_flag = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = { # casual - timed happiness boost
+		name = colony.9290.a
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_positive_medium
+				days = 720
+			}
+		}
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		add_deposit = d_ancient_manufactorium_working
+	}
+	option = { # memorialists civic - adding 1 death/drone chronicler job
+		name = colony.9290.b
+		custom_tooltip = colony.9290.b.desc
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_memorialist
+					has_civic = civic_machine_memorialist
+					has_civic = civic_hive_memorialist
+				}
+			}
+		}
+		set_planet_flag = manufactorium_memorialists
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		add_deposit = d_ancient_manufactorium_working
+	}
+	option = { # aristocratic elite - adding 1 noble job
+		name = colony.9290.c
+		custom_tooltip = colony.9290.c.desc
+		trigger = {
+			owner = {
+				has_civic = civic_aristocratic_elite
+			}
+		}
+		set_planet_flag = manufactorium_aristocrats
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		add_deposit = d_ancient_manufactorium_working
+	}
+	option = { # free traders - adding 1 executive job
+		name = colony.9290.d
+		custom_tooltip = colony.9290.d.desc
+		trigger = {
+			owner = {
+				is_megacorp = yes
+			}
+		}
+		set_planet_flag = manufactorium_traders
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		add_deposit = d_ancient_manufactorium_working
+	}
+	option = { # casual - gestalt, nothing
+		name = colony.9290.e
+		trigger = {
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		remove_deposit = d_ancient_manufactorium_vaultexploration
+		add_deposit = d_ancient_manufactorium_working
 	}
 }

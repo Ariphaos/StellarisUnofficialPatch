@@ -98,12 +98,12 @@ country_event = {
 
 	option = {
 		name = action.96.a
-		trigger = { has_authority = auth_corporate }
+		trigger = { is_megacorp = yes }
 	}
 
 	option = {
 		name = action.96.b
-		trigger = { NOT = { has_authority = auth_corporate } }
+		trigger = { is_megacorp = no }
 	}
 }
 
@@ -116,7 +116,7 @@ country_event = {
 		trigger = {
 			NOR = {
 				is_xenophobe = yes
-				has_authority = auth_corporate
+				is_megacorp = yes
 			}
 		}
 	}
@@ -126,7 +126,7 @@ country_event = {
 	}
 	desc = {
 		text = action.97.desc.corp
-		trigger = { has_authority = auth_corporate }
+		trigger = { is_megacorp = yes }
 	}
 	picture = GFX_evt_financial_instruments
 	show_sound = event_galactic_market
@@ -148,13 +148,13 @@ country_event = {
 
 	option = {
 		name = action.96.a
-		trigger = { has_authority = auth_corporate }
+		trigger = { is_megacorp = yes }
 		custom_tooltip = enable_decision_market_nomination
 	}
 
 	option = {
 		name = action.96.b
-		trigger = { NOT = { has_authority = auth_corporate } }
+		trigger = { is_megacorp = no }
 		custom_tooltip = enable_decision_market_nomination
 	}
 }
@@ -552,7 +552,7 @@ country_event = {
 					}
 					modifier = {
 						factor = 9
-						has_authority = auth_corporate
+						is_megacorp = yes
 					}
 					modifier = {
 						factor = 2
@@ -564,7 +564,7 @@ country_event = {
 					}
 					modifier = {
 						factor = 0.75
-						has_ethic = ethic_gestalt_consciousness
+						is_gestalt = yes
 					}
 				}
 				capital_scope = {
@@ -1829,6 +1829,51 @@ starbase_event = {
 				destroy_fleet = this
 			}
 		}
+		if = {
+			limit = {
+				is_orbital_ring = yes
+				exists = planet
+			}
+			planet = {
+				set_planet_flag = ruined_orbital_ring_planet
+				remove_planet_flag = has_megastructure
+				save_event_target_as = ruined_orbital_ring_planet
+			}
+			solar_system = {
+				spawn_megastructure = {
+					type = "orbital_ring_ruined"
+					planet = event_target:ruined_orbital_ring_planet
+
+					init_effect = {
+						set_owner = prev.owner
+						create_ambient_object = {
+							type = "medium_debris_01_object"
+							location = this
+							use_3d_location = yes
+						}
+						last_created_ambient_object = {
+							set_location = {
+								target = prev
+								distance = 8
+								angle = 90
+							}
+						}
+						create_ambient_object = {
+							type = "medium_debris_02_object"
+							location = this
+							use_3d_location = yes
+						}
+						last_created_ambient_object = {
+							set_location = {
+								target = prev
+								distance = 3
+								angle = 270
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -1843,15 +1888,7 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		if = {
-			limit = {
-				has_trait = trait_necrophage
-			}
-			set_origin = origin_necrophage
-		}
-		else = {
-			set_origin = origin_default
-		}
+		set_origin_effect = yes
 		if = {
 			limit = {
 				has_civic = civic_galactic_sovereign
@@ -1864,6 +1901,23 @@ country_event = {
 			}
 			force_remove_civic = civic_galactic_sovereign_megacorp
 		}
+		if = {
+			limit = {
+				has_civic = civic_pompous_purists
+			}
+			force_remove_civic = civic_pompous_purists
+			change_government = {
+				cooldown = no
+				civics = { civic = random }
+			}
+		}
+		# Overlord has 90 Intel on released sectors
+		from = {
+			add_intel = {
+				who = root
+				amount = 80
+			}
+		}
 	}
 }
 
@@ -1874,28 +1928,12 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		has_authority = auth_corporate
-		from = { has_authority = auth_corporate }
+		is_megacorp = yes
+		from = { is_megacorp = yes }
 	}
 
 	immediate = {
-		if = {
-			limit = { has_technology = tech_galactic_administration }
-			change_government = {
-				authority = auth_oligarchic
-				cooldown = no
-				remove_invalid_civics = yes
-				civics = { civic = civic_merchant_guilds civic = random civic = random }
-			}
-		}
-		else = {
-			change_government = {
-				authority = auth_oligarchic
-				cooldown = no
-				remove_invalid_civics = yes
-				civics = { civic = civic_merchant_guilds civic = random }
-			}
-		}
+		set_merchant_government_effect = yes
 	}
 }
 
@@ -2018,6 +2056,9 @@ system_event = {
 					is_megastructure_type = gateway_ruined
 					is_megastructure_type = gateway_restored
 					is_megastructure_type = gateway_final
+					is_megastructure_type = hyper_relay_ruined
+					is_megastructure_type = hyper_relay_restored
+					is_megastructure_type = hyper_relay
 				}
 			}
 			set_owner = FROM
@@ -2036,6 +2077,9 @@ system_event = {
 					is_megastructure_type = gateway_ruined
 					is_megastructure_type = gateway_restored
 					is_megastructure_type = gateway_final
+					is_megastructure_type = hyper_relay_ruined
+					is_megastructure_type = hyper_relay_restored
+					is_megastructure_type = hyper_relay
 				}
 			}
 			set_owner = FROM
@@ -2175,6 +2219,663 @@ espionage_operation_event = {
 				days = 30
 				target = root.owner.capital_scope
 			}
+		}
+	}
+}
+
+# On research Planetary Unification
+country_event = {
+	id = action.400
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		last_increased_tech = tech_planetary_unification
+	}
+
+	immediate = {
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
+	}
+}
+
+country_event = {
+	id = action.405
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_valid_civic = civic_distinguished_admiralty
+			has_valid_civic = civic_machine_warbots
+			has_valid_civic = civic_hive_strength_of_legions
+		}
+		from = {
+			OR = {
+				leader_class = admiral
+				leader_class = general
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			add_skill = 2
+		}
+	}
+}
+
+country_event = {
+	id = action.410
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_valid_civic = civic_distinguished_admiralty
+			has_valid_civic = civic_machine_warbots
+			has_valid_civic = civic_hive_strength_of_legions
+		}
+		any_pool_leader = {
+			OR = {
+				leader_class = admiral
+				leader_class = general
+			}
+			has_skill = 1
+		}
+	}
+
+	immediate = {
+		every_pool_leader = {
+			limit = {
+				OR = {
+					leader_class = admiral
+					leader_class = general
+				}
+				has_skill = 1
+			}
+			add_skill = 2
+		}
+	}
+}
+# Random pulse (set up the delay) - on_five_year_pulse_country - for overlords
+country_event = {
+	id = action.420
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_overlord = yes
+	}
+
+	immediate = {
+		country_event = { id = action.421 random = 360 }
+	}
+}
+
+# Random pulse part 2 (fire the on action) - on_five_year_pulse_country - for overlords
+country_event = {
+	id = action.421
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_overlord = yes
+	}
+
+	immediate = {
+		fire_on_action = { on_action = on_five_year_random_pulse_overlord }
+	}
+}
+
+#Yeet the Fleet achievement
+fleet_event = {
+	id = action.425
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_controlled_ship = {
+			is_civilian = no
+		}
+		solar_system = {
+			is_capital_system = yes
+			space_owner = { is_at_war_with = root.owner }
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = yeet_the_fleet_achievement }
+	}
+}
+
+# Into the Unknown Achievement
+fleet_event = {
+	id = action.430
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_origin = origin_star_slingshot }
+		any_controlled_ship = {
+			is_ship_class = shipclass_science_ship
+		}
+		exists = leader
+		solar_system = {
+			NOT = { has_star_flag = into_the_unknown_flag_@root.owner }
+			is_surveyed = {
+				who = root.owner
+				status = no
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			set_star_flag = into_the_unknown_flag_@root.owner
+		}
+		owner = {
+			change_variable = {
+				which = into_the_unknown_counter
+				value = 1
+			}
+			if = {
+				limit = {
+					check_variable = {
+						which = into_the_unknown_counter
+						value >= 10
+					}
+				}
+				set_country_flag = into_the_unknown_achievement
+			}
+		}
+	}
+}
+
+# This = agreement
+# owner = overlord
+# target = subject
+# Fine Print achievement
+agreement_event = {
+	id = action.435
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		always = yes
+	}
+
+	immediate = {
+		owner = { set_country_flag = fine_print_achievement }
+		target = { set_country_flag = fine_print_achievement }
+	}
+}
+
+# This = agreement
+# owner = overlord
+# target = subject
+# Force Subjects to join GalCom, on Agreement Change.
+agreement_event = {
+	id = action.440
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_term_value = {
+			term = subject_diplomacy
+			value = subject_can_do_diplomacy_but_not_vote
+		}
+		owner = {
+			is_galactic_community_member = yes
+		}
+		target = {
+			is_galactic_community_member = no
+		}
+	}
+
+	immediate = {
+		target = {
+			add_to_galactic_community = yes
+		}
+	}
+}
+
+# This = subject
+# From = subject's overlord
+# Force Subjects to join GalCom, on Subjugation
+country_event = {
+	id = action.441
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_galactic_community_member = yes
+		}
+		this = {
+			is_galactic_community_member = no
+			any_agreement = {
+				has_term_value = {
+					term = subject_diplomacy
+					value = subject_can_do_diplomacy_but_not_vote
+				}
+			}
+		}
+	}
+
+	immediate = {
+		add_to_galactic_community = yes
+	}
+}
+
+# This = agreement
+# owner = overlord
+# target = subject
+# Force Subjects to join Federation, on Agreement Change.
+agreement_event = {
+	id = action.442
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_term_value = {
+			term = subject_diplomacy
+			value = subject_can_do_diplomacy_but_not_vote
+		}
+		owner = {
+			has_federation = yes
+			federation = { has_federation_law = allow_subjects_to_join_yes }
+		}
+		target = {
+			has_federation = no
+		}
+	}
+
+	immediate = {
+		target = {
+			join_alliance = {
+				who = this
+				override_requirements = yes
+			}
+		}
+	}
+}
+
+# This = agreement
+# owner = overlord
+# target = subject
+# Force Subjects to join Federation, on Agreement Change.
+agreement_event = {
+	id = action.443
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_term_value = {
+			term = subject_diplomacy
+			value = subject_can_do_diplomacy_but_not_vote
+		}
+		owner = {
+			has_federation = yes
+			federation = { has_federation_law = allow_subjects_to_join_yes }
+		}
+		target = {
+			has_federation = yes
+			NOT = { is_in_federation_with = owner }
+		}
+	}
+
+	immediate = {
+		target = {
+			leave_alliance = {
+				override_requirements = yes
+				apply_opinion_penalty = no
+			}
+			join_alliance = {
+				who = this
+				override_requirements = yes
+			}
+		}
+	}
+}
+
+# Recalculate divided patronage on government reform if you have Feudal Society or Franchising.
+country_event = {
+	id = action.445
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_civic = civic_feudal_realm
+			has_civic = civic_franchising
+		}
+	}
+
+	immediate = {
+		refresh_subject_count_loyalty_penalty = yes
+	}
+}
+
+# Recalculate divided patronage on taking Shared Destiny AP.
+country_event = {
+	id = action.446
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		refresh_subject_count_loyalty_penalty = yes
+	}
+}
+
+# This = agreement
+# owner = overlord
+# target = subject
+agreement_event = {
+	id = action.450
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		target = { set_country_flag = specialistion_subject_conversion_flag }
+	}
+}
+
+agreement_event = {
+	id = action.451
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		target = { remove_country_flag = specialistion_subject_conversion_flag }
+	}
+}
+
+# Unlock Memorialist buildings for hive-minds that reform into the civic.
+country_event = {
+	id = action.455
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_civic = civic_hive_memorialist
+		NOT = {
+			has_technology = tech_cultural_heritage
+		}
+	}
+
+	immediate = {
+		give_technology = {
+			tech = tech_cultural_heritage
+			message = no
+		}
+	}
+}
+
+# Strange Mood achievement
+country_event = {
+	id = action.460
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_crafter_empire = yes
+		OR = {
+			has_modifier = covenant_whisperers_in_the_void
+			has_modifier = covenant_composer_of_strands
+			has_modifier = covenant_instrument_of_desire
+			has_modifier = covenant_eater_of_worlds
+			has_modifier = covenant_end_of_the_cycle
+		}
+		has_country_flag = has_built_or_repaired_megastructure
+	}
+
+	immediate = {
+		set_country_flag = strange_mood_achievement
+	}
+}
+
+# Directive 67 achievement
+country_event = {
+	id = action.465
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = declared_crisis
+		OR = {
+			has_ai_personality = fallen_empire_spiritualist
+			has_ai_personality = awakened_fallen_empire_spiritualist
+		}
+
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = directive_67_achievement
+		}
+	}
+}
+
+# Destroy People of Earth achievement
+country_event = {
+	id = action.470
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = human_1
+		from = {
+			has_country_flag = human_2
+			ruler = {
+				has_trait = leader_trait_ruler_brainslug
+				species = {
+					is_human_species = yes
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = destroy_people_of_earth_achievement
+		}
+	}
+}
+
+# Fishing for Trouble
+country_event = {
+	id = action.475
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_anglers_empire = yes
+		fromfrom = {
+			OR = {
+				using_war_goal = { type = wg_fe_humiliation				owner = attacker }
+				using_war_goal = { type = wg_fe_stop_atrocities			owner = attacker }
+				using_war_goal = { type = wg_fe_stop_ai					owner = attacker }
+				using_war_goal = { type = wg_fe_cleanse_holy_worlds		owner = attacker }
+				using_war_goal = { type = wg_fe_cleanse_border_worlds	owner = attacker }
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = fishing_for_trouble_achievement
+	}
+}
+
+# Zombie on my Lawn
+country_event = {
+	id = action.480
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		from = { is_country_type = default }
+		OR = {
+			# Either, they're plants and we're zombies
+			AND = {
+				is_species_class = PLANT
+				from = { is_species_class = NECROID }
+			}
+			# or we're plants and they're zombies.
+			AND = {
+				is_species_class = NECROID
+				from = { is_species_class = PLANT }
+			}
+		}
+	}
+
+	immediate = {
+		from = { set_country_flag = zombie_on_my_lawn_achievement }
+	}
+}
+
+# With Great Power Achievement
+planet_event = {
+	id = action.485
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = { has_origin = origin_necrophage }
+		this.owner = { is_primitive = yes }
+	}
+
+	immediate = {
+		from = { set_country_flag = with_great_power_achievement_locked }
+	}
+}
+
+# Could Be Worse Achievement
+planet_event = {
+	id = action.490
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		has_planet_flag = toxic_terraforming_candidate
+		is_planet_class = pc_nuked
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = could_be_worse_achievement
+		}
+	}
+}
+
+# Tend the Garden Achievement
+planet_event = {
+	id = action.495
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:wenkwort_artem
+		is_same_value = event_target:wenkwort_artem
+	}
+
+	immediate = {
+		set_planet_flag = disrupted_garden
+	}
+}
+
+country_event = {
+	id = action.500
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			num_owned_relics > 0
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				from = {
+					has_relic = r_war_forge
+				}
+			}
+			set_variable = {
+				which = cybrex_count
+				value = 1
+			}
+		}
+		steal_relic = {
+			target = from
+			relic = all
+		}
+		create_message = {
+			type = MESSAGE_TYPE_RELICS_GAINED_INTEGRATION
+			localization = MESSAGE_RELICS_GAINED_INTEGRATION
+			days = 30
+			target = root
+		}
+	}
+}
+
+starbase_event = {
+	id = action.503
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		is_orbital_ring = yes
+	}
+
+	immediate = {
+		from = {
+			solar_system = {
+				spawn_megastructure = {
+					type = orbital_ring_ruined
+					planet = prev
+				}
+			}
+			set_planet_flag = ruined_orbital_ring_planet
 		}
 	}
 }

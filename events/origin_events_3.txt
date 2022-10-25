@@ -248,3 +248,2168 @@ planet_event = {
 		}
 	}
 }
+
+##################
+# PROGENITOR HIVE
+##################
+
+country_event = {
+	id = origin.3200
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_progenitor_hive
+	}
+
+	immediate = {
+		every_owned_leader = {
+			limit = { is_idle = no }
+			#This approximates a function to level up every 1.5(n+1) years so that you can expect to get a level 10 leader after 80 years.
+			export_trigger_value_to_variable = {
+				trigger = has_skill
+				variable = experience_bonus
+			}
+			multiply_variable = {
+				which = experience_bonus
+				value = 2.5
+			}
+			floor_variable = experience_bonus
+
+			change_variable = {
+				which = experience_bonus
+				value = 4
+			}
+			random_list = { #We want some randomness
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = -3
+					}
+				}
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = -2
+					}
+				}
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = -1
+					}
+				}
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = 0
+					}
+				}
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = 1
+					}
+				}
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = 2
+					}
+				}
+				1 = {
+					set_variable = {
+						which = random_factor
+						value = 3
+					}
+				}
+			}
+			change_variable = {
+				which = experience_bonus
+				value = random_factor
+			}
+			add_experience = experience_bonus
+
+			clear_variable = experience_bonus
+			clear_variable = random_factor
+		}
+	}
+}
+
+#Capital Transfer
+planet_event = {
+	id = origin.3205
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_origin = origin_progenitor_hive }
+		from = {
+			OR = {
+				has_deposit = d_progenitor
+				has_deposit = d_progenitor_empty
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				from = { has_deposit = d_progenitor }
+			}
+			from = { remove_deposit = d_progenitor }
+			add_deposit = d_progenitor
+		}
+		else_if = {
+			limit = {
+				from = { has_deposit = d_progenitor_empty }
+			}
+			from = { remove_deposit = d_progenitor_empty }
+			add_deposit = d_progenitor_empty
+		}
+	}
+}
+# Triggers country_event for the defender upon defeat
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+country_event = {#Capital world lost
+ 	id = origin.3210
+ 	title = origin.3210.name
+ 	desc = origin.3210.desc
+ 	picture = GFX_evt_progenitor_throne
+ 	show_sound = event_bad_omen
+
+ 	is_triggered_only = yes
+
+ 	trigger = {
+ 		has_origin = origin_progenitor_hive
+ 		fromfrom = { has_deposit = d_progenitor }
+ 	}
+
+ 	immediate = {
+ 		fromfrom = {
+ 			remove_deposit = d_progenitor
+ 			add_deposit = d_progenitor_empty
+ 		}
+ 	}
+
+ 	option = {
+ 		name = origin.3215.a
+ 		 if = {
+ 		 	limit = { NOT = { has_modifier = missing_progenitor_modifier } }
+			add_modifier = {
+				modifier = missing_progenitor_modifier
+				days = -1
+			}
+		}
+ 	}
+}
+
+# Progenitor Deposit cleanup after War Loss
+# A war has ended
+# Root = Loser
+# From = Main Winner
+#country_event = {
+#	id = origin.3215
+#	title = origin.3215.name
+#	desc = origin.3215.desc
+# 	picture = GFX_evt_progenitor_throne
+# 	show_sound = event_bad_omen
+#
+# 	is_triggered_only = yes
+#
+# 	trigger = {
+# 		has_origin = origin_progenitor_hive
+#		capital_scope = {
+#			NOR = {
+# 				has_deposit = d_progenitor
+# 				has_deposit = d_progenitor_empty
+# 			}
+# 		}
+# 	}
+#
+# 	immediate = {
+# 		capital_scope = {
+# 			add_deposit = d_progenitor_empty
+# 		}
+# 		hidden_effect = {
+# 			From = {
+# 				random_owned_planet = {
+# 					limit = {
+# 						OR = {
+# 							has_deposit = d_progenitor
+# 							has_deposit = d_progenitor_empty
+# 						}
+# 						NOT = {
+# 							planet = { is_same_value = capital_scope }
+# 						}
+# 					}
+# 					remove_deposit = d_progenitor
+# 					remove_deposit = d_progenitor_empty
+# 				}
+# 			}
+# 		}
+# 	}
+#
+# 	option = {
+# 		name = origin.3215.a
+# 		if = {
+# 			limit = { NOT = { has_modifier = missing_progenitor_modifier } }
+#			add_modifier = {
+#				modifier = missing_progenitor_modifier
+#				days = -1
+#			}
+#		}
+# 	}
+#}
+
+#On Colonize and transfer missing offspring modifier
+planet_event = {
+	id = origin.3225
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_origin = origin_progenitor_hive }
+		NOT = {
+			num_assigned_jobs = {
+				job = offspring_drone
+				value >= 1
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_modifier = missing_offspring_modifier }
+			}
+			add_modifier = {
+				modifier = missing_offspring_modifier
+				days = -1
+			}
+		}
+	}
+}
+
+#Monthly check to add and remove missing offspring modifier
+country_event = {
+	id = origin.3230
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_origin = origin_progenitor_hive }
+	}
+
+	immediate = {
+		every_owned_planet = {
+			limit = {
+				NOR = {
+					has_modifier = missing_offspring_modifier
+					num_assigned_jobs = {
+						job = offspring_drone
+						value >= 1
+					}
+				}
+			}
+			add_modifier = {
+				modifier = missing_offspring_modifier
+				days = -1
+			}
+		}
+		every_owned_planet = {
+			limit = {
+				has_modifier = missing_offspring_modifier
+				OR = {
+					num_assigned_jobs = {
+						job = offspring_drone
+						value >= 1
+					}
+					has_deposit = d_progenitor
+				}
+
+			}
+			remove_modifier = "missing_offspring_modifier"
+		}
+	}
+}
+
+#Warning every 2 year if you don't have an offspring working
+country_event = {
+	id = origin.3235
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_origin = origin_progenitor_hive }
+		any_owned_planet = {
+			has_modifier = missing_offspring_modifier
+			NOT = { has_planet_flag = offspring_missing_warned }
+			num_pops >= 3
+			is_capital = no
+		}
+	}
+
+	immediate = {
+		every_owned_planet = {
+			limit = {
+				has_modifier = missing_offspring_modifier
+				num_pops >= 3
+				NOT = { has_planet_flag = offspring_missing_warned }
+			}
+			set_timed_planet_flag = {
+				flag = offspring_missing_warned
+				days = 720
+			}
+			create_message = {
+				type = MESSAGE_NO_OFFSPRING
+				localization = MESSAGE_NO_OFFSPRING_DESC
+				days = 30
+				target = this
+				variable = {
+					type = name
+					localization = PLANET
+					scope = this
+				}
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = origin.3240 #removes the modifier if you aren't a progenitor hive
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { From = { has_origin = origin_progenitor_hive } }
+		has_modifier = missing_offspring_modifier
+	}
+
+	immediate = {
+		remove_modifier = missing_offspring_modifier
+	}
+}
+
+planet_event = { #Glassing the Progenitor
+	id = origin.3245
+ 	title = origin.3245.name
+ 	desc = origin.3245.desc
+ 	picture = GFX_evt_progenitor_throne
+ 	show_sound = evn_ove_progenitor_throne
+ 	is_triggered_only = yes
+
+ 	pre_triggers = {
+ 		is_capital = yes
+ 		has_owner = yes
+ 	}
+
+ 	trigger = {
+ 		owner = { has_origin = origin_progenitor_hive }
+ 		has_deposit = d_progenitor
+ 	}
+
+ 	immediate = {
+ 		remove_deposit = d_progenitor
+ 		add_deposit = d_progenitor_empty
+ 	}
+ 	option = {
+ 		name = origin.3245.a
+ 	}
+ 	option = {
+ 		name = origin.3245.b
+ 	}
+ 	option = {
+ 		name = origin.3245.c
+ 	}
+ 	option = {
+ 		name = origin.3245.d
+ 	}
+ 	after = {
+ 	 	owner = {
+ 			if = {
+ 				limit = {
+ 					NOT = { has_modifier = missing_progenitor_modifier }
+ 				}
+				add_modifier = {
+					modifier = missing_progenitor_modifier
+					days = -1
+				}
+			}
+		}
+ 	}
+}
+
+country_event = {
+	id = origin.3250 #removes the deposit even if you kill the country
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_progenitor_hive
+		capital_scope = {
+			OR = {
+				has_deposit = d_progenitor
+				has_deposit = d_progenitor_empty
+			}
+		}
+	}
+
+	immediate = {
+		capital_scope = {
+			if = {
+				limit = { has_deposit = d_progenitor }
+				remove_deposit = d_progenitor
+			}
+			if = {
+				limit = { has_deposit = d_progenitor_empty }
+				remove_deposit = d_progenitor_empty
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = origin.3255 #removes Missing Offspring when abandoning colonies
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = missing_offspring_modifier
+	}
+	immediate = {
+		remove_modifier = missing_offspring_modifier
+	}
+
+}
+
+# This = owner of ship 1 (destroyed)
+# From = owner of ship 2 (combatant)
+# FromFrom = ship 1
+# FromFromFrom = ship 2
+country_event = {
+	id = origin.3260
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_progenitor_hive
+		fromfrom = {
+			has_component = SHIP_AURA_OFFSPRING
+			solar_system = {
+				NOT = {
+					any_ship_in_system = {
+						NOT = {
+							is_same_value = fromfrom
+						}
+						is_owned_by = root
+						has_component = SHIP_AURA_OFFSPRING
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_FINAL_OFFSPRING_SHIP
+			localization = MESSAGE_FINAL_OFFSPRING_SHIP_DESC
+			days = 30
+			target = fromfrom.solar_system
+			variable = {
+				type = name
+				localization = SYSTEM
+				scope = fromfrom.solar_system
+			}
+		}
+	}
+}
+
+country_event = { #Bombarding Capital
+	id = origin.3265
+ 	title = origin.3265.name
+ 	desc = origin.3265.desc
+ 	picture = GFX_evt_progenitor_throne
+ 	show_sound = evn_ove_progenitor_throne
+ 	is_triggered_only = yes
+
+ 	option = {
+ 		name = origin.3215.a
+ 	}
+ 	after = {
+ 	 	owner = {
+ 			if = {
+ 				limit = {
+ 					NOT = { has_modifier = missing_progenitor_modifier }
+ 				}
+				add_modifier = {
+					modifier = missing_progenitor_modifier
+					days = -1
+				}
+			}
+		}
+		 capital_scope = {
+ 			add_deposit = d_progenitor_empty
+ 		}
+ 	}
+}
+
+country_event = {
+	id = origin.3270
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		from = { has_origin = origin_progenitor_hive }
+	}
+
+	immediate = {
+		set_origin = origin_progenitor_hive
+		capital_scope = {
+			add_deposit = d_progenitor
+		}
+	}
+}
+
+#########################
+# SLINGSHOT TO THE STARS
+#########################
+
+# Start Game event
+country_event = {
+	id = origin.3500
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		# Remove a guaranteed habitable
+		if = {
+			limit = { num_guaranteed_colonies >= 1 }
+			capital_scope.solar_system = {
+				closest_system = {
+					limit = { has_star_flag = neighbor_t1_first_colony }
+					random_system_planet = {
+						limit = { has_planet_flag = prescripted_ideal }
+						remove_planet_flag = prescripted_ideal
+						change_pc = pc_frozen
+					}
+				}
+			}
+		}
+		# Find Quantum Catapult Star
+		capital_scope.solar_system = {
+			closest_system = {
+				limit = {
+					NOR = {
+						has_star_flag = empire_home_system
+						has_star_flag = hostile_system
+						is_binary_star = yes
+						is_trinary_star = yes
+					}
+				}
+				save_event_target_as = quantum_catapult_system
+			}
+		}
+		set_country_flag = slingshot_origin_arcsite_owner
+		add_modifier = {
+			modifier = into_the_unknown
+			days = -1
+		}
+		set_visited = event_target:quantum_catapult_system
+		event_target:quantum_catapult_system = {
+			set_star_class = sc_pulsar
+			set_star_flag = quantum_catapult_system_flag@root
+
+			spawn_megastructure = {
+				type = "quantum_catapult_ruined_slingshot"
+				planet = event_target:quantum_catapult_system.star
+
+				init_effect = {
+					create_ambient_object = {
+						type = "large_debris_object"
+						location = this
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 20
+							angle = 20
+						}
+					}
+					create_ambient_object = {
+						type = "large_debris_object"
+						location = this
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 20
+							angle = 150
+						}
+					}
+					create_ambient_object = {
+						type = "medium_debris_01_object"
+						location = this
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 35
+							angle = 90
+						}
+					}
+					create_ambient_object = {
+						type = "medium_debris_02_object"
+						location = this
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 3
+							angle = 270
+						}
+					}
+				}
+			}
+
+			star = { create_archaeological_site = slingshot_digsite }
+		}
+	}
+}
+
+# On Occupy the System with Quantum Catapult (Ship Event)
+ship_event = {
+	id = origin.3505
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_origin = origin_star_slingshot }
+		solar_system = {
+			has_star_flag = quantum_catapult_system_flag@root.owner
+			NOT = { has_star_flag = quantum_catapult_occupied }
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			set_star_flag = quantum_catapult_occupied
+		}
+		owner = {
+			country_event = {
+				id = origin.3510
+			}
+		}
+	}
+}
+
+# On Occupying the System with Quantum Catapult (Country Event)
+country_event = {
+	id = origin.3510
+	title = origin.3510.title
+	desc = origin.3510.desc
+	picture = GFX_evt_slingshot_stars
+	show_sound = evn_ove_slingshot_stars
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_star_slingshot
+	}
+
+	option = {
+		name = origin.3510.a
+		add_resource = { influence = 150 }
+	}
+}
+
+# Digsite Events
+fleet_event = {
+	id = origin.3515
+	title = "origin.3515.name"
+	desc = "origin.3515.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = origin.3515.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = origin.3520
+	title = "origin.3520.name"
+	desc = "origin.3520.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = INTRIGUING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = origin.3525
+	title = "origin.3525.name"
+	desc = "origin.3525.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = origin.3515.a
+	}
+}
+
+fleet_event = {
+	id = origin.3530
+	title = "origin.3530.name"
+	desc = "origin.3530.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = FASCINATING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = origin.3535
+	title = "origin.3535.name"
+	desc = "origin.3535.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = origin.3515.a
+	}
+}
+
+fleet_event = {
+	id = origin.3540
+	title = "origin.3540.name"
+	desc = "origin.3540.desc"
+	picture = GFX_evt_slingshot_stars
+	show_sound = evn_ove_slingshot_stars
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = origin.3540.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+		}
+		owner = {
+			if = {
+				limit = {
+					years_passed < 30
+				}
+				add_modifier = {
+					modifier = infinity_beckons
+					days = 3600
+				}
+			}
+		}
+	}
+}
+
+#########################
+# TEACHERS OF THE SHROUD
+#########################
+
+# Start / Setup event
+country_event = {
+	id = origin.5600
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_shroudwalker_apprentice
+		exists = event_target:shroudwalker_enclave_country #set up in initializers
+	}
+
+	immediate = {
+		# Have met aliens (the Shroudwalkers)
+		set_country_flag = first_contact_event
+		set_country_flag = Story2 # Already encountered spacefarers
+
+		# Get to know the Shroudwalkers from the start
+		establish_communications_no_message = event_target:shroudwalker_enclave_country
+
+		# Set up all necessary country flags
+		set_country_flag = shroudwalker_enclave_diplomacy_engaged
+		set_country_flag = shroudwalker_enclave_bought_shroud_beacon
+
+		every_system = {
+			limit = {
+				has_star_flag = shroudwalker_enclave_system
+			}
+			root = { set_visited = prev }
+		}
+
+		# Shroudify some planets
+		while = {
+			count = 7
+			closest_system = {
+				limit = {
+					any_system_planet = {
+						uninhabitable_regular_planet = yes
+						NOR = {
+							has_modifier = terraforming_candidate
+							has_anomaly = yes
+						}
+					}
+					NOT = {
+						count_system_planet = {
+							count = 2
+							limit = {
+								is_planet_class = pc_shrouded
+							}
+						}
+					}
+				}
+				min_steps = 1
+				max_steps = 3
+				random_system_planet = {
+					limit = {
+						uninhabitable_regular_planet = yes
+						NOR = {
+							has_modifier = terraforming_candidate
+							has_anomaly = yes
+						}
+					}
+					weights = {
+						base = 1
+						modifier = {
+							add = trigger:planet_size
+						}
+					}
+					change_pc = pc_shrouded
+					clear_planet_modifiers = yes
+					clear_deposits = yes
+				}
+			}
+		}
+		if = {
+			limit = {
+				capital_star.solar_system = {
+					any_system_planet = {
+						uninhabitable_regular_planet = yes
+					}
+				}
+			}
+			capital_star.solar_system = {
+				while = {
+					count = 2
+					random_system_planet = {
+						limit = {
+							uninhabitable_regular_planet = yes
+							NOT = { has_modifier = terraforming_candidate }
+						}
+						weights = {
+							base = 1
+							modifier = {
+								add = trigger:planet_size
+							}
+						}
+						change_pc = pc_shrouded
+						clear_planet_modifiers = yes
+						clear_deposits = yes
+					}
+				}
+			}
+		}
+
+		# Let them start researching Psionic Theory from the get-go
+		add_research_option = tech_psionic_theory
+	}
+}
+
+# Shroudwalker Enclave: Initial Diplomatic Greeting for Teachers of the Shroud Origin
+# This = player country; event_target:shroudwalker_enclave_country = enclave country
+country_event = {
+	id = origin.5605
+	title = origin.5605.name
+	trigger = {
+		has_origin = origin_shroudwalker_apprentice
+		exists = event_target:shroudwalker_enclave_country
+		has_country_flag = first_contact_event
+		has_country_flag = Story2
+		has_country_flag = shroudwalker_enclave_diplomacy_engaged
+	}
+	desc = {
+		trigger = {
+			hidden:owner = {
+				switch = {
+					trigger = has_authority
+					auth_corporate = { text = origin.5605.corporate.desc }
+					default = { text = origin.5605.generic.desc }
+				}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	custom_gui = "enclave_artist_window"
+	custom_gui_option = "enclave_artist_option"
+	picture_event_data = {
+		portrait = event_target:shroudwalker_enclave_country
+		room = shroudwalkers_room
+	}
+
+	immediate = {
+		country_event = {
+			id = tutorial.2100 # Tutorial: Enclave Diplomacy
+			scopes = { from = event_target:shroudwalker_enclave_country }
+		}
+	}
+
+	#Respond with awe and reverence - offers a callback flavour for future events.
+	option = {
+		name = origin.5605.a
+		custom_tooltip = shroud_beacon_info
+		custom_tooltip = origin.5605.tt #"We also receive:"
+		add_resource = { rare_crystals = 25 }
+		set_country_flag = shroudwalker_enclave_bought_shroud_beacon
+		hidden_effect = {
+			event_target:shroudwalker_enclave_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+			set_country_flag = shroud_beacon
+		}
+	}
+	#Respond with arrogance - offers a callback flavour for future events.
+	option = {
+		name = origin.5605.b
+		custom_tooltip = shroud_beacon_info
+		custom_tooltip = origin.5605.tt #"We also receive:"
+		add_resource = { rare_crystals = 25 }
+		set_country_flag = shroudwalker_enclave_bought_shroud_beacon
+		hidden_effect = {
+			set_country_flag = shroud_beacon
+		}
+	}
+}
+
+## Teachers of the Shroud - Determine how player enters Shroudwalker System (not player-facing)
+fleet_event = {
+	id = origin.5610
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		set_timed_fleet_flag = { flag = used_shroud_tunnel days = 5 }
+	}
+}
+
+ship_event = {
+	id = origin.5615
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		fleet = {
+			fleet_event = {
+				id = origin.5620 days = 1
+			}
+		}
+	}
+}
+
+## Teachers of the Shroud - Origin Event - Player Empire Enters the Shroudwalker Enclave system via hyperlane
+fleet_event = {
+	id = origin.5620
+	title = "origin.5615.name"
+	desc = {
+		trigger = {
+			has_fleet_flag = used_shroud_tunnel
+		}
+		text = origin.5620.b.desc
+	}
+	desc = {
+		trigger = {
+			NOT = {
+				has_fleet_flag = used_shroud_tunnel
+			}
+		}
+		text = origin.5615.a.desc
+	}
+	location = event_target:shroudwalker_enclave_system
+
+	diplomatic = yes
+	custom_gui = "enclave_artist_window"
+	custom_gui_option = "enclave_artist_option"
+	picture_event_data = {
+		portrait = event_target:shroudwalker_enclave_country
+		room = shroudwalkers_room
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			has_origin = origin_shroudwalker_apprentice
+		}
+		fromfrom = {
+			has_star_flag = shroudwalker_enclave_system
+		}
+		NOT = {
+			owner = {
+				has_country_flag = teachers_origin_meet_enclave
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = teachers_origin_meet_enclave
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+## Teachers of the Shroud - Origin Event - Player Empire builds Shroud Beacon
+country_event = {
+	id = origin.5625
+	title = "origin.5625.name"
+	desc = {
+		trigger = {
+			NOT = { exists = event_target:shroudwalker_system_owner_closed }
+		}
+		text = "origin.5625.a.desc"
+	}
+	desc = {
+		trigger = {
+			exists = event_target:shroudwalker_system_owner_closed
+		}
+		text = "origin.5625.b.desc"
+	}
+	picture = GFX_evt_shroud_tunnel
+	show_sound = event_mystic_reveal
+	location = FROM
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_shroudwalker_apprentice
+		NOT = { has_country_flag = built_first_shroud_tunnel }
+		any_owned_starbase = {
+			has_starbase_building = shroud_beacon
+		}
+	}
+
+	immediate = {
+		event_target:shroudwalker_enclave_country = {
+			set_country_flag = shroud_beacon@root
+		}
+		if = {
+			limit = {
+				exists = event_target:shroudwalker_enclave_system
+				event_target:shroudwalker_enclave_system = {
+					exists = owner
+					owner = { has_closed_borders = root }
+				}
+			}
+			event_target:shroudwalker_enclave_system = {
+				owner = {
+					save_event_target_as = shroudwalker_system_owner_closed
+				}
+			}
+		}
+		owner = {
+			set_country_flag = built_first_shroud_tunnel
+			add_seen_bypass_type = shroud_tunnel
+		}
+	}
+
+	option = {
+		trigger = {
+			NOT = { exists = event_target:shroudwalker_system_owner_closed }
+		}
+		name = "origin.5625.a.option"
+	}
+
+	option = {
+		trigger = {
+			exists = event_target:shroudwalker_system_owner_closed
+		}
+		name = UNDERSTOOD
+	}
+}
+
+##################
+# IMPERIAL VASSAL
+##################
+
+# Start / Setup Event
+country_event = {
+	id = origin.5700
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					closest_system = {
+						limit = { has_star_flag = overlord_empire_flag }
+						max_steps = 5
+					}
+				}
+			}
+			capital_scope.solar_system = {
+				spawn_system = {
+					min_distance = 30
+					max_distance = 80
+					min_jumps = 2
+					max_jumps = 3
+					hyperlane = yes
+					initializer = overlord_system_8_init
+				}
+			}
+		}
+		# Have met aliens (their liege)
+		set_country_flag = first_contact_event
+		set_country_flag = Story2 # Already encountered spacefarers
+
+		event_target:origin_imperial_homeland_country = {
+			every_subject = {
+				establish_communications_no_message = root
+				every_system_within_border = {
+					set_surveyed = {
+						surveyed = yes
+						surveyor = root
+					}
+				}
+			}
+			establish_communications_no_message = root
+			every_system_within_border = {
+				set_surveyed = {
+					surveyed = yes
+					surveyor = root
+				}
+			}
+		}
+		set_subject_of = {
+			who = event_target:origin_imperial_homeland_country
+		}
+		overlord = {
+			add_opinion_modifier = {
+				modifier = opinion_imperial_vassal_ai_opinion
+				who = root
+			}
+		}
+		random_agreement = {
+			limit = {
+				owner = { is_same_value = root.overlord }
+				target = { is_same_value = root }
+			}
+			set_agreement_terms = {
+				subject_diplomacy = subject_can_do_diplomacy
+				subject_integration = subject_can_not_be_integrated
+				subject_expand = subject_can_expand_with_tithe
+				subject_holdings_limit = subject_holdings_limit_1
+				joins_subject_wars = joins_subject_wars_defensive
+				joins_overlord_wars = joins_overlord_wars_none
+			}
+		}
+	}
+}
+
+# Choose Vassal Specialization & Intro Event Chain
+country_event = {
+	id = origin.5703
+	title = TRANSMISSION
+	desc = origin.5703.desc
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = event_target:overlord_empire
+		planet_background = event_target:overlord_empire
+		graphical_culture = event_target:overlord_empire
+		city_level = event_target:overlord_empire
+		room = event_target:overlord_empire.ruler
+	}
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+		is_ai = no
+	}
+
+	immediate = {
+		overlord = { save_event_target_as = overlord_empire }
+	}
+
+	option = {
+		name = origin.5703.a
+		icon = {
+			icon = GFX_option_icon_hostile
+			text = dialog_hostile_overlord
+		}
+		set_country_flag = imperial_fiefdom_harsh_response
+		event_target:overlord_empire = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_imperial_vassal_harsh_response_overlord_opinion
+			}
+		}
+	}
+	option = {
+		name = origin.5703.b
+		default_hide_option = yes
+		icon = {
+			icon = GFX_option_icon_isolationist
+			text = dialog_wary_overlord
+		}
+	}
+	option = {
+		name = origin.5703.c
+		icon = {
+			icon = GFX_option_icon_friendly
+			text = dialog_friendly_overlord
+		}
+		set_country_flag = imperial_fiefdom_grateful_response
+		event_target:overlord_empire = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_imperial_vassal_grateful_response_overlord_opinion
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			country_event = { id = origin.5705 }
+		}
+	}
+}
+
+country_event = {
+	id = origin.5705
+	title = TRANSMISSION
+	desc = {
+		trigger = {
+			has_country_flag = imperial_fiefdom_harsh_response
+		}
+		text = origin.5705.desc.harsh
+	}
+	desc = {
+		trigger = {
+			has_country_flag = imperial_fiefdom_grateful_response
+		}
+		text = origin.5705.desc.grateful
+	}
+	desc = {
+		trigger = {
+			has_country_flag = imperial_fiefdom_reconsider_response
+		}
+		text = origin.5705.desc.reconsider
+	}
+	desc = {
+		trigger = {
+			NOR = {
+				has_country_flag = imperial_fiefdom_harsh_response
+				has_country_flag = imperial_fiefdom_grateful_response
+				has_country_flag = imperial_fiefdom_reconsider_response
+			}
+		}
+		text = origin.5705.desc
+	}
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = event_target:overlord_empire
+		planet_background = event_target:overlord_empire
+		graphical_culture = event_target:overlord_empire
+		city_level = event_target:overlord_empire
+		room = event_target:overlord_empire.ruler
+	}
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+		is_ai = no
+	}
+
+	option = {
+		name = origin.5705.a
+		origin_imperial_fiefdom_bulwark_specialization_effect = yes
+	}
+	option = {
+		name = origin.5705.b
+		hidden_effect = {
+			country_event = { id = origin.5706 }
+		}
+	}
+	option = {
+		name = origin.5705.c
+		default_hide_option = yes
+		origin_imperial_fiefdom_scholarium_specialization_effect = yes
+	}
+	option = {
+		name = origin.5705.d
+		hidden_effect = {
+			country_event = { id = origin.5707 }
+		}
+	}
+	option = {
+		name = origin.5705.e
+		origin_imperial_fiefdom_prospectorium_specialization_effect = yes
+	}
+	option = {
+		name = origin.5705.f
+		hidden_effect = {
+			country_event = { id = origin.5708 }
+		}
+	}
+
+	after = {
+		remove_country_flag = imperial_fiefdom_harsh_response
+		remove_country_flag = imperial_fiefdom_grateful_response
+	}
+}
+
+country_event = { # Learn more about Bulwarks
+	id = origin.5706
+	title = TRANSMISSION
+	desc = origin.5706.desc
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = event_target:overlord_empire
+		planet_background = event_target:overlord_empire
+		graphical_culture = event_target:overlord_empire
+		city_level = event_target:overlord_empire
+		room = event_target:overlord_empire.ruler
+	}
+
+	option = {
+		name = origin.5706.a
+		default_hide_option = yes
+		origin_imperial_fiefdom_bulwark_specialization_effect = yes
+	}
+	option = {
+		name = origin.5706.b
+		hidden_effect = {
+			country_event = { id = origin.5705 }
+			set_country_flag = imperial_fiefdom_reconsider_response
+		}
+	}
+}
+
+country_event = { # Learn more about Scholaria
+	id = origin.5707
+	title = TRANSMISSION
+	desc = origin.5707.desc
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = event_target:overlord_empire
+		planet_background = event_target:overlord_empire
+		graphical_culture = event_target:overlord_empire
+		city_level = event_target:overlord_empire
+		room = event_target:overlord_empire.ruler
+	}
+
+	option = {
+		name = origin.5707.a
+		default_hide_option = yes
+		origin_imperial_fiefdom_scholarium_specialization_effect = yes
+	}
+	option = {
+		name = origin.5707.b
+		hidden_effect = {
+			country_event = { id = origin.5705 }
+			set_country_flag = imperial_fiefdom_reconsider_response
+		}
+	}
+}
+
+country_event = { # Learn more about Prospectoria
+	id = origin.5708
+	title = TRANSMISSION
+	desc = origin.5708.desc
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = event_target:overlord_empire
+		planet_background = event_target:overlord_empire
+		graphical_culture = event_target:overlord_empire
+		city_level = event_target:overlord_empire
+		room = event_target:overlord_empire.ruler
+	}
+
+	option = {
+		name = origin.5708.a
+		default_hide_option = yes
+		origin_imperial_fiefdom_prospectorium_specialization_effect = yes
+	}
+	option = {
+		name = origin.5708.b
+		hidden_effect = {
+			country_event = { id = origin.5705 }
+			set_country_flag = imperial_fiefdom_reconsider_response
+		}
+	}
+}
+
+# AI Setup
+country_event = {
+	id = origin.5710
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+		is_ai = yes
+	}
+
+	immediate = {
+		overlord = { save_event_target_as = overlord_empire }
+
+		if = { # Influence reduction modifier
+			limit = {
+				NOT = { has_country_flag = origin_imperial_vassal_rival_country }
+			}
+			add_modifier = {
+				modifier = imperial_vassal_ai_modifier
+				days = -1
+			}
+		}
+
+		# Opinion Modifiers
+		add_opinion_modifier = {
+			modifier = opinion_imperial_overlord_ai_opinion
+			who = event_target:overlord_empire
+		}
+		event_target:overlord_empire = {
+			every_subject = {
+				limit = {
+					is_ai = no
+				}
+				root = {
+					add_opinion_modifier = {
+						modifier = opinion_imperial_vassal_ai_opinion
+						who = prev
+					}
+				}
+			}
+		}
+
+		random_agreement = { # Agreement Terms with Overlord
+			limit = {
+				owner = { is_same_value = root.overlord }
+				target = { is_same_value = root }
+			}
+			set_agreement_terms = { # Generic values everyone gets
+				subject_integration = subject_can_not_be_integrated
+				subject_holdings_limit = subject_holdings_limit_1
+				joins_subject_wars = joins_subject_wars_all
+				joins_overlord_wars = joins_overlord_wars_none
+			}
+			if = { # Rival Country specific
+				limit = {
+					root = { has_country_flag = origin_imperial_vassal_rival_country }
+				}
+				set_agreement_terms = {
+					subject_diplomacy = subject_can_do_diplomacy
+				}
+			}
+			else = { # Rest
+				set_agreement_terms = {
+					subject_diplomacy = subject_can_not_do_diplomacy
+				}
+				random_list = {
+					1 = {
+						set_agreement_terms = {
+							subject_expand = subject_cannot_expand
+						}
+					}
+					1 = {
+						set_agreement_terms = {
+							subject_expand = subject_can_expand_with_tithe
+						}
+					}
+				}
+			}
+		}
+
+		if = { # Rival Country bonuses
+			limit = {
+				has_country_flag = origin_imperial_vassal_rival_country
+			}
+			create_fleet = {
+				effect = {
+					set_owner = root
+					create_ship = {
+						name = random
+						random_existing_design = science
+					}
+					set_location = root.capital_star
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = root
+					create_ship = {
+						name = random
+						random_existing_design = constructor
+					}
+					set_location = root.capital_star
+				}
+			}
+			create_fleet = {
+				effect = {
+					set_owner = root
+					while = {
+						count = 3
+						create_ship = {
+							name = random
+							design = NAME_Dagger
+						}
+					}
+					set_location = root.capital_star
+				}
+			}
+			add_resource = {
+				energy = 2000
+				food = 1000
+				minerals = 1000
+				influence = 300
+			}
+		}
+
+		# Holding Building
+		capital_scope = {
+			add_holding = {
+				holding = holding_garrison
+				owner = event_target:overlord_empire
+			}
+		}
+	}
+}
+
+## Overlord Dissolution Events
+# Pre-Event
+country_event = { # Overlord
+	id = origin.5715
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal_overlord
+		years_passed >= 35
+	}
+
+	immediate = {
+		country_event = {
+			id = origin.5720
+			days = 1825
+			random = 9125
+		}
+	}
+}
+
+# Previous Leader dies, succession crisis
+country_event = { # Overlord version
+	id = origin.5720
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal_overlord
+	}
+
+	immediate = {
+		heir = {
+			save_event_target_as = overlord_heir
+		}
+		ruler = {
+			save_event_target_as = overlord_ruler
+			kill_leader = { show_notification = no }
+		}
+		country_event = {
+			id = origin.5730
+			days = 365
+			random = 1825
+		}
+		every_subject = {
+			country_event = {
+				id = origin.5725
+			}
+		}
+	}
+}
+
+country_event = { # Vassal version
+	id = origin.5725
+	title = origin.5725.title
+	desc = origin.5725.desc
+	picture = GFX_evt_arguing_senate
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	option = {
+		name = origin.5725.a
+	}
+}
+
+# Dissolution of the Empire
+country_event = { # Overlord Version
+	id = origin.5730
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal_overlord
+	}
+
+	immediate = {
+		save_event_target_as = previous_overlord
+		set_country_flag = origin_imperial_vassal_ex_overlord
+		set_origin = origin_default
+		every_megastructure = {
+			limit = {
+				is_megastructure_type = gateway_derelict
+			}
+			solar_system = {
+				spawn_megastructure = {
+					type = "gateway_ruined"
+					coords_from = prev
+				}
+			}
+			remove_megastructure = this
+		}
+		change_government = {
+			authority = auth_dictatorial
+			civics = random
+		}
+		every_subject = { # Release and notify current subjects
+			if = {
+				limit = {
+					is_ai = yes
+				}
+				set_subject_of = { who = none }
+			}
+			country_event = { id = origin.5735 }
+		}
+		while = { # iterate through all splintering worlds
+			limit = { any_owned_planet = { is_capital = no } }
+			random_system_within_border = { # we want a country per colonized system
+				limit = { is_capital_system = no }
+				random_system_planet = {
+					limit = { is_colony = yes }
+					create_country = {
+						name = random
+						type = default
+						authority = random
+						civics = random
+						species = root.species
+						ethos = random
+						origin = origin_default
+						day_zero_contact = no
+						effect = {
+							set_country_flag = origin_imperial_vassal_ex_overlord
+							set_country_flag = origin_imperial_vassal_ex_overlord@event_target:previous_overlord # also unique in case of MP (while the overlord survives...)
+							set_timed_country_flag = { flag = day_0 days = 7 } # suppresses the contact events, but not notifications
+							save_event_target_as = current_splinter
+
+							every_playable_country = { # Establish Contact with previous vassals
+								limit = {
+									has_communications = root
+									NOT = { has_communications = event_target:current_splinter }
+								}
+								establish_communications_no_message = event_target:current_splinter
+							}
+							every_playable_country = {
+								limit = {
+									NOT = { has_communications = root }
+									has_active_first_contact_with = root
+								}
+								establish_contact = {
+									who = event_target:current_splinter
+									location = event_target:current_splinter.capital_star
+								}
+							}
+
+							root = { # Give them one of the previous Overlord's fleets
+								random_owned_fleet = {
+									set_owner = event_target:current_splinter
+								}
+							}
+
+							# Give them tech from previous Overlord
+							copy_techs_from = {
+								target = event_target:previous_overlord
+							}
+
+							# Give them a fleet of their own
+							create_fleet = {
+								effect = {
+									set_owner = event_target:current_splinter
+									while = {
+										count = 10
+										create_ship = {
+											name = random
+											design = NAME_Ravager
+										}
+									}
+									set_location = event_target:current_splinter.capital_star
+								}
+							}
+
+							# Give them some starting resources
+							add_basic_resources_effect = { VALUE = 3000 }
+							add_manufactured_resources_effect = { VALUE = 1500 }
+							add_advanced_resources_effect = { VALUE = 1000 }
+
+							declare_war = { # Start a war with the previous Overlord
+								target = root
+								name = {
+									key = "NAME_Imperial_War"
+								}
+								attacker_war_goal = wg_subjugation
+							}
+						}
+					}
+					set_owner = event_target:current_splinter
+				}
+				every_system_planet = {
+					limit = { is_colony = yes }
+					set_owner = event_target:current_splinter
+				}
+				starbase = { set_owner = event_target:current_splinter }
+			}
+		}
+	}
+}
+
+country_event = { # Vassal Version
+	id = origin.5735
+	title = origin.5735.title
+	desc = origin.5735.desc
+	picture = GFX_evt_burning_settlement
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	option = {
+		name = origin.5735.a
+		trigger = {
+			OR = {
+				is_ai = no
+				is_militarist = no
+				is_xenophobe = no
+			}
+		}
+		set_subject_of = { who = none }
+	}
+
+	option = {
+		name = origin.5735.b
+		trigger = {
+			OR = {
+				is_ai = no
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}
+
+		set_subject_of = { who = none }
+
+		add_resource = { influence = -100 }
+		custom_tooltip = origin.5735.b.tt
+		hidden_effect = {
+			every_playable_country = {
+				limit = {
+					OR = {
+						has_country_flag = origin_imperial_vassal_ex_overlord@event_target:previous_overlord
+						has_origin = origin_imperial_vassal
+					}
+					NOT = { is_same_value = root }
+				}
+				root = {
+					if = {
+						limit = {
+							NOT = {
+								has_casus_belli = {
+									target = prev
+									type = cb_subjugation
+								}
+							}
+						}
+						add_casus_belli = {
+							type = cb_subjugation
+							who = prev
+							days = 10800
+						}
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = origin.5735.c
+		trigger = {
+			is_ai = no
+		}
+		custom_tooltip = origin.5735.c.tt
+		add_resource = { influence = 100 }
+	}
+
+	after = {
+		if = {
+			limit = {
+				is_ai = yes
+				NOT = { has_country_flag = origin_imperial_vassal_rival_country }
+			}
+			country_event = {
+				id = origin.5740
+				days = 15
+				random = 45
+			}
+		}
+	}
+}
+
+## AI Vassals looking for new Overlord
+country_event = {
+	id = origin.5740
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = yes
+		has_origin = origin_imperial_vassal
+		NOT = { has_country_flag = origin_imperial_vassal_rival_country }
+	}
+
+	immediate = {
+		save_event_target_as = new_subject_target
+
+		if = {
+			limit = {
+				any_country = {
+					has_origin = origin_imperial_vassal
+					relative_power = {
+						who = root
+						category = fleet
+						value >= superior
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_origin = origin_imperial_vassal
+					relative_power = {
+						who = root
+						category = fleet
+						value >= superior
+					}
+				}
+				save_event_target_as = new_overlord_target
+			}
+			switch = {
+				trigger = has_country_flag
+				origin_imperial_vassal_technocrat_country = {
+					event_target:new_overlord_target = {
+						country_event = { id = origin.5745 }
+					}
+				}
+				origin_imperial_vassal_prince_electorate_country = {
+					event_target:new_overlord_target = {
+						country_event = { id = origin.5750 }
+					}
+				}
+				origin_imperial_vassal_palatinate_country = {
+					event_target:new_overlord_target = {
+						country_event = { id = origin.5755 }
+					}
+				}
+				origin_imperial_vassal_league_country = {
+					event_target:new_overlord_target = {
+						country_event = { id = origin.5760 }
+					}
+				}
+			}
+		}
+	}
+}
+
+# Technocrats
+country_event = {
+	id = origin.5745
+	title = origin.5745.title
+	desc = origin.5745.desc
+	picture = GFX_evt_society_research
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	option = {
+		name = origin.5745.a
+		origin_imperial_vassal_new_overlord_eventchain_1 = yes
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier1researchreward
+			min = @tier1researchmin
+			max = @tier1researchmax
+		}
+	}
+	option = {
+		name = origin.5745.b
+		trigger = {
+			is_ai = no
+		}
+		origin_imperial_vassal_new_overlord_eventchain_2 = yes
+	}
+}
+
+# Prince-Electorate
+country_event = {
+	id = origin.5750
+	title = origin.5750.title
+	desc = origin.5750.desc
+	picture = GFX_evt_two_sided_deal
+	show_sound = evn_ove_two_sided_deal
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	option = {
+		name = origin.5750.a
+		origin_imperial_vassal_new_overlord_eventchain_1 = yes
+		add_monthly_resource_mult = {
+			resource = influence
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
+	}
+	option = {
+		name = origin.5750.b
+		trigger = {
+			is_ai = no
+		}
+		origin_imperial_vassal_new_overlord_eventchain_2 = yes
+	}
+}
+
+# Palatinate
+country_event = {
+	id = origin.5755
+	title = origin.5755.title
+	desc = origin.5755.desc
+	picture = GFX_evt_star_chart
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	option = {
+		name = origin.5755.a
+		origin_imperial_vassal_new_overlord_eventchain_1 = yes
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1unityreward
+			min = @tier1unitymin
+			max = @tier1unitymax
+		}
+	}
+	option = {
+		name = origin.5755.b
+		trigger = {
+			is_ai = no
+		}
+		origin_imperial_vassal_new_overlord_eventchain_2 = yes
+	}
+}
+
+# League
+country_event = {
+	id = origin.5760
+	title = origin.5760.title
+	desc = origin.5760.desc
+	picture = GFX_evt_smugglers_in_bar
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_imperial_vassal
+	}
+
+	option = {
+		name = origin.5760.a
+		origin_imperial_vassal_new_overlord_eventchain_1 = yes
+		add_monthly_resource_mult = {
+			resource = energy
+			value = @tier1materialreward
+			min = @tier1materialmin
+			max = @tier1materialmax
+		}
+	}
+	option = {
+		name = origin.5760.b
+		trigger = {
+			is_ai = no
+		}
+		origin_imperial_vassal_new_overlord_eventchain_2 = yes
+	}
+}
+

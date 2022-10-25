@@ -360,6 +360,10 @@ planet_event = {
 			}
 			save_event_target_as = voidspawn_spawn
 		}
+		every_owned_pop = {
+			unemploy_pop = yes
+			kill_pop = yes
+		}
 		destroy_colony = yes
 		clear_deposits = yes
 		add_deposit = d_society_10
@@ -772,6 +776,7 @@ fleet_event = {
 
 	is_triggered_only = yes
 	trigger = {
+		exists = owner
 		owner = {
 			NOT = { has_country_flag = encountered_hatchling }
 		}
@@ -930,7 +935,7 @@ country_event = {
 		name = galactic_features.385.reanimated
 
 		trigger = {
-			has_civic = civic_reanimated_armies
+			is_reanimator = yes
 		}
 
 		event_target:hatchling_egg = {
@@ -938,6 +943,20 @@ country_event = {
 				name = "REANIMATE_VOIDSPAWN"
 				location = this
 				owner = root.owner
+			}
+		}
+	}
+	after = {
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_voidspawn
+					set_situation_flag = standard_unity_reward
+				}
 			}
 		}
 	}
@@ -1019,23 +1038,32 @@ event = {
 	id = distar.8000
 	hide_window = yes
 	is_triggered_only = yes
+
 	immediate = {
-		random_list = {
-			50 = {
-				set_global_flag = gray_goo_crisis_set
-				set_global_flag = active_gray_goo
+		if = {
+			limit = {
+				lgate_enabled = yes
 			}
-			30 = {}
-			30 = { set_global_flag = dragon_season }
-			30 = { set_global_flag = gray_goo_empire_set }
-		}
-		event_target:global_event_country = {
-			country_event = { id = distar.8001 days = 30 } # Workaround Fix
+			random_list = {
+				50 = {
+					set_global_flag = gray_goo_crisis_set
+					set_global_flag = active_gray_goo
+				}
+				30 = {}
+				30 = {
+					set_global_flag = dragon_season
+				}
+				30 = {
+					set_global_flag = gray_goo_empire_set
+				}
+			}
 		}
 	}
 }
 
 # Workaround (temp vanilla fix)
+# This should be fixed so currently unreachable, but leaving
+# the code available if needed again.
 country_event = {
 	id = distar.8001
 	hide_window = yes
@@ -1310,11 +1338,11 @@ country_event = {
 
 		# if = { limit = { mid_game_years_passed < 0 }
 		# Save game workaround fix: must be re-run due strange bug in 3.0 at game_start
-		if = { limit = { has_global_flag = dragon_season } # only if bug default
-			event_target:global_event_country = {
-				country_event = { id = distar.8001 }
-			}
-		}
+		#if = { limit = { has_global_flag = dragon_season } # only if bug default
+		#	event_target:global_event_country = {
+		#		country_event = { id = distar.8001 }
+		#	}
+		#}
 		# outcome, to be determined at game start
 		if = {
 			limit = { has_global_flag = gray_goo_crisis_set }
@@ -1752,222 +1780,6 @@ country_event = {
 	}
 }
 
-#hip_event = {
-#	id = distar.11002
-#	title = action.92.name
-#	desc = {
-#		trigger = {
-#			success_text = {
-#				text =							 distar.11002.nanodust
-#				hidden:from = { has_resource = { type = sr_distar_nanodust amount > 0 } }
-#			}
-#			success_text = {
-#				text =							 distar.11002.nanocrystal
-#				hidden:from = { has_resource = { type = sr_distar_nanocrystal amount > 0 } }
-#			}
-#			success_text = {
-#				text =							 distar.11002.nanoscale
-#				hidden:from = { has_resource = { type = sr_distar_nanoscale amount > 0 } }
-#			}
-#			success_text = {
-#				text =							 distar.11002.nanoactuator
-#				hidden:from = { has_resource = { type = sr_distar_nanoactuator amount > 0 } }
-#			}
-#		}
-#	}
-#	picture = GFX_evt_surreal_visions
-#	show_sound = event_default
-#	location = from
-#
-#	is_triggered_only = yes
-#
-#	trigger = {
-#		from = { has_strategic_resource = yes } # basically a pre-trigger
-#		owner = {
-#			OR = {
-#				AND = {
-#					root.from = {
-#						has_resource = {
-#							amount > 0
-#									type =	sr_distar_nanodust
-#						}
-#					}
-#					NOT = {
-#						has_country_flag =		distar_nanodust_found
-#					}
-#				}
-#				AND = {
-#					root.from = {
-#						has_resource = {
-#							amount > 0
-#									type =	sr_distar_nanocrystal
-#						}
-#					}
-#					NOT = {
-#						has_country_flag =		distar_nanocrystal_found
-#					}
-#				}
-#				AND = {
-#					root.from = {
-#						has_resource = {
-#							amount > 0
-#									type =	sr_distar_nanoscale
-#						}
-#					}
-#					NOT = {
-#						has_country_flag =		distar_nanoscale_found
-#					}
-#				}
-#				AND = {
-#					root.from = {
-#						has_resource = {
-#							amount > 0
-#									type =	sr_distar_nanoactuator
-#						}
-#					}
-#					NOT = {
-#						has_country_flag =		distar_nanoactuator_found
-#					}
-#				}
-#			}
-#		}
-#	}
-#
-#	immediate = {
-#		from = {
-#			if = {
-#				limit = { has_resource = { type = sr_distar_nanodust amount > 0 } }
-#				root.owner = { set_country_flag =	distar_nanodust_found }
-#			}
-#			else_if = {
-#				limit = { has_resource = { type = sr_distar_nanocrystal amount > 0 } }
-#				root.owner = { set_country_flag =	distar_nanocrystal_found }
-#			}
-#			else_if = {
-#				limit = { has_resource = { type = sr_distar_nanoscale amount > 0 } }
-#				root.owner = { set_country_flag =	distar_nanoscale_found }
-#			}
-#			else_if = {
-#				limit = { has_resource = { type = sr_distar_nanoactuator amount > 0 } }
-#				root.owner = { set_country_flag =	distar_nanoactuator_found }
-#			}
-#		}
-#	}
-#
-#	option = {
-#		name = OK
-#		from = {
-#			hidden_effect = {
-#				if = {
-#					limit = { has_resource = { type = sr_distar_nanodust amount > 0 } }
-#					custom_tooltip = distar.11002.nanodust.tooltip
-#				}
-#				else_if = {
-#					limit = { has_resource = { type = sr_distar_nanocrystal amount > 0 } }
-#					custom_tooltip = distar.11002.nanocrystal.tooltip
-#				}
-#				else_if = {
-#					limit = { has_resource = { type = sr_distar_nanoscale amount > 0 } }
-#					custom_tooltip = distar.11002.nanoscale.tooltip
-#				}
-#				else_if = {
-#					limit = { has_resource = { type = sr_distar_nanoactuator amount > 0 } }
-#					custom_tooltip = distar.11002.nanoactuator.tooltip
-#				}
-#			}
-#		}
-#	}
-#}
-
-# Curator Buy Clue Menu
-country_event = {
-	id = distar.11501
-	title = distar.11501.name
-	desc = distar.11501.desc
-
-	is_triggered_only = yes
-	diplomatic = yes
-	custom_gui = "enclave_curator_window"
-
-	picture_event_data = {
-		portrait = event_target:curators
-		room = enclave_curator_room
-	}
-
-	immediate = {
-		set_country_flag = curator_enclave_diplomacy_engaged
-		event_target:curators = {
-			owner_species = { save_event_target_as = curator_species }
-		}
-	}
-
-	after = {
-		hidden_effect = {
-			remove_country_flag = curator_enclave_diplomacy_engaged
-		}
-	}
-
-	option = {
-		name = distar.11501.a
-		custom_gui = "enclave_curator_option"
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 5000 }
-			hidden_trigger = {
-				NOR = {
-					has_completed_event_chain_counter = {
-						event_chain = l_cluster_chain
-						counter = clues
-					}
-					has_country_flag = curator_clue_purchased
-				}
-			}
-		}
-		add_resource = { energy = -5000 }
-		custom_tooltip = opinion20
-		generate_lcluster_clue = yes
-		hidden_effect = {
-			event_target:curators = {
-				add_trust = {
-					who = root
-					amount = 20
-				}
-			}
-			random_list = {
-				1 = {
-					set_timed_country_flag = {
-						flag = curator_clue_purchased
-						days = 4680 # 13 years
-					}
-				}
-				1 = {
-					set_timed_country_flag = {
-						flag = curator_clue_purchased
-						days = 3600 # 10 years
-					}
-				}
-				1 = {
-					set_timed_country_flag = {
-						flag = curator_clue_purchased
-						days = 2520 # 7 years
-					}
-				}
-			}
-		}
-	}
-	option = { # Back
-		name = leviathans.506.d
-		custom_gui = "enclave_curator_option"
-		hidden_effect = {
-			country_event = { id = leviathans.505 }
-		}
-	}
-	option = { # Sign Off
-		name = leviathans.506.e
-		custom_gui = "enclave_curator_option"
-		default_hide_option = yes
-	}
-}
-
 # researched clue
 country_event = {
 	id = distar.12000
@@ -2360,59 +2172,60 @@ planet_event = {
 		exists = space_owner
 		NOT = { exists = fromfrom } # not surveyed by science ship
 
+		num_deposits > 0 #has_resource is checking the deposits
 		OR = {
 			AND = {
+				NOT = {
+					from = { has_country_flag =	exotic_gases_found }
+				}
 				has_resource = {
 					amount > 0
-					type =	exotic_gases
-				}
-				NOT = {
-					from = { has_country_flag =		exotic_gases_found }
+					type = exotic_gases
 				}
 			}
 			AND = {
+				NOT = {
+					from = { has_country_flag =	rare_crystals_found }
+				}
 				has_resource = {
 					amount > 0
-					type =	rare_crystals
-				}
-				NOT = {
-					from = { has_country_flag =		rare_crystals_found }
+					type = rare_crystals
 				}
 			}
 			AND = {
+				NOT = {
+					from = { has_country_flag =	volatile_motes_found }
+				}
 				has_resource = {
 					amount > 0
-					type =	volatile_motes
-				}
-				NOT = {
-					from = { has_country_flag =		volatile_motes_found }
+					type = volatile_motes
 				}
 			}
 			AND = {
+				NOT = {
+					from = { has_country_flag =	living_metal_found }
+				}
 				has_resource = {
 					amount > 0
-					type =	sr_living_metal
-				}
-				NOT = {
-					from = { has_country_flag =		living_metal_found }
+					type = sr_living_metal
 				}
 			}
 			AND = {
+				NOT = {
+					from = { has_country_flag =	zro_found }
+				}
 				has_resource = {
 					amount > 0
-					type =	sr_zro
-				}
-				NOT = {
-					from = { has_country_flag =		zro_found }
+					type = sr_zro
 				}
 			}
 			AND = {
+				NOT = {
+					from = { has_country_flag =	dark_matter_found }
+				}
 				has_resource = {
 					amount > 0
-					type =	sr_dark_matter
-				}
-				NOT = {
-					from = { has_country_flag =		dark_matter_found }
+					type = sr_dark_matter
 				}
 			}
 		}
@@ -2478,7 +2291,10 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		NOT = { has_country_flag = encountered_first_wormhole }
+		NOT = {
+			has_origin = origin_shroudwalker_apprentice
+			has_country_flag = encountered_first_wormhole
+		}
 		FROM = {
 			has_natural_wormhole = yes
 		}

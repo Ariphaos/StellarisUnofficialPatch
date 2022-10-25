@@ -8,7 +8,6 @@ building_military_academy = {
 	category = army
 
 	potential = {
-		buildings_simple_allow = yes
 		exists = owner
 		owner = { NOT = { has_valid_civic = civic_reanimated_armies } }
 	}
@@ -17,8 +16,18 @@ building_military_academy = {
 		exists = owner
 		owner = {
 			OR = {
-				is_ai = yes
 				has_valid_civic = civic_reanimated_armies
+				AND = {
+					is_ai = yes
+					prev = {
+						NOR = {
+							has_building = building_stronghold
+							has_building = building_fortress
+							is_capital = yes
+							solar_system = { is_bottleneck_system = yes }
+						}
+					}
+				}
 			}
 		}
 	}
@@ -95,7 +104,6 @@ building_dread_encampment = {
 	category = army
 
 	potential = {
-		buildings_simple_allow = yes
 		exists = owner
 		owner = { has_valid_civic = civic_reanimated_armies }
 	}
@@ -139,25 +147,9 @@ building_stronghold = {
 	position_priority = 100
 
 	category = army
+	exempt_from_ai_planet_specialization = no
 
 	potential = {
-		buildings_simple_allow = yes
-	}
-
-	destroy_trigger = {
-		exists = owner
-		owner = { is_ai = yes }
-		AND = {
-			OR = {
-				num_buildings = { type = building_stronghold value > 1 }
-				has_building = building_fortress
-			}
-			free_building_slots = 0
-			owner = {
-				used_naval_capacity_percent < 0.6
-				is_at_war = no # don't destroy while at war
-			}
-		}
 	}
 
 	triggered_planet_modifier = {
@@ -181,15 +173,6 @@ building_stronghold = {
 
 	resources = {
 		category = planet_buildings_strongholds
-		produces = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_active_tradition = tr_unyielding_resistance_is_frugal
-				}
-			}
-			unity = 3
-		}
 		cost = {
 			minerals = @b1_minerals
 		}
@@ -232,27 +215,6 @@ building_fortress = {
 
 	allow = {
 		has_upgraded_capital = yes
-		exists = owner
-		OR = {
-			owner = { is_ai = no }
-			AND = {
-				buildings_upgrade_allow = yes
-				buildings_has_motes = yes
-			}
-		}
-	}
-
-	destroy_trigger = {
-		exists = owner
-		owner = { is_ai = yes }
-		OR = {
-			AND = {
-				num_buildings = { type = building_fortress value > 1 }
-				free_building_slots = 0
-				owner = { used_naval_capacity_percent < 0.4	}
-			}
-			buildings_no_motes = yes
-		}
 	}
 
 	triggered_planet_modifier = {
@@ -276,15 +238,6 @@ building_fortress = {
 
 	resources = {
 		category = planet_buildings_strongholds
-		produces = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_active_tradition = tr_unyielding_resistance_is_frugal
-				}
-			}
-			unity = 3
-		}
 		cost = {
 			minerals = @b2_minerals
 			volatile_motes = @b2_rare_cost
@@ -330,6 +283,10 @@ building_planetary_shield_generator = {
 	destroy_trigger = {
 		exists = owner
 		owner = { is_ai = yes }
+		is_capital = no
+		solar_system = { is_bottleneck_system = no }
+		num_buildings = { type = building_stronghold value < 1 }
+		num_buildings = { type = building_fortress value < 1 }
 	}
 
 	planet_modifier = {

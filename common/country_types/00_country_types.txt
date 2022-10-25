@@ -5,6 +5,7 @@
 #	can_own_empty_planets					#no by default, decides if empty planets belonging to country are automatically removed from the country.
 #	playable = yes							#if this type is available for players. used when listing countries for hot-joining players
 #	has_pulse_events = no					#if this type gets checked for country-specific pulse events from on_action
+#	has_deficits = yes						#if this type suffers from resource deficits
 #	randomize_ethos = no					#does this empire have a randomly generated ethos?
 #	shuffle_pop_ethos = no					#if pops belonging to this country type should mutate their ethos every now and then
 #	sub_title = "EXAMPLE_COUNTRY"			#sub title that will be shown for this empire. Like "Example Federation - Fallen Empire"
@@ -62,13 +63,24 @@
 #		construction = yes					#should AI build ships and buildings? default yes
 #		tech = yes							#should AI advance its technology? default yes
 #		espionage = yes					#should AI use espionage? default yes
-#		ship_data							#highest fleet slot size first for military ship sizes
 #
 #		modules = {							#List of diferent ai modules this country type should have
 #			military_minister_module
 #			foreign_minister_module
 #			interior_minister_module
 #		}
+#	}
+#
+# 							#Note: these effects are also covered by on_actions on_fleet_contract_started, on_fleet_contract_expired, on_fleet_contract_cancelled and on_fleet_contract_broken
+#	fleet_manager = {								#block of Country Fleet Manager settings
+#		on_contract_started = {						#effect fired when fleet owned by country is hired
+#		}											#Scope - Fleet, From - Country that hired the fleet, FromFrom - Country that owns fleet, FromFromFrom - Country that initiated the ending of the contract
+#		on_contract_expired = {						#effect fired when hire contract of a fleet owned by country is expired
+#		}											#Scope - Fleet, From - Country that hired the fleet, FromFrom - Country that owns fleet, FromFromFrom - Country that initiated the ending of the contract
+#		on_contract_cancelled = {					#effect fired when hire contract of a fleet owned by country is cancelled (when controller prematurely finishes the contract or when the contract cancellation is a part of trade deal)
+#		}											#Scope - Fleet, From - Country that hired the fleet, FromFrom - Country that owns fleet, FromFromFrom - Country that initiated the ending of the contract (trade deal actor when the contract cancellation is a part of trade deal)
+#		on_contract_broken = {						#effect fired when hire contract of a fleet owned by country is broken (when country is attacked by someone of when a war is started)
+#		}											#Scope - Fleet, From - Country that hired the fleet, FromFrom - Country that owns fleet, FromFromFrom - Country that initiated the ending of the contract (main attacker in a case of war)
 #	}
 #
 #	modules = {							#List of modules countries of this should have.
@@ -92,6 +104,7 @@ default = {
 	pop_growth = yes
 	playable = yes
 	has_pulse_events = yes
+	has_deficits = yes
 	piracy_risk = yes
 	randomize_ethos = yes
 	shuffle_pop_ethos = yes
@@ -103,6 +116,7 @@ default = {
 	observable = yes
 	can_use_invalid_technology = no
 	can_receive_envoys = yes
+	ownership_limits = default
 
 	ai = {
 		enabled = yes
@@ -122,324 +136,9 @@ default = {
 			military_minister_module
 			foreign_minister_module
 			interior_minister_module
+			mercenary_buyer_minister_module
+			enclave_founder_minister_module
 		}
-
-		ship_data = {
-			constructor = {
-				min = 4
-				max = 6
-				system_mult = 0.1
-			}
-
-			science	= {
-				min = 4
-				max = 6
-			}
-
-			colonizer = {
-				min = 1
-				max = 1
-			}
-
-			juggernaut = {
-				min = 1
-				max = 1
-			}
-
-			colossus = {
-				min = 1
-				max = 1
-			}
-
-			star_eater = {
-				min = 1
-				max = 1
-			}
-
-			titan = {
-				min = 1
-				max = 5
-			}
-
-			battleship = {
-				fraction = {
-					modifier = {
-						add = 25
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			cruiser = {
-				fraction = {
-					modifier = {
-						add = 35
-						has_technology = tech_cruisers
-					}
-					modifier = {
-						add = -10
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			destroyer = {
-				fraction = {
-					modifier = {
-						add = 50
-						has_technology = tech_destroyers
-					}
-					modifier = {
-						add = -15
-						has_technology = tech_cruisers
-					}
-					modifier = {
-						add = -10
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			corvette = {
-				fraction = {
-					base = 100
-					modifier = {
-						add = -25
-						has_technology = tech_destroyers
-					}
-					modifier = {
-						add = -45
-						has_technology = tech_cruisers
-					}
-					modifier = {
-						add = -5
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			crisis_cruiser = {
-				fraction = {
-					modifier = {
-						add = 35
-						has_crisis_level = crisis_level_4
-					}
-				}
-			}
-
-			crisis_destroyer = {
-				fraction = {
-					modifier = {
-						add = 50
-						has_crisis_level = crisis_level_3
-					}
-					modifier = {
-						add = -15
-						has_crisis_level = crisis_level_4
-					}
-				}
-			}
-
-			crisis_corvette = {
-				fraction = {
-					modifier = {
-						add = 100
-						has_crisis_level = crisis_level_2
-					}
-					modifier = {
-						add = -25
-						has_crisis_level = crisis_level_3
-					}
-					modifier = {
-						add = -45
-						has_crisis_level = crisis_level_4
-					}
-				}
-			}
-
-			space_dragon_origin_baby = {
-				max = 10
-				fraction = {
-					modifier = {
-						add = 1000
-						is_dragon_breeder_country = yes
-					}
-				}
-			}
-		}
-
-		army_data = {
-			assault_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							has_authority = auth_machine_intelligence
-							has_technology = tech_telepathy
-							has_technology = tech_gene_seed_purification
-							AND = {
-								OR = {
-									has_ethic = ethic_militarist
-									has_ethic = ethic_fanatic_militarist
-								}
-								has_technology = tech_gene_banks
-							}
-							AND = {
-								has_ai_personality_behaviour = slaver
-								has_technology = tech_neural_implants
-							}
-							AND = {
-								has_ai_personality_behaviour = robot_liberator
-								has_technology = tech_droid_workers
-							}
-						}
-					}
-				}
-			}
-
-			slave_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							has_authority = auth_machine_intelligence
-							has_technology = tech_telepathy
-							has_technology = tech_gene_seed_purification
-							AND = {
-								OR = {
-									has_ethic = ethic_militarist
-									has_ethic = ethic_fanatic_militarist
-								}
-								has_technology = tech_gene_banks
-							}
-							NAND = {
-								has_ai_personality_behaviour = slaver
-								has_technology = tech_neural_implants
-							}
-							AND = {
-								has_ai_personality_behaviour = robot_liberator
-								has_technology = tech_droid_workers
-							}
-						}
-					}
-				}
-			}
-
-			robotic_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							has_authority = auth_machine_intelligence
-							has_technology = tech_telepathy
-							has_technology = tech_gene_seed_purification
-							NAND = {
-								has_ai_personality_behaviour = robot_liberator
-								has_technology = tech_droid_workers
-							}
-						}
-					}
-				}
-			}
-
-			clone_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							OR = {
-								NOT = { has_authority = auth_machine_intelligence }
-								has_civic = civic_machine_assimilator
-							}
-							has_technology = tech_telepathy
-							has_technology = tech_gene_seed_purification
-							NAND = {
-								OR = {
-									has_ethic = ethic_militarist
-									has_ethic = ethic_fanatic_militarist
-								}
-								has_technology = tech_gene_banks
-							}
-						}
-					}
-				}
-			}
-
-			psionic_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							has_authority = auth_machine_intelligence
-							NOT = { has_technology = tech_telepathy }
-							has_technology = tech_gene_seed_purification
-						}
-					}
-				}
-			}
-
-			gene_warrior_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							has_authority = auth_machine_intelligence
-							NOT = { has_technology = tech_gene_seed_purification }
-						}
-					}
-				}
-			}
-
-			machine_assault_1 = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							NOT = { has_authority = auth_machine_intelligence }
-							has_technology = tech_adaptive_combat_algorithms
-						}
-					}
-				}
-			}
-
-			machine_assault_2 = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = -25
-						has_technology = tech_biomechanics
-					}
-					modifier = {
-						factor = 0
-						OR = {
-							NOT = { has_authority = auth_machine_intelligence }
-							NOT = { has_technology = tech_adaptive_combat_algorithms }
-						}
-					}
-				}
-			}
-
-			machine_assault_3 = {
-				fraction = {
-					factor = 25
-					modifier = {
-						factor = 0
-						OR = {
-							NOT = { has_authority = auth_machine_intelligence }
-							NOT = { has_technology = tech_biomechanics }
-						}
-					}
-				}
-			}
-		}
-
 	}
 
 	trade_routes_available = {
@@ -600,6 +299,30 @@ dragon_dummy = { #This country type is only needed for the origin_here_be_dragon
 	}
 	modules = {
 		exclusive_diplomacy_module = { # Nothing is allowed, but we need this for relationships.
+		}
+		basic_technology_module = {}
+	}
+}
+
+clutch_of_whelps = { #Whelp nation spawned from killing origin_dragon
+	scaled_difficulty_bonuses = 0.5	# scales to setting
+	is_space_critter = yes
+	government = no
+	blocks_piracy = yes
+	destroys_starbases = yes
+	observable = no
+	ai = {
+		enabled = no
+	}
+	faction = {
+		hostile = no
+		needs_border_access = no
+		generate_borders = no
+		needs_colony = no
+	}
+	modules = {
+		exclusive_diplomacy_module = {
+			contact_rule = on_action_only
 		}
 		basic_technology_module = {}
 	}
@@ -836,68 +559,6 @@ fallen_empire = {
 			foreign_minister_module
 			interior_minister_module
 		}
-
-		army_data = {
-			gene_warrior_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_xenophile }
-					}
-				}
-			}
-
-			psionic_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_spiritualist }
-					}
-				}
-			}
-
-			xenomorph_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_xenophobe }
-					}
-				}
-			}
-
-			robotic_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_materialist }
-					}
-				}
-			}
-
-			machine_assault_2 = {
-				fraction = {
-					factor = 50
-					modifier = {
-						factor = 0
-						NOT = { has_authority = auth_machine_intelligence }
-					}
-				}
-			}
-
-			machine_assault_3 = {
-				fraction = {
-					factor = 25
-					modifier = {
-						factor = 0
-						NOT = { has_authority = auth_machine_intelligence }
-					}
-				}
-			}
-		}
 	}
 	modules = {
 		all_technology_module = {}
@@ -987,103 +648,6 @@ awakened_fallen_empire = {
 			military_minister_module
 			foreign_minister_module
 			interior_minister_module
-		}
-
-		army_data = {
-			gene_warrior_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_xenophile }
-					}
-				}
-			}
-
-			psionic_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_spiritualist }
-					}
-				}
-			}
-
-			xenomorph_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_xenophobe }
-					}
-				}
-			}
-
-			robotic_army = {
-				fraction = {
-					factor = 75
-					modifier = {
-						factor = 0
-						NOT = { has_ethic = ethic_fanatic_materialist }
-					}
-				}
-			}
-
-			machine_assault_2 = {
-				fraction = {
-					factor = 50
-					modifier = {
-						factor = 0
-						NOT = { has_authority = auth_machine_intelligence }
-					}
-				}
-			}
-
-			machine_assault_3 = {
-				fraction = {
-					factor = 25
-					modifier = {
-						factor = 0
-						NOT = { has_authority = auth_machine_intelligence }
-					}
-				}
-			}
-		}
-
-		ship_data = {
-			constructor = {
-				min = 5
-				max = 5
-			}
-
-			colonizer = {
-				min = 1
-				max = 1
-			}
-
-			colossus = {
-				min = 1
-				max = 1
-			}
-
-			massive_ship_fallen_empire = {
-				min = 1
-				max = 5
-				planet_mult = 0.05
-			}
-
-			large_ship_fallen_empire = {
-				fraction = {
-					base = 25
-				}
-			}
-			small_ship_fallen_empire = {
-				fraction = {
-					base = 75
-				}
-			}
-
 		}
 	}
 	modules = {
@@ -1263,6 +827,212 @@ enclave = {
 	}
 }
 
+enclave_mercenary = {
+	blocks_piracy = yes
+	show_in_contacts_list = yes
+	can_have_their_comms_shared = yes
+	government = yes
+	is_enclave = yes
+	is_mercenary = yes
+	observable = yes # no
+	playable = no
+	needs_survey = no
+	ship_disengagement = yes
+	has_complete_sensor = no
+	orbital_bombardment = yes
+	attack_unarmed_orbital_stations = yes
+	destroys_starbases = yes
+
+	ai = {
+		enabled = yes
+		modules = {
+			enclave_mercenary_military_minister_module
+			interior_minister_module
+			standard_species_rights_module
+			space_monsters_modules
+			enclave_mercenary_seller_minister_module
+		}
+
+		declare_war = no
+		colonizer = no
+		internal_policies = no
+		modification = no
+		construction = no
+		limited_military_construction = yes
+		limited_leaders = yes
+		tech = yes
+		espionage = no
+	}
+	fleet_manager = {
+		on_contract_started = {
+			if = {
+				limit = {
+					is_active_resolution = resolution_defenseprivatization_corporate_warlords
+				}
+				add_modifier = {
+					modifier = hired_mercenary_fleet_naval_cap_usage_galcom_5
+				}
+			}
+			else_if = {
+				limit = {
+					is_active_resolution = resolution_defenseprivatization_security_business
+				}
+				add_modifier = {
+					modifier = hired_mercenary_fleet_naval_cap_usage_galcom_4
+				}
+			}
+			else_if = {
+				limit = {
+					is_active_resolution = resolution_defenseprivatization_condottieri
+				}
+				add_modifier = {
+					modifier = hired_mercenary_fleet_naval_cap_usage_galcom_3
+				}
+			}
+			else_if = {
+				limit = {
+					is_active_resolution = resolution_defenseprivatization_private_support_troops
+				}
+				add_modifier = {
+					modifier = hired_mercenary_fleet_naval_cap_usage_galcom_2
+				}
+			}
+			else_if = {
+				limit = {
+					is_active_resolution = resolution_defenseprivatization_defense_contracts
+				}
+				add_modifier = {
+					modifier = hired_mercenary_fleet_naval_cap_usage_galcom_1
+				}
+			}
+			else = {
+				add_modifier = {
+					modifier = hired_mercenary_fleet_naval_cap_usage_no_galcom
+				}
+			}
+		}
+		on_contract_expired = {
+			remove_fleet_contract_modifiers = yes
+		}
+		on_contract_cancelled = {
+			remove_fleet_contract_modifiers = yes
+		}
+		on_contract_broken = {
+			remove_fleet_contract_modifiers = yes
+		}
+	}
+	faction = {
+		hostile = no
+		needs_border_access = no
+		generate_borders = no
+		needs_colony = no
+	}
+	custom_diplomacy = yes
+	custom_opinion = yes
+	modules = {
+		standard_technology_module = {}
+		standard_event_module = {}
+		standard_leader_module = {}
+		standard_economy_module = {}
+		exclusive_diplomacy_module = { contact_rule = on_action_only } # Nothing is allowed, but we need this for relationships.
+	}
+
+	resources = {
+		category = country_base
+		produces = {
+			energy = 500
+			minerals = 250
+			food = 100
+			alloys = 250
+			consumer_goods = 100
+			rare_crystals = 1
+			exotic_gases = 1
+			volatile_motes = 1
+			sr_dark_matter = 1
+			sr_living_metal = 1
+			sr_zro = 1
+
+			physics_research = 100
+			engineering_research = 100
+			society_research = 100
+
+			unity = 50
+		}
+
+		produces = {
+			trigger = {
+				mid_game_years_passed > 0
+			}
+			energy = 250
+			alloys = 250
+			rare_crystals = 10
+			exotic_gases = 10
+			volatile_motes = 10
+
+			physics_research = 250
+			engineering_research = 250
+			society_research = 250
+		}
+
+		produces = {
+			trigger = {
+				end_game_years_passed > 0
+			}
+			energy = 250
+			alloys = 250
+			sr_dark_matter = 2
+			sr_living_metal = 2
+			sr_zro = 2
+
+			physics_research = 400
+			engineering_research = 400
+			society_research = 400
+		}
+
+		produces = {
+			trigger = {
+				has_technology = tech_rare_crystals
+			}
+			rare_crystals = 2
+		}
+
+		produces = {
+			trigger = {
+				has_technology = tech_exotic_gases
+			}
+			exotic_gases = 2
+		}
+
+		produces = {
+			trigger = {
+				has_technology = tech_volatile_motes
+			}
+			volatile_motes = 2
+		}
+
+		produces = {
+			trigger = {
+				has_technology = tech_mine_dark_matter
+			}
+			sr_dark_matter = 1
+		}
+
+		produces = {
+			trigger = {
+				has_technology = tech_mine_living_metal
+			}
+			sr_living_metal = 1
+		}
+
+		produces = {
+			trigger = {
+				has_technology = tech_mine_zro
+			}
+			sr_zro = 1
+		}
+	}
+}
+
 shroud = {
 	is_the_shroud = yes
 	show_in_contacts_list = yes
@@ -1329,95 +1099,6 @@ gdf = {
 		modules = {
 			military_minister_module
 			galactic_community_patrol_military_minister_module
-		}
-
-		ship_data = {
-			constructor = {
-				min = 4
-				max = 6
-			}
-
-			science	= {
-				min = 4
-				max = 6
-			}
-
-			colonizer = {
-				min = 1
-				max = 1
-			}
-
-			juggernaut = {
-				min = 1
-				max = 1
-			}
-
-			colossus = {
-				min = 1
-				max = 1
-			}
-
-			titan = {
-				min = 1
-				max = 5
-			}
-
-			battleship = {
-				fraction = {
-					modifier = {
-						add = 25
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			cruiser = {
-				fraction = {
-					modifier = {
-						add = 35
-						has_technology = tech_cruisers
-					}
-					modifier = {
-						add = -10
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			destroyer = {
-				fraction = {
-					modifier = {
-						add = 50
-						has_technology = tech_destroyers
-					}
-					modifier = {
-						add = -15
-						has_technology = tech_cruisers
-					}
-					modifier = {
-						add = -10
-						has_technology = tech_battleships
-					}
-				}
-			}
-
-			corvette = {
-				fraction = {
-					base = 100
-					modifier = {
-						add = -25
-						has_technology = tech_destroyers
-					}
-					modifier = {
-						add = -45
-						has_technology = tech_cruisers
-					}
-					modifier = {
-						add = -5
-						has_technology = tech_battleships
-					}
-				}
-			}
 		}
 	}
 	faction = {

@@ -80,13 +80,13 @@ country_event = {
 	title = "distar.2.name"
 	desc = {
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		text = "distar.2.desc"
 	}
 	desc = {
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		text = "distar.2.desc.machi"
 	}
@@ -422,7 +422,10 @@ ship_event = {
 				clear_deposits = yes
 			}
 		}
-		owner = { country_event = { id = story.5 days = 30 } }
+		owner = {
+			set_country_flag = seen_event_horizon
+			country_event = { id = story.5 days = 30 }
+		}
 	}
 
 	option = {
@@ -545,7 +548,7 @@ planet_event = {
 			owner = {
 				NOR = {
 					has_policy_flag = ai_outlawed
-					has_ethic = ethic_gestalt_consciousness
+					is_gestalt = yes
 				}
 			}
 		}
@@ -585,7 +588,7 @@ planet_event = {
 	}
 	option = {
 		trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		name = "distar.26.mach"
 		custom_tooltip = "distar.26.a.tooltip"
@@ -632,7 +635,7 @@ ship_event = { #MI version
 	is_triggered_only = yes
 
 	trigger = {
-		owner = { has_authority = auth_machine_intelligence }
+		owner = { is_machine_empire = yes }
 	}
 
 	option = {
@@ -662,7 +665,7 @@ ship_event = { #Biological version
 	is_triggered_only = yes
 
 	trigger = {
-		owner = { NOT = { has_authority = auth_machine_intelligence } }
+		owner = { is_machine_empire = no }
 	}
 
 	option = {
@@ -1049,7 +1052,7 @@ planet_event = { #Rage Virus cured
 				limit = {
 					NOT = { has_technology = tech_genome_mapping }
 					OR = {
-						NOT = { has_authority = auth_machine_intelligence }
+						is_machine_empire = no
 						has_civic = civic_machine_assimilator
 						has_civic = civic_machine_servitor
 					}
@@ -1074,7 +1077,7 @@ planet_event = { #Rage Virus cured
 				limit = {
 					NOT = { has_technology = tech_vitality_boosters }
 					OR = {
-						NOT = { has_authority = auth_machine_intelligence }
+						is_machine_empire = no
 						has_civic = civic_machine_assimilator
 					}
 				}
@@ -1490,10 +1493,6 @@ country_event = { #Adopted Amoeba Evolves
 				}
 				set_location = {
 					target = event_target:lost_amoeba_fleet
-				}
-				set_timed_fleet_flag = {
-					flag = centenarian
-					days = 36140
 				}
 				set_fleet_stance = passive
 				set_fleet_flag = lost_amoeba_adult_fleet@root
@@ -2076,12 +2075,6 @@ country_event = { #Discovering Scientist becomes depressed if Amoeba dies
 	is_triggered_only = yes
 
 	trigger = {
-#		fromfrom.fleet = {
-#			OR = {
-#				has_fleet_flag = lost_amoeba_adult_fleet@root
-#				has_fleet_flag = lost_amoeba_centenarian_fleet@root
-#			}
-#		}
 		exists = event_target:amoeba_finding_scientist
 	}
 
@@ -2107,7 +2100,7 @@ ship_event = { #Disabled event for Reanimators
 		if = {
 			limit = {
 				owner = {
-					has_civic = civic_reanimated_armies
+					is_reanimator = yes
 				}
 				#exists = event_target:amoeba_finding_scientist
 				NOT = { has_ship_flag = resurrected_once }
@@ -2152,7 +2145,7 @@ ship_event = {
 		name = "distar.340.a"
 
 		trigger = {
-			owner = { has_civic = civic_reanimated_armies }
+			owner = { is_reanimator = yes }
 		}
 		if = {
 			limit = { exists = event_target:amoeba_finding_scientist }
@@ -2205,7 +2198,7 @@ country_event = {
 	show_sound = event_mystic_reveal
 
 	immediate = {
-		random_owned_ship = {
+		random_controlled_ship = {
 			limit = {
 				has_ship_flag = lost_amoeba_ship
 			}
@@ -2229,7 +2222,7 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		random_owned_ship = {
+		random_controlled_ship = {
 			limit = {
 				has_ship_flag = lost_amoeba_ship
 			}
@@ -2239,7 +2232,7 @@ country_event = {
 	}
 }
 
-country_event = { #Upgrade if Amoeba survives 100 years
+country_event = { #Upgrade if Amoeba survives 100 years (time delay, from distar.50)
 	id = distar.304
 	title = "distar.304.name"
 	desc = "distar.304.desc"
@@ -2250,11 +2243,11 @@ country_event = { #Upgrade if Amoeba survives 100 years
 	is_triggered_only = yes
 
 	trigger = {
-		any_owned_fleet = { #Since each empire can have one, we don't want a GET
+		any_controlled_fleet = {
 			has_fleet_flag = lost_amoeba_adult_fleet@root
 		}
 		NOT = {
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = lost_amoeba_ship
 				OR = {
 					has_ship_flag = resurrected_once
@@ -2265,7 +2258,7 @@ country_event = { #Upgrade if Amoeba survives 100 years
 	}
 
 	immediate = {
-		random_owned_fleet = {
+		random_controlled_fleet = {
 			limit = {
 				has_fleet_flag = lost_amoeba_adult_fleet@root
 			}
@@ -2346,6 +2339,33 @@ ship_event = { #Ouroboros
 		}
 		solar_system = { save_global_event_target_as = ouroboros_system }
 		from = { set_planet_flag = ouroboros_pulsar_flag }
+	}
+
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+		hidden_effect = { owner = { country_event = { id = distar.61 days = 360 } } }
+	}
+}
+
+country_event = {
+	id = distar.61
+	title = "distar.61.name"
+	desc = "distar.61.desc"
+	picture = GFX_evt_ship_in_orbit_2
+	show_sound = event_sensor_ping
+	location = event_target:kohtalo_second_fleet
+
+	is_triggered_only = yes
+
+	immediate = {
 		create_country = {
 			name = "NAME_Kohtalo"
 			type = faction
@@ -2375,33 +2395,6 @@ ship_event = { #Ouroboros
 				save_event_target_as = kohtalo_country
 			}
 		}
-	}
-
-	option = {
-		name = UNFORTUNATE
-		owner = {
-			add_monthly_resource_mult = {
-				resource = society_research
-				value = @tier3researchreward
-				min = @tier3researchmin
-				max = @tier3researchmax
-			}
-		}
-		hidden_effect = { owner = { country_event = { id = distar.61 days = 360 } } }
-	}
-}
-
-country_event = {
-	id = distar.61
-	title = "distar.61.name"
-	desc = "distar.61.desc"
-	picture = GFX_evt_ship_in_orbit_2
-	show_sound = event_sensor_ping
-	location = event_target:kohtalo_second_fleet
-
-	is_triggered_only = yes
-
-	immediate = {
 		random_planet_within_border = {
 			limit = {
 				is_star = yes
@@ -2702,7 +2695,7 @@ ship_event = {
 				#any_owned_planet = { free_housing > 1	}
 				NOR = { #Disallow for non-DS Hiveminds and non-Civic'd MIs
 					AND = {
-						has_authority = auth_machine_intelligence
+						is_machine_empire = yes
 						NOR = {
 							has_civic = civic_machine_terminator
 							has_civic = civic_machine_assimilator
@@ -2710,7 +2703,7 @@ ship_event = {
 						}
 					}
 					AND = {
-						has_authority = auth_hive_mind
+						is_hive_empire = yes
 						NOT = {
 							has_civic = civic_hive_devouring_swarm
 						}
@@ -3243,7 +3236,7 @@ planet_event = { #On colonizing the repaired Megastructure section
 		trigger = {
 			owner = {
 				NOR = {
-					has_ethic = ethic_gestalt_consciousness
+					is_gestalt = yes
 					has_civic = civic_fanatic_purifiers
 				}
 			}
@@ -3570,7 +3563,7 @@ ship_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		owner = { NOT = { has_authority = auth_machine_intelligence } }
+		owner = { is_machine_empire = no }
 	}
 
 	option = {
@@ -3597,7 +3590,7 @@ ship_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		owner = { has_authority = auth_machine_intelligence }
+		owner = { is_machine_empire = yes }
 	}
 
 	immediate = {
@@ -3607,7 +3600,7 @@ ship_event = {
 					is_country_type = default
 					has_communications = prev
 					NOR = {
-						has_ethic = ethic_gestalt_consciousness
+						is_gestalt = yes
 						is_at_war_with = prev
 						is_country = prev
 					}
@@ -4248,6 +4241,17 @@ country_event = { #Death of Scavenger Bot
 		}
 		give_technology = { tech = tech_nanite_repair_system }
 	}
+	after = {
+		generate_parade_city = yes
+		start_situation = {
+			type = leviathan_celebration_opportunity
+			target = event_target:parade_city
+			effect = {
+				set_situation_flag = celebration_scavenger_bot
+				set_situation_flag = standard_unity_reward
+			}
+		}
+	}
 }
 
 ship_event = {
@@ -4363,7 +4367,7 @@ ship_event = { #The Big Friendly Warform
 	option = {
 		# Todo: Move this to dialog?
 		trigger = {
-			owner = { NOR = { has_policy_flag = ai_outlawed has_authority = auth_machine_intelligence } }
+			owner = { NOR = { has_policy_flag = ai_outlawed is_machine_empire = yes } }
 		}
 		name = "distar.155.a"
 		from = {
@@ -4376,7 +4380,7 @@ ship_event = { #The Big Friendly Warform
 	}
 	option = {
 		trigger = {
-			owner = { NOR = { has_policy_flag = ai_outlawed has_authority = auth_machine_intelligence } }
+			owner = { NOR = { has_policy_flag = ai_outlawed is_machine_empire = yes } }
 		}
 		name = "distar.155.b"
 	}
@@ -4389,7 +4393,7 @@ ship_event = { #The Big Friendly Warform
 	}
 	option = {
 		trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		name = "distar.155.machi"
 		from = {
@@ -4402,7 +4406,7 @@ ship_event = { #The Big Friendly Warform
 	}
 	option = {
 		trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		name = "distar.155.machi_2"
 	}
@@ -4501,13 +4505,13 @@ ship_event = {
 	title = "distar.156.name"
 	desc = {
 		trigger = {
-			owner = { NOT = { has_authority = auth_machine_intelligence } }
+			owner = { is_machine_empire = no }
 		}
 		text = "distar.156.desc"
 	}
 	desc = {
 		trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		text = "distar.156.desc.machi"
 	}
@@ -4613,7 +4617,7 @@ country_event = {
 	option = {
 		name = "distar.158.d"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.159 } }
 	}
@@ -4621,7 +4625,7 @@ country_event = {
 	option = {
 		name = "distar.158.d.machi"
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		hidden_effect = { country_event = { id = distar.159 } }
 	}
@@ -4646,14 +4650,14 @@ country_event = {
 	option = {
 		name = "distar.159.a"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.160 } }
 	}
 	option = {
 		name = "distar.159.a.machi"
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		hidden_effect = { country_event = { id = distar.160 } }
 	}
@@ -4677,14 +4681,14 @@ country_event = {
 	option = {
 		name = "distar.160.a"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.161 } }
 	}
 	option = {
 		name = "distar.160.a.machi"
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		hidden_effect = { country_event = { id = distar.161 } }
 	}
@@ -4708,21 +4712,21 @@ country_event = {
 	option = {
 		name = "distar.161.a"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.162 } }
 	}
 	option = {
 		name = "distar.161.a.machi"
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		hidden_effect = { country_event = { id = distar.162 } }
 	}
 	option = {
 		name = "distar.161.b"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.164 } }
 	}
@@ -4746,14 +4750,14 @@ country_event = {
 	option = {
 		name = "distar.162.a"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.163 } }
 	}
 	option = {
 		name = "distar.162.a.machi"
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		hidden_effect = { country_event = { id = distar.163 } }
 	}
@@ -4777,7 +4781,7 @@ country_event = {
 	option = {
 		name = "distar.163.a"
 		trigger = {
-			NOT = { has_authority = auth_machine_intelligence }
+			is_machine_empire = no
 		}
 		hidden_effect = { country_event = { id = distar.164 } }
 	}
@@ -4785,7 +4789,7 @@ country_event = {
 	option = {
 		name = "distar.163.a.machi"
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		hidden_effect = { country_event = { id = distar.164 } }
 	}
@@ -4820,7 +4824,7 @@ country_event = {
 				has_ethic = ethic_fanatic_pacifist
 				has_ethic = ethic_egalitarian
 				has_ethic = ethic_fanatic_egalitarian
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 		}
 		hidden_effect = {
@@ -4850,7 +4854,7 @@ country_event = {
 				has_ethic = ethic_fanatic_materialist
 				has_ethic = ethic_spiritualist
 				has_ethic = ethic_fanatic_spiritualist
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 		}
 		hidden_effect = {
@@ -4878,7 +4882,7 @@ country_event = {
 
 	option = {
 		exclusive_trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		name = "distar.164.machi"
 		hidden_effect = {
@@ -5020,7 +5024,7 @@ ship_event = {
 	desc = {
 		trigger = {
 			owner = {
-				NOT = { has_authority = auth_machine_intelligence }
+				is_machine_empire = no
 			}
 		}
 		text = "distar.170.desc"
@@ -5028,7 +5032,7 @@ ship_event = {
 	desc = {
 		trigger = {
 			owner = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 		text = "distar.170.desc.machi"
@@ -5039,10 +5043,16 @@ ship_event = {
 
 	is_triggered_only = yes
 
+	immediate = {
+		owner = {
+			set_country_flag = brainslug_divination_flag
+		}
+	}
+
 	option = {
 		trigger = {
 			owner = {
-				NOT = { has_authority = auth_machine_intelligence }
+				is_machine_empire = no
 				is_homicidal = no
 				any_owned_pop = {
 					species = {
@@ -5068,7 +5078,7 @@ ship_event = {
 	option = {
 		trigger = {
 			owner = {
-				NOT = { has_authority = auth_machine_intelligence }
+				is_machine_empire = no
 			}
 		}
 		name = NOTIME
@@ -5077,7 +5087,7 @@ ship_event = {
 	option = {
 		trigger = {
 			owner = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 		name = "distar.170.machi"
@@ -5688,13 +5698,13 @@ ship_event = {
 	}
 	desc = {
 		trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		text = "distar.190.desc.machi"
 	}
 	desc = {
 		trigger = {
-			owner = { has_authority = auth_hive_mind }
+			owner = { is_hive_empire = yes }
 		}
 		text = "distar.190.desc.hive"
 	}
@@ -5709,7 +5719,7 @@ ship_event = {
 			save_global_event_target_as = living_planet_scientist
 		}
 		from = {
-			save_event_target_as = living_planet_tar
+			save_global_event_target_as = living_planet_tar
 		}
 	}
 
@@ -5717,6 +5727,32 @@ ship_event = {
 		name = distar.190.a
 		trigger = {
 			owner = { is_regular_empire = yes }
+		}
+		if = {
+			limit = {
+				from = {
+					exists = space_owner
+					space_owner = { is_same_value = root.owner }
+				}
+			}
+			event_target:living_planet_tar = {
+				enable_special_project = {
+					name = "STUDY_LIVING_SEA"
+					location = from
+					owner = root
+				}
+			}
+		}
+		else = {
+			owner = {
+				create_point_of_interest = {
+					id = living_sea.1
+					name = "living_sea_poi"
+					desc = living_sea_poi_desc
+					event_chain = living_planet_chain
+					location = from
+				}
+			}
 		}
 		owner = {
 			begin_event_chain = {
@@ -5731,13 +5767,6 @@ ship_event = {
 			}
 			hidden_effect = {
 				set_country_flag = living_planet_started
-				create_point_of_interest = {
-					id = living_sea.1
-					name = "living_sea_poi"
-					desc = living_sea_poi_desc
-					event_chain = living_planet_chain
-					location = from
-				}
 			}
 		}
 	}
@@ -5765,7 +5794,7 @@ ship_event = {
 	}
 }
 
-country_event = { #On enacting Study The Sea Decision
+country_event = { #On enacting Study The Sea Special Project
 	id = distar.191
 	title = "distar.191.name"
 	desc = {
@@ -5792,15 +5821,23 @@ country_event = { #On enacting Study The Sea Decision
 	}
 
 	immediate = {
-		random_planet_within_border = {
-			limit = { has_modifier = living_sea }
-			save_event_target_as = living_planet_tar
+		if = {
+			limit = { NOT = { exists = event_target:living_planet_tar } }
+			random_planet_within_border = {
+				limit = { has_modifier = living_sea }
+				save_global_event_target_as = living_planet_tar
+			}
 		}
-		end_event_chain = "living_planet_chain"
 	}
 
 	option = {
 		name = "distar.191.a"
+		event_target:living_planet_tar = {
+			add_modifier = {
+				modifier = pm_study_the_sea
+				days = -1
+			}
+		}
 		hidden_effect = {
 			country_event = { id = distar.192 days = 180 random = 30 } #Scientist is alive
 			country_event = { id = distar.193 days = 3650 } #Scientist is dead
@@ -5879,6 +5916,9 @@ country_event = { #Scientist is alive
 			}
 			remove_country_flag = strange_calling_fired
 		}
+		end_event_chain = "living_planet_chain"
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 	}
 }
 
@@ -5893,10 +5933,8 @@ country_event = { #Scientist dies
 	is_triggered_only = yes
 
 	trigger = {
-		NOR = {
-			has_country_flag = strange_calling_fired
-			exists = event_target:living_planet_scientist
-		}
+		NOT = { has_country_flag = strange_calling_fired }
+		NOT = { exists = event_target:living_planet_scientist }
 		event_target:living_planet_tar = {
 			has_modifier = pm_study_the_sea
 			has_modifier = living_sea
@@ -5935,6 +5973,9 @@ country_event = { #Scientist dies
 				max = @tier4researchmax
 			}
 		}
+		end_event_chain = "living_planet_chain"
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 		hidden_effect = {
 			event_target:living_planet_tar = {
 				remove_modifier = pm_study_the_sea
@@ -5990,11 +6031,14 @@ country_event = {
 			min = @tier2researchmin
 			max = @tier2researchmax
 		}
+		end_event_chain = "living_planet_chain"
 		hidden_effect = {
 			event_target:living_planet_tar = {
 				remove_modifier = pm_study_the_sea
 			}
 		}
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 	}
 }
 
@@ -6053,6 +6097,78 @@ country_event = {
 		}
 	}
 }
+
+starbase_event = {
+	id = distar.1999 #198 exists. It is below 199 in the file. :(
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		exists = solar_system
+		solar_system = {
+			has_star_flag = living_planet_system
+		}
+		#that narrows it down enough, the rest is covered in the trigger of distar.199
+	}
+
+	immediate = {
+		fleet = {
+			random_owned_ship = {
+				limit = {
+					is_ship_class = shipclass_starbase
+				}
+				ship_event = { id = distar.199 }
+			}
+		}
+	}
+}
+
+ship_event = { #Special Project Gatekeeper (on_starbase_transfer, on_building_starbase_outpost)
+	id = distar.199
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = solar_system
+		solar_system = {
+			has_star_flag = living_planet_system
+		}
+		owner = {
+			NOT = { has_special_project = STUDY_LIVING_SEA }
+			has_country_flag = living_planet_started
+			has_event_chain = "living_planet_chain"
+		}
+	}
+
+	immediate = {
+		owner = {
+			enable_special_project = {
+				name = "STUDY_LIVING_SEA"
+				location = event_target:living_planet_tar
+				owner = root
+			}
+			remove_point_of_interest = living_sea.1
+		}
+		every_country = {
+			limit = {
+				has_special_project = STUDY_LIVING_SEA
+				NOT = {
+					is_same_value = root.owner
+				}
+			}
+			abort_special_project = { type = STUDY_LIVING_SEA }
+			create_point_of_interest = {
+				id = living_sea.1
+				name = "living_sea_poi"
+				desc = living_sea_poi_desc
+				event_chain = living_planet_chain
+				location = event_target:living_planet_tar
+			}
+		}
+	}
+}
+
 
 # living planet port from ecumenopolis
 country_event = {
@@ -6322,7 +6438,7 @@ country_event = { #Death of the Matriarch
 		name = galactic_features.385.reanimated
 
 		trigger = {
-			has_civic = civic_reanimated_armies
+			is_reanimator = yes
 		}
 
 		event_target:dead_matriarch = {
@@ -6336,6 +6452,23 @@ country_event = { #Death of the Matriarch
 		hidden_effect = {
 			country_event = { id = distar.213 }
 			country_event = { id = galcom.110 days = 60 }
+		}
+	}
+	after = {
+		if = {
+			limit = {
+				is_robot_empire = no
+				num_owned_planets > 0
+			}
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_tiyanki_matriarch
+					set_situation_flag = standard_unity_reward
+				}
+			}
 		}
 	}
 }
@@ -6510,7 +6643,7 @@ country_event = {
 	option = {
 		name = distar.215.a
 		trigger = {
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 		event_target:ahab_fleet = {
 			set_owner = root
@@ -6545,7 +6678,7 @@ country_event = {
 	option = {
 		name = distar.215.a.gesta
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 		event_target:ahab_fleet = {
 			set_owner = root
@@ -6742,7 +6875,7 @@ ship_event = {
 	desc = {
 		trigger = {
 			owner = {
-				NOT = { has_authority = auth_machine_intelligence }
+				is_machine_empire = no
 			}
 		}
 		text = "distar.220.desc"
@@ -6750,7 +6883,7 @@ ship_event = {
 	desc = {
 		trigger = {
 			owner = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 		text = "distar.220.desc.machi"
@@ -6975,19 +7108,6 @@ country_event = { #Spawn Ratlings #Root = Global Event Country
 	}
 
 	immediate = {
-		IF = { #If another empire claimed Ratling capital, or it's shattered
-			LIMIT = {
-				event_target:ratling_capital = {
-					OR = {
-						is_colony = yes
-						is_under_colonization = yes
-						exists = space_owner
-						is_planet_class = "pc_broken"
-						is_planet_class = "pc_shattered"
-					}
-				}
-			}
-		}
 		create_species = {
 			name = "NAME_Ketling"
 			plural = "NAME_Ketlings"
@@ -8312,6 +8432,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			NOR = {
 				has_country_flag = encountered_sealed_system
@@ -8432,13 +8553,13 @@ ship_event = { #Sealed System Anomaly Reward
 	title = "distar.244.name"
 	desc = {
 		trigger = {
-			owner = { NOT = { has_authority = auth_machine_intelligence } }
+			owner = { is_machine_empire = no }
 		}
 		text = "distar.244.desc"
 	}
 	desc = {
 		trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		text = "distar.244.desc.machi"
 	}
@@ -8461,7 +8582,7 @@ ship_event = { #Sealed System Anomaly Reward
 
 	option = {
 		exclusive_trigger = {
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 		}
 		name = CURIOUS
 		owner = {
@@ -8575,7 +8696,7 @@ country_event = {
 		name = "distar.246.a"
 		trigger = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_policy_flag = ai_outlawed
 				has_civic = civic_fanatic_purifiers
 			}
@@ -8594,7 +8715,7 @@ country_event = {
 		name = "distar.246.b"
 		trigger = {
 			NOR = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				has_policy_flag = ai_outlawed
 			}
 		}
@@ -8634,7 +8755,7 @@ country_event = {
 		trigger = {
 			NOR = {
 				has_policy_flag = ai_full_rights
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 		tooltip = {
@@ -8652,7 +8773,7 @@ country_event = {
 
 	option = {	#Accept the leader (MI)
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		name = "distar.246.machi"
 		custom_tooltip = "distar.246.a.tooltip"
@@ -8669,7 +8790,7 @@ country_event = {
 
 	option = {	#Repurpose the leader (MI)
 		trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		name = "distar.246.machi.b"
 		custom_tooltip = "distar.246.b.tooltip"
@@ -8718,11 +8839,11 @@ country_event = { #Destroying the leader
 	id = distar.248
 	title = "distar.248.name"
 	desc = {
-		trigger = { has_authority = auth_machine_intelligence }
+		trigger = { is_machine_empire = yes }
 		text = "distar.248.desc.machi"
 	}
 	desc = {
-		trigger = { NOT = { has_authority = auth_machine_intelligence } }
+		trigger = { is_machine_empire = no }
 		text = "distar.248.desc"
 	}
 	location = event_target:droppod_tar
@@ -8739,7 +8860,7 @@ country_event = { #Destroying the leader
 	option = {
 		name = "distar.248.machi"
 		exclusive_trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		add_resource = { minerals = 100 }
 		add_monthly_resource_mult = {
@@ -8792,7 +8913,7 @@ country_event = {
 
 	option = {
 		exclusive_trigger = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 		}
 		name = "distar.249.a.machi"
 	}
@@ -9507,7 +9628,7 @@ planet_event = {
 		}
 		owner = {
 			NOT = {
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 			}
 		}
 	}

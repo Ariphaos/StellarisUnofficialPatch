@@ -175,6 +175,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			has_event_chain = "sublight_probes_chain"
 			FROM = {
@@ -229,7 +230,7 @@ fleet_event = {
 			FROM = { remove_star_flag = probe_system_4 }
 			owner = { remove_point_of_interest = probe_search_poi.4 }
 		}
-		random_owned_ship = {
+		random_controlled_ship = {
 			if = {
 				limit = {
 					owner = {
@@ -505,7 +506,7 @@ fleet_event = {
 			name = "NAME_Unscrupulous_Salvagers"
 			type = neutral_faction
 		}
-		random_owned_ship = {
+		random_controlled_ship = {
 			save_event_target_as = ship_for_fleet_event
 		}
 		last_created_country = {
@@ -1324,7 +1325,7 @@ country_event = {
 		is_ai = no
 		NOR = {
 			has_country_flag = habitable_worlds_survey
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 		has_country_flag = first_alien_life
 	}
@@ -1346,7 +1347,12 @@ country_event = {
 	}
 	option = {
 		name = "country.50.b"
-		add_resource = { influence = 20 }
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1unityreward
+			min = @tier1unitymin
+			max = @tier1unitymax
+		}
 	}
 }
 
@@ -2187,7 +2193,7 @@ country_event = {
 
 	trigger = {
 		NOR = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 			has_country_flag = starting_event
 		}
 		is_ai = no
@@ -2533,6 +2539,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			has_country_flag = searching_for_cultists
 			NOT = { has_country_flag = cultists_sighted_1 }
@@ -2717,6 +2724,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			has_country_flag = searching_for_cultists
 			NOT = { has_country_flag = cultists_sighted_2 }
@@ -2806,6 +2814,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			has_country_flag = searching_for_cultists
 			NOT = { has_country_flag = cultists_sighted_3 }
@@ -3306,6 +3315,7 @@ ship_event = {
 
 	trigger = {
 		has_ship_flag = cultist_flagship
+		exists = owner
 		owner = { has_country_flag = cultist_rebels_of@from.owner }
 	}
 
@@ -3616,9 +3626,32 @@ planet_event = {
 
 	trigger = {
 		NOT = { exists = fromfrom } #Checks it didn't get surveyed by a ship
+		from = {
+			is_ai = no
+			has_event_chain = "hunting_hyacinth"
+		}
+		solar_system = {
+			OR = {
+				has_star_flag = hyacinth_system_1
+				has_star_flag = hyacinth_system_2
+				has_star_flag = hyacinth_system_3
+			}
+			NOR = {
+				has_star_flag = event_sent
+				any_system_planet = {
+					is_surveyed = {
+						who = from
+						status = no
+					}
+				}
+			}
+		}
 	}
 
 	immediate = {
+		solar_system = {
+			set_star_flag = event_sent
+		}
 		from = { #from is the country
 			country_event = { id = country.260 }
 		}
@@ -3644,33 +3677,7 @@ country_event = {
 
 	is_triggered_only = yes
 
-	trigger = {
-		is_ai = no
-		has_event_chain = "hunting_hyacinth"
-		from = {
-			solar_system = {
-				OR = {
-					has_star_flag = hyacinth_system_1
-					has_star_flag = hyacinth_system_2
-					has_star_flag = hyacinth_system_3
-				}
-				NOT = {
-					has_star_flag = event_sent
-					any_system_planet = {
-						is_surveyed = {
-							who = from
-							status = no
-						}
-					}
-				}
-			}
-		}
-	}
-
 	immediate = {
-		from.solar_system = {
-			set_star_flag = event_sent
-		}
 		save_event_target_as = star_chart_owner
 		from = {
 			solar_system = {
@@ -3882,6 +3889,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			is_ai = no
 			has_event_chain = "hunting_hyacinth"

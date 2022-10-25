@@ -167,6 +167,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = owner
 		owner = {
 			is_ai = no
 			NOT = { has_country_flag = guardians_stellarite_encountered }
@@ -265,7 +266,7 @@ country_event = {
 			owner = {
 				is_country_type = guardian_stellarite
 			}
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = stellarite_ship
 			}
 			has_hp_percentage < 0.995
@@ -360,7 +361,7 @@ fleet_event = {
 			owner = {
 				is_country_type = guardian_stellarite
 			}
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = stellarite_ship
 			}
 			has_hp_percentage < 0.995
@@ -375,7 +376,7 @@ fleet_event = {
 		}
 		random_combatant_fleet = {
 			limit = {
-				any_owned_ship = {
+				any_controlled_ship = {
 					has_ship_flag = stellarite_ship
 				}
 			}
@@ -542,7 +543,7 @@ country_event = {
 
 	trigger = {
 		is_country_type = guardian_stellarite
-		any_owned_ship = {
+		any_controlled_ship = {
 			has_ship_flag = stellarite_ship
 			fleet = {
 				has_hp_percentage < 0.995
@@ -640,7 +641,7 @@ fleet_event = {
 
 	trigger = {
 		any_combatant_fleet = {
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = stellarite_ship
 			}
 			has_hp_percentage < 0.995
@@ -663,7 +664,7 @@ fleet_event = {
 
 	trigger = {
 		any_combatant_fleet = {
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = stellarite_ship
 			}
 			has_hp_percentage < 0.995
@@ -674,7 +675,7 @@ fleet_event = {
 	immediate = {
 		random_combatant_fleet = {
 			limit = {
-				any_owned_ship = {
+				any_controlled_ship = {
 					has_ship_flag = stellarite_ship
 				}
 			}
@@ -690,7 +691,7 @@ fleet_event = {
 
 	trigger = {
 		any_combatant_fleet = {
-			any_owned_ship = {
+			any_controlled_ship = {
 				has_ship_flag = stellarite_ship
 			}
 			has_hp_percentage > 0.995
@@ -701,7 +702,7 @@ fleet_event = {
 	immediate = {
 		random_combatant_fleet = {
 			limit = {
-				any_owned_ship = {
+				any_controlled_ship = {
 					has_ship_flag = stellarite_ship
 				}
 			}
@@ -717,8 +718,8 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		any_owned_fleet = {
-			any_owned_ship = { has_ship_flag = stellarite_ship }
+		any_controlled_fleet = {
+			any_controlled_ship = { has_ship_flag = stellarite_ship }
 			OR = {
 				has_hp_percentage < 0.33
 				has_fleet_flag = returning_home
@@ -727,9 +728,9 @@ country_event = {
 	}
 
 	immediate = {
-		random_owned_fleet = {
+		random_controlled_fleet = {
 			limit = {
-				any_owned_ship = { has_ship_flag = stellarite_ship }
+				any_controlled_ship = { has_ship_flag = stellarite_ship }
 			}
 			clear_fleet_actions = this
 			queue_actions = {
@@ -778,11 +779,11 @@ country_event = {
 	title = leviathans.1000.name
 	desc = {
 		text = leviathans.1016.desc
-		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { is_gestalt = no }
 	}
 	desc = {
 		text = leviathans.1016.desc.gesta
-		trigger = { has_ethic = ethic_gestalt_consciousness }
+		trigger = { is_gestalt = yes }
 	}
 	picture = GFX_evt_stellarites
 	show_sound = event_radio_chatter
@@ -863,31 +864,46 @@ country_event = {
 			}
 		#}
 	}
+	#option = {
+	#	name = leviathans.1016.b
+	#	trigger = {
+	#		OR = {
+	#			has_ethic = ethic_militarist
+	#			has_ethic = ethic_fanatic_militarist
+	#			has_ethic = ethic_xenophobe
+	#			has_ethic = ethic_fanatic_xenophobe
+	#		}
+	#	}
+	#	add_resource = { influence = 500 }
+	#	capital_scope = {
+	#		add_deposit = d_stellarite_trophy
+	#	}
+	#	hidden_effect = {
+	#		set_country_flag = stellarite_trophy_allowed
+	#		random_ambient_object = {
+	#			limit = {
+	#				has_ambient_object_flag = stellarite_project_object
+	#			}
+	#			destroy_ambient_object = this
+	#		}
+	#	}
+	#}
+
 	option = {
-		name = leviathans.1016.b
-		trigger = {
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-			}
-		}
-		add_resource = { influence = 500 }
-		capital_scope = {
-			add_deposit = d_stellarite_trophy
-		}
-		hidden_effect = {
-			set_country_flag = stellarite_trophy_allowed
-			random_ambient_object = {
-				limit = {
-					has_ambient_object_flag = stellarite_project_object
+		name = leviathans.1016.c
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_stellar_devourer
+					set_situation_flag = standard_unity_reward
 				}
-				destroy_ambient_object = this
 			}
 		}
 	}
-
 	after = {
 		hidden_effect = {
 			random_system = {
@@ -907,13 +923,13 @@ ship_event = {
 	desc = {
 		text = leviathans.1017.desc
 		trigger = {
-			NOT = { owner = { has_ethic = ethic_gestalt_consciousness } }
+			NOT = { owner = { is_gestalt = yes } }
 		}
 	}
 	desc = {
 		text = leviathans.1017.desc.gesta
 		trigger = {
-			owner = { has_ethic = ethic_gestalt_consciousness }
+			owner = { is_gestalt = yes }
 		}
 	}
 	picture = GFX_evt_star_yellow
@@ -1515,7 +1531,7 @@ country_event = {
 		name = leviathans.1040.c
 		trigger = {
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_technology = tech_robotic_workers
 				has_technology = tech_droid_workers
 				has_technology = tech_synthetic_workers
@@ -1534,7 +1550,7 @@ country_event = {
 		trigger = {
 			has_technology = tech_robotic_workers
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_technology = tech_droid_workers
 				has_technology = tech_synthetic_workers
 				has_technology = tech_synthetic_leaders
@@ -1553,7 +1569,7 @@ country_event = {
 			has_technology = tech_robotic_workers
 			has_technology = tech_droid_workers
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_technology = tech_synthetic_workers
 				has_technology = tech_synthetic_leaders
 			}
@@ -1572,7 +1588,7 @@ country_event = {
 			has_technology = tech_droid_workers
 			has_technology = tech_synthetic_workers
 			NOR = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 				has_technology = tech_synthetic_leaders
 			}
 			can_research_technology = tech_synthetic_leaders
@@ -1669,7 +1685,7 @@ country_event = {
 
 	immediate = {
 		event_target:guardian_technosphere_country = {
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = {
 					is_ship_size = sphere
 				}
@@ -1713,7 +1729,7 @@ country_event = {
 	immediate = {
 		set_country_flag = technosphere_studied
 		event_target:guardian_technosphere_country = {
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = {
 					is_ship_size = sphere
 				}
@@ -1725,7 +1741,7 @@ country_event = {
 	option = {
 		name = leviathans.1051.a
 		trigger = {
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 		hidden_effect = {
 			country_event = { id = leviathans.1055 }
@@ -1781,7 +1797,7 @@ country_event = {
 	option = {
 		name = leviathans.1051.e #hack it - Gestalt Consciousness
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 		enable_special_project = {
 			name = TECHNOSPHERE_HACKING
@@ -1797,12 +1813,12 @@ country_event = {
 	title = leviathans.1050.name
 	desc = {
 		trigger = {
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 		text = leviathans.1052.desc
 	}
 	desc = {
-		trigger = { has_ethic = ethic_gestalt_consciousness }
+		trigger = { is_gestalt = yes }
 		text = leviathans.1052.gestalt.desc
 	}
 	picture = GFX_evt_technosphere
@@ -1816,7 +1832,7 @@ country_event = {
 
 	immediate = {
 		event_target:guardian_technosphere_country = {
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = {
 					is_ship_size = sphere
 				}
@@ -1845,7 +1861,7 @@ country_event = {
 		name = leviathans.1052.a
 		if = {
 			limit = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 			give_technology = { tech = tech_positronic_implants }
 		}
@@ -2068,7 +2084,7 @@ country_event = {
 		response_text = leviathans.1061.a.reply
 		if = {
 			limit = {
-				has_ethic = ethic_gestalt_consciousness
+				is_gestalt = yes
 			}
 			give_technology = { tech = tech_positronic_implants }
 		}
@@ -2150,7 +2166,7 @@ country_event = {
 	immediate = {
 		set_country_flag = technosphere_studied
 		event_target:guardian_technosphere_country = {
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = {
 					is_ship_size = sphere
 				}
@@ -2175,7 +2191,7 @@ country_event = {
 		name = leviathans.1062.a
 		hidden_effect = {
 			event_target:guardian_technosphere_country = {
-				random_owned_ship = {
+				random_controlled_ship = {
 					limit = {
 						is_ship_size = sphere
 					}
@@ -2242,7 +2258,7 @@ country_event = {
 			}
 			if = {
 				limit = {
-					has_ethic = ethic_gestalt_consciousness
+					is_gestalt = yes
 				}
 				give_technology = { tech = tech_positronic_implants }
 			}
@@ -2406,13 +2422,13 @@ ship_event = {
 	desc = {
 		text = leviathans.2010.desc
 		trigger = {
-			owner = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+			owner = { is_gestalt = no }
 		}
 	}
 	desc = {
 		text = leviathans.2010.desc.gesta
 		trigger = {
-			owner = { has_ethic = ethic_gestalt_consciousness }
+			owner = { is_gestalt = yes }
 		}
 	}
 	picture = GFX_evt_star_pulsar
@@ -2561,6 +2577,17 @@ event = {
 						}
 					}
 				}
+				every_country = {
+					limit = {
+						is_non_hostile_to_wraith = yes
+					}
+					set_faction_hostility = {
+						target = prev 
+						set_hostile = no
+						set_neutral = yes
+						set_friendly = no
+					}
+				}
 			}
 			if = {
 				limit = { exists = space_owner }
@@ -2579,19 +2606,23 @@ country_event = {
 	desc = {
 		text = leviathans.2012.desc
 		trigger = {
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 	}
 	desc = {
 		text = leviathans.2012.desc.gesta
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 	}
 	picture = GFX_evt_wraith
 	show_sound = event_space_whale
 
 	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = guardians_wraith_encountered }
+	}
 
 	immediate = {
 		country_event = { id = story.8 days = 15 }
@@ -2637,13 +2668,13 @@ country_event = {
 	desc = {
 		text = leviathans.2014.desc
 		trigger = {
-			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_gestalt = no
 		}
 	}
 	desc = {
 		text = leviathans.2014.desc.gesta
 		trigger = {
-			has_ethic = ethic_gestalt_consciousness
+			is_gestalt = yes
 		}
 	}
 	picture = GFX_evt_wraith
@@ -2684,6 +2715,20 @@ country_event = {
 			days = -1
 		}
 	}
+	after = {
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_spectral_wraith
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
+	}
 }
 
 # Wraith Frequency Modifier Mechanics
@@ -2707,7 +2752,7 @@ fleet_event = {
 				}
 			}
 		}
-		random_owned_ship = {
+		random_controlled_ship = {
 			if = {
 				limit = { has_modifier = wraith_frequency_sync }
 				# Removes the modifier when the right star class is not present
@@ -2815,11 +2860,11 @@ country_event = {
 	title = "leviathans.2101.name"
 	desc = {
 		text = "leviathans.2101.desc"
-		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { is_gestalt = no }
 	}
 	desc = {
 		text = "leviathans.2101.desc.gesta"
-		trigger = { has_ethic = ethic_gestalt_consciousness }
+		trigger = { is_gestalt = yes }
 	}
 	picture = GFX_evt_enigmatic_fortress
 	show_sound = event_space_battle
@@ -2834,7 +2879,7 @@ country_event = {
 		exists = event_target:fortress_vault_core
 		NOT = { has_event_chain = "enigmatic_fortress_chain" }
 		event_target:fortress_country = {
-			count_owned_ship = { # Check that all ships are disabled
+			count_controlled_ship = { # Check that all ships are disabled
 				limit = { is_disabled = no }
 				count < 1
 			}
@@ -2864,18 +2909,18 @@ country_event = {
 			target = root
 		}
 		hidden_effect = { country_event = { id = leviathans.2111 } }
-		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { is_gestalt = no }
 	}
 
 	option = {
 		name = "leviathans.2101.b"
 		hidden_effect = { country_event = { id = leviathans.2160 days = 360 } }
-		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { is_gestalt = no }
 	}
 
 	option = {
 		name = leviathans.2101.c.gesta
-		trigger = { has_ethic = ethic_gestalt_consciousness }
+		trigger = { is_gestalt = yes }
 		add_monthly_resource_mult = {
 			resource = engineering_research
 			value = 24
@@ -2913,7 +2958,7 @@ country_event = {
 				}
 			}
 			#event_target:fortress_country = {
-			#	every_owned_fleet = {
+			#	every_controlled_fleet = {
 			#		delete_fleet = this
 			#	}
 			#}
@@ -2940,6 +2985,18 @@ country_event = {
 			#	}
 			#}
 		}
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_enigmatic_fortress
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
 	}
 }
 
@@ -2959,7 +3016,7 @@ country_event = {
 	trigger = {
 		from.owner = { is_same_value = event_target:fortress_country }
 		event_target:fortress_country = {
-			count_owned_ship = { # Check that all ships are disabled
+			count_controlled_ship = { # Check that all ships are disabled
 				limit = { is_disabled = no }
 				count < 1
 			}
@@ -2975,7 +3032,7 @@ country_event = {
 			establish_communications_no_message = event_target:fortress_country
 		}
 		event_target:fortress_country = {
-			random_owned_ship = {
+			random_controlled_ship = {
 				limit = { has_ship_flag = fortress_vault }
 				save_global_event_target_as = disabled_enigmatic_fortress
 			}
@@ -3388,6 +3445,20 @@ country_event = {
 		}
 		end_event_chain = "enigmatic_fortress_chain"
 	}
+	after = {
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_enigmatic_fortress
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
+	}
 }
 
 # Our Star Witness
@@ -3539,6 +3610,20 @@ country_event = {
 		}
 		end_event_chain = "enigmatic_fortress_chain"
 	}
+	after = {
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_enigmatic_fortress
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
+	}
 }
 
 # The End
@@ -3651,6 +3736,20 @@ country_event = {
 			progress = 0.30
 		}
 		end_event_chain = "enigmatic_fortress_chain"
+	}
+	after = {
+		if = {
+			limit = { num_owned_planets > 0 }
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_enigmatic_fortress
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
 	}
 }
 
@@ -3783,7 +3882,7 @@ country_event = {
 		hidden_effect = {
 			random_country = {
 				limit = { is_country_type = guardian_fortress }
-				random_owned_ship = {
+				random_controlled_ship = {
 					limit = { has_ship_flag = fortress_vault }
 					save_event_target_as = disabled_enigmatic_fortress
 				}
@@ -3991,6 +4090,24 @@ country_event = {
 			}
 		}
 	}
+	after = {
+		if = {
+			limit = {
+				NOT = { has_country_flag = horrific_celebration }
+				num_owned_planets > 0
+			}
+			set_country_flag = horrific_celebration
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_dimensional_horror
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
+	}
 }
 
 # Special Project Completed
@@ -4096,11 +4213,11 @@ ship_event = {
 	id = leviathans.3100
 	title = "leviathans.3100"
 	desc = {
-		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		trigger = { owner = { is_machine_empire = no } }
 		text = leviathans.3100.desc
 	}
 	desc = {
-		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		trigger = { owner = { is_machine_empire = yes } }
 		text = leviathans.3100.desc.mach
 	}
 	picture = GFX_evt_automated_dreadnought
@@ -4217,7 +4334,7 @@ country_event = {
 	option = {
 		name = "leviathans.3102.b"
 		add_resource = {
-			minerals = 5000
+			alloys = 1000
 			energy = 5000
 		}
 		add_monthly_resource_mult = {
@@ -4227,6 +4344,22 @@ country_event = {
 			max = 5000
 		}
 	}
+	after = {
+		if = {
+			limit = {
+				num_owned_planets > 0
+			}
+			generate_parade_city = yes
+			start_situation = {
+				type = leviathan_celebration_opportunity
+				target = event_target:parade_city
+				effect = {
+					set_situation_flag = celebration_automated_dreadnought
+					set_situation_flag = standard_unity_reward
+				}
+			}
+		}
+	}
 }
 
 # Dreadnought Rebuilt
@@ -4234,11 +4367,11 @@ ship_event = {
 	id = leviathans.3103
 	title = "leviathans.3103"
 	desc = {
-		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		trigger = { owner = { is_machine_empire = no } }
 		text = leviathans.3103.desc
 	}
 	desc = {
-		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		trigger = { owner = { is_machine_empire = yes } }
 		text = leviathans.3103.desc.mach
 	}
 	picture = GFX_evt_automated_dreadnought
@@ -4609,9 +4742,9 @@ country_event = {
 	trigger = {
 		is_country_type = guardian_hiver
 		has_country_flag = hive_country
-		count_owned_ship = {
+		count_controlled_ship = {
 			limit = { is_ship_size = hive_asteroid }
-			count < 1 # count_owned_ships no longer counts dead ships
+			count < 1 # count_controlled_ships no longer counts dead ships
 		}
 		FROM = {
 			has_country_flag = provoked_hivers
@@ -4722,7 +4855,7 @@ fleet_event = {
 
 	immediate = {
 		owner = {
-			random_owned_ship = {
+			random_controlled_ship = {
 				set_disabled = no
 			}
 		}

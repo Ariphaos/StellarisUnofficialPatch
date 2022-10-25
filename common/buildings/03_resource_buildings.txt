@@ -33,7 +33,6 @@ building_hydroponics_farm = {
 				free_district_slots = 0
 			}
 		}
-		buildings_simple_allow = yes
 	}
 
 	destroy_trigger = {
@@ -71,7 +70,7 @@ building_hydroponics_farm = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 				OR = {
 					is_anglers_empire = no
@@ -121,7 +120,7 @@ building_hydroponics_farm = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 				is_anglers_empire = yes
 				PREV = { planet = { is_wet = yes } }
@@ -188,13 +187,6 @@ building_hydroponics_farm = {
 	prerequisites = {
 		"tech_hydroponics"
 	}
-
-	ai_resource_production = {
-		food = 1
-		trigger = {
-			always = yes
-		}
-	}
 }
 
 building_food_processing_facility = {
@@ -208,7 +200,15 @@ building_food_processing_facility = {
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
 		}
+
+		OR = {
+			owner = {
+				is_ai = no
+			}
+			has_any_farming_district_or_buildings = yes
+		}
 	}
+
 	destroy_trigger = {
 		exists = owner
 		OR = {
@@ -218,11 +218,13 @@ building_food_processing_facility = {
 			}
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
+			AND = {
+				owner = {
+					is_ai = yes
+				}
+				has_any_farming_district_or_buildings = no
+			}
 		}
-	}
-
-	allow = {
-		buildings_simple_allow = yes
 	}
 
 	planet_modifier = {
@@ -233,7 +235,7 @@ building_food_processing_facility = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 				OR = {
 					is_anglers_empire = no
@@ -273,7 +275,7 @@ building_food_processing_facility = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 				is_anglers_empire = yes
 				PREV = { planet = { is_wet = yes } }
@@ -337,23 +339,6 @@ building_food_processing_facility = {
 	prerequisites = {
 		"tech_food_processing_1"
 	}
-
-	ai_resource_production = {
-		food = 1
-		trigger = {
-			always = yes
-		}
-	}
-	ai_resource_production = {
-		food = 5
-		trigger = {
-			planet_resource_compare = {
-				resource = food
-				value >= 30
-				type = produces
-			}
-		}
-	}
 }
 
 building_food_processing_center = {
@@ -370,14 +355,21 @@ building_food_processing_center = {
 		OR = {
 			AND = {
 				exists = owner
-				owner = {
-					is_ai = yes
-					country_uses_food = no
+				OR = {
+					owner = {
+						is_ai = yes
+						country_uses_food = no
+					}
+					AND = {
+						owner = {
+							is_ai = yes
+						}
+						has_any_farming_district_or_buildings = no
+					}
 				}
 			}
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
-			buildings_no_motes = yes
 		}
 	}
 
@@ -389,7 +381,7 @@ building_food_processing_center = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 				OR = {
 					is_anglers_empire = no
@@ -429,7 +421,7 @@ building_food_processing_center = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 				is_anglers_empire = yes
 				PREV = { planet = { is_wet = yes } }
@@ -491,23 +483,6 @@ building_food_processing_center = {
 	prerequisites = {
 		"tech_food_processing_2"
 	}
-
-	ai_resource_production = {
-		food = 6
-		trigger = {
-			always = yes
-		}
-	}
-	ai_resource_production = {
-		food = 10
-		trigger = {
-			planet_resource_compare = {
-				resource = food
-				value >= 32
-				type = produces
-			}
-		}
-	}
 }
 
 building_mineral_purification_plant = {
@@ -527,7 +502,16 @@ building_mineral_purification_plant = {
 	category = resource
 
 	destroy_trigger = {
-		has_modifier = resort_colony
+		OR = {
+			has_modifier = resort_colony
+			AND = {
+				exists = owner
+				owner = {
+					is_ai = yes
+				}
+				has_any_mining_district = no
+			}
+		}
 	}
 
 	potential = {
@@ -541,10 +525,12 @@ building_mineral_purification_plant = {
 			NOT = { is_planet_class = pc_habitat }
 			has_planet_flag = mining_habitat
 		}
-	}
-
-	allow = {
-		buildings_simple_allow = yes
+		OR = {
+			owner = {
+				is_ai = no
+			}
+			has_any_mining_district = yes
+		}
 	}
 
 	planet_modifier = {
@@ -556,7 +542,7 @@ building_mineral_purification_plant = {
 			NOT = { is_planet_class = pc_shattered_ring_habitable }
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 			}
 		}
@@ -591,7 +577,7 @@ building_mineral_purification_plant = {
 		potential = {
 			is_planet_class = pc_shattered_ring_habitable
 			exists = owner
-			owner = { is_regular_empire = yes }
+			owner = { is_gestalt = no }
 		}
 		modifier = {
 			job_scrap_miner_add = 1
@@ -695,26 +681,9 @@ building_mineral_purification_plant = {
 		trigger = {
 			is_planet_class = pc_shattered_ring_habitable
 			exists = owner
-			owner = { is_regular_empire = yes }
+			owner = { is_gestalt = no }
 		}
 		text = job_scrap_miner_effect_desc
-	}
-
-	ai_resource_production = {
-		minerals = 1
-		trigger = {
-			always = yes
-		}
-	}
-	ai_resource_production = {
-		minerals = 5
-		trigger = {
-			planet_resource_compare = {
-				resource = minerals
-				value >= 30
-				type = produces
-			}
-		}
 	}
 }
 
@@ -742,7 +711,14 @@ building_mineral_purification_hub = {
 	destroy_trigger = {
 		OR = {
 			has_modifier = resort_colony
-			buildings_no_motes = yes
+
+			AND = {
+				exists = owner
+				owner = {
+					is_ai = yes
+				}
+				has_any_mining_district = no
+			}
 		}
 	}
 
@@ -771,7 +747,7 @@ building_mineral_purification_hub = {
 			NOT = { is_planet_class = pc_shattered_ring_habitable }
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 			}
 		}
@@ -805,7 +781,7 @@ building_mineral_purification_hub = {
 		potential = {
 			is_planet_class = pc_shattered_ring_habitable
 			exists = owner
-			owner = { is_regular_empire = yes }
+			owner = { is_gestalt = no }
 		}
 		modifier = {
 			job_scrap_miner_add = 2
@@ -907,26 +883,9 @@ building_mineral_purification_hub = {
 		trigger = {
 			is_planet_class = pc_shattered_ring_habitable
 			exists = owner
-			owner = { is_regular_empire = yes }
+			owner = { is_gestalt = no }
 		}
 		text = job_scrap_miner_effect_desc
-	}
-
-	ai_resource_production = {
-		minerals = 6
-		trigger = {
-			always = yes
-		}
-	}
-	ai_resource_production = {
-		minerals = 9
-		trigger = {
-			planet_resource_compare = {
-				resource = minerals
-				value >= 32
-				type = produces
-			}
-		}
 	}
 }
 
@@ -936,20 +895,23 @@ building_energy_grid = {
 	category = resource
 
 	destroy_trigger = {
-		has_modifier = resort_colony
+		OR = {
+			OR = {
+				has_modifier = resort_colony
+			}
+
+			AND = {
+				exists = owner
+				owner = {
+					is_ai = yes
+				}
+				has_any_generator_district_or_building = no
+			}
+		}
 	}
 
 	potential = {
 		NOT = { has_modifier = resort_colony }
-		or = {
-			owner = { is_ai = no }
-			OR = {
-				num_districts = { type = district_generator value > 2 }
-				num_districts = { type = district_generator_uncapped value > 2 }
-				num_districts = { type = district_hab_energy value > 2 }
-				num_districts = { type = district_rw_generator value >= 1 }
-			}
-		}
 		OR = {
 			NOT = { is_planet_class = pc_habitat }
 			AND = {
@@ -958,10 +920,12 @@ building_energy_grid = {
 			}
 			has_planet_flag = energy_habitat
 		}
-	}
-
-	allow = {
-		buildings_simple_allow = yes
+		OR = {
+			owner = {
+				is_ai = no
+			}
+			has_any_generator_district_or_building = yes
+		}
 	}
 
 	planet_modifier = {
@@ -972,7 +936,7 @@ building_energy_grid = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 			}
 		}
@@ -1070,23 +1034,6 @@ building_energy_grid = {
 		}
 		text = job_fe_acolyte_generator_effect_desc
 	}
-
-	ai_resource_production = {
-		energy = 1
-		trigger = {
-			always = yes
-		}
-	}
-	ai_resource_production = {
-		energy = 5
-		trigger = {
-			planet_resource_compare = {
-				resource = energy
-				value >= 30
-				type = produces
-			}
-		}
-	}
 }
 
 building_energy_nexus = {
@@ -1101,10 +1048,15 @@ building_energy_nexus = {
 	destroy_trigger = {
 		OR = {
 			has_modifier = resort_colony
-			buildings_no_exotic_gases = yes
+			AND = {
+				exists = owner
+				owner = {
+					is_ai = yes
+				}
+				has_any_generator_district_or_building = no
+			}
 		}
 	}
-
 
 	planet_modifier = {
 		planet_technician_energy_produces_add = 2
@@ -1114,7 +1066,7 @@ building_energy_nexus = {
 		potential = {
 			exists = owner
 			owner = {
-				is_regular_empire = yes
+				is_gestalt = no
 				is_fallen_empire_spiritualist = no
 			}
 		}
@@ -1210,23 +1162,6 @@ building_energy_nexus = {
 		}
 		text = job_fe_acolyte_generator_effect_desc
 	}
-
-	ai_resource_production = {
-		energy = 6
-		trigger = {
-			always = yes
-		}
-	}
-	ai_resource_production = {
-		energy = 9
-		trigger = {
-			planet_resource_compare = {
-				resource = energy
-				value >= 32
-				type = produces
-			}
-		}
-	}
 }
 
 building_resource_silo = {
@@ -1268,7 +1203,7 @@ building_resource_silo = {
 	triggered_planet_modifier = {
 		potential = {
 			exists = owner
-			owner = { is_regular_empire = yes }
+			owner = { is_gestalt = no }
 		}
 		modifier = {
 			job_clerk_add = 1
@@ -1295,7 +1230,17 @@ building_resource_silo = {
 	}
 
 	country_modifier = {
-		country_resource_max_add = 2000
+		country_resource_max_add = 5000
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_technology = tech_construction_templates
+			}
+		}
+		country_resource_max_add = 5000
 	}
 
 	prerequisites = {
@@ -1330,6 +1275,10 @@ building_bio_reactor = {
 				is_machine_empire = yes
 				is_mechanical_empire = yes
 				is_lithoid_empire = yes
+			}
+			OR = {
+				owner = { is_ai = no }
+				owner = { country_uses_food = no }
 			}
 		}
 	}

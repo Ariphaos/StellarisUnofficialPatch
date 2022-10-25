@@ -9,62 +9,26 @@
 # The implication of that is that you can not balance the weights TOO FAR from each other - otherwise some modules will never be chosen, unless they are the only thing on the evaluation
 # Due to the progression of the game and the unlocking of tech, though, it is often the case that there will only be 1 item on the list at any given time anyway
 
+# How the AI/game selects which type to use:
+# First of all, it will try to find one which fulfils both the potential trigger and has a positive weight_modifier
+# If this succeeds, the starbase already has a type.
+# If it fails, it will go through each starbase type that fulfils the potential trigger. Then it will check the ratio it has built (total of this type / total upgraded starbases) compared to the desired ratio. If it is set to desire a minimum value and owns less than that, it multiplies its ratio desire by * 100. Then it build according to that type's template.
+
 # Shipyard
 sshipyard = {
 	potential = {
 		has_starbase_size > starbase_outpost
-		OR = {
-			count_starbase_modules = {
-				type = shipyard
-				count > 0
-			}
-			owner = {
-				is_ai = yes # fix
-				NOT = {
-					any_owned_starbase = {
-						has_starbase_module = shipyard
-					}
-				}
-			}
-		}
 	}
 
 	weight_modifier = {
-		base = 100
-		modifier = {
-			add = 100
-			count_starbase_modules = {
+		base = 0
+		complex_trigger_modifier = { #+100 for each shipyard
+			trigger = count_starbase_modules
+			parameters = {
 				type = shipyard
-				count > 1
 			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = shipyard
-				count > 2
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = shipyard
-				count > 3
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = shipyard
-				count > 4
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = shipyard
-				count > 5
-			}
+			mode = add
+			mult = 100
 		}
 		modifier = {
 			add = 1000
@@ -81,13 +45,12 @@ sshipyard = {
 	ai_design = {
 		min = {
 			base = 1
-			factor = 1
 		}
 
 		ratio = {
-			base = 0.25
+			base = 0.20
 			modifier = {
-				add = 0.10
+				add = 0.05
 				exists = owner
 				owner = {
 					has_ethic = ethic_militarist
@@ -100,6 +63,18 @@ sshipyard = {
 					has_ethic = ethic_fanatic_militarist
 				}
 			}
+			modifier = {
+			 	factor = 0.5
+			 	exists = owner
+			 	owner = {
+			 		any_owned_megastructure = {
+			 			OR = {
+			 				is_megastructure_type = mega_shipyard_3
+			 				is_megastructure_type = mega_shipyard_restored
+			 			}
+			 		}
+			 	}
+			 }
 		}
 
 		# token followed by priority
@@ -109,15 +84,15 @@ sshipyard = {
 			}
 
 			fleet_academy = {
-				base = 1.00
+				base = 10.00
 			}
 
 			titan_yards = {
-				base = 1.00
+				base = 2.00
 			}
 
 			colossus_yards = {
-				base = 1.00
+				base = 2.00
 			}
 
 			ice_mining_station = {
@@ -125,11 +100,11 @@ sshipyard = {
 			}
 
 			dragon_hatchery = {
-				base = 1.00
+				base = 2.00
 			}
 
 			hydroponics_bay = {
-				base = 1.00
+				base = 0
 			}
 		}
 
@@ -143,7 +118,7 @@ sshipyard = {
 			}
 
 			hangar_bay = {
-				base = 0.45
+				base = 0
 			}
 		}
 	}
@@ -153,59 +128,27 @@ sshipyard = {
 sanchorage = {
 	potential = {
 		has_starbase_size > starbase_outpost
-		count_starbase_modules = {
-			type = anchorage
-			count > 0
-		}
 	}
 
 	weight_modifier = {
-		base = 100
-		modifier = {
-			add = 100
-			count_starbase_modules = {
+		base = 0
+		complex_trigger_modifier = { #+100 for each anchorage
+			trigger = count_starbase_modules
+			parameters = {
 				type = anchorage
-				count > 1
 			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = anchorage
-				count > 2
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = anchorage
-				count > 3
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = anchorage
-				count > 4
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = anchorage
-				count > 5
-			}
+			mode = add
+			mult = 100
 		}
 	}
 
 	ai_design = {
 		min = {
 			base = 0
-			factor = 0
 		}
 
 		ratio = {
-			base = 0.45
+			base = 0.65
 			modifier = {
 				add = 0.05
 				exists = owner
@@ -226,7 +169,7 @@ sanchorage = {
 		buildings = {
 
 			naval_logistics_office = {
-				base = 1.00
+				base = 2.00
 			}
 
 			defense_grid = {
@@ -258,16 +201,12 @@ sanchorage = {
 			}
 
 			hydroponics_bay = {
-				base = 2.00
+				base = 1.00
 			}
 		}
 
 		modules = {
 			anchorage = {
-				base = 1.00
-			}
-
-			solar_panel_network = {
 				base = 1.00
 			}
 		}
@@ -278,49 +217,109 @@ sanchorage = {
 strading_hub = {
 	potential = {
 		has_starbase_size > starbase_outpost
-		count_starbase_modules = {
-			type = trading_hub
-			count > 0
-		}
 		exists = owner
 		owner = { NOT = { has_ethic = ethic_gestalt_consciousness } }
 	}
 
 	weight_modifier = {
-		base = 100
+		base = 0
+		complex_trigger_modifier = { #+100 for each trading_hub
+			trigger = count_starbase_modules
+			parameters = {
+				type = trading_hub
+			}
+			mode = add
+			mult = 100
+		}
+		# Added
 		modifier = {
 			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 1
+			has_starbase_building = warp_fluctuator # Hyperlane Registrar
+		}
+		# offworld_trading_company?
+		modifier = {
+			add = 300
+			owner = { is_ai = yes }
+			solar_system = {
+				is_capital_system = yes
+				NOT = {
+					any_neighbor_system = {
+						exists = starbase
+						starbase = {
+							owner = { is_same_value = root.owner }
+							has_starbase_module = trading_hub
+						}
+					}
+				}
 			}
 		}
 		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 2
+			add = 150
+			owner = { is_ai = yes }
+			solar_system = {
+				any_neighbor_system = {
+					# good to place near capital
+					is_capital_system = yes
+					exists = starbase
+
+					NOR = {
+						# ...if capital isn't already a trade hub
+						starbase = {
+							count_starbase_modules = { type = trading_hub count > 1 }
+						} # Have to check for 2 because it always starts with 1.
+						# ...and no other system neighboring capital is a trade hub
+						any_neighbor_system = {
+							exists = starbase
+							starbase = {
+								NOT = { is_same_value = root }
+								owner = { is_same_value = root.owner }
+								has_starbase_module = trading_hub
+							}
+						}
+					}
+				}
 			}
 		}
+		# want to be near center of empire, not borders
+		# has_trade_route = yes
+		# num_trade_routes - Counts the number trade routes in the empire.
 		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 3
+			factor = 0 # Useless if cut off or if every owned system has a starbase
+			owner = {
+				is_ai = yes
+				is_same_value = root.owner
+			}
+
+			solar_system = { 
+				OR = {
+					has_trade_route = no # assuming this include the trade route it generates
+					# don't want to count other empire's trade routes; no good trigger exists for excluding them though.
+					owner = { num_starbases >= trigger:controlled_systems } # does this include orbital rings?
+					NOT = {
+						any_neighbor_system = {
+							exists = owner
+							owner = { is_same_value = root.owner }
+						}
+					}
+				}
 			}
 		}
+		# x0 if ai and trade collection not needed
 		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 4
-			}
-		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 5
+			factor = 0
+			owner = { is_ai = yes }
+			NOT = { has_starbase_module = trading_hub }
+			NOT = {
+				owner = {
+					any_system_within_border = {
+						has_uncollected_system_trade_value > 0
+						# distance = {
+						# 	source = root
+						# 	max_jumps = 6 # technically 8 is possible w/ registrar & mercantile tradition
+						# 	# doesn't account for jumping thru borders
+						# }
+					}
+				}
 			}
 		}
 	}
@@ -328,23 +327,28 @@ strading_hub = {
 	ai_design = {
 		min = {
 			base = 0
-			factor = 0
 		}
 
 		ratio = {
-			base = 0.3
+			base = 0.10
 			modifier = {
 				add = 0.05
 				exists = owner
 				owner = {
-					has_ethic = ethic_materialist
+					OR = {
+						has_ethic = ethic_xenophile
+						is_megacorp = yes
+					}
 				}
 			}
 			modifier = {
 				add = 0.10
 				exists = owner
 				owner = {
-					has_ethic = ethic_fanatic_materialist
+					OR = {
+						has_ethic = ethic_fanatic_xenophile
+						is_megacorp = yes
+					}
 				}
 			}
 		}
@@ -404,139 +408,88 @@ strading_hub = {
 sfortress = {
 	potential = {
 		has_starbase_size > starbase_outpost
+		exists = owner
 		OR = {
-			has_starbase_module = gun_battery
-			has_starbase_module = missile_battery
-			has_starbase_module = hangar_bay
+			owner = { is_ai = no }
+			AND = {
+				solar_system = { is_bottleneck_system = yes }
+				closest_system = {
+					min_steps = 0
+					max_steps = 2
+					limit = {
+						exists = owner
+						owner = {
+							is_country_type = default
+							NOR = {
+								is_same_value = root.owner
+								is_in_federation_with = root.owner
+								has_association_status = root.owner
+								has_defensive_pact = root.owner
+								has_non_aggression_pact = root.owner
+								has_overlord = root.owner
+								AND = {
+									has_subject = root.owner
+									has_loyalty > 0
+								}
+							}
+						}
+					}
+					exists = this
+				}
+			}
 		}
 	}
 
+	ai_use_defense_platforms = yes #AI will not build defense platforms otherwise, except in the capital system
+
 	weight_modifier = {
-		base = 75
-		modifier = {
-			add = 75
-			count_starbase_modules = {
+		base = 0
+		complex_trigger_modifier = { #+75 for each gun_battery
+			trigger = count_starbase_modules
+			parameters = {
 				type = gun_battery
-				count > 0
 			}
+			mode = add
+			mult = 75
 		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = gun_battery
-				count > 1
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = gun_battery
-				count > 2
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = gun_battery
-				count > 3
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = gun_battery
-				count > 4
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = gun_battery
-				count > 5
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
+		complex_trigger_modifier = { #+75 for each missile_battery
+			trigger = count_starbase_modules
+			parameters = {
 				type = missile_battery
-				count > 0
 			}
+			mode = add
+			mult = 75
 		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = missile_battery
-				count > 1
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = missile_battery
-				count > 2
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = missile_battery
-				count > 3
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = missile_battery
-				count > 4
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = missile_battery
-				count > 5
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
+		complex_trigger_modifier = { #+75 for each hangar_bay
+			trigger = count_starbase_modules
+			parameters = {
 				type = hangar_bay
-				count > 0
 			}
+			mode = add
+			mult = 75
 		}
 		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = hangar_bay
-				count > 1
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = hangar_bay
-				count > 2
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = hangar_bay
-				count > 3
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = hangar_bay
-				count > 4
-			}
-		}
-		modifier = {
-			add = 75
-			count_starbase_modules = {
-				type = hangar_bay
-				count > 5
+			add = 150
+			solar_system = { is_bottleneck_system = yes }
+			closest_system = {
+				max_steps = 2
+				limit = {
+					exists = owner
+					owner = {
+						OR = {
+							is_rival = root.owner
+							is_hostile_to = root.owner
+							is_hostile = root.owner
+							is_domineering_to = root.owner
+							is_unfriendly_to = root.owner
+							is_angry_to = root.owner
+							is_belligerent_to = root.owner
+							root.owner = { is_threatened_to = prev }
+							has_claim = root.owner
+						}
+					}
+				}
+				exists = this
 			}
 		}
 	}
@@ -544,23 +497,22 @@ sfortress = {
 	ai_design = {
 		min = {
 			base = 0
-			factor = 0
 		}
 
 		ratio = {
-			base = 0.25
+			base = 0.10
 			modifier = {
 				add = 0.10
 				exists = owner
 				owner = {
-					has_ethic = ethic_militarist
+					has_ethic = ethic_pacifist
 				}
 			}
 			modifier = {
-				add = 0.1
+				add = 0.10
 				exists = owner
 				owner = {
-					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_fanatic_pacifist
 				}
 			}
 		}
@@ -588,20 +540,16 @@ sfortress = {
 				base = 0.90
 			}
 
-			warp_fluctuator = {
-				base = 0.90
-			}
-
 			ice_mining_station = {
 				base = 3.00
 			}
 
 			dragon_hatchery = {
-				base = 3.00
+				base = 0.0
 			}
 
 			hydroponics_bay = {
-				base = 0.25
+				base = 0.0
 			}
 		}
 
@@ -625,49 +573,591 @@ sfortress = {
 strading_hub_gestalt = {
 	potential = {
 		has_starbase_size > starbase_outpost
-		count_starbase_modules = {
-			type = trading_hub
-			count > 0
-		}
 		exists = owner
 		owner = { has_ethic = ethic_gestalt_consciousness }
 	}
 
 	weight_modifier = {
-		base = 100
-		modifier = {
-			add = 100
-			count_starbase_modules = {
+		base = 0
+		complex_trigger_modifier = { #+100 for each trading_hub
+			trigger = count_starbase_modules
+			parameters = {
 				type = trading_hub
-				count > 1
+			}
+			mode = add
+			mult = 100
+		}
+	}
+}
+
+### ORBITAL RINGS
+
+sorbital_ring = { # generic
+	potential = { is_orbital_ring = yes }
+	weight_modifier = { base = 10 }
+	ai_design = {
+		min = {
+			base = 0
+		}
+		modules = {
+			orbital_ring_habitation = {
+				base = 20.00
+				modifier = {
+					factor = 2
+					planet = {
+						num_free_districts = { type = any value <= 2 }
+					}
+				}
+			}
+
+			orbital_ring_shipyard = {
+				base = 0.0 # Generally better to use normal starbases for this
+			}
+
+			orbital_ring_anchorage = {
+				base = 0.0 # Generally better to use normal starbases for this
+			}
+
+			orbital_ring_gun_battery = {
+				base = 0.0
+			}
+
+			orbital_ring_missile_battery = {
+				base = 0.0
+			}
+
+			orbital_ring_hangar_bay = {
+				base = 0.0
 			}
 		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 2
+
+		# token followed by priority
+		buildings = {
+			ring_synapse_hub = {
+				base = 1.00
+			}
+
+			ring_maintenance_hub = {
+				base = 1.00
+			}
+
+			ring_bureaucracy_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_unity_designation = yes
+							has_building = building_sensorium_1
+							has_building = building_autochthon_monument
+							has_building = building_corporate_monument
+							has_building = building_galactic_memorial_1
+							has_building = building_simulation_1
+						}
+					}
+				}
+			}
+
+			ring_minerals_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_mining_designation = yes
+							has_building = building_mineral_purification_plant
+							has_building = building_mineral_purification_hub
+						}
+					}
+				}
+			}
+
+			ring_energy_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_generator_designation = yes
+							has_building = building_energy_grid
+							has_building = building_energy_nexus
+						}
+					}
+				}
+			}
+
+			ring_food_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_farming_designation = yes
+							has_building = building_food_processing_facility
+							has_building = building_food_processing_center
+						}
+					}
+				}
+			}
+
+			ring_consumer_goods_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_factory_designation = yes
+							has_industrial_designation = yes
+							has_building = building_factory_1
+							has_building = building_factory_2
+							has_building = building_factory_3
+						}
+					}
+				}
+			}
+
+			ring_alloys_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_foundry_designation = yes
+							has_industrial_designation = yes
+							has_building = building_foundry_1
+							has_building = building_foundry_2
+							has_building = building_foundry_3
+						}
+					}
+				}
+			}
+
+			ring_trade_hub = {
+				base = 1
+				modifier = {
+					add = 2
+					planet = {
+						OR = {
+							has_trade_designation = yes
+							has_building = building_galactic_stock_exchange
+						}
+					}
+				}
 			}
 		}
+	}
+}
+
+# Shipyard
+sorbital_shipyard = {
+	potential = {
+		is_orbital_ring = yes
+		has_starbase_module = orbital_ring_shipyard
+	}
+
+	weight_modifier = {
+		base = 0
+
+		complex_trigger_modifier = { # +100 for each shipyard
+			trigger = count_starbase_modules
+			parameters = {
+				type = orbital_ring_shipyard
+			}
+			mode = add
+			mult = 100
+		}
+
 		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 3
+			add = 1000
+			owner = {
+				NOR = {
+					any_owned_megastructure = {
+						OR = {
+							is_megastructure_type = mega_shipyard_1
+							is_megastructure_type = mega_shipyard_2
+							is_megastructure_type = mega_shipyard_3
+							is_megastructure_type = mega_shipyard_restored
+						}
+					}
+					any_owned_starbase = {
+						has_starbase_module = shipyard
+						has_starbase_module = orbital_ring_shipyard
+					}
+				}
 			}
 		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 4
+	}
+
+	ai_design = {
+		min = {
+			base = 0
+		}
+
+		# token followed by priority
+		buildings = {
+			crew_quarters = {
+				base = 1.00
+			}
+
+			hydroponics_bay = {
+				base = 0.25
 			}
 		}
-		modifier = {
-			add = 100
-			count_starbase_modules = {
-				type = trading_hub
-				count > 5
+
+		modules = {
+			orbital_ring_shipyard = {
+				base = 1.00
+			}
+		}
+	}
+}
+
+# Anchorage
+sorbital_anchorage = {
+	potential = {
+		is_orbital_ring = yes
+		has_starbase_module = orbital_ring_anchorage
+	}
+
+	weight_modifier = {
+		base = 0
+		complex_trigger_modifier = { # +100 for each anchorage
+			trigger = count_starbase_modules
+			parameters = {
+				type = orbital_ring_anchorage
+			}
+			mode = add
+			mult = 100
+		}
+	}
+
+	ai_design = {
+		min = {
+			base = 0
+		}
+
+		ratio = {
+			base = 0.15
+			modifier = {
+				add = 0.15
+				exists = owner
+				owner = {
+					is_militarist = yes
+				}
+			}
+		}
+
+		# token followed by priority
+		buildings = {
+			naval_logistics_office = {
+				base = 10.00
+			}
+
+			defense_grid = {
+				base = 0.25
+			}
+
+			communications_jammer = {
+				base = 0.25
+			}
+
+			nebula_refinery = {
+				base = 2.00
+			}
+
+			hydroponics_bay = {
+				base = 1.00
+			}
+		}
+
+		modules = {
+			orbital_ring_anchorage = {
+				base = 1.00
+			}
+
+			orbital_ring_habitation = {
+				base = 0
+				modifier = {
+					add = 1
+					planet = {
+						num_free_districts = { type = any value <= 2 }
+					}
+				}
+			}
+		}
+	}
+}
+
+# Fortress System
+sorbital_fortress = {
+	potential = {
+		is_orbital_ring = yes
+		OR = {
+			has_starbase_module = orbital_ring_gun_battery
+			has_starbase_module = orbital_ring_missile_battery
+			has_starbase_module = orbital_ring_hangar_bay
+		}
+	}
+
+	ai_use_defense_platforms = yes #AI will not build defense platforms otherwise, except in the capital system
+
+	weight_modifier = {
+		base = 0
+		complex_trigger_modifier = { # +75 for each gun_battery
+			trigger = count_starbase_modules
+			parameters = {
+				type = orbital_ring_gun_battery
+			}
+			mode = add
+			mult = 75
+		}
+		complex_trigger_modifier = { # +75 for each missile_battery
+			trigger = count_starbase_modules
+			parameters = {
+				type = orbital_ring_missile_battery
+			}
+			mode = add
+			mult = 75
+		}
+		complex_trigger_modifier = { # +75 for each hangar_bay
+			trigger = count_starbase_modules
+			parameters = {
+				type = orbital_ring_hangar_bay
+			}
+			mode = add
+			mult = 75
+		}
+	}
+
+	ai_design = {
+		min = {
+			base = 0
+		}
+
+		ratio = {
+			base = 0.15
+			modifier = {
+				add = 0.15
+				exists = owner
+				owner = {
+					is_pacifist = yes
+				}
+			}
+		}
+
+		# token followed by priority
+		buildings = {
+			target_uplink_computer = {
+				base = 2.00
+			}
+
+			command_center = {
+				base = 2.00
+			}
+
+			defense_grid = {
+				base = 1.00
+			}
+
+			communications_jammer = {
+				base = 0.90
+			}
+
+			disruption_field = {
+				base = 0.90
+			}
+		}
+
+		modules = {
+			orbital_ring_hangar_bay = {
+				base = 1.00
+				modifier = {
+					factor = 3
+					owner = {
+						is_preferred_weapons = weapon_type_strike_craft
+					}
+				}
+			}
+
+			orbital_ring_missile_battery = {
+				base = 1.00
+				modifier = {
+					factor = 3
+					owner = {
+						is_preferred_weapons = weapon_type_explosive
+					}
+				}
+			}
+
+			orbital_ring_gun_battery = {
+				base = 1.00
+				modifier = {
+					factor = 3
+					owner = {
+						OR = {
+							is_preferred_weapons = weapon_type_energy
+							is_preferred_weapons = weapon_type_kinetic
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+sorbital_habitation = {
+	potential = {
+		is_orbital_ring = yes
+		has_starbase_module = orbital_ring_habitation
+	}
+
+	weight_modifier = {
+		base = 0
+		complex_trigger_modifier = { # +75 for each habitation module
+			trigger = count_starbase_modules
+			parameters = {
+				type = orbital_ring_habitation
+			}
+			mode = add
+			mult = 75
+		}
+	}
+
+	ai_design = {
+		min = {
+			base = 1
+		}
+
+		ratio = {
+			base = 0.50
+			modifier = {
+				add = 0.25
+				exists = owner
+				owner = {
+					is_pacifist = yes
+				}
+			}
+		}
+
+		# token followed by priority
+		buildings = {
+			ring_synapse_hub = {
+				base = 1.00
+			}
+
+			ring_maintenance_hub = {
+				base = 1.00
+			}
+
+			ring_bureaucracy_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_designation = col_bureau
+							has_designation = col_bureau_spiritualist
+							has_building = building_sensorium_1
+							has_building = building_autochthon_monument
+							has_building = building_corporate_monument
+							has_building = building_galactic_memorial_1
+							has_building = building_simulation_1
+						}
+					}
+				}
+			}
+
+			ring_minerals_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_designation = col_mining
+							has_building = building_mineral_purification_plant
+							has_building = building_mineral_purification_hub
+						}
+					}
+				}
+			}
+
+			ring_energy_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_designation = col_generator
+							has_building = building_energy_grid
+							has_building = building_energy_nexus
+						}
+					}
+				}
+			}
+
+			ring_food_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_designation = col_farming
+							has_building = building_food_processing_facility
+							has_building = building_food_processing_center
+						}
+					}
+				}
+			}
+
+			ring_consumer_goods_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_designation = col_industrial
+							has_designation = col_factory
+							has_building = building_factory_1
+							has_building = building_factory_2
+							has_building = building_factory_3
+						}
+					}
+				}
+			}
+
+			ring_alloys_hub = {
+				base = 0
+				modifier = {
+					add = 3
+					planet = {
+						OR = {
+							has_designation = col_industrial
+							has_designation = col_foundry
+							has_building = building_foundry_1
+							has_building = building_foundry_2
+							has_building = building_foundry_3
+						}
+					}
+				}
+			}
+
+			ring_trade_hub = {
+				base = 1
+				modifier = {
+					add = 2
+					planet = {
+						OR = {
+							has_designation = col_city
+							has_building = building_galactic_stock_exchange
+						}
+					}
+				}
+			}
+		}
+
+		modules = {
+			orbital_ring_habitation = {
+				base = 20.00
 			}
 		}
 	}
