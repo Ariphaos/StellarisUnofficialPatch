@@ -964,6 +964,16 @@ robot_pop_strength = {
 	}
 }
 
+num_toxic_terraform_candidates = {
+	complex_trigger_modifier = {
+		trigger = count_planet_within_border
+		parameters = {
+			limit = { has_modifier = toxic_terraforming_candidate }
+		}
+		mode = add
+	}
+}
+
 robot_pop_strength_headcount = {
 	# Headcount Progress comes from Number of Robot Pops:
 	### Max 5 at: 1000 Robot Pops, OR 250 Robot Specialists with "AI allowed".
@@ -1264,6 +1274,99 @@ brood_usage_mult = {
 	}
 }
 
+conclave_election_ascension_value = {
+	add = trigger:num_planetary_ascension_tiers
+	mult = 0.1
+	add = 1
+}
+
+conclave_election_robots_value = {
+	base = 1
+	complex_trigger_modifier = {
+		trigger = pop_percentage
+		parameters = {
+			limit = { is_robot_pop = yes }
+		}
+		mode = subtract
+	}
+}
+
+conclave_election_bribes_value = {
+	base = 1
+	add = conclave_election_bribes
+}
+
+conclave_election_value = {
+	complex_trigger_modifier = {
+		trigger = pop_percentage
+		parameters = {
+			limit = {
+				OR = {
+					has_job = priest
+					has_job = high_priest
+					has_job = death_priest
+					has_job = mortal_initiate
+					has_job = preacher
+				}
+			}
+		}
+		mode = add
+		mult = 200 #normalising percentage, then x2
+	}
+
+	mult = value:conclave_election_robots_value
+	mult = value:conclave_election_ascension_value
+
+	modifier = {
+		factor = 1.1
+		has_ethic = ethic_spiritualist
+	}
+	modifier = {
+		factor = 1.25
+		has_ethic = ethic_fanatic_spiritualist
+	}
+	modifier = {
+		factor = 1.25
+		has_tradition = tr_psionics_finish
+	}
+	modifier = {
+		factor = 5
+		exists = ruler
+		ruler = { has_trait = leader_trait_ruler_chosen }
+	}
+	modifier = {
+		factor = 1.25
+		has_relic = r_severed_head
+	}
+	modifier = {
+		factor = 1.25
+		any_owned_planet = { has_modifier = holy_planet }
+	}
+	modifier = {
+		factor = 1.25
+		check_variable = {
+			which = num_consecrated_worlds
+			value > 2
+		}
+	}
+	modifier = {
+		factor = conclave_election_random_factor
+		is_variable_set = conclave_election_random_factor
+	}
+	modifier = {
+		factor = value:conclave_election_bribes_value
+		is_variable_set = conclave_election_bribes
+	}
+	modifier = {
+		subtract = 100
+		is_gestalt = yes
+	}
+	modifier = {
+		subtract = 1000
+		is_subject = yes
+	}
+}
+
 num_toxic_workplace = {
 	base = -1
 	complex_trigger_modifier = {
@@ -1280,12 +1383,48 @@ num_toxic_workplace = {
 consequences_cost = {
 	base = 1
 	complex_trigger_modifier = {
-   		trigger = resource_income_compare
-   		parameters = {
-   		   	resource = unity
-   		}
-   		mode = add
+		trigger = resource_income_compare
+		parameters = {
+			resource = unity
+		}
+		mode = add
 	}
 	abs = yes
 	divide = 1.2
+}
+
+negative_opinion_decay_rate = {
+	base = 1
+	modifier = {
+		add = 0.5
+		OR = {
+			is_improving_relations_with = from
+			from = { is_improving_relations_with = root }
+		}
+	}
+	modifier = {
+		subtract = 0.5
+		OR = {
+			is_harming_relations_with = from
+			from = { is_harming_relations_with = root }
+		}
+	}
+}
+
+positive_opinion_decay_rate = {
+	base = 1
+	modifier = {
+		subtract = 0.5
+		OR = {
+			is_improving_relations_with = from
+			from = { is_improving_relations_with = root }
+		}
+	}
+	modifier = {
+		add = 0.5
+		OR = {
+			is_harming_relations_with = from
+			from = { is_harming_relations_with = root }
+		}
+	}
 }

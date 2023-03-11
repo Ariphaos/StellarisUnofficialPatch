@@ -162,6 +162,12 @@ event = {
 			country_event = { id = origin.60 }
 		}
 
+		# Shattered Ring
+		every_playable_country = {
+			limit = { has_origin = origin_shattered_ring }
+			country_event = { id = origin.3150 }
+		}
+
 		# Slingshot to the Stars
 		every_playable_country = {
 			limit = { has_origin = origin_star_slingshot }
@@ -583,6 +589,7 @@ country_event = {
 			}
 			give_technology = { message = no tech = tech_powered_exoskeletons }
 			give_technology = { message = no tech = tech_robotic_workers }
+			add_research_option = tech_robomodding
 		}
 		if = {
 			limit = {
@@ -659,30 +666,65 @@ country_event = {
 				set_take_point = yes
 				effect = {
 					set_owner = prev
-
-					while = {
-						count = 2
-						create_ship = {
-							name = random
-							random_existing_design = corvette
-						}
-					}
 					if = {
 						limit = {
-							root = { has_origin = origin_progenitor_hive }
+							root = {
+								NOT = {
+									has_valid_civic = civic_hive_cordyceptic_drones
+								}
+							}
 						}
-						create_ship = {
-							name = random
-							random_existing_design = offspring_corvette
+						while = {
+							count = 2
+							create_ship = {
+								name = random
+								random_existing_design = corvette
+							}
 						}
+						if = {
+							limit = {
+								root = { has_origin = origin_progenitor_hive }
+							}
+							create_ship = {
+								name = random
+								random_existing_design = offspring_corvette
+							}
+						}
+						else = {
+							create_ship = {
+								name = random
+								random_existing_design = corvette
+							}
+						}
+						set_location = prev.capital_star
 					}
 					else = {
-						create_ship = {
-							name = random
-							random_existing_design = corvette
+						while = {
+							count = 2
+							create_ship = {
+								name = NAME_Reanimated_Small_Space_Organism
+								design = NAME_Reanimated_Small_Space_Organism
+								prefix = yes
+							}
 						}
+						if = {
+							limit = {
+								root = { has_origin = origin_progenitor_hive }
+							}
+							create_ship = {
+								name = random
+								random_existing_design = offspring_corvette
+							}
+						}
+						else = {
+							create_ship = {
+								name = "NAME_Reanimated_Small_Space_Organism"
+								design = NAME_Reanimated_Small_Space_Organism
+								prefix = yes
+							}
+						}
+						set_location = prev.capital_star
 					}
-					set_location = prev.capital_star
 				}
 			}
 		}
@@ -957,11 +999,15 @@ planet_event = {
 			}
 			while = {
 				count = 2
-				add_district = district_industrial
+				add_district_if_possible_effect = {
+					district = district_industrial
+				}
 			}
 			while = {
 				count = 2
-				add_district = district_mining_uncapped
+				add_district_if_possible_effect = {
+					district = district_mining_uncapped
+				}
 			}
 			if = {
 				limit = {
@@ -969,15 +1015,25 @@ planet_event = {
 				}
 				while = {
 					count = 2
-					add_district = district_city
+					add_district_if_possible_effect = {
+						district = district_city
+					}
 				}
 				if = {
 					limit = {
-						owner = { is_lithoid_empire = yes }
+						owner = { 
+							is_lithoid_empire = yes
+						}
 					}
-					add_district = district_srw_commercial
+					add_district_if_possible_effect = {
+						district = district_srw_commercial
+					}
 				}
-				else = { add_district = district_farming_uncapped }
+				else = {
+					add_district_if_possible_effect = {
+						district = district_farming_uncapped
+					}
+				}
 			}
 			else_if = {
 				limit = {
@@ -985,20 +1041,30 @@ planet_event = {
 				}
 				while = {
 					count = 2
-					add_district = district_hive
+					add_district_if_possible_effect = {
+						district = district_hive
+					}
 				}
 				if = {
 					limit = {
 						owner = { is_lithoid_empire = yes }
 					}
-					add_district = district_hive
+					add_district_if_possible_effect = {
+						district = district_hive
+					}
 				}
-				else = { add_district = district_farming_uncapped }
+				else = {
+					add_district_if_possible_effect = {
+						district = district_farming_uncapped
+					}
+				}
 			}
 			else = {
 				while = {
 					count = 3
-					add_district = district_nexus
+					add_district_if_possible_effect = {
+						district = district_nexus
+					}
 				}
 			}
 

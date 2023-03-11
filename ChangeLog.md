@@ -1,5 +1,37 @@
 # ChangeLog
 
+## March 10th
+
+- Fixed invalid scope for faction check (SirBlackAxe)
+- Restored station_uninhabitable_category (HyperLordBender)
+- Fixed some error spamming from a couple events. (koras321)
+- Fixed erroneous sector scope for starbase building. (koras321)
+- Should have fixed unrest.161.
+
+
+## December 6th
+
+- 3.6.1 Release
+- Added surveillance_supercomputer_system_spawned flag for people/mods who want a way to safely guarantee the system spawns.
+
+Paradox Fixes:
+
+- Horizon signal functions on shattered ring origin.
+
+## November
+
+- 3.6 Release
+
+Paradox fixes:
+
+- AI preference grants alpine habitability
+- Erudite and enigmatic intelligence affect all science-producing jobs on a planet
+- Fixed first contact opinion weights
+- Fixed opinions for destroying caravaneer home
+- A handful of SirBlackAxe's faction logic fixes
+
+## November 3rd
+
 - AI is more likely to comply with galactic law regarding Amoebas, and gives more weight to the strength of its convictions.
 - Should have removed the last of the legacy AI economic code.
 - Purging fix now fires fire_on_action appropriately.

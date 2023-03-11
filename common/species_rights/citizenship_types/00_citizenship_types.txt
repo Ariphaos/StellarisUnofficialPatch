@@ -2,11 +2,11 @@
 # this = species
 
 citizenship_full = {
-	token = citizenship_full
+	is_full_citizenship = yes
 
 	potential = {
 		exists = from
-		NOT = { from = { is_machine_empire = yes } }
+		from = { is_machine_empire = no }
 		NOR = {
 			has_trait = trait_machine_unit
 			is_shackled_robot_species_rights = yes
@@ -27,7 +27,7 @@ citizenship_full = {
 		custom_tooltip = {
 			fail_text = "HIVE_MIND_SPECIES_CITIZENS_ONLY"
 			OR = {
-				NOT = { from = { is_hive_empire = yes } }
+				from = { is_hive_empire = no }
 				has_trait = trait_hive_mind
 			}
 		}
@@ -66,7 +66,7 @@ citizenship_full = {
 }
 
 citizenship_full_machine = {
-	token = citizenship_full_machine
+	is_full_citizenship = yes
 
 	potential = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
@@ -105,7 +105,7 @@ citizenship_full_machine = {
 }
 
 citizenship_assimilation = {
-	token = citizenship_assimilation
+	is_assimilation = yes
 
 	potential = {
 		OR = {
@@ -114,24 +114,64 @@ citizenship_assimilation = {
 		}
 		exists = from
 		from = {
-			NOT = { has_civic = civic_fanatic_purifiers }
 			OR = {
-				AND = { # machine assimilator
-					is_machine_empire = yes
-					has_civic = civic_machine_assimilator
+				is_homicidal = no
+				AND = {
+					has_civic = civic_machine_terminator
+					has_active_tradition = tr_synthetics_adopt_machine
+					root = {
+						is_robotic_species = yes
+					}
 				}
-				AND = { # non-devouring hive mind
-					is_hive_empire = yes
-					NOT = { has_civic = civic_hive_devouring_swarm }
-					ROOT = { is_robotic = no }
+			}
+			OR = {
+				AND = { # machine cyborg assimilator
+					has_authority = auth_machine_intelligence
+					has_civic = civic_machine_assimilator
+					OR = {
+						AND = {
+							has_active_tradition = tr_synthetics_adopt_machine
+							root = {
+								is_robotic_species = yes
+							}
+						}
+						root = {
+							NOR = {
+								has_trait = trait_mechanical
+								has_trait = trait_machine_unit
+								has_trait = trait_cybernetic
+							}
+						}
+					}
+				}
+				AND = { # machine synthetic assimilator
+					has_authority = auth_machine_intelligence
+					has_active_tradition = tr_synthetics_adopt_machine
+					root = {
+						is_robotic_species = yes
+					}
 				}
 				AND = {
-					has_ascension_perk = ap_evolutionary_mastery
-					is_gestalt = no
+					OR = {
+						AND = {
+							# non-devouring hive mind
+							has_authority = auth_hive_mind
+							NOT = { has_civic = civic_hive_devouring_swarm }
+						}
+						# Regular empire
+						NOT = { has_ethic = ethic_gestalt_consciousness }
+					}
+					OR = {
+						has_tradition = tr_genetics_creation	# genetic assimilation
+						has_tradition = tr_cybernetics_transubstantiation_synthesis # cybernetic assimilation
+					}
+					ROOT = { is_robotic_species = no }
 				}
-				has_country_flag = synthetic_empire # synthetically ascended empire
-				has_country_flag = flesh_weakened # cyborg empire
-				has_ascension_perk = ap_transcendence # psionic assimilation
+				AND = {
+					has_country_flag = synth_assimilation # synth assimilation
+					NOT = { has_authority = auth_machine_intelligence }
+				}
+				has_tradition = tr_psionics_psionic_assimilation # psionic assimilation
 			}
 		}
 	}
@@ -147,13 +187,22 @@ citizenship_assimilation = {
 			if = {
 				limit = { is_lonely_hive_mind_pop = yes }
 				from = {
-					has_ascension_perk = ap_evolutionary_mastery
+					OR = {
+						has_tradition = tr_genetics_creation
+						has_tradition = tr_cybernetics_transubstantiation_synthesis
+						has_tradition = tr_cybernetics_assimilator_inevitable_assimilation
+					}
 				}
 			}
 		}
 		custom_tooltip = {
 			fail_text = "disconnected_machine_pops_collapse_citizenship"
-			is_disconnected_machine_pop = no
+			OR = {
+				from = {
+					has_country_flag = synth_assimilation 
+				}
+				is_disconnected_machine_pop = no
+			}
 		}
 		if = {
 			limit = {
@@ -161,22 +210,20 @@ citizenship_assimilation = {
 			}
 			custom_tooltip = { # machine assimilator
 				fail_text = MACHINE_SPECIES_MUST_BE_ORGANIC
-				NOR = {
-					has_trait = trait_mechanical
-					has_trait = trait_machine_unit
-					has_trait = trait_cybernetic
-				}
+			}
+			custom_tooltip = { 
+				fail_text = requires_tradition_tr_synthetics_adopt
 			}
 		}
 		else_if = {
 			limit = {
-				from = { is_hive_empire = yes }
+				from = {
+					has_authority = auth_hive_mind
+					has_active_tradition = tr_genetics_creation
+				}
 			}
 			custom_tooltip = { # non-devouring hive mind
 				fail_text = HIVE_SPECIES_MUST_BE_NON_HIVE
-				from = {
-					has_ascension_perk = ap_evolutionary_mastery
-				}
 				NOR = {
 					has_trait = trait_hive_mind
 					has_trait = trait_mechanical
@@ -186,37 +233,64 @@ citizenship_assimilation = {
 		}
 		else_if = {
 			limit = {
-				from = { has_country_flag = synthetic_empire }
+				from = {
+					has_authority = auth_hive_mind
+					has_active_tradition = tr_cybernetics_transubstantiation_synthesis
+				}
 			}
-			custom_tooltip = { # synthetically ascended empire
-				fail_text = SYNTH_SPECIES_MUST_BE_ORGANIC
+			custom_tooltip = { # non-devouring hive mind
+				fail_text = HIVE_SPECIES_MUST_BE_NON_HIVE
 				NOR = {
 					has_trait = trait_mechanical
 					has_trait = trait_machine_unit
+					AND = {
+						has_trait = trait_hive_mind
+						has_trait = trait_cybernetic
+					}
 				}
 			}
 		}
 		else_if = {
 			limit = {
-				from = { has_country_flag = flesh_weakened }
+				from = {
+					NOT = { has_authority = auth_hive_mind }
+					has_active_tradition = tr_cybernetics_transubstantiation_synthesis
+				}
 			}
 			custom_tooltip = { # cyborg empire
 				fail_text = CYBORG_SPECIES_MUST_BE_ORGANIC
-				NOR = {
-					has_trait = trait_mechanical
-					has_trait = trait_machine_unit
-					has_trait = trait_cybernetic
+				OR = {
+					AND = {
+						has_trait = trait_hive_mind
+						from = {
+							NOT = {
+								has_authority = auth_hive_mind
+							}
+						}
+					}
+					AND = {
+						NOT = {
+							has_trait = trait_hive_mind
+						}
+						from = {
+							has_authority = auth_hive_mind
+						}
+					}
+					NOR = {
+						has_trait = trait_mechanical
+						has_trait = trait_machine_unit
+						has_trait = trait_cybernetic
+					}
 				}
 			}
 		}
 		else_if = {
 			limit = {
-				from = { has_ascension_perk = ap_transcendence }
+				from = { has_tradition = tr_psionics_psionic_assimilation }
 			}
 			custom_tooltip = { # species must be organic to transcend
 				fail_text = TRANSCENDING_SPECIES_MUST_BE_ORGANIC
-				is_robotic = no
-				NOT = { has_trait = trait_cybernetic }
+				is_robotic_species = no
 			}
 			custom_tooltip = { # species already has psionic trait
 				fail_text = TRANSCENDING_SPECIES_IS_ALREADY_PSIONIC
@@ -229,7 +303,7 @@ citizenship_assimilation = {
 		}
 		else_if = {
 			limit = {
-				from = { has_ascension_perk = ap_evolutionary_mastery }
+				from = { has_tradition = tr_genetics_creation }
 			}
 			custom_tooltip = {
 				fail_text = CAN_ONLY_ASSIMILATE_HIVES
@@ -255,8 +329,6 @@ citizenship_assimilation = {
 
 
 citizenship_organic_trophy = {
-	token = citizenship_organic_trophy
-
 	potential = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		exists = from
@@ -289,7 +361,6 @@ citizenship_organic_trophy = {
 }
 
 citizenship_limited = {
-	token = citizenship_limited
 	new_pop_weight = 0.75
 
 	pop_modifier = {
@@ -316,7 +387,7 @@ citizenship_limited = {
 		custom_tooltip = {
 			fail_text = "HIVE_MIND_SPECIES_CITIZENS_ONLY"
 			OR = {
-				NOT = { from = { is_hive_empire = yes } }
+				from = { is_hive_empire = no }
 				has_trait = trait_hive_mind
 			}
 		}
@@ -379,7 +450,7 @@ citizenship_limited = {
 }
 
 citizenship_slavery = {
-	token = citizenship_slavery
+	is_slavery = yes
 
 	in_breach_of = {
 		{
@@ -521,8 +592,7 @@ citizenship_slavery = {
 }
 
 citizenship_robot_servitude = {
-	token = citizenship_robot_servitude
-
+	is_robot_servant = yes
 	potential = {
 		exists = from
 		from = { is_gestalt = no }
@@ -551,8 +621,9 @@ citizenship_robot_servitude = {
 }
 
 citizenship_purge = {
-	token = citizenship_purge
 	new_pop_weight = 0.0
+
+	is_purge = yes
 
 	potential = {
 		exists = from
@@ -569,13 +640,6 @@ citizenship_purge = {
 
 	allow = {
 		hidden_trigger = { exists = from }
-		custom_tooltip = {
-			fail_text = "HIVE_MIND_MAIN_SPECIES_ALWAYS_CITIZEN"
-			NAND = {
-				from = { is_hive_empire = yes }
-				has_trait = trait_hive_mind
-			}
-		}
 		if = {
 			limit = { is_lonely_hive_mind_pop = yes }
 			hidden_trigger = { always = yes }
@@ -613,6 +677,11 @@ citizenship_purge = {
 		modifier = {
 			factor = 0
 			ariphaos_patch_slaves_expel = no
+		}
+		modifier = {
+			factor = 0
+			has_trait = trait_machine_unit
+			from = { is_machine_empire = yes }
 		}
 		modifier = {
 			factor = 0
@@ -696,8 +765,9 @@ citizenship_purge = {
 }
 
 citizenship_purge_machine = {
-	token = citizenship_purge_machine
 	new_pop_weight = 0.0
+
+	is_purge = yes
 
 	potential = {
 		exists = from

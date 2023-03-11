@@ -1,0 +1,139 @@
+# from = country
+# this = species
+
+colonization_control_yes = {
+	can_colonize = no
+	potential = {
+		NAND = {
+			from = { is_machine_empire = yes }
+			OR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+			}
+		}
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		if = {
+			limit = {
+				OR = {
+					has_citizenship_type = { country = from type = citizenship_purge }
+					has_citizenship_type = { country = from type = citizenship_purge_machine }
+					has_citizenship_type = { country = from type = citizenship_slavery }
+					has_citizenship_type = { country = from type = citizenship_robot_servitude }
+				}
+			}
+			hidden_trigger = { always = yes }
+		}
+		else = {
+			custom_tooltip = {
+				fail_text = same_species_disallowed
+				NOT = { is_same_species = from }
+			}
+		}
+	}
+
+	ai_will_do = {
+		factor = 2
+		modifier = {
+			factor = 0
+			from = {
+				NOR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					is_gestalt = yes
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			has_trait = trait_cybernetic
+			from = { has_valid_civic = civic_machine_assimilator }
+		}
+		modifier = {
+			factor = 0
+			has_slavery_type = { country = from type = slavery_indentured }
+		}
+	}
+}
+
+colonization_control_no = {
+	potential = {
+		exists = from
+		NAND = {
+			from = { is_machine_empire = yes }
+			NOR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+				AND = {
+					has_trait = trait_cybernetic
+					from = { has_valid_civic = civic_machine_assimilator }
+				}
+				from = { has_valid_civic = civic_machine_servitor }
+			}
+		}
+	}
+
+	allow = {
+		hidden_trigger = { exists = from }
+		custom_tooltip = {
+			NOR = {
+				has_citizenship_type = { country = from type = citizenship_purge_machine }
+				has_citizenship_type = { country = from type = citizenship_purge }
+			}
+			fail_text = is_undesirables_tooltip
+		}
+		custom_tooltip = {
+			fail_text = "HIVE_MIND_SPECIES_CITIZENS_ONLY"
+			OR = {
+				NOT = { from = { is_hive_empire = yes } }
+				has_trait = trait_hive_mind
+			}
+		}
+		custom_tooltip = {
+			fail_text = "ROBOTS_CANNOT_COLONIZE"
+			OR = {
+				NOT = { has_trait = trait_mechanical }
+				from = { has_technology = tech_droid_workers }
+				from = { is_machine_empire = yes }
+			}
+		}
+		custom_tooltip = {
+			fail_text = "SPECIES_CANNOT_COLONIZE"
+			NOR = {
+				has_trait = trait_syncretic_proles
+				can_think = no
+			}
+		}
+		custom_tooltip = {
+			fail_text = is_slaves_not_battle_thralls_or_indentured_fail
+			if = {
+				limit = {
+					has_citizenship_type = { country = from type = citizenship_slavery }
+				}
+				OR = {
+					has_slavery_type = { country = from type = slavery_military }
+					has_slavery_type = { country = from type = slavery_indentured }
+				}
+			}
+		}
+	}
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			from = {
+				has_origin = origin_necrophage
+			}
+		}
+		modifier = {
+			factor = 0
+			from = { has_valid_civic = civic_machine_servitor }
+			NOR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+			}
+		}
+	}
+}

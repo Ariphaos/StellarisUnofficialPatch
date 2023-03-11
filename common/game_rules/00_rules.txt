@@ -380,12 +380,18 @@ can_generate_army_from_species = {
 		OR = {
 			has_military_service_type = { type = military_service_full country = prev }
 			has_military_service_type = { type = military_service_limited country = prev }
+			AND = {
+				exists = prev
+				prev = {
+					is_primitive = yes
+				}
+			}
 		}
 	}
 }
 
-# Root = species
-# This = country
+# Root = country
+# This = species
 can_modify_species = {
 	OR = {
 		NOT = { has_trait = trait_self_modified }
@@ -580,12 +586,16 @@ can_terraform_planet = {
 	custom_tooltip = {
 		fail_text = terraform_fail_no_presapient_protection_or_no_presapients
 		NAND = {
-			root = { has_policy_flag = pre_sapients_protect }
+			AND = {
+				exists = root
+				root = { has_policy_flag = pre_sapients_protect }
+			}
 			any_owned_species = { is_sapient = no }
 		}
 	}
 	custom_tooltip = {
 		fail_text = "requires_actor_not_devouring_swarm_lithoid"
+		exists = root
 		root = { is_lithoid_devouring_swarm = no }
 	}
 
@@ -603,8 +613,8 @@ can_terraform_planet = {
 #This = pop
 can_colonize_with_pop = {
 	has_colonization_control = {
-		value = no
-		country =root
+		type = colonization_control_no
+		country = root
 	}
 	OR = {
 		NOT = { has_trait = trait_self_modified }
@@ -630,8 +640,8 @@ can_colonize_with_pop = {
 #This = species
 can_colonize_with_species = {
 	has_colonization_control = {
-		value = no
-		country =root
+		type = colonization_control_no
+		country = root
 	}
 	OR = {
 		NOT = { has_trait = trait_self_modified }
@@ -639,7 +649,10 @@ can_colonize_with_species = {
 	}
 	if = {
 		limit = {
-			is_sapient = no
+			OR = {
+				is_sapient = no
+				has_trait = trait_zombie
+			}
 		}
 		custom_tooltip = {
 			always = no
@@ -663,7 +676,13 @@ can_colonize_with_species = {
 # This = Pop
 # NOTE: species_has_happiness is also checked for this
 pop_has_random_ethics = {
-	NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+	exists = from
+	NOT = {
+		has_citizenship_type = {
+			country = from
+			type = citizenship_organic_trophy
+		}
+	}
 }
 
 # Root = Species
@@ -734,7 +753,7 @@ can_species_procreate = {
 		NOT = {
 			root = {
 				any_owned_species = {
-					has_population_control = { country = root.owner value = no }
+					has_population_control = { country = root.owner type = no }
 					species_can_be_necrophaged = yes
 				}
 			}
@@ -773,6 +792,21 @@ can_species_be_assembled = {
 				}
 			}
 			else_if = {
+				limit = { has_trait = trait_tiyanki }
+				root = {
+					any_owned_species = { is_exact_same_species = prevprev }
+				}
+			}
+			else_if = {
+				limit = {
+					root.owner = {
+						has_tradition = tr_cybernetics_assembly_standards
+						has_policy_flag = roboticist_output_build_cyborgs
+					}
+				}
+				has_trait = trait_cybernetic
+			}
+			else_if = {
 				limit = {
 					OR = {
 						has_trait = trait_clone_soldier_infertile
@@ -807,7 +841,7 @@ can_species_be_assembled = {
 		}
 	}
 	has_population_control = {
-		value = no
+		type = no
 		country = root.owner
 	}
 }
@@ -983,11 +1017,8 @@ will_anger_fallen_empire = {
 		AND = {
 			root = { has_ai_personality_behaviour = holy_planets }
 			has_modifier = "holy_planet"
-			OR = {
-				NOT = { exists = space_owner }
-				space_owner = {
-					has_relic = r_severed_head
-				}
+			space_owner = {
+				NOT = { has_relic = r_severed_head }
 			}
 		}
 	}
@@ -1884,7 +1915,20 @@ can_pop_auto_migrate = {
 		custom_tooltip = {
 			fail_text = AUTO_MIGRATE_SLAVE_PROCESSING
 			OR = {
-				planet = { has_building = building_slave_processing }
+				planet = {
+					OR = {
+						has_building = building_slave_processing
+						AND = {
+							exists = orbital_defence
+							orbital_defence = {
+								exists = starbase
+								starbase = {
+									has_starbase_building = ring_slave_processing_facility
+								}
+							}
+						}
+					}
+				}
 				solar_system = {
 					count_starbase_buildings = {
 						type = transit_hub
@@ -1910,6 +1954,10 @@ can_planet_auto_migrate = {
 			colony_age > 60
 			is_capital = yes # Don't break Doomsday!
 		}
+	}
+	custom_tooltip = {
+		fail_text = AUTO_MIGRATE_ONLY_HAS_ONE_POP
+		num_sapient_pops > 1 
 	}
 	hidden_trigger = {
 		exists = owner
@@ -1938,14 +1986,18 @@ can_gene_mod_habitability = {
 
 #This, root = country
 can_add_advanced_traits = {
-	host_has_dlc = "Utopia"
-	has_technology = tech_genetic_resequencing
+	has_utopia = yes
+	has_tradition = tr_genetics_creation
 }
 
 #This, root = country
 can_add_negative_traits_organic = {
-	host_has_dlc = "Utopia"
-	has_technology = tech_genetic_resequencing
+	has_utopia = yes
+	OR = {
+		has_tradition = tr_genetics_resequencing
+		has_tradition = tr_cybernetics_integrated_anatomy
+		has_tradition = tr_cybernetics_assimilator_integrated_anatomy
+	}
 }
 
 #This, root = country
@@ -1953,19 +2005,24 @@ can_remove_positive_traits_organic = {
 	OR = {
 		AND = {
 			has_utopia = yes
-			has_technology = tech_genetic_resequencing
+			OR = {
+				has_tradition = tr_genetics_resequencing
+				has_tradition = tr_cybernetics_integrated_anatomy
+				has_tradition = tr_cybernetics_assimilator_integrated_anatomy
+			}
 		}
 		AND = {
 			has_toxoids = yes
 			has_origin = origin_overtuned
 		}
+		has_technology = tech_epigenetic_triggers
 	}
 }
 
 #This, root = country
 can_modify_organic_portraits = {
-	host_has_dlc = "Utopia"
-	has_technology = tech_genetic_resequencing
+	has_utopia = yes
+	has_tradition = tr_genetics_enhanced_expression
 }
 
 # This = country contacting
@@ -2272,6 +2329,40 @@ can_trade_fleet = {
 				is_country_type = fallen_empire
 				is_country_type = awakened_fallen_empire
 			}
+		}
+	}
+}
+
+
+##TERRAFORMING CANDIDATES
+
+# This = planet
+# Checked if planet is a terraforming candidate
+is_terraforming_candidate = {
+	OR = { 
+		has_modifier = terraforming_candidate
+		has_modifier = frozen_terraforming_candidate
+		has_modifier = toxic_terraforming_candidate
+	}
+}
+
+# Root = country
+# This = planet
+# Checked if the planet is special terraforming candidate and the country has the required matching ascension perk to do it
+has_ascension_for_terraforming_candidate = {
+	exists = root
+	OR = {
+		AND = {
+			#No ascension perk required for terraforming_candidate modifier
+			has_modifier = terraforming_candidate
+		}
+		AND = {
+			root = { has_ascension_perk = ap_detox }
+			has_modifier = toxic_terraforming_candidate
+		}
+		AND = {
+			root = { has_ascension_perk = ap_hydrocentric }
+			has_modifier = frozen_terraforming_candidate
 		}
 	}
 }

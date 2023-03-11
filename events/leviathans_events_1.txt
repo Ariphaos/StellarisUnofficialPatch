@@ -6796,6 +6796,7 @@ fleet_event = {
 	id = leviathans.601
 	hide_window = yes
 	trigger = { always = no }
+	is_test_event = yes
 
 	immediate = {
 		fleet_event = { id = leviathans.602 }
@@ -6805,6 +6806,7 @@ fleet_event = {
 	id = leviathans.602
 	hide_window = yes
 	trigger = { always = no }
+	is_test_event = yes
 
 	immediate = {
 		owner = { country_event = { id = leviathans.640 } }
@@ -7648,17 +7650,7 @@ country_event = {
 
 	option = {
 		name = leviathans.660.a
-		trigger = {
-			NOR = {
-				has_tech_option = tech_dragon_armor
-				has_technology = tech_dragon_armor
-			}
-		}
-		add_research_option = tech_dragon_armor
-		add_tech_progress = {
-			tech = tech_dragon_armor
-			progress = 0.3
-		}
+		grant_dragon_armor_effect = yes
 	}
 
 	option = {
@@ -7881,50 +7873,17 @@ country_event = {
 	option = {
 		name = leviathans.670.a
 		trigger = {
-			fromfrom = {
-				exists = leader
-			}
-		}
-		fromfrom = {
-			leader = {
-				if = {
-					limit = {
-						leader_class = admiral
-					}
-					add_trait = leader_trait_dragonslayer
-				}
-				ELSE_IF = {
-					limit = {
-						leader_class = general
-					}
-					add_trait = leader_trait_dragonbane
-				}
-			}
+			can_harvest_dna = no
 		}
 		add_resource = { influence = 300 }
 		add_relic = r_dragon_trophy
 	}
 
-	option = {
-		name = leviathans.670.a
-		trigger = {
-			fromfrom = {
-				NOT = {
-					exists = leader
-				}
-			}
-		}
-		add_resource = { influence = 300 }
-		add_relic = r_dragon_trophy
-	}
 	option = {
 		name = galactic_features.385.reanimated
 
 		trigger = {
 			is_reanimator = yes
-			fromfrom = {
-				exists = leader
-			}
 		}
 
 		enable_special_project = {
@@ -7932,47 +7891,40 @@ country_event = {
 			location = fromfrom.solar_system.star
 			owner = root.owner
 		}
-		fromfrom = {
-			leader = {
-				if = {
-					limit = {
-						leader_class = admiral
-					}
-					add_trait = leader_trait_dragonslayer
-				}
-				ELSE_IF = {
-					limit = {
-						leader_class = general
-					}
-					add_trait = leader_trait_dragonbane
-				}
-			}
-		}
 		add_resource = { influence = 300 }
 		add_relic = r_dragon_trophy
 	}
+
 	option = {
-		name = galactic_features.385.reanimated
-
+		name = aquatics.105.A
 		trigger = {
-			is_reanimator = yes
-			fromfrom = {
-				NOT = {
-					exists = leader
-				}
-			}
+			can_harvest_dna = yes 
 		}
-
-		enable_special_project = {
-			name = "REANIMATE_GUARDIAN_DRAGON"
-			location = fromfrom.solar_system.star
-			owner = root.owner
-		}
-
+		set_country_flag = harvested_dragon_dna
+		custom_tooltip = aquatics.105.A.tooltip
 		add_resource = { influence = 300 }
 		add_relic = r_dragon_trophy
 	}
+
+
 	after = {
+		if = {
+			limit = { exists = fromfrom.leader }
+			fromfrom.leader = {
+				if = {
+					limit = {
+						leader_class = admiral
+					}
+					add_trait = leader_trait_dragonslayer
+				}
+				ELSE_IF = {
+					limit = {
+						leader_class = general
+					}
+					add_trait = leader_trait_dragonbane
+				}
+			}
+		}
 		if = {
 			limit = { num_owned_planets > 0 }
 			generate_parade_city = yes
@@ -7992,12 +7944,23 @@ country_event = {
 country_event = {
 	id = leviathans.675
 	title = "distar.218.name"
-	desc = "leviathans.675.desc"
+	desc = {
+		trigger = {
+			is_hive_empire = no
+		}
+		text = "leviathans.675.desc.regular"
+	}
+	desc = {
+		trigger = {
+			is_hive_empire = yes
+		}
+		text = "leviathans.675.desc.hive"
+	}
 	location = from
 
 	is_triggered_only = yes
 
-	picture = GFX_evt_space_dragon
+	picture = GFX_evt_necromancy
 	show_sound = event_mystic_reveal
 
 	option = {
@@ -8009,7 +7972,7 @@ country_event = {
 				set_owner = root
 				create_ship = {
 					name = "NAME_Avice"
-					design = "NAME_Grand_Dragon"
+					design = "NAME_Reanimated_Grand_Dragon"
 					prefix = no
 					upgradable = no
 				}

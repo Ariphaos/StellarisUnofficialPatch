@@ -433,6 +433,80 @@ decision_abolish_resort_colony = {
 	}
 }
 
+# Crucible Colony
+decision_crucible_colony = {
+	owned_planets_only = yes
+
+	resources = {
+		category = decisions
+		cost = {
+			unity = 1000
+		}
+	}
+
+	potential = {
+		is_capital = no
+		is_artificial = no
+		owner = {
+			has_tradition = tr_cybernetics_assimilator_crucible
+		}
+		NOR = {
+			is_planet_class = pc_machine
+			is_planet_class = pc_city
+			has_modifier = crucible_colony
+		}
+	}
+
+	allow = {
+		planet_size >= 15
+		custom_tooltip = {
+			fail_text = decision_crucible_colony_only_one
+			NOT = {
+				owner = {
+					any_owned_planet = { has_modifier = crucible_colony }
+				}
+			}
+		}
+	}
+
+	effect = {
+		add_modifier = {
+			modifier = crucible_colony
+			days = -1
+		}
+		hidden_effect = { validate_planet_buildings_and_districts = yes }
+	}
+
+	ai_weight = {
+		weight = 0 #TODO investigate later
+	}
+}
+
+decision_abolish_crucible_colony = {
+	owned_planets_only = yes
+	icon = decision_crucible_colony
+
+	resources = {
+		category = decisions
+		cost = {
+			unity = 2500
+		}
+	}
+
+	potential = {
+		has_modifier = crucible_colony
+	}
+
+	effect = {
+		remove_modifier = crucible_colony
+		hidden_effect = { validate_planet_buildings_and_districts = yes }
+	}
+
+	ai_weight = {
+		weight = 0
+	}
+}
+
 # Mastery of Nature
 decision_mastery_of_nature = {
 	owned_planets_only = yes
@@ -1351,15 +1425,19 @@ decision_market_nomination = {
 					}
 					modifier = {
 						factor = 0.33
-						from = { is_megacorp = yes }
+						from = { has_authority = auth_corporate }
 					}
 					modifier = {
-						factor = 0.33
-						from = { trade_income >= 100 }
+						factor = 0.5
+						solar_system = { has_system_trade_value >= 120 }
+					}
+					modifier = {
+						factor = 0.5
+						solar_system = { has_system_trade_value >= 80 }
 					}
 					modifier = {
 						factor = 2
-						from = { trade_income <= 50 }
+						solar_system = { has_system_trade_value < 50 }
 					}
 					modifier = {
 						factor = 1.5
@@ -1389,15 +1467,19 @@ decision_market_nomination = {
 					}
 					modifier = {
 						factor = 2
-						from = { trade_income >= 120 }
+						solar_system = { has_system_trade_value >= 120 }
+					}
+					modifier = {
+						factor = 1.5
+						solar_system = { has_system_trade_value >= 80 }
 					}
 					modifier = {
 						factor = 0.5
-						from = { trade_income <= 50 }
+						solar_system = { has_system_trade_value < 50 }
 					}
 					modifier = {
-						factor = 0.75
-						from = { is_gestalt = yes }
+						factor = 0.5
+						from = { has_ethic = ethic_gestalt_consciousness }
 					}
 					add_modifier = {
 						modifier = market_nominee_level_3
@@ -1439,7 +1521,25 @@ decision_market_nomination = {
 		}
 		modifier = {
 			factor = 2
-			from = { is_megacorp = yes }
+			from = { has_authority = auth_corporate }
+		}
+		modifier = {
+			factor = 1.5
+			solar_system = {
+				has_system_trade_value > 150
+			}
+		}
+		modifier = {
+			factor = 2
+			solar_system = {
+				has_system_trade_value > 80
+			}
+		}
+		modifier = {
+			factor = 0.5
+			solar_system = {
+				has_system_trade_value < 30
+			}
 		}
 	}
 }
@@ -2298,11 +2398,11 @@ decision_shattered_ring_project = {
 	owned_planets_only = yes
 	icon = decision_arcology_project
 
-	enactment_time = 3600
+	enactment_time = 2700
 	resources = {
 		category = decisions
 		cost = {
-			alloys = 10000
+			alloys = 7500
 		}
 	}
 
@@ -2322,6 +2422,27 @@ decision_shattered_ring_project = {
 		hidden_effect = {
 			clear_deposits = yes
 			change_pc = pc_ringworld_habitable
+
+			set_planet_entity = {
+				entity = "ringworld_seam_entity_01_entity"
+				graphical_culture = owner
+			}
+			solar_system = {
+				every_system_planet = {
+					limit = { is_planet_class = pc_ringworld_tech }
+					set_planet_entity = {
+						entity = ringworld_tech_entity_01_entity
+						graphical_culture = root.owner
+					}
+				}
+				every_system_planet = {
+					limit = { is_planet_class = pc_ringworld_seam }
+					set_planet_entity = {
+						entity = ringworld_seam_entity_01_entity
+						graphical_culture = root.owner
+					}
+				}
+			}
 
 			# Remove Scrap Processing Buildings
 			if = {
@@ -2388,6 +2509,8 @@ decision_shattered_ring_project = {
 			}
 			# Finally, bring it in line with ringworld sizes
 			set_planet_size = 10
+			# And set the country flag so you can take Galactic Wonders
+			owner = { set_country_flag = has_built_or_repaired_megastructure }
 		}
 	}
 
@@ -2410,6 +2533,7 @@ decision_expand_planetary_sea = {
 		owner = {
 			has_ascension_perk = ap_hydrocentric
 		}
+		is_terraforming = no
 	}
 
 	allow = {

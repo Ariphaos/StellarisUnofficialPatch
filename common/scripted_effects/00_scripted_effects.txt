@@ -15,17 +15,17 @@
 # Debug scope printing
 print_scope_effect = {
 	log = "------------------------------"
-	log = "- Printing the current scopes (trigger) -"
+	log = "- Printing the current scopes (effect) -"
 	log = "- This: \\[This.GetName]"
 	log = "- Root: \\[Root.GetName]"
 	log = "- Prev: \\[Prev.GetName]"
-	log = "- PrevPrev: \\[Prev.Prev.GetName]"
-	log = "- PrevPrevPrev: \\[Prev.Prev.Prev.GetName]"
-	log = "- PrevPrevPrevPrev: \\[Prev.Prev.Prev.Prev.GetName]"
+	log = "- PrevPrev: \\[PrevPrev.GetName]"
+	log = "- PrevPrevPrev: \\[PrevPrevPrev.GetName]"
+	log = "- PrevPrevPrevPrev: \\[PrevPrevPrevPrev.GetName]"
 	log = "- From: \\[From.GetName]"
-	log = "- FromFrom: \\[From.From.GetName]"
-	log = "- FromFromFrom: \\[From.From.From.GetName]"
-	log = "- FromFromFromFrom: \\[From.From.From.From.GetName]"
+	log = "- FromFrom: \\[FromFrom.GetName]"
+	log = "- FromFromFrom: \\[FromFromFrom.GetName]"
+	log = "- FromFromFromFrom: \\[FromFromFromFrom.GetName]"
 	log = "- This's Solar System: \\[This.GetStarName]"
 	log = "- This's Planet: \\[This.Planet.GetName]"
 	log = "- This's Sector: \\[This.Sector.GetName]"
@@ -2558,20 +2558,26 @@ reroll_planet = {
 # Scope: Something that has a species and an owner
 create_cybernetic_species_mod = {
 	species = {
-		create_species = {
-			is_mod = yes
-			name = this
-			plural = this
-			class = this
-			portrait = this
-			traits = this
-			can_be_modified = this
-			homeworld = this
-			namelist = this
-			gender = this
-			traits = {
-				ideal_planet_class = prev
-				trait = trait_cybernetic
+		modify_species = {
+			remove_trait = trait_latent_psionic
+			remove_trait = trait_psionic
+			effect = {
+				create_species = {
+					is_mod = yes
+					name = this
+					plural = this
+					class = this
+					portrait = this
+					traits = this
+					can_be_modified = this
+					homeworld = this
+					namelist = this
+					gender = this
+					traits = {
+						ideal_planet_class = prev
+						trait = trait_cybernetic
+					}
+				}
 			}
 		}
 		save_event_target_as = changing_species
@@ -3023,6 +3029,35 @@ generate_cyborg_treats = {
 		value = 1
 		min = 5
 		max = 100
+	}
+	change_variable = {
+		which = num_assimilated_pops
+		value = 1
+	}
+}
+
+generate_cyborg_extra_treats = {
+	add_monthly_resource_mult = {
+		resource = unity
+		value = 2
+		min = 10
+		max = 200
+	}
+	add_monthly_resource_mult = {
+		resource = society_research
+		value = 2
+		min = 10
+		max = 200
+	}
+	add_monthly_resource_mult = {
+		resource = engineering_research
+		value = 2
+		min = 10
+		max = 200
+	}
+	change_variable = {
+		which = num_assimilated_pops
+		value = 1
 	}
 }
 
@@ -4249,7 +4284,6 @@ generate_lcluster_clue = {
 				value = 1
 			}
 		}
-		# check if completed
 		if = {
 			limit = {
 				has_completed_event_chain_counter = {
@@ -4870,10 +4904,22 @@ assimilation_effect = {
 				country = root.owner
 			}
 		}
-		if = { # ascended synths
+		if = { # Has Synth Assimilation
 			limit = {
-				root.owner = {
-					has_country_flag = synthetic_empire
+				OR = {
+					root.owner = {
+						has_country_flag = synth_assimilation
+					}
+					AND = {
+						OR = {
+							has_trait = trait_mechanical
+							has_trait = trait_machine_unit
+						}
+						root.owner = {
+							has_authority = auth_machine_intelligence
+							has_active_tradition = tr_synthetics_adopt_machine
+						}
+					}
 				}
 			}
 			kill_pop = yes
@@ -4963,9 +5009,20 @@ apply_post_assimilation_effects = {
 			root.owner = {
 				is_machine_empire = yes
 				has_civic = civic_machine_assimilator
+				NOT = { has_tradition = tr_cybernetics_assimilator_adopt }
 			}
 		}
 		root.owner = { generate_cyborg_treats = yes } # scripted effect
+	}
+	else_if = {
+		limit = {
+			root.owner = {
+				has_authority = auth_machine_intelligence
+				has_civic = civic_machine_assimilator
+				has_tradition = tr_cybernetics_assimilator_adopt
+			}
+		}
+		root.owner = { generate_cyborg_extra_treats = yes } # scripted effect
 	}
 	if = {
 		limit = {
@@ -5794,7 +5851,10 @@ declare_crisis_war_effect = {
 	event_target:community_war_leader = {
 		declare_war = {
 			target = event_target:new_crisis
-			name = "NAME_Declared_Crisis_War"
+			name = {
+				key = "NAME_Declared_Crisis_War"
+				variable_string = "This.MainDefender.GetAdj"
+			}
 			attacker_war_goal = "wg_declared_crisis"
 			effect = { save_event_target_as = crisis_war }
 		}
@@ -5971,6 +6031,12 @@ deduce_planetary_separatism_species = {
 						}
 					}
 				}
+				OR = {
+					root = {
+						NOT = { has_situation_flag = slave_revolt }
+					}
+					has_citizenship_type = { type = citizenship_slavery country = root.owner }
+				}
 			}
 			weights = {
 				base = 100
@@ -6066,6 +6132,20 @@ cleanup_separatism_situation = {
 		random_owned_species = {
 			limit = { has_species_flag = rebellion_species@root }
 			remove_species_flag = rebellion_species@root
+		}
+	}
+	target = {
+		if = {
+			limit = { has_modifier = slave_hunger_strike }
+			remove_modifier = slave_hunger_strike
+		}
+		if = {
+			limit = { has_modifier = adding_unrest_slaves }
+			remove_modifier = adding_unrest_slaves
+		}
+		if = {
+			limit = { has_modifier = slave_riots }
+			remove_modifier = slave_riots
 		}
 	}
 	every_country = {
@@ -7822,8 +7902,14 @@ impose_ideology_effect = {
 	}
 	if = {
 		limit = {
-			root = { is_megacorp = yes }
-			is_megacorp = yes
+			has_civic = civic_psionic_sovereign
+		}
+		force_remove_civic = civic_psionic_sovereign
+	}
+	if = {
+		limit = {
+			root = { has_authority = auth_corporate }
+			has_authority = auth_corporate
 		}
 		set_merchant_government_effect = yes
 	}
@@ -7848,6 +7934,90 @@ detox_hangover = {
 	}
 }
 
+machine_synthetic_leader_effect = {
+	every_owned_leader = {
+		limit = {
+			species = { has_trait = trait_machine_unit }
+			NOR = {
+				has_trait = leader_trait_admiral_synthetic
+				has_trait = leader_trait_general_synthetic
+				has_trait = leader_trait_governor_synthetic
+				has_trait = leader_trait_scientist_synthetic
+				has_trait = leader_trait_ruler_synthetic
+			}
+		}
+		if = {
+			limit = { leader_class = admiral }
+			add_trait = leader_trait_admiral_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = general }
+			add_trait = leader_trait_general_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+			remove_trait = leader_trait_general_cyborg
+			remove_ruler_trait = leader_trait_ruler_cyborg
+		}
+		if = {
+			limit = { leader_class = governor }
+			add_trait = leader_trait_governor_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = scientist }
+			add_trait = leader_trait_scientist_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = ruler }
+			add_trait = leader_trait_ruler_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+	}
+	every_pool_leader = {
+		limit = {
+			species = { has_trait = trait_machine_unit }
+			NOR = {
+				has_trait = leader_trait_admiral_synthetic
+				has_trait = leader_trait_general_synthetic
+				has_trait = leader_trait_governor_synthetic
+				has_trait = leader_trait_scientist_synthetic
+				has_trait = leader_trait_ruler_synthetic
+			}
+		}
+		if = {
+			limit = { leader_class = admiral }
+			add_trait = leader_trait_admiral_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = general }
+			add_trait = leader_trait_general_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = governor }
+			add_trait = leader_trait_governor_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = scientist }
+			add_trait = leader_trait_scientist_synthetic
+			add_ruler_trait = leader_trait_ruler_synthetic
+		}
+		if = {
+			limit = { leader_class = ruler }
+			add_trait = leader_trait_ruler_synthetic
+		}
+	}
+}
+
+give_nanite_techs = {
+	give_technology = { tech = tech_nanite_repair_system }
+	give_technology = { tech = tech_nanite_autocannon }
+	give_technology = { tech = tech_nanite_flak_batteries }
+}
+
 create_demon_species_effect = {
 	if = {
 		limit = {
@@ -7858,7 +8028,7 @@ create_demon_species_effect = {
 			name = "NAME_Demon_Refugees"
 			plural = "NAME_Demon_Refugee_pl"
 			class = MAM
-			namelist = random
+			namelist = random_class
 			portrait = "humanoid_hp_01"
 			traits = {
 				trait = "trait_pc_nuked_preference"
@@ -7876,7 +8046,7 @@ create_demon_species_effect = {
 			name = "NAME_Demon_Refugees"
 			plural = "NAME_Demon_Refugee_pl"
 			class = MAM
-			namelist = random
+			namelist = random_class
 			portrait = random
 			traits = {
 				trait = "trait_pc_nuked_preference"
@@ -7888,6 +8058,13 @@ create_demon_species_effect = {
 				trait = "trait_slow_breeders"
 			}
 		}
+	}
+}
+
+remove_trait_effect = {
+	if = {
+		limit = { has_trait = $TRAIT$ }
+		remove_trait = $TRAIT$
 	}
 }
 
@@ -7937,5 +8114,109 @@ remove_fauna_yuht = {
 	if = {
 		limit = { has_modifier = migrating_forests_2 }
 		remove_modifier = migrating_forests_2
+	}
+}
+
+create_random_devolved_species = {
+	# Requires event_target:species_target as a species input.
+	# Gives event_target:devolved_species_target as a species output.
+	random_list = {
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_starborn
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
+		
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_earthbound
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
+
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_natural_intellectuals
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
+
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_proles
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
+
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_conservative
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
+
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_irradiated
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
+
+		1 = {
+			modify_species = {
+				species = event_target:species_target
+				add_trait = trait_presapient_docile_livestock
+				add_traits_at_start_of_list = yes
+				effect = {
+					change_species_characteristics = {
+						sapient = no
+					}
+					save_event_target_as = devolved_species_target
+				}
+			}
+		}
 	}
 }

@@ -73,11 +73,17 @@ planet_event = {
 			location = this
 			owner = root
 		}
-		enable_special_project = {
-			name = "MIGRATING_FORESTS_2_PROJECT"
-			location = this
-			owner = root
+		if = {
+			limit = {
+				owner = { NOT = { has_civic = civic_environmentalist } }
+			}
+			enable_special_project = {
+				name = "MIGRATING_FORESTS_2_PROJECT"
+				location = this
+				owner = root
+			}	
 		}
+		
 	}
 }
 
@@ -94,9 +100,23 @@ planet_event = {
 
 	option = {
 		name = EXCELLENT
+		
 		remove_modifier = "migrating_forests"
 		remove_deposit = d_migrating_forests
 		add_deposit = d_migrating_forest_reserve
+		if = {
+			limit = {
+				owner = { has_civic = civic_environmentalist }
+			}
+			owner = {
+				add_monthly_resource_mult = {
+					resource = unity
+					value = @tier1unityreward
+					min = @tier1unitymin
+					max = @tier1unitymax
+				}
+			}	
+		}
 		hidden_effect = {
 			set_planet_flag = forest_pheremones
 			add_modifier = {
@@ -3096,14 +3116,41 @@ planet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		create_species = {
-			name = random
-			class = random_non_machine
-			portrait = random
-			traits = random
-			homeworld = root
-			effect = {
-				save_event_target_as = vault_survivor_species
+		if = {
+			limit = {
+				has_planet_flag = nuked_earth
+				NOT = {
+					any_galaxy_species = {
+						is_human_species = yes
+					}
+				}
+			}
+			create_species = {
+				name = NAME_Human
+				plural = NAME_Human_plural
+				class = "HUM"
+				portrait = "human"
+				homeworld = this
+				traits = {
+					trait = "trait_adaptive"
+					trait = "trait_nomadic"
+					trait = "trait_wasteful"
+				}
+				effect = {
+					save_event_target_as = vault_survivor_species
+				}
+			}
+		}
+		else = {
+			create_species = {
+				name = random
+				class = random_non_machine
+				portrait = random
+				traits = random
+				homeworld = root
+				effect = {
+					save_event_target_as = vault_survivor_species
+				}
 			}
 		}
 	}
@@ -3592,7 +3639,10 @@ planet_event = {
 				}
 			}
 		}
-		owner = { is_gestalt = no }
+		owner = {
+			empire_has_good_habitability_on_tomb_worlds = no
+			is_gestalt = no
+		}
 		num_pops > 0
 		NOT = {
 			owner = {
@@ -4063,7 +4113,7 @@ planet_event = {
 				name = "NAME_Asteroid"
 				effect = {
 					set_aggro_range = 0
-					set_fleet_stance = aggressive
+#					set_fleet_stance = aggressive
 					set_aggro_range_measure_from = self
 					set_owner = PREV
 					set_fleet_flag = asteroid_fleet
@@ -4332,7 +4382,7 @@ country_event = {
 					has_planet_flag = tasty_desert
 				}
 			}
-			set_country_flag = room_for_desert_achievement 
+			set_country_flag = room_for_desert_achievement
 		}
 		from = {
 			every_owned_pop = {

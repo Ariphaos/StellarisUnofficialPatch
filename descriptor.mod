@@ -1,8 +1,8 @@
-version="3.5.3.0"
+version="3.6.1.1"
 tags={
 	"Fixes"
 }
 picture="thumbnail.png"
-name="~~Ariphaos Unofficial Patch (3.5)"
-supported_version="3.5.3"
+name="~~Ariphaos Unofficial Patch (3.6)"
+supported_version="3.6.1"
 remote_file_id="1995601384"

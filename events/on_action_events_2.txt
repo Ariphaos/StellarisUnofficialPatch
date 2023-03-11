@@ -173,82 +173,43 @@ country_event = {
 		}
 		remove_global_flag = ongoing_market_nomination
 		# nominees start equal, modifiers improve chances
-		random_country = {
+		random_galaxy_planet = {
 			limit = {
-				is_country_type = default
-				has_country_flag = market_nomination_eligible
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible
+				}
 			}
 			weights = {
-				# can use add or mult
 				base = 1
 				modifier = {
-					add = 400
-					check_variable = {
-						which = market_rating
-						value = 5
+					owner = { is_variable_set = market_rating }
+					add = owner.market_rating
+				}
+				modifier = {
+					mult = solar_system.trigger:has_system_trade_value
+					solar_system = {
+						has_system_trade_value > 0
 					}
 				}
 				modifier = {
-					add = 75
-					check_variable = {
-						which = market_rating
-						value = 4
+					factor = 0.1
+					NOR = {
+						has_modifier = market_nominee_level_1
+						has_modifier = market_nominee_level_2
+						has_modifier = market_nominee_level_3
+						has_modifier = market_nominee_level_4
+						has_modifier = market_nominee_level_5
 					}
 				}
-				modifier = {
-					add = 20
-					check_variable = {
-						which = market_rating
-						value = 3
-					}
-				}
-				modifier = {
-					add = 4
-					check_variable = {
-						which = market_rating
-						value = 2
-					}
-				}
-				modifier = {
-					add = 1
-					check_variable = {
-						which = market_rating
-						value = 1
-					}
-				}
-				modifier = {
-					factor = 0.2
-					NOT = {
-						any_owned_planet = {
-							OR = {
-								has_modifier = market_nominee_level_1
-								has_modifier = market_nominee_level_2
-								has_modifier = market_nominee_level_3
-								has_modifier = market_nominee_level_4
-								has_modifier = market_nominee_level_5
-							}
-						}
-					}
-				}
+				pow = 1.5
 			}
-			save_global_event_target_as = market_founder
-			random_owned_planet = {
-				weights = {
-					base = 1
-					modifier = {
-						factor = 9999
-						OR = {
-							has_modifier = market_nominee_level_1
-							has_modifier = market_nominee_level_2
-							has_modifier = market_nominee_level_3
-							has_modifier = market_nominee_level_4
-							has_modifier = market_nominee_level_5
-						}
-					}
-				}
-				save_global_event_target_as = market_founder_planet
+			save_global_event_target_as = market_founder_planet
+			owner = {
+				save_global_event_target_as = market_founder
+				country_event = { id = action.99 }
 			}
-			country_event = { id = action.99 }
 		}
 		every_playable_country = {
 			limit = { has_country_flag = market_nomination_eligible }
@@ -293,10 +254,7 @@ country_event = {
 					remove_modifier = market_nominee_level_5
 				}
 			}
-			set_variable = {
-				which = market_rating
-				value = 0
-			}
+			clear_variable = market_rating
 		}
 	}
 }
@@ -894,41 +852,55 @@ country_event = {
 	}
 
 	immediate = {
-		every_relation = {
+		if = {
 			limit = {
-				is_country_type = default
-				OR = {
-					has_intel_level = {
-						who = root
-						category = economy
-						level >= 1
-					}
-					has_intel_level = {
-						who = root
-						category = technology
-						level >= 1
+				has_country_flag = did_not_repair_gateway
+				from = {
+					OR = {
+						is_megastructure_type = gateway_final
+						is_megastructure_type = gateway_restored
 					}
 				}
 			}
-			create_message = {
-				type = ALIEN_MEGASTRUCTURE_BUILT
-				localization = MESSAGE_ALIEN_MEGASTRUCTURE_BUILT
-				days = 30
-				target = root.from # the Go To
-				variable = {
-					type = name
-					localization = COUNTRY
-					scope = root
+			remove_country_flag = did_not_repair_gateway
+		}
+		else = {
+			every_relation = {
+				limit = {
+					is_country_type = default
+					OR = {
+						has_intel_level = {
+							who = root
+							category = economy
+							level >= 1
+						}
+						has_intel_level = {
+							who = root
+							category = technology
+							level >= 1
+						}
+					}
 				}
-				variable = {
-					type = name
-					localization = MEGASTRUCTURE
-					scope = root.from
-				}
-				variable = {
-					type = name
-					localization = SYSTEM
-					scope = root.fromfrom
+				create_message = {
+					type = ALIEN_MEGASTRUCTURE_BUILT
+					localization = MESSAGE_ALIEN_MEGASTRUCTURE_BUILT
+					days = 30
+					target = root.from # the Go To
+					variable = {
+						type = name
+						localization = COUNTRY
+						scope = root
+					}
+					variable = {
+						type = name
+						localization = MEGASTRUCTURE
+						scope = root.from
+					}
+					variable = {
+						type = name
+						localization = SYSTEM
+						scope = root.fromfrom
+					}
 				}
 			}
 		}
@@ -1903,6 +1875,12 @@ country_event = {
 		}
 		if = {
 			limit = {
+				has_civic = civic_psionic_sovereign
+			}
+			force_remove_civic = civic_psionic_sovereign
+		}
+		if = {
+			limit = {
 				has_civic = civic_pompous_purists
 			}
 			force_remove_civic = civic_pompous_purists
@@ -2138,6 +2116,12 @@ country_event = {
 				has_civic = civic_galactic_sovereign_megacorp
 			}
 			force_remove_civic = civic_galactic_sovereign_megacorp
+		}
+		if = {
+			limit = {
+				has_civic = civic_psionic_sovereign
+			}
+			force_remove_civic = civic_psionic_sovereign
 		}
 	}
 }
@@ -2747,6 +2731,7 @@ country_event = {
 
 	trigger = {
 		is_country_type = default
+		exists = from
 		from = { is_country_type = default }
 		OR = {
 			# Either, they're plants and we're zombies
