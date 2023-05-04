@@ -1,0 +1,2333 @@
+@resolution_weight_hated = 3
+@resolution_weight_disliked = 4
+@resolution_weight_unpopular = 5
+@resolution_weight_normal = 6
+@resolution_weight_popular = 6.5
+@resolution_weight_loved = 7
+
+@resolution_cost_t1 = 100
+@resolution_cost_t2 = 150
+@resolution_cost_t3 = 200
+@resolution_cost_t4 = 250
+@resolution_cost_t5 = 300
+@resolution_cost_denounce = 25
+
+@resolution_flag_timer = 360
+
+#example_resolution = {
+#	icon = "name of the icon key"
+#	resources = {} # cost and category
+#	target = yes/no # if this resolution requires a target country
+#	harmful = yes/no # if the AI should consider this harmful when choosing target
+#	modifier = {} # modifier to be applied to all community members if passed
+#	triggered_modifier = {} # triggered modifier to be applied, scope is country
+#	effect = {} # effect to be applied if passed, scope is proposer unless there is a target country - then scope is target country, with proposer in from scope
+#	fail_effects = {} # effect to be applied if failed, scope is proposer unless there is a target country - then scope is target country, with proposer in from scope
+#	potential = {} # potential trigger, scope is country
+#	allow = {} # allow trigger, scope is country
+#	active = {} # Enacted resolutions are cancelled if this trigger fails
+#
+#	ai_weight = {} # ai weight modifiers, scope is country. from scope is the target country for targeted resolutions
+#	NOTE: all ai_weight modifiers are multiplicative. The end result is also multiplied with a factor based on the opinion towards the proposer and/or target,
+#	see RESOLUTION_TARGET_OPINION_MIN_FACTOR etc. in 00_defines.txt. Also see RESOLUTION_VOTE_SUPPORT_THRESHOLD etc. for balancing the values.
+#
+#	valid_target = {} # valid targets trigger, scope is country
+#} 
+
+# NOTE: Remember to add Resolutions to a Resolution Category!
+
+### DEFENSE PRIVATIZATION
+
+resolution_defenseprivatization_repeal_1 = {
+	icon = "GFX_resolution_repeal_red"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t1
+		}
+	}
+	target = no
+	fire_and_forget = yes
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_repeal_1_effect_success
+		hidden_effect = {
+			cancel_resolution = "resolution_defenseprivatization_defense_contracts"
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				remove_modifier = resolution_defenseprivatization_defense_contracts_merc_naval_cap
+			}
+		}
+	}
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_defenseprivatization_defense_contracts"
+	}
+
+	ai_weight = {
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 0
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 0
+			has_authority = auth_corporate
+			desc = auth_corporate
+		}
+		
+		modifier = {
+			factor = 0
+			OR = {
+				has_valid_civic = civic_free_traders
+				has_valid_civic = civic_trading_posts
+				has_valid_civic = civic_merchant_guilds
+			}
+			desc = gal_com_trade_civic
+		}
+
+		modifier = {
+			factor = 0
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 0
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 1.2
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 1.2
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	}
+}
+
+resolution_defenseprivatization_repeal_2 = {
+	icon = "GFX_resolution_repeal_red"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t2
+		}
+	}
+	target = no
+	fire_and_forget = yes
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_repeal_2_effect_success
+		hidden_effect = {
+			cancel_resolution = "resolution_defenseprivatization_private_support_troops"
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				remove_modifier = resolution_defenseprivatization_private_support_troops_merc_naval_cap
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_defenseprivatization_private_support_troops"
+	}
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 0.5
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 0
+			has_authority = auth_corporate
+			desc = auth_corporate
+		}
+		
+		modifier = {
+			factor = 0.25
+			OR = {
+				has_valid_civic = civic_free_traders
+				has_valid_civic = civic_trading_posts
+				has_valid_civic = civic_merchant_guilds
+			}
+			desc = gal_com_trade_civic
+		}
+
+		modifier = {
+			factor = 0
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 0
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 2
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 2
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	} 
+}
+
+resolution_defenseprivatization_repeal_3 = {
+	icon = "GFX_resolution_repeal_red"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+	target = no
+	fire_and_forget = yes
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_repeal_3_effect_success
+		hidden_effect = {
+			cancel_resolution = "resolution_defenseprivatization_condottieri"
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				remove_modifier = resolution_defenseprivatization_condottieri_merc_naval_cap
+			}
+		}
+		custom_tooltip = resolution_defenseprivatization_private_support_troops_tooltip
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_defenseprivatization_condottieri"
+	}
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+	}
+
+	ai_weight = { 
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 0.5
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 0.5
+			has_authority = auth_corporate
+			desc = auth_corporate
+		}
+		
+		modifier = {
+			factor = 0.5
+			OR = {
+				has_civic = civic_barbaric_despoilers
+				has_civic = civic_warrior_culture
+				has_civic = civic_naval_contractors
+			}
+			desc = gal_com_opposing_civics
+		}
+
+		modifier = {
+			factor = 0
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 0
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 10
+			in_breach_of = resolution_defenseprivatization_condottieri
+			desc = gal_com_in_breach_of_proposed_resolution
+		}
+
+		modifier = {
+			factor = 2
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+		
+		modifier = {
+			factor = 2
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+	}
+}
+
+resolution_defenseprivatization_repeal_4 = {
+	icon = "GFX_resolution_repeal_red"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t4
+		}
+	}
+	target = no
+	fire_and_forget = yes
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_repeal_4_effect_success
+		hidden_effect = {
+			cancel_resolution = "resolution_defenseprivatization_security_business"
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				remove_modifier = resolution_defenseprivatization_security_business_merc_naval_cap
+			}
+		}
+		custom_tooltip = resolution_defenseprivatization_condottieri
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_defenseprivatization_security_business"
+	}
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+		resolution_defenseprivatization_condottieri = 1
+	}
+
+	ai_weight = { 
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 0.5
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 2
+			NOT = { has_policy_flag = unrestricted_wars }
+			desc = unrestricted_wars
+		}
+
+		modifier = {
+			factor = 0.5
+			OR = {
+				has_civic = civic_barbaric_despoilers
+				has_civic = civic_warrior_culture
+				has_civic = civic_naval_contractors
+			}
+			desc = gal_com_opposing_civics
+		}
+
+		modifier = {
+			factor = 0
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 0
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 10
+			in_breach_of = resolution_defenseprivatization_security_business
+			desc = gal_com_in_breach_of_proposed_resolution
+		}
+
+		modifier = {
+			factor = 2
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+		
+		modifier = {
+			factor = 2
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+	}
+}
+
+resolution_defenseprivatization_repeal_5 = {
+	icon = "GFX_resolution_repeal_red"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t5
+		}
+	}
+	target = no
+	fire_and_forget = yes
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_repeal_5_effect_success
+		hidden_effect = {
+			cancel_resolution = "resolution_defenseprivatization_corporate_warlords"
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				remove_modifier = resolution_defenseprivatization_corporate_warlords_merc_naval_cap
+			}
+		}
+		custom_tooltip = resolution_defenseprivatization_security_business
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization_repeal days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_defenseprivatization_corporate_warlords"
+	}
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+		resolution_defenseprivatization_condottieri = 1
+		resolution_defenseprivatization_security_business = 1
+	}
+
+	ai_weight = { 
+		base = @resolution_weight_popular
+
+		modifier = {
+			factor = 0.5
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 0.5
+			OR = {
+				has_civic = civic_barbaric_despoilers
+				has_civic = civic_warrior_culture
+				has_civic = civic_naval_contractors
+			}
+			desc = gal_com_opposing_civics
+		}
+
+		modifier = {
+			factor = 0
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 0
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 10
+			in_breach_of = resolution_defenseprivatization_corporate_warlords
+			desc = gal_com_in_breach_of_proposed_resolution
+		}
+
+		modifier = {
+			factor = 2
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+
+		modifier = {
+			factor = 2
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+	}
+}
+
+resolution_defenseprivatization_defense_contracts = {
+	icon = "GFX_resolution_defence_privatization"
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t1
+		}
+	}
+	target = no
+	level = 1
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+	}
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_defense_contracts_tooltip
+		hidden_effect = {
+			set_global_flag = galactic_community_resolution_passed
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				add_modifier = {
+					modifier = resolution_defenseprivatization_defense_contracts_merc_naval_cap
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOR = {
+				is_active_resolution = "resolution_defenseprivatization_defense_contracts"
+				is_active_resolution = "resolution_defenseprivatization_private_support_troops"
+				is_active_resolution = "resolution_defenseprivatization_condottieri"
+				is_active_resolution = "resolution_defenseprivatization_security_business"
+				is_active_resolution = "resolution_defenseprivatization_corporate_warlords"
+			}
+		}
+	}
+
+	ai_weight = { 
+		base = @resolution_weight_loved
+
+		modifier = {
+			factor = 2
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 2
+			has_authority = auth_corporate
+			desc = auth_corporate
+		}
+
+		modifier = {
+			factor = 1.5
+			OR = {
+				has_valid_civic = civic_free_traders
+				has_valid_civic = civic_trading_posts
+				has_valid_civic = civic_merchant_guilds
+			}
+			desc = gal_com_trade_civic
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 3
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 0.8
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 0.8
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	}  
+}
+
+resolution_defenseprivatization_private_support_troops = {
+	icon = "GFX_resolution_defence_privatization"
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t2
+		}
+	}
+	target = no
+	level = 2
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+	}
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_private_support_troops_tooltip
+		hidden_effect = {
+			set_global_flag = resolution_with_breach_effect_passed
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				add_modifier = {
+					modifier = resolution_defenseprivatization_private_support_troops_merc_naval_cap
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	allow = {
+		is_active_resolution = "resolution_defenseprivatization_defense_contracts"
+	}
+
+	ai_weight = {
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 1.5
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 2
+			has_authority = auth_corporate
+			desc = auth_corporate
+		}
+
+		modifier = {
+			factor = 1.5
+			OR = {
+				has_valid_civic = civic_free_traders
+				has_valid_civic = civic_trading_posts
+				has_valid_civic = civic_merchant_guilds
+			}
+			desc = gal_com_trade_civic
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_private_military_companies
+			desc = civic_private_military_companies
+		}
+
+		modifier = {
+			factor = 3
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 0
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 0.5
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	}
+}
+
+resolution_defenseprivatization_condottieri = {
+	icon = "GFX_resolution_defence_privatization"
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+	target = no
+	level = 3
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+		resolution_defenseprivatization_condottieri = 1
+	}
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_condottieri_tooltip
+		hidden_effect = {
+			set_global_flag = resolution_with_breach_effect_passed
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				add_modifier = {
+					modifier = resolution_defenseprivatization_condottieri_merc_naval_cap
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	allow = {
+		is_active_resolution = "resolution_defenseprivatization_private_support_troops"
+	}
+
+	breach = {
+		is_at_war = yes
+		NOT = {
+			any_controlled_fleet ={
+				owner ={
+					is_country_type = enclave_mercenary
+				}
+			}
+		}
+		NOT = { has_country_flag = constitutional_immunity }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 1.5
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 2
+			OR = {
+				has_civic = civic_barbaric_despoilers
+				has_civic = civic_warrior_culture
+				has_civic = civic_naval_contractors
+				has_civic = civic_private_military_companies
+			}
+			desc = gal_com_supporting_civics
+		}
+
+		modifier = {
+			factor = 3
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 0
+			in_breach_of = resolution_defenseprivatization_condottieri
+			desc = gal_com_in_breach_of_proposed_resolution
+		}
+
+		modifier = {
+			factor = 0
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 0
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	}
+}
+
+resolution_defenseprivatization_security_business = {
+	icon = "GFX_resolution_defence_privatization"
+
+	potential = {
+		has_overlord_dlc = yes
+		has_federations_dlc = yes
+	}
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t4
+		}
+	}
+	target = no
+	level = 4
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+		resolution_defenseprivatization_condottieri = 1
+		resolution_defenseprivatization_security_business = 1
+	}
+	
+	triggered_modifier = {
+		potential = {
+			any_controlled_fleet ={
+				owner ={
+					is_country_type = enclave_mercenary
+				}
+			}
+		}
+		modifier = {
+			resolution_defenseprivatization_security_business_merc_hired = 1
+		}
+	}
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_security_business_tooltip
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				add_modifier = {
+					modifier = resolution_defenseprivatization_security_business_merc_naval_cap
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_failed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	allow = {
+		is_active_resolution = "resolution_defenseprivatization_condottieri"
+	}
+
+	breach = {
+		is_at_war = yes
+		NOT = {
+			any_controlled_fleet ={
+				owner ={
+					is_country_type = enclave_mercenary
+				}
+			}
+		}
+		NOT = { has_country_flag = constitutional_immunity }
+	}
+
+	ai_weight = { 
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 2
+			is_militarist = yes
+			desc = ethic_militarist
+		}
+
+		modifier = {
+			factor = 2
+			has_policy_flag = unrestricted_wars
+			desc = unrestricted_wars
+		}
+
+
+		modifier = {
+			factor = 2
+			OR = {
+				has_civic = civic_barbaric_despoilers
+				has_civic = civic_warrior_culture
+				has_civic = civic_naval_contractors
+				has_civic = civic_private_military_companies
+			}
+			desc = gal_com_supporting_civics
+		}
+
+		modifier = {
+			factor = 2
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 0
+			in_breach_of = resolution_defenseprivatization_security_business
+			desc = gal_com_in_breach_of_proposed_resolution
+		}
+
+		modifier = {
+			factor = 0
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 0
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	}
+}
+
+resolution_defenseprivatization_corporate_warlords = {
+	icon = "GFX_resolution_defence_privatization"
+
+	potential = {
+		has_overlord_dlc = yes
+		has_federations_dlc = yes
+	}
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t5
+		}
+	}
+	target = no
+	level = 5
+
+	modifier = {
+		resolution_defenseprivatization_defense_contracts = 1
+		resolution_defenseprivatization_private_support_troops = 1
+		resolution_defenseprivatization_condottieri = 1
+		resolution_defenseprivatization_security_business = 1
+		resolution_defenseprivatization_corporate_warlords = 1
+	}
+
+	triggered_modifier = {
+		potential = {
+			any_controlled_fleet ={
+				owner ={
+					is_country_type = enclave_mercenary
+				}
+			}
+		}
+		modifier = {
+			resolution_defenseprivatization_security_business_merc_hired = 1
+			resolution_defenseprivatization_corporate_warlords_merc_hired = 1
+		}
+	}
+
+	effect = {
+		custom_tooltip = resolution_defenseprivatization_corporate_warlords_tooltip
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_passed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+			every_country = {
+				limit = {
+					is_country_type = enclave_mercenary
+				}
+				add_modifier = {
+					modifier = resolution_defenseprivatization_corporate_warlords_merc_naval_cap
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		hidden_effect = {
+			set_timed_country_flag = { flag = galactic_community_resolution_failed_defenseprivatization days = @resolution_flag_timer }
+			add_modifier = {
+				modifier = resolution_passed_diplomatic_weight
+				days = 2200
+			}
+		}
+	}
+
+	allow = {
+		is_active_resolution = "resolution_defenseprivatization_security_business"
+	}
+
+	breach = {
+		NOT = {
+			any_controlled_fleet ={
+				owner ={
+					is_country_type = enclave_mercenary
+				}
+			}
+		}
+		NOT = { has_country_flag = constitutional_immunity }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_disliked
+
+		modifier = {
+			factor = 2
+			OR = {
+				has_civic = civic_barbaric_despoilers
+				has_civic = civic_warrior_culture
+				has_civic = civic_naval_contractors
+				has_civic = civic_private_military_companies
+			}
+			desc = gal_com_supporting_civics
+		}
+
+		modifier = {
+			factor = 0
+			in_breach_of = resolution_defenseprivatization_corporate_warlords
+			desc = gal_com_in_breach_of_proposed_resolution
+		}
+
+		modifier = {
+			factor = 2
+
+			has_ascension_perk = ap_lord_of_war
+			desc = ap_lord_of_war
+		}
+
+		modifier = {
+			factor = 0
+			is_gestalt = yes
+			desc = ethic_gestalt_consciousness
+		}
+
+		modifier = {
+			factor = 0
+			is_pacifist = yes
+			desc = ethic_pacifist
+		}
+	}
+}
+
+### Intergalactic Directives
+resolution_intergalacticdirective_regulated_growth = {
+	icon = "GFX_resolution_intergalactic_directives"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t1
+		}
+	}
+
+	target = no
+	level = 1
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOR = {
+				is_active_resolution = "resolution_intergalacticdirective_regulated_growth"
+				is_active_resolution = "resolution_intergalacticdirective_ensured_sovereignty"
+				is_active_resolution = "resolution_intergalacticdirective_a_voice_for_all"
+			}
+		}
+	}
+
+	effect = {
+		galcom_success_effect = { FLAG = galactic_community_resolution_passed_intergalacticdirective }
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_intergalacticdirective }
+	}
+
+	modifier = {
+		resolution_intergalacticdirective_regulated_growth = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 3
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 0.25
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 2
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.25
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_intergalacticdirective_ensured_sovereignty = {
+	icon = "GFX_resolution_intergalactic_directives"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t2
+		}
+	}
+
+	target = no
+	level = 2
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	allow = {
+		is_active_resolution = "resolution_intergalacticdirective_regulated_growth"
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOR = {
+				is_active_resolution = "resolution_intergalacticdirective_ensured_sovereignty"
+				is_active_resolution = "resolution_intergalacticdirective_a_voice_for_all"
+			}
+		}
+	}
+
+	effect = {
+		galcom_success_effect = { FLAG = galactic_community_resolution_passed_intergalacticdirective }
+		custom_tooltip = galcom_tooltip_no_integration_permitted
+		hidden_effect = {
+			galcom_change_agreement_term_resolution_effect = {
+				TERM = subject_integration
+				CURRENT_VALUE = subject_can_be_integrated
+				NEW_VALUE = subject_can_not_be_integrated
+			}
+		}
+		custom_tooltip = galcom_tooltip_no_expansion_prohibited
+		hidden_effect = {
+			galcom_change_agreement_term_resolution_effect = {
+				TERM = subject_expand
+				CURRENT_VALUE = subject_cannot_expand
+				NEW_VALUE = subject_can_expand_with_tithe
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_intergalacticdirective }
+	}
+
+	modifier = {
+		resolution_intergalacticdirective_regulated_growth = 1
+		resolution_intergalacticdirective_ensured_sovereignty = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 3
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 0.25
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 2
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.25
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_intergalacticdirective_a_voice_for_all = {
+	icon = "GFX_resolution_intergalactic_directives"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+
+	target = no
+	level = 3
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	allow = {
+		is_active_resolution = "resolution_intergalacticdirective_ensured_sovereignty"
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOT = { is_active_resolution = "resolution_intergalacticdirective_a_voice_for_all" }
+		}
+	}
+
+	effect = {
+		custom_tooltip = galcom_tooltip_strengthened_specialists
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_specialist_subject_type = { TYPE = bulwark }
+				}
+				add_modifier = {
+					modifier = resolution_galcom_bulwark_modifier
+					days = -1
+				}
+			}
+		}
+		galcom_success_effect = { FLAG = galactic_community_resolution_passed_intergalacticdirective }
+		custom_tooltip = galcom_tooltip_no_limited_diplomacy
+		hidden_effect = {
+			galcom_change_agreement_term_resolution_effect = {
+				TERM = subject_diplomacy
+				CURRENT_VALUE = subject_can_not_do_diplomacy
+				NEW_VALUE = subject_can_do_diplomacy_but_not_vote
+			}
+		}
+		custom_tooltip = galcom_tooltip_no_expansion_regulated
+		hidden_effect = {
+			galcom_change_agreement_term_resolution_effect = {
+				TERM = subject_expand
+				CURRENT_VALUE = subject_can_expand_with_tithe
+				NEW_VALUE = subject_can_expand
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_intergalacticdirective }
+	}
+
+	modifier = {
+		resolution_intergalacticdirective_regulated_growth = 1
+		resolution_intergalacticdirective_ensured_sovereignty = 1
+		resolution_intergalacticdirective_a_voice_for_all = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_disliked
+
+		modifier = {
+			factor = 3
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 0.25
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 2
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.25
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_intergalacticdirective_repeal_1 = {
+	icon = "GFX_resolution_council_veto"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t1
+		}
+	}
+
+	target = no
+	fire_and_forget = yes
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_intergalacticdirective_regulated_growth"
+	}
+
+	effect = {
+		galcom_success_effect_repeal = {
+			RESOLUTION = resolution_intergalacticdirective_regulated_growth
+			FLAG = galactic_community_resolution_passed_intergalactivedirective_repeal
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_intergalacticdirective_repeal }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_disliked
+
+		modifier = {
+			factor = 0.25
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 3
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 0.5
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 2
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_intergalacticdirective_repeal_2 = {
+	icon = "GFX_resolution_council_veto"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t2
+		}
+	}
+
+	target = no
+	fire_and_forget = yes
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_intergalacticdirective_ensured_sovereignty"
+	}
+
+	effect = {
+		galcom_success_effect_repeal = {
+			RESOLUTION = resolution_intergalacticdirective_ensured_sovereignty
+			FLAG = galactic_community_resolution_passed_intergalactivedirective_repeal
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_intergalacticdirective_repeal }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 0.25
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 3
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 0.5
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 2
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_intergalacticdirective_repeal_3 = {
+	icon = "GFX_resolution_council_veto"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+
+	target = no
+	fire_and_forget = yes
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_intergalacticdirective_a_voice_for_all"
+	}
+
+	effect = {
+		galcom_success_effect_repeal = {
+			RESOLUTION = resolution_intergalacticdirective_a_voice_for_all
+			FLAG = galactic_community_resolution_passed_intergalactivedirective_repeal
+		}
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_specialist_subject_type = { TYPE = bulwark }
+				}
+				remove_modifier = resolution_galcom_bulwark_modifier
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_intergalacticdirective_repeal }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 0.25
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 3
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 0.5
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 2
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+### Bureaucratic Surveillance
+resolution_bureaucraticsurveillance_administrative_insight = {
+	icon = "GFX_resolution_bureaucratic_surveillance"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t1
+		}
+	}
+
+	target = no
+	level = 1
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	allow = {
+		is_overlord = yes
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOR = {
+				is_active_resolution = "resolution_bureaucraticsurveillance_administrative_insight"
+				is_active_resolution = "resolution_bureaucraticsurveillance_borderless_authority"
+				is_active_resolution = "resolution_bureaucraticsurveillance_personal_oversight"
+			}
+		}
+	}
+
+	effect = {
+		galcom_success_effect = { FLAG = galactic_community_resolution_passed_bureaucraticsurveillance }
+		custom_tooltip = galcom_tooltip_ethics_tier_1
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_subject = yes
+				}
+				galcom_subject_ethic_modifier_effect = yes
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_bureaucraticsurveillance }
+	}
+
+	modifier = {
+		resolution_bureaucraticsurveillance_administrative_insight = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 0.25
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 3
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 0.5
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 2
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_bureaucraticsurveillance_borderless_authority = {
+	icon = "GFX_resolution_bureaucratic_surveillance"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t2
+		}
+	}
+
+	target = no
+	level = 2
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	allow = {
+		is_active_resolution = "resolution_bureaucraticsurveillance_administrative_insight"
+		is_overlord = yes
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOR = {
+				is_active_resolution = "resolution_bureaucraticsurveillance_borderless_authority"
+				is_active_resolution = "resolution_bureaucraticsurveillance_personal_oversight"
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = galcom_tooltip_ethics_tier_2
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_subject = yes
+				}
+				galcom_upgrade_ethic_modifier_effect = yes
+			}
+		}
+		galcom_success_effect = { FLAG = galactic_community_resolution_passed_bureaucraticsurveillance }
+		custom_tooltip = galcom_tooltip_no_independent_sensors
+		hidden_effect = {
+			galcom_change_agreement_term_resolution_effect = {
+				TERM = subject_sensors
+				CURRENT_VALUE = subject_does_not_get_sensors
+				NEW_VALUE = subject_gets_sensors
+			}
+		}
+		custom_tooltip = galcom_tooltip_no_holdings_4
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_overlord = yes
+				}
+				every_agreement = {
+					limit = {
+						has_term_value = {
+							term = subject_holdings_limit
+							value = subject_holdings_limit_4
+						}
+					}
+					set_agreement_terms = {
+						subject_holdings_limit = subject_holdings_limit_3
+					}
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_bureaucraticsurveillance }
+	}
+
+	modifier = {
+		resolution_bureaucraticsurveillance_administrative_insight = 1
+		resolution_bureaucraticsurveillance_borderless_authority = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 0.25
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 3
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 0.5
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 2
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_bureaucraticsurveillance_personal_oversight = {
+	icon = "GFX_resolution_bureaucratic_surveillance"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+
+	target = no
+	level = 3
+
+	potential = {
+		has_overlord_dlc = yes
+	}
+
+	allow = {
+		is_active_resolution = "resolution_bureaucraticsurveillance_borderless_authority"
+		is_overlord = yes
+		custom_tooltip = {
+			fail_text = "resolution_already_active"
+			NOT = { is_active_resolution = "resolution_bureaucraticsurveillance_personal_oversight" }
+		}
+	}
+
+	effect = {
+		custom_tooltip = galcom_tooltip_ethics_tier_3
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_subject = yes
+				}
+				galcom_upgrade_ethic_modifier_effect = yes
+			}
+		}
+		galcom_success_effect = { FLAG = galactic_community_resolution_passed_bureaucraticsurveillance }
+		custom_tooltip = galcom_tooltip_no_independent_diplomacy
+		hidden_effect = {
+			galcom_change_agreement_term_resolution_effect = {
+				TERM = subject_diplomacy
+				CURRENT_VALUE = subject_can_do_diplomacy
+				NEW_VALUE = subject_can_do_diplomacy_but_not_vote
+			}
+		}
+		custom_tooltip = galcom_tooltip_no_holdings_3
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_overlord = yes
+				}
+				every_agreement = {
+					limit = {
+						has_term_value = {
+							term = subject_holdings_limit
+							value = subject_holdings_limit_3
+						}
+					}
+					set_agreement_terms = {
+						subject_holdings_limit = subject_holdings_limit_2
+					}
+				}
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_bureaucraticsurveillance }
+	}
+
+	modifier = {
+		resolution_bureaucraticsurveillance_administrative_insight = 1
+		resolution_bureaucraticsurveillance_borderless_authority = 1
+		resolution_bureaucraticsurveillance_personal_oversight = 1
+	}
+
+	ai_weight = {
+		base = @resolution_weight_disliked
+
+		modifier = {
+			factor = 0.25
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 3
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 0.5
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 2
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 0.5
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_bureaucraticsurveillance_repeal_1 = {
+	icon = "GFX_resolution_council_veto"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t1
+		}
+	}
+
+	target = no
+	fire_and_forget = yes
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_bureaucraticsurveillance_administrative_insight"
+	}
+
+	effect = {
+		galcom_success_effect_repeal = {
+			RESOLUTION = resolution_bureaucraticsurveillance_administrative_insight
+			FLAG = galactic_community_resolution_passed_bureaucraticsurveillance_repeal
+		}
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_subject = yes
+				}
+				galcom_downgrade_ethic_modifier_effect = yes
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_bureaucraticsurveillance_repeal }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_disliked
+
+		modifier = {
+			factor = 3
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 0.25
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 2
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.25
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_bureaucraticsurveillance_repeal_2 = {
+	icon = "GFX_resolution_council_veto"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t2
+		}
+	}
+
+	target = no
+	fire_and_forget = yes
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_bureaucraticsurveillance_borderless_authority"
+	}
+
+	effect = {
+		galcom_success_effect_repeal = {
+			RESOLUTION = resolution_bureaucraticsurveillance_borderless_authority
+			FLAG = galactic_community_resolution_passed_bureaucraticsurveillance_repeal
+		}
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_subject = yes
+				}
+				galcom_downgrade_ethic_modifier_effect = yes
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_bureaucraticsurveillance_repeal }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_unpopular
+
+		modifier = {
+			factor = 3
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 0.25
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 2
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.25
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
+
+resolution_bureaucraticsurveillance_repeal_3 = {
+	icon = "GFX_resolution_council_veto"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+
+	target = no
+	fire_and_forget = yes
+
+	potential = {
+		has_overlord_dlc = yes
+		is_active_resolution = "resolution_bureaucraticsurveillance_personal_oversight"
+	}
+
+	effect = {
+		galcom_success_effect_repeal = {
+			RESOLUTION = resolution_bureaucraticsurveillance_personal_oversight
+			FLAG = galactic_community_resolution_passed_bureaucraticsurveillance_repeal
+		}
+		hidden_effect = {
+			every_galcom_member = {
+				limit = {
+					is_subject = yes
+				}
+				galcom_downgrade_ethic_modifier_effect = yes
+			}
+		}
+	}
+
+	fail_effects = {
+		galcom_fail_effects = { FLAG = galactic_community_resolution_failed_bureaucraticsurveillance_repeal }
+	}
+
+	ai_weight = {
+		base = @resolution_weight_normal
+
+		modifier = {
+			factor = 3
+			is_subject = yes
+			desc = galcom_is_subject
+		}
+
+		modifier = {
+			factor = 0.25
+			is_overlord = yes
+			is_xenophile = no
+			is_egalitarian = no
+			desc = galcom_is_overlord
+		}
+
+		modifier = {
+			factor = 2
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.25
+			is_authoritarian = yes
+			desc = ethic_authoritarian
+		}
+
+		modifier = {
+			factor = 0.5
+			is_xenophobe = yes
+			is_subject = no
+			desc = ethic_xenophobe
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_feudal_realm
+			desc = civic_feudal_realm
+		}
+
+		modifier = {
+			factor = 2
+			has_civic = civic_franchising
+			desc = civic_franchising
+		}
+	}
+}
