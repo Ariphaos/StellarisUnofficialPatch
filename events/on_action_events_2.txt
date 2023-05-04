@@ -4,46 +4,14 @@
 #
 #########################################
 
-namespace = action
+##############################
+# FORMING THE GALACTIC MARKET
+##############################
 
-## Founding the galactic market
-## on_yearly_pulse
-#event = {
-#	id = action.95
-#	hide_window = yes
-#	is_triggered_only = yes
-#
-#	trigger = {
-#		years_passed >= 50
-#		NOR = {
-#			has_global_flag = galactic_market_founded
-#			has_global_flag = ongoing_market_nomination
-#		}
-#		count_country = { # minimum 3 countries
-#			limit = { is_country_type = default }
-#			count >= 3
-#		}
-#		any_playable_country = {
-#			perc_communications_with_playable >= 0.5
-#			is_homicidal = no
-#			is_gestalt = no
-#			# gestalts can use but not found the market
-#		}
-#	}
-#
-#	immediate = {
-#		random_playable_country = {
-#			limit = {
-#				perc_communications_with_playable >= 0.5
-#				is_homicidal = no
-#				is_gestalt = no
-#			}
-#			country_event = { id = action.96 }
-#		}
-#	}
-#}
+# NOTE: See also 'galcom.64' (Relocate the Galactic Market)
 
-# Market Founder event
+# Market Founder event (resolution accepted)
+# via resolution_galactic_market_form = {} | this = Resolution proposer country
 country_event = {
 	id = action.96
 	title = action.96.name
@@ -57,16 +25,13 @@ country_event = {
 	}
 	picture = GFX_evt_financial_instruments
 	show_sound = event_galactic_market
-
 	is_triggered_only = yes
-
-	fire_only_once = yes # failsafe
 
 	immediate = {
 		set_global_flag = ongoing_market_nomination
 		set_country_flag = market_nomination_eligible
 		event_target:global_event_country = {
-			country_event = { id = action.98 days = 1800 }
+			country_event = { id = action.98 days = @galactic_market_nomination_period }
 		}
 		begin_event_chain = {
 			event_chain = market_founding_chain
@@ -77,12 +42,18 @@ country_event = {
 				NOT = { is_same_value = root }
 				is_galactic_community_member = yes
 			}
-			begin_event_chain = {
-				event_chain = market_founding_chain
-				target = this
-			}
-			country_event = { id = action.97 }
+			country_event = { id = action.97 } # inform all other concerned countries
 		}
+	}
+
+	option = {
+		name = action.96.a
+		trigger = { has_authority = auth_corporate }
+	}
+
+	option = {
+		name = action.96.b
+		trigger = { NOT = { has_authority = auth_corporate } }
 	}
 
 	after = {
@@ -95,19 +66,10 @@ country_event = {
 			}
 		}
 	}
-
-	option = {
-		name = action.96.a
-		trigger = { is_megacorp = yes }
-	}
-
-	option = {
-		name = action.96.b
-		trigger = { is_megacorp = no }
-	}
 }
 
-# Market Nomination started notification event
+# Market Nomination started (notification event)
+# this = every GalCom member except the resolution proposer
 country_event = {
 	id = action.97
 	title = action.97.name
@@ -130,19 +92,13 @@ country_event = {
 	}
 	picture = GFX_evt_financial_instruments
 	show_sound = event_galactic_market
-
 	is_triggered_only = yes
 
 	immediate = {
 		set_country_flag = market_nomination_eligible
-	}
-
-	after = {
-		tooltip = {
-			begin_event_chain = {
-				event_chain = market_founding_chain
-				target = this
-			}
+		begin_event_chain = {
+			event_chain = market_founding_chain
+			target = this
 		}
 	}
 
@@ -154,138 +110,155 @@ country_event = {
 
 	option = {
 		name = action.96.b
-		trigger = { is_megacorp = no }
+		trigger = {
+			NOT = { has_authority = auth_corporate }
+		}
 		custom_tooltip = enable_decision_market_nomination
+	}
+
+	after = {
+		tooltip = {
+			begin_event_chain = {
+				event_chain = market_founding_chain
+				target = this
+			}
+		}
 	}
 }
 
-
-# Market Founder luck-of-the-draw
+# Appoint a host for the Galactic Market
+# this = global country | from = proposing country
 country_event = {
 	id = action.98
 	hide_window = yes
 	is_triggered_only = yes
 
 	immediate = {
-		every_playable_country = {
-			limit = { has_event_chain = market_founding_chain }
-			end_event_chain = market_founding_chain
-		}
 		remove_global_flag = ongoing_market_nomination
-		# nominees start equal, modifiers improve chances
-		random_galaxy_planet = {
+		# If at least one planet was nominated, choose a host planet...
+		if = {
 			limit = {
-				exists = owner
-				owner = {
-					is_country_type = default
-					has_country_flag = market_nomination_eligible
-				}
-			}
-			weights = {
-				base = 1
-				modifier = {
-					owner = { is_variable_set = market_rating }
-					add = owner.market_rating
-				}
-				modifier = {
-					mult = solar_system.trigger:has_system_trade_value
-					solar_system = {
-						has_system_trade_value > 0
+				any_galaxy_planet = {
+					is_market_nominee_planet = yes
+					exists = owner
+					owner = {
+						is_country_type = default
+						has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
 					}
 				}
-				modifier = {
-					factor = 0.1
-					NOR = {
-						has_modifier = market_nominee_level_1
-						has_modifier = market_nominee_level_2
-						has_modifier = market_nominee_level_3
-						has_modifier = market_nominee_level_4
-						has_modifier = market_nominee_level_5
-					}
-				}
-				pow = 1.5
 			}
-			save_global_event_target_as = market_founder_planet
-			owner = {
-				save_global_event_target_as = market_founder
+			every_playable_country = {
+				limit = { has_event_chain = market_founding_chain }
+				end_event_chain = market_founding_chain
+			}
+			choose_galactic_market_host = yes
+			# Start the process of informing the new founder
+			event_target:market_founder = {
 				country_event = { id = action.99 }
 			}
 		}
-		every_playable_country = {
-			limit = { has_country_flag = market_nomination_eligible }
-			every_owned_planet = {
-				limit = {
-					OR = {
-						has_modifier = market_nominee_level_1
-						has_modifier = market_nominee_level_2
-						has_modifier = market_nominee_level_3
-						has_modifier = market_nominee_level_4
-						has_modifier = market_nominee_level_5
-					}
-				}
-				# remove boosted flags
-				if = {
-					limit = { has_planet_flag = boosted_once }
-					remove_planet_flag = boosted_once
-				}
-				if = {
-					limit = { has_planet_flag = boosted_twice }
-					remove_planet_flag = boosted_twice
-				}
-				# remove modifiers
-				if = {
-					limit = { has_modifier = market_nominee_level_1 }
-					remove_modifier = market_nominee_level_1
-				}
-				else_if = {
-					limit = { has_modifier = market_nominee_level_2 }
-					remove_modifier = market_nominee_level_2
-				}
-				else_if = {
-					limit = { has_modifier = market_nominee_level_3 }
-					remove_modifier = market_nominee_level_3
-				}
-				else_if = {
-					limit = { has_modifier = market_nominee_level_4 }
-					remove_modifier = market_nominee_level_4
-				}
-				else_if = {
-					limit = { has_modifier = market_nominee_level_5 }
-					remove_modifier = market_nominee_level_5
-				}
+		# ... else inform the galaxy that nominations were not forthcoming, and reset.
+		else = {
+			from = {
+				country_event = { id = action.1000 } # Our effort failed
 			}
-			clear_variable = market_rating
+			every_playable_country = {
+				limit = {
+					NOT = {
+						is_same_value = from
+					}
+					has_event_chain = market_founding_chain
+				}
+				country_event = { id = action.1005 } # The attempt failed
+			}
 		}
 	}
 }
 
-# Founder selected port
+# Market did not form (proposing country)
+# this = proposing country
+country_event = {
+	id = action.1000
+	title = action.1000.name
+	desc = action.1000.desc
+	picture = GFX_evt_financial_instruments
+	show_sound = event_galactic_market
+	is_triggered_only = yes
+
+	immediate = {
+		end_event_chain = market_founding_chain
+	}
+
+	option = {
+		name = action.1000.a
+		tooltip = {
+			end_event_chain = market_founding_chain
+		}
+	}
+}
+
+# Market did not form (other GalCom countries)
+# this = country
+country_event = {
+	id = action.1005
+	title = action.1000.name
+	desc = {
+		text = action.1005.desc
+		trigger = { is_xenophobe = no }
+	}
+	desc = {
+		text = action.1005.desc.phobe
+		trigger = { is_xenophobe = yes }
+	}
+	picture = GFX_evt_financial_instruments
+	show_sound = event_galactic_market
+	is_triggered_only = yes
+
+	immediate = {
+		end_event_chain = market_founding_chain
+	}
+
+	option = {
+		name = {
+			text = UNFORTUNATE
+			trigger = {
+				is_xenophobe = no
+			}
+		}
+		name = {
+			text = action.1005.a.phobe
+			trigger = {
+				is_xenophobe = yes
+			}
+		}
+		tooltip = {
+			end_event_chain = market_founding_chain
+		}
+	}
+}
+
+# Market forms; founder selected (gateway event)
+# this = new host country
 country_event = {
 	id = action.99
 	hide_window = yes
 	is_triggered_only = yes
+
 	immediate = {
-		set_global_flag = galactic_market_founded
-		# code listens for this flag to create market
+		set_global_flag = galactic_market_founded # code listens for this flag to create market
 		country_event = { id = action.104 days = 5 }
 	}
 }
 
+# Market forms (notifying the new host)
+# this = new host country
 country_event = {
 	id = action.104
 	title = action.99.name
-	desc = {
-		text = action.99.desc
-		trigger = { is_xenophobe = no }
-	}
-	desc = {
-		text = action.99.desc.phobe
-		trigger = { is_xenophobe = yes }
-	}
+	desc = action.99.desc
 	picture = GFX_evt_financial_instruments
 	location = event_target:galactic_market_station
 	show_sound = event_galactic_market
-
 	is_triggered_only = yes
 
 	immediate = {
@@ -413,7 +386,7 @@ country_event = {
 	}
 }
 
-# Founder selected notification
+# Market forms (notification to the wider community)
 country_event = {
 	id = action.101
 	title = action.101.name
@@ -451,7 +424,12 @@ country_event = {
 	}
 }
 
+##############################################
+# GALACTIC MARKET: FORCED RELOCATION/TRANSFER
+##############################################
+
 # Market station lost, is conquered or moved
+# via on_system_lost | this = system's former owner; from = system; fromfrom = new system owner
 country_event = {
 	id = action.102
 	hide_window = yes
@@ -467,7 +445,8 @@ country_event = {
 	}
 
 	immediate = {
-		if = { # no new owner or homicidal empire
+		# System either has no new owner, or an owner who's homicidal or not a GalCom member
+		if = {
 			limit = {
 				OR = {
 					NOT = { exists = fromfrom }
@@ -476,20 +455,20 @@ country_event = {
 						fromfrom = {
 							OR = {
 								is_homicidal = yes
-								is_galactic_community_member = yes
+								is_galactic_community_member = no
 							}
 						}
 					}
 				}
 			}
-			# transfer to contact
+			# Destroy old Galactic Market
 			event_target:galactic_market_station = {
 				destroy_ambient_object = this
 			}
 			clear_global_event_target = galactic_market_station
 			clear_global_event_target = market_founder_planet
 			remove_modifier = galactic_market_founder
-
+			# Transfer to a contact
 			random_playable_country = {
 				limit = {
 					is_homicidal = no
@@ -500,7 +479,8 @@ country_event = {
 					modifier = {
 						factor = 999
 						has_communications = root
-						has_country_flag = market_nomination_eligible
+						has_country_flag = has_market_access
+						has_country_flag = market_nomination_eligible # NOTE: this flag is set never removed, even if the contact leaves GalCom
 					}
 					modifier = {
 						factor = 20
@@ -546,14 +526,14 @@ country_event = {
 					days = -1
 				}
 				set_market_leader = yes
-
 				country_event = { id = action.103 }
 			}
+			# Notification
 			create_message = {
 				type = MESSAGE_TYPE_LOST_MARKET_STATION
 				localization = MESSAGE_LOST_MARKET_STATION
 				days = 30
-				target = root.from # the Go To
+				target = root.from # Sets location marker
 				variable = {
 					type = name
 					localization = SYSTEM
@@ -561,7 +541,8 @@ country_event = {
 				}
 			}
 		}
-		else_if = { # lost to valid empire without market access (somehow)
+		# System has a new owner who somehow lacks access to the Market
+		else_if = {
 			limit = {
 				exists = fromfrom
 				fromfrom = {
@@ -569,6 +550,9 @@ country_event = {
 					NOT = { has_country_flag = has_market_access }
 				}
 			}
+			# Remove empire modifier
+			remove_modifier = galactic_market_founder
+			# Enable Market access (and host status) for the new owner
 			fromfrom = {
 				set_country_flag = has_market_access
 				enable_galactic_market = yes
@@ -578,12 +562,12 @@ country_event = {
 				}
 				set_market_leader = yes
 			}
-			remove_modifier = galactic_market_founder
+			# Notification
 			create_message = {
 				type = MESSAGE_TYPE_LOST_MARKET_STATION
 				localization = MESSAGE_LOST_MARKET_STATION
 				days = 30
-				target = root.from # the Go To
+				target = root.from # Sets location marker
 				variable = {
 					type = name
 					localization = SYSTEM
@@ -591,6 +575,7 @@ country_event = {
 				}
 			}
 		}
+		# System has a new owner (non-homicidal, member of GalCom) who can take control of the Galactic Market
 		else = {
 			remove_modifier = galactic_market_founder
 			fromfrom = {
@@ -600,11 +585,12 @@ country_event = {
 				}
 				set_market_leader = yes
 			}
+			# Notification
 			create_message = {
 				type = MESSAGE_TYPE_LOST_MARKET_STATION
 				localization = MESSAGE_LOST_MARKET_STATION
 				days = 30
-				target = root.from # the Go To
+				target = root.from # Sets location marker
 				variable = {
 					type = name
 					localization = SYSTEM
@@ -615,7 +601,7 @@ country_event = {
 	}
 }
 
-# Market station moved to my system
+# Market station moved to our system
 country_event = {
 	id = action.103
 	title = action.103.name
@@ -667,6 +653,7 @@ event = {
 	}
 }
 
+# via on_post_communications_established = {}
 country_event = {
 	id = action.110
 	hide_window = yes
@@ -726,7 +713,6 @@ country_event = {
 		trigger = { is_xenophobe = yes }
 	}
 	picture = GFX_evt_financial_instruments
-
 	is_triggered_only = yes
 
 	trigger = {
@@ -825,6 +811,10 @@ event = {
 		}
 	}
 }
+
+#########################
+# ASSORTED NOTIFICATIONS
+#########################
 
 # Megastructure completed notification for contacts
 country_event = {
@@ -1849,6 +1839,47 @@ starbase_event = {
 	}
 }
 
+# From = system
+# FromFrom = country (new owner)
+# This = country (previous owner)
+country_event = {
+	id = action.226
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { exists = from.owner }
+	}
+
+	immediate = {
+		#remove leftovers
+		from = {
+			every_system_planet = {
+				if = {
+					limit = {
+						has_mining_station = yes
+					}
+					mining_station = { delete_fleet = this }
+				}
+				if = {
+					limit = {
+						has_research_station = yes
+					}
+					research_station = { delete_fleet = this }
+				}
+				if = {
+					limit = {
+						has_observation_outpost = yes
+					}
+					observation_outpost = { delete_fleet = this }
+				}
+			}
+		}
+	}
+}
+
+
 
 # on_released_as_vassal
 # This = released vassal
@@ -1933,6 +1964,7 @@ country_event = {
 						is_same_value = root
 						has_communications = root
 						has_country_flag = suppress_first_contact_comms
+						is_primitive = yes
 					}
 					root = {
 						has_established_contact = prev
@@ -2862,5 +2894,204 @@ starbase_event = {
 			}
 			set_planet_flag = ruined_orbital_ring_planet
 		}
+	}
+}
+
+# Random pulse (set up the delay) - on_five_year_pulse_country - for pre-ftl diplo events
+country_event = {
+	id = action.620
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_first_contact_dlc = yes
+		has_any_active_pre_ftl_agreement = yes
+	}
+
+	immediate = {
+		country_event = { id = action.621 random = 360 }
+	}
+}
+
+# Random pulse part 2 (fire the on action) - on_five_year_pulse_country - for pre-ftl diplo events
+country_event = {
+	id = action.621
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_first_contact_dlc = yes
+		has_any_active_pre_ftl_agreement = yes
+	}
+
+	immediate = {
+		fire_on_action = { on_action = on_five_year_random_pulse_pre_ftl }
+	}
+}
+
+# Random pulse (set up the delay) - on_five_year_pulse_country - for pre-ftl tech events
+country_event = {
+	id = action.630
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_pre_ftl_recent_tech_development = yes
+	}
+
+	immediate = {
+		country_event = { id = action.631 random = 360 }
+	}
+}
+
+# Random pulse part 2 (fire the on action) - on_five_year_pulse_country - for pre-ftl tech events
+country_event = {
+	id = action.631
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_pre_ftl_recent_tech_development = yes
+	}
+
+	immediate = {
+		fire_on_action = { on_action = on_five_year_random_pulse_pre_ftl_tech_events }
+	}
+}
+
+# Random pulse (set up the delay) - on_bi_yearly_pulse_country - for Payback and Broken Shackles interactions
+country_event = {
+	id = action.632
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_origin = origin_payback
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			has_country_flag = broken_shackles_recognized_payback@root
+			has_communications = prev
+		}
+	}
+
+	immediate = {
+		country_event = { id = action.633 random = 30 }
+	}
+}
+
+# Random pulse (fire the on action) - on_five_year_pulse_country - for Payback and Broken Shackles interactions
+country_event = {
+	id = action.633
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_origin = origin_payback
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			has_country_flag = broken_shackles_recognized_payback@root
+			has_communications = prev
+		}
+	}
+
+	immediate = {
+		fire_on_action = { on_action = on_decade_random_pulse_country_payback_broken_shackles }
+	}
+}
+
+# Contact report follow-up (fire the on action) - on_first_contact_started
+first_contact_event = {
+	id = action.635
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_country_type = default
+			NOT = { has_country_flag = Story7 }
+		}
+		contact_country = {
+			NOR = {
+				has_country_flag = radical_cult
+				is_country_type = fallen_empire
+				is_country_type = awakened_fallen_empire
+				is_country_type = primitive
+				is_guardian_country = yes
+				has_relation_flag = { flag = no_coms who = owner }
+				has_relation_flag = { flag = AbandonedRefugees who = owner }
+				has_relation_flag = { flag = pirate_relation who = owner }
+				has_country_flag = day_0
+			}
+		}
+	}
+
+	immediate = {
+		contact_country = {
+			save_event_target_as = contact_country
+		}
+		owner = {
+			country_event = { id = story.7 days = 15 scopes = { from = event_target:contact_country } }
+		}
+	}
+}
+
+# Root = Country
+# From = War
+country_event = {
+	id = action.640
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_war_participant = {
+			war = from
+			side = attackers
+		}
+		any_owned_fleet = {
+			is_cloaked = yes
+			solar_system = {
+				is_capital_system = yes
+				owner = {
+					is_war_participant = {
+						war = root.from
+						side = defenders
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = nothing_to_see_here_achievement
+	}
+}
+
+# Galatron activated for the first time - fired from the r_galatron relic - unlocks the CB to steal it
+country_event = {
+	id = action.650
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = galatron_activated_first_time }
+	}
+
+	immediate = {
+		set_global_flag = galatron_activated_first_time
 	}
 }

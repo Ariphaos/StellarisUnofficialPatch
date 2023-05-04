@@ -129,26 +129,16 @@ technologist = {
 		}
 	}
 
-	demand = {
-		title = "FACTION_OUTRAGED_GC"
-		unfulfilled_title = "FACTION_OUTRAGED_GC"
-		desc = "FACTION_OUTRAGED_GC_DESC"
-
-		fulfilled_effect = -20
-		unfulfilled_effect = 0.001
-
-		potential = {
-			exists = owner
-			owner = {
-				has_country_flag = faction_materialist_outraged_gc
-			}
+	# DEMAND: Faction Outraged (by a GalCom Resolution)
+	inline_script = {
+		script = pop_faction_types/demand_faction_outraged
+		FLAG = galcom_resolution_passed_anti_technologist
 		}
 
-		trigger = {
-			owner = {
-				has_country_flag = faction_materialist_outraged_gc
-			}
-		}
+	# DEMAND: Faction Pleased (by a GalCom Resolution)
+	inline_script = {
+		script = pop_faction_types/demand_faction_pleased
+		FLAG = galcom_resolution_passed_pro_technologist
 	}
 
 	demand = {
@@ -172,10 +162,6 @@ technologist = {
 							level >= 1
 						}
 					}
-				}
-				NOR = {
-					has_country_flag = primitives_can_into_space
-					#is_subject = yes
 				}
 			}
 		}
@@ -229,12 +215,14 @@ technologist = {
 							has_federation_perk = research_federation_passive
 						}
 					}
-					count_playable_country = {
+					count_country = {
 						count > 2
 						limit = {
 							exists = this
 							OR = {
 								root.owner = { has_research_agreement = prev }
+								is_under_open_technological_enlightenment = prev
+								is_under_stratified_technological_enlightenment = prev
 								AND = {
 									is_subject = yes
 									has_overlord = root.owner
@@ -297,10 +285,6 @@ technologist = {
 		}
 	}
 
-	on_create = {
-		pop_faction_event = { id = factions.1 }
-	}
-
 	demand = {
 		title = "TECHNOLOGIST_SECRET_KNOWLEDGE"
 		unfulfilled_title = "TECHNOLOGIST_NO_SECRET_KNOWLEDGE"
@@ -348,29 +332,6 @@ technologist = {
 
 		trigger = {
 			owner.federation = { has_federation_type = research_federation }
-		}
-	}
-
-	demand = {
-		title = TECHNOLOGIST_FEDERATION_ANTI
-		unfulfilled_title = TECHNOLOGIST_FEDERATION_ANTI_NOT_SPIRITUALIST
-		desc = TECHNOLOGIST_FEDERATION_ANTI_DESC
-
-		unfulfilled_effect = -10
-		fulfilled_effect = 0.001
-
-		potential = {
-			exists = owner.federation
-			owner.federation = { has_federation_type = spiritualist_federation }
-		}
-
-		trigger = {
-			OR = {
-				NOT = { exists = owner.federation }
-				owner.federation = {
-					NOT = { has_federation_type = spiritualist_federation }
-				}
-			}
 		}
 	}
 
@@ -436,16 +397,7 @@ technologist = {
 
 		trigger = {
 			owner = {
-				OR = {
-					has_modifier = artifact_cybrex_research_completed
-					has_modifier = artifact_irassian_research_completed
-					has_modifier = artifact_league_research_completed
-					has_modifier = artifact_vultaum_research_completed_suppressed
-					has_modifier = artifact_vultaum_research_completed_public
-					has_country_flag = artifact_yuht_research_completed
-					has_modifier = artifact_baol_research_completed
-					has_modifier = artifact_zroni_research_completed
-				}
+				has_completed_precursor_research = yes
 			}
 		}
 	}
@@ -472,6 +424,10 @@ technologist = {
 				has_policy_flag = diplo_stance_cooperative
 			}
 		}
+	}
+
+	on_create = {
+		pop_faction_event = { id = factions.1 }
 	}
 
 	on_destroy = {

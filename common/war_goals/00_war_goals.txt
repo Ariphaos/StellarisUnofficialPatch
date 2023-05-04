@@ -36,8 +36,21 @@ wg_independence = {
 	on_status_quo = {
 		custom_tooltip = wg_independence_status_quo
 		hidden_effect = {
-			set_subject_of = {
-				who = none
+			fromfrom = {
+				every_war_participant = {
+					limit = {
+						fromfrom = {
+							is_war_participant = {
+								who = prev
+								side = Root
+							}
+						}
+						has_overlord = Root.from
+					}
+					set_subject_of = {
+						who = none
+					}
+				}
 			}
 		}
 	}
@@ -45,14 +58,27 @@ wg_independence = {
 	on_accept = {
 		custom_tooltip = wg_independence_accept
 		hidden_effect = {
-			set_subject_of = {
-				who = none
-			}
-			every_system_within_border = {
-				limit = {
-					from = { has_claim = prev }
+			fromfrom = {
+				every_war_participant = {
+					limit = {
+						fromfrom = {
+							is_war_participant = {
+								who = prev
+								side = Root
+							}
+						}
+						has_overlord = Root.from
+					}
+					set_subject_of = {
+						who = none
+					}
+					every_system_within_border = {
+						limit = {
+							Root.from = { has_claim = prev }
+						}
+						remove_claims = { who = Root.from }
+					}
 				}
-				remove_claims = { who = from }
 			}
 		}
 	}
@@ -69,6 +95,8 @@ wg_independence = {
 	ai_weight = {
 		weight = 100
 	}
+
+	should_ignore_federations = yes
 }
 
 
@@ -860,6 +888,16 @@ wg_tribute = {
 					amount = 0.25
 				}
 			}
+			set_truce = {
+				target = FROM
+				type = war
+			}
+			FROM = {
+				set_truce = {
+					target = ROOT
+					type = war
+				}
+			}
 		}
 		if = {
 			limit = { from = { has_been_declared_crisis = no } }
@@ -992,6 +1030,16 @@ wg_megacorp_subjugate = {
 					amount = 0.5
 				}
 			}
+			set_truce = {
+				target = FROM
+				type = war
+			}
+			FROM = {
+				set_truce = {
+					target = ROOT
+					type = war
+				}
+			}
 		}
 		FROM = {
 			if = {
@@ -1120,6 +1168,13 @@ wg_force_ideology = {
 		NAND = {
 			is_galactic_emperor = yes
 			from = { is_galactic_community_member = yes }
+		}
+		# Payback empires with the Payback CB should use that version to avoid soft-locking the event chain
+		NAND = {
+			has_origin = origin_payback
+			from = {
+				has_origin = origin_slavers
+			}
 		}
 	}
 	possible = {
@@ -2303,7 +2358,7 @@ wg_revenge_for_eaten_star = {
 	casus_belli = cb_revenge_for_eaten_star
 	hide_if_no_cb = yes
 	total_war = yes
-	set_defender_wargoal = wg_end_threat_colossus
+	set_defender_wargoal = wg_end_threat_revenge_for_eaten_star
 
 	galactic_empire_joins_defender = {
 		from = { is_galactic_emperor = yes }
@@ -2433,5 +2488,41 @@ wg_allegiance = {
 
 	ai_weight = {
 		weight = 15
+	}
+}
+
+wg_payback_stop_atrocities = {
+	casus_belli = cb_payback_punishment
+	hide_if_no_cb = yes
+
+	galactic_empire_joins_defender = {
+		from = { is_galactic_emperor = yes }
+		imperial_authority >= 100
+	}
+
+	allowed_peace_offers = {
+		status_quo
+		surrender
+		demand_surrender
+	}
+
+	potential = {
+		always = yes
+	}
+	possible = {
+		from = { is_valid_target_fe_stop_atrocities = yes }
+	}
+	on_accept = {
+		custom_tooltip = wg_humiliation_fe_accept
+		custom_tooltip = wg_payback_stop_atrocities_accept
+		save_event_target_as = fallen_empire_humiliator
+		from = {
+			payback_stop_atrocities_effect = yes
+			fallen_empire_humiliate_effect = yes
+		}
+	}
+
+	ai_weight = {
+		weight = 10
 	}
 }

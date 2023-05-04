@@ -26,6 +26,8 @@
 #	system_mult/planet_mult = 0.1	#Adds this amount for each system/planet the country owns. I.e. min + ( num planets * planet_mult ) + ( num systems * system_mult )
 #	max = 5							#Sets a maximum absolute number the country will aim to have. Note that it will still want only the minimum unless you define a system_mult or planet_mult
 #}
+# ship_roles = { name1 name2 } # Show up as selectable roles in the ship designer
+# triggered_ship_roles = { { name = test1 trigger = {} } { name = test1 trigger = {} } } # List of triggered ship roles, show up in the ship designer when the trigger is true, executes on country scope
 
 ####################
 
@@ -57,6 +59,12 @@ corvette = {
 
 	default_behavior = swarm
 	ship_roles = { screen gunship artillery brawler }
+	triggered_ship_roles = {
+		{
+			name = brawler_stealth
+			trigger = { has_technology = tech_cloaking_1 }
+		}
+	}
 
 	prerequisites = { "tech_corvettes" }
 
@@ -140,9 +148,18 @@ frigate = {
 	use_shipnames_from = corvette
 
 	default_behavior = torpedo
-	ship_roles = { explosive artillery }
-
-	prerequisites = { "tech_corvettes" "tech_torpedoes_1" }
+	ship_roles = { explosive }
+	triggered_ship_roles = {
+		{
+			name = explosive_stealth
+			trigger = { has_technology = tech_cloaking_1 }
+		}
+		{
+			name = energy_torpedoes
+			trigger = { has_technology = tech_energy_torpedoes_1 }
+		}
+	} 
+	prerequisites = { "tech_torpedoes_1" }
 
 	combat_disengage_chance = 1.00
 
@@ -209,7 +226,12 @@ destroyer = {
 
 	default_behavior = picket
 	ship_roles = { screen gunship artillery brawler }
-
+	triggered_ship_roles = {
+		{
+			name = artillery_stealth
+			trigger = { has_technology = tech_cloaking_2 }
+		}
+	}
 	prerequisites = { "tech_destroyers" }
 
 	combat_disengage_chance = 1.50
@@ -285,8 +307,34 @@ cruiser = {
 	enable_3dview_in_ship_browser = yes #if yes, ship design will have a 3d view in the ship browser
 
 	default_behavior = line
-	ship_roles = { gunship artillery explosive carrier energy_torpedoes }
-
+	ship_roles = { gunship artillery carrier }
+	triggered_ship_roles = {
+		{
+			name = explosive
+			trigger = { has_technology = tech_torpedoes_1 }
+		}
+		{
+			name = explosive_stealth
+			trigger = { has_technology = tech_cloaking_3 }
+		}
+		{
+			name = energy_torpedoes
+			trigger = { has_technology = tech_energy_torpedoes_1 }
+		}
+		{
+			name = energy_torpedoes_stealth
+			trigger = {
+				has_technology = tech_cloaking_3
+				has_technology = tech_energy_torpedoes_1
+			}
+		}
+		{
+			name = artillery_stealth
+			trigger = {
+				has_technology = tech_cloaking_3
+			}
+		}
+	}
 	prerequisites = { "tech_cruisers" }
 
 	combat_disengage_chance = 1.50
@@ -569,6 +617,16 @@ constructor = {
 		}
 	}
 
+	potential_country = {
+		OR = {
+			has_technology = tech_hyper_drive_1
+			has_technology = tech_hyper_drive_2
+			has_technology = tech_hyper_drive_3
+			has_technology = tech_jump_drive_1
+			has_technology = tech_psi_jump_drive_1
+		}
+	}
+
 	ai_ship_data = {
 		min = value:desired_constructors_min
 		system_mult = 0.15
@@ -694,6 +752,17 @@ colonizer = {
 			alloys = @colony_upkeep_alloys
 		}
 	}
+
+	potential_country = {
+		OR = {
+			has_technology = tech_hyper_drive_1
+			has_technology = tech_hyper_drive_2
+			has_technology = tech_hyper_drive_3
+			has_technology = tech_jump_drive_1
+			has_technology = tech_psi_jump_drive_1
+		}
+	}
+
 	ai_ship_data = {
 		min = value:desired_colonizers
 	}
@@ -749,6 +818,13 @@ sponsored_colonizer = {
 			has_civic = civic_corporate_dominion
 			has_civic = civic_private_prospectors
 		}
+		OR = {
+			has_technology = tech_hyper_drive_1
+			has_technology = tech_hyper_drive_2
+			has_technology = tech_hyper_drive_3
+			has_technology = tech_jump_drive_1
+			has_technology = tech_psi_jump_drive_1
+		}
 	}
 	ai_ship_data = {
 		min = value:desired_colonizers_base
@@ -803,6 +879,13 @@ lithoid_colonizer = {
 
 	potential_country = {
 		has_origin = origin_lithoid
+		OR = {
+			has_technology = tech_hyper_drive_1
+			has_technology = tech_hyper_drive_2
+			has_technology = tech_hyper_drive_3
+			has_technology = tech_jump_drive_1
+			has_technology = tech_psi_jump_drive_1
+		}
 	}
 	ai_ship_data = {
 		min = value:desired_colonizers_base
@@ -842,6 +925,7 @@ science = {
 	required_component_set = "ftl_components"
 	required_component_set = "thruster_components"
 	required_component_set = "sensor_components"
+	required_component_set = "science_cloaking_components"
 	valid_target_aggressive_stance = no
 	auto_upgrade = yes
 
@@ -859,6 +943,13 @@ science = {
 	potential_country = {
 		NOT = {
 			is_country_type = enclave_mercenary
+		}
+		OR = {
+			has_technology = tech_hyper_drive_1
+			has_technology = tech_hyper_drive_2
+			has_technology = tech_hyper_drive_3
+			has_technology = tech_jump_drive_1
+			has_technology = tech_psi_jump_drive_1
 		}
 	}
 
@@ -1133,12 +1224,14 @@ observation_station = {
 	is_space_station = yes
 	build_block_radius = @build_block_radius_civilian
 	is_civilian = yes
+	auto_upgrade = yes
 	components_add_to_cost = no
+	is_designable = no
 
 	enable_default_design = yes	#if yes, countries will have an auto-generated design at start
 	class = shipclass_observation_station
-	is_designable = no
 	valid_target_aggressive_stance = no
+	required_component_set = "science_cloaking_components"
 
 	resources = {
 		category = station_observers

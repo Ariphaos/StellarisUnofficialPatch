@@ -81,9 +81,9 @@ planet_event = {
 				name = "MIGRATING_FORESTS_2_PROJECT"
 				location = this
 				owner = root
-			}	
+			}
 		}
-		
+
 	}
 }
 
@@ -100,7 +100,7 @@ planet_event = {
 
 	option = {
 		name = EXCELLENT
-		
+
 		remove_modifier = "migrating_forests"
 		remove_deposit = d_migrating_forests
 		add_deposit = d_migrating_forest_reserve
@@ -115,7 +115,7 @@ planet_event = {
 					min = @tier1unitymin
 					max = @tier1unitymax
 				}
-			}	
+			}
 		}
 		hidden_effect = {
 			set_planet_flag = forest_pheremones
@@ -572,6 +572,7 @@ planet_event = {
 			has_planet_flag = colony_event
 			is_planet_class = pc_nuked
 			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_shattered_ring_habitable
 			is_planet_class = pc_habitat
 			is_planet_class = pc_city
 			is_planet_class = pc_relic
@@ -588,7 +589,7 @@ planet_event = {
 		add_deposit = d_underground_farm_blocked
 		add_deposit = d_underground_mine_blocked
 		add_deposit = d_underground_generator_blocked
-		create_subterranean_nation = yes
+		create_subterranean_nation = { FLAG = subterranean_nation }
 	}
 
 	option = {
@@ -639,7 +640,7 @@ planet_event = {
 	immediate = {
 		owner = { save_event_target_as = subterranean_planet_owner }
 		set_planet_flag = seismic_disturbance_friendly
-		create_subterranean_nation = yes
+		create_subterranean_nation = { FLAG = subterranean_nation }
 	}
 
 	option = {
@@ -719,7 +720,7 @@ country_event = {
 		hidden_effect = {
 			FROM = {
 				set_planet_flag = seismic_disturbance_friendly
-				create_subterranean_nation = yes
+				create_subterranean_nation = { FLAG = subterranean_nation }
 			}
 		}
 		FROM = {
@@ -738,7 +739,7 @@ country_event = {
 		hidden_effect = {
 			FROM = {
 				set_planet_flag = seismic_disturbance_friendly
-				create_subterranean_nation = yes
+				create_subterranean_nation = { FLAG = subterranean_nation }
 			}
 		}
 		FROM = {
@@ -786,8 +787,11 @@ planet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		create_subterranean_nation = yes #makes sure the event targets are set
-		owner = { set_country_flag = subterranean_invasion_country }
+		create_subterranean_nation = { FLAG = subterranean_nation } #makes sure the event targets are set
+		owner = {
+			set_country_flag = has_fought_subterraneans
+			set_country_flag = subterranean_invasion_country
+		}
 		set_planet_flag = subterranean_invasion_planet
 		event_target:subterranean_nation = {
 			create_leader = {
@@ -1046,7 +1050,7 @@ planet_event = {
 		text = "colony.59.desc.subterranean"
 	}
 	picture = GFX_evt_alien_cavemen
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	is_triggered_only = yes
@@ -1618,7 +1622,7 @@ planet_event = {
 	title = "colony.69.name"
 	desc = "colony.69.desc"
 	picture = GFX_evt_alien_cavemen
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	pre_triggers = {
@@ -1691,7 +1695,7 @@ planet_event = {
 		text = "colony.70.desc.subterranean"
 	}
 	picture = GFX_evt_alien_cavemen
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	pre_triggers = {
@@ -1751,7 +1755,7 @@ planet_event = {
 		text = "colony.71.desc.subterranean"
 	}
 	picture = GFX_evt_alien_cavemen
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	pre_triggers = {
@@ -1820,7 +1824,7 @@ planet_event = {
 	title = "colony.72.name"
 	desc = "colony.72.desc"
 	picture = GFX_evt_underground_civilization
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	pre_triggers = {
@@ -1925,7 +1929,7 @@ planet_event = {
 	title = "colony.74.name"
 	desc = "colony.74.desc"
 	picture = GFX_evt_alien_cavemen
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	pre_triggers = {
@@ -1990,7 +1994,7 @@ planet_event = {
 	title = "colony.75.name"
 	desc = "colony.75.desc"
 	picture = GFX_evt_alien_cavemen
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = ROOT
 
 	pre_triggers = {
@@ -2105,6 +2109,7 @@ planet_event = {
 			is_planet_class = pc_nuked
 			is_planet_class = pc_gaia
 			is_planet_class = pc_relic
+			has_modifier = living_sea
 			owner = { has_country_flag = abandoned_terraforming_country }
 			owner = { is_machine_empire = yes }
 			AND = {
@@ -3050,11 +3055,14 @@ planet_event = {
 	trigger = {
 		owner = { is_ai = no } 
 		NOT = { has_global_flag = underground_vault_global }
-		NOT = { has_planet_flag = armageddon_nuked }
+		NOR = {
+			has_planet_flag = armageddon_nuked
+			has_planet_flag = colony_event
+		}
 		is_planet_class = pc_nuked
 		NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
 		NOR = {
-			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = pre_ftls_nuked_themselves
 			solar_system = {
 				any_system_planet = {
 					is_capital = yes
@@ -3344,10 +3352,13 @@ planet_event = {
 
 	trigger = {
 		owner = { is_ai = no }
-		NOT = { has_planet_flag = armageddon_nuked }
+		NOR = {
+			has_planet_flag = armageddon_nuked
+			has_planet_flag = colony_event
+		}
 		is_planet_class = pc_nuked
 		OR = {
-			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = pre_ftls_nuked_themselves
 			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
 		}
 		NOR = {
@@ -3441,10 +3452,13 @@ planet_event = {
 
 	trigger = {
 		owner = { is_ai = no }
-		NOT = { has_planet_flag = armageddon_nuked }
+		NOR = {
+			has_planet_flag = armageddon_nuked
+			has_planet_flag = colony_event
+		}
 		is_planet_class = pc_nuked
 		OR = {
-			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = pre_ftls_nuked_themselves
 			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
 		}
 		NOR = {
@@ -3498,10 +3512,13 @@ planet_event = {
 
 	trigger = {
 		owner = { is_ai = no }
-		NOT = { has_planet_flag = armageddon_nuked }
+		NOR = {
+			has_planet_flag = armageddon_nuked
+			has_planet_flag = colony_event
+		}
 		is_planet_class = pc_nuked
 		OR = {
-			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = pre_ftls_nuked_themselves
 			NOT = { has_planet_flag = nuked_planet_anomalies_disabled }
 		}
 		NOR = {
@@ -3560,11 +3577,14 @@ planet_event = {
 
 	trigger = {
 		owner = { is_ai = no }
-		NOT = { has_planet_flag = armageddon_nuked }
+		NOR = {
+			has_planet_flag = armageddon_nuked
+			has_planet_flag = colony_event
+		}
 		is_planet_class = pc_nuked
 		NOR = {
 			has_planet_flag = wasteland_space_station
-			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = pre_ftls_nuked_themselves
 			has_planet_flag = nuked_planet_anomalies_disabled
 			solar_system = {
 				any_system_planet = {
@@ -3632,6 +3652,7 @@ planet_event = {
 			has_planet_flag = armageddon_nuked
 		}
 		NOR = {
+			has_planet_flag = colony_event
 			has_planet_flag = wasteland_radiation
 			solar_system = {
 				any_system_planet = {
@@ -3698,6 +3719,7 @@ planet_event = {
 			has_planet_flag = armageddon_nuked
 		}
 		NOR = {
+			has_planet_flag = colony_event
 			has_planet_flag = wasteland_pacifist_movement
 			solar_system = {
 				any_system_planet = {
@@ -3883,11 +3905,14 @@ planet_event = {
 
 	trigger = {
 		owner = { is_ai = no }
-		NOT = { has_planet_flag = armageddon_nuked }
+		NOR = {
+			has_planet_flag = armageddon_nuked
+			has_planet_flag = colony_event
+		}
 		is_planet_class = pc_nuked
 		NOR = {
 			has_planet_flag = wasteland_orbital_debris
-			has_planet_flag = primitives_nuked_themselves
+			has_planet_flag = pre_ftls_nuked_themselves
 			has_planet_flag = nuked_planet_anomalies_disabled
 			solar_system = {
 				any_system_planet = {
@@ -4068,6 +4093,7 @@ planet_event = {
 		NOR = {
 			is_planet_class = pc_habitat
 			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_shattered_ring_habitable
 			has_planet_flag = asteroid_sighted
 			has_planet_flag = asteroid_collision
 			has_global_flag = asteroid_sighted_global

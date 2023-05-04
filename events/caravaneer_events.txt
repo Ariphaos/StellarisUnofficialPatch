@@ -343,7 +343,6 @@ country_event = {
 		planet_background = pc_barren_cold
 	}
 	location = event_target:caravaneer_home_system
-
 	option = {
 		custom_gui = "enclave_caravaneer_option"
 		name = ccoinswhat
@@ -915,10 +914,7 @@ country_event = {
 				modifier = {
 					factor = 0
 					any_playable_country = {
-						OR = {
-							has_modifier = galatron_modifier
-							has_country_flag = galatron_owner
-						}
+						has_relic = r_galatron
 					}
 				}
 				set_country_flag = recent_galatron
@@ -3900,7 +3896,9 @@ country_event = {
 	option = { # Reject
 		name = cara.930.b
 		response_text = cara.940.b.reply
-		trigger = { is_xenophobe = no }
+		trigger = {
+			is_xenophobe = no
+		}
 		hidden_effect = { # find other empire
 			if = {
 				limit = {
@@ -3958,7 +3956,12 @@ country_event = {
 
 	option = { # Reject
 		name = cara.930.c
-		trigger = { OR = { has_ethic = ethic_xenophobe has_ethic = ethic_fanatic_xenophobe } }
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
 		response_text = cara.940.b.reply
 		hidden_effect = { # find other empire
 			if = {
@@ -4029,6 +4032,37 @@ country_event = {
 
 	option = {
 		name = OK
+	}
+}
+
+# Check if Caravaneers are dead - fired by on_fleet_destroyed_victim
+country_event = {
+	id = cara.945
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		caravaneers_enabled = yes
+		is_country_type = caravaneer_fleet
+		num_ships = 0
+		NOT = { has_global_flag = caravaneers_destroyed }
+		NOT = {
+			any_country = {
+				is_country_type = caravaneer_fleet
+				num_ships > 0
+			}
+		}
+		exists = event_target:caravaneer_home_country
+		event_target:caravaneer_home_country = {
+			num_starbases = 0
+		}
+	}
+
+	immediate = {
+		set_global_flag = caravaneers_destroyed
+		event_target:caravaneer_home_country = {
+			destroy_country = yes
+		}
 	}
 }
 
@@ -4248,7 +4282,7 @@ country_event = {
 			10 = { add_resource = { minerals = 8000 } }
 			10 = { add_resource = { food = 8000 } }
 			10 = { add_resource = { alloys = 5000 } }
-			10 = { add_resource = { minor_artifacts = 30 } }
+			10 = { add_resource = { minor_artifacts = 300 } }
 			10 = { add_resource = { rare_crystals = 500 } }
 			10 = { add_resource = { volatile_motes = 500 } }
 			10 = { add_resource = { consumer_goods = 5000 } }

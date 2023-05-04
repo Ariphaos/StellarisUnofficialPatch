@@ -435,6 +435,18 @@ can_take_hostile_actions = {
 	}
 	else_if = {
 		limit = {
+			has_country_flag = fotd_seperatist_country@ROOT
+			ROOT = {
+				has_origin = origin_fear_of_the_dark
+			}
+		}
+		custom_tooltip = {
+			text = "CAN_TAKE_HOSTILE_ACTION_FOTD"
+			always = no
+		}
+	}
+	else_if = {
+		limit = {
 			AND = {
 				NOT = { is_hostile = root }
 				ROOT = {
@@ -452,9 +464,8 @@ can_take_hostile_actions = {
 		limit = {
 			ROOT = {
 				is_country_type = default
-				OR = {
-					has_policy_flag = interference_passive
-					has_policy_flag = interference_active
+				NOT = {
+					has_policy_flag = interference_aggressive
 				}
 			}
 			is_primitive = yes
@@ -720,12 +731,18 @@ can_be_hostile_towards = {
 	if = {
 		limit = { is_primitive = yes }
 		ROOT = {
-			NOT = { has_policy_flag = interference_passive }
+			NOR = {
+				has_policy_flag = interference_not_allowed
+				has_policy_flag = interference_subtle
+			}
 		}
 	}
 	else_if = {
 		limit = { ROOT = { is_primitive = yes } }
-		NOT = { has_policy_flag = interference_passive }
+		NOR = {
+			has_policy_flag = interference_not_allowed
+			has_policy_flag = interference_subtle
+		}
 	}
 	else_if = {
 		limit = { is_country_type = ratlings }
@@ -868,8 +885,8 @@ can_orbital_bombard = {
 		AND = {
 			ROOT.CONTROLLER = {
 				NOR = {
-					has_policy_flag = interference_passive
-					has_policy_flag = interference_active
+					has_policy_flag = interference_not_allowed
+					has_policy_flag = interference_subtle
 				}
 			}
 			FROM.OWNER = { is_country_type = primitive }
@@ -900,6 +917,7 @@ can_orbital_bombard = {
 				is_country_type = dormant_marauders
 				is_country_type = marauder_raiders
 				is_country_type = ruined_marauders
+				is_country_type = debt_collectors
 				is_country_type = gray_goo
 				is_country_type = vol
 				AND = {
@@ -1037,7 +1055,7 @@ can_have_robot_pops = {
 can_stop_purge_pop_manually = {
 	custom_tooltip = {
 		fail_text = "ENTIRE_SPECIES_BEING_PURGED"
-		NOT = { has_citizenship_type = { type = citizenship_purge } }
+		NOT = { has_citizenship_type = { type = citizenship_purge country = owner } }
 	}
 }
 
@@ -1046,7 +1064,7 @@ can_stop_purge_pop_manually = {
 can_purge_pop_manually = {
 	custom_tooltip = {
 		fail_text = "ALREADY_BEING_PURGED"
-		NOT = { has_citizenship_type = { type = citizenship_purge } }
+		NOT = { has_citizenship_type = { type = citizenship_purge country = owner } }
 	}
 	custom_tooltip = {
 		fail_text = "ACTION_CANNOT_PURGE_CITIZEN"
@@ -1055,8 +1073,8 @@ can_purge_pop_manually = {
 			is_robot_pop = yes
 			is_sapient = no
 			owner = { is_hive_empire = yes }
-			has_citizenship_type = { type = citizenship_slavery }
-			has_citizenship_type = { type = citizenship_full_machine }
+			has_citizenship_type = { type = citizenship_slavery country = owner }
+			has_citizenship_type = { type = citizenship_full_machine country = owner }
 		}
 	}
 	custom_tooltip = {
@@ -1269,6 +1287,7 @@ system_blocks_sensors = {
 	OR = {
 		is_inside_nebula = yes
 		has_modifier = space_storm
+		has_modifier = zroni_storm
 		has_star_flag = lcluster
 		has_star_flag = sealed_system
 	}
@@ -1551,7 +1570,20 @@ can_support_branch_offices = {
 	}
 	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_REGULAR_EMPIRE
-		is_regular_empire = yes
+		is_gestalt = no
+	}
+	custom_tooltip = {
+		fail_text = BRANCH_OFFICE_NOT_ADVANCED_PRE_FTL
+		if = {
+			limit = {
+				is_primitive = yes
+				is_gestalt = no
+			}
+			OR = {
+				has_pre_ftl_age = atomic_age
+				has_pre_ftl_age = early_space_age
+			}
+		}
 	}
 }
 
@@ -1569,12 +1601,31 @@ can_build_branch_office_on_planet = {
 		}
 	}
 	custom_tooltip = {
+		fail_text = BRANCH_OFFICE_NO_OBSERVATION_OUTPOST
+		if = {
+			limit = {
+				root = { is_criminal_syndicate = yes }
+				owner = { is_primitive = yes }
+			}
+			has_observation_outpost = yes
+			observation_outpost_owner = {
+				is_same_value = root
+			}
+		}
+	}
+	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_COMMERCIAL_PACT
 		exists = owner
 		OR = {
 			root = { is_criminal_syndicate = yes }
 			owner = { has_commercial_pact = root }
 			owner = { is_in_federation_with = root }
+			AND = {
+				has_observation_outpost = yes
+				observation_outpost = {
+					has_modifier = preftl_action_trade_pact
+				}
+			}
 
 			# allow branch offices in subsidiaries and vice versa (and fellow subjects)
 			root = {
@@ -1869,7 +1920,10 @@ can_be_part_of_galactic_council = {
 # If, 'yes', forces an empire to be advanced at game start (overrides game settings)
 # This = country
 must_be_advanced_empire = {
+	OR = {
 	has_country_flag = lost_colony_parent
+		has_country_flag = MSI
+	}
 }
 
 # If 'no', blocks an empire from being advanced at game start (overrides 'must_be_advanced_empire' above)
@@ -2104,6 +2158,14 @@ can_have_first_contact = {
 		has_origin = origin_here_be_dragons
 		from = { has_country_flag = dragon_of@prev }
 	}
+	else_if = {
+		limit = {
+			from = {
+				is_country_type = jaunting_traveler_dummy
+			}
+		}
+		from = { has_country_flag = jaunting_traveler_of@prev }
+	}
 }
 
 # Root = Country with envoys to send
@@ -2137,7 +2199,7 @@ can_fill_drone_job = {
 		is_being_purged = no
 		is_enslaved = no
 		is_being_assimilated = no
-		NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+		NOT = { has_citizenship_type = { type = citizenship_organic_trophy country = owner } }
 	}
 }
 
@@ -2150,7 +2212,7 @@ can_fill_worker_job = {
 		exists = owner
 		is_being_purged = no
 		is_being_assimilated = no
-		NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+		NOT = { has_citizenship_type = { type = citizenship_organic_trophy country = owner } }
 		NAND = {
 			has_citizenship_type = { type = citizenship_slavery }
 			OR = {
@@ -2206,7 +2268,7 @@ can_fill_ruler_job = {
 					owner = { has_policy_flag = ai_full_rights }
 				}
 			}
-			NOT = { has_citizenship_type = { type = citizenship_organic_trophy } }
+			NOT = { has_citizenship_type = { type = citizenship_organic_trophy country = owner } }
 			if = {
 				limit = {
 					divinity_right_to_work_job_check_trigger_exempt = no
@@ -2316,6 +2378,10 @@ can_trade_leader = {
 			}
 		}
 	}
+	NOR = { 
+		has_trait = leader_trait_fotd_scientist
+		has_trait = leader_trait_fotd_admiral
+	}
 }
 
 # This = fleet, fleet we'd like to trade
@@ -2333,6 +2399,13 @@ can_trade_fleet = {
 	}
 }
 
+# Determines if pre-ftl country is unaware of alien life
+# this: pre-ftl country
+are_pre_ftls_unaware = {
+	NOT = {
+		current_awareness_level = full
+	}
+}
 
 ##TERRAFORMING CANDIDATES
 
@@ -2365,4 +2438,73 @@ has_ascension_for_terraforming_candidate = {
 			has_modifier = frozen_terraforming_candidate
 		}
 	}
+}
+
+# This = country that tries to rename
+# Root = country owning the planet
+# From = planet
+# Checks if the planet (from) can be renamed by the country (this) that contains it in its borders, even if it has a different owner (Root)
+# Renaming is never possible if the planet is not in your borders; and it is always possible if it is in your borders but the owner is yourself/no-one
+can_be_renamed_by = {
+	FROM = {
+		exists = owner
+		owner = {
+			is_same_species = root
+		}
+		has_planet_flag = haven_flag
+
+	}
+}
+
+# Root/this = country
+# From = planet
+# Checks if the country is allowed to build any orbital station around this planet/star
+can_build_station_around = {
+	exists = root
+	always = yes
+}
+
+# Root/this = country
+# From = planet
+# Checks if the country is allowed to build a mining station around this planet/star
+can_build_mining_station_around = {
+	exists = root
+	always = yes
+}
+
+# Root/this = country
+# From = planet
+# Checks if the country is allowed to build a research station around this planet/star
+can_build_research_station_around = {
+	exists = root
+	always = yes
+}
+
+# Root/this = country
+# From = planet
+# Checks if the country is allowed to build a military station around this planet/star
+can_build_military_station_around = {
+	exists = root
+	always = yes
+}
+
+# Root/this = country
+# From = planet
+# Checks if the country is allowed to build an observation station around this planet/star
+can_build_observation_station_around = {
+	exists = root
+	FROM = {
+		NOR = {
+			has_planet_flag = haven_flag #FotD
+			has_planet_flag = no_observation #Solarpunk
+		}
+	}
+}
+
+# Root/this = country
+# From = planet
+# Checks if the country is allowed to build a starbase around this planet/star
+can_build_starbase_around = {
+	exists = root
+	always = yes
 }

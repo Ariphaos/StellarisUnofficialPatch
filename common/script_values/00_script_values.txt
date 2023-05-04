@@ -122,7 +122,29 @@ revolt_situation_rebellion_joiners = {
 
 revolt_fleet_comparison_factor = {
 	add = owner.trigger:fleet_power
-	divide = event_target:rebel_empire.trigger:fleet_power
+	# Let's not risk a divide by zero.
+	#divide = event_target:rebel_empire.trigger:fleet_power
+
+	# Divide by 100 if too low.
+	modifier = {
+		factor = 0.01
+		event_target:rebel_empire = {
+			fleet_power < 101
+		}
+	}
+	complex_trigger_modifier = {
+		trigger = fleet_power
+		trigger_scope = event_target:rebel_empire
+		#parameters = {
+		#	limit = { fleet_power > 100 }
+		#}
+		potential = {
+			event_target:rebel_empire = {
+				fleet_power > 100
+			}
+		}
+		mode = divide
+	}
 	pow = 3
 }
 
@@ -322,7 +344,7 @@ desired_constructors_max = {
 		years_passed > 10
 	}
 	modifier = {
-		set = 3
+		set = 5
 		is_country_type = awakened_fallen_empire
 	}
 }
@@ -579,7 +601,7 @@ knights_research_output_modifier = {
 	}
 	modifier = {
 		add = 1
-		owner = { has_country_flag = toxoids_7220_a } #TODO_CD: apply to knight commanders
+		owner = { has_country_flag = toxoids_7220_a }
 	}
 	mult = value:job_total_research_output_modifier|JOB|researcher|
 }
@@ -597,6 +619,10 @@ knight_commander_unity_output_modifier = {
 	modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7130_c }
+	}
+	modifier = {
+		add = 1
+		owner = { has_country_flag = toxoids_7220_a }
 	}
 	mult = value:job_total_output_modifier|JOB|politician|RESOURCE|unity|
 }
@@ -1393,6 +1419,148 @@ consequences_cost = {
 	divide = 1.2
 }
 
+# Total number of main species pop on empire : 100 = VALUE : % we want
+# VALUE = number of main species * percentage we want / 100
+ten_percent_main_species = {
+	# count main species pop
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		parameters = {
+			limit = {
+				is_same_species = owner_main_species
+			}
+		}
+		mode = add
+	}
+	mult = 0.10
+	floor = yes
+}
+
+five_percent_species = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		mode = add
+	}
+	mult = 0.05
+	floor = yes
+}
+
+ten_percent_species = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		mode = add
+	}
+	mult = 0.10
+	floor = yes
+}
+
+twenty_percent_species = {
+	# count main species pop
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		mode = add
+	}
+	mult = 0.20
+	floor = yes
+}
+
+fifty_percent_species = {
+	# count main species pop
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		mode = add
+	}
+	mult = 0.50
+	floor = yes
+}
+
+pre_ftl_pops_shifting_ethic = {
+	base = 1
+	modifier = {
+		add = 1
+		has_pre_ftl_age = bronze_age
+	}
+	modifier = {
+		add = 2
+		has_pre_ftl_age = iron_age
+	}
+	modifier = {
+		add = 3
+		has_pre_ftl_age = late_medieval_age
+	}
+	modifier = {
+		add = 4
+		has_pre_ftl_age = renaissance_age
+	}
+	modifier = {
+		add = 6
+		has_pre_ftl_age = steam_age
+	}
+	modifier = {
+		add = 8
+		has_pre_ftl_age = industrial_age
+	}
+	modifier = {
+		add = 11
+		has_pre_ftl_age = machine_age
+	}
+	modifier = {
+		add = 13
+		has_pre_ftl_age = atomic_age
+	}
+	modifier = {
+		add = 15
+		has_pre_ftl_age = early_space_age
+	}
+	[[BONUS]
+		add = $bonus$
+	]
+}
+
+pre_ftl_gain_tech_progress = {
+	base = 192
+	[[BONUS]
+		add = $BONUS$
+	]
+}
+
+thirty_percent_species = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		mode = add
+	}
+	mult = 0.30
+	floor = yes
+}
+
+primitive_slider_value = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = check_galaxy_setup_value
+		parameters = {
+			setting = primitive_worlds_scale
+		}
+		mode = add
+	}
+}
+
+presapient_spawn_chance = {
+	base = 7.5
+	mult = value:primitive_slider_value
+}
+
+halfway_to_mid_game_year = {
+	base = -1
+	complex_trigger_modifier = {
+		trigger = check_galaxy_setup_value
+		parameters = {
+			setting = mid_game_year
+		}
+		mode = mult
+	}
+	divide = 2
+}
+
 negative_opinion_decay_rate = {
 	base = 1
 	modifier = {
@@ -1427,4 +1595,522 @@ positive_opinion_decay_rate = {
 			from = { is_harming_relations_with = root }
 		}
 	}
+}
+
+zoo_keeper_output = {
+	base = 4
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		trigger_scope = planet
+		parameters = {
+			limit = {
+				OR = {
+					has_job = xeno_zoo_animal
+					has_job = xeno_zoo_beast
+					has_job = livestock_zoo_animal
+					has_job = livestock_zoo_beast
+				}
+			}
+		}
+		mode = add
+		mult = 2
+	}
+}
+
+unusual_senses_mult = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_starbase_modules
+		parameters = {
+			type = detection_array
+		}
+		mode = add
+	}
+	divide = 3
+	floor = yes
+}
+
+dark_matter_detection_value = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_starbase_modules
+		parameters = {
+			type = detection_array
+		}
+		mode = add
+	}
+	divide = 3
+	floor = yes
+}
+
+fotd_seperatists_fleet_corvette_1 = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.66
+	floor = yes
+}
+
+fotd_seperatists_fleet_frigate_1 = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.33
+	floor = yes
+}
+
+fotd_seperatists_fleet_corvette_2 = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.3
+	floor = yes
+}
+
+fotd_seperatists_fleet_frigate_2 = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.40
+	floor = yes
+}
+
+fotd_seperatists_fleet_destroyer_2 = {#Since destroyers cost 2 pips their mult has to be devided by 2
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.15
+	floor = yes
+}
+
+fotd_seperatists_fleet_corvette_3 = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.15
+	floor = yes
+}
+
+fotd_seperatists_fleet_frigate_3 = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.55
+	floor = yes
+}
+
+fotd_seperatists_fleet_destroyer_3 = {#Since destroyers cost 2 pips their mult has to be devided by 2
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.10
+	floor = yes
+}
+
+fotd_seperatists_fleet_cruiser_3 = {#Since cruisers cost 4 pips their mult has to be divide by 4
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = from
+		trigger = max_naval_capacity
+		mode = add
+	}
+	divide = 3
+	mult = 0.05
+	floor = yes
+}
+
+fotd_support_cost = {
+	base = 0
+	complex_trigger_modifier = {
+   		trigger = resource_income_compare
+   		parameters = {
+   		   	resource = $RESOURCE$
+   		}
+   		mode = add
+	}
+	ceiling = yes
+	abs = yes
+}
+
+insight_reduction = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = situation_progress
+		mode = add
+	}
+	mult = -1
+}
+percent_species_ethic = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		parameters = {
+			limit = {
+				is_$ETHIC$ = yes
+			}
+		}
+		mode = add
+	}
+	mult = 100
+	complex_trigger_modifier = {
+		trigger = count_owned_pop
+		mode = divide
+	}
+}
+
+pre_ftl_trade_value_mult = {
+	base = 0.5
+	modifier = {
+		add = 0.5
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = bronze_age
+			}
+		}
+	}
+	modifier = {
+		add = 1.0
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = iron_age
+			}
+		}
+	}
+	modifier = {
+		add = 1.5
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = late_medieval_age
+			}
+		}
+	}
+	modifier = {
+		add = 2.0
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = renaissance_age
+			}
+		}
+	}
+	modifier = {
+		add = 2.5
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = steam_age
+			}
+		}
+	}
+	modifier = {
+		add = 3.0
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = industrial_age
+			}
+		}
+	}
+	modifier = {
+		add = 3.5
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = machine_age
+			}
+		}
+	}
+	modifier = {
+		add = 4.0
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = atomic_age
+			}
+		}
+	}
+	modifier = {
+		add = 4.5
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = early_space_age
+			}
+		}
+	}
+	modifier = {
+		mult = 1.5
+		exists = owner
+		owner = {
+			is_galactic_community_member = yes
+		}
+		is_active_resolution = "resolution_pre_ftl_stances_equal_standing"
+	}
+}
+
+pre_ftl_age_mult = {
+	base = 0.1
+	modifier = {
+		add = 0.2
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = bronze_age
+			}
+		}
+	}
+	modifier = {
+		add = 0.3
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = iron_age
+			}
+		}
+	}
+	modifier = {
+		add = 0.4
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = late_medieval_age
+			}
+		}
+	}
+	modifier = {
+		add =  0.5
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = renaissance_age
+			}
+		}
+	}
+	modifier = {
+		add = 0.6
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = steam_age
+			}
+		}
+	}
+	modifier = {
+		add = 0.7
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = industrial_age
+			}
+		}
+	}
+	modifier = {
+		add = 0.8
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = machine_age
+			}
+		}
+	}
+	modifier = {
+		add = 0.9
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = atomic_age
+			}
+		}
+	}
+	modifier = {
+		add = 1.0
+		orbit = {
+			exists = owner
+			owner = {
+				has_pre_ftl_age = early_space_age
+			}
+		}
+	}
+}
+
+pre_ftl_spy_network_mult = {
+	base = 0.5
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 10
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 20
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 30
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 40
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 50
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 60
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 70
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 80
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level >= 90
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+	modifier = {
+		add = 0.1
+		exists = owner
+		owner = {
+			any_spynetwork = {
+				is_spynetwork_level = 100
+				target = {
+					is_same_value = root.orbit.owner
+				}
+			}
+		}
+	}
+}
+
+natural_blocker_count = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger_scope = planet
+		trigger = count_deposits
+		parameters = {
+			category = deposit_cat_blockers_natural
+		}
+		mode = add
+	}
+}
+
+decades_since_game_start = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = years_passed
+		mode = add
+	}
+	divide = 10
+	floor = yes
+	min = $MINIMUM$
+	max = $MAXIMUM$
 }

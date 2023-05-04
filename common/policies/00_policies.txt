@@ -207,6 +207,10 @@ diplomatic_stance = {
 			}
 			modifier = {
 				factor = 1.3
+				has_valid_civic = civic_machine_exploration_protocol
+			}
+			modifier = {
+				factor = 1.3
 				has_ethic = ethic_fanatic_pacifist
 			}
 			modifier = {
@@ -648,15 +652,19 @@ diplomatic_stance = {
 	}
 
 	option = {
-		name = "diplo_stance_primitive"
+		name = "diplo_stance_ignorant"
 		icon = "GFX_diplomatic_stance_isolationist"
 
 		potential = {
 			is_country_type = primitive
+			current_awareness_level < medium
+			capital_scope = {
+				NOT = { has_modifier = culture_shock_diplomacy }
+			}
 		}
 
 		policy_flags = {
-			diplo_stance_primitive
+			diplo_stance_ignorant
 		}
 
 		modifier = {
@@ -664,6 +672,130 @@ diplomatic_stance = {
 
 		ai_weight = {
 			weight = 1
+		}
+	}
+
+	option = {
+		name = "diplo_stance_questioning"
+		icon = "GFX_diplomatic_stance_expansionist"
+
+		potential = {
+			is_country_type = primitive
+			current_awareness_level = medium
+			capital_scope = {
+				NOT = { has_modifier = culture_shock_diplomacy }
+			}
+		}
+
+		policy_flags = {
+			diplo_stance_questioning
+		}
+
+		modifier = {
+		}
+
+		ai_weight = {
+			weight = 1
+		}
+	}
+
+	option = {
+		name = "diplo_stance_eager"
+		icon = "GFX_diplomatic_stance_cooperative"
+
+		potential = {
+			is_country_type = primitive
+			current_awareness_level >= high
+			is_xenophile = yes
+			capital_scope = {
+				NOT = { has_modifier = culture_shock_diplomacy }
+			}
+		}
+
+		policy_flags = {
+			diplo_stance_eager
+		}
+
+		modifier = {
+		}
+
+		ai_weight = {
+			weight = 1
+		}
+	}
+
+	option = {
+		name = "diplo_stance_fearful"
+		icon = "GFX_diplomatic_stance_withdrawn"
+
+		potential = {
+			is_country_type = primitive
+			current_awareness_level >= high
+			is_xenophobe = yes
+			capital_scope = {
+				NOT = { has_modifier = culture_shock_diplomacy }
+			}
+		}
+
+		policy_flags = {
+			diplo_stance_fearful
+		}
+
+		modifier = {
+		}
+
+		ai_weight = {
+			weight = 1
+		}
+	}
+
+	option = {
+		name = "diplo_stance_uncertain"
+		icon = "GFX_diplomatic_stance_isolationist"
+
+		potential = {
+			is_country_type = primitive
+			current_awareness_level >= high
+			is_xenophile = no
+			is_xenophobe = no
+			capital_scope = {
+				NOT = { has_modifier = culture_shock_diplomacy }
+			}
+		}
+
+		policy_flags = {
+			diplo_stance_uncertain
+		}
+
+		modifier = {
+		}
+
+		ai_weight = {
+			weight = 1
+		}
+	}
+
+	option = {
+		name = "diplo_stance_culture_shock"
+		icon = "GFX_diplomatic_stance_belligerent"
+
+		potential = {
+			is_country_type = primitive
+			capital_scope = {
+				has_modifier = culture_shock_diplomacy
+			}
+		}
+
+		policy_flags = {
+			diplo_stance_culture_shock
+		}
+
+		modifier = {
+			diplo_action_acceptance_add = -100
+		}
+
+		ai_weight = {
+			weight = 100
 		}
 	}
 }
@@ -1380,8 +1512,9 @@ orbital_bombardment = {
 				factor = 0.1
 				is_galactic_community_member = yes
 				OR = {
-					is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
-					is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+					is_active_resolution = "resolution_rulesofwar_independent_tribunals"
+					is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
+					is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
 				}
 			}
 		}
@@ -1430,20 +1563,77 @@ interference = {
 	}
 
 	option = {
-		name = "interference_passive"
+		name = "interference_not_allowed"
 
 		policy_flags = {
-			interference_passive
+			interference_not_allowed
 		}
 
 		on_enabled = {
-			hidden_effect = { set_country_flag = encountered_first_primitive }
+			hidden_effect = { 
+				set_country_flag = encountered_first_primitive
+			}
 		}
 
 		in_breach_of = {
 			{
 				key = resolution_galacticstudies_advanced_xenostudies
 			}
+			{
+				key = resolution_pre_ftl_stances_equal_standing
+			}
+			{
+				key = resolution_pre_ftl_stances_exploitation
+			}
+		}
+
+		valid = {
+			OR = {
+				custom_tooltip = {
+					text = is_a_signatory_vassal
+					any_agreement = { agreement_preset = preset_signatory }
+				}
+				is_active_resolution = resolution_pre_ftl_stances_non_interference
+				NOR = {
+					has_valid_civic = "civic_fanatic_purifiers"
+					has_valid_civic = "civic_hive_devouring_swarm"
+					has_valid_civic = "civic_machine_terminator"
+				}
+				OR = {
+					NOT = { has_ethic = "ethic_fanatic_xenophobe" }
+					is_pacifist = yes
+				}
+			}
+		}
+
+		AI_weight = {
+			modifier = {
+				factor = 0.1
+				is_galactic_community_member = yes
+				OR = {
+					is_active_resolution = "resolution_galacticstudies_advanced_xenostudies"
+					is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+					is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+					is_active_resolution = "resolution_pre_ftl_stances_equal_standing"
+					is_active_resolution = "resolution_pre_ftl_stances_exploitation"
+				}
+			}
+			modifier = {
+				factor = 5
+				has_valid_civic = "civic_inwards_perfection"
+			}
+		}
+	}
+
+	option = {
+		name = "interference_subtle"
+
+		policy_flags = {
+			interference_subtle
+		}
+
+		on_enabled = {
+			hidden_effect = { set_country_flag = encountered_first_primitive }
 		}
 
 		valid = {
@@ -1463,12 +1653,15 @@ interference = {
 
 		AI_weight = {
 			modifier = {
-				factor = 0.1
-				is_galactic_community_member = yes
-				OR = {
-					is_active_resolution = "resolution_galacticstudies_advanced_xenostudies"
-					is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
-					is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+				factor = 2
+				has_valid_ai_personality = yes
+				has_ai_personality_behaviour = infiltrator
+			}
+			modifier = {
+				factor = 0
+				has_valid_ai_personality = yes
+				NOT = {
+					has_ai_personality_behaviour = infiltrator
 				}
 			}
 		}
@@ -1480,7 +1673,12 @@ interference = {
 		policy_flags = {
 			interference_active
 		}
-		modifier = {}
+		
+		in_breach_of = {
+			{
+				key = resolution_pre_ftl_stances_non_interference
+			}
+		}
 
 		on_enabled = {
 			hidden_effect = { set_country_flag = encountered_first_primitive }
@@ -1513,22 +1711,31 @@ interference = {
 					has_ai_personality_behaviour = infiltrator
 					has_ai_personality_behaviour = dominator
 				}
-				NOT = {
-					is_galactic_community_member = yes
-					OR = {
-						is_active_resolution = "resolution_galacticstudies_advanced_xenostudies"
-						is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
-						is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
-					}
+			}
+			modifier = {
+				factor = 0.1
+				is_galactic_community_member = yes
+				OR = {
+					is_active_resolution = "resolution_galacticstudies_advanced_xenostudies"
+					is_active_resolution = "resolution_galacticstudies_ethical_guideline_refactoring"
+					is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+					is_active_resolution = "resolution_pre_ftl_stances_non_interference"
 				}
 			}
 		}
 	}
 	option = {
-		name = "interference_full"
+		name = "interference_aggressive"
 
-		potential = {
+		in_breach_of = {
+			{
+				key = resolution_pre_ftl_stances_non_interference
+			}
+			{
+				key = resolution_pre_ftl_stances_equal_standing
+			}
 		}
+
 		valid = {
 			custom_tooltip = {
 				success_text = is_not_a_signatory_vassal_success
@@ -1538,13 +1745,16 @@ interference = {
 			NOR = {
 				has_ethic = "ethic_pacifist"
 				has_ethic = "ethic_fanatic_pacifist"
+				has_ethic = "ethic_xenophile"
+				has_ethic = "ethic_fanatic_xenophile"
+				has_valid_civic = civic_machine_exploration_protocol
 			}
 		}
 		on_enabled = {
 			hidden_effect = { set_country_flag = encountered_first_primitive }
 		}
 		policy_flags = {
-			interference_full
+			interference_aggressive
 		}
 		modifier = {}
 		AI_weight = {
@@ -1567,6 +1777,14 @@ interference = {
 					has_ethic = "ethic_fanatic_pacifist"
 				}
 			}
+			modifier = {
+				factor = 0.1
+				is_galactic_community_member = yes
+				OR = {
+					is_active_resolution = "resolution_pre_ftl_stances_non_interference"
+					is_active_resolution = "resolution_pre_ftl_stances_equal_standing"
+				}
+			}
 		}
 	}
 }
@@ -1584,9 +1802,32 @@ enlightenment = {
 			enlightenment_not_allowed
 		}
 
-		on_enabled = {
-			# custom_tooltip = "policy_allow_slavery_effect_disable"
+		AI_weight = {
+			weight = 1
+			modifier = {
+				factor = 3
+				is_xenophobe = yes
+			}
 		}
+	}
+
+	option = {
+		name = "enlightenment_covert_only"
+
+		policy_flags = {
+			enlightenment_covert_only
+		}
+
+		valid = {
+			NOT = { has_policy_flag = interference_not_allowed }
+			NOR = {
+				has_ethic = "ethic_fanatic_xenophobe"
+				has_valid_civic = "civic_fanatic_purifiers"
+				has_valid_civic = "civic_hive_devouring_swarm"
+				has_valid_civic = "civic_machine_terminator"
+			}
+		}
+		
 		AI_weight = {
 			weight = 1
 		}
@@ -1601,6 +1842,7 @@ enlightenment = {
 		modifier = {}
 
 		valid = {
+			NOT = { has_policy_flag = interference_not_allowed }
 			NOR = {
 				has_ethic = "ethic_fanatic_xenophobe"
 				has_valid_civic = "civic_fanatic_purifiers"
@@ -1834,6 +2076,7 @@ first_contact_protocol = {
 		valid = {
 			is_homicidal = no
 			is_xenophobe = no
+			NOT = { has_origin = origin_payback }
 		}
 
 		AI_weight = {
@@ -1884,6 +2127,10 @@ first_contact_protocol = {
 			modifier = {
 				factor = 1.5
 				always = yes #Liu Cixin is right
+			}
+			modifier = {
+				factor = 2
+				has_origin = origin_payback
 			}
 		}
 	}
@@ -1952,7 +2199,10 @@ border_policy = {
 		}
 
 		potential = {
-			is_country_type = default
+			OR = {
+				is_country_type = default
+				is_primitive = yes
+			}
 		}
 
 		valid = {
@@ -1969,7 +2219,7 @@ border_policy = {
 		modifier = {}
 
 		valid = {
-			always = yes
+			is_primitive = no
 		}
 
 		AI_weight = {
@@ -2913,6 +3163,10 @@ slavery = {
 				fail_text = is_not_a_signatory_vassal_fail
 				NOT = { any_agreement = { agreement_preset = preset_signatory } }
 			}
+			custom_tooltip = {
+				fail_text = is_broken_shackles_origin
+				NOT = { has_origin = origin_broken_shackles }
+			}
 			OR = {
 				has_ethic = ethic_authoritarian
 				has_ethic = ethic_fanatic_authoritarian
@@ -3033,6 +3287,10 @@ purge = {
 				success_text = is_not_a_signatory_vassal_success
 				fail_text = is_not_a_signatory_vassal_fail
 				NOT = { any_agreement = { agreement_preset = preset_signatory } }
+			}
+			custom_tooltip = {
+				fail_text = is_broken_shackles_origin
+				NOT = { has_origin = origin_broken_shackles }
 			}
 			OR = {
 				is_gestalt = yes

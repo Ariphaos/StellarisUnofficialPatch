@@ -1,12 +1,61 @@
 # ChangeLog
 
+## May 4th
+
+- Fix AI triggering a divide by zero error.
+
+## March 29th
+
+- Paradox fixed the multi-Galatron bug.
+- Paradox fixed the class 4 singularity building.
+
+- Only the top two ranks of market nominees compete against each other.
+- Insight techs no longer have 'prerequisites'.
+- Made non-corporate/despoiler/etc. ai a bit less eager for mercenary resolutions after the first, and matched proposals to repeals.
+- Allow you to avoid making peace with mercenary enclaves.
+- Allow other living standards for displacement purging.
+- Take care of Fear of the Dark secret fealty wonkiness.
+- Fix uplifting description triggers in wrong scope. (Fireprince)
+
+## March 21st
+
+- Paradox fixed the low opinion boosting for accepting a protectorate request (30 -> 150, I only went to 100)
+
+- Paradox's fixes to preftls nuking themselves only apply to those primitives where outposts aren't build. Thus I've kept my fix though made it a bit less extreme.
+- Abandoned Terraforming Equipment won't trigger on Sea of Consciousness
+
+## March 18th
+
+- Presapients should no longer trigger 'What Separates Us'
+- Fixed displacement-only purge policy
+- Fixed one of the Locus events triggering on captured planets.
+- Allow inward perfectionists to have a policy of non-interference (And encourage it for AI)
+- Removed unity cap on precursor discovery (9,999 unity is not what it used to be)
+- Fear of the Dark and similar primitives that start in your home system will not nuke themselves.
+- Made some adjustments to the Missing Scientist chain - it needs more work with the new system.
+- Calmed down preftl nuking frequency.
+- Hopefully don't wipe out FE buildings when invading.
+- Can now build class 4 singularities from artifact reconstruction.
+
+## March 14th
+
+Fixes now done by Paradox:
+
+- Most Ghost pop issues should now be resolved in vanilla.
+- Major cleanup of the First Contact event. 
+- Scrapped all observation fixes.
+
+- Factions are not outraged by getting the resolutions they want.
+- AI get their anomaly events again.
+
+
+
 ## March 10th
 
 - Fixed invalid scope for faction check (SirBlackAxe)
 - Restored station_uninhabitable_category (HyperLordBender)
 - Fixed some error spamming from a couple events. (koras321)
 - Fixed erroneous sector scope for starbase building. (koras321)
-- Should have fixed unrest.161.
 
 
 ## December 6th

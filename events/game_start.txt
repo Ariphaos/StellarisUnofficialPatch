@@ -9,6 +9,7 @@ event = {
 	immediate = {
 		set_global_flag = game_started
 
+
 		every_country = {
 			limit = { is_ai = no }
 			country_event = { id = country.900 days = 460 random = 60 }
@@ -29,7 +30,7 @@ event = {
 				40 = {
 					random_system = {
 						limit = { has_owner = no }
-						spawn_system = { initializer = "special_init_03" }
+						spawn_system = { initializer = "pre_ftl_init_sol" }
 					}
 					add_extra_hyperlane_to_spawned_system_effect = yes
 				}
@@ -137,6 +138,16 @@ event = {
 			}
 		}
 
+		### SLOW DOWN PRE-FTL EVENTS
+		set_timed_global_flag = {
+			flag = asteroid_sighted_pre_ftl_global
+			years = 10
+		}
+		set_timed_global_flag = {
+			flag = nuclear_war_pre_ftl_global
+			years = 10
+		}
+
 		### ORIGINS
 
 		# Scion
@@ -232,6 +243,12 @@ event = {
 			country_event = { id = aquatics.1000 }
 		}
 
+		# Broken Shackles
+		every_playable_country = {
+			limit = { has_origin = origin_broken_shackles }
+			country_event = { id = origin.110 }
+		}
+
 		# Teachers of the Shroud
 		every_playable_country = {
 			limit = { has_origin = origin_shroudwalker_apprentice }
@@ -246,6 +263,73 @@ event = {
 				}
 			}
 			imperial_origin_start_effect = yes
+		}
+		
+		# Payback
+		every_playable_country = {
+			limit = { has_origin = origin_payback }
+			country_event = { id = origin.4000 }
+		}
+
+		## Payback/Escaped Slaves Slaver empire
+		# if advanced starts are enabled or a player has picked it, continue
+		if = {
+			limit = {
+				OR = {
+					any_playable_country = {
+						has_slave_origin = yes
+						is_ai = no
+					}
+					check_galaxy_setup_value = { setting = num_advanced_empires value > 0 }
+				}
+			}
+		}
+		# if an AI has picked it and advanced starts are not enabled,
+		# give them default origin instead.
+		else = {
+			every_playable_country = {
+				limit = {
+					has_slave_origin = yes
+				}
+				log = "REMOVED SLAVE ORIGIN"
+				set_origin = origin_default
+			}
+		}
+
+		# Spawn Broken Shackles for Payback
+		every_playable_country = {
+			limit = {
+				has_origin = origin_payback
+			}
+			country_event = {
+				id = origin.112
+			}
+		}
+
+		# Spawn Payback for Broken Shackles
+		every_playable_country = {
+			limit = {
+				has_origin = origin_broken_shackles
+			}
+			country_event = {
+				id = origin.113
+			}
+		}
+
+		# Fear of the Dark
+		every_playable_country = {
+			limit = { has_origin = origin_fear_of_the_dark }
+			fear_of_the_dark_binary_planets = yes
+		}
+
+		# Eagar Explorers
+		every_playable_country = {
+			limit = {
+				is_eager_explorer_empire = yes
+			}
+			give_technology = { message = no tech = tech_subspace_drive }
+			low_tech_start_add_research_options_effect = yes
+			add_research_option = tech_hyper_drive_1
 		}
 	}
 }
@@ -469,6 +553,54 @@ event = {
 			}
 			set_planet_flag = ancient_history_planet
 		}
+		every_system = {
+			limit = {
+				has_owner = no
+			}
+			every_system_planet = {
+				limit = {
+					colonizable_planet = yes
+					has_owner = no
+					AND = {
+						if = {
+							limit = {
+								exists = event_target:sol_system_earth
+							}
+							NOT = { is_same_value = event_target:sol_system_earth }
+						}
+						NOT = { has_planet_flag = prescripted_ideal }
+						NOT = { has_planet_flag = ratling_planet }
+					}
+				}
+				save_event_target_as = pre_sapient_planet
+				random_list = {
+					100 = {
+						modifier = {
+							subtract = value:presapient_spawn_chance
+						}
+					}
+					0 = { # 7.5% chance at 1x on the slider.
+						spawn_presapient_species_randomizer_effect = yes
+						modifier = {
+							add = value:presapient_spawn_chance
+						}
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_system = {
+					has_star_flag = old_foes_system
+				}
+			}
+			random_system = {
+				limit = {
+					has_star_flag = old_foes_system
+				}
+				spawn_old_foes_effect = yes
+			}
+		}
 	}
 }
 
@@ -607,6 +739,12 @@ country_event = {
 			}
 			give_technology = { message = no tech = tech_space_trading }
 		}
+		if = {
+			limit = {
+				has_civic = civic_privatized_exploration
+			}
+			give_technology = { message = no tech = tech_starbase_3 }
+		}
 	}
 
 	# Additional resources that may be changed by subspecies are granted in generate_start_buildings_and_districts
@@ -620,48 +758,165 @@ country_event = {
 
 	immediate = {
 		#science
-		create_fleet = {
-			effect = {
-				set_owner = prev
+		if = {
+			limit = { is_low_tech_start = no }
 
-				create_ship = {
-					name = random
-					random_existing_design = science
-				}
+			create_fleet = {
+				effect = {
+					set_owner = prev
 
-				set_fleet_stance = evasive
-				#set_location = prev.capital_star
-				set_location = prev.capital_scope.star
-
-				owner = {
-					create_leader = {
-						class = scientist
-						sub_type = survey
+					create_ship = {
 						name = random
-						species = owner_main_species
+						random_existing_design = science
 					}
+
+					set_fleet_stance = evasive
+					#set_location = prev.capital_star
+					set_location = prev.capital_scope.star
+
+					owner = {
+						create_leader = {
+							class = scientist
+							sub_type = survey
+							name = random
+							species = owner_main_species
+						}
+					}
+					last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
+					set_leader = last_created_leader
 				}
-				last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
-				set_leader = last_created_leader
-			}
-		}
-
-		#constructor
-		create_fleet = {
-			effect = {
-				set_owner = prev
-
-				create_ship = {
-					name = random
-					random_existing_design = constructor
-				}
-
-				set_fleet_stance = evasive
-				set_location = prev.capital_star
 			}
 		}
 
 		if = {
+			limit = {
+				is_eager_explorer_empire = yes
+			}
+			while = {
+				count = 2
+				create_fleet = {
+					effect = {
+						set_owner = prev
+	
+						create_ship = {
+							name = random
+							random_existing_design = explorer_vessel
+						}
+	
+						set_fleet_stance = passive
+						set_location = prev.capital_scope.star
+	
+						owner = {
+							create_leader = {
+								class = scientist
+								sub_type = survey
+								name = random
+								species = owner_main_species
+							}
+						}
+						if = {
+							limit = {
+								NOT = { root =  { has_country_flag = created_first_eager_ship } }
+							}
+							root = {
+								set_country_flag = created_first_eager_ship
+							}
+							last_created_leader = {
+								add_trait = leader_trait_meticulous
+							}
+						}
+						else = {
+							if = {
+								limit = {
+									root = {
+										is_machine_empire = no
+									}
+								}
+								last_created_leader = {
+									add_trait = leader_trait_roamer
+								}
+							}
+							else = {
+								last_created_leader = {
+									add_trait = leader_trait_cataloger
+								}
+							}
+						}
+						last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
+						set_leader = last_created_leader
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				has_civic = civic_privatized_exploration
+			}
+			random_owned_starbase = {
+				set_starbase_size = starbase_starhold
+				set_starbase_module = {
+					slot = 2
+					module = shipyard
+				}
+				set_starbase_module = {
+					slot = 3
+					module = trading_hub
+				}
+				set_starbase_module = {
+					slot = 4
+					module = trading_hub
+				}
+				set_starbase_building = {
+					slot = 2
+					building = resource_silo
+				}
+			}
+		}
+
+		#constructor
+		if = {
+			limit = { is_low_tech_start = no }
+
+			create_fleet = {
+				effect = {
+					set_owner = prev
+
+					create_ship = {
+						name = random
+						random_existing_design = constructor
+					}
+
+					set_fleet_stance = evasive
+					set_location = prev.capital_star
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				is_eager_explorer_empire = yes
+			}
+			create_fleet = {
+				effect = {
+					set_owner = prev
+
+					create_ship = {
+						name = random
+						random_existing_design = engineer_vessel
+					}
+
+					set_fleet_stance = evasive
+					set_location = prev.capital_star
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				is_low_tech_start = no
+			}
+
 			create_fleet = {
 				set_take_point = yes
 				effect = {
@@ -725,6 +980,28 @@ country_event = {
 						}
 						set_location = prev.capital_star
 					}
+				}
+			}
+		}
+
+		else_if = {
+			limit = {
+				has_civic = civic_hive_cordyceptic_drones
+				has_civic = civic_hive_stargazers
+			}
+			create_fleet = {
+				set_take_point = yes
+				effect = {
+					set_owner = prev
+					while = {
+						count = 3
+						create_ship = {
+							name = NAME_Reanimated_Small_Space_Organism
+							design = NAME_Reanimated_Small_Space_Organism
+							prefix = yes
+						}
+					}
+					set_location = prev.capital_star
 				}
 			}
 		}
@@ -1590,6 +1867,9 @@ country_event = {
 					has_deposit_for = shipclass_mining_station
 					has_planet_flag = starting_mining_target
 					has_mining_station = no
+					root = {
+						is_low_tech_start = no
+					}
 				}
 				create_mining_station = {
 					owner = ROOT
@@ -1600,6 +1880,9 @@ country_event = {
 					has_deposit_for = shipclass_research_station
 					has_planet_flag = starting_research_target
 					has_research_station = no
+					root = {
+						is_low_tech_start = no
+					}
 				}
 				create_research_station = {
 					owner = ROOT
@@ -1667,6 +1950,27 @@ country_event = {
 			remove_country_flag = necrophage_une
 			remove_country_flag = necrophage_commonwealth
 		}
+		if = {
+			limit = {
+				has_origin = origin_slavers
+			}
+			capital_scope = { generate_slaver_bonus = yes }
+		}
+		if = {
+			limit = {
+				has_valid_civic = civic_hive_stargazers
+			}
+			every_system = {
+				limit = {
+					distance = {
+						source = root.capital_scope
+						use_bypasses = no
+						max_jumps = 3
+					}
+				}
+				root = { set_visited = prev }
+			}
+		}
 	}
 }
 
@@ -1680,6 +1984,7 @@ event = {
 	immediate = {
 		every_system = {
 			limit = { is_inside_nebula = yes }
+			nebula_cloaking_effect = yes
 			# Class B
 			if = {
 				limit = {

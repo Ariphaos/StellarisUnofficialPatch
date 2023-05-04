@@ -276,30 +276,32 @@ country_event = {
 	}
 }
 
-# Primitives gain comms with anyone that has surveyed their planet
-# on_planet_surveyed
-# A country has gained a surveyed status on a planet. Happens after "on_survey" if a science ship surveyed a planet.
-# Root = Planet
-# From = Country
-# FromFrom = Fleet of the science ship that surveyed it, if any
-planet_event = {
+# Communications with primitives can be established after observation station is built
+# This = construction ship or observation station
+# From = planet it is built on
+ship_event = {
 	id = communications_spread.4
 	hide_window = yes
 	is_triggered_only = yes
 
-	pre_triggers = {
-		has_owner = yes
-	}
-
 	trigger = {
-		exists = owner
-		owner = {
-			is_country_type = primitive
+		exists = controller
+		from = {
+			exists = owner
+			owner = {
+				is_country_type = primitive
+			}
 		}
 	}
 
 	immediate = {
-		from = { establish_communications_no_message = root.owner }
+		from.owner = { establish_communications = root.controller }
+		owner = {
+			add_intel = {
+				amount = 100
+				who = from.owner
+			}
+		}
 	}
 }
 
@@ -318,11 +320,50 @@ country_event = {
 						NOR = {
 							is_same_value = root
 							is_same_value = root.fromfrom
+							is_country_type = primitive
 						}
 					}
 				}
 				controller = {
 					establish_communications_no_message = root
+				}
+			}
+		}
+	}
+}
+
+# Communications with primitives should be removed after observation station is destroyed/lost to another empire
+# This = station
+# From = planet it was built on
+ship_event = {
+	id = communications_spread.6
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ship_size = observation_station
+		exists = controller
+		from = {
+			exists = owner
+			owner = {
+				is_country_type = primitive
+				NOT = {
+					has_country_flag = was_enlightened
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from.owner = { 
+			remove_communications = root.controller
+			clear_relations = {
+				target = root.controller
+				relations = {
+					is_under_societal_enlightenment
+					is_under_open_technological_enlightenment
+					is_under_stratified_technological_enlightenment
+					has_pre_ftl_trade
 				}
 			}
 		}

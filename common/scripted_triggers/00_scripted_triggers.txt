@@ -225,6 +225,15 @@ wears_clothes = { # The species uses the portrait that wears clothes
 		species_portrait = nec13
 		species_portrait = nec14
 		species_portrait = nec15
+		species_portrait = tox2
+		species_portrait = tox3
+		species_portrait = tox6
+		species_portrait = tox8
+		species_portrait = tox10
+		species_portrait = tox11
+		species_portrait = tox12
+		species_portrait = tox14
+		species_portrait = tox15
 	}
 }
 
@@ -381,11 +390,18 @@ harvested_leviathan_dna = {
 }
 
 has_overlord_dlc = {
+	optimize_memory
 	host_has_dlc = "Overlord"
 }
 
 has_toxoids = {
+	optimize_memory
 	host_has_dlc = "Toxoids Species Pack"
+}
+
+has_first_contact_dlc = {
+	optimize_memory
+	host_has_dlc = "First Contact Story Pack"
 }
 
 uninhabitable_regular_planet = {
@@ -430,6 +446,20 @@ habitable_planet_not_urban = {
 		is_planet_class = pc_alpine
 		is_planet_class = pc_savannah
 		is_planet_class = pc_gaia
+	}
+}
+
+is_starting_planet_type = {
+	OR = {
+		is_planet_class = pc_desert
+		is_planet_class = pc_tropical
+		is_planet_class = pc_arid
+		is_planet_class = pc_continental
+		is_planet_class = pc_ocean
+		is_planet_class = pc_tundra
+		is_planet_class = pc_arctic
+		is_planet_class = pc_alpine
+		is_planet_class = pc_savannah
 	}
 }
 
@@ -544,6 +574,7 @@ has_encountered_other_species = {
 	OR = {
 		has_origin = origin_syncretic_evolution
 		has_origin = origin_necrophage
+		has_origin = origin_payback
 		has_civic = civic_machine_servitor
 		num_communications > 0
 		any_owned_species = {
@@ -561,11 +592,9 @@ has_encountered_other_species = {
 # }
 
 allows_alien_leaders = {
-	any_owned_planet ={
-		any_owned_pop = {
-			NOT = { is_same_species = root }
-			has_citizenship_rights = yes
-		}
+	any_owned_species = {
+		NOT = { is_same_species = root }
+		has_citizenship_rights = yes
 	}
 }
 
@@ -581,7 +610,7 @@ can_be_military_leader = {
 	OR = {
 		AND = { # MIs only accept Fully Integrated leaders
 			owner = { has_authority = auth_machine_intelligence }
-			has_citizenship_type = { type = citizenship_full_machine }
+			has_citizenship_type = { type = citizenship_full_machine country = owner }
 			has_military_service_type = { type = military_service_full }
 		}
 		AND = { # non-MIs accept whatever
@@ -609,10 +638,17 @@ allows_slavery = {
 
 allows_purge = {
 	OR = {
-		has_ethic = ethic_gestalt_consciousness
-		has_valid_civic = civic_fanatic_purifiers
 		has_policy_flag = purge_allowed
 		has_policy_flag = purge_displacement_only
+		has_ethic = ethic_gestalt_consciousness
+		has_valid_civic = civic_fanatic_purifiers
+	}
+}
+
+allows_preftl_exploitation = {
+	OR = {
+		has_policy_flag = interference_aggressive
+		has_policy_flag = interference_active
 	}
 }
 
@@ -846,6 +882,15 @@ is_binary_star = {
 	}
 }
 
+# Use: owner_has_resolution = { RES = resolution_ecology_integrated_gardens }
+owner_has_resolution = {
+	exists = owner
+	owner = {
+		is_galactic_community_member = yes
+		is_active_resolution = $RES$
+	}
+}
+
 is_under_crisis_bombardment = {
 	has_orbital_bombardment = yes
 	any_fleet_in_orbit = {
@@ -926,7 +971,7 @@ crisis_happened_and_defeated = { #Excluding Marauders/The Khan and Gray Tempest
 
 is_pre_sapient_livestock = {
 	is_sapient = no
-	has_citizenship_type = { type = citizenship_slavery }
+	has_citizenship_type = { type = citizenship_slavery	country = owner }
 	has_slavery_type = { type = slavery_livestock }
 }
 
@@ -1121,6 +1166,83 @@ has_opposing_ethics = {
 	}
 }
 
+has_alternative_ethics = { # Consider THIS_SCOPE as the entity you are checking (e.g. a Pop), and REF_SCOPE as the reference point (e.g. an empire) you're checking against for ethical drift. Note that this trigger ignores directly opposing ethics.
+	OR = {
+		AND = {
+			$THIS_SCOPE$ = {
+				is_pacifist = yes
+			}
+			$REF_SCOPE$ = {
+				is_pacifist = no
+				is_militarist = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_militarist = yes
+			}
+			$REF_SCOPE$ = {
+				is_militarist = no
+				is_pacifist = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_xenophobe = yes
+			}
+			$REF_SCOPE$ = {
+				is_xenophobe = no
+				is_xenophile = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_xenophile = yes
+			}
+			$REF_SCOPE$ = {
+				is_xenophile = no
+				is_xenophobe = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_egalitarian = yes
+			}
+			$REF_SCOPE$ = {
+				is_egalitarian = no
+				is_authoritarian = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_authoritarian = yes
+			}
+			$REF_SCOPE$ = {
+				is_authoritarian = no
+				is_egalitarian = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_spiritualist = yes
+			}
+			$REF_SCOPE$ = {
+				is_spiritualist = no
+				is_materialist = no
+			}
+		}
+		AND = {
+			$THIS_SCOPE$ = {
+				is_materialist = yes
+			}
+			$REF_SCOPE$ = {
+				is_materialist = no
+				is_spiritualist = no
+			}
+		}
+	}
+}
+
 is_fanatic = {
 	OR = {
 		has_ethic = ethic_fanatic_authoritarian
@@ -1195,6 +1317,16 @@ is_regular_empire = {
 		is_country_type = default
 		is_country_type = fallen_empire
 		is_country_type = awakened_fallen_empire #for checks in buildings
+	}
+	NOT = { has_ethic = ethic_gestalt_consciousness	}
+}
+
+is_regular_empire_or_primitive = {
+	OR = {
+		is_country_type = default
+		is_country_type = fallen_empire
+		is_country_type = awakened_fallen_empire #for checks in buildings
+		is_primitive = yes
 	}
 	NOT = { has_ethic = ethic_gestalt_consciousness	}
 }
@@ -2274,6 +2406,7 @@ is_specialist_researcher = { #Specialist traits for recruitable leaders
 		has_trait = leader_trait_expertise_psionics
 		has_trait = leader_trait_expertise_statecraft
 		has_trait = leader_trait_expertise_voidcraft
+		has_trait = leader_trait_expertise_archaeostudies
 	}
 }
 
@@ -2423,6 +2556,7 @@ baol_colony_3_trigger = {
 	any_system_planet = {
 		habitable_planet = yes
 		NOT = { is_planet_class = pc_city }
+		NOT = { is_planet_class = pc_relic }
 		has_anomaly = no
 		NOR = {
 			exists = archaeological_site
@@ -2433,6 +2567,7 @@ baol_colony_3_trigger = {
 			is_colony = no
 			num_sapient_pops < 10
 		}
+		NOT = { has_modifier = holy_planet }
 	}
 }
 
@@ -2447,6 +2582,7 @@ baol_colony_3_fallback_trigger = {
 	any_system_planet = {
 		habitable_planet = yes
 		NOT = { is_planet_class = pc_city }
+		NOT = { is_planet_class = pc_relic }
 		has_anomaly = no
 		NOR = {
 			exists = archaeological_site
@@ -2457,6 +2593,7 @@ baol_colony_3_fallback_trigger = {
 			is_colony = no
 			num_sapient_pops < 10
 		}
+		NOT = { has_modifier = holy_planet }
 	}
 }
 
@@ -2693,6 +2830,7 @@ basic_eligibility_for_separatism_joining_trigger = {
 		has_defensive_pact = event_target:revolt_situation.owner
 		has_non_aggression_pact = event_target:revolt_situation.owner
 	}
+	has_communications = event_target:revolt_situation.owner
 	is_country_type = default
 }
 
@@ -2849,6 +2987,24 @@ is_crisis_sphere = {
 		is_megastructure_type = crisis_sphere_3
 		is_megastructure_type = crisis_sphere_4
 		is_megastructure_type = crisis_sphere_ruined
+	}
+}
+
+is_low_tech_start = {
+	OR = {
+		is_primitive = yes
+		has_origin = origin_broken_shackles
+		has_origin = origin_payback
+		is_eager_explorer_empire = yes
+	}
+}
+
+is_eager_explorer_empire = {
+	OR = {
+		has_civic = civic_eager_explorers
+		has_civic = civic_privatized_exploration
+		has_civic = civic_hive_stargazers
+		has_civic = civic_machine_exploration_protocol
 	}
 }
 
@@ -3091,6 +3247,14 @@ is_catalytic_empire = {
 	}
 }
 
+is_idyllic_bloom_empire = {
+	OR = {
+		has_valid_civic = civic_idyllic_bloom
+		has_valid_civic = civic_hive_idyllic_bloom
+		has_valid_civic = civic_life_seeded
+	}
+}
+
 is_death_cult_empire = {
 	OR = {
 		has_valid_civic = civic_death_cult
@@ -3187,6 +3351,10 @@ is_faction_allowed = {
 			days_passed > 30
 			has_valid_civic = civic_parliamentary_system
 		}
+		AND = {
+			days_passed > 350
+			has_origin = origin_broken_shackles
+		}
 	}
 	NOT = { has_ethic = ethic_gestalt_consciousness }
 	NOT = { has_country_flag = suppress_vanilla_factions }
@@ -3231,6 +3399,7 @@ values_others = {
 		is_xenophile = yes
 		has_valid_civic = civic_hive_empath
 		has_valid_civic = civic_machine_servitor
+		has_valid_civic = civic_machine_exploration_protocol
 	}
 }
 
@@ -3563,6 +3732,20 @@ can_think = {
 	}
 }
 
+has_slave_origin = {
+	OR = {
+		has_origin = origin_broken_shackles
+		has_origin = origin_payback
+	}
+}
+
+has_reduced_pop_origin = {
+	OR = {
+		has_origin = origin_broken_shackles
+		has_origin = origin_payback
+		has_origin = origin_fear_of_the_dark
+	}
+}
 has_specialist_subject_leader_trait = {
 	OR = {
 		has_trait = leader_trait_bulwark_watcher
@@ -3640,6 +3823,7 @@ is_non_hostile_to_wraith = {
 		is_country_type = drone_faction
 		is_country_type = cloud
 		is_country_type = marauder_raiders
+		is_country_type = debt_collectors
 		is_country_type = enigmatic_cache
 		is_country_type = vluur
 	}
@@ -3679,6 +3863,25 @@ can_remove_overtuned_traits = {
 	}
 }
 
+is_preftl_but_not_special = {
+	is_primitive = yes
+	OR = {
+		species = {
+			NOR = {
+				has_trait = trait_hive_mind
+				has_trait = trait_pc_habitat_preference
+	#			has_trait = pc_warden_guardian_preference
+			}
+		}
+		capital_scope = {
+			NOR = {
+				has_planet_flag = haven_flag
+				has_planet_flag = prescripted_ideal
+			}
+		}
+	}
+}
+
 can_add_cybernetic_traits = {
 	hidden_trigger = { exists = from }
 	from = {
@@ -3707,6 +3910,16 @@ is_scavenger = {
 	}
 }
 
+is_market_nominee_planet = {
+	OR = {
+		has_modifier = market_nominee_level_1
+		has_modifier = market_nominee_level_2
+		has_modifier = market_nominee_level_3
+		has_modifier = market_nominee_level_4
+		has_modifier = market_nominee_level_5
+	}
+}
+
 has_chosen_covenant_trait_non_ruler = {
 	OR = {
 		has_trait = leader_trait_general_composer_chosen
@@ -3724,6 +3937,16 @@ has_chosen_covenant_trait_non_ruler = {
 	}
 }
 
+has_chosen_trait_ruler = {
+	OR = {
+		has_ruler_trait = leader_trait_ruler_chosen
+		has_ruler_trait = leader_trait_ruler_composer_chosen
+		has_ruler_trait = leader_trait_ruler_eater_chosen
+		has_ruler_trait = leader_trait_ruler_instrument_chosen
+		has_ruler_trait = leader_trait_ruler_whisperers_chosen
+	}
+}
+
 has_presapient_trait = {
 	OR = {
 		has_trait = trait_presapient_starborn
@@ -3733,5 +3956,6 @@ has_presapient_trait = {
 		has_trait = trait_presapient_conservative
 		has_trait = trait_presapient_irradiated
 		has_trait = trait_presapient_docile_livestock
+		has_trait = trait_presapient_forcefully_devolved
 	}
 }

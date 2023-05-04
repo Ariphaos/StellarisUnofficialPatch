@@ -88,9 +88,10 @@ planet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		NOT = { days_passed < 1 }
 		OR = {
 			AND = {
-				FROM = { has_origin = origin_tree_of_life }
+				owner = { has_origin = origin_tree_of_life }
 				NOR = {
 					has_deposit = d_tree_of_life_colony
 					has_deposit = d_tree_of_life_home
@@ -98,23 +99,26 @@ planet_event = {
 				}
 			}
 			AND = {
-				FROM = { NOT = { has_origin = origin_tree_of_life } }
+				owner = { NOT = { has_origin = origin_tree_of_life } }
 				has_modifier = no_lifetree
 			}
 		}
-
 	}
 
 	immediate = {
 		if = {
 			limit = {
-				FROM = { has_origin = origin_tree_of_life }
+				owner = { has_origin = origin_tree_of_life }
+				NOT = {
+					has_deposit = d_tree_of_life_colony
+					has_deposit = d_tree_of_life_home
+				}
 			}
 			add_modifier = { modifier = no_lifetree }
 		}
 		if = {
 			limit = {
-				FROM = { NOT = { has_origin = origin_tree_of_life } }
+				owner = { NOT = { has_origin = origin_tree_of_life } }
 			}
 			remove_modifier = no_lifetree
 		}
@@ -266,7 +270,11 @@ country_event = {
 			capital_scope = {
 				solar_system = {
 					every_megastructure = {
-						limit = { is_megastructure_type = ring_world_ruined }
+						limit = { 
+							exists = owner
+							owner = { has_origin = origin_shattered_ring }
+							is_megastructure_type = ring_world_ruined
+						}
 						remove_megastructure = this
 					}
 					spawn_shattered_ring_guaranteed_1_effect = yes
@@ -280,6 +288,8 @@ country_event = {
 				solar_system = {
 					random_megastructure = {
 						limit = {
+							exists = owner
+							owner = { has_origin = origin_shattered_ring }
 							is_megastructure_type = ring_world_ruined
 							has_megastructure_flag = guaranteed_1
 						}
@@ -387,6 +397,7 @@ planet_event = {
 
 	trigger = {
 		owner = { has_origin = origin_progenitor_hive }
+		exists = from
 		from = {
 			OR = {
 				has_deposit = d_progenitor
@@ -835,20 +846,6 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		# Remove a guaranteed habitable
-		if = {
-			limit = { num_guaranteed_colonies >= 1 }
-			capital_scope.solar_system = {
-				closest_system = {
-					limit = { has_star_flag = neighbor_t1_first_colony }
-					random_system_planet = {
-						limit = { has_planet_flag = prescripted_ideal }
-						remove_planet_flag = prescripted_ideal
-						change_pc = pc_frozen
-					}
-				}
-			}
-		}
 		# Find Quantum Catapult Star
 		capital_scope.solar_system = {
 			closest_system = {
@@ -2456,3 +2453,4014 @@ country_event = {
 	}
 }
 
+##################
+# Fear of the Dark
+##################
+
+country_event = { # Tombola, fired every year
+	id = origin.6000
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		has_origin = origin_fear_of_the_dark
+		event_target:fotd_seperatist_planet@root = {
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+		NOT = { has_country_flag = angered_seperatists }
+	}
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			owner = {
+				save_event_target_as = fotd_habitants
+			}
+		}
+		random_list = {
+			1 = { 
+				modifier = {
+					factor = 0
+					has_country_flag = fotd_leader_cooldown
+				}
+				country_event = { id = origin.6005 days = 5 random = 350 } #Gain Scientist
+			}
+			1 = { 
+				modifier = {
+					factor = 0
+					has_country_flag = fotd_leader_cooldown
+				}
+				country_event = { id = origin.6006 days = 5 random = 350 } #Gain Admiral
+			}
+			2 = { country_event = { id = origin.6015 days = 5 random = 350 } } #Gain Technology
+			2 = { 
+				modifier = {
+					factor = 0
+					has_country_flag = fotd_requested_aid_recently
+				}
+				country_event = { id = origin.6020 days = 5 random = 350 } #Seperatist Deficit
+			} 
+			20 = {
+				modifier = {
+					factor = 0
+					NOR = {
+						has_deficit_situation_stage_2 = yes
+						has_deficit_situation_stage_3 = yes
+						has_deficit_situation_stage_4 = yes
+					}
+				}
+				modifier = {
+					factor = 0
+					NOR = {
+						has_country_flag = fotd_exploited_seperatists
+						has_country_flag = fotd_aided_seperatists
+					}
+				}
+				country_event = { id = origin.6025 } #Seperatists Help Player
+			}
+			20 = {}
+		}
+	}
+}
+
+country_event = { # Get Scientist
+	id = origin.6005
+	title = origin.6005.name
+	desc = {
+		trigger = {
+			success_text = {
+				text = origin.6005.desc.base1
+				has_country_flag = base1
+			}
+			success_text = {
+				text = origin.6005.desc.base2
+				has_country_flag = base2
+			}
+			success_text = {
+				text = origin.6005.desc.base3
+				has_country_flag = base3
+			}
+			success_text = {
+				text = origin.6005.desc.base4
+				has_country_flag = base4
+			}
+			text = newline
+			success_text = {
+				text = origin.6005.desc.end1
+				has_country_flag = end1
+			}
+			success_text = {
+				text = origin.6005.desc.end2
+				has_country_flag = end2
+			}
+			success_text = {
+				text = origin.6005.desc.end3
+				has_country_flag = end3
+			}
+			success_text = {
+				text = origin.6005.desc.end4
+				has_country_flag = end4
+			}
+		}
+	}
+
+	picture = GFX_evt_fear_of_the_dark
+
+	trigger = {
+		NOT = {
+			has_country_flag = fotd_leader_cooldown
+		}
+	}
+	is_triggered_only = yes
+	immediate = {
+		random_list = {
+			1 = { set_country_flag = base1 }
+			1 = { set_country_flag = base2 }
+			1 = { set_country_flag = base3 }
+			1 = { set_country_flag = base4 }
+		}
+		random_list = {
+			1 = { set_country_flag = end1 }
+			1 = { set_country_flag = end2 }
+			1 = { set_country_flag = end3 }
+			1 = { set_country_flag = end4 }
+		}
+		create_leader = {
+			class = scientist
+			species = event_target:fotd_habitants.species
+			skill = 5
+			traits = {
+				trait = random_trait
+			}
+		}
+		last_created_leader = {
+			add_trait = leader_trait_fotd_scientist
+			save_event_target_as = fotd_Leader
+			exile_leader_as = fotd_Leader_exile
+		}
+		set_timed_country_flag = {
+			flag = fotd_leader_cooldown
+			days = 3600
+		}
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6005.a
+		clone_leader = {
+			target = event_target:fotd_Leader
+			class = scientist
+		}
+		last_created_leader = {
+			save_event_target_as = fotd_Leader_accepted
+		}
+		custom_tooltip = origin.6005.a.tt
+		hidden_effect = {
+			country_event = { id = origin.6010 days = 1800 random = 200 }
+		}
+	}
+	option = {
+		name = origin.6005.b
+		hidden_effect = {
+			event_target:fotd_Leader = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+	after = {
+		remove_country_flag = base1
+		remove_country_flag = base2
+		remove_country_flag = base3
+		remove_country_flag = base4
+		remove_country_flag = end1
+		remove_country_flag = end2
+		remove_country_flag = end3
+		remove_country_flag = end4
+	}
+}
+
+country_event = { # Get Admiral
+	id = origin.6006
+	title = origin.6005.name
+	desc = {
+		trigger = {
+			success_text = {
+				text = origin.6006.desc.base1
+				has_country_flag = base1
+			}
+			success_text = {
+				text = origin.6006.desc.base2
+				has_country_flag = base2
+			}
+			success_text = {
+				text = origin.6006.desc.base3
+				has_country_flag = base3
+			}
+			success_text = {
+				text = origin.6006.desc.base4
+				has_country_flag = base4
+			}
+		}
+	}
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+	immediate = {
+		random_list = {
+			1 = { set_country_flag = base1 }
+			1 = { set_country_flag = base2 }
+			1 = { set_country_flag = base3 }
+			1 = { set_country_flag = base4 }
+		}
+		create_leader = {
+			class = admiral
+			species = event_target:fotd_habitants.species
+			skill = 5
+			traits = {
+				trait = random_trait
+			}
+		}
+		last_created_leader = {
+			add_trait = leader_trait_fotd_admiral
+			save_event_target_as = fotd_Leader
+			exile_leader_as = fotd_Leader_exile
+		}
+		set_timed_country_flag = {
+			flag = fotd_leader_cooldown
+			days = 3600
+		}
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6006.a
+		clone_leader = {
+			target = event_target:fotd_Leader
+			class = admiral
+		}
+		last_created_leader = {
+			save_event_target_as = fotd_Leader_accepted
+		}
+		custom_tooltip = origin.6006.a.tt
+		hidden_effect = {
+			country_event = { id = origin.6010 days = 1800 random = 200 }
+		}
+	}
+	option = {
+		name = origin.6006.b
+		hidden_effect = {
+			event_target:fotd_Leader = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+	after = {
+		remove_country_flag = base1
+		remove_country_flag = base2
+		remove_country_flag = base3
+		remove_country_flag = base4
+	}
+}
+
+country_event = { # Return the Leader
+	id = origin.6010
+	title = origin.6010.name
+	desc = origin.6010.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:fotd_Leader_accepted
+		event_target:fotd_seperatist_planet@root = {
+			owner = {
+				NOT = {
+					is_same_value = root
+				}
+			}
+		}
+	}
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+	option = { # Yes
+		name = origin.6010.a
+		custom_tooltip = origin.6010.a.tt
+		hidden_effect = {
+			event_target:fotd_Leader_accepted = { kill_leader = { show_notification = no } }
+		}
+	}
+	option = { # No
+		name = origin.6010.b
+		allow = {
+			resource_stockpile_compare = {
+				resource = unity
+				value >= 500
+			}
+		}
+		event_target:fotd_Leader_accepted = {
+			add_trait = leader_trait_stubborn
+		}
+		owner = {
+			add_resource = { unity = -500 }
+		}
+		hidden_effect = {
+			country_event = { id = origin.6011 days = 1800 random = 60 }
+		}
+	}
+}
+
+country_event = { # Return the Leader Escalated
+	id = origin.6011
+	title = origin.6010.name
+	desc = origin.6011.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:fotd_Leader_accepted
+	}
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = { # Yes
+		name = origin.6010.a
+		custom_tooltip = origin.6010.a.tt
+		hidden_effect = {
+			event_target:fotd_Leader_accepted = { kill_leader = { show_notification = no } }
+		}
+	}
+	option = { # No
+		name = origin.6010.b
+		allow = {
+			resource_stockpile_compare = {
+				resource = unity
+				value >= 1000
+			}
+		}
+		event_target:fotd_Leader_accepted = {
+			if = {
+				limit = {
+					NOT = { has_trait = leader_trait_substance_abuser }
+				}
+				add_trait = leader_trait_substance_abuser
+				owner = {
+					add_resource = { unity = -1000 }
+					hidden_effect = {
+						random_list = {
+							30 = {}
+							70 = {
+								country_event = { id = origin.6011 days = 960 random = 60 }
+							}
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					NOT = { has_trait = leader_trait_arrested_development }
+				}
+				add_trait = leader_trait_arrested_development
+				owner = {
+					add_resource = { unity = -1000 }
+					hidden_effect = {
+						country_event = { id = origin.6011 days = 960 random = 60 }
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_trait = leader_trait_arrested_development
+					has_trait = leader_trait_substance_abuser
+				}
+				owner = {
+					add_resource = { unity = -1000 }
+					hidden_effect = {
+						country_event = { id = origin.6012 days = 960 random = 60 }
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Leader Gone
+	id = origin.6012
+	title = origin.6012.name
+	desc = origin.6012.desc
+
+	picture = GFX_evt_fear_of_the_dark
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:fotd_Leader
+	}
+
+	option = { # Yes
+		name = UNFORTUNATE
+		custom_tooltip = origin.6012.a.tt
+		hidden_effect = {
+			event_target:fotd_Leader_accepted = { kill_leader = { show_notification = no } }
+		}
+		owner = {
+			add_resource = { unity = -2000 }
+		}
+	}
+}
+
+country_event = { # Tech
+	id = origin.6015
+	title = origin.6015.name
+	desc = origin.6015.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			owner = {
+				save_event_target_as = seperatist_country
+			}
+		}
+		random_list = {
+			2 = { set_country_flag = terraforming_tech }
+			1 = { set_country_flag = unity_tech }
+			2 = { set_country_flag = cloaking_tech }
+			1 = { set_country_flag = laser_tech }
+			2 = { set_country_flag = mining_tech }
+			1 = { set_country_flag = building_tech }
+		}
+		random_list = {
+			5 = {
+				modifier = {
+					factor = 0
+					NOT = {
+						any_system = { #If there is no system within 20 jumps of your capital which you have not surveyed this will not fire.
+							is_surveyed = {
+								who = root
+								status = no
+							}
+							distance = {
+								source = root.capital_scope
+								use_bypasses = no
+								max_jumps = 20
+							}
+						}
+					}
+				}
+				set_country_flag = slowed_science_ships
+			}	
+			5 = {
+				modifier = {
+					factor = 0
+					NOT = {
+						any_active_first_contact = {
+							exists = this
+						}
+					}
+				}
+				set_country_flag = slowed_first_contact
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					num_defensive_pacts < 1
+				}
+				set_country_flag = break_defensive_pact
+			}
+
+			2 = {
+				modifier = {
+					factor = 0
+					num_migration_pacts < 1
+				}
+				set_country_flag = break_migration_pact
+			}
+			2 = { 
+				set_country_flag = support_speratists
+			}
+			5 = { 
+				modifier = {
+					factor = 0
+					NOT = { has_country_flag = breached_shroud }
+				}
+				set_country_flag = stop_communing_with_shroud
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					NOT = { exists = federation }
+				}
+				set_country_flag = leave_federation
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					is_galactic_community_member = no
+				}
+				set_country_flag = have_no_voice
+			}
+		}
+	}
+
+	option = {
+		name = origin.6015.a
+		add_fotd_tech = yes
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = stop_communing_with_shroud
+				}
+			}
+			fotd_tech_cost = yes
+		}
+		else = {
+			hidden_effect = {
+				fotd_tech_cost = yes
+			}
+			custom_tooltip = origin.6015.a.tt
+		}
+	}
+	option = {
+		name = origin.6015.b
+		allow = {
+			resource_stockpile_compare = {
+				resource = influence
+				value >= 50
+				mult = value:decades_since_game_start|MINIMUM|1|MAXIMUM|5|
+			}
+		}
+		add_resource = {
+			influence = -50
+			mult = value:decades_since_game_start|MINIMUM|1|MAXIMUM|5|
+		}
+		add_fotd_tech_progress = yes
+	}
+	option = {
+		name = origin.6015.c
+	}
+	after = {
+		remove_country_flag = terraforming_tech
+		remove_country_flag = unity_tech
+		remove_country_flag = cloaking_tech
+		remove_country_flag = laser_tech
+		remove_country_flag = mining_tech
+		remove_country_flag = building_tech
+		remove_country_flag = slowed_science_ships
+		remove_country_flag = slowed_first_contact
+		remove_country_flag = break_defensive_pact
+		remove_country_flag = break_migration_pact
+		remove_country_flag = support_speratists
+		remove_country_flag = stop_communing_with_shroud
+		remove_country_flag = leave_federation
+		remove_country_flag = have_no_voice
+		remove_country_flag = end_violence
+	}
+}
+
+country_event = { # Requests aid
+	id = origin.6020
+	title = origin.6020.name
+	desc = origin.6020.desc
+	picture = GFX_evt_deficit
+	show_sound = event_bad_omen
+	location = event_target:fotd_seperatist_planet
+
+	is_triggered_only = yes
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+		random_list = {
+			1 = {
+				modifier = {
+					factor = 2
+					is_lithoid_empire = yes
+				}
+				set_country_flag = mineral_seperatist_deficit
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					is_lithoid_empire = yes
+				}
+				modifier = {
+					factor = 2
+					is_catalytic_empire = yes
+				}
+				set_country_flag = food_seperatist_deficit
+			}
+			1 = {
+				modifier = {
+					factor = 2
+					is_megacorp = yes
+				}
+				set_country_flag = energy_seperatist_deficit
+			}
+			1 = {
+				modifier = {
+					factor = 2
+					is_at_war = no
+				}
+				set_country_flag = alloy_seperatist_deficit
+			}
+			1 = {
+				modifier = {
+					factor = 2
+					is_at_war = yes
+				}
+				set_country_flag = consumer_goods_seperatist_deficit
+			}
+		}
+		set_timed_country_flag = {
+			flag = fotd_requested_aid_recently
+			days = 3600
+		}
+	}
+
+	option = { #Help
+		allow = {
+			support_seperatist_deficit_trigger = yes
+		}
+		name = origin.6020.a
+		support_seperatist_deficit_effect = yes
+		custom_tooltip = origin.6020.a.tt
+		remove_country_flag = fotd_exploited_seperatists
+		set_country_flag = fotd_aided_seperatists
+	}
+
+	option = { #Extort
+		name = origin.6020.b
+		allow = {
+			support_seperatist_deficit_trigger = yes
+		}
+		add_modifier = {
+			modifier = fotd_extorted_seperatists
+			days = 3600
+		}
+		support_seperatist_deficit_effect = yes
+		custom_tooltip = origin.6020.a.tt
+
+		set_timed_country_flag = {
+			flag = angered_seperatists
+			days = 3600
+		}
+		set_country_flag = fotd_exploited_seperatists
+		remove_country_flag = fotd_aided_seperatists
+	}
+	option = { #Ignore
+		name = origin.6020.c
+		event_target:fotd_seperatist_planet = {
+			while = {
+				count = 1
+				random_owned_pop = {
+					kill_pop = yes
+				}
+			}
+		}
+		add_modifier = {
+			modifier = fotd_rationed_living
+			days = 3600
+		}
+	}
+	after = {
+		remove_country_flag = mineral_seperatist_deficit
+		remove_country_flag = food_seperatist_deficit
+		remove_country_flag = energy_seperatist_deficit
+		remove_country_flag = alloy_seperatist_deficit
+		remove_country_flag = consumer_goods_seperatist_deficit
+	}
+}
+
+country_event = { # Seperatists come to your aid
+	id = origin.6025
+	title = origin.6025.name
+	desc = {
+		trigger = {
+			has_country_flag = fotd_aided_seperatists
+		} 
+		text = origin.6025.desc.helped
+	}
+	desc = {
+		trigger = {
+			has_country_flag = fotd_exploited_seperatists
+		} 
+		text = origin.6025.desc.didnthelp
+	}
+
+	picture = GFX_evt_fear_of_the_dark
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+		if = {
+			limit = {
+				has_country_flag = fotd_exploited_seperatists 
+			}
+			random_list = {
+				5 = {
+					modifier = {
+						factor = 0
+						NOT = {
+							any_system = { #If there is no system within 20 jumps of your capital which you have not surveyed this will not fire.
+								is_surveyed = {
+									who = root
+									status = no
+								}
+								distance = {
+									source = root.capital_scope
+									use_bypasses = no
+									max_jumps = 20
+								}
+							}
+						}
+					}
+					set_country_flag = slowed_science_ships
+				}	
+				5 = {
+					modifier = {
+						factor = 0
+						NOT = {
+							any_active_first_contact = {
+								exists = this
+							}
+						}
+					}
+					set_country_flag = slowed_first_contact
+				}
+				2 = {
+					modifier = {
+						factor = 0
+						num_defensive_pacts < 1
+					}
+					set_country_flag = break_defensive_pact
+				}
+				2 = {
+					modifier = {
+						factor = 0
+						num_migration_pacts < 1
+					}
+					set_country_flag = break_migration_pact
+				}
+				2 = { 
+					set_country_flag = support_speratists
+				}
+				5 = { 
+					modifier = {
+						factor = 0
+						NOT = { has_country_flag = breached_shroud }
+					}
+					set_country_flag = stop_communing_with_shroud
+				}
+				2 = {
+					modifier = {
+						factor = 0
+						NOT = { exists = federation }
+					}
+					set_country_flag = leave_federation
+				}
+				2 = {
+					modifier = {
+						factor = 0
+						is_galactic_community_member = no
+					}
+					set_country_flag = have_no_voice
+				}
+			}
+		}
+	}
+
+	option = {
+		name = origin.6025.a
+		trigger = {
+			has_country_flag = fotd_aided_seperatists
+		}
+		seperatist_help_player_deficit_effect = yes
+	}
+	option = {
+		trigger = {
+			has_country_flag = fotd_exploited_seperatists
+		}
+		name = origin.6025.b
+		seperatist_help_player_deficit_effect = yes
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = stop_communing_with_shroud
+				}
+			}
+			fotd_tech_cost = yes
+		}
+		else = {
+			hidden_effect = {
+				fotd_tech_cost = yes
+			}
+			custom_tooltip = origin.6015.a.tt
+		}
+	}
+	option = {
+		name = origin.6025.c
+	}
+
+	after = {
+		remove_country_flag = slowed_science_ships
+		remove_country_flag = slowed_first_contact
+		remove_country_flag = break_defensive_pact
+		remove_country_flag = break_migration_pact
+		remove_country_flag = support_speratists
+		remove_country_flag = stop_communing_with_shroud
+		remove_country_flag = leave_federation
+		remove_country_flag = have_no_voice
+		remove_country_flag = end_violence
+		remove_country_flag = fotd_exploited_seperatists
+		remove_country_flag = fotd_aided_seperatists
+	}
+}
+
+country_event = { # Encounter Alien Life
+	id = origin.6030
+	title = origin.6030.name
+	desc = origin.6030.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_country_flag = encountered_alien_life
+		}
+		any_planet_within_border = {
+			has_planet_flag = fotd_seperatist_planet@root
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+	}
+	immediate = {
+		set_country_flag = encountered_alien_life
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6030.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_alien_shock
+				}
+			}
+			add_modifier = {
+				modifier = fotd_alien_shock
+				days = 1800 
+			}
+		}
+	}
+	option = {
+		name = origin.6030.b
+		set_timed_country_flag = {
+			flag = angered_seperatists
+			days = 3600
+		} 
+	}
+}
+
+country_event = { # Encounter Sapient Alien Life
+	id = origin.6040
+	title = origin.6040.name
+	desc = origin.6040.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_country_flag = encountered_sapient_alien_life
+		}
+		any_planet_within_border = {
+			has_planet_flag = fotd_seperatist_planet@root
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = encountered_alien_life
+		set_country_flag = encountered_sapient_alien_life
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+	option = {
+		name = origin.6040.a
+		add_modifier = {
+			modifier = fotd_secure_contact
+			years = 5
+		}
+		set_country_flag = fotd_secured_contact
+	}
+
+	option = {
+		name = origin.6040.b
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_alien_shock
+				}
+			}
+			add_modifier = {
+				modifier = fotd_alien_shock
+				days = 1800 
+			}
+		}
+	}
+}
+
+first_contact_event = {
+	id = origin.6044
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			owner = {
+				has_origin = origin_fear_of_the_dark
+				NOT = { has_country_flag = finished_sapient_first_contact }
+			}
+			from = {
+				has_origin = origin_fear_of_the_dark
+				NOT = { has_country_flag = finished_sapient_first_contact }
+			}
+		}
+		from = { is_country_type = default }
+		owner = { is_country_type = default }
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				owner = {
+					has_origin = origin_fear_of_the_dark
+					NOT = { has_country_flag = finished_sapient_first_contact }
+				}
+			}
+			owner = {
+				country_event = {
+					id = origin.6045
+					days = 14
+					scopes = { from = from }
+				}
+			}
+		}
+		else = {
+			from = {
+				country_event = {
+					id = origin.6045
+					days = 14
+					scopes = { from = root.owner }
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Finishing First Contact
+	id = origin.6045
+	title = origin.6045.name
+	desc = {
+		trigger = { has_country_flag = fotd_secured_contact }
+		text = origin.6045.desc.secured
+	}
+	desc = {
+		trigger = { NOT = { has_country_flag = fotd_secured_contact } }
+		text = origin.6045.desc.notsecured
+	}
+
+	location = event_target:target_system
+
+	picture = GFX_evt_machine_space_battle
+	show_sound = event_ship_explosion
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_country_flag = finished_sapient_first_contact
+		}
+		any_planet_within_border = {
+			has_planet_flag = fotd_seperatist_planet@root
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+		From = { is_country_type = default }
+		capital_scope = {
+			closest_system = {
+				limit = {
+					exists = space_owner
+					space_owner = {
+						is_same_value = from
+					}
+					any_system_planet = {
+						NOT = { is_capital = yes }
+					}
+				}
+				max_steps = 20
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = encountered_alien_life
+		set_country_flag = finished_sapient_first_contact
+		capital_scope = {
+			closest_system = {
+				limit = {
+					exists = space_owner
+					space_owner = {
+						is_same_value = from
+					}
+					any_system_planet = {
+						NOT = { is_capital = yes }
+					}
+				}
+				max_steps = 20
+				save_event_target_as = target_system
+			}
+		}
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = { #Stop them and Apologize
+		trigger = {
+			has_country_flag = fotd_secured_contact
+		}
+		name = origin.6045.a
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = fotd_apoligized
+			}
+		}
+	}
+	option = { #Explosion happens, reprimand Seperatists
+		name = {
+			text = origin.6045.b.secured
+			trigger = {
+				has_country_flag = fotd_secured_contact
+			}
+		}
+		name = {
+			text = origin.6045.b.notsecured
+			trigger = {
+				NOT = { has_country_flag = fotd_secured_contact }
+			}
+		}
+		custom_tooltip = origin.6045.starbase_destroyed.tt
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = fotd_destroyed_starbase
+			}
+		}
+		hidden_effect = {
+			event_target:target_system = {
+				starbase.fleet = { destroy_fleet = this }
+			}
+			from = {
+				country_event = { id = origin.6046 } #They blew up our starbase!
+			}
+		}
+	}
+	option = { #Use this chance
+		allow = {
+			is_pacifist = no
+		}
+		name = origin.6045.c
+		custom_tooltip = origin.6045.c.tt
+		hidden_effect = {
+			event_target:target_system = {
+				starbase.fleet = { destroy_fleet = this }
+			}
+			set_visited = event_target:target_system
+			declare_war = {
+				target = from
+				attacker_war_goal = wg_fotd_really_bad_contact
+			}
+			create_fleet = {
+				effect = {
+					set_owner = root
+					while = {
+						count = 5
+						create_ship = {
+							name = random
+							design = NAME_fotd_corvette_1
+						}
+					}
+					set_location = event_target:target_system
+					set_cloaking_active = yes
+				}
+			}
+			from = {
+				add_opinion_modifier = {
+					who = root
+					modifier = fotd_destroyed_starbase
+				}
+			}
+			from = {
+				country_event = { id = origin.6047 } #They blew up our starbase and declared war!
+			}
+		}
+	}
+}
+
+country_event = { #They blew up our starbase
+	id = origin.6046
+	title = origin.6046.name
+	desc = origin.6046.desc
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = event_ship_explosion
+
+	is_triggered_only = yes
+
+	show_sound = event_ship_explosion
+	location = event_target.target_system
+
+	option = {
+		name = origin.6046.a
+		ai_chance = {
+			weight = 100
+		}
+	}
+	option = {
+		allow = {
+			is_pacifist = no
+		}
+		name = origin.6046.b
+		declare_war = {
+			target = from
+			attacker_war_goal = wg_fotd_really_bad_contact
+		}
+	}
+}
+
+country_event = { #They blew up our starbase and are coming for us.
+	id = origin.6047
+	title = origin.6047.name
+	desc = origin.6047.desc
+	picture = GFX_evt_fear_of_the_dark
+
+	is_triggered_only = yes
+
+	show_sound = event_red_alert
+
+	option = {
+		name = BATTLESTATIONS
+	}
+}
+
+country_event = { # Joining a Federation
+	id = origin.6050
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		From = {
+			has_origin = origin_fear_of_the_dark
+			NOT = {
+				has_country_flag = joined_federation
+			}
+			any_planet_within_border = {
+				has_planet_flag = fotd_seperatist_planet@from
+				owner = {
+					has_country_flag = fotd_seperatist_country@from
+				}
+			}
+			is_country_type = default
+		}
+	}
+
+	immediate = {
+		from = { country_event = { id = origin.6055 days = 5 } }
+	}
+}
+
+country_event = {
+	id = origin.6055
+	title = origin.6055.name
+	desc = {
+		trigger = {
+			has_modifier = fotd_refusal_to_work
+		}
+		text = origin.6055.desc.protests
+	}
+	desc = {
+		trigger = {
+			NOT = { has_modifier = fotd_refusal_to_work }
+		}
+		text = origin.6055.desc.noprotests
+	}
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = joined_federation
+		hidden_effect = {
+			if = {
+				limit = {
+					has_modifier = fotd_refusal_to_work
+				}
+				remove_modifier = fotd_refusal_to_work
+				add_modifier = {
+					modifier = fotd_refusal_to_work
+					days = 3600
+				}
+				federation = {
+					every_member = {
+						limit = {
+							NOT = {
+								is_same_value = root
+							}
+						}
+						add_opinion_modifier = {
+							who = root
+							modifier = fotd_antagonized
+						}
+					}
+
+				}
+				set_country_flag = fotd_insulted_federation
+			}
+		}
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		trigger = {
+			NOT = {
+				has_modifier = fotd_refusal_to_work
+			}
+		}
+		name = origin.6055.a
+		add_modifier = {
+			modifier = fotd_refusal_to_work
+			days = 3600 
+		}
+	}
+
+	option = {
+		trigger = {
+			has_country_flag = fotd_insulted_federation
+		}
+		name = origin.6055.b
+		tooltip = {
+			if = {
+				limit = {
+					has_modifier = fotd_refusal_to_work
+				}
+				federation = {
+					every_member = {
+						limit = {
+							NOT = {
+								is_same_value = root
+							}
+						}
+						add_opinion_modifier = {
+							who = root
+							modifier = fotd_antagonized
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Encounter Leviathan
+	id = origin.6060
+	title = origin.6060.name
+	desc = origin.6060.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_country_flag = encountered_leviathan_life
+		}
+		any_planet_within_border = {
+			has_planet_flag = fotd_seperatist_planet@root
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = encountered_alien_life
+		set_country_flag = encountered_leviathan_life
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6060.a
+		custom_tooltip = origin.6060.a.tt
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_alien_terrified
+				}
+			}
+			add_modifier = {
+				modifier = fotd_alien_terrified
+				days = 1800 
+			}
+		}
+		hidden_effect = {
+			home_planet = {
+				random_owned_pop = {
+					limit = {
+						species = {
+							is_same_value = root.species
+						}
+					}
+					kill_pop = yes
+				}
+				random_owned_pop = {
+					limit = {
+						species = {
+							is_same_value = root.species
+						}
+					}
+					kill_pop = yes
+				}
+			}
+			event_target:fotd_seperatist_planet@root = {
+				while = {
+					count = 2
+					create_pop = {
+						species = root.species
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = origin.6060.b
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_alien_terrified
+				}
+			}
+			add_modifier = {
+				modifier = fotd_alien_terrified
+				days = 1800 
+			}
+		}
+		home_planet = {
+			add_modifier = {
+				modifier = fotd_forced_to_stay
+				days = 1800
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6064
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_origin = origin_fear_of_the_dark
+		NOT = {
+			has_country_flag = became_subject
+		}
+	}
+
+	immediate = {
+		country_event = { id = origin.6065 days = 5 }
+	}
+}
+
+country_event = { # Becoming a subject
+	id = origin.6065
+	title = origin.6065.name
+	desc = origin.6065.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_country_flag = became_subject
+		}
+		any_planet_within_border = {
+			has_planet_flag = fotd_seperatist_planet@root
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = became_subject
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6065.a
+		add_modifier = {
+			modifier = fotd_disunity
+			days = 1800
+		}
+	}
+}
+
+country_event = { # Got a subject
+	id = origin.6070
+
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		From = {
+			NOR = {
+				has_country_flag = got_a_subject
+				is_same_species = root
+			}
+			any_planet_within_border = {
+				has_planet_flag = fotd_seperatist_planet@prev
+				owner = {
+					has_country_flag = fotd_seperatist_country@prevprev
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from = { country_event = { id = origin.6075 days = 5 } }
+	}
+}
+
+country_event = {
+	id = origin.6075
+	title = origin.6075.name
+	desc = origin.6075.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = got_a_subject
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6075.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_refusal_to_work
+				}
+			}
+			add_modifier = {
+				modifier = fotd_refusal_to_work
+				days = 3600 
+			}
+		}
+	}
+}
+
+country_event = { # Entered a War
+	id = origin.6080
+
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		NOR = {
+			has_country_flag = had_war_declared_on
+			from = {
+				OR = {
+					using_war_goal = {
+						type = wg_fotd_really_bad_contact
+						owner = attacker
+					}
+					using_war_goal = {
+						type = wg_fotd_really_bad_contact
+						owner = defender
+					}
+				}
+			}
+		}
+		any_planet_within_border = {
+			has_planet_flag = fotd_seperatist_planet@root
+			owner = {
+				has_country_flag = fotd_seperatist_country@root
+			}
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				from = { is_war_participant = { who = root side = attackers } }
+				NOT = { has_country_flag = declared_war }
+			}
+			country_event = { id = origin.6085 }
+		}
+		else_if = {
+			limit = { 
+				from = {
+					is_war_participant = { who = root side = defenders }
+					is_total_war = no
+				}
+				NOT = { 
+					has_country_flag = had_war_declared_on
+				}
+			}
+			country_event = { id = origin.6090 }
+		}
+		else_if = {
+			limit = { 
+				from = {
+					is_war_participant = { who = root side = defenders }
+					is_total_war = yes
+				}
+				NOT = { 
+					has_country_flag = had_total_war_declared_on
+				}
+			}
+			country_event = { id = origin.6220 }
+		}
+	}
+}
+
+country_event = {
+	id = origin.6085
+	title = origin.6085.name
+	desc = origin.6085.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = declared_war
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6085.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_assited_shipyards
+				}
+			}
+			add_modifier = {
+				modifier = fotd_assited_shipyards
+				days = 1800 
+			}
+		}
+	}
+	option = {
+		name = origin.6085.b
+		add_modifier = {
+			modifier = fotd_assisted_fleet
+			days = 1800 
+		}
+	}
+	option = {
+		name = origin.6085.c
+		fromfrom = {
+			random_defender = {
+				limit = {
+					is_war_leader = yes
+				}
+				save_event_target_as = defending_country
+			}
+		}
+		add_intel = {
+			who = event_target:defending_country
+			amount = 30
+		}
+	}
+	option = {
+		name = origin.6085.d
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}	
+	}
+}
+
+country_event = {
+	id = origin.6090
+	title = origin.6090.name
+	desc = origin.6090.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = had_war_declared_on
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = BATTLESTATIONS
+		custom_tooltip = five_percent_xenophobe_tt
+		hidden_effect = {
+			while = {
+				count = value:five_percent_species
+				random_owned_pop = {
+					limit = {
+						NOT = {
+							has_ethic = ethic_xenophobe
+						}
+					}
+					pop_change_ethic = ethic_xenophobe
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Cybernetic Tradition Pick
+	id = origin.6095
+	title = origin.6095.name
+	desc = origin.6095.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6095.a
+	}
+}
+
+country_event = { # Modular Cyberetics
+	id = origin.6096
+	title = origin.6096.name
+	desc = origin.6096.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_country_flag = had_modular_cybernetics
+		}
+	}
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+		set_country_flag = had_modular_cybernetics
+	}
+
+	option = {
+		name = origin.6096.a
+		add_modifier = {
+			modifier = fotd_terrified_outraged
+			days = 3600
+		}
+	}
+}
+
+country_event = { # Syntheic Ascenion: Starts Tree
+	id = origin.6099
+	title = origin.6099.name
+	desc = origin.6099.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6099.a
+	}
+}
+
+country_event = { # Syntheic Ascenion: Turns into robot
+	id = origin.6100
+	title = origin.6100.name
+	desc = origin.6100.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6100.a
+		add_modifier = {
+			modifier = fotd_terrified_outraged
+			days = 3600
+		}
+	}
+}
+
+country_event = { # Psionic Ascenion: Start Tree
+	id = origin.6105
+	title = origin.6105.name
+	desc = origin.6105.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6105.a
+	}
+}
+
+country_event = { # Psionic Ascenion: Finish Tree
+	id = origin.6110
+	title = origin.6110.name
+	desc = origin.6110.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6110.a
+		add_modifier = {
+			modifier = fotd_terrified_outraged
+			days = 3600
+		}
+	}
+}
+
+country_event = { # Genetic Ascenion: Start Tree
+	id = origin.6115
+	title = origin.6115.name
+	desc = origin.6115.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6115.a
+	}
+}
+
+country_event = { # Genetic Ascenion: Finish
+	id = origin.6120
+	title = origin.6120.name
+	desc = origin.6120.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6120.a
+		add_modifier = {
+			modifier = fotd_terrified_outraged
+			days = 3600
+		}
+	}
+}
+
+country_event = { # Prethoryn Arrival
+	id = origin.6125
+	title = origin.6125.name
+	desc = origin.6125.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = event_red_alert
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6125.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_unified_purpose
+				}
+			}
+			add_modifier = {
+				modifier = fotd_unified_purpose
+				days = 1800 
+			}
+		}
+		if = {
+			limit = {
+				event_target:fotd_seperatist_planet.owner = {
+					any_owned_fleet = {
+						is_ship_class = shipclass_military
+					}
+				}
+			}
+			event_target:fotd_seperatist_planet.owner = {
+				random_owned_fleet = {
+					limit = {
+						is_ship_class = shipclass_military
+					}
+					give_fleet = { controller = root days = 99999 }
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Unbidden Arrival
+	id = origin.6130
+	title = origin.6125.name
+	desc = origin.6125.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = event_red_alert
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6125.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_unified_purpose
+				}
+			}
+			add_modifier = {
+				modifier = fotd_unified_purpose
+				days = 1800 
+			}
+		}
+		if = {
+			limit = {
+				event_target:fotd_seperatist_planet.owner = {
+					any_owned_fleet = {
+						is_ship_class = shipclass_military
+					}
+				}
+			}
+			event_target:fotd_seperatist_planet.owner = {
+				random_owned_fleet = {
+					limit = {
+						is_ship_class = shipclass_military
+					}
+					give_fleet = { controller = root days = 99999 }
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Contigency is here
+	id = origin.6135
+	title = origin.6125.name
+	desc = origin.6125.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = event_red_alert
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6125.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_unified_purpose
+				}
+			}
+			add_modifier = {
+				modifier = fotd_unified_purpose
+				days = 1800 
+			}
+		}
+		if = {
+			limit = {
+				event_target:fotd_seperatist_planet.owner = {
+					any_owned_fleet = {
+						is_ship_class = shipclass_military
+					}
+				}
+			}
+			event_target:fotd_seperatist_planet.owner = {
+				random_owned_fleet = {
+					limit = {
+						is_ship_class = shipclass_military
+					}
+					give_fleet = { controller = root days = 99999 }
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6136
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			owner = {
+				random_owned_fleet = {
+					limit = {
+						is_leased = yes
+					}
+					end_fleet_contract = {
+						initiator = root
+						reason = cancelled
+					}
+				}
+			}
+		}
+	}
+}
+event = { #fotd Midgame
+	id = origin.6140
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_playable_country = {
+			any_planet_within_border = {
+				has_planet_flag = fotd_seperatist_planet@prev
+				owner = {
+					has_country_flag = fotd_seperatist_country@prevprev
+				}
+			}
+		}
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				any_planet_within_border = {
+					has_planet_flag = fotd_seperatist_planet@prev
+					owner = {
+						has_country_flag = fotd_seperatist_country@prevprev
+					}
+				}
+			}
+			country_event = { id = origin.6145 days = 25 }
+		}
+	}
+}
+
+country_event = { # Mid game special project
+	id = origin.6145
+	title = origin.6145.name
+	desc = origin.6145.desc
+
+	picture = GFX_evt_egg_cracked
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				has_planet_flag = fotd_seperatist_planet@root
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = divider_flag
+					}
+					save_event_target_as = fotd_divider
+				}
+			}
+		}
+	}
+
+	option = {
+		name = origin.6145.a
+		enable_special_project = {
+			name = "FOTD_CONFIRM_FINDINGS"
+			location = event_target:fotd_divider
+		}
+	}
+}
+
+country_event = { # We have found them
+	id = origin.6150
+	title = origin.6150.name
+	desc = origin.6150.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+	location = event_target:hunter_system
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+		hidden_effect = {
+			owner = {
+				random_system_within_border = {
+					spawn_system = {
+						min_distance = 5
+						max_distance = 20
+						max_jumps = 1
+						initializer = "hunter_of_the_dark_system"
+					}
+					add_extra_hyperlane_to_spawned_system_effect = yes
+				}
+				last_created_system = {
+					set_star_flag = hunter_system@root
+					random_system_planet = {
+						limit = {
+							has_planet_flag = fotd_hunter
+						}
+						set_planet_flag = fotd_hunter@root
+						create_species = {
+							name = "NAME_fotd_Hunter_species"
+							plural = "NAME_fotd_Hunter_plural"
+							class = random_non_machine
+							traits = random
+							homeworld = this
+						}
+						create_country = {
+							name = "NAME_fotd_Hunters"
+							authority = random
+							civics = {
+								civic = civic_atmospheric_pollution
+								civic = civic_increasing_urbanization
+							}
+							species = last_created_species
+							ethos = {
+								ethic = ethic_militarist
+								ethic = ethic_fanatic_xenophobe
+							}
+
+							flag = random
+							origin = origin_default_pre_ftl
+							type = primitive
+							effect = {
+								set_country_flag = early_space_age
+								set_pre_ftl_age = early_space_age
+								set_country_flag = fotd_hunter@root
+								set_country_flag = tech_frozen
+								set_country_flag = fotd_hunter
+							}
+						}
+						set_owner = last_created_country
+						set_capital = yes
+
+						remove_building = building_colony_shelter
+						add_building = building_primitive_farm
+						add_building = building_primitive_factory
+						add_building = building_primitive_farm
+						add_building = building_primitive_power_plant
+						add_building = building_primitive_capital
+						add_building = building_urban_dwellings
+						remove_building = building_colony_shelter
+						while = {
+							count = 16
+							create_pop = {
+								species = last_created_species
+							}
+						}
+					}
+					save_event_target_as = hunter_system
+				}
+			}
+		}
+	}
+
+	option = {
+		name = origin.6150.a
+		begin_event_chain = {
+			event_chain = "fotd_chain"
+			target = this
+		}
+		create_point_of_interest = {
+			id = fotd_hunter_poi
+			name = "fotd_hunter_poi"
+			desc = fotd_hunter_desc
+			event_chain = fotd_chain
+			location = event_target:hunter_system
+		}
+	}
+}
+
+ship_event = { # Entering hunter system
+	id = origin.6155
+	title = origin.6155.name
+	desc = origin.6155.desc
+
+	picture = GFX_evt_ruined_system
+	show_sound = event_ghost_town
+
+	is_triggered_only = yes
+
+	location = solar_system
+
+	trigger = {
+		solar_system = {
+			any_system_planet = {
+				has_planet_flag = fotd_hunter@root.owner
+			}
+		}
+	}
+
+	option = {
+		name = origin.6155.a
+		hidden_effect = {
+			owner = { remove_point_of_interest = fotd_hunter_poi }
+		}
+	}
+}
+
+ship_event = { # Scanning hunter planet
+	id = origin.6160
+	title = origin.6160.name
+	desc = origin.6160.desc
+
+	picture = GFX_evt_fleet_from_surface
+	show_sound = event_yellow_alert
+
+	location = from
+
+	trigger = {
+		from = {
+			has_planet_flag = fotd_hunter@root.owner
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		solar_system = {
+		 	random_system_planet = {
+		 		limit = {
+		 			is_moon = yes
+		 		}
+		 		set_planet_flag = fotd_moon@root.owner
+		 	}
+		}
+	}
+	option = {# Everything needs to die
+		name = origin.6160.a
+		custom_tooltip = origin.6160.a.tooltip
+		owner = {
+			add_modifier = { modifier = fotd_settled_differences }
+		}
+		hidden_effect = {
+			from = {
+				every_owned_pop = {
+					kill_pop = yes
+				}
+				change_pc = pc_nuked
+				destroy_colony = yes
+			}
+			owner = {
+				country_event = { id = origin.6165 days = 3 }
+				country_event = { id = origin.6170 days = 13 }
+			}
+		}
+	}
+	option = {
+		name = origin.6160.b
+		custom_tooltip = origin.6160.c.tooltip
+		hidden_effect = {
+			owner = {
+				country_event = { id = origin.6170 days = 13 }
+			}
+			from.owner = {
+				set_country_flag = fevorian_enlighten@root
+				country_event = { id = origin.6270 days = 360 }
+			}
+		}
+	}
+}
+
+#Turns you into a purifier
+country_event = {
+	id = origin.6165
+	title = origin.6165.name
+	desc = origin.6165.desc
+
+	show_sound = event_screams
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	location = fromfrom
+
+	option = {
+		name = origin.6165.a
+		icon = {
+			icon = GFX_fanatic_purifier
+			text = WILL_TURN_TO_PURIFIER
+		}
+
+		if = {
+			limit = {
+				is_megacorp = yes
+			}
+			change_government = {
+				cooldown = no
+				authority = auth_oligarchic
+				remove_invalid_civics = yes
+			}
+		}
+		clear_ethos = yes
+		country_add_ethic = ethic_fanatic_xenophobe
+		country_add_ethic = ethic_militarist
+		force_add_civic = civic_fanatic_purifiers
+		set_country_flag = dark_forest_achievement
+		
+		add_resource = { unity = 5000 }
+		event_target:fotd_seperatist_planet@root = {
+			owner = {
+				every_owned_fleet = {
+					set_owner = root
+				}
+			}
+			set_owner = root
+		}
+		hidden_effect = {
+			every_playable_country = {
+				limit = {
+					exists = overlord
+					overlord = {
+						is_same_value = root
+					}
+					NOT = {
+						species = {
+							is_same_species = root.species
+						}
+					}
+				}
+				release_subject = yes
+			}
+			every_playable_country = {
+				limit = {
+					has_secret_fealty_with = root
+					NOT = {
+						species = {
+							is_same_species = root.species
+						}
+					}
+				}
+				remove_secret_fealty = root
+			}
+			if = {
+				limit = {
+					exists = overlord
+					NOT = {
+						is_same_species = root.species
+					}
+				}
+				release_subject = yes
+			}
+			every_envoy = {
+				limit = {
+					has_envoy_task = {
+						task = improve_relations
+					}
+				}
+				unassign_leader = this
+			}
+			every_playable_country = {
+				limit = {
+					NOT = {
+						species = {
+							is_same_species = root.species
+						}
+					}
+				}
+				end_all_treaties_with = root
+			}
+			remove_from_galactic_community = yes
+		}
+	}
+
+	option = {
+		name = origin.6165.b
+		add_resource = { unity = 5000 }
+	}
+}
+
+country_event = {
+	id = origin.6170
+	title = origin.6170.name
+	desc = origin.6170.desc
+
+	show_sound = event_red_alert
+	picture = GFX_evt_crisis_declared
+
+	location = fromfrom
+
+	is_triggered_only = yes
+	trigger = {
+		home_planet.owner = {
+			is_same_value = root
+		}
+	}
+
+	option = {
+		name = origin.6170.a
+		start_situation = {
+			type = situation_last_gift
+			target = root.home_planet
+			effect = {
+				set_situation_approach = approach_stop_the_bullet
+			}
+		}
+	}
+}
+
+situation_event = {
+	id = origin.6175
+	title = origin.6175.name
+	desc = origin.6175.desc
+
+	show_sound = event_screams
+	picture = GFX_evt_exploding_planet
+
+	is_triggered_only = yes
+	situation = this
+
+	immediate = {
+		target = {
+			every_owned_pop = { kill_pop = yes }
+			destroy_colony = yes
+			change_pc = pc_shattered
+			clear_deposits = yes
+			add_deposit = d_alloys_10
+		}
+		owner = {
+			random_planet_within_border = {
+				limit = {
+					has_planet_flag = fotd_seperatist_planet@root.owner
+					owner = {
+						has_country_flag = fotd_seperatist_country@root.owner
+					}
+				}
+				set_owner = root
+				set_capital = yes
+			}
+			end_event_chain = fotd_chain
+		}
+		event_target:fotd_seperatist_planet@owner = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+	option = {
+		name = DEVASTATING
+	}
+}
+
+situation_event = {
+	id = origin.6180
+	title = origin.6180.name
+	desc = origin.6180.desc
+
+	show_sound = event_celebration
+	picture = GFX_evt_crisis_defeated
+	location = event_target:fevorian_moon
+	is_triggered_only = yes
+	situation = this
+	trigger = {
+		owner.home_planet.owner = {
+			is_same_value = root.owner
+		}
+		has_situation_flag = deflecting_fields
+		has_situation_flag = reversed_thrusters
+		has_situation_flag = counter_shot
+		has_situation_flag = controlled_shattering
+	}
+
+	option = {
+		name = origin.6180.a
+		owner = {
+			end_event_chain = fotd_chain
+		}
+		random_system = {
+			limit = {
+				has_star_flag = hunter_system@root.owner
+			}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = fotd_moon@root.owner
+				}
+				add_modifier = { modifier = ruined_mass_driver }
+				add_deposit = d_engineering_10
+				save_event_target_as = fevorian_moon
+			}
+		}
+	}
+
+	after = {
+		destroy_situation = this
+	}
+}
+
+situation_event = {
+	id = origin.6185
+	title = origin.6185.name
+	desc = origin.6185.desc
+
+	show_sound = event_red_alert
+	picture = GFX_evt_ongoing_disaster
+
+	is_triggered_only = yes
+	situation = this
+
+	immediate = {
+		target = {
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = divider_flag
+					}
+					save_event_target_as = fotd_divider
+				}
+				random_system_planet = {
+					limit = {
+						is_asteroid = yes
+					}
+					save_event_target_as = fotd_asteroid
+				}
+			}
+		}
+	}
+
+	option = {
+		name = origin.6185.a
+		enable_special_project = {
+			name = "FOTD_DEFLECTING_FIELDS"
+			location = owner.home_planet
+		}
+		enable_special_project = {
+			name = "FOTD_REVERSED_THRUSTERS"
+			location = event_target:fotd_divider
+		}
+		enable_special_project = {
+			name = "FOTD_COUNTER_SHOT"
+			location = event_target:fotd_asteroid
+		}
+		enable_special_project = {
+			name = "FOTD_CONTROLLED_SHATTERING"
+			location = owner.home_planet
+		}
+	}
+}
+
+country_event = {
+	id = origin.6186
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_SLOWED_LAST_GIFT
+			localization = MESSAGE_DEFLECTING_FIELDS
+			days = 30
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = situation_last_gift
+			}
+			set_situation_flag = deflecting_fields
+		}
+	}
+}
+
+country_event = {
+	id = origin.6187
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_SLOWED_LAST_GIFT
+			localization = MESSAGE_REVERSED_THRUSTERS
+			days = 30
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = situation_last_gift
+			}
+			set_situation_flag = reversed_thrusters
+		}
+	}
+}
+
+country_event = {
+	id = origin.6188
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_SLOWED_LAST_GIFT
+			localization = MESSAGE_COUNTER_SHOT
+			days = 30
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = situation_last_gift
+			}
+			set_situation_flag = counter_shot
+		}
+		event_target:fotd_asteroid = {
+			remove_planet = yes
+		}
+	}
+}
+
+country_event = {
+	id = origin.6189
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_SLOWED_LAST_GIFT
+			localization = MESSAGE_CONTROLLED_SHATTERING
+			days = 30
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = situation_last_gift
+			}
+			set_situation_flag = controlled_shattering
+		}
+	}
+}
+
+country_event = { # Signed Migration Pact
+	id = origin.6200
+
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		OR = {
+			AND = {
+				NOT = { has_country_flag = signed_migration_pact }
+				any_planet_within_border = {
+					has_planet_flag = fotd_seperatist_planet@root
+					owner = {
+						has_country_flag = fotd_seperatist_country@root
+					}
+				}
+			}
+			AND = {
+				from = {
+					NOT = { has_country_flag = signed_migration_pact }
+					any_planet_within_border = {
+						has_planet_flag = fotd_seperatist_planet@root.from
+						owner = {
+							has_country_flag = fotd_seperatist_country@root.from
+						}
+					}
+				}
+			}
+		}
+	}
+	immediate = {
+		from = {
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = signed_migration_pact
+					}
+					any_planet_within_border = {
+						has_planet_flag = fotd_seperatist_planet@root.from
+						owner = {
+							has_country_flag = fotd_seperatist_country@root.from
+						}
+					}
+				}
+				country_event = { 
+					id = origin.6205
+					days = 3
+					scopes = { from = root }
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = signed_migration_pact
+				}
+				any_planet_within_border = {
+					has_planet_flag = fotd_seperatist_planet@root
+					owner = {
+						has_country_flag = fotd_seperatist_country@root
+					}
+				}
+			}
+			country_event = { 
+				id = origin.6205
+				days = 3
+				scopes = { from = from }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6205
+	title = origin.6205.name
+	desc = origin.6205.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = signed_migration_pact
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6205.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_refusal_to_work
+				}
+			}
+			add_modifier = {
+				modifier = fotd_refusal_to_work
+				days = 3600 
+			}
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = fotd_insulted_migration
+			}
+		}
+	}
+	option = {
+		name = origin.6205.b
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = fotd_insulted_migration_no_apology
+			}
+		}
+	}
+}
+
+#country_event = { # Gray Tempest
+#	id = origin.6210
+#	title = origin.6210.name
+#	desc = origin.6210.desc
+#
+#	picture = GFX_evt_fear_of_the_dark
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = origin.6210.a
+#		if = {
+#			limit = {
+#				NOT = {
+#					has_modifier = fotd_unified_stance
+#				}
+#			}
+#			add_modifier = {
+#				modifier = fotd_unified_stance
+#				days = 1800 
+#			}
+#		}
+#	}
+#}
+#
+#country_event = { # Khan
+#	id = origin.6215
+#	title = origin.6215.name
+#	desc = origin.6215.desc
+#
+#	picture = GFX_evt_fear_of_the_dark
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = origin.6215.a
+#		if = {
+#			limit = {
+#				NOT = {
+#					has_modifier = fotd_unified_stance
+#				}
+#			}
+#			add_modifier = {
+#				modifier = fotd_unified_stance
+#				days = 1800 
+#			}
+#		}
+#	}
+#}
+
+country_event = { # Total War
+	id = origin.6220
+	title = origin.6220.name
+	desc = origin.6220.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = event_red_alert
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = had_total_war_declared_on
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6220.a
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = fotd_unified_stance
+				}
+			}
+			add_modifier = {
+				modifier = fotd_unified_stance
+				days = 1800 
+			}
+		}
+	}
+	option = {
+		name = origin.6220.b
+		add_modifier = {
+			modifier = fotd_unified_fleet
+			days = 1800 
+		}
+	}
+	option = {
+		name = origin.6220.c
+		fromfrom = {
+			random_attacker = {
+				limit = {
+					is_war_leader = yes
+				}
+				save_event_target_as = attacking_country
+			}
+		}
+		add_intel = {
+			who = event_target:attacking_country
+			amount = 40
+		}
+	}
+	option = {
+		name = origin.6220.d
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier3unityreward
+			min = @tier3unitymin
+			max = @tier3unitymax
+		}	
+	}
+}
+
+#Terraforming Situation Gatekeeper
+situation_event = {
+	id = origin.6225
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		target.space_owner = {
+			has_origin = origin_fear_of_the_dark
+			home_planet = {
+				is_same_value = root.owner.home_planet
+			}
+		}
+	}
+
+	immediate = {
+		switch = {
+			trigger = current_stage
+			stage_2 = {
+				target.space_owner = {
+					country_event = { 
+						id = origin.6230
+					}
+				}
+			}
+			stage_3 = {
+				target.space_owner = {
+					country_event = { 
+						id = origin.6235
+					}
+				}
+			}
+			stage_4 = {
+				target.space_owner = {
+					country_event = { 
+						id = origin.6240
+					}
+				}
+			}
+		}
+	}
+}
+#Terraforming into prefered type but not perfect
+country_event = {
+	id = origin.6230
+	title = origin.6230.name
+	desc = origin.6230.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = origin.6230.a
+		from.target = {
+			switch = {
+				trigger = is_planet_class
+				pc_ocean = {
+					if = {
+						limit = {
+							owner.species = {
+								has_trait = trait_pc_desert_preference
+							}
+						}
+						change_pc = pc_arid
+					}
+					else = {
+						change_pc = pc_desert
+					}
+				}
+				pc_tropical = {
+					if = {
+						limit = {
+							owner.species = {
+								has_trait = trait_pc_arctic_preference
+							}
+						}
+						change_pc = pc_alpine
+					}
+					else = {
+						change_pc = pc_arctic
+					}
+				}
+				pc_desert = {
+					if = {
+						limit = {
+							owner.species = {
+								has_trait = trait_pc_ocean_preference
+							}
+						}
+						change_pc = pc_tropical
+					}
+					else = {
+						change_pc = pc_ocean
+					}
+				}
+			}
+		}
+	}
+}
+#Terraforming into same as homeworld
+country_event = {
+	id = origin.6235
+	title = origin.6235.name
+	desc = origin.6235.desc
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = event_mystic_reveal
+
+	is_triggered_only = yes
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+	option = {
+		name = origin.6235.a
+		from.target = {
+			change_pc = from.owner.species
+		}
+	}
+}
+#Reaching Gaia
+country_event = {
+	id = origin.6240
+	title = origin.6240.name
+	desc = {
+		trigger = {
+			home_planet = {
+				is_starting_planet_type = no
+			}
+		}
+		text = origin.6240.desc.changedhome
+	}
+	desc = {
+		trigger = {
+			home_planet = {
+				is_starting_planet_type = yes
+			}
+		}
+		text = origin.6240.desc.notchangedhome
+	}
+	
+
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+
+	is_triggered_only = yes
+
+	trigger = {
+		from.owner = {#Aquatic pops prefer Ocean worlds to Gaia
+			NOT = { has_trait = trait_aquatic }
+		}
+	}
+
+	immediate = {
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = {
+			trigger = {
+				home_planet = {
+					is_starting_planet_type = no
+				}
+			}
+			text = origin.6240.a.changedhome
+		}
+		name = {
+			trigger = {
+				home_planet = {
+					is_starting_planet_type = yes
+				}
+			}
+			text = origin.6240.a.notchangedhome
+		}
+		from.target = {
+			change_pc = pc_gaia
+		}
+	}
+}
+# Seperatist Yearly Update
+event = {
+	id = origin.6245
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_playable_country = {
+			has_origin = origin_fear_of_the_dark
+		}
+		years_passed > 10
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				has_origin = origin_fear_of_the_dark
+				any_pre_ftl_within_border = {
+					has_country_flag = fotd_seperatist_country@prev
+				}
+			}
+			random_pre_ftl_within_border = {
+				limit = {
+					has_country_flag = fotd_seperatist_country@prev
+				}
+				country_event = { id = origin.6250 random = 200 scopes = { from = prev } }
+				country_event = { id = origin.6253 scopes = { from = prev } }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6250
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_at_war = no
+		}
+		capital_scope.solar_system = {
+			NOT = {
+				any_fleet_in_system = {
+					owner = {
+						is_hostile_to = from
+					}
+				}
+			}
+		}
+		NOT = {
+			any_owned_fleet = {
+				is_leased = yes
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_owned_fleet = {
+					is_ship_class = shipclass_military
+				}
+			}
+			random_owned_fleet = {
+				limit = {
+					is_ship_class = shipclass_military
+				}
+				delete_fleet = this
+			}
+		}
+		if = {
+			limit = {
+				from = { NOT = { has_technology = tech_cloaking_2 } }
+			}
+			from = {
+				create_fleet = {
+					name = {
+						key = NAME_fotd_seperatists_fleet
+						variable_string = "[root.capital_scope.GetName]"
+					}
+					effect = {
+						set_owner = root
+						while = {
+							count = value:fotd_seperatists_fleet_corvette_1
+							create_ship = {
+								name = ""
+								design = NAME_fotd_corvette_1
+							}
+						}
+						while = {
+							count = value:fotd_seperatists_fleet_frigate_1
+							create_ship = {
+								name = ""
+								design = NAME_fotd_frigate_1
+							}
+						}
+						set_location = {
+							target = root.capital_scope
+							distance = 15
+							angle = 300
+						}
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				from = { NOT = { has_technology = tech_cloaking_3 } }
+			}
+			create_fleet = {
+				name = {
+					key = NAME_fotd_seperatists_fleet
+					variable_string = "[root.capital_scope.GetName]"
+				}
+				effect = {
+					set_owner = root
+					while = {
+						count = value:fotd_seperatists_fleet_corvette_2
+						create_ship = {
+							name = ""
+							design = NAME_fotd_corvette_2
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_frigate_2
+						create_ship = {
+							name = ""
+							design = NAME_fotd_frigate_2
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_destroyer_2
+						create_ship = {
+							name = ""
+							design = NAME_fotd_destroyer_2
+						}
+					}
+					set_location = {
+						target = root.capital_scope
+						distance = 15
+						angle = 300
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				from = { 
+					NOR = { 
+						has_technology = tech_cloaking_psi
+						has_technology = tech_cloaking_dark_matter
+					}
+				}
+			}
+			create_fleet = {
+				name = {
+					key = NAME_fotd_seperatists_fleet
+					variable_string = "[root.capital_scope.GetName]"
+				}
+				effect = {
+					set_owner = root
+					while = {
+						count = value:fotd_seperatists_fleet_corvette_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_corvette_3
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_frigate_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_frigate_3
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_destroyer_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_destroyer_3
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_cruiser_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_cruiser_3
+						}
+					}
+					set_location = {
+						target = root.capital_scope
+						distance = 15
+						angle = 300
+					}
+				}
+			}
+		}
+		else = {
+			create_fleet = {
+				name = {
+					key = NAME_fotd_seperatists_fleet
+					variable_string = "[root.capital_scope.GetName]"
+				}
+				effect = {
+					set_owner = root
+					while = {
+						count = value:fotd_seperatists_fleet_corvette_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_corvette_4
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_frigate_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_frigate_4
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_destroyer_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_destroyer_4
+						}
+					}
+					while = {
+						count = value:fotd_seperatists_fleet_cruiser_3
+						create_ship = {
+							name = ""
+							design = NAME_fotd_cruiser_4
+						}
+					}
+					set_location = {
+						target = root.capital_scope
+						distance = 15
+						angle = 300
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_owned_leader = {
+					has_leader_flag = fotd_patrol_admiral
+				}
+			}
+			random_owned_leader = {
+				limit = {
+					has_leader_flag = fotd_patrol_admiral
+				}
+				save_event_target_as = fotd_patrol_admiral_target
+			}
+		}
+		else = {
+			create_leader = {
+				class = admiral
+				species = root.species
+				skill = 5
+				traits = {
+					trait = random_trait
+				}
+			}
+			last_created_leader = {
+				add_trait = leader_trait_fotd_admiral
+				save_event_target_as = fotd_patrol_admiral_target
+				set_leader_flag = fotd_patrol_admiral
+			}
+		}
+		last_created_fleet = {
+			set_owner = root
+			set_aggro_range = 1000
+			set_leader = event_target:fotd_patrol_admiral_target
+			fleet_event = {
+				id = origin.6251
+				days = 100
+			}
+			queue_actions = {
+				find_closest_planet = {
+					trigger = {
+						id = fotd.patrol.1@root
+						has_planet_flag = divider_flag
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 100
+						}
+					}
+				}
+				find_closest_planet  = {
+					trigger = {
+						id = fotd.patrol.2@root
+						is_star = yes
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 80
+						}
+					}
+				}
+				find_closest_planet  = {
+					trigger = {
+						id = fotd.patrol.3@root
+						has_planet_flag = haven_flag
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 10000
+						}
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				from = {
+					NOT = { has_country_flag = had_seperatist_fleet_toast }
+				}
+			}
+			from = {
+				country_event = { id = origin.6260 days = 5 }
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = origin.6251
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		set_cloaking_active = yes
+		fleet_event = {
+			id = origin.6252
+			days = 100
+		}
+	}
+}
+
+fleet_event = {
+	id = origin.6252
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		set_cloaking_active = no
+		fleet_event = {
+			id = origin.6251
+			days = 100
+		}
+	}
+}
+country_event = {
+	id = origin.6253
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			export_trigger_value_to_variable = {
+				trigger = num_pops
+				variable = seperatist_pops
+			}
+			change_variable = { #Makes it so that they are at least always 5 pops behind the player
+				which = seperatist_pops
+				value = 5
+			}
+		}
+		home_planet = {
+			export_trigger_value_to_variable = {
+				trigger = num_pops
+				variable = fotd_pops
+			}
+		}
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = capital_scope.seperatist_pops
+					value < home_planet.fotd_pops
+				}
+			}
+			capital_scope = {
+				create_pop = {
+					species = root.species
+				}
+				if = {
+					limit = {
+						NOT = { is_variable_set = added_pops }
+					}
+					set_variable = {
+						which = added_pops
+						value = 1
+					}
+				}
+				else = {
+					change_variable = {
+						which = added_pops
+						value = 1
+					}
+				}
+				if = { #every 3 pops we try to add a building or district
+					limit = {
+						check_variable = {
+							which = added_pops
+							value >= 3
+						}
+					}
+					if = {
+						limit = {
+							free_building_slots > 0
+						}
+						random_list = {
+							1 = {
+								modifier = {
+									factor = 0
+									has_building = building_foundry_1
+								}
+								add_building = building_foundry_1
+							}
+							1 = {
+								modifier = {
+									factor = 0
+									has_building = building_factory_1
+								}
+								add_building = building_factory_1
+							}
+							1 = {
+								modifier = {
+									factor = 0
+									has_building = building_clinic
+								}
+								add_building = building_foundry_1
+							}
+							5 = {
+								modifier = {
+									factor = 0
+									has_building = building_refinery
+								}
+								add_building = building_refinery
+							}
+							1 = {
+								add_building = building_research_lab_1
+							}
+						}
+					}
+					else_if = {
+						limit = {
+							free_district_slots > 0
+						}
+						random_list = {
+							2 = {
+								add_district = district_city
+							}
+							1 = {
+								add_district = district_industrial
+							}
+							1 = {
+								modifier = {
+									factor = 0
+									num_free_districts = {
+										type = district_farming
+										value = 0
+									}
+								}
+								modifier = {
+									factor = 0
+									owner = {
+										is_lithoid_empire = yes
+									}
+								}
+								add_district = district_farming
+							}
+							1 = {
+								modifier = {
+									factor = 0
+									num_free_districts = {
+										type = district_mining
+										value = 0
+									}
+								}
+								modifier = {
+									factor = 0
+									from = {
+										is_catalytic_empire = yes
+									}
+								}
+								add_district = district_mining
+							}
+							1 = {
+								modifier = {
+									factor = 0
+									num_free_districts = {
+										type = district_generator
+										value = 0
+									}
+								}
+								add_district = district_generator
+							}
+						}
+					}
+					else_if = {
+						limit = {
+							count_deposits = {
+								category = deposit_cat_blockers_natural
+								count > 0
+							}
+						}
+						clear_blockers = yes
+					}
+					set_variable = { #reset the counter to 0
+						which = added_pops
+						value = 0
+					}
+				}
+			}
+		}
+		capital_scope = { clear_variable = seperatist_pops }
+		from.home_planet = { clear_variable = fotd_pops }
+	}
+}
+
+fleet_event = {
+	id = origin.6255
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = fotd_system
+			exists = owner
+			owner = {
+				is_hostile = root.owner
+				has_origin = origin_fear_of_the_dark
+			}
+			any_fleet_in_system = {
+				owner = { is_country_type = primitive }
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			random_fleet_in_system = {
+				limit = {
+					owner = { is_country_type = primitive }
+				}
+				owner = {
+					set_hostile = root.owner
+					establish_communications_no_message = root.owner
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6256
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_origin = origin_fear_of_the_dark
+			AND = {
+				exists = from
+				from = {
+					has_origin = origin_fear_of_the_dark
+				}
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				has_origin = origin_fear_of_the_dark
+			}
+			event_target:fotd_seperatist_planet@root = {
+				owner = {
+					set_faction_hostility = {
+						target = from
+						set_hostile = no
+						set_neutral = yes
+						set_friendly = no
+					}
+				}
+			}
+		}
+		else = {
+			event_target:fotd_seperatist_planet@from = {
+				owner = {
+					set_faction_hostility = {
+						target = root
+						set_hostile = no
+						set_neutral = yes
+						set_friendly = no
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6260
+	title = origin.6260.name
+	desc = origin.6260.desc
+	picture = GFX_evt_fear_of_the_dark
+	show_sound = evn_fc_disunity_origin
+	is_triggered_only = yes
+
+	location = event_target:fotd_seperatist_planet
+
+	immediate = {
+		set_country_flag = had_seperatist_fleet_toast
+		event_target:fotd_seperatist_planet@root = {
+			save_event_target_as = fotd_seperatist_planet
+		}
+	}
+
+	option = {
+		name = ACKNOWLEDGED
+	}
+}
+
+country_event = {
+	id = origin.6265
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		has_modifier = fotd_settled_differences
+		from = {
+			species = { is_same_species = root.species }
+		}
+	}
+
+	immediate = {
+		random_list = { #70% of the time leader doesn't get trait
+			70 = {}
+			30 = {
+				from = {
+					switch = {
+						trigger = leader_class
+						admiral = { add_trait = leader_trait_fotd_admiral }
+						scientist = { add_trait = leader_trait_fotd_scientist }
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.6270
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				capital_scope = {
+					has_observation_outpost = yes
+					observation_outpost_owner = {
+						has_origin = origin_fear_of_the_dark
+					}
+				}
+				has_country_flag = fotd_hunter@capital_scope.observation_outpost_owner
+				is_xenophobe = no
+			}
+			capital_scope.observation_outpost_owner = {
+				country_event = { id = origin.6275 }
+			}
+		}
+		else = {
+			country_event = { id = origin.6270 days = 360 }
+		}
+	}
+}
+
+country_event = {
+	id = origin.6275
+	title = origin.6275.name
+	desc = origin.6275.desc
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	picture_event_data = {
+		portrait = from
+		planet_background = from
+		graphical_culture = from
+		city_level = from
+		room = from.ruler
+	}
+
+	immediate = {
+		from = {
+			set_awareness = 100
+		}
+	}
+
+	option = { #We can work something out
+		name = origin.6275.a
+		add_modifier = {
+			modifier = fotd_triumviri
+		}
+		from.capital_scope = {
+			set_owner = root
+			hidden_effect = {
+				observation_outpost = {
+					dismantle = yes
+				}
+			}
+		}
+	}
+	option = { #You are free to do so on your own
+		name = origin.6275.b
+		custom_tooltip = origin.6275.b.tt
+		from = {	
+			add_opinion_modifier = {
+				modifier = opinion_fotd_allowed_exploration
+				who = root
+			}
+		}
+		hidden_effect = {
+			from = {
+				set_country_flag = primitives_can_into_space
+				set_country_type = default
+				change_country_flag = random
+				set_species_graphical_culture = yes
+				change_government = {
+					authority = random
+					civics = random
+				}
+				copy_techs_from = {
+					target = root
+					except = {
+						# Horizon Signal
+						tech_akx_worm_1
+						tech_akx_worm_2
+						tech_akx_worm_3
+					}
+				}
+				add_resource = { minerals = 10000 }
+				add_resource = { energy = 10000 }
+				add_resource = { food = 3000 }
+				add_resource = { consumer_goods = 3000 }
+				add_resource = { alloys = 7000 }
+				add_resource = { influence = 1000 }
+				add_resource = { unity = 27000 }
+				if = {
+					limit = {
+						has_technology = tech_destroyers
+					}
+					create_fleet = {
+						effect = {
+							set_owner = prev
+							while = {
+								count = 8
+								create_ship = {
+									name = random
+									random_existing_design = destroyer
+									graphical_culture = prev
+								}
+							}
+							set_location = {
+								target = prev.capital_scope
+								distance = 10
+								angle = random
+							}
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_technology = tech_cruisers
+					}
+					create_fleet = {
+						effect = {
+							set_owner = prev
+							while = {
+								count = 6
+								create_ship = {
+									name = random
+									random_existing_design = cruiser
+									graphical_culture = prev
+								}
+							}
+							set_location = {
+								target = prev.capital_scope
+								distance = 10
+								angle = random
+							}
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_technology = tech_battleships
+					}
+					create_fleet = {
+						effect = {
+							set_owner = prev
+							while = {
+								count = 2
+								create_ship = {
+									name = random
+									random_existing_design = battleship
+									graphical_culture = prev
+								}
+							}
+							set_location = {
+								target = prev.capital_scope
+								distance = 10
+								angle = random
+							}
+						}
+					}
+				}
+				create_fleet = {
+					effect = {
+						set_owner = prev
+						while = {
+							count = 10
+							create_ship = {
+								name = random
+								random_existing_design = corvette
+								graphical_culture = prev
+							}
+						}
+					}
+				}
+				capital_scope = {
+					observation_outpost = {
+						dismantle = yes
+					}
+					clear_blockers = yes
+					remove_all_buildings = yes
+					generate_start_buildings_and_districts = yes
+					solar_system.starbase = {
+						set_owner = root.from
+					}
+				}
+			}
+		}
+	}
+	option = { #Stay on your rock
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		name = origin.6275.c
+		custom_tooltip = origin.6275.c.tt
+		add_resource = { unity = 20000 }
+		hidden_effect = {
+			from = {
+				remove_country_flag = fotd_hunter@root
+			}
+		}
+	}
+}
+
+# From = system
+# FromFrom = country (new owner)
+# This = country (previous owner)
+country_event = { #Seperatists would rather die than give you their planet
+	id = origin.6280
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_fear_of_the_dark
+		exists = fromfrom
+		fromfrom = {
+			OR = {
+				is_country_type = default
+				is_country_type = awakened_fallen_empire
+			}
+		}
+		from = {
+			any_system_planet = {
+				has_owner = yes
+				owner = {
+					has_country_flag = fotd_seperatist_country@root
+				}
+			}
+		}
+		NOT = { is_same_species = fromfrom } #they wont nuke themselves if the invaders is the same species
+	}
+
+	immediate = {
+		from = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = fotd_seperatist_planet@root
+				}
+				every_owned_pop = {
+					kill_pop = yes
+				}
+				change_pc = pc_nuked
+				destroy_colony = yes
+			}
+		}
+	}
+}

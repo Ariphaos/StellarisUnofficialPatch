@@ -977,6 +977,7 @@ planet_event = { # Rogue moon
 		NOR = {
 			is_planet_class = pc_habitat
 			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_shattered_ring_habitable
 			has_planet_flag = colony_event
 		}
 		has_moon = yes
@@ -1117,6 +1118,7 @@ planet_event = { #Dimensional portal
 		NOR = {
 			is_planet_class = pc_habitat
 			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_shattered_ring_habitable
 			has_planet_flag = colony_event
 		}
 	}
@@ -2609,7 +2611,7 @@ country_event = {
 				}
 				every_fleet_in_system = {
 					limit = { is_owned_by = root }
-					set_mia = yes
+					set_mia = mia_return_home
 				}
 			}
 		}
@@ -2618,6 +2620,14 @@ country_event = {
 	option = {
 		name = colony.3051.a
 		custom_tooltip = demonic_incursion_tooltip
+	}
+
+	option = {
+		name = colony.3051.b
+		custom_tooltip = demonic_takeover_tooltip
+		hidden_effect = {
+			event_target:demonic_incursion_country = { set_player = root }
+		}
 	}
 
 	after = {
@@ -3262,6 +3272,7 @@ planet_event = {
 			has_planet_flag = colony_event
 			is_planet_class = pc_habitat
 			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_shattered_ring_habitable
 		}
 		NOT = { owner = { has_country_flag = bluelotus } }
 		num_pops > 0
@@ -4934,6 +4945,7 @@ planet_event = { # starting event - finding the ancient vaults
 			has_planet_flag = colony_event
 			is_planet_class = pc_habitat
 			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_shattered_ring_habitable
 		}
 	}
 
@@ -7279,6 +7291,7 @@ country_event = {
 	show_sound = event_activating_unknown_technology
 
 	immediate = {
+		set_country_flag = b_world_spawned 
 		if = {
 			limit = {
 				has_origin = origin_ocean_paradise
@@ -7288,7 +7301,6 @@ country_event = {
 					spawn_planet = {
 						class = pc_ocean
 						location = root.home_planet
-						orbit_distance_offset = 2
 						orbit_angle_offset = 180
 						size = 30
 						init_effect = {
@@ -7307,7 +7319,8 @@ country_event = {
 							generate_start_deposits_and_blockers = yes
 							remove_all_buildings = yes
 							set_planet_flag = colony_event
-							if = {
+							generate_start_buildings_and_districts = yes
+								if = {
 								limit = {
 									root = { is_gestalt = yes }
 								}
@@ -7354,6 +7367,7 @@ country_event = {
 							generate_start_deposits_and_blockers = yes
 							remove_all_buildings = yes
 							set_planet_flag = colony_event
+							generate_start_buildings_and_districts = yes
 						}
 					}
 					every_ambient_object = {
@@ -7388,6 +7402,7 @@ country_event = {
 							generate_start_deposits_and_blockers = yes
 							remove_all_buildings = yes
 							set_planet_flag = colony_event
+							generate_start_buildings_and_districts = yes
 						}
 					}
 					every_ambient_object = {
@@ -7565,9 +7580,14 @@ situation_event = {
 	option = {
 		allow = {
 			owner = {
-				NOR = {
-					has_valid_civic = civic_barbaric_despoilers
-					has_ascension_perk = ap_nihilistic_acquisition
+				OR = {
+					NOR = {
+						has_valid_civic = civic_barbaric_despoilers
+						has_ascension_perk = ap_nihilistic_acquisition
+					}
+					root.target = {
+						has_modifier = multiple_stolen_great_works
+					}
 				}
 			}
 		}
@@ -8090,6 +8110,24 @@ country_event = {
 				is_situation_type = situation_negative_mass
 			}
 			add_situation_progress = 15
+		}
+	}
+}
+
+#Removes 'Sprawling Slums' blockers from popless planets
+
+planet_event = {
+	id = colony.9895
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		every_deposit = {
+			limit = {
+				is_deposit_type = d_decrepit_dwellings 
+			}
+			clear_blocker = yes
 		}
 	}
 }

@@ -76,7 +76,7 @@ create_subterranean_nation = {
 			NOT = {
 				any_country = {
 					is_country_type = adversary
-					has_country_flag = subterranean_nation
+					has_country_flag = $FLAG$
 				}
 			}
 		}
@@ -118,7 +118,7 @@ create_subterranean_nation = {
 					who = root.owner
 					flag = subterror
 				}
-				set_country_flag = subterranean_nation
+				set_country_flag = $FLAG$
 				establish_contact = { who = event_target:subterranean_planet_owner location = root }
 				establish_communications_no_message = event_target:subterranean_planet_owner
 				save_event_target_as = subterranean_nation
@@ -133,7 +133,7 @@ create_subterranean_nation = {
 		random_country = {
 			limit = {
 				is_country_type = adversary
-				has_country_flag = subterranean_nation
+				has_country_flag = $FLAG$
 			}
 			save_event_target_as = subterranean_nation
 		}
@@ -697,6 +697,23 @@ add_random_leader_trait = {
 					}
 					if = {
 						limit = {
+							NOT = { has_trait = leader_trait_expertise_archaeostudies }
+						}
+						add_trait = leader_trait_expertise_archaeostudies
+						set_timed_leader_flag = { flag = gained_leader_trait_expertise_archaeostudies days = 7 }
+						set_timed_leader_flag = { flag = has_gained_trait days = 7 }
+					}
+				}
+				5 = {
+					modifier = {
+						factor = 0
+						OR = {
+							is_researching_area = engineering
+							is_researching_area = physics
+						}
+					}
+					if = {
+						limit = {
 							NOT = { has_trait = leader_trait_expertise_military_theory }
 						}
 						add_trait = leader_trait_expertise_military_theory
@@ -811,6 +828,24 @@ add_random_leader_trait = {
 						add_trait = leader_trait_trickster
 						set_timed_leader_flag = { flag = gained_leader_trait_trickster days = 7 }
 						set_timed_leader_flag = { flag = has_gained_trait days = 7 }
+					}
+					modifier = {
+						factor = 0
+						has_first_contact_dlc = yes
+					}
+				}
+				5 = {
+					if = {
+						limit = {
+							NOT = { has_trait = leader_trait_trickster_fircon }
+						}
+						add_trait = leader_trait_trickster_fircon
+						set_timed_leader_flag = { flag = gained_leader_trait_trickster_fircon days = 7 }
+						set_timed_leader_flag = { flag = has_gained_trait days = 7 }
+					}
+					modifier = {
+						factor = 0
+						has_first_contact_dlc = no
 					}
 				}
 				5 = {
@@ -2617,6 +2652,64 @@ create_cybernetic_species_mod = {
 	}
 }
 
+create_nuked_species_mod = {
+	species = {
+		modify_species = {
+			effect = {
+				create_species = {
+					is_mod = yes
+					name = this
+					plural = this
+					class = this
+					portrait = this
+					traits = this
+					can_be_modified = this
+					homeworld = this
+					namelist = this
+					gender = this
+					traits = {
+						trait = trait_survivor
+					}
+				}
+			}
+		}
+		save_event_target_as = changing_species
+	}
+
+	owner = {
+		every_owned_pop = {
+			limit = { is_exact_same_species = event_target:changing_species }
+			change_species = last_created_species
+		}
+		every_owned_leader = {
+			limit = { is_exact_same_species = event_target:changing_species }
+			change_species = last_created_species
+		}
+		every_pool_leader = {
+			limit = { is_exact_same_species = event_target:changing_species }
+			change_species = last_created_species
+		}
+		every_envoy = {
+			limit = { is_exact_same_species = event_target:changing_species }
+			change_species = last_created_species
+		}
+		every_owned_army = {
+			limit = {
+				exists = species
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+		every_controlled_ship = {
+			limit = {
+				is_ship_class = shipclass_colonizer
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+	}
+}
+
 set_all_comms_surveyed = {
 	every_country = {
 		limit = {
@@ -2996,25 +3089,101 @@ remove_culture_shock = {
 	}
 }
 
-nuke_primitives_effect = {
+nuke_pre_ftls_effect = {
+	every_owned_pop = {
+		kill_pop = yes
+	}
 	destroy_colony = yes
-	set_planet_flag = primitives_nuked_themselves
+	set_planet_flag = pre_ftls_nuked_themselves
+	if = {
+		limit = {
+			is_artificial = no
+		}
 	change_pc = pc_nuked
 	reroll_planet = yes
 	remove_all_buildings = yes
 	add_deposit = d_metal_boneyard
 	set_planet_flag = nuked_planet_anomalies_disabled
 }
+}
 
-nuke_primitives_toxic_effect = {
+nuke_pre_ftls_toxic_effect = {
+	every_owned_pop = {
+		kill_pop = yes
+	}
 	destroy_colony = yes
-	change_pc = pc_toxic
+	if = {
+		limit = {
+			is_artificial = no
+		}
+		change_pc = pc_toxic
+		set_deposit = d_society_3
+		if = {
+			limit = {
+				has_toxoids = yes
+			}
+			set_planet_flag = toxic_terraforming_candidate
+			add_modifier = {
+				modifier = toxic_terraforming_candidate
+			}
+		}
+	}
 	reset_planet = yes
 	add_modifier = {
 		modifier = "nuclear_devastation"
 		days = -1
 	}
-	set_deposit = d_society_3
+}
+
+# (Pre-FTL) planet scope | owner = pre-FTL country
+nuke_pre_ftls_stone_age_effect = {
+	every_owned_pop = {
+		limit = { is_robotic_species = yes }
+		kill_pop = yes
+	}
+	while = {
+		limit = {
+			num_pops > 2
+		}
+		random_owned_pop = {
+			kill_pop = yes
+		}
+	}
+	owner = {
+		if = {
+			limit = {
+				NOT = {
+					has_pre_ftl_age = stone_age
+				}
+			}
+			set_pre_ftl_age_effect = {
+				PRE_FTL_AGE = stone_age
+			}
+		}
+	}
+	if = {
+		limit = {
+			is_artificial = no
+		}
+		owner = {
+			set_origin = origin_post_apocalyptic
+			# Propagate a new, 'Survivor' Trait species based on the existing pre-FTL one
+			random_owned_pop = {
+				limit = { is_exact_same_species = prev }
+				create_nuked_species_mod = yes
+				species = { save_event_target_as = new_main_species }
+			}
+			change_dominant_species = { species = event_target:new_main_species }
+			set_awareness = 0
+		}
+		change_pc = pc_nuked
+		reroll_planet = yes
+		owner = {
+			add_pre_ftl_buildings = yes
+		}
+		add_deposit = d_metal_boneyard
+		set_planet_flag = nuked_planet_anomalies_disabled
+	}
 }
 
 generate_cyborg_treats = {
@@ -5119,6 +5288,7 @@ setup_baol_colony_3 = {
 		limit = {
 			habitable_planet = yes
 			NOT = { is_planet_class = pc_city }
+			NOT = { is_planet_class = pc_relic }
 			has_anomaly = no
 			NOR = {
 				exists = archaeological_site
@@ -5129,6 +5299,7 @@ setup_baol_colony_3 = {
 				is_colony = no
 				num_sapient_pops < 10
 			}
+			NOT = { has_modifier = holy_planet }
 		}
 		save_event_target_as = baol_colony_3
 	}
@@ -5141,6 +5312,7 @@ setup_baol_colony_3_fallback = {
 		limit = {
 			habitable_planet = yes
 			NOT = { is_planet_class = pc_city }
+			NOT = { is_planet_class = pc_relic }
 			has_anomaly = no
 			NOR = {
 				exists = archaeological_site
@@ -5151,6 +5323,7 @@ setup_baol_colony_3_fallback = {
 				is_colony = no
 				num_sapient_pops < 10
 			}
+			NOT = { has_modifier = holy_planet }
 		}
 		save_event_target_as = baol_colony_3
 	}
@@ -5478,7 +5651,7 @@ destroy_star_system = {
 				exists = event_target:crisis_country #i.e. not final destruction of all matter
 				is_mobile = yes
 			}
-			set_mia = yes
+			set_mia = mia_return_home
 		}
 		else = {
 			destroy_fleet = this
@@ -5618,7 +5791,11 @@ destroy_machine_world = {
 				NOT = { has_planet_flag = destroyed_by_colossus }
 				has_planet_flag = planet_godrayed
 				has_planet_flag = planet_drenched
+				has_planet_flag = planet_devolved
 			}
+		}
+		every_owned_pop = {
+			kill_pop = yes
 		}
 		destroy_colony = yes
 		change_pc = pc_broken
@@ -5853,7 +6030,7 @@ declare_crisis_war_effect = {
 			target = event_target:new_crisis
 			name = {
 				key = "NAME_Declared_Crisis_War"
-				variable_string = "This.MainDefender.GetAdj"
+				variable_string = "\\[This.MainDefender.GetAdj\\]"
 			}
 			attacker_war_goal = "wg_declared_crisis"
 			effect = { save_event_target_as = crisis_war }
@@ -6307,6 +6484,11 @@ create_hive_nu_baol_effect = {
 create_origin_dragon_deposit_effect = {
 	event_target:here_be_the_dragon_ship = { delete_ship = this }
 	add_deposit = d_landed_dragon
+
+	owner = {
+		remove_country_flag = space_dragon_about_to_land
+	}
+
 
 	planet_event = { id = aquatics.170 days = 5400 random = 360 } #about 15 years
 }
@@ -8117,6 +8299,214 @@ remove_fauna_yuht = {
 	}
 }
 
+# (global) country scope
+choose_galactic_market_host = {
+	if = {
+		limit = {
+			any_galaxy_planet = {
+				has_modifier = market_nominee_level_5
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+		}
+		random_galaxy_planet = {
+			limit = {
+				OR = {
+					has_modifier = market_nominee_level_5
+					has_modifier = market_nominee_level_4
+				}
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+			weights = {
+				base = 1
+				modifier = {
+					owner = { is_variable_set = market_rating }
+					add = owner.market_rating
+				}
+				modifier = {
+					mult = solar_system.trigger:has_system_trade_value
+					solar_system = {
+						has_system_trade_value > 0
+					}
+				}
+				pow = 2
+			}
+			save_global_event_target_as = market_founder_planet
+			owner = {
+				save_global_event_target_as = market_founder
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			any_galaxy_planet = {
+				has_modifier = market_nominee_level_4
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+		}
+		random_galaxy_planet = {
+			limit = {
+				OR = {
+					has_modifier = market_nominee_level_4
+					has_modifier = market_nominee_level_3
+				}
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+			weights = {
+				base = 1
+				modifier = {
+					owner = { is_variable_set = market_rating }
+					add = owner.market_rating
+				}
+				modifier = {
+					mult = solar_system.trigger:has_system_trade_value
+					solar_system = {
+						has_system_trade_value > 0
+					}
+				}
+				pow = 2
+			}
+			save_global_event_target_as = market_founder_planet
+			owner = {
+				save_global_event_target_as = market_founder
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			any_galaxy_planet = {
+				has_modifier = market_nominee_level_3
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+		}
+		random_galaxy_planet = {
+			limit = {
+				OR = {
+					has_modifier = market_nominee_level_3
+					has_modifier = market_nominee_level_2
+				}
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+			weights = {
+				base = 1
+				modifier = {
+					owner = { is_variable_set = market_rating }
+					add = owner.market_rating
+				}
+				modifier = {
+					mult = solar_system.trigger:has_system_trade_value
+					solar_system = {
+						has_system_trade_value > 0
+					}
+				}
+				pow = 2
+			}
+			save_global_event_target_as = market_founder_planet
+			owner = {
+				save_global_event_target_as = market_founder
+			}
+		}
+	}
+	else = {
+		random_galaxy_planet = {
+			limit = {
+				is_market_nominee_planet = yes
+				exists = owner
+				owner = {
+					is_country_type = default
+					has_country_flag = market_nomination_eligible # i.e. they are or were a GalCom member
+				}
+			}
+			weights = {
+				base = 1
+				modifier = {
+					owner = { is_variable_set = market_rating }
+					add = owner.market_rating
+				}
+				modifier = {
+					mult = solar_system.trigger:has_system_trade_value
+					solar_system = {
+						has_system_trade_value > 0
+					}
+				}
+				pow = 2
+			}
+			save_global_event_target_as = market_founder_planet
+			owner = {
+				save_global_event_target_as = market_founder
+			}
+		}
+	}
+	every_playable_country = {
+	limit = {
+			has_country_flag = market_nomination_eligible
+		}
+		remove_galactic_market_modifiers = yes
+	}
+}
+
+# country scope
+remove_galactic_market_modifiers = {
+	every_owned_planet = {
+		limit = {
+			is_market_nominee_planet = yes
+		}
+		# remove boosted flags
+		if = {
+			limit = { has_planet_flag = boosted_once }
+			remove_planet_flag = boosted_once
+		}
+		if = {
+			limit = { has_planet_flag = boosted_twice }
+			remove_planet_flag = boosted_twice
+		}
+		# remove modifiers
+		if = {
+			limit = { has_modifier = market_nominee_level_1 }
+			remove_modifier = market_nominee_level_1
+		}
+		else_if = {
+			limit = { has_modifier = market_nominee_level_2 }
+			remove_modifier = market_nominee_level_2
+		}
+		else_if = {
+			limit = { has_modifier = market_nominee_level_3 }
+			remove_modifier = market_nominee_level_3
+		}
+		else_if = {
+			limit = { has_modifier = market_nominee_level_4 }
+			remove_modifier = market_nominee_level_4
+		}
+		else_if = {
+			limit = { has_modifier = market_nominee_level_5 }
+			remove_modifier = market_nominee_level_5
+		}
+	}
+	clear_variable = market_rating
+}
 create_random_devolved_species = {
 	# Requires event_target:species_target as a species input.
 	# Gives event_target:devolved_species_target as a species output.
@@ -8217,6 +8607,22 @@ create_random_devolved_species = {
 					save_event_target_as = devolved_species_target
 				}
 			}
+		}
+	}
+}
+
+create_devolved_species = {
+	# Requires event_target:species_target as a species input.
+	# Gives event_target:devolved_species_target as a species output.
+	modify_species = {
+		species = event_target:species_target
+		add_trait = trait_presapient_forcefully_devolved
+		add_traits_at_start_of_list = yes
+		effect = {
+			change_species_characteristics = {
+				sapient = no
+			}
+			save_event_target_as = devolved_species_target
 		}
 	}
 }

@@ -17,6 +17,10 @@ citizenship_full = {
 		hidden_trigger = { exists = from }
 
 		custom_tooltip = {
+			fail_text = "pre_sapients_citizenship"
+			is_sapient = yes
+		}
+		custom_tooltip = {
 			fail_text = "lonely_hive_mind_pops_kill_themselves_citizenship"
 			is_lonely_hive_mind_pop = no
 		}
@@ -117,6 +121,12 @@ citizenship_assimilation = {
 			OR = {
 				is_homicidal = no
 				AND = {
+					is_homicidal = yes
+					root = {
+						is_same_species = prev
+					}
+				}
+				AND = {
 					has_civic = civic_machine_terminator
 					has_active_tradition = tr_synthetics_adopt_machine
 					root = {
@@ -181,6 +191,10 @@ citizenship_assimilation = {
 		custom_tooltip = {
 			fail_text = MUST_NOT_BE_DOMINANT_SPECIES
 			NOT = { is_exact_same_species = from }
+		}
+		custom_tooltip = {
+			fail_text = "pre_sapients_citizenship"
+			is_sapient = yes
 		}
 		custom_tooltip = {
 			fail_text = "lonely_hive_mind_pops_kill_themselves_citizenship_assimilation"
@@ -385,6 +399,18 @@ citizenship_limited = {
 
 	allow = {
 		custom_tooltip = {
+			fail_text = "presapients_not_accepted_citizenship"
+			OR = {
+				is_sapient = yes
+				from = { 
+					NOT = {
+						has_policy_flag = pre_sapients_eat
+						has_policy_flag = pre_sapients_purge
+					}
+				}
+			}
+		}
+		custom_tooltip = {
 			fail_text = "HIVE_MIND_SPECIES_CITIZENS_ONLY"
 			OR = {
 				from = { is_hive_empire = no }
@@ -473,6 +499,29 @@ citizenship_slavery = {
 
 	allow = {
 		hidden_trigger = { exists = from }
+		custom_tooltip = {
+			fail_text = "presapients_allowed_citizenship"
+			OR = {
+				is_sapient = yes
+				from = { 
+					NOT = {
+						has_policy_flag = pre_sapients_protect
+						has_policy_flag = pre_sapients_allow
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = "presapients_purged_citizenship"
+			OR = {
+				is_sapient = yes
+				from = { 
+					NOT = {
+						has_policy_flag = pre_sapients_purge
+					}
+				}
+			}
+		}
 		custom_tooltip = {
 			fail_text = "HIVE_MIND_MAIN_SPECIES_ALWAYS_CITIZEN"
 			NAND = {
@@ -646,8 +695,42 @@ citizenship_purge = {
 		}
 		else = {
 			custom_tooltip = {
+				fail_text = is_broken_shackles_origin
+				if = {
+					limit = {
+						OR = {
+							is_robotic_species = no
+							AND = {
+								is_robotic_species = yes
+								NOT = {
+									from = { has_policy_flag = robots_outlawed }
+								}
+							}
+						}
+					}
+					from = {
+						NOT = {
+							has_origin = origin_broken_shackles
+						}
+					}
+				}
+			}
+			custom_tooltip = {
 				fail_text = same_species_disallowed
 				NOT = { is_same_species = from }
+			}
+			custom_tooltip = {
+				fail_text = "presapients_not_purged_citizenship"
+				OR = {
+					is_sapient = yes
+					from = { 
+						NOT = {
+							has_policy_flag = pre_sapients_protect
+							has_policy_flag = pre_sapients_allow
+							has_policy_flag = pre_sapients_eat
+						}
+					}
+				}
 			}
 			if = {
 				limit = {
@@ -658,7 +741,11 @@ citizenship_purge = {
 				}
 				custom_tooltip = {
 					fail_text = PURGING_NOT_ALLOWED
-					from = { allows_purge = yes }
+					from = {
+						NOT = {
+							has_policy_flag = purge_not_allowed
+						}
+					}
 				}
 			}
 			custom_tooltip = {

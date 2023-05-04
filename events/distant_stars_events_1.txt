@@ -5047,6 +5047,10 @@ ship_event = {
 		owner = {
 			set_country_flag = brainslug_divination_flag
 		}
+		from = {
+			save_event_target_as = pre_sapient_planet
+			create_generic_presapient_species = { UPLIFT_TO = REP }
+		}
 	}
 
 	option = {
@@ -5812,7 +5816,6 @@ country_event = { #On enacting Study The Sea Special Project
 	picture = GFX_evt_ocean
 	show_sound = event_scanner
 	location = event_target:living_planet_tar
-
 	is_triggered_only = yes
 
 	trigger = {
@@ -5822,7 +5825,9 @@ country_event = { #On enacting Study The Sea Special Project
 
 	immediate = {
 		if = {
-			limit = { NOT = { exists = event_target:living_planet_tar } }
+			limit = {
+				NOT = { exists = event_target:living_planet_tar }
+			}
 			random_planet_within_border = {
 				limit = { has_modifier = living_sea }
 				save_global_event_target_as = living_planet_tar
@@ -5873,11 +5878,11 @@ country_event = { #Scientist is alive
 	picture = GFX_evt_ship_in_orbit
 	show_sound = event_radio_chatter
 	location = event_target:living_planet_tar
-
 	is_triggered_only = yes
 
 	trigger = {
 		exists = event_target:living_planet_scientist
+		exists = event_target:living_planet_tar
 		event_target:living_planet_tar = {
 			has_modifier = pm_study_the_sea
 			has_modifier = living_sea
@@ -5929,7 +5934,6 @@ country_event = { #Scientist dies
 	picture = GFX_evt_ship_in_orbit
 	show_sound = event_radio_chatter
 	location = event_target:living_planet_tar
-
 	is_triggered_only = yes
 
 	trigger = {
@@ -5992,10 +5996,10 @@ country_event = {
 	picture = GFX_evt_ocean
 	show_sound = event_mystic_reveal
 	location = event_target:living_planet_tar
-
 	is_triggered_only = yes
 
 	trigger = {
+		exists = event_target:living_planet_tar
 		event_target:living_planet_tar = {
 			has_modifier = pm_study_the_sea
 			has_modifier = living_sea
@@ -6048,12 +6052,11 @@ country_event = {
 	title = "distar.195.name"
 	desc = "distar.195.desc"
 	location = event_target:living_planet_tar
-
 	diplomatic = yes
-
 	is_triggered_only = yes
 
 	trigger = {
+		exists = event_target:living_planet_tar
 		exists = event_target:living_planet_scientist
 		event_target:living_planet_tar = { has_modifier = living_sea }
 	}
@@ -6081,10 +6084,10 @@ country_event = {
 	picture = GFX_evt_atmospheric_entry
 	show_sound = event_ship_explosion
 	location = event_target:living_planet_tar
-
 	is_triggered_only = yes
 
 	trigger = {
+		exists = event_target:living_planet_tar
 		event_target:living_planet_tar = { has_modifier = living_sea }
 	}
 
@@ -6127,10 +6130,10 @@ starbase_event = {
 ship_event = { #Special Project Gatekeeper (on_starbase_transfer, on_building_starbase_outpost)
 	id = distar.199
 	hide_window = yes
-
 	is_triggered_only = yes
 
 	trigger = {
+		exists = event_target:living_planet_tar
 		exists = solar_system
 		solar_system = {
 			has_star_flag = living_planet_system
@@ -6978,7 +6981,7 @@ ship_event = {
 		if = {
 			limit = { has_ancrel = yes }
 			custom_tooltip = minor_artifacts_found
-			owner = { add_resource = { minor_artifacts = 1 } }
+			owner = { add_resource = { minor_artifacts = 10 } }
 		}
 		hidden_effect = {
 			owner = { pop_lcluster_event = yes }
@@ -7024,10 +7027,6 @@ fleet_event = { #Junkheap Ratlings
 				save_event_target_as = ratling_planet_tar #Used for loc for this event only
 			}
 		}
-		# Risa fix
-		#event_target:ratling_capital = {
-		#	add_anomaly = DISTAR_RAT_CAT
-		#}	# let distar.231 be called by on_survey instead
 	}
 
 	option = {
@@ -7051,6 +7050,27 @@ fleet_event = { #Junkheap Ratlings
 		exclusive_trigger = {
 			owner = {
 				has_civic = civic_machine_terminator
+			}
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				root.solar_system = {
+					NOT = {
+						has_star_flag = ratling_home_system
+					}
+				}
+			}
+			event_target:ratling_capital.solar_system = {
+				root.owner = { set_visited = prev }
+			}
+		}
+		event_target:ratling_capital = {
+			add_anomaly = {
+				category = DISTAR_RAT_CAT
+				target = root.owner
 			}
 		}
 	}

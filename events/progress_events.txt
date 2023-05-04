@@ -543,10 +543,13 @@ planet_event = {
 	trigger = {
 		NOR = {
 			is_planet_class = pc_habitat
-			owner = { has_origin = origin_remnants }
 		}
 		owner = {
-			NOT = { has_country_flag = first_colony }
+			NOR = {
+				has_origin = origin_remnants
+				has_origin = origin_broken_shackles
+				has_country_flag = first_colony 
+			}
 			num_owned_planets < 3
 		}
 	}
@@ -621,6 +624,10 @@ country_event = {
 	trigger = {
 		is_ai = no
 		NOT = { has_country_flag = first_contact_event }
+		NOR = { 
+			has_origin = origin_payback 
+			has_origin = origin_broken_shackles
+		}
 		event_target:contact_empire = {
 			NOR = {
 				is_country_type = fallen_empire
@@ -748,12 +755,16 @@ country_event = {
 
 	trigger = {
 		is_ai = no
-		NOT = { has_country_flag = first_contact_event }
+		NOT = { has_country_flag = first_contact_preFTL_established }
+		NOR = {
+			has_origin = origin_payback
+			has_origin = origin_broken_shackles
+		}
 		event_target:contact_empire = { is_primitive = yes }
 	}
 
 	immediate = {
-		set_country_flag = first_contact_event
+		set_country_flag = first_contact_preFTL_established
 	}
 
 	option = {
@@ -866,6 +877,7 @@ country_event = {
 	trigger = {
 		is_ai = no
 		NOT = { has_country_flag = first_contact_event }
+		NOT = { has_origin = origin_payback }
 		event_target:contact_empire = { is_country_type = fallen_empire }
 	}
 
@@ -949,6 +961,182 @@ planet_event = {
 	immediate = {
 		owner = {
 			set_country_flag = first_colony
+		}
+	}
+}
+
+# First Contact (special event for Payback Origin)
+country_event = {
+	id = progress.9
+	title = "progress.9.name"
+	picture = GFX_evt_news_room
+
+	desc = {
+		trigger = {
+			text = "progress.9.desc.start"
+			success_text = {
+				text = "progress.9.desc.default"
+				event_target:contact_empire = {
+					is_country_type = default
+					NOT = { has_origin = origin_slavers }
+				}
+			}
+			success_text = {
+				text = "progress.9.desc.preftl"
+				event_target:contact_empire = { is_primitive = yes }
+			}
+			success_text = {
+				text = "progress.9.desc.fallen"
+				event_target:contact_empire = { is_country_type = fallen_empire }
+			}
+			success_text = {
+				text = "progress.9.desc.msi"
+				event_target:contact_empire = { has_origin = origin_slavers }
+			}
+			text = newline
+			success_text = {
+				text = "progress.9.desc.friendly_friendly"
+				has_country_flag = first_contact_event_friendly_friendly
+			}
+			success_text = {
+				text = "progress.9.desc.friendly_mean"
+				has_country_flag = first_contact_event_friendly_mean
+			}
+			success_text = {
+				text = "progress.9.desc.mean_friendly"
+				has_country_flag = first_contact_event_mean_friendly
+			}
+			success_text = {
+				text = "progress.9.desc.mean_mean"
+				has_country_flag = first_contact_event_mean_mean
+			}
+			success_text = {
+				text = "progress.9.desc.msi2"
+				event_target:contact_empire = { has_origin = origin_slavers }
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = no
+		has_origin = origin_payback
+		NOT = { has_country_flag = first_contact_event_payback }
+	}
+
+	immediate = {
+		set_country_flag = first_contact_event_payback
+		if = {
+			limit = {
+				# friendly aliens meeting friendly aliens
+					is_unfriendly = no
+					is_xenophobe = no
+
+				event_target:contact_empire = {
+					is_unfriendly = no
+					is_xenophobe = no
+				}
+			}
+			set_country_flag = first_contact_event_friendly_friendly
+		}
+		else_if = {
+			# friendly aliens meeting mean aliens
+			limit = {
+					is_unfriendly = no
+					is_xenophobe = no
+
+				event_target:contact_empire = {
+					OR = {
+						is_unfriendly = yes
+						is_xenophobe = yes
+					}
+				}
+			}
+			set_country_flag = first_contact_event_friendly_mean
+			# xenophobic faction created
+			hidden_effect = {
+				while = {
+					count = 5
+					random_owned_pop = {
+						limit = {
+							is_same_species = owner.species
+							NOT = { has_ethic = "ethic_xenophobe" }
+						}
+						pop_change_ethic = "ethic_xenophobe"
+					}
+				}
+			}
+			# If militarist, they now want to defeat the mean aliens
+			# if not, they just want to be left alone
+			if = {
+				limit = { is_militarist = yes }
+				enable_faction_of_type = supremacist
+			}
+			else = {
+				enable_faction_of_type = isolationist
+			}
+		}
+		else_if = {
+			# mean aliens meeting nice aliens
+			limit = {
+				OR = {
+					is_unfriendly = yes
+					is_xenophobe = yes
+				}
+				event_target:contact_empire = {
+					is_unfriendly = no
+					is_xenophobe = no
+				}
+			}
+			set_country_flag = first_contact_event_mean_friendly
+			# xenophilic faction created
+			enable_faction_of_type = xenoist
+			hidden_effect = {
+				while = {
+					count = 5
+					random_owned_pop = {
+						limit = {
+							is_same_species = owner.species
+							NOT = { has_ethic = "ethic_xenophile" }
+						}
+						pop_change_ethic = "ethic_xenophile"
+						set_pop_faction = xenoist
+					}
+				}
+			}
+		}
+		else_if = {
+			# mean aliens meeting mean aliens
+			limit = {
+				OR = {
+					is_unfriendly = yes
+					is_xenophobe = yes
+				}
+				event_target:contact_empire = {
+					OR = {
+						is_unfriendly = yes
+						is_xenophobe = yes
+					}
+				}
+			}
+			set_country_flag = first_contact_event_mean_mean
+		}
+		else = {
+			# generic fallback option
+			set_country_flag = first_contact_event_neutral
+		}
+	}
+
+	option = {
+		name = ACKNOWLEDGED
+	}
+
+	after = {
+		every_owned_planet = {
+			every_owned_pop = {
+				force_faction_evaluation = yes
+			}
 		}
 	}
 }

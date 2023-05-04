@@ -341,6 +341,7 @@ country_event = {
 			NOR = {
 				is_planet_class = pc_habitat
 				is_planet_class = pc_ringworld_habitable
+				is_planet_class = pc_shattered_ring_habitable
 			}
 		}
 	}
@@ -1117,7 +1118,7 @@ planet_event = {
 			}
 			set_planet_flag = destroyed_by_colossus
 			set_planet_flag = planet_godrayed
-			planet_event = { id = crisis.2040 }
+			planet_event = { id = crisis.2040 } 
 			create_ambient_object = {
 				location = this
 				type = habitat_cracker_object
@@ -1854,7 +1855,7 @@ country_event = {
 			target = event_target:FE_outrager
 			name = {
 				key = "NAME_Holy_World_War"
-				variable_string = "This.MainAttacker.GetAdj"
+				variable_string = "[This.MainAttacker.GetAdj]"
 			}
 			# "[This.MainAttacker.GetAdj] Holy World War"
 			attacker_war_goal = wg_subjugation
@@ -2579,7 +2580,367 @@ country_event = {
 	}
 }
 
+# Devolving Beam
+planet_event = {
+	id = planet_destruction.900
+	hide_window = yes
 
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { is_planet_class = pc_ai }
+				exists = owner
+				owner = { NOT = { is_same_value = from.owner } }
+			}
+			from.owner = {
+				country_event = { id = planet_destruction.901 }
+			}
+		}
+
+		# Contingency Machine World ### Maybe block these if no AP
+		if = {
+			limit = {
+				is_planet_class = pc_ai
+				NOT = { has_planet_flag = machine_lair }
+				from.owner = {
+					has_ascension_perk = ap_archaeoengineers
+				}
+			}
+			set_planet_flag = destroyed_by_colossus
+			set_planet_flag = planet_devolved
+			planet_event = { id = crisis.2040 }
+			create_ambient_object = {
+				location = this
+				type = habitat_cracker_object
+				duration = 5
+
+				use_3d_location = yes
+				base_angle_towards = star
+				entity_face_object = star
+
+				entity_offset = { min = 0 max = 0 }
+
+				entity_scale_to_size = yes
+				scale = 0.5
+			}
+		}
+
+		# Contingency Final Machine World
+		if = {
+			limit = {
+				is_planet_class = pc_ai
+				has_planet_flag = machine_lair
+				from.owner = {
+					has_ascension_perk = ap_archaeoengineers
+				}
+			}
+			set_planet_flag = destroyed_by_colossus
+			set_planet_flag = planet_devolved
+			from.owner = { save_event_target_as = final_machine_world_destroyer }
+			stop_crisis_sound = yes
+			planet_event = { id = crisis.2046 }
+			create_ambient_object = {
+				location = this
+				type = habitat_cracker_object
+				duration = 5
+
+				use_3d_location = yes
+				base_angle_towards = star
+				entity_face_object = star
+
+				entity_offset = { min = 0 max = 0 }
+
+				entity_scale_to_size = yes
+				scale = 0.5
+			}
+		}
+
+		if = {
+			limit = {
+				OR = {
+					is_active_resolution = "resolution_rulesofwar_independent_tribunals"
+					is_active_resolution = "resolution_rulesofwar_last_resort_doctrine"
+					is_active_resolution = "resolution_rulesofwar_demobilization_initiative"
+				}
+			}
+			from.owner = {
+				set_timed_country_flag = { flag = resolution_breached_fired_devolution_beam days = 3600 }
+			}
+		}
+
+		if = {
+			limit = {
+				NOT = { is_planet_class = pc_ai }
+				exists = owner
+				owner = {
+					NOT = { is_same_value = from.owner }
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+				}
+			}
+			# Generate threat
+			add_threat = { who = from.owner amount = 3 }
+			# modifier for allies + those upset by conversion
+			every_country = {
+				limit = {
+					NOR = {
+						is_same_value = from.owner
+						is_same_value = root.owner
+						AND = {
+							has_federation = yes
+							is_in_federation_with = from.owner
+						}
+					}
+					OR = {
+						has_communications = from.owner
+						has_communications = root.owner
+					}
+					OR = {
+						AND = {
+							has_federation = yes
+							is_in_federation_with = root.owner
+						}
+						has_ai_personality = awakened_fallen_empire_spiritualist
+						AND = {
+							is_country_type = default
+							OR = {
+								is_spiritualist = yes
+								is_xenophile = yes
+								has_authority = auth_hive_mind
+							}
+						}
+					}
+				}
+				add_opinion_modifier = {
+					modifier = opinion_devolved_a_world
+					who = from.owner
+				}
+			}
+			# modifiers for victim
+			owner = {
+				add_opinion_modifier = {
+					modifier = opinion_devolved_my_world
+					who = from.owner
+				}
+				if = {
+					limit = {
+						NOT = { has_ethic = ethic_gestalt_consciousness }
+					}
+					add_modifier = {
+						modifier = colossus_victim
+						days = 10800 # 30 years
+					}
+				}
+			}
+			# Add war exhaustion to planet owner
+			owner = {
+				if = {
+					limit = { #isn't the case when the crisis bombards planets, for instance
+						is_at_war_with = from.fleet.owner
+					}
+					add_static_war_exhaustion = {
+						attacker = from.fleet.owner
+						location = root
+						value_for_planet_destruction = 1.0
+					}
+				}
+			}
+		}
+		every_owned_pop = {
+			limit = {
+				from.owner = {
+					has_ascension_perk = ap_archaeoengineers
+				}
+				OR = {
+					has_trait = trait_mechanical
+					has_trait = trait_machine_unit
+				}
+			}
+			kill_pop = yes
+			from.owner = {
+				if = {
+					limit = { has_ascension_perk = ap_become_the_crisis }
+					complete_crisis_objective = crisobj_purge_pops
+				}
+			}
+		}
+		if = {
+			limit = {
+				from.owner = {
+					has_ascension_perk = ap_archaeoengineers
+				}
+			}
+			planet = {
+				every_planet_army = {
+					limit = {
+						OR = {
+							army_type = occupation_army
+							army_type = cybrex_warform
+							army_type = care_defensive_protocols
+							army_type = gray_army
+							army_type = robot_uprising_army
+							army_type = robotic_army
+							army_type = machine_assault_1
+							army_type = machine_assault_2
+							army_type = machine_assault_3
+							army_type = robotic_defense_army
+							army_type = machine_defense
+							army_type = robotic_occupation_army
+							army_type = machine_occupation_army
+						}
+					}
+					remove_army = yes
+				}
+			}
+		}
+		while = {
+			limit = {
+				any_owned_pop = {
+					NOR = {
+						has_trait = trait_mechanical
+						has_trait = trait_machine_unit
+					}
+					is_sapient = yes
+				}
+			}
+			random_owned_pop = {
+				limit = {
+					NOR = {
+						has_trait = trait_mechanical
+						has_trait = trait_machine_unit
+					}
+					is_sapient = yes
+				}
+				species = { save_event_target_as = species_target }
+				create_devolved_species = yes
+			}
+			every_owned_pop = {
+				limit = {
+					NOR = {
+						has_trait = trait_mechanical
+						has_trait = trait_machine_unit
+					}
+					is_same_species = event_target:species_target
+					is_sapient = yes
+				}
+				change_species = event_target:devolved_species_target
+			}	
+		}
+
+		random_owned_pop = {
+			change_species = event_target:species_target
+		}
+		random_list = {
+			33 = {}
+			33 = {
+				random_owned_pop = {
+					change_species = event_target:species_target
+				}
+			}
+			33 = {
+				random_owned_pop = {
+					change_species = event_target:species_target
+				}
+				random_owned_pop = {
+					change_species = event_target:species_target
+				}
+			}
+		}
+		planet = {
+			every_planet_army = {
+				limit = {
+					OR = {
+						army_type = occupation_army
+						army_type = offspring_defense
+						army_type = undead_defense_army
+						army_type = defense_army
+						army_type = assault_army
+						army_type = slave_army 
+						army_type = clone_army
+						army_type = psionic_army
+						army_type = xenomorph_army
+						army_type = gene_warrior_army
+						army_type = undead_army
+						army_type = rebel_army
+						army_type = rebel_slave_defense_army
+						army_type = primitive_army
+						army_type = primitive_additional_army
+						army_type = industrial_army
+						army_type = postatomic_army
+						army_type = subterranean_industrial_army
+						army_type = subterranean_postatomic_army
+						army_type = mutant_army
+						army_type = swarm_army
+						army_type = tree_army
+						army_type = enraged_army
+						army_type = ketling_army
+						army_type = titanic_assault_army
+						army_type = titanic_azizian_assault_army
+						army_type = titanic_guardian_army
+						army_type = imperial_legion
+						army_type = giant_undead_army
+						army_type = ice_army
+						army_type = mercenary_army
+						army_type = mecha_army
+						army_type = subterranean_defense_army
+						army_type = new_world_order_defensive_army
+						army_type = new_world_order_offensive_army
+					}
+				}
+				remove_army = yes
+			}
+			check_planet_employment = yes
+		}
+		# Special graphics for Habitats and Ring Worlds
+		if = {
+			limit = {
+				is_planet_class = pc_habitat
+			}
+			spawn_habitat_neutron_effect = yes
+		}
+		else_if = {
+			limit = {
+				is_planet_class = pc_ringworld_habitable
+			}
+			spawn_ringworld_neutron_effect = yes
+		}
+		else = {
+			change_pc = this
+		}
+		set_timed_planet_flag = {
+			flag = devolved_planet
+			days = 360
+		}
+	}
+}
+
+country_event = {
+	id = planet_destruction.901
+	title = planet_destruction.901.name
+	desc = planet_destruction.901.desc
+	picture = GFX_evt_planet_beam
+	show_sound = event_mystic_reveal
+	location = from
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = fired_devolving_beam }
+	}
+
+	immediate = {
+		set_country_flag = fired_devolving_beam 
+	}
+
+	option = {
+		name = OK
+	}
+}
 
 #Notification for dismantled outpost
 country_event = {
