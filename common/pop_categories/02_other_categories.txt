@@ -7,6 +7,7 @@ purge = {
 			is_being_purged = yes
 			has_pop_flag = event_purge
 			AND = { # controlled by crisis
+				has_global_flag = galactic_crisis_happened
 				exists = planet
 				planet = {
 					exists = controller
@@ -62,16 +63,16 @@ robot_servant = {
 	}
 
 	assign_to_pop = {
+		OR = {
+			is_shackled_robot = yes
+			is_non_sapient_robot = yes
+		}
 		NAND = {
 			exists = planet
 			planet = {
 				exists = owner
 				owner = { is_gestalt = yes }
 			}
-		}
-		OR = {
-			is_shackled_robot = yes
-			is_non_sapient_robot = yes
 		}
 	}
 	weight = {
@@ -124,13 +125,6 @@ slave = {
 		energy = 50
 	}
 
-	triggered_planet_modifier = {
-		potential = {
-			can_assemble_budding_pop = yes
-		}
-		planet_pop_assembly_organic_add = @plantoid_budding_rate
-	}
-
 	triggered_pop_modifier = {
 		potential = {
 			NOT = { has_trait = trait_noxious }
@@ -138,6 +132,31 @@ slave = {
 		key = trait_noxious
 		pop_happiness = 1
 		mult = modifier:pop_non_noxious_happiness
+	}
+	
+	triggered_pop_modifier = {
+		potential = {
+			owner = {
+				has_councilor = { COUNCILOR = "councilor_barbaric_despoilers" } 
+			}
+		}
+		species_empire_size_mult = 1
+		mult = value:empire_size_councilor_barbaric_despoilers
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_civic = civic_dystopian_society }
+		}
+		planet_crime_add = 1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			can_assemble_budding_pop = yes
+		}
+		planet_pop_assembly_organic_add = @plantoid_budding_rate
 	}
 
 	triggered_planet_modifier = {
@@ -153,6 +172,17 @@ slave = {
 		}
 		key = trait_noxious
 		pop_non_noxious_happiness = @noxious_happiness_penalty
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = {
+				has_councilor = { COUNCILOR = "councilor_indentured_assets" } 
+			}
+		}
+
+		trade_value_add = @councilor_indentured_assets_trade_value
+		mult = value:councilor_level|TYPE|councilor_indentured_assets|
 	}
 
 	resources = {
@@ -377,6 +407,22 @@ criminal = {
 		}
 		trade_value_add = @trade_value_very_low
 		mult = value:scripted_modifier_mult|MODIFIER|pop_lifestyle_trade_mult|
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_civic = civic_dystopian_society }
+			planet = {
+				OR = {
+					has_branch_office = no
+					branch_office_owner = {
+						is_criminal_syndicate = no
+					}
+				}
+			}
+		}
+		planet_crime_add = 2
+		planet_stability_add = -2
 	}
 
 	triggered_pop_modifier = {

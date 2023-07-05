@@ -276,8 +276,13 @@ country_event = {
 					remove_situation_flag = has_ongoing_observation_event_chain
 				}
 			}
-			observation_outpost = {
-				set_event_locked = no
+			if = {
+				limit = {
+					exists = observation_outpost
+				}
+				observation_outpost = {
+					set_event_locked = no
+				}
 			}
 		}
 		remove_country_flag = asteroid_sighted_pre_ftl_country
@@ -304,6 +309,14 @@ country_event = {
 		remove_country_flag = asteroid_sighted_pre_ftl_country
 		event_target:pre_ftl_planet = {
 			remove_planet_flag = asteroid_sighted_planet
+			if = {
+				limit = {
+					exists = observation_outpost
+				}
+				observation_outpost = {
+					set_event_locked = no
+				}
+			}
 		}
 		event_target:pre_ftl_country = {
 			random_situation = {
@@ -312,11 +325,7 @@ country_event = {
 				}
 				remove_situation_flag = has_ongoing_observation_event_chain
 			}
-			observation_outpost = {
-				set_event_locked = no
-			}
 		}
-		save_event_target_as = observation_post_owner
 	}
 
 	option = {
@@ -358,8 +367,13 @@ country_event = {
 			limit = { has_planet_flag = asteroid_sighted_planet }
 			remove_planet_flag = asteroid_sighted_planet
 			save_event_target_as = pre_ftl_planet
-			observation_outpost = {
-				set_event_locked = no
+			if = {
+				limit = {
+					exists = observation_outpost
+				}
+				observation_outpost = {
+					set_event_locked = no
+				}
 			}
 		}
 		event_target:pre_ftl_planet = {
@@ -900,7 +914,9 @@ ship_event = {
 							set_planet_flag = extraction_civil_war
 						}
 						country_event = {
-							id = observation.107
+							# This used to immediately call observation.107 which ends in devastation.
+							# Now there is an extra event which gives the player one last chance to avert catastrophe.
+							id = observation.3205
 							# 5 ± 2.5 years
 							days = 900
 							random = 1800
@@ -947,13 +963,15 @@ ship_event = {
 	}
 }
 
-# Planet Descends into Civil War
+## Prelude event to catasrophe escalation.
+## There is no turning back after this event.
+## Act now or they gon get nuked!
 country_event = {
-	id = observation.107
-	title = "observation.107.name"
-	desc = "observation.107.desc"
-	picture = GFX_evt_city_ruins
-	show_sound = event_ground_battle
+	id = observation.3205
+	title = "observation.3205.name"
+	desc = "observation.3205.desc"
+	picture = GFX_evt_alien_abduction
+	show_sound = event_air_raid_siren
 	location = event_target:pre_ftl_planet
 
 	is_triggered_only = yes
@@ -985,6 +1003,63 @@ country_event = {
 		}
 		event_target:pre_ftl_planet.observation_outpost = {
 			set_event_locked = no
+		}
+	}
+
+	option = {
+		name = "observation.3205.a"
+		if = {
+			limit = {
+				event_target:pre_ftl_country = {
+					NOT = {
+						has_ethic = ethic_fanatic_spiritualist
+					}
+				}
+			}
+			event_target:pre_ftl_country = {
+				shift_ethic = "ethic_fanatic_spiritualist"
+			}
+		}
+		observation_breach_effect = {
+			RESOLUTION = resolution_pre_ftl_stances_non_interference
+		}
+	}
+	
+	option = {
+		name = "observation.3205.b"
+		event_target:pre_ftl_country = {
+			shift_ethic = "ethic_fanatic_spiritualist"
+		}
+		hidden_effect = {
+			# This will not end well...
+			country_event = {
+				id = observation.107
+				days = 100
+			}
+		}
+	}
+}
+
+# Planet Descends into Civil War
+country_event = {
+	id = observation.107
+	title = "observation.107.name"
+	desc = "observation.107.desc"
+	picture = GFX_evt_city_ruins
+	show_sound = event_ground_battle
+	location = event_target:pre_ftl_planet
+
+	is_triggered_only = yes
+
+	trigger = {
+		event_target:pre_ftl_planet = {
+			owner = {
+				is_regular_pre_ftl = yes
+			}
+			has_observation_outpost = yes
+			observation_outpost_owner = {
+				has_country_flag = missing_scientist_chain
+			}
 		}
 	}
 
@@ -1030,6 +1105,12 @@ country_event = {
 							id = observation.1405
 							days = 360
 							random = 360
+						}
+						modifier = {
+							factor = 2
+							owner = {
+								is_pacifist = yes
+							}
 						}
 					}
 				}
@@ -1576,19 +1657,19 @@ country_event = {
 
 	option = {
 		name = "observation.203.a"
-		event_target:pre_ftl_country = {
-			set_awareness = 100
-		}
 		hidden_effect = {
 			set_country_flag = scientists_captured_chain
 			event_target:pre_ftl_planet = {
 				random_list = {
 					33 = {
-						planet_event = {
-							id = observation.204
-							# 5 ± 2.5 years
-							days = 900
-							random = 1800
+						root = {
+							country_event = {
+								# This used fire planet event observation.204, but now there is a last chance to save pre-FTLs from destruction.
+								id = observation.3210
+								# 5 ± 2.5 years
+								days = 900
+								random = 1800
+							}
 						}
 						modifier = {
 							factor = 0
@@ -1622,6 +1703,53 @@ country_event = {
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+}
+
+## Prelude event to catasrophe escalation.
+## There is no turning back after this event.
+## Act now or they gon get nuked!
+country_event = {
+	id = observation.3210
+	title = "observation.3210.name"
+	desc = observation.3210.desc
+
+	picture = GFX_evt_society_research
+	show_sound = event_air_raid_siren
+	location = FROMFROMFROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		fromfromfrom = {
+			save_event_target_as = pre_ftl_planet
+			owner = {
+				save_event_target_as = pre_ftl_country
+			}
+			set_country_flag = scientists_captured_chain
+		}
+	}
+
+	option = {
+		name = "observation.3210.a"
+		event_target:pre_ftl_country = {
+			set_awareness = 100
+		}
+		observation_breach_effect = {
+			RESOLUTION = resolution_pre_ftl_stances_non_interference
+		}
+	}
+
+	option = {
+		name = "observation.3210.b"
+		hidden_effect = {
+			event_target:pre_ftl_planet = {
+				planet_event = {
+					id = observation.204
+					days = 100
 				}
 			}
 		}
@@ -3510,6 +3638,67 @@ country_event = {
 		}
 	}
 }
+
+### Last chance to stop the pre-FTL planet from destroying themselves ###
+country_event = {
+	id = observation.3215
+	title = "observation.3215.name"
+	desc = "observation.3215.desc"
+	picture = GFX_evt_deficit
+	show_sound = event_air_raid_siren
+	location = event_target:pre_ftl_planet
+
+	is_triggered_only = yes
+
+	option = {
+		name = "observation.3215.a"
+		observation_breach_effect = {
+			RESOLUTION = resolution_pre_ftl_stances_non_interference
+		}
+	}
+
+
+	option = {
+		name = "observation.3215.b"
+		hidden_effect = {
+			event_target:pre_ftl_planet = {
+				random_list = {
+					50 = {
+						# Planet Depopulated
+						planet_event = {
+							id = observation.1401 
+						}
+						modifier = {
+							factor = 0.5
+							owner = {
+								is_militarist = no
+							}
+						}
+					}
+					50 = {
+						# Planet Uninhabitable
+						planet_event = {
+							id = observation.1403
+						}
+						modifier = {
+							factor = 0.5
+							owner = {
+								is_militarist = no
+							}
+						}
+					}
+					200 = {
+						# Pre-FTLs regress to Stone Age
+						planet_event = {
+							id = observation.1405
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 # Nuclear War (Gatekeeper)
 situation_event = {
 	id = observation.1400
@@ -3548,73 +3737,8 @@ situation_event = {
 		owner = {
 			set_country_flag = observation_1400_fired
 			save_event_target_as = pre_ftl_country
-
 			capital_scope = {
 				save_event_target_as = pre_ftl_planet
-				random_list = {
-					500 = {
-						# Close Call!
-						modifier = {
-							factor = 2
-							owner = {
-								is_pacifist = yes
-							}
-						}
-					}
-					50 = {
-						# Planet Depopulated
-						planet_event = {
-							id = observation.1401
-						}
-						root = {
-							set_situation_flag = has_ongoing_observation_event_chain
-							# Setting this flag for the duration of the entire event chain
-							# to prevent other observation events from interfering.
-						}
-						modifier = {
-							factor = 0.5
-							owner = {
-								is_militarist = no
-							}
-						}
-						modifier = {
-							factor = 0.1
-							has_observation_outpost = no
-						}
-					}
-					50 = {
-						# Planet Uninhabitable
-						planet_event = {
-							id = observation.1403
-						}
-						root = {
-							set_situation_flag = has_ongoing_observation_event_chain
-							# Setting this flag for the duration of the entire event chain
-							# to prevent other observation events from interfering.
-						}
-						modifier = {
-							factor = 0.5
-							owner = {
-								is_militarist = no
-							}
-						}
-						modifier = {
-							factor = 0.1
-							has_observation_outpost = no
-						}
-					}
-					200 = {
-						# Pre-FTLs regress to Stone Age
-						planet_event = {
-							id = observation.1405
-						}
-						root = {
-							set_situation_flag = has_ongoing_observation_event_chain
-							# Setting this flag for the duration of the entire event chain
-							# to prevent other observation events from interfering.
-						}
-					}
-				}
 				if = {
 					limit = {
 						has_observation_outpost = no
@@ -3622,6 +3746,69 @@ situation_event = {
 					set_timed_global_flag = {
 						flag = nuclear_war_pre_ftl_global
 						years = 50
+					}
+					random_list = {
+						500 = {
+							# Close Call!
+							modifier = {
+								factor = 2
+								owner = {
+									is_pacifist = yes
+								}
+							}
+						}
+						5 = {
+							# Planet Depopulated
+							planet_event = {
+								id = observation.1401
+							}
+							root = {
+								set_situation_flag = has_ongoing_observation_event_chain
+								# Setting this flag for the duration of the entire event chain
+								# to prevent other observation events from interfering.
+							}
+							modifier = {
+								factor = 0.5
+								owner = {
+									is_militarist = no
+								}
+							}
+						}
+						5 = {
+							# Planet Uninhabitable
+							planet_event = {
+								id = observation.1403
+							}
+							root = {
+								set_situation_flag = has_ongoing_observation_event_chain
+								# Setting this flag for the duration of the entire event chain
+								# to prevent other observation events from interfering.
+							}
+							modifier = {
+								factor = 0.5
+								owner = {
+									is_militarist = no
+								}
+							}
+						}
+						200 = {
+							# Pre-FTLs regress to Stone Age
+							planet_event = {
+								id = observation.1405
+							}
+							root = {
+								set_situation_flag = has_ongoing_observation_event_chain
+								# Setting this flag for the duration of the entire event chain
+								# to prevent other observation events from interfering.
+							}
+						}
+					}
+				}
+				else = {
+					observation_outpost_owner = {
+						country_event = {
+							id = observation.3215
+						}
 					}
 				}
 			}

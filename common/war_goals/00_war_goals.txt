@@ -415,7 +415,6 @@ wg_absorption_vs_fe = {
 	}
 }
 
-
 wg_plunder = {
 	casus_belli = cb_despoliation
 	hide_if_no_cb = no
@@ -477,6 +476,77 @@ wg_plunder = {
 		add_resource = {
 			energy = 250
 			minerals = 250
+			mult = from.trigger:num_owned_planets
+		}
+		hidden_effect = { from = { add_modifier = { modifier = raided days = 3600 } } }
+	}
+
+	ai_weight = {
+		weight = 100
+	}
+}
+
+wg_plunder_raid = {
+	casus_belli = cb_pirate_raid
+	hide_if_no_cb = no
+	total_war = no
+
+	galactic_empire_joins_defender = {
+		from = { is_galactic_emperor = yes }
+		imperial_authority >= 100
+	}
+
+	allowed_peace_offers = {
+		status_quo
+		surrender
+		demand_surrender
+	}
+
+	surrender_acceptance = -25
+
+	potential = {
+		has_total_war_cb = no
+		has_valid_civic = civic_crusader_spirit_corporate
+		NOT = { is_in_federation_with = from }
+		NAND = {
+			is_galactic_emperor = yes
+			from = { is_galactic_community_member = yes }
+		}
+	}
+	possible = {
+		custom_tooltip = {
+			fail_text = has_claimed_all_systems
+			from = {
+				is_country_type = default
+				any_owned_planet = {
+					is_colony = yes
+					root = {
+						NOT = { has_claim = prev.solar_system }
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			fail_text = cannot_use_against_emperor
+			OR = {
+				from = { is_galactic_emperor = no }
+				is_galactic_community_member = no
+			}
+		}
+		custom_tooltip = {
+			fail_text = pax_galactica_active
+			NAND = {
+				is_active_resolution = resolution_emperor_pax_galactica
+				is_galactic_community_member = yes
+				from = { is_galactic_community_member = yes }
+			}
+		}
+	}
+	on_accept = {
+		custom_tooltip = wg_plunder_accept_them
+		add_resource = {
+			energy = 500
+			minerals = 50
 			mult = from.trigger:num_owned_planets
 		}
 		hidden_effect = { from = { add_modifier = { modifier = raided days = 3600 } } }
@@ -1096,7 +1166,7 @@ wg_megacorp_subjugate = {
 					switch = {
 						trigger = has_policy_flag
 						oppressive_terms = {
-							FROM = {
+							PREV = {
 								set_subject_of = {
 									who = ROOT
 									preset = preset_subsidiary_oppressive
@@ -1252,6 +1322,15 @@ wg_force_ideology = {
 					amount = 0.10
 				}
 			}
+			if = {
+				limit = {
+					has_valid_civic = civic_crusader_spirit
+				}
+				change_variable = {
+					which = we_bring_peace_achievement_count
+					value = 1
+				}
+			}
 		}
 	}
 	on_accept = {
@@ -1340,6 +1419,15 @@ wg_force_ideology = {
 			}
 			from = {
 				leave_alliance = { override_requirements = yes }
+			}
+			if = {
+				limit = {
+					has_valid_civic = civic_crusader_spirit
+				}
+				change_variable = {
+					which = we_bring_peace_achievement_count
+					value = 1
+				}
 			}
 		}
 	}

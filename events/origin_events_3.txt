@@ -381,6 +381,21 @@ country_event = {
 				which = experience_bonus
 				value = random_factor
 			}
+			if = {
+				limit = {
+					has_skill <= 6
+				}
+				multiply_variable = {
+					which = experience_bonus
+					value = 0.7
+				}
+			}
+			else = {
+				multiply_variable = {
+					which = experience_bonus
+					value = 0.5
+				}
+			}
 			add_experience = experience_bonus
 
 			clear_variable = experience_bonus
@@ -665,6 +680,7 @@ planet_event = { #Glassing the Progenitor
  	}
 
  	trigger = {
+ 		exists = owner
  		owner = { has_origin = origin_progenitor_hive }
  		has_deposit = d_progenitor
  	}
@@ -2279,6 +2295,7 @@ country_event = {
 			limit = {
 				any_country = {
 					has_origin = origin_imperial_vassal
+					is_subject = no
 					relative_power = {
 						who = root
 						category = fleet
@@ -2289,6 +2306,7 @@ country_event = {
 			random_country = {
 				limit = {
 					has_origin = origin_imperial_vassal
+					is_subject = no
 					relative_power = {
 						who = root
 						category = fleet
@@ -2591,11 +2609,11 @@ country_event = { # Get Scientist
 			species = event_target:fotd_habitants.species
 			skill = 5
 			traits = {
-				trait = random_trait
+				0 = leader_trait_fotd_scientist
 			}
 		}
 		last_created_leader = {
-			add_trait = leader_trait_fotd_scientist
+			add_trait_no_notify = leader_trait_fotd_scientist
 			save_event_target_as = fotd_Leader
 			exile_leader_as = fotd_Leader_exile
 		}
@@ -2682,11 +2700,11 @@ country_event = { # Get Admiral
 			species = event_target:fotd_habitants.species
 			skill = 5
 			traits = {
-				trait = random_trait
+				0 = leader_trait_fotd_admiral
 			}
 		}
 		last_created_leader = {
-			add_trait = leader_trait_fotd_admiral
+			add_trait_no_notify = leader_trait_fotd_admiral
 			save_event_target_as = fotd_Leader
 			exile_leader_as = fotd_Leader_exile
 		}
@@ -2819,7 +2837,7 @@ country_event = { # Return the Leader Escalated
 		event_target:fotd_Leader_accepted = {
 			if = {
 				limit = {
-					NOT = { has_trait = leader_trait_substance_abuser }
+					NOT = { has_trait_tier1or2 = { TRAIT = leader_trait_substance_abuser } }
 				}
 				add_trait = leader_trait_substance_abuser
 				owner = {
@@ -2849,7 +2867,7 @@ country_event = { # Return the Leader Escalated
 			else_if = {
 				limit = {
 					has_trait = leader_trait_arrested_development
-					has_trait = leader_trait_substance_abuser
+					has_trait_tier1or2 = { TRAIT = leader_trait_substance_abuser }
 				}
 				owner = {
 					add_resource = { unity = -1000 }
@@ -3437,15 +3455,6 @@ first_contact_event = {
 					id = origin.6045
 					days = 14
 					scopes = { from = from }
-				}
-			}
-		}
-		else = {
-			from = {
-				country_event = {
-					id = origin.6045
-					days = 14
-					scopes = { from = root.owner }
 				}
 			}
 		}
@@ -4777,6 +4786,10 @@ country_event = {
 	location = fromfrom
 
 	option = {
+		allow = {
+			is_galactic_custodian = no
+			is_galactic_emperor = no
+		}
 		name = origin.6165.a
 		icon = {
 			icon = GFX_fanatic_purifier
@@ -4786,6 +4799,15 @@ country_event = {
 		if = {
 			limit = {
 				is_megacorp = yes
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						has_civic = civic_corporate_anglers
+					}
+					force_remove_civic = civic_corporate_anglers
+					force_add_civic = civic_anglers
+				}
 			}
 			change_government = {
 				cooldown = no
@@ -4809,6 +4831,39 @@ country_event = {
 			set_owner = root
 		}
 		hidden_effect = {
+			if = {
+				limit = {
+					has_civic = civic_barbaric_despoilers
+				}
+				force_remove_civic = civic_barbaric_despoilers
+			}
+			remove_xuracorp_trades = yes
+			remove_riggan_trades = yes
+			remove_muutagan_trades = yes
+			if = {
+				limit = {
+					has_modifier = enclave_artist_patron
+				}
+				remove_modifier = enclave_artist_patron
+			}
+			if = {
+				limit = {
+					has_modifier = curator_insight
+				}
+				remove_modifier = curator_insight
+			}
+			if = {
+				limit = {
+					has_modifier = salvager_insight
+				}
+				remove_modifier = salvager_insight
+			}
+			if = {
+				limit = {
+					has_modifier = salvage_overseer
+				}
+				remove_modifier = salvage_overseer
+			}
 			every_playable_country = {
 				limit = {
 					exists = overlord
@@ -5808,12 +5863,9 @@ country_event = {
 				class = admiral
 				species = root.species
 				skill = 5
-				traits = {
-					trait = random_trait
-				}
 			}
 			last_created_leader = {
-				add_trait = leader_trait_fotd_admiral
+				add_trait_no_notify = leader_trait_fotd_admiral
 				save_event_target_as = fotd_patrol_admiral_target
 				set_leader_flag = fotd_patrol_admiral
 			}

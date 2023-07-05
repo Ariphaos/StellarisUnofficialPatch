@@ -58,6 +58,73 @@ decision_prospect = {
 	}
 }
 
+# decision_geologist_prospect = {
+# 	owned_planets_only = yes
+
+# 	enactment_time = 180
+# 	resources = {
+# 		category = decisions
+# 		cost = {
+# 			energy = 250
+# 		}
+# 	}
+
+# 	potential = {
+# 		is_artificial = no
+# 		NOT = { is_planet_class = pc_machine }
+# 		NOT = { is_planet_class = pc_hive }
+# 		NOT = { is_planet_class = pc_city }
+# 		planet = {
+# 			exists = leader
+# 			leader = {
+# 				has_trait = "leader_trait_geologist"
+# 			}
+# 		}
+# 		NOT = { has_planet_flag = planet_geologist_prospected }
+# 		NOT = { has_planet_flag = planet_naturalist_prospected }
+# 	}
+
+# 	effect = {
+# 		custom_tooltip = decision_geologist_prospect_effect
+# 		hidden_effect = {
+# 			random_list = {
+# 				60 = {
+# 					add_deposit_category_effect = "deposit_cat_rare_resource"
+# 					hidden_effect = {
+# 						create_message = {
+# 							type = MESSAGE_TYPE_PLANET_PROSPECTED
+# 							localization = MESSAGE_PLANET_PROSPECTED
+# 							days = 30
+# 							target = this
+# 							variable = {
+# 								type = name
+# 								localization = PLANET
+# 								scope = this
+# 							}
+# 							variable = {
+# 								type = name
+# 								localization = DEPOSIT
+# 								scope = last_added_deposit
+# 							}
+# 						}
+# 					}
+# 				}
+	
+# 				40 = {
+	
+# 				}
+# 			}
+# 			set_planet_flag = planet_geologist_prospected
+# 		}
+
+# 		custom_tooltip = decision_prospect_effects_short
+# 	}
+
+# 	ai_weight = {
+# 		weight = 10
+# 	}
+# }
+
 decision_prospect_void = {
 	owned_planets_only = yes
 
@@ -556,12 +623,12 @@ decision_consecrated_worlds = {
 	}
 
 	potential = {
-		exists = space_owner
 		exists = from
-		space_owner = { is_same_value = from }
 		from = {
 			has_ascension_perk = ap_consecrated_worlds
 		}
+		exists = space_owner
+		space_owner = { is_same_value = from }
 		is_star = no
 		is_artificial = no
 		is_ringworld = no
@@ -1196,6 +1263,10 @@ decision_arcology_project = {
 				num_districts = { type = district_mining_uncapped value < 1 }
 				num_districts = { type = district_generator_uncapped value < 1 }
 			}
+			custom_tooltip = {
+				fail_text = legendary_leader_decision_arcology_project
+				NOT = { has_planet_flag = legendary_leader_planet }
+			}
 		}
 		num_uncleared_blockers < 1
 	}
@@ -1380,7 +1451,15 @@ decision_market_nomination = {
 			has_global_flag = ongoing_market_relocation_nomination
 		}
 		#from = { has_communications = event_target:50percentcomms } # should include self
-		from = { has_country_flag = market_nomination_eligible }
+		exists = from
+		from = {
+			has_country_flag = market_nomination_eligible
+			NOT = { has_valid_civic = civic_inwards_perfection }
+			OR = {
+				is_ai = no
+				NOT = { has_ethic = ethic_fanatic_xenophobe }
+			}
+		}
 	}
 
 	allow = {

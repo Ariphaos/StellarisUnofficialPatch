@@ -1,0 +1,1232 @@
+#######################################
+# Pop Faction Events
+# by Maximilian Olbers & Gemma Thomson
+#######################################
+
+@RecentFactionsEventTimer = 500 # days until this empire should be eligible for most other 'Faction Reacts' events
+@RecentCommsTimer = 3600 # 10 years, during which parties are considered to have established communications recently
+
+namespace = factions
+
+# A faction is formed
+pop_faction_event = {
+	id = factions.1
+	title = factions.1.title
+	desc = {
+		trigger = {
+			text = factions.1.desc.start
+			text = newline
+			success_text = {
+				text = factions.1.desc.imperialist
+				is_pop_faction_type = imperialist
+			}
+			success_text = {
+				text = factions.1.desc.isolationist
+				is_pop_faction_type = isolationist
+			}
+			success_text = {
+				text = factions.1.desc.progressive
+				is_pop_faction_type = progressive
+			}
+			success_text = {
+				text = factions.1.desc.prosperity
+				is_pop_faction_type = prosperity
+			}
+			success_text = {
+				text = factions.1.desc.supremacist
+				is_pop_faction_type = supremacist
+			}
+			success_text = {
+				text = factions.1.desc.technologist
+				is_pop_faction_type = technologist
+			}
+			success_text = {
+				text = factions.1.desc.totalitarian
+				is_pop_faction_type = totalitarian
+			}
+			success_text = {
+				text = factions.1.desc.traditionalist
+				is_pop_faction_type = traditionalist
+			}
+			success_text = {
+				text = factions.1.desc.xenoist
+				is_pop_faction_type = xenoist
+			}
+			success_text = {
+				text = factions.1.desc.manifesti
+				is_pop_faction_type = manifesti
+			}
+			success_text = {
+				hidden:owner = { NOT = { has_country_flag = first_faction } }
+				text = factions.1.desc.firstfinisher
+			}
+		}
+	}
+	picture = GFX_evt_galactic_senate
+	show_sound = event_factions
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			owner = {
+				has_origin = origin_broken_shackles
+				#has_country_flag = first_faction 
+			}
+		}
+	}
+
+	option = {
+		name = OK
+		hidden_effect = {
+			owner = {
+				every_owned_planet = {
+					every_owned_pop = {
+						force_faction_evaluation = yes
+					}
+				}
+				set_country_flag = first_faction
+			}
+		}
+	}
+}
+
+# Killed Guardian
+country_event = {
+	id = factions.10
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		from = {
+			is_guardian_country = yes
+		}
+	}
+
+	immediate = {
+		set_country_flag = killed_guardian
+	}
+}
+
+# Established comms
+# via on_post_communications_established | this = country which established the communications; from = country communications were established with
+country_event = {
+	id = factions.11
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			is_country_type = default
+			is_country_type = fallen_empire
+			is_country_type = awakened_fallen_empire
+			AND = {
+				is_country_type = primitive
+				current_awareness_level = full
+			}
+		}
+		from = {
+			is_country_type = default
+		}
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_comms_timed
+			days = @RecentCommsTimer
+		}
+		from = {
+			set_timed_country_flag = {
+				flag = recent_comms_timed
+				days = @RecentCommsTimer
+			}
+		}
+	}
+}
+
+# Invaded primitives
+country_event = {
+	id = factions.12
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = { is_country_type = primitive }
+		is_country_type = default
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_primitive_invasion
+			days = 7200 # 20 years
+		}
+	}
+}
+
+# Beginning war as either attacker or defender
+country_event = {
+	id = factions.13
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			if = {
+				limit = { is_war_participant = { who = root side = attackers } }
+				root = {
+					set_timed_country_flag = {
+						flag = entered_war_as_attacker
+						days = 7200 # 20 years
+					}
+				}
+			}
+			else_if = {
+				limit = { is_war_participant = { who = root side = defenders } }
+				root = {
+					set_timed_country_flag = {
+						flag = entered_war_as_defender
+						days = 7200 # 20 years
+					}
+				}
+			}
+		}
+	}
+}
+
+# Remove Factions-specific modifiers if the world changes owners
+# via on_planet_transfer = {}
+planet_event = {
+	id = factions.15
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = { has_modifier = planet_political_frontier }
+			remove_modifier = planet_political_frontier
+		}
+		if = {
+			limit = { has_modifier = planet_political_safezone }
+			remove_modifier = planet_political_safezone
+		}
+		if = {
+			limit = { has_modifier = planet_political_crackdown }
+			remove_modifier = planet_political_crackdown
+		}
+		if = {
+			limit = { has_modifier = planet_political_admittance }
+			remove_modifier = planet_political_admittance
+		}
+	}
+}
+
+# Xenoist Uplift Demand
+# via on_uplift_completion = {}
+planet_event = {
+	id = factions.1005
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		owner = {
+			set_timed_country_flag = {
+				flag = recent_uplift_timed
+				days = 7200 # 20 years
+			}
+		}
+	}
+}
+
+# Notification event - other empire shifts ethics
+country_event = {
+	id = factions.2000
+	title = factions.2000.title
+	location = event_target:TargetFaction.Owner.capital_scope
+	desc = {
+		trigger = {
+			text = factions.2000.desc.start
+			text = newline
+			success_text = {
+				text = factions.2000.desc.imperialist
+				event_target:TargetFaction = { is_pop_faction_type = imperialist }
+			}
+			success_text = {
+				text = factions.2000.desc.isolationist
+				event_target:TargetFaction = { is_pop_faction_type = isolationist }
+			}
+			success_text = {
+				text = factions.2000.desc.progressive
+				event_target:TargetFaction = { is_pop_faction_type = progressive }
+			}
+			success_text = {
+				text = factions.2000.desc.prosperity
+				event_target:TargetFaction = { is_pop_faction_type = prosperity }
+			}
+			success_text = {
+				text = factions.2000.desc.supremacist
+				event_target:TargetFaction = { is_pop_faction_type = supremacist }
+			}
+			success_text = {
+				text = factions.2000.desc.technologist
+				event_target:TargetFaction = { is_pop_faction_type = technologist }
+			}
+			success_text = {
+				text = factions.2000.desc.totalitarian
+				event_target:TargetFaction = { is_pop_faction_type = totalitarian }
+			}
+			success_text = {
+				text = factions.2000.desc.traditionalist
+				event_target:TargetFaction = { is_pop_faction_type = traditionalist }
+			}
+			success_text = {
+				text = factions.2000.desc.xenoist
+				event_target:TargetFaction = { is_pop_faction_type = xenoist }
+			}
+			success_text = {
+				text = factions.2000.desc.manifesti
+				event_target:TargetFaction = { is_pop_faction_type = manifesti }
+			}
+		}
+	}
+
+	picture = GFX_evt_alien_propaganda
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+	}
+}
+
+# The PoliticaL Frontier
+# via on_colony_[1/2]_years_old = {} | this = colony world
+planet_event = {
+	id = factions.3000
+	title = factions.3000.name
+	desc = factions.3000.desc
+	picture = GFX_evt_alien_propaganda
+	show_sound = event_factions
+	location = this
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			is_regular_empire = yes
+			NOR = {
+				has_country_flag = recent_factions_event
+				has_country_flag = factions_political_frontier
+			}
+			count_pop_faction = {
+				count > 1
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_timed_country_flag = {
+				flag = recent_factions_event
+				days = @RecentFactionsEventTimer
+			}
+			set_country_flag = factions_political_frontier
+		}
+	}
+
+	# Carry on (standard)
+	option = {
+		name = INTERESTING
+		trigger = {
+			owner = {
+				NOR = {
+					has_authority = auth_democratic
+					is_authoritarian = yes
+				}
+			}
+		}
+		add_modifier = {
+			modifier = planet_political_frontier
+			years = 10
+		}
+	}
+	# Carry on (Democracy)
+	option = {
+		name = factions.3000.a.demo
+		trigger = {
+			owner = {
+				has_authority = auth_democratic
+			}
+		}
+		add_modifier = {
+			modifier = planet_political_frontier
+			years = 10
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
+		planet_event = {
+			id = factions.3010
+			days = 200
+		}
+	}
+	# Carry on (Authoritarian)
+	option = {
+		name = factions.3000.a.auth
+		trigger = {
+			owner = {
+				is_authoritarian = yes
+			}
+		}
+		add_modifier = {
+			modifier = planet_political_frontier
+			years = 5
+		}
+		planet_event = {
+			id = factions.3005
+			days = 200
+		}
+	}
+	# Shut this down (standard)
+	option = {
+		name = factions.3000.b
+		trigger = {
+			owner = {
+				NOR = {
+					has_authority = auth_democratic
+					has_valid_civic = civic_police_state
+					is_authoritarian = yes
+				}
+			}
+		}
+		add_modifier = {
+			modifier = planet_political_safezone
+			years = 10
+		}
+	}
+	# Shut this down (Authoritarian)
+	option = {
+		name = factions.3000.b.auth
+		trigger = {
+			owner = {
+				OR = {
+					is_authoritarian = yes
+					has_valid_civic = civic_police_state
+				}
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = unity
+					value >= 250
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				unity = -250
+			}
+		}
+		add_modifier = {
+			modifier = planet_political_crackdown
+			years = 40
+		}
+	}
+}
+
+# The Political Frontier: Authoritarian Infiltration
+# this = colony world
+planet_event = {
+	id = factions.3005
+	title = factions.3005.name
+	desc = {
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+		}
+		text = factions.3005.desc.1
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = frontier_egalitarianism
+		}
+		text = factions.3005.desc.2
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = frontier_alternatives
+		}
+		text = factions.3005.desc.3
+	}
+	picture = {
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+		}
+		picture = GFX_evt_spymaster
+	}
+	picture = {
+		trigger = {
+			OR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+		}
+		picture = GFX_evt_space_monster # tendrils
+	}
+	show_sound = event_factions
+	location = this
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = planet_political_frontier # would have been removed if the planet changed owner since the preceding event
+		owner = {
+			count_pop_faction = {
+				count > 1
+			}
+		}
+	}
+
+	immediate = {
+		if = { # Egalitarianism has taken root
+			limit = {
+				count_owned_pop = {
+					limit = {
+						is_egalitarian = yes
+					}
+					count > 0
+				}
+			}
+			set_planet_flag = frontier_egalitarianism
+		}
+		else_if = { # Other, unsupported ethics are present
+			limit = {
+				count_owned_pop = {
+					limit = {
+						has_alternative_ethics = {
+							THIS_SCOPE = this
+							REF_SCOPE = root.owner
+						}
+					}
+					count > 1
+				}
+			}
+			set_planet_flag = frontier_alternatives
+		}
+		# else: Political harmony
+	}
+
+	# Political harmony: acknowledge
+	option = {
+		name = EXCELLENT
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+		}
+		remove_modifier = planet_political_frontier
+	}
+	# Political harmony: commendations
+	option = {
+		name = factions.3005.a
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 300
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				energy = -300
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
+		remove_modifier = planet_political_frontier
+	}
+	# Political deviance: useful insights
+	option = {
+		name = EXCELLENT
+		trigger = {
+			OR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+		}
+		remove_modifier = planet_political_frontier
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		add_modifier = { # planet modifier
+			modifier = promoted_authoritarian
+			years = 10
+		}
+	}
+	# Political deviance: perhaps it's okay?
+	option = {
+		name = {
+			trigger = { has_planet_flag = frontier_egalitarianism }
+			text = factions.3005.b
+		}
+		name = {
+			trigger = { has_planet_flag = frontier_alternatives }
+			text = factions.3005.c
+		}
+		trigger = {
+			OR = {
+				has_planet_flag = frontier_egalitarianism
+				has_planet_flag = frontier_alternatives
+			}
+			owner = {
+				NOT = {
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		remove_modifier = planet_political_frontier
+		add_modifier = { # planet modifier
+			modifier = planet_political_admittance
+			years = 30
+		}
+	}
+
+	after = {
+		remove_planet_flag = frontier_egalitarianism
+		remove_planet_flag = frontier_alternatives
+	}
+}
+
+# The Political Frontier: Democratic Report
+# this = colony world
+planet_event = {
+	id = factions.3010
+	title = factions.3005.name
+	desc = {
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_authoritarianism
+				has_planet_flag = frontier_discourse
+			}
+		}
+		text = factions.3010.desc.1
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = frontier_authoritarianism
+		}
+		text = factions.3010.desc.2
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = frontier_discourse
+		}
+		text = factions.3010.desc.3
+	}
+	picture = {
+		trigger = {
+			NOT = { has_planet_flag = frontier_authoritarianism }
+		}
+		picture = GFX_evt_civil_action
+	}
+	picture = {
+		trigger = {
+			has_planet_flag = frontier_authoritarianism
+		}
+		picture = GFX_evt_space_monster # tendrils
+	}
+	show_sound = event_factions
+	location = this
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = planet_political_frontier # would have been removed if the planet changed owner since the preceding event
+		owner = {
+			count_pop_faction = {
+				count > 1
+			}
+		}
+	}
+
+	immediate = {
+		if = { # Authoritarianism has taken root
+			limit = {
+				count_owned_pop = {
+					limit = {
+						is_authoritarian = yes
+					}
+					count > 0
+				}
+			}
+			set_planet_flag = frontier_authoritarianism
+		}
+		else_if = { # Diverse ethics are present (mutually exclusive with above)
+			limit = {
+				count_owned_pop = {
+					limit = {
+						has_alternative_ethics = {
+							THIS_SCOPE = this
+							REF_SCOPE = root.owner
+						}
+					}
+					count > 2
+				}
+			}
+			set_planet_flag = frontier_discourse
+		}
+		# else: Status quo
+	}
+
+	# Status quo: acknowledge
+	option = {
+		name = GOOD
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_authoritarianism
+				has_planet_flag = frontier_discourse
+			}
+		}
+		remove_modifier = planet_political_frontier
+	}
+	# Status quo: encourage radical thought
+	option = {
+		name = factions.3010.a
+		trigger = {
+			NOR = {
+				has_planet_flag = frontier_authoritarianism
+				has_planet_flag = frontier_discourse
+			}
+		}
+		remove_modifier = planet_political_frontier
+		add_modifier = { # planet modifier
+			modifier = planet_political_admittance
+			years = 30
+		}
+	}
+	# Diverse politics OR Authoritarianism taking root: useful insights
+	option = {
+		name = factions.3010.b
+		trigger = {
+			OR = {
+				has_planet_flag = frontier_discourse
+				has_planet_flag = frontier_authoritarianism
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		custom_tooltip = factions.3010.frontier.tt # informing that planet_political_frontier will remain in place
+	}
+	# Diverse politics OR Authoritarianism taking root: too risky
+	option = {
+		name = {
+			trigger = { has_planet_flag = frontier_authoritarianism }
+			text = factions.3010.c
+		}
+		name = {
+			trigger = { has_planet_flag = frontier_discourse }
+			text = factions.3010.d
+		}
+		trigger = {
+			OR = {
+				has_planet_flag = frontier_discourse
+				has_planet_flag = frontier_authoritarianism
+			}
+			owner = {
+				NOT = {
+					has_ethic = ethic_fanatic_egalitarian
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		remove_modifier = planet_political_frontier
+		add_modifier = { # planet modifier
+			modifier = planet_political_safezone
+			years = 20
+		}
+	}
+
+	after = {
+		remove_planet_flag = frontier_authoritarianism
+		remove_planet_flag = frontier_discourse
+	}
+}
+
+####################
+# Manifesti Destiny
+# By Gemma Thomson
+####################
+
+namespace = manifesti
+
+# Triggered by chance from on_five_year_pulse = {}
+planet_event = {
+	id = manifesti.1
+	title = manifesti.1.name
+	desc = manifesti.1.desc
+	picture = GFX_evt_tradestation_interior
+	show_sound = event_celebration
+	location = root
+
+	is_triggered_only = yes
+
+	pre_triggers = {
+		has_owner = yes
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		years_passed > 10
+		any_country = {
+			NOT = { has_country_flag = manifesti_spawned }
+		}
+		owner = {
+			is_ai = no
+			is_regular_empire = yes
+			has_encountered_other_species = yes
+			is_at_war = no
+			NOR = {
+				is_homicidal = yes
+				is_fanatic = yes
+				has_valid_civic = civic_warrior_culture #Keeps entertainers
+				has_valid_civic = civic_dystopian_society
+				has_origin = origin_legendary_leader
+				has_origin = origin_legendary_leader_imperial
+				has_origin = origin_legendary_leader_dictatorial
+				has_country_flag = manifesti_spawned
+			}
+		}
+		OR = {
+			has_building = building_holo_theatres
+			has_building = building_hyper_entertainment_forum
+			has_building = building_autochthon_monument
+			has_building = building_corporate_monument
+			has_building = building_noble_estates
+			has_building = building_commercial_zone
+			has_district = district_hab_cultural
+		}
+	}
+
+	immediate = {
+		save_event_target_as = manifesti_world
+		owner = { set_country_flag = manifesti_spawned }
+	}
+
+	option = {
+		name = manifesti.1.a
+		begin_event_chain = {
+			event_chain = manifesti_chain
+			target = owner
+		}
+		add_modifier = {
+			modifier = planet_manifesti_joy
+			days = 720
+		}
+		hidden_effect = {
+			planet_event = { id = manifesti.5 days = 59 }
+		}
+	}
+}
+
+# Protests cease; the group is named
+planet_event = {
+	id = manifesti.5
+	title = manifesti.5.name
+	desc = {
+		text = manifesti.5.desc
+		trigger = { NOT = { has_planet_flag = manifesti_investigate } }
+	}
+	desc = {
+		text = manifesti.5.investigated.desc
+		trigger = { has_planet_flag = manifesti_investigate }
+	}
+	picture = GFX_evt_city_planet
+	show_sound = event_cityscape
+	location = root
+
+	is_triggered_only = yes
+
+	pre_triggers = {
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		owner = { has_event_chain = "manifesti_chain" }
+	}
+
+	immediate = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "manifesti_chain"
+				counter = "manifesti_rise"
+				amount = 1
+			}
+			random_owned_planet = {
+				limit = { num_pops > 7 }
+				save_event_target_as = manifesti_world #Can be the same world as ROOT if needs be
+			}
+		}
+	}
+
+	option = { #Let them continue
+		name = manifesti.5.a
+		hidden_effect = {
+			event_target:manifesti_world = {
+				planet_event = { id = manifesti.15 days = 245 }
+			}
+		}
+	}
+	option = { #Make arrests
+		name = manifesti.5.b
+		allow = {
+			hidden_trigger = {
+				owner = {
+					# Check if can afford. Authoritarian Empires pay half price.
+					has_unity_times_empire_size = { VALUE = 1 }
+					OR = {
+						is_authoritarian = yes
+						has_unity_times_empire_size = { VALUE = 2 }
+					}
+				}
+			}
+		}
+		# Pay up, half price for Authoritarians.
+		if = {
+			limit = {
+				owner = { is_authoritarian = yes }
+			}
+			owner = { add_unity_times_empire_size = { VALUE = -1 } }
+		}
+		else = {
+			owner = { add_unity_times_empire_size = { VALUE = -2 } }
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				planet_event = { id = manifesti.10 days = 93 }
+			}
+		}
+	}
+}
+
+# Manifesti apprehended
+planet_event = {
+	id = manifesti.10
+	title = manifesti.10.name
+	desc = manifesti.10.desc
+	picture = GFX_evt_surreal_visions
+	show_sound = event_mystic_reveal
+	location = root
+
+	is_triggered_only = yes
+
+	pre_triggers = {
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		exists = owner
+		owner = { has_event_chain = "manifesti_chain" }
+	}
+
+	immediate = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "manifesti_chain"
+				counter = "manifesti_rise"
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = manifesti.10.a
+		root = {
+			remove_modifier = planet_manifesti_joy
+		}
+		owner = { end_event_chain = manifesti_chain }
+	}
+}
+
+# Manifesti language takes root
+planet_event = {
+	id = manifesti.15
+	title = manifesti.15.name
+	desc = manifesti.15.desc
+	picture = GFX_evt_smugglers_in_bar
+	show_sound = event_cityscape
+	location = root
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_event_chain = "manifesti_chain" }
+	}
+
+	immediate = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "manifesti_chain"
+				counter = "manifesti_rise"
+				amount = 1
+			}
+			random_owned_planet = { #Manifesti spreads
+				limit = {
+					num_pops > 7
+				}
+				save_event_target_as = manifesti_world #Can be the same world as ROOT if needs be
+				add_modifier = { modifier = planet_manifesti_uslurp_mod days = 360 }
+			}
+		}
+	}
+
+	option = { #Let them continue
+		name = manifesti.15.a
+		owner = {
+			add_modifier = { modifier = manifesti_uslurp_mod days = 360 }
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				planet_event = { id = manifesti.20 days = 145 }
+			}
+		}
+	}
+	option = { #Make arrests
+		name = manifesti.15.b
+		trigger = {
+			owner = { is_egalitarian = no }
+		}
+		allow = {
+			hidden_trigger = {
+				owner = {
+					# Check if can afford. Authoritarian Empires pay half price.
+					has_unity_times_empire_size = { VALUE = 1 }
+					OR = {
+						is_authoritarian = yes
+						has_unity_times_empire_size = { VALUE = 2 }
+					}
+				}
+			}
+		}
+		# Pay up, half price for Authoritarians.
+		if = {
+			limit = {
+				owner = { is_authoritarian = yes }
+			}
+			owner = { add_unity_times_empire_size = { VALUE = -1 } }
+		}
+		else = {
+			owner = { add_unity_times_empire_size = { VALUE = -2 } }
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				planet_event = { id = manifesti.10 days = 93 }
+			}
+		}
+	}
+}
+
+# Manifesti exhibition
+planet_event = {
+	id = manifesti.20
+	title = manifesti.20.name
+	desc = manifesti.20.desc
+	picture = GFX_evt_surreal_visions
+	show_sound = event_mystic_reveal
+	location = root
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_event_chain = "manifesti_chain" }
+	}
+
+	immediate = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "manifesti_chain"
+				counter = "manifesti_rise"
+				amount = 1
+			}
+		}
+	}
+
+	option = { #Let them continue
+		name = manifesti.20.a
+		owner = {
+			add_modifier = {
+				modifier = manifesti_reflections_mod
+				days = 720
+			}
+		}
+		hidden_effect = {
+			planet_event = { id = manifesti.25 days = 156 }
+		}
+	}
+	option = { #Make arrests
+		name = manifesti.20.b
+		hidden_effect = {
+			planet_event = { id = manifesti.10 days = 93 }
+		}
+	}
+}
+
+# Rumours of a new faction
+planet_event = {
+	id = manifesti.25
+	title = manifesti.25.name
+	desc = manifesti.25.desc
+	picture = GFX_evt_announcement
+	show_sound = event_factions
+	location = owner.capital_scope
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { has_event_chain = "manifesti_chain" }
+	}
+
+	immediate = { }
+
+	option = {
+		name = INTERESTING
+		hidden_effect = {
+			owner = {
+				country_event = { id = manifesti.26 days = 20 } #Forces evaluation of the Manifesti faction
+			}
+		}
+	}
+	option = {
+		name = manifesti.25.b
+	}
+
+	after = {
+		owner = {
+			set_timed_country_flag = { flag = manifesti_faction days = 955 } #Matches faction on_create, plus some of the evaluation event delay above
+		}
+	}
+}
+
+country_event = {
+	id = manifesti.26
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		enable_faction_of_type = manifesti
+	}
+}
+
+# Manifesti faction in decline (via faction on_destroy OR faction on_create + time delay | from = pop_faction )
+country_event = {
+	id = manifesti.30
+	title = manifesti.30.name
+	desc = manifesti.30.desc
+	picture = GFX_evt_galactic_senate
+	show_sound = event_factions
+	location = capital_scope
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			NOT = {
+				any_pop_faction = { is_pop_faction_type = manifesti }
+			}
+			any_pop_faction = {
+				is_pop_faction_type = manifesti
+				faction_approval < 0.35
+			}
+		}
+		NOT = {
+			has_country_flag = manifesti_decline
+		}
+	}
+
+	immediate = {
+		set_country_flag = manifesti_decline #Can force removal of the faction even if the timed "manifesti_faction" flag remains active
+		every_owned_pop = {
+			limit = {
+				OR = { #Those eligible to join the faction (in lieu of a has_faction trigger for pops)
+					has_ethic = ethic_egalitarian
+					has_ethic = ethic_fanatic_egalitarian
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+				}
+			}
+			set_pop_flag = manifesti_bored
+		}
+	}
+
+	option = {
+		name = manifesti.30.a
+		add_modifier = {
+			modifier = manifesti_sweet_dreams_mod
+			days = 2880 #8 years
+		}
+		add_resource = { society_research = 1800 }
+		end_event_chain = manifesti_chain
+	}
+	option = {
+		name = manifesti.30.b
+		exclusive_trigger = {
+			OR = {
+				is_authoritarian = yes
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}
+		add_modifier = {
+			modifier = manifesti_sweet_dreams_mod
+			days = 1440 #4 years
+		}
+		add_resource = { society_research = 1800 }
+		end_event_chain = manifesti_chain
+	}
+}

@@ -45,13 +45,13 @@ country_event = {
 	hide_window = yes
 
 	trigger = {
-		is_hive_empire = yes
-		FROM = { leader_class = ruler }
+		has_authority = auth_hive_mind
+		FROM = { is_ruler = yes }
 	}
 
 	immediate = {
 		from = {
-			add_trait = leader_trait_ruler_hive_mind
+			add_trait_no_notify = leader_trait_ruler_hive_mind
 		}
 	}
 }
@@ -63,7 +63,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		is_hive_empire = yes
+		has_authority = auth_hive_mind
 		from = { has_trait = trait_hive_mind }
 	}
 
@@ -233,7 +233,7 @@ country_event = {
 		name = EXCELLENT
 		TRIGGER = {
 			OR = {
-				is_hive_empire = no
+				NOT = { has_authority = auth_hive_mind }
 				has_valid_civic = civic_hive_devouring_swarm
 			}
 		}
@@ -242,7 +242,7 @@ country_event = {
 	option = {
 		name = EXCELLENT
 		trigger = {
-			is_hive_empire = yes
+			has_authority = auth_hive_mind
 			NOT = { has_valid_civic = civic_hive_devouring_swarm }
 		}
 	}
@@ -503,30 +503,41 @@ country_event = {
 
 		every_owned_leader = {
 			limit = {
+				species = { has_trait = trait_cybernetic }
 				NOR = {
-					has_trait = leader_trait_admiral_cyborg
-					has_trait = leader_trait_general_cyborg
-					has_trait = leader_trait_governor_cyborg
-					has_trait = leader_trait_scientist_cyborg
-					has_trait = leader_trait_ruler_cyborg
+					has_trait = leader_trait_cyborg
+					has_leader_flag = renowned_leader
+					has_leader_flag = legendary_leader
 				}
 			}
-			add_leader_traits_after_modification = yes
-			remove_leader_traits_after_modification = yes
+			add_trait_no_notify = leader_trait_cyborg
+		}
+
+		create_message = {
+			type = MESSAGE_ALL_GAINED_TRAIT
+			localization = MESSAGE_ALL_GAINED_TRAIT_DESC
+			days = @toast_message_days
+			variable = {
+				type = key
+				value = leader_trait_cyborg
+				localization = TRAIT
+			}
+			variable = {
+				key = TRAIT_KEY
+				value = leader_trait_cyborg
+			}
+			variable = {
+				key = "border"
+				value = "GFX_invisible" #TODO Common/ no rarity frame
+			}
 		}
 
 		every_pool_leader = {
 			limit = {
-				NOR = {
-					has_trait = leader_trait_admiral_cyborg
-					has_trait = leader_trait_general_cyborg
-					has_trait = leader_trait_governor_cyborg
-					has_trait = leader_trait_scientist_cyborg
-					has_trait = leader_trait_ruler_cyborg
-				}
+				species = { has_trait = trait_cybernetic }
+				NOT = { has_trait = leader_trait_cyborg }
 			}
-			add_leader_traits_after_modification = yes
-			remove_leader_traits_after_modification = yes
+			add_trait_no_notify = leader_trait_cyborg
 		}
 
 		observer_event = { id = observer.55 }
@@ -551,6 +562,19 @@ country_event = {
 				}
 			}
 			country_event = { id = origin.6095 days = 5 random = 2 }
+		}
+
+		if = {
+			limit = {
+				is_gestalt = yes
+			}
+			every_owned_leader = {
+				limit = {
+					is_councilor = yes
+					is_ruler = no
+				}
+				set_gestalt_node_protrait_effect = yes
+			}
 		}
 	}
 
@@ -635,43 +659,17 @@ country_event = {
 		from = {
 			species = {
 				has_trait = trait_erudite
-				is_robotic = no
+				NOR = {
+					has_trait = trait_machine_unit
+					has_trait = trait_mechanical
+				}
 			}
 		}
 	}
 
 	immediate = {
 		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_erudite
-				add_ruler_trait = leader_trait_ruler_erudite
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_erudite
-				add_ruler_trait = leader_trait_ruler_erudite
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_erudite
-				add_ruler_trait = leader_trait_ruler_erudite
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_erudite
-				add_ruler_trait = leader_trait_ruler_erudite
-				break = yes
-			}
-			if = {
-				limit = { leader_class = ruler }
-				add_trait = leader_trait_ruler_erudite
-				add_ruler_trait = leader_trait_ruler_erudite
-				break = yes
-			}
+			add_trait_no_notify = leader_trait_erudite
 		}
 	}
 }
@@ -690,80 +688,7 @@ country_event = {
 
 	immediate = {
 		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_cyborg
-				add_ruler_trait = leader_trait_ruler_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_cyborg
-				add_ruler_trait = leader_trait_ruler_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_cyborg
-				add_ruler_trait = leader_trait_ruler_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_cyborg
-				add_ruler_trait = leader_trait_ruler_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = ruler }
-				add_trait = leader_trait_ruler_cyborg
-				add_ruler_trait = leader_trait_ruler_cyborg
-				break = yes
-			}
-		}
-	}
-}
-
-# Ruler gets normal class trait if one hasn't been assigned
-country_event = {
-	id = utopia.2511
-	is_triggered_only = yes
-	hide_window = yes
-
-	trigger = {
-		from = {
-			species = { has_trait = trait_cybernetic }
-			NOR = {
-				has_trait = leader_trait_admiral_cyborg
-				has_trait = leader_trait_general_cyborg
-				has_trait = leader_trait_governor_cyborg
-				has_trait = leader_trait_scientist_cyborg
-			}
-		}
-	}
-
-	immediate = {
-		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_cyborg
-				break = yes
-			}
+			add_trait_no_notify = leader_trait_cyborg
 		}
 	}
 }
@@ -961,11 +886,11 @@ country_event = {
 						is_robotic = no
 						is_livestock = no
 					}
-					has_trait = leader_trait_admiral_synthetic
-					has_trait = leader_trait_ruler_synthetic
-					has_trait = leader_trait_general_synthetic
-					has_trait = leader_trait_governor_synthetic
-					has_trait = leader_trait_scientist_synthetic
+					has_trait = leader_trait_synthetic
+				}
+				NOR = {
+					has_leader_flag = renowned_leader
+					has_leader_flag = legendary_leader
 				}
 			}
 			change_species = event_target:new_robotic_species
@@ -978,11 +903,7 @@ country_event = {
 						is_robotic = no
 						is_livestock = no
 					}
-					has_trait = leader_trait_admiral_synthetic
-					has_trait = leader_trait_ruler_synthetic
-					has_trait = leader_trait_general_synthetic
-					has_trait = leader_trait_governor_synthetic
-					has_trait = leader_trait_scientist_synthetic
+					has_trait = leader_trait_synthetic
 				}
 			}
 			change_species = event_target:new_robotic_species
@@ -994,16 +915,34 @@ country_event = {
 			limit = {
 				species = { has_trait = trait_mechanical }
 				NOR = {
-					has_trait = leader_trait_admiral_synthetic
-					has_trait = leader_trait_general_synthetic
-					has_trait = leader_trait_governor_synthetic
-					has_trait = leader_trait_scientist_synthetic
-					has_trait = leader_trait_ruler_synthetic
+					has_trait = leader_trait_synthetic
+					has_leader_flag = renowned_leader
+					has_leader_flag = legendary_leader
 				}
 			}
-			add_leader_traits_after_modification = yes
-			remove_leader_traits_after_modification = yes
+			add_trait_no_notify = leader_trait_synthetic
+			remove_trait = leader_trait_cyborg
 		}
+
+		create_message = {
+			type = MESSAGE_ALL_GAINED_TRAIT
+			localization = MESSAGE_ALL_GAINED_TRAIT_DESC
+			days = @toast_message_days
+			variable = {
+				type = key
+				value = leader_trait_synthetic
+				localization = TRAIT
+			}
+			variable = {
+				key = TRAIT_KEY
+				value = leader_trait_synthetic
+			}
+			variable = {
+				key = "border"
+				value = "GFX_invisible" #TODO Common/ no rarity frame
+			}
+		}
+
 		every_envoy = {
 			limit = {
 				species = {
@@ -1017,16 +956,10 @@ country_event = {
 		every_pool_leader = {
 			limit = {
 				species = { has_trait = trait_mechanical }
-				NOR = {
-					has_trait = leader_trait_admiral_synthetic
-					has_trait = leader_trait_general_synthetic
-					has_trait = leader_trait_governor_synthetic
-					has_trait = leader_trait_scientist_synthetic
-					has_trait = leader_trait_ruler_synthetic
-				}
+				NOT = { has_trait = leader_trait_synthetic }
 			}
-			add_leader_traits_after_modification = yes
-			remove_leader_traits_after_modification = yes
+			add_trait_no_notify = leader_trait_synthetic
+			remove_trait = leader_trait_cyborg
 		}
 
 		observer_event = { id = observer.4 }
@@ -1264,84 +1197,7 @@ country_event = {
 
 	immediate = {
 		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_synthetic
-				add_ruler_trait = leader_trait_ruler_synthetic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_synthetic
-				add_ruler_trait = leader_trait_ruler_synthetic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_synthetic
-				add_ruler_trait = leader_trait_ruler_synthetic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_synthetic
-				add_ruler_trait = leader_trait_ruler_synthetic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = ruler }
-				add_trait = leader_trait_ruler_synthetic
-				add_ruler_trait = leader_trait_ruler_synthetic
-				break = yes
-			}
-		}
-	}
-}
-
-# Ruler gets normal class trait if one hasn't been assigned
-country_event = {
-	id = utopia.2561
-	is_triggered_only = yes
-	hide_window = yes
-
-	trigger = {
-		from = {
-			species = { has_trait = trait_mechanical }
-			NOR = {
-				has_trait = leader_trait_admiral_synthetic
-				has_trait = leader_trait_general_synthetic
-				has_trait = leader_trait_governor_synthetic
-				has_trait = leader_trait_scientist_synthetic
-			}
-		}
-	}
-
-	immediate = {
-		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_synthetic
-				remove_trait = leader_trait_admiral_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_synthetic
-				remove_trait = leader_trait_general_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_synthetic
-				remove_trait = leader_trait_governor_cyborg
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_synthetic
-				remove_trait = leader_trait_scientist_cyborg
-				break = yes
-			}
+			add_trait_no_notify = leader_trait_synthetic
 		}
 	}
 }
@@ -1437,45 +1293,13 @@ country_event = {
 
 	trigger = {
 		from = {
-			species = {
-				has_trait = trait_latent_psionic
-				is_robotic = no
-			}
+			species = { has_trait = trait_latent_psionic }
 		}
 	}
 
 	immediate = {
 		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = ruler }
-				add_trait = leader_trait_ruler_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
+			add_trait_no_notify = leader_trait_psionic
 		}
 	}
 }
@@ -1522,13 +1346,15 @@ country_event = {
 	option = {
 		name = "utopia.2602.b"
 		trigger = {
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-			NOR = {
-				is_at_war_with = from
-				species = { has_trait = trait_psionic }
+			AND = {
+				OR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+				NOR = {
+					is_at_war_with = from
+					species = { has_trait = trait_psionic }
+				}
 			}
 		}
 	}
@@ -1558,26 +1384,13 @@ country_event = {
 	trigger = {
 		owner_species = {
 			has_trait = trait_latent_psionic
-			NOR = {
-				has_trait = trait_cybernetic
-				has_trait = trait_machine_unit
-				has_trait = trait_mechanical
-			}
 		}
 		any_owned_leader = {
 			is_same_species = owner_species
 			NOT = {
 				OR = {
-					has_trait = leader_trait_admiral_psionic
-					has_trait = leader_trait_general_psionic
-					has_trait = leader_trait_governor_psionic
-					has_trait = leader_trait_scientist_psionic
-					has_trait = leader_trait_ruler_psionic
-					has_trait = leader_trait_admiral_chosen
-					has_trait = leader_trait_general_chosen
-					has_trait = leader_trait_governor_chosen
-					has_trait = leader_trait_scientist_chosen
-					has_trait = leader_trait_ruler_chosen
+					has_trait = leader_trait_psionic
+					has_trait = leader_trait_chosen
 				}
 			}
 		}
@@ -1593,16 +1406,8 @@ country_event = {
 				is_same_species = owner_species
 				NOT = {
 					OR = {
-						has_trait = leader_trait_admiral_psionic
-						has_trait = leader_trait_general_psionic
-						has_trait = leader_trait_governor_psionic
-						has_trait = leader_trait_scientist_psionic
-						has_trait = leader_trait_ruler_psionic
-						has_trait = leader_trait_admiral_chosen
-						has_trait = leader_trait_general_chosen
-						has_trait = leader_trait_governor_chosen
-						has_trait = leader_trait_scientist_chosen
-						has_trait = leader_trait_ruler_chosen
+						has_trait = leader_trait_psionic
+						has_trait = leader_trait_chosen
 					}
 				}
 			}
@@ -1613,36 +1418,7 @@ country_event = {
 	option = {
 		name = "utopia.2605.a"
 		event_target:psionic_leader = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_psionic
-				hidden_effect = { add_ruler_trait = leader_trait_ruler_psionic }
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_psionic
-				hidden_effect = { add_ruler_trait = leader_trait_ruler_psionic }
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_psionic
-				hidden_effect = { add_ruler_trait = leader_trait_ruler_psionic }
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_psionic
-				hidden_effect = { add_ruler_trait = leader_trait_ruler_psionic }
-				break = yes
-			}
-			if = {
-				limit = { leader_class = ruler }
-				hidden_effect = { add_trait = leader_trait_ruler_psionic }
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
+			add_trait = leader_trait_psionic
 		}
 	}
 }
@@ -1696,32 +1472,73 @@ country_event = {
 							is_same_value = event_target:psionic_species
 						}
 						NOR = {
-							has_trait =	leader_trait_admiral_psionic
-							has_trait =	leader_trait_general_psionic
-							has_trait =	leader_trait_governor_psionic
-							has_trait =	leader_trait_scientist_psionic
-							has_trait =	leader_trait_ruler_psionic
+							has_trait = leader_trait_psionic
+							has_leader_flag = renowned_leader
+							has_leader_flag = legendary_leader
 						}
 					}
-					add_leader_traits_after_modification = yes
-					remove_leader_traits_after_modification = yes
+					add_trait_no_notify = leader_trait_psionic
+					owner = {
+						if = {
+							limit = {
+								NOT = {
+									has_country_flag = psionic_leader_toast
+								}
+							}
+							set_timed_country_flag = { 
+								flag = psionic_leader_toast
+								days = 30
+							}
+						}
+					}
 				}
+
 				every_pool_leader = {
 					limit = {
 						species = {
 							has_trait = trait_psionic
 							is_same_value = event_target:psionic_species
 						}
-						NOR = {
-							has_trait = leader_trait_admiral_psionic
-							has_trait = leader_trait_general_psionic
-							has_trait = leader_trait_governor_psionic
-							has_trait = leader_trait_scientist_psionic
-							has_trait = leader_trait_ruler_psionic
+						NOT = { has_trait = leader_trait_psionic }
+					}
+					add_trait_no_notify = leader_trait_psionic
+					owner = {
+						if = {
+							limit = {
+								NOT = {
+									has_country_flag = psionic_leader_toast
+								}
+							}
+							set_timed_country_flag = { 
+								flag = psionic_leader_toast
+								days = 30
+							}
 						}
 					}
-					add_leader_traits_after_modification = yes
-					remove_leader_traits_after_modification = yes
+				}
+
+				if = {
+					limit = {
+						has_country_flag = psionic_leader_toast
+					}
+					create_message = {
+						type = MESSAGE_ALL_GAINED_TRAIT
+						localization = MESSAGE_ALL_GAINED_TRAIT_DESC
+						days = @toast_message_days
+						variable = {
+							type = key
+							value = leader_trait_psionic
+							localization = TRAIT
+						}
+						variable = {
+							key = TRAIT_KEY
+							value = leader_trait_psionic
+						}
+						variable = {
+							key = "border"
+							value = "GFX_invisible" #TODO Common/ no rarity frame
+						}
+					}
 				}
 			}
 			observer_event = { id = observer.6 }
@@ -1745,45 +1562,13 @@ country_event = {
 
 	trigger = {
 		from = {
-			species = {
-				has_trait = trait_psionic
-				is_robotic = no
-			}
+			species = { has_trait = trait_psionic }
 		}
 	}
 
 	immediate = {
 		from = {
-			if = {
-				limit = { leader_class = admiral }
-				add_trait = leader_trait_admiral_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = general }
-				add_trait = leader_trait_general_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = governor }
-				add_trait = leader_trait_governor_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = scientist }
-				add_trait = leader_trait_scientist_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
-			if = {
-				limit = { leader_class = ruler }
-				add_trait = leader_trait_ruler_psionic
-				add_ruler_trait = leader_trait_ruler_psionic
-				break = yes
-			}
+			add_trait_no_notify = leader_trait_psionic
 		}
 	}
 }
@@ -1812,13 +1597,15 @@ country_event = {
 	option = {
 		name = "utopia.2652.b"
 		trigger = {
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-			}
-			NOR = {
-				is_at_war_with = from
-				species = { has_trait = trait_psionic }
+			AND = {
+				OR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+				NOR = {
+					is_at_war_with = from
+					species = { has_trait = trait_psionic }
+				}
 			}
 		}
 	}
@@ -1833,304 +1620,6 @@ country_event = {
 		name = "utopia.2652.d"
 		trigger = {
 			species = { has_trait = trait_psionic }
-		}
-	}
-}
-
-# Ruler gets normal class trait if one hasn't been assigned
-country_event = {
-	id = utopia.2653
-	is_triggered_only = yes
-	hide_window = yes
-
-	trigger = {
-		from = {
-			OR = {
-				species = { has_trait = trait_psionic }
-				has_ruler_trait = leader_trait_ruler_psionic
-				has_ruler_trait = leader_trait_ruler_chosen
-				has_leader_flag = leader_trait_chosen
-			}
-			OR = {
-				has_ruler_trait = leader_trait_ruler_chosen
-				has_leader_flag = leader_trait_chosen
-				NOR = {
-					has_trait = leader_trait_admiral_psionic
-					has_trait = leader_trait_general_psionic
-					has_trait = leader_trait_governor_psionic
-					has_trait = leader_trait_scientist_psionic
-				}
-			}
-			NOR = {
-				has_trait = leader_trait_admiral_chosen
-				has_trait = leader_trait_general_chosen
-				has_trait = leader_trait_governor_chosen
-				has_trait = leader_trait_scientist_chosen
-				has_chosen_covenant_trait_non_ruler = yes
-			}
-		}
-	}
-
-	immediate = {
-		from = {
-			if = {
-				limit = {
-					OR = {
-						has_ruler_trait = leader_trait_ruler_chosen
-						has_leader_flag = leader_trait_chosen
-					}
-				}
-				if = {
-					limit = { leader_class = admiral }
-					add_trait = leader_trait_admiral_chosen
-					remove_trait = leader_trait_admiral_psionic
-					break = yes
-				}
-				if = {
-					limit = { leader_class = general }
-					add_trait = leader_trait_general_chosen
-					remove_trait = leader_trait_general_psionic
-					break = yes
-				}
-				if = {
-					limit = { leader_class = governor }
-					add_trait = leader_trait_governor_chosen
-					remove_trait = leader_trait_governor_psionic
-					break = yes
-				}
-				if = {
-					limit = { leader_class = scientist }
-					add_trait = leader_trait_scientist_chosen
-					remove_trait = leader_trait_scientist_psionic
-					break = yes
-				}
-			}
-			else = {
-				if = {
-					limit = { leader_class = admiral }
-					add_trait = leader_trait_admiral_psionic
-					break = yes
-				}
-				if = {
-					limit = { leader_class = general }
-					add_trait = leader_trait_general_psionic
-					break = yes
-				}
-				if = {
-					limit = { leader_class = governor }
-					add_trait = leader_trait_governor_psionic
-					break = yes
-				}
-				if = {
-					limit = { leader_class = scientist }
-					add_trait = leader_trait_scientist_psionic
-					break = yes
-				}
-			}
-		}
-	}
-}
-
-country_event = { #Chosen rulers gets Chosen trait for their normal leader class
-	id = utopia.2654
-	is_triggered_only = yes
-	hide_window = yes
-
-	trigger = {
-		from = {
-			OR = {
-				species = { has_trait = trait_psionic }
-				has_ruler_trait = leader_trait_ruler_composer_chosen
-				has_ruler_trait = leader_trait_ruler_eater_chosen
-				has_ruler_trait = leader_trait_ruler_whisperers_chosen
-				has_ruler_trait = leader_trait_ruler_instrument_chosen
-				has_ruler_trait = leader_trait_ruler_chosen
-			}
-			NOR = {
-				has_trait = leader_trait_admiral_psionic
-				has_trait = leader_trait_general_psionic
-				has_trait = leader_trait_governor_psionic
-				has_trait = leader_trait_scientist_psionic
-				has_trait = leader_trait_admiral_chosen
-				has_trait = leader_trait_general_chosen
-				has_trait = leader_trait_governor_chosen
-				has_trait = leader_trait_scientist_chosen
-				has_chosen_covenant_trait_non_ruler = yes
-			}
-		}
-	}
-
-	immediate = {
-		if =  {
-			limit = { has_country_flag = composer_covenant_rank_3 }
-			if = {
-				limit = { 
-					from = {
-						leader_class = general
-						has_ruler_trait = leader_trait_ruler_composer_chosen
-					}
-				}
-				from = { add_trait = leader_trait_general_composer_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = governor
-						has_ruler_trait = leader_trait_ruler_composer_chosen
-					}
-				}
-				from = { add_trait = leader_trait_governor_composer_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = scientist
-						has_ruler_trait = leader_trait_ruler_composer_chosen
-					}
-				}
-				from = { add_trait = leader_trait_scientist_composer_chosen }
-				break = yes
-			}
-		}
-		if =  {
-			limit = { has_country_flag = eater_covenant_rank_3 }
-			if = {
-				limit = { 
-					from = {
-						leader_class = admiral
-						has_ruler_trait = leader_trait_ruler_eater_chosen
-					}
-				}
-				from = { add_trait = leader_trait_admiral_eater_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = general
-						has_ruler_trait = leader_trait_ruler_eater_chosen
-					}
-				}
-				from = { add_trait = leader_trait_general_eater_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = governor
-						has_ruler_trait = leader_trait_ruler_eater_chosen
-					}
-				}
-				from = { add_trait = leader_trait_governor_eater_chosen }
-				break = yes
-			}
-		}
-		if =  {
-			limit = { has_country_flag = instrument_covenant_rank_3 }
-			if = {
-				limit = { 
-					from = {
-						leader_class = admiral
-						has_ruler_trait = leader_trait_ruler_instrument_chosen
-					}
-				}
-				from = { add_trait = leader_trait_admiral_instrument_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = governor
-						has_ruler_trait = leader_trait_ruler_instrument_chosen
-					}
-				}
-				from = { add_trait = leader_trait_governor_instrument_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = scientist
-						has_ruler_trait = leader_trait_ruler_instrument_chosen
-					}
-				}
-				from = { add_trait = leader_trait_scientist_instrument_chosen }
-				break = yes
-			}
-		}
-		if =  {
-			limit = { has_country_flag = whisperers_covenant_rank_3 }
-			if = {
-				limit = { 
-					from = {
-						leader_class = admiral
-						has_ruler_trait = leader_trait_ruler_whisperers_chosen
-					}
-				}
-				from = { add_trait = leader_trait_admiral_whisperers_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = general
-						has_ruler_trait = leader_trait_ruler_whisperers_chosen
-					}
-				}
-				from = { add_trait = leader_trait_general_whisperers_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = scientist
-						has_ruler_trait = leader_trait_ruler_whisperers_chosen
-					}
-				}
-				from = { add_trait = leader_trait_scientist_whisperers_chosen }
-				break = yes
-			}
-		}
-		if =  {
-			limit = { from = { has_ruler_trait = leader_trait_ruler_chosen } }
-			if = {
-				limit = { 
-					from = {
-						leader_class = admiral
-					}
-				}
-				from = { add_trait = leader_trait_admiral_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = general
-					}
-				}
-				from = { add_trait = leader_trait_general_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = governor
-					}
-				}
-				from = { add_trait = leader_trait_governor_chosen }
-				break = yes
-			}
-			if = {
-				limit = { 
-					from = {
-						leader_class = scientist
-					}
-				}
-				from = { add_trait = leader_trait_scientist_chosen }
-				break = yes
-			}
 		}
 	}
 }
@@ -2470,13 +1959,7 @@ country_event = {
 							NOR = {
 								has_country_flag = shroud_vision_10
 								any_owned_leader = {
-									OR = {
-										has_trait = leader_trait_admiral_chosen
-										has_trait = leader_trait_general_chosen
-										has_trait = leader_trait_governor_chosen
-										has_trait = leader_trait_ruler_chosen
-										has_trait = leader_trait_scientist_chosen
-									}
+									has_trait = leader_trait_chosen
 								}
 							}
 
@@ -2951,7 +2434,7 @@ country_event = {
 					OR = {
 						is_at_war = no
 						ruler = {
-							has_trait = leader_trait_substance_abuser
+							has_trait_tier1or2 = { TRAIT = leader_trait_substance_abuser }
 						}
 						any_owned_planet = {
 							is_colony = yes
@@ -3454,214 +2937,92 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+
+		# First leader option.
 		random_owned_leader = {
-			limit = { leader_class = ruler }
+			limit = {
+
+				# If Ruler's class fits, pick it.
+				if = {
+					limit = { owner = { ruler = { suitable_for_chosen = yes } } }
+					is_ruler = yes
+				}
+
+				# Else, do regular pick.
+				else = {
+					suitable_for_chosen = yes
+				}
+			}
 			save_event_target_as = leader_1
 		}
+
+		# Second leader option.
 		random_owned_leader = {
 			limit = {
 				NOT = { is_same_value = event_target:leader_1 }
-				AND = {
-					owner = { has_country_flag = composer_covenant_rank_3 }
-					OR = {
-						leader_class = governor
-						leader_class = scientist
-						leader_class = general
-					}
-				}
+				suitable_for_chosen = yes
 			}
 			save_event_target_as = leader_2
 		}
+
+		# Third leader option.
 		random_owned_leader = {
 			limit = {
-				NOT = { is_same_value = event_target:leader_1 }
-				owner = { has_country_flag = eater_covenant_rank_3 }
-			}
-			if = {
-				limit = {
-					leader_class = admiral
-				}
-				save_event_target_as = leader_2
-			}
-			else_if = {
-				limit = {
-					leader_class = general
-				}
-				save_event_target_as = leader_2
-			}
-			else_if = {
-				limit = {
-					leader_class = governor
-				}
-				save_event_target_as = leader_2
-			}
-		}
-		random_owned_leader = {
-			limit = {
-				NOT = { is_same_value = event_target:leader_1 }
-				AND = {
-					owner = { has_country_flag = instrument_covenant_rank_3 }
-					OR = {
-						leader_class = governor
-						leader_class = scientist
-						leader_class = admiral
+
+				# If Chosen One exists, pick it.
+				if = {
+					limit = {
+						owner = {
+							any_owned_leader = {
+								NOR = {
+									is_same_value = event_target:leader_1
+									is_same_value = event_target:leader_2
+								}
+								has_trait = leader_trait_chosen
+								has_chosen_covenant_trait_non_ruler = no
+							}
+						}
 					}
+					has_trait = leader_trait_chosen
 				}
-			}
-			save_event_target_as = leader_2
-		}
-		random_owned_leader = {
-			limit = {
-				NOT = { is_same_value = event_target:leader_1 }
-				AND = {
-					owner = { has_country_flag = whisperers_covenant_rank_3 }
-					OR = {
-						leader_class = general
-						leader_class = scientist
-						leader_class = admiral
+
+				# Else, do regular pick.
+				else = {
+					NOR = {
+						is_same_value = event_target:leader_1
+						is_same_value = event_target:leader_2
 					}
-				}
-			}
-			save_event_target_as = leader_2
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-				}
-				AND = {
-					owner = { has_country_flag = composer_covenant_rank_3 }
-					OR = {
-						leader_class = governor
-						leader_class = scientist
-						leader_class = general
-					}
+					suitable_for_chosen = yes
 				}
 			}
 			save_event_target_as = leader_3
 		}
+
+		# Forth leader option.
 		random_owned_leader = {
 			limit = {
 				NOR = {
 					is_same_value = event_target:leader_1
 					is_same_value = event_target:leader_2
-				}
-				AND = {
-					owner = { has_country_flag = eater_covenant_rank_3 }
-					OR = {
-						leader_class = governor
-						leader_class = admiral
-						leader_class = general
-						leader_class = ruler
-					}
-				}
-			}
-			save_event_target_as = leader_3
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-				}
-				AND = {
-					owner = { has_country_flag = instrument_covenant_rank_3 }
-					OR = {
-						leader_class = governor
-						leader_class = scientist
-						leader_class = admiral
-					}
-				}
-			}
-			save_event_target_as = leader_3
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-				}
-				AND = {
-					owner = { has_country_flag = whisperers_covenant_rank_3 }
-					OR = {
-						leader_class = admiral
-						leader_class = scientist
-						leader_class = general
-					}
-				}
-			}
-			save_event_target_as = leader_3
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
+					is_same_value = event_target:leader_3
 				}
 				OR = {
-					has_trait = leader_trait_ruler_chosen
-					has_trait = leader_trait_admiral_chosen
-					has_trait = leader_trait_general_chosen
-					has_trait = leader_trait_governor_chosen
-					has_trait = leader_trait_scientist_chosen
-				}
-				
-			}
-			save_event_target_as = leader_3
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-					is_same_value = event_target:leader_3
-				}
-				AND = {
-					owner = { has_country_flag = composer_covenant_rank_3 }
-					leader_class = scientist
-				}
-			}
-			save_event_target_as = leader_4
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-					is_same_value = event_target:leader_3
-				}
-				AND = {
-					owner = { has_country_flag = eater_covenant_rank_3 }
-					leader_class = admiral
-				}
-			}
-			save_event_target_as = leader_4
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-					is_same_value = event_target:leader_3
-				}
-				AND = {
-					owner = { has_country_flag = instrument_covenant_rank_3 }
-					leader_class = governor
-				}
-			}
-			save_event_target_as = leader_4
-		}
-		random_owned_leader = {
-			limit = {
-				NOR = {
-					is_same_value = event_target:leader_1
-					is_same_value = event_target:leader_2
-					is_same_value = event_target:leader_3
-				}
-				AND = {
-					owner = { has_country_flag = whisperers_covenant_rank_3 }
-					leader_class = scientist
+					AND = {
+						owner = { has_country_flag = composer_covenant_rank_3 }
+						leader_class = scientist
+					}
+					AND = {
+						owner = { has_country_flag = eater_covenant_rank_3 }
+						leader_class = admiral
+					}
+					AND = {
+						owner = { has_country_flag = instrument_covenant_rank_3 }
+						leader_class = governor
+					}
+					AND = {
+						owner = { has_country_flag = whisperers_covenant_rank_3 }
+						leader_class = scientist
+					}
 				}
 			}
 			save_event_target_as = leader_4
@@ -3719,220 +3080,53 @@ country_event = {
 		name = "utopia.2682.a"
 		default_hide_option = yes
 		event_target:chosen_leader = {
-			remove_trait_effect = { TRAIT = leader_trait_stubborn }
-			remove_trait_effect = { TRAIT = leader_trait_substance_abuser }
-			remove_trait_effect = { TRAIT = leader_trait_arrested_development }
-			remove_trait_effect = { TRAIT = leader_trait_nervous }
-			remove_trait_effect = { TRAIT = leader_trait_lethargic }
-			remove_trait_effect = { TRAIT = leader_trait_armchair_commander }
-			remove_trait_effect = { TRAIT = leader_trait_corrupt }
-			remove_trait_effect = { TRAIT = leader_trait_paranoid }
-			remove_trait_effect = { TRAIT = leader_trait_traumatized }
-			remove_trait_effect = { TRAIT = leader_trait_maimed }
-		}
-		# Composer cases
-		if = {
-			limit = { 
-				has_country_flag = composer_covenant_rank_3
-				event_target:chosen_leader = { leader_class = general } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_general_composer_chosen
-				remove_trait = leader_trait_general_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = composer_covenant_rank_3
-				event_target:chosen_leader = { leader_class = governor } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_governor_composer_chosen
-				remove_trait = leader_trait_governor_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = composer_covenant_rank_3
-				event_target:chosen_leader = { leader_class = ruler } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_ruler_composer_chosen
-				remove_trait = leader_trait_ruler_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = composer_covenant_rank_3
-				event_target:chosen_leader = { leader_class = scientist } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_scientist_composer_chosen
-				remove_trait = leader_trait_scientist_psionic
-			}
-		}
+			remove_all_negative_traits = yes
 
-		#Eater cases
-		if = {
-			limit = { 
-				has_country_flag = eater_covenant_rank_3
-				event_target:chosen_leader = { leader_class = admiral } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_admiral_eater_chosen
-				remove_trait = leader_trait_admiral_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = eater_covenant_rank_3
-				event_target:chosen_leader = { leader_class = general } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_general_eater_chosen
-				remove_trait = leader_trait_general_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = eater_covenant_rank_3
-				event_target:chosen_leader = { leader_class = governor } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_governor_eater_chosen
-				remove_trait = leader_trait_governor_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = eater_covenant_rank_3
-				event_target:chosen_leader = { leader_class = ruler } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_ruler_eater_chosen
-				remove_trait = leader_trait_ruler_psionic
-			}
-		}
-
-		#Instrument cases
-		if = {
-			limit = { 
-				has_country_flag = instrument_covenant_rank_3
-				event_target:chosen_leader = { leader_class = admiral } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_admiral_instrument_chosen
-				remove_trait = leader_trait_admiral_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = instrument_covenant_rank_3
-				event_target:chosen_leader = { leader_class = governor } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_governor_instrument_chosen
-				remove_trait = leader_trait_governor_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = instrument_covenant_rank_3
-				event_target:chosen_leader = { leader_class = ruler } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_ruler_instrument_chosen
-				remove_trait = leader_trait_ruler_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = instrument_covenant_rank_3
-				event_target:chosen_leader = { leader_class = scientist } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_scientist_instrument_chosen
-				remove_trait = leader_trait_scientist_psionic
-			}
-		}
-
-		#Whisperers cases
-		if = {
-			limit = { 
-				has_country_flag = whisperers_covenant_rank_3
-				event_target:chosen_leader = { leader_class = admiral } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_admiral_whisperers_chosen
-				remove_trait = leader_trait_admiral_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = whisperers_covenant_rank_3
-				event_target:chosen_leader = { leader_class = general } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_general_whisperers_chosen
-				remove_trait = leader_trait_general_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = whisperers_covenant_rank_3
-				event_target:chosen_leader = { leader_class = ruler } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_ruler_whisperers_chosen
-				remove_trait = leader_trait_ruler_psionic
-			}
-		}
-		if = {
-			limit = { 
-				has_country_flag = whisperers_covenant_rank_3
-				event_target:chosen_leader = { leader_class = scientist } 
-			}
-			event_target:chosen_leader = {
-				add_trait = leader_trait_scientist_whisperers_chosen
-				remove_trait = leader_trait_scientist_psionic
-			}
-		}
-
-		hidden_effect = {
+			# Composer.
 			if = {
 				limit = {
-					has_country_flag = composer_covenant_rank_3
+					ROOT = { has_country_flag = composer_covenant_rank_3 }
 				}
-				event_target:chosen_leader = {
-					add_ruler_trait = leader_trait_ruler_composer_chosen
-					remove_ruler_trait = leader_trait_ruler_psionic
-				}
-			}
-			if = {
-				limit = {
-					has_country_flag = eater_covenant_rank_3
-				}
-				event_target:chosen_leader = {
-					add_ruler_trait = leader_trait_ruler_eater_chosen
-					remove_trait = leader_trait_ruler_psionic
+				add_trait = leader_trait_composer_chosen
+				if = {
+					limit = { has_trait = leader_trait_psionic }
+					remove_trait = leader_trait_psionic
 				}
 			}
+
+			# Eater.
 			if = {
 				limit = {
-					has_country_flag = instrument_covenant_rank_3
+					ROOT = { has_country_flag = eater_covenant_rank_3 }
 				}
-				event_target:chosen_leader = {
-					add_ruler_trait = leader_trait_ruler_instrument_chosen
-					remove_trait = leader_trait_ruler_psionic
+				add_trait = leader_trait_eater_chosen
+				if = {
+					limit = { has_trait = leader_trait_psionic }
+					remove_trait = leader_trait_psionic
 				}
 			}
+
+			# Instrument.
 			if = {
 				limit = {
-					has_country_flag = whisperers_covenant_rank_3
+					ROOT = { has_country_flag = instrument_covenant_rank_3 }
 				}
-				event_target:chosen_leader = {
-					add_ruler_trait = leader_trait_ruler_whisperers_chosen
-					remove_trait = leader_trait_ruler_psionic
+				add_trait = leader_trait_instrument_chosen
+				if = {
+					limit = { has_trait = leader_trait_psionic }
+					remove_trait = leader_trait_psionic
+				}
+			}
+
+			# Whisperers.
+			if = {
+				limit = {
+					ROOT = { has_country_flag = whisperers_covenant_rank_3 }
+				}
+				add_trait = leader_trait_whisperers_chosen
+				if = {
+					limit = { has_trait = leader_trait_psionic }
+					remove_trait = leader_trait_psionic
 				}
 			}
 		}

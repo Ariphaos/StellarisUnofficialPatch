@@ -2267,6 +2267,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		NOT = { has_country_flag = spawning_renowned_leader }
 		OR = {
 			has_valid_civic = civic_distinguished_admiralty
 			has_valid_civic = civic_machine_warbots
@@ -2282,7 +2283,49 @@ country_event = {
 
 	immediate = {
 		from = {
-			add_skill = 2
+			if = {
+				limit = {
+					is_pool_leader = yes
+				}
+				add_skill = 2
+			}
+			else = {
+				add_skill_without_trait_selection = 2
+			}
+		}
+	}
+}
+
+country_event = { # Random leader pool variations
+	id = action.406
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			if = {
+				limit = { is_pool_leader = yes }
+				random_list = {
+					90 = { }
+					10 = {
+						add_trait_no_notify = "random_common"
+						add_trait_no_notify = "random_negative"
+						# Variable "leader_pending_negative_traits_unmodified" doesn't exist yet, can't reduce it yet. Checked now made in paragon_2.2200.
+					}
+				}
+				random_list = {
+					94 = { }
+					5 = {
+						add_skill = 1
+						add_age = 5
+					}
+					1 = {
+						add_skill = 2
+						add_age = 10
+					}
+				}
+			}
 		}
 	}
 }
@@ -2655,6 +2698,75 @@ country_event = {
 	}
 }
 
+# On country created, set up Imperial Ruler
+country_event = {
+	id = action.501
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_authority = auth_imperial
+	}
+
+	immediate = {
+		ruler = {
+			if = {
+				limit = {
+					NOT = { has_trait = trait_imperial_heir }
+				}
+				add_trait_no_notify = trait_imperial_heir
+			}
+
+			set_variable_to_random_value = {
+				which = ruler_age_mod
+				min = 5
+				max = 15
+				rounded = yes
+			}
+			add_age = ruler_age_mod
+
+			random_list = {
+				95 = { }
+				5 = {
+					add_trait_no_notify = "random_common"
+					add_trait_no_notify = "random_negative"
+					# Variable "leader_pending_negative_traits_unmodified" doesn't exist yet, can't reduce it yet. Checked now made in paragon_2.2200.
+					modifier = {
+						factor = 0
+						owner = { has_valid_civic = civic_philosopher_king }
+					}
+				}
+			}
+		}
+	}
+}
+
+# Remove Imperial Heir trait on changing away from Imperial authority.
+country_event = {
+	id = action.502
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_owned_leader = {
+			has_trait = trait_imperial_heir
+		}
+		NOT = {
+			has_authority = auth_imperial
+		}
+	}
+
+	immediate = {
+		every_owned_leader = {
+			limit = {
+				has_trait = trait_imperial_heir
+			}
+			remove_trait = trait_imperial_heir
+		}
+	}
+}
+
 # Strange Mood achievement
 country_event = {
 	id = action.460
@@ -2676,6 +2788,244 @@ country_event = {
 
 	immediate = {
 		set_country_flag = strange_mood_achievement
+	}
+}
+
+# New heir appointed
+leader_event = {
+	id = action.504
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+	}
+
+	immediate = {
+		# Set age to be younger than normal.
+		set_variable_to_random_value = {
+			which = heir_age_mod
+			min = -10
+			max = 0
+			rounded = yes
+		}
+		add_age = heir_age_mod
+
+		####################
+		# CLASS RANDOMISER #
+		####################
+
+		if = {
+			limit = {
+				owner = {
+					OR = {
+						# Admiral
+						has_valid_civic = civic_crusader_spirit_corporate
+						has_tradition = tr_supremacy_war_games
+						# Admiral and General
+						has_valid_civic = civic_distinguished_admiralty
+						has_valid_civic = civic_crusader_spirit
+						# Governor
+						has_valid_civic = civic_aristocratic_elite
+						has_valid_civic = civic_feudal_realm
+						has_tradition = tr_domination_colonial_viceroys
+						# Scientist
+						has_valid_civic = civic_technocracy
+						has_tradition = tr_discovery_science_division
+						# Current Ruler's Class
+						has_valid_civic = civic_philosopher_king
+					}
+				}
+			}
+
+			# All classes have a base weight of 10.
+			# Civics that boost only one class add 40.
+			# Civics that boost two classes add 20 to each class.
+			# Traditions that boost a class add 20.
+
+			random_list = {
+				# Admiral
+				0 = {
+					modifier = {
+						add = value:heir_class_weight_admiral
+					}
+					change_leader_class = admiral
+				}
+				# General
+				0 = {
+					modifier = {
+						add = value:heir_class_weight_general
+					}
+					change_leader_class = general
+				}
+				# Governor
+				0 = {
+					modifier = {
+						add = value:heir_class_weight_governor
+					}
+					change_leader_class = governor
+				}
+				# Scientist
+				0 = {
+					modifier = {
+						add = value:heir_class_weight_scientist
+					}
+					change_leader_class = scientist
+				}
+			}
+		}
+
+		# Initial Traits, set after determining class.
+		add_trait_no_notify = trait_imperial_heir
+		add_trait_no_notify = "random_common"
+
+		# Chance for a negative trait.
+		random_list = {
+			95 = { }
+			5 = {
+				add_trait_no_notify = "random_common"
+				add_trait_no_notify = "random_negative"
+				# Variable "leader_pending_negative_traits_unmodified" doesn't exist yet, can't reduce it yet. Checked now made in paragon_2.2200.
+				modifier = {
+					factor = 0
+					owner = { has_valid_civic = civic_philosopher_king }
+				}
+			}
+		}
+
+		################
+		# BONUS LEVELS #
+		################
+
+		# Vaults of Memory
+		if = {
+			limit = {
+				owner = {
+					is_memory_vault_empire = yes
+				}
+			}
+			add_skill_without_trait_selection = 1
+		}
+
+		# Distinguished Admiralty
+		if = {
+			limit = {
+				owner = {
+					has_valid_civic = civic_distinguished_admiralty
+				}
+				OR = {
+					leader_class = admiral
+					leader_class = general
+				}
+			}
+			add_skill_without_trait_selection = 2
+		}
+
+		##########
+		# TRAITS #
+		##########
+
+		# Under One Rule
+		if = {
+			limit = {
+				owner = {
+					OR = {
+						has_origin = origin_legendary_leader_imperial
+						ruler = { has_trait = leader_trait_legendary_offspring }
+					}
+				}
+			}
+			add_trait_no_notify = leader_trait_legendary_offspring
+		}
+
+		# Technocracy
+		if = {
+			limit = {
+				owner = {
+					has_valid_civic = civic_technocracy
+				}
+				leader_class = scientist 
+			}
+			add_random_expertise_trait_effect = yes
+		}
+
+		# Heroic Tales
+		if = {
+			limit = {
+				owner = {
+					has_valid_civic = civic_heroic_tales
+				}
+			}
+			add_trait_no_notify = "random_common"
+		}
+
+		# Crusader Spirit - Admiral
+		if = {
+			limit = {
+				owner = {
+					has_valid_civic = civic_crusader_spirit
+				}
+				leader_class = admiral 
+			}
+			add_trait_no_notify = leader_trait_par_zealot
+		}
+
+		# Crusader Spirit - General
+		if = {
+			limit = {
+				owner = {
+					has_valid_civic = civic_crusader_spirit
+				}
+				leader_class = general 
+			}
+			add_trait_no_notify = leader_trait_crusader
+		}
+
+		# Letters of Marque
+		if = {
+			limit = {
+				owner = {
+					has_valid_civic = civic_crusader_spirit_corporate
+				}
+				leader_class = admiral 
+			}
+			add_trait_no_notify = leader_trait_corsair
+		}
+
+		# Aptitude Traditions
+		if = {
+			limit = {
+				owner = {
+					has_tradition = tr_aptitude_adopt
+				}
+			}
+			add_trait_no_notify = "random_common"
+		}
+	}
+}
+
+# Add Imperial Ruler trait on changing to Imperial authority.
+country_event = {
+	id = action.505
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_authority = auth_imperial
+		exists = ruler
+	}
+
+	immediate = {
+		ruler = {
+			if = {
+				limit = {
+					NOT = { has_trait = trait_imperial_heir }
+				}
+				add_trait = trait_imperial_heir
+			}
+		}
 	}
 }
 
@@ -2714,7 +3064,7 @@ country_event = {
 		from = {
 			has_country_flag = human_2
 			ruler = {
-				has_trait = leader_trait_ruler_brainslug
+				has_trait = leader_trait_brainslug
 				species = {
 					is_human_species = yes
 				}
@@ -2875,6 +3225,86 @@ country_event = {
 	}
 }
 
+planet_event = {
+	id = action.601
+
+	show_sound = event_default
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_homicidal = no
+			is_gestalt = no
+			is_primitive = no
+		}
+		from = {
+			not = { has_country_flag = picked_orbital_bombardment_policy_flag }
+			is_ai = no
+			is_gestalt = no
+			is_homicidal = no #locked to "forbidden"
+			is_crisis_faction = no
+			can_change_policy = orbital_bombardment_accept_surrender #player has already made their own choice, no need to draw attention to this
+		}
+	}
+
+	immediate = {
+		from = { set_country_flag = picked_orbital_bombardment_policy_flag }
+		from = { country_event = { id = action.600 } }
+	}
+}
+
+country_event = {
+	id = action.600
+	title = action.600.name
+
+	desc = {
+		text = action.600.desc
+	}
+
+	picture = GFX_evt_board_meeting
+	show_sound = event_default
+	hide_window = no
+
+	is_triggered_only = yes
+
+	option = {
+		name = action.600.A
+		allow = {
+			can_set_policy = {
+				policy = orbital_bombardment_accept_surrender
+				option = orbital_bombardment_surrender_forbidden
+			}
+		}
+		
+		set_policy = {
+			policy = orbital_bombardment_accept_surrender
+			option = orbital_bombardment_surrender_forbidden
+			cooldown = yes
+		}
+	}
+
+	option = {
+		name = action.600.B
+		allow = {
+			can_set_policy = {
+				policy = orbital_bombardment_accept_surrender
+				option = orbital_bombardment_surrender_allowed
+			}
+		}
+		set_policy = {
+			policy = orbital_bombardment_accept_surrender
+			option = orbital_bombardment_surrender_allowed
+			cooldown = yes
+		}
+	}
+}
+
+# A planet has been rendered ownerless, it has an orbital ring or similar, though. The orbital ring is still there, but is about to be deleted
+# this = starbase
+# from = planet
+# fromfrom = old owner
 starbase_event = {
 	id = action.503
 	is_triggered_only = yes
@@ -3063,6 +3493,7 @@ country_event = {
 		}
 		any_owned_fleet = {
 			is_cloaked = yes
+			exists = solar_system
 			solar_system = {
 				is_capital_system = yes
 				owner = {
@@ -3093,5 +3524,32 @@ country_event = {
 
 	immediate = {
 		set_global_flag = galatron_activated_first_time
+	}
+}
+
+# Reset colony type upon colonization if this was a former pre-ftl world.
+# Scope = Planet
+planet_event = {
+	id = action.655
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_pre_ftl_colony_type = yes
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				owner = {
+					is_machine_empire = yes
+				}
+			}
+			set_colony_type = col_default_machine
+		}
+		else = {
+			set_colony_type = col_default
+		}
 	}
 }

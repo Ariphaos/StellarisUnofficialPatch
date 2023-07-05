@@ -300,7 +300,11 @@ opinion_genocidal = {
 		}
 		modifier = {
 			add = -5
-			has_ethic = "ethic_xenophile"
+			OR = {
+				has_ethic = "ethic_xenophile"
+				has_civic = civic_hive_empath
+				has_civic = civic_machine_servitor
+			}
 			allows_purge = no
 			NOR = {
 				is_country_type = fallen_empire
@@ -360,11 +364,17 @@ opinion_necrophage = {
 		base = -1
 		modifier = {
 			add = -1
-			has_ethic = ethic_xenophile
+			OR = {
+				has_ethic = ethic_xenophile
+				has_civic = civic_hive_empath
+			}
 		}
 		modifier = {
 			add = -3
-			has_ethic = ethic_fanatic_xenophile
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_civic = civic_machine_servitor
+			}
 		}
 	}
 
@@ -419,38 +429,53 @@ opinion_nuker = {
 	opinion = {
 		base = 0
 		modifier = {
-			add = -5
-			NOR = { 
-				has_ethic = "ethic_militarist"
-				has_ethic = "ethic_fanatic_militarist"
-				has_ethic = "ethic_xenophobe"
-				has_ethic = "ethic_fanatic_xenophobe"
-			}
-			is_country_type = default
-		}
-		modifier = {
-			add = -5
+			add = -1
 			OR = {
-				has_ethic = "ethic_pacifist"
-				has_ethic = "ethic_xenophile"
+				is_militarist = yes
+				is_xenophobe = yes
+				is_robot_empire = yes
 			}
 			is_country_type = default
 		}
 		modifier = {
-			add = -10
+			add = -3
+			NOR = {
+				is_militarist = yes
+				is_xenophobe = yes
+				is_robot_empire = yes
+			}
+			is_country_type = default
+		}
+		modifier = {
+			add = -3
 			OR = {
-				has_ethic = "ethic_fanatic_pacifist"
-				has_ethic = "ethic_fanatic_xenophile"
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_xenophile
+				has_civic = civic_hive_empath
 			}
 			is_country_type = default
 		}
 		modifier = {
-			add = -5
+			add = -6
+			OR = {
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_fanatic_xenophile
+				has_civic = civic_machine_servitor
+			}
+			is_country_type = default
+		}
+		modifier = {
+			add = -6
 			has_ai_personality = awakened_fallen_empire_xenophile
+		}
+		modifier = {
+			add = -6
+			is_at_war_with = root.from
+			is_country_type = default
 		}
 	}
 
-	min = -100
+	min = -250
 
 	accumulative = yes
 
@@ -461,7 +486,12 @@ opinion_nuker = {
 			OR = {
 				has_defensive_pact = from
 				is_in_federation_with = from
+				is_improving_relations_with = from
 			}
+		}
+		modifier = {
+			add = 1
+			from = { is_improving_relations_with = prev }
 		}
 	}
 }
@@ -681,7 +711,7 @@ opinion_forced_subjectized = {
 	}
 
 	decay = {
-		base = 5
+		base = 1
 	}
 }
 
@@ -964,7 +994,7 @@ opinion_decline_war = {
 	}
 
 	decay = {
-		base = 1
+		base = 5
 	}
 	
 	min = -100
@@ -2531,6 +2561,27 @@ triggered_opinion_ap_defender_of_the_galaxy = {
 		FROM = {
 			has_ascension_perk = ap_defender_of_the_galaxy
 		}
+		# Is not a Fallen Empire, Awakened Empire or Pre-FTL Empire
+		is_country_type = default
+		OR = {
+			# Is independent
+			is_subject = no
+			# Or a subject of another empire that is capable of independent diplomacy
+			AND = {
+				is_subject = yes
+				FROM = {
+					NOT = { is_overlord_to = PREV }
+				}
+				any_agreement = {
+					NOT = {
+						has_term_value = {
+							term = subject_diplomacy
+							value = subject_can_not_do_diplomacy
+						}
+					}
+				}
+			}
+		}
 	}
 
 	opinion = {
@@ -3733,6 +3784,30 @@ triggered_opinion_barbaric_despoilers = {
 	}
 }
 
+triggered_opinion_crusader_spirit = {
+	trigger = {
+		is_country_type = default
+		has_civic = civic_crusader_spirit
+		FROM = {
+			NOT = { has_same_ethos = PREV }
+		}
+	}
+	opinion = {
+		base = -80
+	}
+}
+
+triggered_opinion_crusader_spirit_pos = {
+	trigger = {
+		is_country_type = default
+		has_civic = civic_crusader_spirit
+		FROM = { has_same_ethos = PREV }
+	}
+	opinion = {
+		base = 20
+	}
+}
+
 triggered_authoritarian_opinion_barbaric_despoilers = {
 	trigger = {
 		is_country_type = default
@@ -3945,3 +4020,11 @@ contact_with_MSI_02 = {
 	}
 }
 
+opinion_has_sensitive_information_about_us = {
+	opinion = {
+		base = -25
+	}
+	decay = {
+		base = 1
+	}
+}

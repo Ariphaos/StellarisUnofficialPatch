@@ -1331,6 +1331,14 @@ is_regular_empire_or_primitive = {
 	NOT = { has_ethic = ethic_gestalt_consciousness	}
 }
 
+is_default_or_fallen = {
+	OR = {
+		is_country_type = default
+		is_country_type = fallen_empire
+		is_country_type = awakened_fallen_empire #for checks in buildings
+	}
+}
+
 is_capitalist = {
 	OR = {
 		has_authority = auth_corporate
@@ -1861,6 +1869,28 @@ can_have_trade_deposits = {
 	}
 }
 
+can_have_volatile_motes_deposit = {
+	OR = {
+		is_planet_class = pc_molten
+		is_planet_class = pc_asteroid
+	}
+}
+
+can_have_rare_crystals_deposits = {
+	OR = {
+		is_planet_class = pc_gas_giant
+		is_planet_class = pc_toxic
+	}
+}
+
+can_have_exotic_gases_deposits = {
+	OR = {
+		is_planet_class = pc_frozen
+		is_planet_class = pc_ice_asteroid
+		is_inside_nebula = yes
+	}
+}
+
 is_fallen_empire = {
 	OR = {
 		is_country_type = fallen_empire
@@ -1880,6 +1910,8 @@ can_build_megastructures = {
 	OR = {
 		has_technology = tech_gateway_construction
 		has_technology = tech_ring_world
+		has_technology = tech_orbital_ring_tier_1
+		has_technology = tech_hyper_relays 
 		can_build_unity_megastructures = yes
 	}
 }
@@ -1894,6 +1926,7 @@ can_build_unity_megastructures = {
 		has_technology = tech_dyson_sphere
 		has_technology = tech_matter_decompressor
 		has_technology = tech_mega_shipyard
+		has_technology = tech_quantum_catapult 
 	}
 }
 
@@ -2392,24 +2425,6 @@ enigmatic_modifier_jobs = { # Only pops with jobs affecting resources without mo
 	}
 }
 
-is_specialist_researcher = { #Specialist traits for recruitable leaders
-	OR = {
-		has_trait = leader_trait_expertise_biology
-		has_trait = leader_trait_expertise_computing
-		has_trait = leader_trait_expertise_field_manipulation
-		has_trait = leader_trait_expertise_industry
-		has_trait = leader_trait_expertise_materials
-		has_trait = leader_trait_expertise_military_theory
-		has_trait = leader_trait_expertise_new_worlds
-		has_trait = leader_trait_expertise_particles
-		has_trait = leader_trait_expertise_propulsion
-		has_trait = leader_trait_expertise_psionics
-		has_trait = leader_trait_expertise_statecraft
-		has_trait = leader_trait_expertise_voidcraft
-		has_trait = leader_trait_expertise_archaeostudies
-	}
-}
-
 is_special_colony_type = {
 	OR = {
 		has_modifier = penal_colony
@@ -2507,6 +2522,7 @@ baol_colony_1_trigger = {
 		has_star_flag = first_grunur_site@root.owner
 		has_star_flag = grunur_site@root.owner
 		has_star_flag = sol_system
+		is_star_class = sc_black_hole
 	}
 	OR = {
 		has_owner = no
@@ -2528,6 +2544,7 @@ baol_colony_2_trigger = {
 		has_star_flag = first_grunur_site@root.owner
 		has_star_flag = grunur_site@root.owner
 		has_star_flag = sol_system
+		is_star_class = sc_black_hole
 	}
 	OR = {
 		has_owner = no
@@ -2542,12 +2559,13 @@ baol_colony_2_trigger = {
 }
 
 baol_colony_3_trigger = {
-	has_access_fleet = root.owner
+	is_within_borders_of = root.owner
 	is_capital_system = no
 	NOR = {
 		is_same_value = root.solar_system
 		has_star_flag = first_grunur_site@root.owner
 		has_star_flag = sol_system
+		is_star_class = sc_black_hole
 	}
 	OR = {
 		has_owner = no
@@ -2851,6 +2869,21 @@ default_endgame_early_start_triggers = {
 				has_global_flag = war_in_heaven_ended
 				NOT = { has_global_flag = war_in_heaven_recently_started }
 			}
+		}
+	}
+}
+
+should_ai_focus_on_trade = {
+	is_ai = yes
+	OR = {
+		has_ai_personality = peaceful_traders
+		has_ai_personality = ruthless_capitalists
+	}
+	owner_main_species = {
+		OR = {
+			has_trait = "trait_thrifty"
+			has_trait = "trait_cyborg_trading_algorithms"
+			has_trait = "trait_robot_trading_algorithms"
 		}
 	}
 }
@@ -3667,6 +3700,26 @@ got_any_unprotected_drones = {
 	}
 }
 
+# This can replace all the specific ones.
+has_councilor = {
+	exists = owner
+	owner = { 
+		any_owned_leader = {
+			is_councilor = yes
+			is_councilor_type = $COUNCILOR$					
+		}
+	}
+}
+
+is_gestalt_node = {
+	OR = {
+		is_councilor_type = councilor_gestalt_governor
+		is_councilor_type = councilor_gestalt_scientist
+		is_councilor_type = councilor_gestalt_admiral
+		is_councilor_type = councilor_gestalt_general
+	}
+}
+
 has_special_star_flag_trigger = {
 	OR = {
 		# Start System Flags
@@ -3882,6 +3935,8 @@ is_preftl_but_not_special = {
 	}
 }
 
+
+
 can_add_cybernetic_traits = {
 	hidden_trigger = { exists = from }
 	from = {
@@ -3922,33 +3977,16 @@ is_market_nominee_planet = {
 
 has_chosen_covenant_trait_non_ruler = {
 	OR = {
-		has_trait = leader_trait_general_composer_chosen
-		has_trait = leader_trait_scientist_composer_chosen
-		has_trait = leader_trait_governor_composer_chosen
-		has_trait = leader_trait_general_eater_chosen
-		has_trait = leader_trait_admiral_eater_chosen
-		has_trait = leader_trait_governor_eater_chosen
-		has_trait = leader_trait_admiral_instrument_chosen
-		has_trait = leader_trait_scientist_instrument_chosen
-		has_trait = leader_trait_governor_instrument_chosen
-		has_trait = leader_trait_general_whisperers_chosen
-		has_trait = leader_trait_admiral_whisperers_chosen
-		has_trait = leader_trait_scientist_whisperers_chosen
-	}
-}
-
-has_chosen_trait_ruler = {
-	OR = {
-		has_ruler_trait = leader_trait_ruler_chosen
-		has_ruler_trait = leader_trait_ruler_composer_chosen
-		has_ruler_trait = leader_trait_ruler_eater_chosen
-		has_ruler_trait = leader_trait_ruler_instrument_chosen
-		has_ruler_trait = leader_trait_ruler_whisperers_chosen
+		has_trait = leader_trait_composer_chosen
+		has_trait = leader_trait_eater_chosen
+		has_trait = leader_trait_instrument_chosen
+		has_trait = leader_trait_whisperers_chosen
 	}
 }
 
 has_presapient_trait = {
 	OR = {
+		has_trait = trait_presapient_forcefully_devolved
 		has_trait = trait_presapient_starborn
 		has_trait = trait_presapient_earthbound
 		has_trait = trait_presapient_natural_intellectuals
@@ -3956,6 +3994,14 @@ has_presapient_trait = {
 		has_trait = trait_presapient_conservative
 		has_trait = trait_presapient_irradiated
 		has_trait = trait_presapient_docile_livestock
-		has_trait = trait_presapient_forcefully_devolved
+	}
+}
+
+is_memory_vault_empire = {
+	OR = {
+		has_civic = civic_memory_vault
+		has_civic = civic_memory_vault_corporate
+		has_civic = civic_memory_vault_machine
+		has_civic = civic_memory_vault_hive
 	}
 }

@@ -530,6 +530,10 @@ building_expanded_warren = {
 		has_upgraded_capital = yes
 	}
 
+	destroy_trigger = {
+		owner = { is_hive_empire = no }
+	}
+
 	show_tech_unlock_if = {
 		owner = { is_hive_empire = yes }
 	}
@@ -582,7 +586,10 @@ building_holo_theatres = {
 
 	potential = {
 		NOT = {	has_modifier = slave_colony	}
-		owner = { is_gestalt = no }
+		owner = {
+			is_regular_empire = yes
+			NOT = { has_valid_civic = civic_dystopian_society }
+		}
 		OR = {
 			owner = {
 				NOT = { is_ai = yes }
@@ -608,7 +615,8 @@ building_holo_theatres = {
 	destroy_trigger = {
 		exists = owner
 		OR = {
-			owner = { is_gestalt = yes }
+			owner = { is_regular_empire = no }
+			owner = { has_valid_civic = civic_dystopian_society }
 			has_modifier = slave_colony
 			AND = {
 				free_building_slots = 0
@@ -694,10 +702,23 @@ building_hyper_entertainment_forum = {
 
 	allow = {
 		has_upgraded_capital = yes
+		owner = {
+			NOT = { has_valid_civic = civic_dystopian_society }
+		}
+		OR = {
+			owner = {
+				NOT = { is_ai = yes }
+			}
+			AND = {
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_forbidden_jobs = entertainer }
+			}
+		}
 	}
 
 	destroy_trigger = {
 		exists = owner
+		owner = { has_valid_civic = civic_dystopian_society }
 		OR = {
 			owner = { is_gestalt = yes }
 			has_modifier = slave_colony
@@ -787,6 +808,27 @@ building_clinic = {
 			}
 		}
 		NOT = { has_modifier = slave_colony }
+
+		OR = {
+			owner = {
+				OR = {
+					is_ai = no
+					has_valid_civic = civic_private_healthcare_corporate
+					prev = {
+						has_branch_office = yes
+						branch_office_owner = {
+							has_valid_civic = civic_private_healthcare_corporate
+						}
+					}
+				}
+			}
+			AND = {
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_forbidden_jobs = entertainer }
+				planet_stability < 50
+				free_amenities < 0
+			}
+		}
 	}
 
 	destroy_trigger = {
@@ -803,8 +845,12 @@ building_clinic = {
 			}
 			has_modifier = slave_colony
 			AND = {
-				buildings_stop_pop = yes
-				owner = { is_ai = yes }
+				owner = {
+					is_ai = yes
+					NOT = { has_valid_civic = civic_private_healthcare_corporate }
+				}
+				planet_stability > 70
+				free_amenities > 20
 			}
 		}
 	}
@@ -902,6 +948,26 @@ building_hospital = {
 
 	allow = {
 		has_upgraded_capital = yes
+		OR = {
+			owner = {
+				OR = {
+					has_valid_civic = civic_private_healthcare_corporate
+					is_ai = no
+				}
+			}
+			AND = {
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_forbidden_jobs = entertainer }
+				planet_stability < 55
+				free_amenities < 5
+			}
+			AND = {
+				has_branch_office = yes
+				branch_office_owner = {
+					has_valid_civic = civic_private_healthcare_corporate
+				}
+			}
+		}
 	}
 
 	destroy_trigger = {

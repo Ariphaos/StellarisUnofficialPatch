@@ -1,0 +1,4480 @@
+namespace = paragon
+
+####################
+### THE BEHOLDER ###
+####################
+
+# Abort Beholder chain if pre-sapient planet is colonized by another - fired from on_colonized
+# Or add Beholder building if colonized by chain owner
+# Scope = Planet
+planet_event = {
+	id = paragon.100
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:beholder_planet
+		is_same_value = event_target:beholder_planet
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				exists = owner
+				owner = { has_country_flag = beholder_chain_owner }
+			}
+			root = { add_building = building_the_beholder }
+		}
+		else = {
+			every_playable_country = {
+				limit = { has_country_flag = beholder_chain_owner }
+				remove_country_flag = beholder_chain_owner
+				country_event = { id = paragon.102 }
+			}
+		}
+	}
+}
+
+# Abort Beholder chain if pre-sapients get uplifted - fired from on_uplift_completion
+# Scope = planet_event
+# From = uplifted species (pre-modification)
+# This = planet scope
+planet_event = {
+	id = paragon.101
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:beholder_planet
+		is_same_value = event_target:beholder_planet
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = { has_country_flag = beholder_chain_owner }
+			country_event = { id = paragon.102 }
+		}
+	}
+}
+
+# Abort Beholder chain
+country_event = {
+	id = paragon.102
+	title = paragon.102.name
+	desc = paragon.102.desc
+	picture = GFX_evt_alien_cavemen # PARAGON TO DO: Paragon art
+	show_sound = event_default
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			if = {
+				limit = { has_modifier = the_beholder_presapients_protected }
+				remove_modifier = the_beholder_presapients_protected
+			}
+			if = {
+				limit = { has_building = building_the_beholder }
+				remove_building = building_the_beholder
+			}
+		}
+	}
+
+	option = {
+		name = UNFORTUNATE
+	}
+
+	after = {
+		hidden_effect = {
+			clear_global_event_target = beholder_planet
+			clear_global_event_target = beholder_presapients
+		}
+	}
+}
+
+#Anomaly researched, opt out or send down a ship - fired from anomaly research (paragon_beholder_category)
+ship_event = {
+	id = paragon.3
+	title = paragon.3.name
+	desc = paragon.3.desc
+	picture = GFX_evt_alien_cavemen # PARAGON TO DO: Paragon art
+	show_sound = event_default
+	location = from
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		# Shennanigans insurance
+		NOT = { has_global_flag = spawned_beholder_chain }
+	}
+
+	option = {
+		name = paragon.3.a
+		hidden_effect = {
+			from = {
+				save_global_event_target_as = beholder_planet
+			}
+			owner = { 
+				country_event = { id = paragon.4 days = 20 random = 20 }
+				set_country_flag = beholder_chain_owner
+			}
+			set_global_flag = spawned_beholder_chain
+		}
+	}
+
+	option = {
+		name = paragon.3.b
+	}
+}
+
+#Temple of Whispers found 
+country_event = {
+	id = paragon.4
+	title = paragon.4.name
+	desc = paragon.4.desc
+	picture = GFX_evt_temple_of_whispers
+	show_sound = par_event_beholder
+	location = fromfrom
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	immediate = {
+		fromfrom = { add_modifier = { modifier = the_beholder_presapients_protected } }
+	}
+
+	option = {
+		name = paragon.4.a
+		trigger = {
+			is_militarist = no
+			is_xenophobe = no
+		}
+		enable_special_project = {
+			name = BEFRIENDING_BEHOLDER_PRESAPIENTS
+			location = fromfrom
+			owner = this
+		}
+	}
+
+	option = {
+		name = paragon.4.b
+		trigger = {
+			is_spiritualist = no
+		}
+		hidden_effect = {
+			random_list = {
+				60 = { # Success
+					country_event = { id = paragon.10 days = 20 random = 20 }
+				}
+				40 = { # Failure
+					country_event = { id = paragon.11 days = 20 random = 20 }
+				}
+			}
+		}
+		custom_tooltip = paragon.4.b.custom_tooltip
+	}
+	option = {
+		name = paragon.4.b
+		trigger = {
+			is_spiritualist = yes
+		}
+		hidden_effect = {
+			random_list = {
+				80 = { # Success
+					country_event = { id = paragon.10 days = 20 random = 20 }
+				}
+				20 = { # Failure
+					country_event = { id = paragon.11 days = 20 random = 20 }
+				}
+			}
+		}
+		custom_tooltip = paragon.4.b.custom_tooltip
+	}
+
+	option = {
+		name = paragon.4.c
+		trigger = {
+			is_pacifist = no
+			is_xenophile = no
+		}
+		hidden_effect = {
+			country_event = { id = paragon.15 days = 20 random = 20 }
+		}
+	}
+
+	option = {
+		name = paragon.4.d
+		hidden_effect = {
+			remove_country_flag = beholder_chain_owner
+			clear_global_event_target = beholder_planet
+			clear_global_event_target = beholder_presapients
+			fromfrom = { remove_modifier = the_beholder_presapients_protected }
+		}
+	}
+}
+
+##BEFRIENDING
+#Trust Within Sight
+country_event = {
+	id = paragon.5
+	title = paragon.5.name
+	desc = paragon.5.desc
+	picture = GFX_evt_alien_cavemen
+	show_sound = event_hand_shake
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = paragon.5.a
+		hidden_effect = {
+			country_event = { id = paragon.25 days = 20 random = 20 }
+		}
+	}
+	
+	after = {
+		add_resource = { society_research = 2000 }
+	}
+}
+
+##PROCLAIMING DIVINITY
+#Success
+country_event = {
+	id = paragon.10
+	title = paragon.10.name
+	desc = paragon.10.desc
+	picture = GFX_evt_alien_propaganda
+	show_sound = event_hand_shake
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+
+	after = {
+		enable_special_project = {
+			name = WHISPER_TEMPLE_STUDY
+			location = event_target:beholder_planet
+			owner = this
+		}
+	}
+}
+#Failure
+country_event = {
+	id = paragon.11
+	title = paragon.11.name
+	desc = paragon.11.desc
+	picture = GFX_evt_alien_propaganda
+	show_sound = event_bad_omen
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = paragon.11.a
+		hidden_effect = {
+			country_event = { id = paragon.15 days = 20 random = 20 }
+		}
+	}
+}
+
+##MAKE THEM MOVE
+country_event = {
+	id = paragon.15
+	title = paragon.15.name
+	desc = paragon.15.desc
+	picture = GFX_evt_alien_cavemen
+	show_sound = event_default
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = paragon.15.a
+	}
+
+	after = {
+		enable_special_project = {
+			name = WHISPER_TEMPLE_STUDY
+			location = event_target:beholder_planet
+			owner = this
+		}
+	}
+}
+
+#WHISPER_TEMPLE_STUDY finished
+country_event = {
+	id = paragon.20
+	title = paragon.20.name
+	desc = paragon.20.desc
+	picture = GFX_evt_temple_of_whispers
+	show_sound = par_event_beholder
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = paragon.20.a
+		hidden_effect = {
+			country_event = { id = paragon.25 days = 20 random = 20 }
+		}
+	}
+}
+
+##THE WHISPERING 1
+country_event = {
+	id = paragon.25
+	title = paragon.25.name
+	desc = paragon.25.desc
+	picture = GFX_evt_temple_of_whispers
+	show_sound = par_event_beholder
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = paragon.25.a
+		hidden_effect = {
+			country_event = { id = paragon.26 }
+		}
+	}
+}
+#THE WHISPERING 2
+country_event = {
+	id = paragon.26
+	title = paragon.26.name
+	desc = paragon.26.desc
+	picture = GFX_evt_temple_of_whispers
+	show_sound = par_event_beholder
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = FASCINATING
+		enable_special_project = {
+			name = WHISPER_TEMPLE_ENERGY
+			location = event_target:beholder_planet
+			owner = this
+		}
+	}
+}
+
+#The Beholder
+country_event = {
+	id = paragon.30
+	title = paragon.30.name
+	desc = paragon.30.desc
+	picture = GFX_evt_temple_of_whispers
+	show_sound = par_event_beholder
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	option = {
+		name = paragon.30.a
+		allow = {
+			has_country_resource = {
+				type = energy
+				amount >= 1200
+			}
+		}
+		add_resource = {
+			energy = -1200
+		}
+		hidden_effect = {
+			country_event = { id = paragon.1 days = 20 random = 20 }
+		}
+	}
+
+	option = {
+		name = paragon.30.b
+		trigger = {
+			resource_income_compare = {
+				resource = energy
+				value >= 100
+			}
+		}
+		add_modifier = {
+			modifier = the_beholder_energy_big
+			days = 360
+		}
+		hidden_effect = {
+			country_event = { id = paragon.1 days = 360 }
+		}
+	}
+	option = {
+		name = paragon.30.b
+		trigger = {
+			resource_income_compare = {
+				resource = energy
+				value < 100
+			}
+			resource_income_compare = {
+				resource = energy
+				value >= 50
+			}
+		}
+		add_modifier = {
+			modifier = the_beholder_energy_medium
+			days = 720
+		}
+		hidden_effect = {
+			country_event = { id = paragon.1 days = 720 }
+		}
+	}
+	option = {
+		name = paragon.30.b
+		trigger = {
+			resource_income_compare = {
+				resource = energy
+				value < 50
+			}
+		}
+		add_modifier = {
+			modifier = the_beholder_energy_small
+			days = 1440
+		}
+		hidden_effect = {
+			country_event = { id = paragon.1 days = 1440 }
+		}
+	}
+
+	option = {
+		name = paragon.30.c
+		hidden_effect = {
+			remove_country_flag = beholder_chain_owner
+			clear_global_event_target = beholder_planet
+			clear_global_event_target = beholder_presapients
+			fromfrom = { remove_modifier = the_beholder_presapients_protected }
+		}
+	}
+}
+
+#Energy given
+#Create and add The Beholder Leader
+country_event = {
+	id = paragon.1
+	title = paragon.31.name
+	desc = paragon.31.desc
+	show_sound = par_event_beholder
+	location = event_target:beholder_planet
+	is_triggered_only = yes
+
+	event_window_type = leader_recruit
+	picture_event_data = {
+		portrait = event_target:beholder_leader
+	}
+	picture = GFX_leader_recruitment_bg_legendary_beholder
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_country_flag = beholder_chain_owner
+		exists = event_target:beholder_planet
+	}
+
+	immediate = {
+		create_country = {
+            name = "NAME_beholder"
+            type = global_event
+            auto_delete = yes
+            flag = {
+                icon = {
+                    category = "special"
+                    file = "unknown.dds"
+                }
+                background = {
+                    category = "backgrounds"
+                    file = "00_solid.dds"
+                }
+                colors = {
+                    "red"
+                    "red"
+                    "null"
+                    "null"
+                }
+            }
+            effect = {
+                save_event_target_as = beholder_country
+            }
+        }
+        event_target:beholder_country = {
+			create_species = {
+				name = "NAME_Unknown"
+				class = PARAGON
+				portrait = paragon01
+				namelist = "PRT1"
+				traits = random
+				effect = {
+					save_event_target_as = beholder_species
+				}
+			}
+			create_leader = {
+				species = event_target:beholder_species
+				event_leader = yes
+				class = admiral
+				name = "NAME_The_Beholder"
+				skill = 10
+				immortal = yes
+				randomize_traits = no
+				can_manually_change_location = no
+				can_assign_to_council = no
+				skip_background_generation = yes
+				custom_catch_phrase = beholder_catch_phrase
+				custom_description = beholder_backstory
+				traits = {
+					trait = leader_trait_scout
+					trait = leader_trait_watchdog
+					trait = leader_trait_cautious
+					trait = leader_trait_psionic
+					trait = subclass_admiral_tactician
+				}
+				gender = indeterminable
+				set_age = 0
+				hide_age = yes
+				effect = {
+					save_global_event_target_as = beholder_leader
+					set_leader_flag = legendary_leader
+					set_leader_flag = beholder
+					set_leader_flag = immune_to_negative_traits
+					set_leader_flag = leader_death_events_blocked
+					set_owner = root
+					exile_leader_as = beholder_leader
+				}
+			}
+		}
+	}
+	
+	option = { # HIRE
+		name = HIRE
+		tag = hire_leader
+		custom_tooltip = paragon_beholder_joins
+		sound = par_beholder_hire
+
+		hidden_effect = {
+			set_country_flag = zro_found
+
+			clone_leader = {
+				target = event_target:beholder_leader
+			}
+			last_created_leader = {
+				save_global_event_target_as = beholder_leader
+				set_leader_flag = legendary_leader
+				set_leader_flag = beholder
+				set_leader_flag = immune_to_negative_traits
+				set_leader_flag = leader_death_events_blocked
+			}
+			# Spawn ship
+			create_fleet = {
+				name = "NAME_Temple_of_Whispers"
+				settings = {
+					can_upgrade = no
+					can_change_composition = no
+					can_change_leader = no
+					can_disband = no
+					spawn_debris = no
+				}
+				effect = {
+					set_owner = root.owner
+					create_ship_design = {
+						design = NAME_Temple_of_Whispers
+					}
+					create_ship = {
+						design = last_created_design
+						name = "NAME_Temple_of_Whispers"
+						prefix = no
+						upgradable = no
+						effect = {
+							set_ship_flag = is_beholder_ship
+							save_global_event_target_as = beholder_ship
+						}
+					}
+					if = {
+						limit = {
+							exists = event_target:beholder_presapients
+							exists = event_target:beholder_planet
+						}
+						set_location = {
+							target = event_target:beholder_planet
+							distance = 1
+							angle = random
+						}
+					}
+					else = {
+						set_location = {
+							target = root.capital_scope
+							distance = 1
+							angle = random
+						}
+					}
+					
+					assign_leader = event_target:beholder_leader
+				}
+			}
+			create_message = {
+				type = MESSAGE_RECRUITED_LEADER
+				localization =  MESSAGE_RECRUITED_LEADER_DESC
+				days = @toast_message_days
+				target = event_target:beholder_leader
+				variable = {
+					type = name
+					localization = LEADER
+					scope = event_target:beholder_leader
+				}
+				variable = {
+					key = "border"
+					value = "GFX_border_legendary"
+				}
+			}
+		}
+	}
+
+	option = { # DISMISS
+		name = DISMISS
+		tag = dismiss_leader
+		sound = par_beholder_dismiss
+
+		hidden_effect = {
+			event_target:beholder_leader = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1.a # To what end to you seek energy?
+		response_text = paragon.1.a.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = paragon.1.b # What can you do for our civilization?
+		response_text = paragon.1.b.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = paragon.1.c # What are you?
+		response_text = paragon.1.c.response
+		is_dialog_only = yes
+	}
+
+	after = {
+		hidden_effect = {
+			clear_global_event_target = beholder_planet
+			clear_global_event_target = beholder_presapients
+			remove_country_flag = beholder_chain_owner
+			event_target:beholder_planet = { remove_modifier = the_beholder_presapients_protected }
+		}
+	}
+}
+
+# Beholder Planetfall
+# Moves Beholder Ship to targeted planet
+planet_event = {
+	id = paragon.99
+	hide_window = yes
+	location = from
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	immediate = {
+		if = {
+			limit = { free_building_slots >= 1 }
+			# A bit of flare
+			spawn_planet_temperature_effect = yes
+			# Add building if applicable
+			if = {
+				limit = { NOT = { has_building = building_the_beholder } }
+				add_building = building_the_beholder
+			}
+			# Change leader into a governor
+			event_target:beholder_leader = {
+				remove_trait = leader_trait_scout
+				remove_trait = leader_trait_watchdog
+				remove_trait = leader_trait_cautious
+				remove_trait = leader_trait_psionic
+				remove_trait = subclass_admiral_tactician
+				change_leader_class = governor
+				add_trait_no_notify = subclass_governor_pioneer
+				add_trait_no_notify = leader_trait_governor_psionic_communion
+				add_trait_no_notify = leader_trait_mediator
+				add_trait_no_notify = leader_trait_generator_focus_2
+				add_trait_no_notify = leader_trait_intellectual
+			}
+			# Delete ship
+			every_fleet_in_orbit = {
+				every_owned_ship = {
+					limit = { has_ship_flag = is_beholder_ship }
+					unassign_leader = this
+					delete_ship = this
+				}
+			}
+
+			# Assign leader to Planet. 
+			assign_leader = event_target:beholder_leader
+
+			# Notification
+			create_message = {
+				type = MESSAGE_BEHOLDER_PLANETFALL
+				localization = MESSAGE_BEHOLDER_PLANETFALL_DESC
+				days = 10
+				target = THIS
+				variable = {
+					type = name
+					localization = PLANET
+					scope = this
+				}
+			}
+		}
+		else = {
+			# Notification
+			create_message = {
+				type = MESSAGE_BEHOLDER_PLANETFALL_NO_SLOTS
+				localization = MESSAGE_BEHOLDER_PLANETFALL_NO_SLOTS_DESC
+				days = 10
+				target = THIS
+				variable = {
+					type = name
+					localization = PLANET
+					scope = this
+				}
+			}
+		}
+	}
+}
+
+# Destroy Beholder's ship if Beholder dies
+# Fired from on_actions: on_leader_death and on_leader_fired
+country_event = {
+	id = paragon.2
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:beholder_ship
+		exists = event_target:beholder_leader
+		event_target:beholder_leader = { is_same_value = from }
+	}
+
+	immediate = {
+		event_target:beholder_ship = { 
+			leader = { unassign_leader = this }
+			delete_ship = this
+		}
+	}
+}
+
+planet_event = {
+	id = paragon.50
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_building = building_the_beholder
+		has_planet_flag = psi_inoculating_pops
+		exists = event_target:beholder_leader
+	}
+
+	immediate = {
+		set_saved_date = {
+			key = beholder_psi_pops_timer
+			days_from_present = 180
+			expires = 180
+		}
+		random_owned_pop = {
+			limit = {
+				is_organic_species = yes
+				is_being_assimilated = no
+				is_being_purged = no
+				NOR = {
+					has_trait = trait_cybernetic
+					has_trait = trait_psionic
+					has_trait = trait_hive_mind
+				}
+			}
+			modify_species = {
+				remove_trait = trait_latent_psionic
+				add_trait = trait_psionic
+			}
+		}
+		create_message = {
+			type = MESSAGE_POPS_INOCULATED
+			localization = MESSAGE_POPS_INOCULATED_DESC
+			days = 20
+			target = root
+			variable = {
+				type = name
+				localization = PLANET
+				scope = root
+			}
+		}
+		if = {
+			limit = {
+				count_owned_pop = {
+					count = 0
+					limit = {
+						is_organic_species = yes
+						is_being_assimilated = no
+						is_being_purged = no
+						NOR = {
+							has_trait = trait_cybernetic
+							has_trait = trait_psionic
+							has_trait = trait_hive_mind
+						}
+					}
+				}
+			}
+			remove_planet_flag = psi_inoculating_pops
+			remove_planet_flag = beholder_psi_pops_timer
+			set_saved_date = {
+				key = beholder_psi_pops_cooldown_timer
+				days_from_present = 180
+				expires = 180
+			}
+		}
+		else = {
+			planet_event = {
+				id = paragon.50
+				days = 180
+			}
+		}
+	}
+}
+
+
+###########################
+### ASTROCREATOR AZARYN ###
+###########################
+
+# On_five_year_pulse_country
+# Chance to start Azaryn chain
+country_event = {
+	id = paragon.200
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+		NOT = { has_country_flag = azaryn_chain_started }
+		has_country_flag = first_contact_protocol_event_happened
+		is_ai = no
+		is_militarist = no
+		is_gestalt = no
+	}
+
+	immediate = {
+		random_list = {
+			99 = {} # Do nothing
+			1 = { owner = { country_event = { id = paragon.202 days = 1 random = 900 } } }
+		}
+	}
+}
+
+# Dead comms 1
+country_event = {
+	id = paragon.202
+	title = "paragon.202.name"
+	desc = "paragon.202.desc"
+	show_sound = event_conversation
+	is_triggered_only = yes
+	fire_only_once = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+		has_country_flag = first_contact_protocol_event_happened
+		is_ai = no
+		is_militarist = no
+		is_gestalt = no
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = paragon_azaryn_room
+	}
+
+	immediate = {
+		set_country_flag = azaryn_chain_started
+	}
+
+	option = {
+		name = paragon.202.a # Hello?
+		response_text = paragon.202.a.response
+		is_dialog_only = yes 
+	}
+	option = {
+		name = paragon.202.b # Odd. Terminate the comms.
+	}
+	
+	after = {
+		hidden_effect = { country_event = { id = paragon.204 days = 120 random = 90 } }
+	}
+}
+
+# Dead comms 2
+country_event = {
+	id = paragon.204
+	title = "paragon.204.name"
+	desc = "paragon.204.desc"
+	show_sound = event_conversation
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.204.a # Trace it
+		enable_special_project = { name = UNKNOWN_COMMS_PROJECT }
+	}
+	option = {
+		name = paragon.204.b # Terminate it
+	}
+}
+
+# Unknown comms source found.
+country_event = {
+	id = paragon.206
+	title = paragon.206.name
+	desc = paragon.206.desc
+	picture = GFX_evt_mysterious_signal
+	show_sound = event_default
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	option = {
+		name = paragon.206.a
+		hidden_effect = {
+			country_event = { id = paragon.208 }
+		}
+	}
+}
+
+# Open comms. Warm greetings.
+country_event = {
+	id = paragon.208
+	title = "paragon.208.name"
+	desc = "paragon.208.desc"
+	show_sound = event_conversation
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	immediate = {
+		hidden_effect = {
+			set_variable = {
+				which = variable_azaryn_score
+				value = 0
+			}
+		}
+	}
+
+	option = {
+		name = paragon.208.a # Who are you?
+		set_country_flag = flag_azaryn_option_intro_done
+		response_text = paragon.208.a.response
+		is_dialog_only = yes 
+	}
+	option = {
+		name = paragon.208.b # Life's value? That depends. A virus, we'd kill.
+		set_country_flag = flag_azaryn_option_virus
+		hidden_effect = { country_event = { id = paragon.210 } }
+		custom_gui = "enclave_caravaneer_option"
+	}
+	option = {
+		name = paragon.208.c # A trick question. It's invariably invaluable.
+		set_country_flag = flag_azaryn_option_invaluable
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = 1
+			}
+			country_event = { id = paragon.210 }
+		}
+		custom_gui = "enclave_caravaneer_option"
+	}
+	option = {
+		name = paragon.208.d # Motivate your question, then we might give an answer.
+		response_text = paragon.208.d.response
+		is_dialog_only = yes
+	}
+	option = { # Try your questions elsewhere. Goodbye.
+		name = paragon.208.e
+	}
+}
+
+# Response to answer.
+country_event = {
+	id = paragon.210
+	title = "paragon.210.name"
+	desc = {
+		trigger = { has_country_flag = flag_azaryn_option_virus }
+		text = paragon.210.desc
+	}
+	desc = {
+		trigger = { has_country_flag = flag_azaryn_option_invaluable }
+		text = paragon.210.desc_alt
+	}
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.210.a # Go ahead.
+		hidden_effect = { country_event = { id = paragon.212 } }
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = flag_azaryn_option_virus
+			remove_country_flag = flag_azaryn_option_invaluable
+		}
+	}
+}
+
+# Azaryn info. What is Azathea/Astrocreation/Your ship?
+country_event = {
+	id = paragon.212
+	title = "paragon.212.name"
+	desc = {
+		trigger = { NOT = { has_country_flag = flag_azaryn_option_intro_done } }
+		text = paragon.212.desc
+	}
+	desc = {
+		trigger = { has_country_flag = flag_azaryn_option_intro_done }
+		text = paragon.212.desc_alt
+	}
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.212.a # What is Azathea?
+		response_text = paragon.212.a.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = paragon.212.b # What is astrocreation?
+		response_text = paragon.212.b.response
+		is_dialog_only = yes
+		hidden_effect = {
+			set_country_flag = flag_azaryn_what_is_astrocreation
+		}
+	}
+	option = {
+		name = paragon.212.c # Are you on a ship?
+		response_text = paragon.212.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = paragon.212.d # Until next time.
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = flag_azaryn_option_intro_done
+		}
+		enable_special_project = { name = AZARYNS_BACTERIA_PROJECT }
+	}
+}
+# Bacteria project done.
+country_event = {
+	id = paragon.214
+	title = paragon.214.name
+	desc = paragon.214.desc
+	picture = GFX_evt_microscopic_life
+	show_sound = event_default
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	option = {
+		name = paragon.214.a
+		add_resource = { society_research = 2000 }
+		hidden_effect = {
+			country_event = { id = paragon.216 }
+		}
+	}
+}
+
+# Open comms.
+# To escape death, would you take the life of another?
+country_event = {
+	id = paragon.216
+	title = "paragon.216.name"
+	desc = "paragon.216.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.216.a # We would.
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = 1
+			}
+			set_country_flag = flag_azaryn_option_take_life
+		}
+	}
+	option = {
+		name = paragon.216.b # We would not.
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = -1
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			country_event = { id = paragon.218 }
+		}
+	}
+}
+
+# Response to answer. Get Rafflesia project
+country_event = {
+	id = paragon.218
+	title = "paragon.218.name"
+	desc = {
+		trigger = { has_country_flag = flag_azaryn_option_take_life }
+		text = paragon.218.desc_yes
+	}
+	desc = {
+		trigger = { NOT = { has_country_flag = flag_azaryn_option_take_life } }
+		text = paragon.218.desc_no
+	}
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = { # Very well. Goodbye.
+		name = paragon.218.a
+		enable_special_project = { name = AZARYNS_RAFFLESIA_PROJECT }
+	}
+}
+
+# Rafflesia project done.
+country_event = {
+	id = paragon.220
+	title = paragon.220.name
+	desc = paragon.220.desc
+	picture = GFX_evt_space_crystals # so-so
+	show_sound = event_default
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	option = {
+		name = paragon.220.a # Open comms.
+		add_resource = { society_research = 5000 }
+		hidden_effect = {
+			country_event = { id = paragon.222 }
+		}
+	}
+}
+
+# GJ with rafflesia. Sacrifice your people to save lives on a massive scale?
+country_event = {
+	id = paragon.222
+	title = "paragon.222.name"
+	desc = "paragon.222.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = { # We would.
+		name = paragon.222.a
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = 1
+			}
+			set_country_flag = flag_azaryn_option_sacrifice
+		}
+	}
+	option = { # We would not.
+		name = paragon.222.b
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = -1
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = { country_event = { id = paragon.224 } }
+	}
+}
+
+# [...]
+# Can hesitation be merited?
+country_event = {
+	id = paragon.224
+	title = "paragon.224.name"
+	desc = {
+		trigger = { has_country_flag = flag_azaryn_option_sacrifice }
+		text = paragon.224.desc_yes
+	}
+	desc = {
+		trigger = { NOT = { has_country_flag = flag_azaryn_option_sacrifice } }
+		text = paragon.224.desc_no
+	}
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = { # If the moment allows.
+		name = paragon.224.a
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = 1
+			}
+			set_country_flag = flag_azaryn_option_hesitate
+		}
+	}
+	option = { # No, never.
+		name = paragon.224.b
+		hidden_effect = {
+			change_variable = {
+				which = variable_azaryn_score
+				value = -1
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = { country_event = { id = paragon.226 } }
+	}
+}
+
+# [...]
+# Quiz done
+country_event = {
+	id = paragon.226
+	title = "paragon.226.name"
+	desc = {
+		trigger = { has_country_flag = flag_azaryn_option_hesitate }
+		text = paragon.226.desc_no # switched places with desc_yes below, as they are mixed up in loc
+	}
+	desc = {
+		trigger = { NOT = { has_country_flag = flag_azaryn_option_hesitate } }
+		text = paragon.226.desc_yes
+	}
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_3_buds
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = GOODBYE
+	}
+
+	after = {
+		hidden_effect = { country_event = { id = paragon.228 days = 60 } }
+	}
+}
+
+# [...]
+# Azaryn: HIRE/DISMISS
+country_event = {
+	id = paragon.228
+	title = "paragon.228.name"
+	# Worst: -2, -1, 0
+	# Mid: 1, 2, 3
+	# Best: 4, 5, 6
+	desc = {
+		trigger = {
+			check_variable = {
+				which = variable_azaryn_score
+				value > 3
+			}
+		}
+		text = paragon.228.desc_best
+	}
+	desc = {
+		trigger = {
+			check_variable = {
+				which = variable_azaryn_score
+				value < 4
+			}
+		}
+		text = paragon.228.desc_mid
+	}
+	desc = {
+		trigger = {
+			check_variable = {
+				which = variable_azaryn_score
+				value < 1
+			}
+		}
+		text = paragon.228.desc_worst
+	}
+	show_sound = par_event_azaryn
+	location = fromfrom
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	event_window_type = leader_recruit
+	picture_event_data = {
+		portrait = event_target:azaryn_leader
+		room = paragon_azaryn_room
+	}
+	picture = GFX_leader_recruitment_bg_legendary_azaryn
+	
+	immediate = {
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = azaryn_country
+				}
+			}
+			event_target:azaryn_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = paragon_azaryn_3_buds
+					namelist = "PRT1"
+					traits = {
+						trait = trait_quick_learners
+						trait = trait_talented
+						trait = trait_docile
+						trait = trait_weak
+						trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = azaryn_species
+					}
+				}
+				create_leader = {
+					species = event_target:azaryn_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_Astrocreator_Azaryn"
+					skill = 7
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_xenophile
+					custom_catch_phrase = sadtoid_catch_phrase
+					custom_description = astrocreator_azaryn_backstory
+					can_manually_change_location = no
+					traits = {
+						trait = leader_trait_legendary_terraformation_nucleus_3_buds
+						trait = leader_trait_xeno_cataloger
+						trait = leader_trait_educator
+						trait = leader_trait_spark_of_genius
+						trait = subclass_scientist_analyst
+					}
+					gender = female
+					set_age = 229
+					immortal = yes
+					effect = {
+						save_global_event_target_as = azaryn_leader
+						set_leader_flag = legendary_leader
+						set_leader_flag = azaryn
+						set_owner = root
+						exile_leader_as = azaryn_leader
+					}
+				}
+			}
+		}
+	}
+
+	option = { # What exactly is astrocreation?
+		trigger = {
+			NOT = { has_country_flag = flag_azaryn_what_is_astrocreation }
+		}
+		name = paragon.228.a
+		is_dialog_only = yes
+		response_text = paragon.228.a.response
+	}
+	option = { # What exactly is astrocreation?
+		trigger = {
+			has_country_flag = flag_azaryn_what_is_astrocreation
+		}
+		name = paragon.228.a
+		is_dialog_only = yes
+		response_text = paragon_astrocreation_is
+	}
+
+	option = { # What are those things on your back?
+		name = paragon.228.c
+		response_text = paragon.228.c.response
+		is_dialog_only = yes
+	}
+	option = { # What is that buzzing, tiny drone of yours?
+		name = paragon.228.d
+		response_text = paragon.228.d.response
+		is_dialog_only = yes
+	}
+
+	option = { # HIRE
+		name = HIRE
+		tag = hire_leader
+		custom_tooltip = paragon.228.b.custom_tooltip # Azaryn joins
+		sound = par_azaryn_hire
+
+		hidden_effect = {
+			random_owned_planet = {
+				limit = {
+					is_variable_set = paragon_memory_vault
+				}
+				change_variable = {
+					which = paragon_memory_vault
+					value = 1
+				}
+			}
+			clone_leader = {
+				target = event_target:azaryn_leader
+			}
+			last_created_leader = {
+				set_leader_flag = legendary_leader
+				save_global_event_target_as = azaryn_leader
+				set_leader_flag = immune_to_negative_traits
+				set_leader_flag = azaryn
+			}
+			event_target:azaryn_leader = {
+				set_variable = {
+					which = azaryn_nuclei_variable
+					value = 3
+				}
+			}
+
+			create_fleet = {
+				name = "NAME_Azaryn_Dome"
+				settings = {
+					can_upgrade = no
+					can_change_composition = no
+					can_change_leader = no
+					can_disband = no
+					spawn_debris = no
+				}
+				effect = {
+					set_owner = root.owner
+					create_ship_design = {
+						design = NAME_Azaryn_Dome
+					}
+					create_ship = {
+						design = last_created_design
+						name = "NAME_Azaryn_Dome"
+						prefix = no
+						upgradable = no
+						effect = {
+							set_ship_flag = is_azaryn_ship
+							save_global_event_target_as = azaryn_ship
+						}
+					}
+					set_fleet_stance = evasive
+					set_location = root.capital_scope
+					assign_leader = event_target:azaryn_leader
+				}
+			}
+			country_event = { id = paragon.230 } # Azaryn sets a course for your capital world
+		}
+	}
+
+	option = { # DISMISS
+		sound = par_azaryn_dismiss
+		name = DISMISS
+		tag = dismiss_leader
+		hidden_effect = {
+			event_target:azaryn_leader = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = flag_azaryn_what_is_astrocreation
+		}
+	}
+}
+
+# [...]
+# Azaryn sets a course for your capital world.
+country_event = {
+	id = paragon.230
+	title = "paragon.230.name"
+	desc = {
+		trigger = {
+			check_variable = {
+				which = variable_azaryn_score
+				value >= 4
+			}
+		}
+		text = paragon.230.desc_best
+	}
+	desc = {
+		trigger = {
+			check_variable = {
+				which = variable_azaryn_score
+				value < 4
+			}
+			check_variable = {
+				which = variable_azaryn_score
+				value >= 1
+			}
+		}
+		text = paragon.230.desc_mid
+	}
+	desc = {
+		trigger = {
+			check_variable = {
+				which = variable_azaryn_score
+				value < 1
+			}
+		}
+		text = paragon.230.desc_worst
+	}
+	location = fromfrom
+	is_triggered_only = yes
+
+	diplomatic = yes
+	diplomatic_title = BLANK_STRING
+
+	picture_event_data = {
+		portrait = event_target:azaryn_leader
+		room = paragon_azaryn_room
+	}
+	picture = GFX_leader_recruitment_bg_renowned
+
+	option = {
+		name = EXCELLENT
+	}
+
+	after = {
+		create_message = {
+			type = MESSAGE_RECRUITED_LEADER
+			localization =  MESSAGE_RECRUITED_LEADER_DESC
+			days = @toast_message_days
+			target = event_target:azaryn_leader
+			variable = {
+				type = name
+				localization = LEADER
+				scope = event_target:azaryn_leader
+			}
+			variable = {
+				key = "border"
+				value = "GFX_border_legendary" 
+			}
+		}
+
+		if = {
+			limit = {
+				check_variable = {
+					which = variable_azaryn_score
+					value >= 4
+				}
+			}
+			add_modifier = { modifier = pheromone_cocktail_best days = 999 }
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = variable_azaryn_score
+					value < 4
+				}
+				check_variable = {
+					which = variable_azaryn_score
+					value >= 1
+				}
+			}
+			add_modifier = { modifier = pheromone_cocktail_mid days = 999 }
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = variable_azaryn_score
+					value < 1
+				}
+			}
+			add_modifier = { modifier = pheromone_cocktail_worst days = 999 }
+		}
+	}
+}
+
+# First terraformation nucleus expended
+# Azaryn withers
+leader_event = {
+	id = paragon.232
+	title = "paragon.232.name"
+	desc = "paragon.232.desc"
+	picture = GFX_evt_worrying_signal
+	show_sound = event_default
+	location = event_target:azaryn_leader
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.232.a
+	}
+}
+
+# Second terraformation nucleus expended
+# Azaryn's health deteriorates further
+leader_event = {
+	id = paragon.235
+	title = "paragon.235.name"
+	desc = "paragon.235.desc"
+	picture = GFX_evt_board_meeting
+	show_sound = event_default
+	location = event_target:azaryn_leader
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.235.a
+	}
+}
+
+# Last terraformation nucleus expended
+# Azaryn dies and the dome ship withers
+country_event = {
+	id = paragon.240
+	title = "paragon.240.name"
+	desc = "paragon.240.desc"
+	show_sound = event_conversation
+	location = from
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = paragon_azaryn_no_buds
+		room = paragon_azaryn_room
+	}
+
+	immediate = {
+		hidden_effect = {
+			event_target:azaryn_ship = { 
+                leader = { unassign_leader = this }
+
+				# Add 'withered' dome ship
+				create_ambient_object = {
+					type = withered_dome_ship_effect
+					location = this
+				}
+
+                delete_ship = this
+            }
+            event_target:azaryn_leader = {
+                kill_leader = { show_notification = no }
+            }
+			set_country_flag = million_souls_achievement
+		}
+	}
+
+	option = {
+		name = paragon.240.a
+		hidden_effect = { country_event = { id = paragon.241 } }
+	}
+}
+
+# Comms close
+# Give Contained Ecosphere
+country_event = {
+	id = paragon.241
+	title = "paragon.240.name" # Reusing
+	desc = "paragon.241.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	immediate = {
+		hidden_effect = {
+			set_country_flag = azaryn_dead
+		}
+	}
+
+	option = {
+		name = paragon.241.a
+		custom_tooltip = paragon.241.a.custom_tooltip
+	}
+}
+
+# Astrocreator Azaryn Terraforming
+# Begin transfixing terraform nucleus
+planet_event = {
+	id = paragon.250
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+		exists = event_target:azaryn_ship
+		has_azaryn_in_orbit = yes
+		NOT = { has_planet_flag = terraform_nucleus_transfixed }
+		NOT = { has_planet_flag = terraform_nucleus_transfix_started }
+	}
+
+	immediate = {
+		planet_event = { id = paragon.252 days = 3 }
+
+		remove_planet_flag = terraform_nucleus_transfix_canceled
+		set_planet_flag = terraform_nucleus_transfix_started
+
+		# Set vars to adapt effect to planet size
+		export_trigger_value_to_variable = {
+			trigger = planet_size
+			variable = effect_size_var
+		}
+		multiply_variable = {
+			which = effect_size_var
+			value = 0.13
+		}
+		create_ambient_object = {
+			type = terraforming_planet_effect
+			location = this
+			use_3d_location = yes
+			entity_scale_to_size = yes
+			scripted_scale = effect_size_var
+		}
+		last_created_ambient_object = {
+			set_ambient_object_flag = azaryn_terraforming_effect
+		}
+		# Set vars to adapt beam to planet size
+		export_trigger_value_to_variable = {
+			trigger = planet_size
+			variable = beam_size_var
+		}
+		switch = {
+			trigger = planet_size
+			30 >= { multiply_variable = { which = beam_size_var value = 0.26 } }
+			28 >= { multiply_variable = { which = beam_size_var value = 0.27 } }
+			26 >= { multiply_variable = { which = beam_size_var value = 0.28 } }
+			24 >= { multiply_variable = { which = beam_size_var value = 0.30 } }
+			22 >= { multiply_variable = { which = beam_size_var value = 0.31 } }
+			20 >= { multiply_variable = { which = beam_size_var value = 0.34 } }
+			19 >= { multiply_variable = { which = beam_size_var value = 0.36 } }
+			18 >= { multiply_variable = { which = beam_size_var value = 0.37 } }
+			16 >= { multiply_variable = { which = beam_size_var value = 0.42 } }
+			14 >= { multiply_variable = { which = beam_size_var value = 0.47 } }
+			12 >= { multiply_variable = { which = beam_size_var value = 0.58 } }
+			10 >= { multiply_variable = { which = beam_size_var value = 0.65 } }
+		}
+		create_ambient_object = {
+			type = terraforming_ship_beam
+			location = event_target:azaryn_ship
+			entity_face_object = this
+			use_3d_location = yes
+			entity_scale_to_size = yes
+			scripted_scale = beam_size_var
+			play_animation_once = yes
+		}
+		last_created_ambient_object = {
+			set_ambient_object_flag = azaryn_terraforming_beam
+		}
+	}
+}
+
+# Astrocreator Azaryn Terraforming Cancel Order
+planet_event = {
+	id = paragon.251
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+		exists = event_target:azaryn_ship
+	}
+
+	immediate = {
+		set_planet_flag = terraform_nucleus_transfix_canceled
+		remove_planet_flag = terraform_nucleus_transfix_started
+
+		# Destroy beam and planet effects
+		solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					OR = {
+						has_ambient_object_flag = azaryn_terraforming_beam
+						has_ambient_object_flag = azaryn_terraforming_effect
+					}
+				}
+				destroy_ambient_object = this
+			}
+		}
+
+		# Notification - Terraforming Canceled
+		create_message = {
+			type = MESSAGE_AZARYN_TERRAFORM_CANCELED
+			localization = MESSAGE_AZARYN_TERRAFORM_CANCELED_DESC
+			days = 10
+			target = this
+			variable = {
+				type = name
+				localization = PLANET
+				scope = this
+			}
+		}
+	}
+}
+
+# Astrocreator Azaryn
+# Terraforming begins
+planet_event = {
+	id = paragon.252
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_ship
+		exists = event_target:azaryn_leader
+		has_azaryn_in_orbit = yes
+		NOT = { has_planet_flag = terraform_nucleus_transfix_canceled }
+		NOT = { has_planet_flag = terraform_nucleus_transfixed }
+	}
+
+	immediate = {
+		# Destroy beam effect
+		solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					OR = {
+						has_ambient_object_flag = azaryn_terraforming_beam
+						#has_ambient_object_flag = azaryn_terraforming_effect
+					}
+				}
+				destroy_ambient_object = this
+			}
+		}
+
+		set_planet_flag = terraform_nucleus_transfixed
+		remove_planet_flag = terraform_nucleus_transfix_started
+		start_terraform_process = pc_gaia
+
+		# "Consume" Terraform Nucleus, i.e. update leader's Trait
+		event_target:azaryn_leader = {
+			switch = {
+				trigger = has_trait
+				leader_trait_legendary_terraformation_nucleus_1_bud = {
+					remove_trait = leader_trait_legendary_terraformation_nucleus_1_bud
+					change_leader_portrait = paragon_azaryn_no_buds
+					owner = { country_event = { id = paragon.240 } }
+				}
+				leader_trait_legendary_terraformation_nucleus_2_buds = {
+					remove_trait = leader_trait_legendary_terraformation_nucleus_2_buds
+					add_trait = leader_trait_legendary_terraformation_nucleus_1_bud
+					change_leader_portrait = paragon_azaryn_1_bud
+					leader_event = { id = paragon.235 days = 90 random = 30 }
+				}
+				leader_trait_legendary_terraformation_nucleus_3_buds = {
+					remove_trait = leader_trait_legendary_terraformation_nucleus_3_buds
+					add_trait = leader_trait_legendary_terraformation_nucleus_2_buds
+					change_leader_portrait = paragon_azaryn_2_buds
+					leader_event = { id = paragon.232 days = 60 random = 30 }
+				}
+			}
+			
+			change_variable = {
+				which = azaryn_nuclei_variable
+				value = -1
+			}
+
+			# Subtract energy cost
+			owner = {
+				add_resource = { energy = @azaryn_terraform_cost_negative }
+			}
+			
+			# Notification - Terraforming Started
+			create_message = {
+				type = MESSAGE_AZARYN_TERRAFORM_STARTED
+				localization = MESSAGE_AZARYN_TERRAFORM_STARTED_DESC
+				days = 10
+				target = prev
+				variable = {
+					type = name
+					localization = PLANET
+					scope = prev
+				}
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			event_target:azaryn_leader = {
+				if = {
+					limit = {
+						check_variable = {
+							which = azaryn_nuclei_variable
+							value >= 1
+						}
+					}
+					random_list = {
+						25 = { owner = { country_event = { id = paragon.260 days = 360 random = 360 } } }
+						75 = {}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Terraformation completed
+# Fires from on_terraforming_complete in 00_on_actions
+# This = Planet
+# From = Terraforming country
+planet_event = {
+	id = paragon.253
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		has_planet_flag = terraform_nucleus_transfixed
+	}
+
+	immediate = {
+		# Add Azaryn-specific modifier to planet
+		add_modifier = { modifier = terraformation_nucleus_side_effect }
+
+		# Destroy planet effect
+		solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					OR = {
+						has_ambient_object_flag = azaryn_terraforming_effect
+					}
+				}
+				destroy_ambient_object = this
+			}
+		}
+
+		remove_planet_flag = terraform_nucleus_transfixed
+	}
+}
+
+# Nucleus sample stolen
+country_event = {
+	id = paragon.260
+	title = "paragon.260.name"
+	desc = "paragon.260.desc"
+	picture = GFX_evt_analyzing_artifacts
+	show_sound = event_default
+	location = from
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	option = {
+		name = paragon.260.a
+		enable_special_project = {
+			name = NUCLEUS_SAMPLE_STOLEN
+			location = from
+		}
+	}
+	option = {
+		name = paragon.260.b
+		hidden_effect = {
+			country_event = { id = paragon.261 days = 30 random = 30 }
+		}
+	}
+}
+
+# Sample returned
+country_event = {
+	id = paragon.261
+	title = "paragon.261.name"
+	desc = "paragon.261.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = event_target:azaryn_leader
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.261.a
+		add_modifier = { modifier = pheromone_cocktail_best days = 999 }
+	}
+
+	option = {
+		name = paragon.261.b
+		is_dialog_only = yes
+		response_text = paragon.261.b.response
+	}
+}
+
+# Sample researched
+country_event = {
+	id = paragon.265
+	title = "paragon.265.name"
+	desc = "paragon.265.desc"
+	picture = GFX_evt_analyzing_artifacts
+	show_sound = event_bad_omen
+	location = fromfrom
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	immediate = {
+		hidden_effect = {
+			random_list = {
+				25 = {
+					capital_scope = {
+						save_event_target_as = nucleus_building_planet
+					}
+					country_event = { id = paragon.270 days = 90 random = 90 }
+				}
+				75 = {}
+			}
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+
+	after = {
+		switch = {
+			trigger = has_technology
+			tech_terrestrial_sculpting = { give_technology = { tech = tech_ecological_adaptation } }
+			tech_ecological_adaptation = { give_technology = { tech = tech_climate_restoration } }
+			tech_climate_restoration = { add_resource = { society_research = 15000 } }
+		}
+		add_resource = { society_research = 5000 }
+	}
+}
+
+# Facility overrun
+country_event = {
+	id = paragon.270
+	title = "paragon.270.name"
+	desc = "paragon.270.desc"
+	picture = GFX_evt_aggressive_flora
+	show_sound = event_bad_omen
+	location = event_target:nucleus_building_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+		exists = event_target:nucleus_building_planet
+	}
+
+	option = {
+		name = paragon.270.a
+		add_resource = { 
+			society_research = -1000
+			alloys = -500
+			minerals = -500
+		}
+		hidden_effect = { country_event = { id = paragon.275 days = 10 random = 10 } }
+	}
+	
+	option = {
+		name = paragon.270.b
+		hidden_effect = { country_event = { id = paragon.272 } }
+		custom_tooltip = paragon.270.b.custom_tooltip
+	}
+}
+
+# Azaryn informed - sooner
+country_event = {
+	id = paragon.272
+	title = "paragon.272.name"
+	desc = "paragon.272.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = event_target:azaryn_leader
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.272.a
+		hidden_effect = {
+			country_event = { id = paragon.273 }
+		}
+	}
+}
+country_event = {
+	id = paragon.273
+	title = "paragon.272.name" # Reuse
+	desc = "paragon.273.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = event_target:azaryn_leader
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.273.a
+		if = {
+			limit = {
+				has_resource = {
+					type = energy
+					amount >= 2500
+				}
+			}
+			add_resource = {
+				energy = -2500
+			}
+		}
+		else = {
+			hidden_effect = {
+				add_resource = {
+					energy = -2500
+				}
+			}
+			custom_tooltip = paragon.273.a.custom_tooltip
+		}
+	}
+}
+
+# Green Terror
+country_event = {
+	id = paragon.275
+	title = "paragon.275.name"
+	desc = "paragon.275.desc"
+	picture = GFX_evt_disease_outbreak
+	show_sound = event_bad_omen
+	location = event_target:nucleus_building_planet
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+		exists = event_target:nucleus_building_planet
+	}
+
+	immediate = {
+		add_modifier = { modifier = nucleus_sample_boils days = 365 }
+	}
+
+	option = {
+		name = paragon.275.a
+		hidden_effect = { country_event = { id = paragon.280 } }
+		custom_tooltip = paragon.270.b.custom_tooltip # Might leave empire
+	}
+
+	after = {
+		while = {
+			count = 5
+			random_owned_pop = {
+				limit = { planet = { is_same_value = event_target:nucleus_building_planet } }
+				kill_pop = yes
+			}
+		}
+		event_target:nucleus_building_planet = {
+			if = {
+				limit = { has_district = district_industrial }
+				remove_district = district_industrial
+			}
+			else_if = {
+				limit = { has_district = district_farming }
+				remove_district = district_farming
+			}
+			else_if = {
+				limit = { has_district = district_rw_farming }
+				remove_district = district_rw_farming
+			}
+			else_if = {
+				limit = { has_district = district_mining }
+				remove_district = district_mining
+			}
+		}
+	}
+}
+
+country_event = {
+	id = paragon.280
+	title = "paragon.280.name"
+	desc = "paragon.280.desc"
+	show_sound = event_conversation
+	location = fromfrom
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+
+	trigger = {
+		has_paragon_dlc = yes
+		exists = event_target:azaryn_leader
+	}
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = event_target:azaryn_leader
+		room = paragon_azaryn_room
+	}
+
+	option = {
+		name = paragon.280.a
+	}
+
+	after = {
+		add_resource = {
+			energy = -1000
+		}
+	}
+}
+
+country_event = { #UTILITY - kill leader when the dome dies
+	id = paragon.285
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:azaryn_leader
+		fromfrom = { has_ship_flag = is_azaryn_ship }
+	}
+
+	immediate = {
+		event_target:azaryn_leader = {
+			kill_leader = {
+				show_notification = yes
+			}
+		}
+	}
+}
+
+country_event = { #UTILITY EVENT - destroy dome ship if you dismiss the sadtoid
+	id = paragon.290
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:azaryn_leader
+		from = {
+			event_target:azaryn_leader = { has_leader_flag = azaryn }
+		}
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.295 days = 2 #It needs to call another event, unless it will always launch for some reason
+		}
+	}
+}
+
+country_event = { #UTILITY EVENT - destroy dome ship if you dismiss the sadtoid
+	id = paragon.295
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { exists = event_target:azaryn_leader }
+	}
+
+	immediate = {
+		every_controlled_ship = {
+			limit = {
+				has_ship_flag = is_azaryn_ship
+			}
+			destroy_ship = this	
+		}
+	}
+}
+
+########################
+## AGENDAS and TRADITIONS
+
+# on_agenda_finished, award XP to all leaders if country has "tr_statecraft_amongst_peers".
+country_event = {
+	id = paragon.402
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				has_tradition = tr_statecraft_amongst_peers
+			}
+			every_owned_leader = {
+				add_experience = @statecraft_amongst_peers_exp_reward
+			}
+			create_message = {
+				type = TRADITION_EFFECT
+				localization =  message_tradition_effect_shared_benefits_effect_desc
+				days = @toast_message_days
+				custom_toast_content_text = tr_statecraft_shared_benefits_effect_desc
+				custom_toast_content_icon = GFX_topbar_leaders_button
+			}
+		}
+	}
+}
+
+# on_colonized, give boost modifier if "Superior Colonies" Agenda is active.
+planet_event = {
+	id = paragon.403
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				owner = { has_modifier = agenda_superior_colonies_finish }
+			}
+			add_modifier = {
+				modifier = agenda_superior_colonies_planet_boost
+				days = @agenda_finish_modifier_duration
+			}
+			remove_planet_flag = superior_colonies_can_be_boosted
+		}
+		else = {
+			# Set flag, so if Agenda is completed later, it can trigger Boost then (paragon.404).
+			set_timed_planet_flag = {
+				flag = superior_colonies_can_be_boosted
+				days = @agenda_finish_modifier_duration
+			}
+		}
+	}
+}
+
+# on_agenda_finished "Superior Colonies", check for young Colonies that should get the boost modifier.
+country_event = {
+	id = paragon.404
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			# Not necessarily the last finished Agenda, but checking if it's active does the job.
+			limit = {
+				owner = { has_modifier = agenda_superior_colonies_finish }
+			}
+			# Check all our Colonies if they were founded last 10 years (has can_be_boosted flag).
+			every_system_within_border = {
+				every_system_planet = {
+					limit = {
+						is_colony = yes
+						is_owned_by = root.owner
+						has_planet_flag = superior_colonies_can_be_boosted
+					}
+					remove_planet_flag = superior_colonies_can_be_boosted
+					add_modifier = {
+						modifier = agenda_superior_colonies_planet_boost
+						days = @agenda_finish_modifier_duration
+					}
+				}
+			}
+		}
+	}
+}
+
+# on_tradition_picked "tr_statecraft_inspiring_agendas", show a notification that they're available.
+country_event = {
+	id = paragon.405
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_country_flag = has_picked_tr_statecraft_inspiring_agendas }
+				has_tradition = tr_statecraft_inspiring_agendas
+			}
+
+			# Makes sure this is only triggered ONCE and only when tr_statecraft_inspiring_agendas was unlocked.
+			set_country_flag = has_picked_tr_statecraft_inspiring_agendas
+
+			create_message = {
+				type = COUNCIL_AGENDA_AVAILABLE
+				localization = MESSAGE_COUNCIL_AGENDA_AVAILABLE_UNLOCKED_INSPIRING_AGENDAS
+				days = 30
+				# Unfortunately can't set message type to: _MESSAGE_TYPE_COUNCIL_AGENDA_READY_, which would enable Left-click to open Council.
+			}
+		}
+	}
+}
+
+
+########################
+## TOASTS
+
+leader_event = { # Leader Hired Toast Message
+	id = paragon.450
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		create_message = {
+			type = MESSAGE_RECRUITED_LEADER
+			localization =  MESSAGE_RECRUITED_LEADER_DESC
+			days = @toast_message_days
+			target = THIS
+			variable = {
+				type = name
+				localization = LEADER
+				scope = THIS
+			}
+			variable = {
+				key = "border"
+				value = "GFX_invisible" #TODO Common/ no rarity frame
+			}
+		}
+	}
+}
+
+########################
+## ELECTIONS
+
+# On Election start, set flags for rulers and councilors.
+country_event = {
+	id = paragon.500
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		set_country_flag = election_under_way
+		every_owned_leader = {
+			if = {
+				limit = {
+					is_councilor = yes
+					is_ruler = no
+				}
+				set_leader_flag = councilor_at_election_start
+			}
+			else = {
+				remove_leader_flag = councilor_at_election_start
+			}
+		}
+		if = {
+			limit = {
+				exists = ruler
+			}
+			ruler = {
+				set_leader_flag = ruler_at_election_start
+			}
+		}
+	}
+}
+
+# On Election end, clean up paragon.500 flags and reset cooldowns for democracies.
+country_event = {
+	id = paragon.501
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				has_authority = auth_democratic
+				exists = ruler
+				ruler = {
+					NOT = {
+						has_leader_flag = ruler_at_election_start
+					}
+				}
+			}
+			set_government_cooldown = no
+			reset_policy_cooldowns = yes
+		}
+		remove_country_flag = election_under_way
+		every_owned_leader = {
+			remove_leader_flag = councilor_at_election_start
+			remove_leader_flag = ruler_at_election_start
+		}
+	}
+}
+
+########################
+## LEADER DEATH
+
+# Launch correct death event for certain leaders
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.549
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		is_country_type = default
+		exists = from
+		from = {
+			is_pool_leader = no
+			NOT = { leader_class = envoy }
+			leader_years_of_service >= 2
+			NOT = {
+				has_leader_flag = leader_death_events_blocked
+			}
+			or = {
+				has_skill >= 4
+				is_ruler = yes
+				has_leader_flag = renowned_leader
+				has_leader_flag = legendary_leader
+			}
+			OR = {
+				is_ruler = yes
+				has_leader_flag = renowned_leader
+				has_leader_flag = legendary_leader
+				NOR = {
+					has_trait = leader_trait_mercenary_warrior
+					has_trait = leader_trait_general_mercenary_warrior
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+			80 = { # Do nothing
+				# Rulers should almost always get a funeral
+				modifier = {
+					factor = 0
+					from = { is_ruler = yes }
+				}
+				# Make repeated funerals less likely
+				modifier = {
+					factor = 5
+					has_country_flag = recently_had_leader_funeral
+				}
+			}
+			0 = { # Funeral event
+				# Rulers should almost always get a funeral
+				modifier = {
+					add = 1000
+					from = { is_ruler = yes }
+				}
+
+				# Slightly increase odds for more interesting leaders
+				modifier = {
+					add = 10
+					from = { is_councilor = yes }
+				}
+				modifier = {
+					add = 10
+					from = { has_leader_flag = renowned_leader }
+				}
+				modifier = {
+					add = 20
+					from = { has_leader_flag = legendary_leader }
+				}
+
+				# Increase chance for leaders of higher level
+				modifier = {
+					add = 10
+					from = { has_skill >= 4 }
+				}
+				modifier = {
+					add = 20
+					from = { has_skill >= 6 }
+				}
+				modifier = {
+					add = 30
+					from = { has_skill >= 8 }
+				}
+				modifier = {
+					add = 40
+					from = { has_skill >= 10 }
+				}
+
+				# Increase chance for leaders that have served the country for a long time
+				modifier = {
+					add = 10
+					from = { leader_years_of_service >= 10 }
+				}
+				modifier = {
+					add = 50
+					from = { leader_years_of_service >= 25 }
+				}
+				modifier = {
+					add = 100
+					from = { leader_years_of_service >= 50 }
+				}
+				modifier = {
+					add = 300
+					from = { leader_years_of_service >= 100 }
+				}
+
+				set_timed_country_flag = {
+					flag = recently_had_leader_funeral
+					years = 5
+				}
+
+				# Make a clone since the original is going to be deleted before any followup event is triggered.
+				create_country = {
+					name = "NAME_dead_leader_country"
+					type = faction
+					auto_delete = yes
+				}
+				last_created_country = {
+					clone_leader = {
+						target = from
+						effect = {
+							set_immortal = yes
+							save_event_target_as = dead_leader_clone
+						}
+					}
+				}
+				last_created_leader = {
+					set_owner = root
+					# This is a hack to make the leader not be added to player country.
+					# We must kill the leader once the event chain is done
+					exile_leader_as = dead_leader_clone_exile
+					set_years_served = from # Copy years served from the original
+					if = {
+						limit = {
+							from = { is_ruler = yes }
+						}
+						set_leader_flag = was_ruler_before_death
+					}			
+				}
+
+				if = {
+					limit = { 
+						is_gestalt = no
+					}
+					from = { set_leader_flag = use_unspecific_death_reason }
+					country_event = { id = paragon.550 scopes = { from = event_target:dead_leader_clone } }
+				}
+				else_if = {
+					limit = {
+						is_hive_empire = yes
+					}
+					from = { set_leader_flag = use_unspecific_death_reason }
+					country_event = { id = paragon.571 scopes = { from = event_target:dead_leader_clone } }
+				}
+				else_if = {
+					limit = {
+						from = {
+							species = {
+								or = {
+									is_species_class = ROBOT
+									is_species_class = MACHINE
+								}
+							}
+						}
+					}
+					from = { set_leader_flag = use_unspecific_death_reason }
+					country_event = { id = paragon.570 scopes = { from = event_target:dead_leader_clone } }
+				}
+				else = {
+					# Clean up the clone since we aren't using it.
+					event_target:dead_leader_clone = {
+						kill_leader = { show_notification = no }
+					}
+				}
+			}
+		}
+	}
+}
+
+# Death of great leader
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.550
+	title = "paragon.550.name"
+	desc = "paragon.550.desc"
+	picture = GFX_evt_news_room
+	show_sound = event_life_support_fail
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			# Private funeral should always be available
+			set_leader_flag = funeral_option_private
+			set_variable = { which = num_funeral_options_added value = 1 }
+
+			# Rulers should always have the public funeral option
+			if = {
+				limit = {
+					has_leader_flag = was_ruler_before_death
+				}
+				set_leader_flag = funeral_option_public
+				change_variable = { which = num_funeral_options_added value = 1 }
+			}
+
+			# Randomize additional options until we have 4 options in total
+			while = {
+				count = 3 # fail safe in case the limit somehow fails
+				limit = {
+					check_variable = {
+						which = num_funeral_options_added
+						value < 3
+					}
+				}
+
+				change_variable = { which = num_funeral_options_added value = 1 }
+
+				random_list = {
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_public
+						}
+						set_leader_flag = funeral_option_public
+					}
+					30 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_negative_traits
+						}
+						modifier = {
+							factor = 0
+							num_leader_traits = {
+								value < 3
+								negative = yes
+								count_tiers = yes
+							}
+						}
+						set_leader_flag = funeral_option_negative_traits
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_materialist
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_materialist
+								root = { is_materialist = yes }
+							}
+						}
+						modifier = {
+							factor = 0
+							species = {
+								OR = {
+									is_species_class = ROBOT
+									is_species_class = MACHINE
+								}
+							}
+						}
+						set_leader_flag = funeral_option_materialist
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_spiritualist
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_spiritualist
+								root = { is_spiritualist = yes }
+							}
+						}
+						set_leader_flag = funeral_option_spiritualist
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_militarist
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_militarist
+								root = { is_militarist = yes }
+							}
+						}
+						set_leader_flag = funeral_option_militarist
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_pacifist
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_pacifist
+								root = { is_pacifist = yes }
+							}
+						}
+						set_leader_flag = funeral_option_pacifist
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_xenophobe
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_xenophobe
+								root = { is_xenophobe = yes }
+							}
+						}
+						set_leader_flag = funeral_option_xenophobe
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_xenophile
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_xenophile
+								root = { is_xenophile = yes }
+							}
+						}
+						set_leader_flag = funeral_option_xenophile
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_authoritarian
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_authoritarian
+								root = { is_authoritarian = yes }
+							}
+						}
+						set_leader_flag = funeral_option_authoritarian
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_egalitarian
+						}
+						modifier = {
+							factor = 0
+							NOR = {
+								has_ethic = ethic_egalitarian
+								root = { is_egalitarian = yes }
+							}
+						}
+						set_leader_flag = funeral_option_egalitarian
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_megacorp
+						}
+						modifier = {
+							factor = 0
+							root = { is_megacorp = no }
+						}
+						set_leader_flag = funeral_option_megacorp
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							has_leader_flag = funeral_option_plantoid_fungoid
+						}
+						modifier = {
+							factor = 0
+							species = {
+								NOR = {
+									is_species_class = PLANT
+									is_species_class = FUN
+									is_species_class = PRE_PLANT
+									is_species_class = PRE_FUN
+								}
+							}
+						}
+						modifier = {
+							factor = 0
+							root = {
+								NOT = {
+									any_owned_planet = {
+										is_colony = yes
+									}
+								}
+							}
+						}
+						set_leader_flag = funeral_option_plantoid_fungoid
+					}
+				}
+			}
+		}
+	}
+
+	# A private funeral
+	option = {
+		name = paragon.550.b
+		trigger = {
+			from = { has_leader_flag = funeral_option_private }
+		}
+		hidden_effect = {
+			country_event = { id = paragon.552 scopes = { from = from } }
+		}
+	}
+
+	# A public funeral
+	option = {
+		name = paragon.550.a
+		trigger = {
+			from = { has_leader_flag = funeral_option_public }
+		}
+
+		inline_script = {
+			script = "events/resource_cost_with_allow"
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_high
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.551 scopes = { from = from } }
+		}
+	}
+
+	# Negative traits
+	option = {
+		name = paragon.550.c
+		trigger = {
+			from = { has_leader_flag = funeral_option_negative_traits }
+		}
+		hidden_effect = {
+			country_event = { id = paragon.553 scopes = { from = from } }
+		}
+	}
+
+	# Materialist
+	option = {
+		name = paragon.550.d
+		trigger = {
+			from = { has_leader_flag = funeral_option_materialist }
+		}
+		icon = {
+			icon = GFX_ethics_materialist
+			text = ethic_materialist
+		}
+		hidden_effect = {
+			country_event = { id = paragon.554 scopes = { from = from } }
+		}
+	}
+
+	# Spiritualist
+	option = {
+		name = paragon.550.e
+		trigger = {
+			from = { has_leader_flag = funeral_option_spiritualist }
+		}
+		icon = {
+			icon = GFX_ethics_spiritualist
+			text = ethic_spiritualist
+		}
+		hidden_effect = {
+			country_event = { id = paragon.555 scopes = { from = from } }
+		}
+	}
+
+	# Militarist
+	option = {
+		name = paragon.550.f
+		trigger = {
+			from = { has_leader_flag = funeral_option_militarist }
+		}
+		icon = {
+			icon = GFX_ethics_militarist
+			text = ethic_militarist
+		}
+
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_medium
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.556 scopes = { from = from } }
+		}
+	}
+
+	# Pacifist
+	option = {
+		name = paragon.550.g
+		trigger = {
+			from = { has_leader_flag = funeral_option_pacifist }
+		}
+		icon = {
+			icon = GFX_ethics_pacifist
+			text = ethic_pacifist
+		}
+
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_medium
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.557 scopes = { from = from } }
+		}
+	}
+
+	# Xenophobe
+	option = {
+		name = paragon.550.h
+		trigger = {
+			from = { has_leader_flag = funeral_option_xenophobe }
+		}
+		icon = {
+			icon = GFX_ethics_xenophobe
+			text = ethic_xenophobe
+		}
+
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_low
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.558 scopes = { from = from } }
+		}
+	}
+
+	# Xenophile
+	option = {
+		name = paragon.550.i
+		trigger = {
+			from = { has_leader_flag = funeral_option_xenophile }
+		}
+		icon = {
+			icon = GFX_ethics_xenophile
+			text = ethic_xenophile
+		}
+
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_low
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.559 scopes = { from = from } }
+		}
+	}
+
+	# Authoritarian
+	option = {
+		name = paragon.550.j
+		trigger = {
+			from = { has_leader_flag = funeral_option_authoritarian }
+		}
+		icon = {
+			icon = GFX_ethics_authoritarian
+			text = ethic_authoritarian
+		}
+
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_medium
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.560 scopes = { from = from } }
+		}
+	}
+
+	# Egalitarian
+	option = {
+		name = paragon.550.k
+		trigger = {
+			from = { has_leader_flag = funeral_option_egalitarian }
+		}
+		icon = {
+			icon = GFX_ethics_egalitarian
+			text = ethic_egalitarian
+		}
+		hidden_effect = {
+			country_event = { id = paragon.561 scopes = { from = from } }
+		}
+	}
+
+	# Megacorporation
+	option = {
+		name = paragon.550.l
+		trigger = {
+			has_authority = auth_corporate
+		}
+
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:funeral_cost_medium
+		}
+
+		hidden_effect = {
+			country_event = { id = paragon.562 scopes = { from = from } }
+		}
+	}
+
+	# Plantoid/Fungoid
+	option = {
+		name = paragon.550.m
+		trigger = {
+			from = { has_leader_flag = funeral_option_plantoid_fungoid }
+		}
+		hidden_effect = {
+			country_event = { id = paragon.563 scopes = { from = from } }
+		}
+	}
+}
+
+# Death of great leader - A public funeral
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.551
+	title = "paragon.551.name"
+	desc = "paragon.551.desc"
+	picture = GFX_evt_coronation
+	show_sound = event_factions
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.551.a
+		add_modifier = {
+			modifier = paragon_death_public_funeral
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - A private funeral
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.552
+	title = "paragon.552.name"
+	desc = "paragon.552.desc"
+	picture = GFX_evt_metropolis
+	show_sound = event_conversation
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.552.a
+		add_modifier = {
+			modifier = paragon_death_private_funeral
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Negative traits
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.553
+	title = "paragon.553.name"
+	desc = "paragon.553.desc"
+	picture = GFX_evt_news_room
+	show_sound = event_conversation
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.553.a
+		add_modifier = {
+			modifier = paragon_death_good_tidings
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Materialist
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.554
+	title = "paragon.554.name"
+	desc = "paragon.554.desc"
+	picture = GFX_evt_society_research
+	show_sound = event_laboratory_sound
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.554.a
+		add_modifier = {
+			modifier = paragon_death_pragmatic_approach
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Spiritualist
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.555
+	title = "paragon.555.name"
+	desc = "paragon.555.desc"
+	picture = GFX_evt_coronation
+	show_sound = event_factions
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.555.a
+		add_modifier = {
+			modifier = paragon_death_harmonious_passing
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Militarist
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.556
+	title = "paragon.556.name"
+	desc = "paragon.556.desc"
+	picture = GFX_evt_space_funeral
+	show_sound = event_ship_thrusters
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.556.a
+		add_modifier = {
+			modifier = paragon_death_military_funeral
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Pacifist
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.557
+	title = "paragon.557.name"
+	desc = "paragon.557.desc"
+	picture = GFX_evt_board_meeting
+	show_sound = event_administrative_work
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.557.a
+		add_modifier = {
+			modifier = paragon_death_foundation_peace
+			years = 10
+		}
+	}
+}
+
+# Death of great leader - Xenophobe
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.558
+	title = "paragon.558.name"
+	desc = "paragon.558.desc"
+	picture = GFX_evt_coronation
+	show_sound = event_conversation
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.558.a
+		add_modifier = {
+			modifier = paragon_death_reignited_traditions
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Xenophile
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.559
+	title = "paragon.559.name"
+	desc = "paragon.559.desc"
+	picture = GFX_evt_ship_travel
+	show_sound = event_ship_thrusters
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.559.a
+		add_modifier = {
+			modifier = paragon_death_to_the_stars
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Authoritarian
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.560
+	title = "paragon.560.name"
+	desc = "paragon.560.desc"
+	picture = GFX_evt_grand_speech
+	show_sound = evn_ove_grand_speech
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.560.a
+		add_modifier = {
+			modifier = paragon_death_towering_memorial
+			years = 10
+		}
+	}
+}
+
+# Death of great leader - Egalitarian
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.561
+	title = "paragon.561.name"
+	desc = "paragon.561.desc"
+	picture = GFX_evt_obelisk_tourists
+	show_sound = event_conversation
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.561.a
+		add_modifier = {
+			modifier = paragon_death_name_wall
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Megacorporation
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.562
+	title = "paragon.562.name"
+	desc = "paragon.562.desc"
+	picture = GFX_evt_metropolis
+	show_sound = event_conversation
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.562.a
+		add_modifier = {
+			modifier = paragon_death_landmark_building
+			years = 5
+		}
+	}
+}
+
+# Death of great leader - Plantoid/Fungoid
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.563
+	title = "paragon.563.name"
+	desc = "paragon.563.desc"
+	picture = GFX_evt_tropical
+	show_sound = event_default
+	is_triggered_only = yes
+
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				is_colony = yes
+			}
+			save_event_target_as = burial_planet
+		}
+	}
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		name = paragon.563.a
+		event_target:burial_planet = {
+			add_modifier = {
+				modifier = paragon_death_rejuvenation
+				years = 5
+			}
+		}
+	}
+}
+
+# Death of great gestalt machine leader
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.570
+	title = "paragon.570.name"
+	desc = "paragon.570.desc"
+	picture = GFX_evt_ship_in_orbit_2
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+
+	option = {
+		trigger = { has_authority = auth_machine_intelligence }
+		name = paragon.570.a
+		add_modifier = {
+			modifier = paragon_death_virtual_advisors
+			years = 5
+		}
+	}
+}
+
+# Death of great gestalt hive leader
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.571
+	title = "paragon.571.name"
+	desc = "paragon.571.desc"
+	picture = GFX_evt_hive_mind
+	show_sound = event_life_support_fail
+	is_triggered_only = yes
+
+	after = {
+		# Clean up the clone since we aren't using it anymore
+		from = { kill_leader = { show_notification = no } }
+	}
+	
+	option = {
+		trigger = { has_authority = auth_hive_mind }
+		name = paragon.571.a
+		add_modifier = {
+			modifier = paragon_death_the_hive_endures
+			years = 5
+		}
+	}
+}
+
+# Roll if the default for each leader should be death or retirement
+# on_leader_death
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.590
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		random = {
+			chance = 70
+			from = { set_leader_flag = retirement_is_default }
+		}
+	}
+}
+
+# on_leader_death
+# This = Country
+# From = Leader
+country_event = {
+	id = paragon.600
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_gestalt_node = yes
+		}
+	}
+
+	immediate = {
+		from = {
+			switch = {
+				trigger = is_councilor_type
+				councilor_gestalt_governor = {
+					root = {
+						country_create_gestalt_councilor = {
+							CLASS = governor
+							COUNCIL_POS = councilor_gestalt_governor
+							DESC = councilor_gestalt_governor_desc
+						}
+					}
+				}
+				councilor_gestalt_scientist = {
+					root = {
+						country_create_gestalt_councilor = {
+							CLASS = scientist
+							COUNCIL_POS = councilor_gestalt_scientist
+							DESC = councilor_gestalt_scientist_desc
+						}
+					}
+				}
+				councilor_gestalt_admiral = {
+					root = {
+						country_create_gestalt_councilor = {
+							CLASS = admiral
+							COUNCIL_POS = councilor_gestalt_admiral
+							DESC = councilor_gestalt_admiral_desc
+						}
+					}
+				}
+				councilor_gestalt_general = {
+					root = {
+						country_create_gestalt_councilor = {
+							CLASS = general
+							COUNCIL_POS = councilor_gestalt_general
+							DESC = councilor_gestalt_general_desc
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+########################
+
+
+##############################
+### RANDOM LEADER EVENTS #####
+##############################
+
+# Fires from on_decade_pulse_country
+country_event = {
+	id = paragon.998
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_paragon_dlc = yes
+		is_country_type = default
+	}
+
+	immediate = {
+		country_event = { id = paragon.999 days = 1 random = 1800 }
+	}
+}
+
+country_event = {
+	id = paragon.999
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_owned_leader = {
+			NOT = { has_leader_flag = beholder }
+			has_skill >= 3
+			leader_years_of_service >= 10
+		}
+	}
+
+	immediate = {
+		random_owned_leader = {
+			limit = {
+				NOT = { has_leader_flag = beholder }
+				has_skill >= 3
+				leader_years_of_service >= 10
+			}
+			if = {
+				limit = { owner = { is_gestalt = yes } }
+				random_list = {
+					10 = { leader_event = { id = paragon.1045 } } # Idiosyncratic Tendencies
+					90 = {}
+				}
+			}
+			else = {
+				random_list = {
+					15 = { leader_event = { id = paragon.1000 } } # Dysfunctional Council
+					5 = { leader_event = { id = paragon.1005 } } # Inspired by Cosmic Phenomenon
+					10 = { leader_event = { id = paragon.1010 } } # Confiscated Contraband
+					10 = { leader_event = { id = paragon.1015 } } # Unified Council
+					5 = { leader_event = { id = paragon.1020 } } # Personal Development
+					5 = { leader_event = { id = paragon.1025 } } # Scientific Progress
+					10 = { leader_event = { id = paragon.1030 } } # Leaked Information
+					10 = { leader_event = { id = paragon.1035 } } # Trendsetter
+					20 = { leader_event = { id = paragon.1040 } } # Echo in Eternity
+					10 = { leader_event = { id = paragon.1050 } } # Empire-Wide Scandal
+				}
+			}
+		}
+	}
+}
+
+# Dysfunctional Council
+leader_event = {
+	id = paragon.1000
+	title = paragon.1000.name
+	desc = paragon.1000.desc
+	picture = GFX_evt_board_meeting
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		is_ruler = no
+		is_councilor = yes
+		OR = {
+			has_trait_tier1or2 = { TRAIT = trait_ruler_warlike }
+			has_trait = leader_trait_fanatic
+			has_trait_tier1or2 = { TRAIT = leader_trait_aggressive }
+			has_trait = leader_trait_bellicose
+			num_leader_traits = {
+				value >= 1
+				negative = yes
+				count_tiers = no
+			}
+		}
+		exists = owner
+		owner = {
+			count_owned_leader = {
+				limit = { is_councilor = yes }
+				count >= 3
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1000.a
+		hidden_effect = { kill_leader = { show_notification = no } }
+		owner = {
+			add_modifier = {
+				modifier = "paragon_efficient_council"
+				days = 3600
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1000.b
+		owner = {
+			add_modifier = {
+				modifier = "paragon_dysfunctional_council"
+				days = 3600
+			}
+		}
+	}
+}
+
+# Inspired by Cosmic Phenomenon
+leader_event = {
+	id = paragon.1005
+	title = paragon.1005.name
+	desc = paragon.1005.desc
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		leader_class = scientist
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1005.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_applied_physics"
+				days = 1800
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1005.b
+		owner = {
+			add_modifier = {
+				modifier = "paragon_applied_society"
+				days = 1800
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1005.c
+		owner = {
+			add_modifier = {
+				modifier = "paragon_applied_engineering"
+				days = 1800
+			}
+		}
+	}
+}
+
+# Confiscated Contraband
+leader_event = {
+	id = paragon.1010
+	title = paragon.1010.name
+	desc = paragon.1010.desc
+	picture = GFX_evt_black_market
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		leader_class = governor
+		NOR = {
+			has_trait_tier1or2 = { TRAIT = leader_trait_corrupt }
+			has_trait_tier1or2 = { TRAIT = leader_trait_embezzler }
+			is_pacifist = no
+		}
+		exists = planet
+		planet = {
+			planet_crime >= 20
+			NOT = { has_modifier = crime_lord_deal }
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1010.a
+		owner = {
+			add_resource = {
+				energy = 400
+				mult = trigger:years_passed
+			}
+			add_modifier = {
+				modifier = "paragon_confiscated_contraband"
+				days = 7200
+			}
+		}
+	}
+}
+
+# Unified Council
+leader_event = {
+	id = paragon.1015
+	title = paragon.1015.name
+	desc = paragon.1015.desc
+	picture = GFX_evt_board_meeting
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		is_councilor = yes
+		has_narratively_great_councilor_trait = yes
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1015.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_unified_council"
+				days = 3600
+			}
+		}
+	}
+}
+
+# Personal Development
+leader_event = {
+	id = paragon.1020
+	title = paragon.1020.name
+	desc = paragon.1020.desc
+	picture = GFX_evt_star_chart
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		has_skill >= 3
+		has_skill <= 6
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1020.a
+		add_experience = 5000
+		remove_all_negative_traits = yes
+	}
+}
+
+# Scientific Progress
+leader_event = {
+	id = paragon.1025
+	title = paragon.1025.name
+	desc = paragon.1025.desc
+	picture = GFX_evt_tradedeal
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		leader_class = scientist
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1025.a
+		add_experience = 1000
+		owner = {
+			add_resource = {
+				physics_research = 1
+				mult = value:income_mult|RESOURCE|physics_research|MULT|5|
+			}
+			add_resource = {
+				society_research = 1
+				mult = value:income_mult|RESOURCE|society_research|MULT|5|
+			}
+			add_resource = {
+				engineering_research = 1
+				mult = value:income_mult|RESOURCE|engineering_research|MULT|5|
+			}
+			add_modifier = {
+				modifier = "paragon_scientific_progress"
+				days = 3600
+			}
+		}
+	}
+}
+
+# Leaked Information
+leader_event = {
+	id = paragon.1030
+	title = paragon.1030.name
+	desc = paragon.1030.desc
+	picture = GFX_evt_news_room
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		is_ruler = no
+		NOR = {
+			has_ethic = ethic_pacifist
+			has_ethic = ethic_xenophile
+		}
+		num_leader_traits = {
+			value >= 1
+			negative = yes
+			count_tiers = no
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1030.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_data_leak"
+				days = 1800
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1030.b
+		custom_tooltip = paragon_leader_dismissed_tooltip
+		hidden_effect = { kill_leader = { show_notification = no } }
+		owner = {
+			add_modifier = {
+				modifier = "paragon_data_leak_punished"
+				days = 3600
+			}
+		}
+	}
+}
+
+# Trendsetter
+leader_event = {
+	id = paragon.1035
+	title = paragon.1035.name
+	desc = paragon.1035.desc
+	picture = GFX_evt_galactic_community
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		species = {
+			NOR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+				is_species_class = ROBOT
+				is_species_class = MACHINE
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1035.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_stylish_trends"
+				days = 1800
+			}
+		}
+	}
+}
+
+# Echo in Eternity
+leader_event = {
+	id = paragon.1040
+	title = paragon.1040.name
+	desc = paragon.1040.desc
+	picture = GFX_evt_grand_speech
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		exists = owner
+		owner = { is_at_war = yes }
+		OR = {
+			AND = {
+				leader_class = admiral
+				exists = fleet
+			}
+			AND = {
+				leader_class = general
+				exists = planet
+			}
+		}
+		OR = {
+			has_narratively_great_speaker_trait = yes
+			has_trait_tier1or2 = { TRAIT = leader_trait_army_veteran }
+			has_trait_tier1or2 = { TRAIT = leader_trait_retired_fleet_officer }			
+		}
+		species = {
+			NOR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+				is_species_class = ROBOT
+				is_species_class = MACHINE
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1040.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_inspired_rhetoric"
+				days = 1800
+			}
+		}
+	}
+}
+
+# Idiosyncratic Tendencies
+leader_event = {
+	id = paragon.1045
+	title = paragon.1045.name
+	desc = paragon.1045.desc
+	picture = GFX_evt_circuitry_modification
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		is_ruler = no
+		NOR = {
+			has_leader_flag = renowned_leader
+			has_leader_flag = legendary_leader
+		}
+		species = {
+			OR = {
+				is_species_class = ROBOT
+				is_species_class = MACHINE
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1045.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_individualistic_tendency_approved"
+				days = 3600
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1045.b
+		custom_tooltip = paragon_leader_dismissed_tooltip
+		hidden_effect = { kill_leader = { show_notification = no } }
+		owner = {
+			add_modifier = {
+				modifier = "paragon_individualistic_tendency_discarded"
+				days = 3600
+			}
+		}
+	}
+}
+
+# Empire-Wide Scandal
+leader_event = {
+	id = paragon.1050
+	title = paragon.1050.name
+	desc = paragon.1050.desc
+	picture = GFX_evt_board_meeting
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		is_ruler = no
+		is_councilor = yes
+		OR = {
+			has_trait_tier1or2 = { TRAIT = leader_trait_fallible }
+			has_trait_tier1or2 = { TRAIT = leader_trait_substance_abuser }
+			has_trait_tier1or2 = { TRAIT = leader_trait_embezzler }
+			has_trait_tier1or2 = { TRAIT = leader_trait_slothful }
+			has_trait_tier1or2 = { TRAIT = leader_trait_lawless }
+			has_trait_tier1or2 = { TRAIT = leader_trait_corrupt }
+			has_trait_tier1or2 = { TRAIT = leader_trait_sadistic }
+			has_trait_tier1or2 = { TRAIT = leader_trait_insider_trading }
+		}
+	}
+
+	immediate = {
+		save_event_target_as = leader_event_target
+	}
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	option = {
+		name = paragon.1050.a
+		owner = {
+			add_modifier = {
+				modifier = "paragon_empire_wide_scandal"
+				days = 3600
+			}
+		}
+	}
+
+	option = {
+		name = paragon.1050.b
+		custom_tooltip = paragon_leader_dismissed_tooltip
+		hidden_effect = { kill_leader = { show_notification = no } }
+		owner = {
+			add_modifier = {
+				modifier = "paragon_empire_wide_scandal_averted"
+				days = 3600
+			}
+		}
+	}
+}

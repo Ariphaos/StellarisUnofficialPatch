@@ -2845,7 +2845,11 @@ ship_event = {
 		event_target:trapped_in_storm = {
 			if = {
 				limit = {
-					NOT = { has_trait = leader_trait_expertise_field_manipulation }
+					NOR = {
+						has_trait = leader_trait_expertise_field_manipulation
+						has_trait = leader_trait_expertise_field_manipulation_2
+						has_trait = leader_trait_expertise_field_manipulation_3
+					}
 				}
 				add_trait = leader_trait_expertise_field_manipulation
 			}
@@ -3739,6 +3743,446 @@ ship_event = {
 				value = @tier2researchreward
 				min = @tier2researchmin
 				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+### Intemporal Orb
+ship_event = {
+	id = anomaly.7105
+	title = "anomaly.7105.name"
+	desc = "anomaly.7105.desc"
+	picture = GFX_evt_ancient_records
+	show_sound = event_sensor_ping
+	location = FROM
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		trigger = {
+			owner = {
+				NOT = {
+					has_valid_civic = civic_hive_devouring_swarm 
+				}
+			}
+		}
+		name = anomaly.7105.a.standard
+		hidden_effect = {
+			ship_event = { id = anomaly.7115 days = 30 random = 10 }
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				has_valid_civic = civic_hive_devouring_swarm 
+			}
+		}
+		name = anomaly.7105.a.devouring
+		hidden_effect = {
+			ship_event = { id = anomaly.7115 days = 30 random = 10 }
+		}
+	}
+	option = {
+		name = anomaly.7105.b
+		hidden_effect = {
+			ship_event = { id = anomaly.7110 days = 30 random = 10 }
+		}
+	}
+}
+
+ship_event = {
+	id = anomaly.7110
+	title = "anomaly.7110.name"
+	desc = "anomaly.7110.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_sensor_ping
+	location = from
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = PECULIAR
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = anomaly.7115
+	title = "anomaly.7115.name"
+	desc = {
+		# Non-hive empire, non-immortal leader, non-heir leader
+		trigger = {
+			owner = {
+				is_hive_empire = no
+			}
+			leader = {
+				AND = {
+					is_immortal = no
+					is_heir = no
+				}
+			}
+		}
+		text = "anomaly.7115.desc.regular"
+	}
+	desc = {
+		# Non-hive empire and either immortal leader or heir
+		trigger = {
+			owner = {
+				is_hive_empire = no
+			}
+			leader = {
+				OR = {
+					is_immortal = yes
+					is_heir = yes
+				}
+			}
+		}
+		text = "anomaly.7115.desc.immortal"
+	}
+	desc = {
+		# Hive empire, but not devouring swarm
+		trigger = {
+			owner = {
+				is_hive_empire = yes
+				NOT = {
+					has_valid_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+		text = "anomaly.7115.desc.hive"
+	}
+	desc = {
+		# Devouring swarm
+		trigger = { 
+			owner = {
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+		text = "anomaly.7115.desc.devouring"
+	}
+	picture = GFX_evt_surreal_visions
+	show_sound = event_sensor_ping
+	location = FROM
+	trackable = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			# Immortal leader or heir, but not hive
+			limit = {
+				owner = {
+					is_hive_empire = no
+				}
+				leader = {
+					OR = {
+						is_immortal = yes
+						is_heir = yes
+					}
+				}
+			}
+			owner = {
+				create_leader = {
+					class = scientist
+					species = owner_main_species
+					name = random
+					skill = 1
+					event_leader = no
+				}
+				last_created_leader = {
+					save_event_target_as = intemporal_leader
+					exile_leader_as = intemporal_leader
+				}
+			}
+		} 
+		else = {
+			leader = {
+				save_event_target_as = intemporal_leader
+			}
+		}
+	}
+	option = {
+		# Exile leader
+		name = anomaly.7115.a
+		if = {
+			limit = {
+				owner = {
+					is_hive_empire = no
+				}
+				leader = {
+					OR = {
+						is_immortal = yes
+						is_heir = yes
+					}
+				}
+			}
+			custom_tooltip = anomaly.7115.a.immortal.tt # Immortal or heir
+		}
+		else = {
+			custom_tooltip = anomaly.7115.a.regular.tt
+		}
+		hidden_effect = {
+			event_target:intemporal_leader = {
+				save_event_target_as = intemporal_explorer
+				exile_leader_as = intemporal_explorer
+				set_immortal = yes
+			}
+			owner = {
+				country_event = { id = anomaly.7120 days = 36000 random = 180 }
+			}
+		}
+	}
+	option = {
+		# Existing scientist stays in empire
+		trigger = {
+			leader = {
+				AND = {
+					is_immortal = no
+					is_heir = no
+				}
+			}
+		}
+		name = anomaly.7115.b.regular
+		custom_tooltip = anomaly.7115.b.regular.tt
+		event_target:intemporal_leader = {
+			add_trait = leader_trait_intemporal
+		}
+	}
+	option = {
+		# New scientist added to empire
+		trigger = {
+			leader = {
+				OR = {
+					is_immortal = yes
+					is_heir = yes
+				}
+			}
+		}
+		name = anomaly.7115.b.immortal
+		custom_tooltip = anomaly.7115.b.immortal.tt
+		owner = {
+			clone_leader = {
+				target = event_target:intemporal_leader
+				class = scientist
+			}
+			last_created_leader = {
+				save_event_target_as = intemporal_leader
+			}
+		}
+		event_target:intemporal_leader = {
+			add_trait = leader_trait_intemporal
+		}
+	}
+}
+
+country_event = {
+	id = anomaly.7120
+	title = "anomaly.7120.name"
+	desc = {
+		trigger = {
+			is_hive_empire = no
+		}
+		text = "anomaly.7120.desc.regular"
+
+	}
+	desc = {
+		trigger = {
+			is_hive_empire = yes
+		}
+		text = "anomaly.7120.desc.hive"
+	}
+	picture = GFX_evt_ship_in_orbit_3
+	show_sound = event_ship_thrusters
+	location = owner.capital_scope # not in science ship anymore
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = FASCINATING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+		}
+	}
+}
+
+### Data Diamond
+# This = ship
+# From = planet
+ship_event = {
+	id = anomaly.3145
+	title = "anomaly.3145.name"
+	desc = "anomaly.3145.desc"
+	picture = GFX_evt_frozen
+	show_sound = event_scanner
+	location = ROOT
+
+	is_triggered_only = yes
+
+	immediate = {
+		FROM = {
+			set_planet_flag = data_diamond_planet
+		}
+	}
+
+	option = {
+		name = anomaly.3145.a
+		hidden_effect = {
+			enable_special_project = {
+				name = "DATA_DIAMOND_PROJECT"
+				location = FROM
+			}	
+		}
+	}
+}
+
+
+#Follow up event + Choice
+# This = ship
+ship_event = {
+	id = anomaly.3150
+	title = "anomaly.3150.name"
+	desc = "anomaly.3150.desc"
+	picture = GFX_evt_surreal_visions
+	show_sound = event_mystic_reveal_light
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = anomaly.3150.a
+		custom_tooltip = anomaly.3150.a.tooltip
+		hidden_effect = {
+			random_galaxy_planet = {
+				limit = {
+					has_planet_flag = data_diamond_planet
+
+				}
+				add_deposit = d_physics_1
+				add_deposit = d_society_1
+				add_deposit = d_engineering_1
+			}
+		}
+	}
+
+	option = {
+		name = anomaly.3150.b
+		custom_tooltip = anomaly.3150.b.tooltip
+		hidden_effect = {
+			ship_event = { id = anomaly.3165 days = 1 }
+		}
+	}
+
+	option = {
+		name = anomaly.3150.c
+		custom_tooltip = anomaly.3150.c.tooltip
+		hidden_effect = {
+			random_galaxy_planet = {
+				limit = {
+					has_planet_flag = data_diamond_planet
+
+				}
+				set_deposit = d_rare_crystals_3
+				planet_event = { id = anomaly.3155 }
+			}
+			if = {
+				limit = {
+					owner = {
+						NOT = {
+							has_technology = tech_mine_rare_crystals
+						}
+					}
+				}
+				owner = {
+					add_research_option = tech_mine_rare_crystals
+					add_tech_progress = {
+						tech = tech_mine_rare_crystals
+						progress = 0.1
+					}
+				}
+			}
+		}
+	}
+}
+
+# Jumps back to the planet at first so you can get distar.305
+# This = planet
+# From = ship
+planet_event = {
+	id = anomaly.3155
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_planet_flag = data_diamond_planet
+	}
+
+	immediate = {
+		from = {
+			ship_event = { id = anomaly.3160 days = 1 }
+		}
+	}
+}
+
+# Fires distar.305 from correct place
+# This = ship
+# From = planet
+ship_event = {
+	id = anomaly.3160
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		ship_event = { id = distar.305 days = 1 }
+	}
+}
+
+#Scientist Dies to save the Data
+# This = ship
+ship_event = {
+	id = anomaly.3165
+	title = "anomaly.3165.name"
+	desc = "anomaly.3165.desc"
+	picture = GFX_evt_emergency_workers
+	show_sound = event_bad_omen
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = anomaly.3165.a
+		from = { 
+			# TODO: This could probably be something custom
+			# set_leader_flag = leader_death_events_blocked
+			kill_leader = { 
+				type = scientist show_notification = no 
+			} 
+		}
+		hidden_effect = {
+			random_galaxy_planet = {
+				limit = {
+					has_planet_flag = data_diamond_planet
+				}
+				add_deposit = d_physics_5
+				add_deposit = d_society_5
+				add_deposit = d_engineering_5
 			}
 		}
 	}

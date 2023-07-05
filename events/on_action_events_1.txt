@@ -5267,9 +5267,7 @@ country_event = {
 		every_owned_leader = {
 			limit = {
 				has_leader_flag = temp_election_leader
-				NOT = {
-					leader_class = ruler
-				}
+				is_ruler = no
 			}
 			kill_leader = {
 				show_notification = no
@@ -6495,10 +6493,17 @@ planet_event = {
 
 	immediate = {
 		owner = {
-			add_static_war_exhaustion = {
-				attacker = from
-				location = root
-				value_for_planet_destruction = 0.5
+			if = {
+				limit = {
+					owner = {
+						is_at_war_with = from
+					}
+				}
+				add_static_war_exhaustion = {
+					attacker = from
+					location = root
+					value_for_planet_destruction = 0.5
+				}
 			}
 			if = {
 				limit = {
@@ -6797,6 +6802,7 @@ event = {
 										is_at_war_with = prevprevprev.owner
 									}
 								}
+								is_cloaked = no
 							}
 							any_fleet_in_system = {
 								exists = controller
@@ -6807,6 +6813,7 @@ event = {
 										is_at_war_with = prevprevprev.owner
 									}
 								}
+								is_cloaked = no
 							}
 							any_system_colony = {
 								exists = owner
@@ -6847,6 +6854,7 @@ event = {
 										is_at_war_with = prevprevprev.owner
 									}
 								}
+								is_cloaked = no
 							}
 							any_fleet_in_system = {
 								exists = controller
@@ -6857,6 +6865,7 @@ event = {
 										is_at_war_with = prevprevprev.owner
 									}
 								}
+								is_cloaked = no
 							}
 							any_system_colony = {
 								exists = owner
@@ -7289,6 +7298,60 @@ planet_event = {
 		remove_modifier = planet_culture_shock
 	}
 
+}
+
+# Other Empires react to a Pop dying due to massive orbital bombardment
+# This = Planet where the pop was bombed to death
+# From = Country which is raining down fire and brimstone
+planet_event = {
+	id = action.100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			exists = this
+			is_country_type = default
+		}
+		owner = {
+			exists = this
+			is_country_type = default
+		}
+	}
+
+	immediate = {
+		owner = {
+			add_opinion_modifier = { who = root.from modifier = opinion_nuker }
+		}
+		every_country = {
+			limit = {
+				has_communications = root.from
+				has_communications = root.owner
+				NOR = {
+					is_country = root.from
+					has_ai_personality_behaviour = purger
+					has_ethic = ethic_fanatic_xenophobe
+				}
+				OR = {
+					is_xenophobe = no
+					NOR ={
+						has_overlord = root.from
+						is_overlord_to = root.from
+						is_in_federation_with = root.from
+						is_harming_relations_with = root.owner
+						is_at_war_with = root.owner
+						has_rival = root.owner
+					}
+				}
+				OR = {
+					is_country_type = default
+					has_ai_personality = awakened_fallen_empire_xenophile
+				}
+			}
+			add_opinion_modifier = { who = root.from modifier = opinion_nuker }
+		}
+	}
 }
 
 # Remove ascension tier on owner change

@@ -1211,6 +1211,8 @@ country_event = {
 						count = 0
 						limit = {
 							leader_class = admiral
+							is_councilor = no
+							is_ruler = no
 						}
 					}
 				}
@@ -1218,15 +1220,20 @@ country_event = {
 					class = admiral
 					species = event_target:mercenary_enclave_species
 					name = random
+					randomize_traits = no
+					event_leader = yes
 					skill = 3
 					traits = {
 						trait = leader_trait_mercenary_warrior
+						trait = leader_trait_aggressive_2
 					}
 				}
 			}
 			random_owned_leader = {
 				limit = {
 					leader_class = admiral
+					is_councilor = no
+					is_ruler = no
 				}
 				save_event_target_as = mercenary_admiral
 				set_immortal = yes
@@ -1985,7 +1992,7 @@ country_event = {
 						}
 					}
 					set_location = {
-						target = root.capital_scope
+						target = root.capital_scope.solar_system
 					}
 				}
 			}
@@ -2030,7 +2037,7 @@ country_event = {
 						}
 					}
 					set_location = {
-						target = root.capital_scope
+						target = root.capital_scope.solar_system
 					}
 				}
 			}
@@ -2072,7 +2079,7 @@ country_event = {
 						}
 					}
 					set_location = {
-						target = root.capital_scope
+						target = root.capital_scope.solar_system
 					}
 				}
 			}
@@ -2117,7 +2124,7 @@ country_event = {
 						}
 					}
 					set_location = {
-						target = root.capital_scope
+						target = root.capital_scope.solar_system
 					}
 				}
 			}
@@ -2159,7 +2166,7 @@ country_event = {
 						}
 					}
 					set_location = {
-						target = root.capital_scope
+						target = root.capital_scope.solar_system
 					}
 				}
 			}
@@ -2183,29 +2190,38 @@ country_event = {
 				is_ship_size = enclave_mercenary_station
 			}
 			solar_system = {
-				space_owner = {
-					save_event_target_as = mercenary_patron
+				if = {
+					limit = {
+						exists = space_owner
+					}
+					space_owner = {
+						save_event_target_as = mercenary_patron
+					}
 				}
 			}
 		}
 		root = {
 			save_event_target_as = mercenary_enclave_country
 		}
-
-		event_target:mercenary_patron = {
-			random_list = {
-				24 = { country_event = { id = enclave.2000 } }
-				24 = { country_event = { id = enclave.2005 } }
-				24 = { country_event = { id = enclave.2010 } }
-				24 = {
-					modifier = {
-						factor = 0
-						event_target:mercenary_patron = { used_naval_capacity_percent > 0.95 }
+		if = {
+			limit = {
+				exists = event_target:mercenary_patron
+			}
+			event_target:mercenary_patron = {
+				random_list = {
+					24 = { country_event = { id = enclave.2000 } }
+					24 = { country_event = { id = enclave.2005 } }
+					24 = { country_event = { id = enclave.2010 } }
+					24 = {
+						modifier = {
+							factor = 0
+							event_target:mercenary_patron = { used_naval_capacity_percent > 0.95 }
+						}
+						country_event = { id = enclave.2015 }
 					}
-					country_event = { id = enclave.2015 }
+					2 = { country_event = { id = enclave.2020 } }
+					2 = { country_event = { id = enclave.2025 } }
 				}
-				2 = { country_event = { id = enclave.2020 } }
-				2 = { country_event = { id = enclave.2025 } }
 			}
 		}
 	}
@@ -2600,6 +2616,8 @@ country_event = {
 						count = 0
 						limit = {
 							leader_class = admiral
+							is_councilor = no
+							is_ruler = no
 						}
 					}
 				}
@@ -2607,15 +2625,20 @@ country_event = {
 					class = admiral
 					species = event_target:mercenary_enclave_species
 					name = random
+					randomize_traits = no
+					event_leader = yes
 					skill = 3
 					traits = {
 						trait = leader_trait_mercenary_warrior
+						trait = leader_trait_aggressive_2
 					}
 				}
 			}
 			random_owned_leader = {
 				limit = {
 					leader_class = admiral
+					is_councilor = no
+					is_ruler = no
 				}
 				save_event_target_as = mercenary_admiral
 			}
@@ -3733,8 +3756,9 @@ country_event = {
 					days = 1000
 				}
 				create_leader = {
-					class = ruler
+					class = admiral
 					species = owner_main_species
+					event_leader = yes
 					name = random
 					skill = 1
 				}
@@ -4223,10 +4247,16 @@ event = {
 					random_owned_fleet = {
 						limit = {
 							is_ship_size = enclave_mercenary_station
+							exists = solar_system
 						}
 						solar_system = {
-							space_owner = {
-								country_event = { id = enclave.2050 }
+							if = {
+								limit = {
+									exists = space_owner
+								}
+								space_owner = {
+									country_event = { id = enclave.2050 }
+								}
 							}
 						}
 					}
@@ -4337,6 +4367,13 @@ event = {
 	}
 
 	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = awakened_marauders
+			}
+			save_event_target_as = khan_country
+		}
+		
 		random_country = {
 			limit = {
 				is_country_type = enclave_mercenary
@@ -4472,6 +4509,7 @@ country_event = {
 	trigger = {
 		any_owned_fleet = {
 			is_leased = no
+			exists = solar_system
 			solar_system = {
 				NOT = {
 					any_ship_in_system = {
@@ -4522,6 +4560,7 @@ country_event = { # Assign an admiral to hired merc fleet if they lose theirs
 		create_leader = {
 			class = admiral
 			species = event_target:mercenary_enclave_species
+			event_leader = yes
 			name = random
 			skill = 3
 			traits = {
@@ -4536,6 +4575,51 @@ country_event = { # Assign an admiral to hired merc fleet if they lose theirs
 				}
 			}
 			assign_leader = last_created_leader
+		}
+	}
+}
+
+# This = fleet
+# From = country that borrowed the fleet
+# FromFrom = country that owns the fleet
+# FromFromFrom = country that initiated the ending (the same as owner in a case of expiration)
+fleet_event = {
+	id = enclave.2080
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		fromfrom = {
+			has_civic = civic_mercenary_enclave
+		}
+	}
+
+	immediate = {
+		leader = {
+			set_owner = fromfrom
+		}
+	}
+}
+
+# This = fleet
+# From = country that borrowed the fleet
+# FromFrom = country that owns the fleet
+# Is fired immediately after fleet is leased out
+fleet_event = {
+	id = enclave.2085
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		fromfrom = {
+			has_civic = civic_mercenary_enclave
+		}
+	}
+
+	immediate = {
+		leader = {
+			set_leader_flag = hired_admiral_merc_leader
+			set_owner = from
 		}
 	}
 }
@@ -6525,8 +6609,9 @@ country_event = {
 
 	trigger = {
 		exists = event_target:salvager_enclave_country
-		NOT = {
+		NOR = {
 			is_hostile = event_target:salvager_enclave_country
+			is_homicidal = yes
 		}
 		event_target:salvager_enclave_country = {
 			trust = {
@@ -8480,7 +8565,6 @@ situation_event = {
 				limit = { is_ship_class = shipclass_science_ship }
 				ship_event = { id = enclave.5055 }
 			}
-			set_country_flag = shrouded_ship
 		}
 	}
 }
@@ -8497,6 +8581,7 @@ ship_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = solar_system # ensure the vessel is e.g. not in transit
 		owner = {
 			NOT = {
 				has_country_flag = shrouded_ship
@@ -8508,6 +8593,9 @@ ship_event = {
 		solar_system = {
 			save_event_target_as = shrouded_system
 		}
+		owner = {
+			set_country_flag = shrouded_ship
+		}
 		fleet = {
 			if = {
 				limit = { exists = leader }
@@ -8518,7 +8606,7 @@ ship_event = {
 				}
 			}
 			delete_fleet = this
-			}
+		}
 		hidden_effect = {
 			create_point_of_interest = {
 				id = enclave.5055.poi.1
@@ -9117,12 +9205,12 @@ planet_event = {
 			effect = {
 				create_leader = {
 					name = random
-					class = ruler
+					class = random_ruler
 					species = event_target:shroudwalker_enclave_country.species
 					skill = 4
 					traits = {
 						trait = leader_trait_expertise_psionics
-						trait = leader_trait_charismatic
+						trait = leader_trait_inspiring
 					}
 				}
 			}
@@ -9537,11 +9625,6 @@ country_event = {
 				}
 				set_location = event_target:floating_core_system
 			}
-			settings = {
-				can_upgrade = no
-				can_change_composition = no
-				uses_naval_capacity = no
-			}
 		}
 	}
 
@@ -9800,11 +9883,25 @@ situation_event = {
 	immediate = {
 		set_situation_flag = divination_occurring
 		owner = {
-			set_country_flag = dportal_country
+			# This gets checked and set in colony.3005
+			# set_country_flag = dportal_country 
 			random_owned_planet = {
 				limit = {
+					has_owner = yes
 					is_colony = yes
-					is_under_colonization = no
+					original_owner = yes
+					NOR = {
+						is_under_colonization = yes
+						has_ground_combat = yes
+						is_homeworld = yes
+						is_occupied_flag = yes
+						is_capital = yes
+						num_pops < 2
+						is_planet_class = pc_habitat
+						is_planet_class = pc_ringworld_habitable
+						is_planet_class = pc_shattered_ring_habitable
+						has_planet_flag = colony_event
+					}
 				}
 				save_event_target_as = doorway_divination_planet
 			}
@@ -10001,7 +10098,7 @@ situation_event = {
 				name = random
 				skill = 3
 				traits = {
-					trait = leader_trait_general_erudite
+					trait = leader_trait_erudite
 				}
 				effect = {
 					save_event_target_as = hero_redivivus
@@ -10839,8 +10936,8 @@ country_event = {
 					name = random
 					skill = 2
 					traits = {
-						trait = leader_trait_governor_psionic
-						trait = leader_trait_governor_erudite
+						trait = leader_trait_psionic
+						trait = leader_trait_erudite
 					}
 					event_leader = yes
 					effect = {
@@ -10862,8 +10959,8 @@ country_event = {
 					name = random
 					skill = 2
 					traits = {
-						trait = leader_trait_governor_synthetic
-						trait = leader_trait_governor_erudite
+						trait = leader_trait_synthetic
+						trait = leader_trait_erudite
 					}
 					event_leader = yes
 					effect = {
@@ -10881,7 +10978,7 @@ country_event = {
 					name = random
 					skill = 3
 					traits = {
-						trait = leader_trait_governor_erudite
+						trait = leader_trait_erudite
 					}
 					event_leader = yes
 					effect = {
@@ -11272,7 +11369,7 @@ country_event = {
 					name = random
 					skill = 1
 					traits = {
-						trait = leader_trait_governor_psionic
+						trait = leader_trait_psionic
 					}
 					event_leader = yes
 					effect = {
@@ -11291,7 +11388,7 @@ country_event = {
 					name = random
 					skill = 1
 					traits = {
-						trait = leader_trait_governor_synthetic
+						trait = leader_trait_synthetic
 					}
 					event_leader = yes
 					effect = {
@@ -11601,6 +11698,7 @@ situation_event = {
 			add_resource = { energy = 1000 }
 		}
 	}
+	after = { destroy_situation = this }
 }
 
 #Wayward Pilgrims
@@ -11958,6 +12056,17 @@ fleet_event = {
 
 	trigger = {
 		exists = leader
+		leader = {
+			NOR = {
+				has_leader_flag = renowned_leader
+				has_leader_flag = legendary_leader
+				has_trait = leader_trait_chosen
+				has_trait = leader_trait_composer_chosen
+				has_trait = leader_trait_instrument_chosen
+				has_trait = leader_trait_eater_chosen
+				has_trait = leader_trait_whisperers_chosen
+			}
+		}
 		NOR = {
 			owner = { has_country_flag = strange_manifestations_cooldown }
 			has_fleet_flag = strange_manifestations
@@ -11994,6 +12103,11 @@ fleet_event = {
 
 	option = {
 		name = INTERESTING
+		trigger = {
+			owner = {
+				is_homicidal = no
+			}
+		}
 		leader = { add_experience = 200 }
 		ai_chance = {
 			factor = 1
@@ -12275,37 +12389,49 @@ fleet_event = {
 					trigger = leader_class
 					admiral = {
 						random_list = {
-							1 = {
+							4 = {
 								add_trait = leader_trait_admiral_mind_wipe_01
-								add_ruler_trait = leader_trait_ruler_mind_wipe_01
+							}
+							4 = {
+								add_trait = leader_trait_admiral_mind_wipe_02
 							}
 							1 = {
-								add_trait = leader_trait_admiral_mind_wipe_02
-								add_ruler_trait = leader_trait_ruler_mind_wipe_02
+								add_trait = leader_trait_ruler_mind_wipe_01
+							}
+							1 = {
+								add_trait = leader_trait_ruler_mind_wipe_02
 							}
 						}
 					}
 					scientist = {
 						random_list = {
-							1 = {
+							4 = {
 								add_trait = leader_trait_scientist_mind_wipe_01
-								add_ruler_trait = leader_trait_ruler_mind_wipe_01
+							}
+							4 = {
+								add_trait = leader_trait_scientist_mind_wipe_02
 							}
 							1 = {
-								add_trait = leader_trait_scientist_mind_wipe_02
-								add_ruler_trait = leader_trait_ruler_mind_wipe_02
+								add_trait = leader_trait_ruler_mind_wipe_01
+							}
+							1 = {
+								add_trait = leader_trait_ruler_mind_wipe_02
 							}
 						}
 					}
 					general = {
 						random_list = {
-							1 = {
+							4 = {
 								add_trait = leader_trait_general_mind_wipe_01
-								add_ruler_trait = leader_trait_ruler_mind_wipe_01
+							}
+							4 = {
+								add_trait = leader_trait_general_mind_wipe_02
 							}
 							1 = {
-								add_trait = leader_trait_general_mind_wipe_02
-								add_ruler_trait = leader_trait_ruler_mind_wipe_02
+								add_trait = leader_trait_ruler_mind_wipe_01
+							}
+							1 = {
+								add_trait = leader_trait_ruler_mind_wipe_02
 							}
 						}
 					}
@@ -12325,11 +12451,9 @@ fleet_event = {
 						random_list = {
 							1 = {
 								add_trait = gestalt_trait_admiral_mind_wipe_01
-								add_ruler_trait = gestalt_trait_ruler_mind_wipe_01
 							}
 							1 = {
 								add_trait = gestalt_trait_admiral_mind_wipe_02
-								add_ruler_trait = gestalt_trait_ruler_mind_wipe_02
 							}
 						}
 					}
@@ -12337,11 +12461,9 @@ fleet_event = {
 						random_list = {
 							1 = {
 								add_trait = gestalt_trait_scientist_mind_wipe_01
-								add_ruler_trait = gestalt_trait_ruler_mind_wipe_01
 							}
 							1 = {
 								add_trait = gestalt_trait_scientist_mind_wipe_02
-								add_ruler_trait = gestalt_trait_ruler_mind_wipe_02
 							}
 						}
 					}
@@ -12349,11 +12471,9 @@ fleet_event = {
 						random_list = {
 							1 = {
 								add_trait = gestalt_trait_general_mind_wipe_01
-								add_ruler_trait = gestalt_trait_ruler_mind_wipe_01
 							}
 							1 = {
 								add_trait = gestalt_trait_general_mind_wipe_02
-								add_ruler_trait = gestalt_trait_ruler_mind_wipe_02
 							}
 						}
 					}

@@ -144,7 +144,7 @@ fleet_event = {
 	immediate = {
 		closest_system = {
 			limit = {
-				has_access_fleet = root.owner
+				is_within_borders_of = root.owner
 				is_capital_system = no
 				NOR = {
 					is_same_value = root.solar_system
@@ -335,7 +335,7 @@ fleet_event = {
 	immediate = {
 		closest_system = {
 			limit = {
-				has_access_fleet = root.owner
+				is_within_borders_of = root.owner
 				is_capital_system = no
 				NOR = {
 					is_same_value = root.solar_system
@@ -494,7 +494,7 @@ fleet_event = {
 	immediate = {
 		closest_system = {
 			limit = {
-				has_access_fleet = root.owner
+				is_within_borders_of = root.owner
 				is_capital_system = no
 				NOR = {
 					is_same_value = root.solar_system
@@ -660,7 +660,7 @@ fleet_event = {
 	immediate = {
 		closest_system = {
 			limit = {
-				has_access_fleet = root.owner
+				is_within_borders_of = root.owner
 				is_capital_system = no
 				NOR = {
 					is_same_value = root.solar_system
@@ -5324,126 +5324,53 @@ fleet_event = {
 country_event = {
 	id = ancrel.4036
 	title = "ancrel.4036.name"
-	diplomatic_title = BLANK_STRING
+	diplomatic_title = NAME_Oracle
 	desc = "ancrel.4036.desc"
 	show_sound = event_administrative_work
-	location = from.from
-
-	diplomatic = yes
-
+	location = fromfrom
 	is_triggered_only = yes
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
+
+	immediate = {
+		ethic_leader_creator = {
+			SPECIES_CLASS = ART
+			LEADER_PORTRAIT = cpl_01
+			CLASS = governor
+			NAME = NAME_Oracle
+			LEVEL = 5
+			GENDER = female
+			IMMORTAL = no
+			ETHIC = gestalt_consciousness
+			DESC = oracle_leader_desc
+			CATCH_PHRASE = oracle_leader_catch_phrase
+		}
+		last_created_leader = {
+			add_trait = leader_trait_governor_oracle
+			add_trait = subclass_governor_economist
+			add_trait = leader_trait_principled_2
+			add_trait = leader_trait_urbanist
+			add_trait = leader_trait_architectural_interest
+			save_global_event_target_as = oracle_leader
+			set_age = 5973
+		}
+	}
 
 	picture_event_data = {
-		room = no_video_feed_room
+		portrait = event_target:oracle_leader
+		room = ethic_spaceship_room
 	}
 
 	option = {
 		name = "ancrel.4036.a"
-		hidden_effect = {
-			country_event = { id = ancrel.4037 }
-		}
+		response_text = ancrel.4037.desc
+		is_dialog_only = yes
 	}
 	option = {
 		name = "ancrel.4036.b"
 		response_text = ancrel.4036.b.response
 		is_dialog_only = yes
 	}
-	option = {
-		name = "ancrel.4036.d"
-		custom_tooltip = ancrel.4036.d.tooltip
-		trigger = {
-			is_gestalt = no
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					NOT = { species_portrait = art13 }
-				}
-
-				create_species = {
-					name = NAME_Oracle
-					plural = NAME_Oracle
-					class = ART
-					portrait = art13
-					namelist = ART1
-					effect = {
-						save_global_event_target_as = oracle_species
-					}
-				}
-			}
-			else_if = {
-				limit = {
-					species_portrait = art13
-				}
-				create_species = {
-					name = NAME_Oracle
-					plural = NAME_Oracle
-					class = ART
-					portrait = art17
-					namelist = ART1
-					effect = {
-						save_global_event_target_as = oracle_species
-					}
-				}
-			}
-		}
-		create_leader = {
-			class = governor
-			species = event_target:oracle_species
-			name = NAME_Oracle
-			immortal = yes
-			skill = 5
-			traits = {
-				trait = leader_trait_governor_oracle
-			}
-		}
-	}
-	option = {
-		name = "ancrel.4038.e"
-		add_modifier = {
-			modifier = oracle_administration
-		}
-	}
-	option = {
-		name = "ancrel.4036.e"
-		custom_tooltip = ancrel.4036.e.tooltip
-		trigger = {
-			is_machine_empire = yes
-		}
-		set_country_flag = oracle_completed
-	}
-	option = {
-		name = "ancrel.4036.c"
-		tooltip = {
-			add_resource = {
-				alloys = 1000
-				engineering_research = 3500
-				influence = 250
-			}
-		}
-		hidden_effect = {
-			country_event = { id = ancrel.4038 days = 1 }
-		}
-	}
-}
-
-
-country_event = {
-	id = ancrel.4037
-	title = "ancrel.4037.name"
-	diplomatic_title = BLANK_STRING
-	desc = "ancrel.4037.desc"
-	show_sound = event_administrative_work
-	location = from.from.from
-
-	diplomatic = yes
-
-	is_triggered_only = yes
-
-	picture_event_data = {
-		room = no_video_feed_room
-	}
-
 	option = {
 		name = ancrel.4037.a
 		response_text = ancrel.4037.a.response
@@ -5459,11 +5386,47 @@ country_event = {
 		response_text = ancrel.4037.c.response
 		is_dialog_only = yes
 	}
-
 	option = {
-		name = ancrel.4037.d
+		name = ancrel.4036.dismiss
+		custom_tooltip = ancrel.4036.c
+		tooltip = {
+			add_resource = {
+				alloys = 1000
+				engineering_research = 3500
+				influence = 250
+			}
+		}
+		
+		tag = dismiss_leader
 		hidden_effect = {
-			country_event = { id = ancrel.4036 }
+			country_event = { id = ancrel.4038 days = 1 }
+		}
+	}
+	option = {
+		allow = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+		name = {
+			trigger = {
+				is_machine_empire = no
+			}
+			text = "ancrel.4036.d"
+		}
+		name = {
+			trigger = {
+				is_machine_empire = yes
+			}
+			text = "ancrel.4036.e"
+		}
+		custom_tooltip = ancrel.4036.d.tooltip
+		tag = hire_leader
+		hidden_effect = {
+			hire_event_leader_effect = {
+				LEADER = oracle_leader
+			}
 		}
 	}
 }
@@ -5471,111 +5434,80 @@ country_event = {
 country_event = {
 	id = ancrel.4038
 	title = "ancrel.4038.name"
-	diplomatic_title = BLANK_STRING
+	diplomatic_title = NAME_Oracle
 	desc = "ancrel.4038.desc"
 	show_sound = event_administrative_work
-	location = from.from.from
-
-	diplomatic = yes
-
+	location = fromfrom
 	is_triggered_only = yes
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
 
 	picture_event_data = {
-		room = no_video_feed_room
+		portrait = event_target:oracle_leader
+		room = ethic_spaceship_room
 	}
 
 	option = {
-		name = ancrel.4038.a
-		trigger = {
-			is_gestalt = no
-		}
-		if = {
-			limit = {
-				NOT = { species_portrait = art13 }
-			}
-			create_species = {
-				name = NAME_Oracle
-				plural = NAME_Oracle
-				class = ART
-				portrait = art13
-				namelist = ART1
-				effect = {
-					save_global_event_target_as = oracle_species
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				species_portrait = art13
-			}
-			create_species = {
-				name = NAME_Oracle
-				plural = NAME_Oracle
-				class = ART
-				portrait = art17
-				namelist = ART1
-				effect = {
-					save_global_event_target_as = oracle_species
-				}
-			}
-		}
-		create_leader = {
-			class = governor
-			species = event_target:oracle_species
-			name = NAME_Oracle
-			immortal = yes
-			skill = 5
-			traits = {
-				trait = leader_trait_governor_oracle
-			}
-		}
-	}
-	option = {
-		name = "ancrel.4036.e"
-		custom_tooltip = ancrel.4036.e.tooltip
 		trigger = {
 			is_machine_empire = yes
 		}
-		set_country_flag = oracle_completed
-	}
-	option = {
-		name = "ancrel.4038.c"
-		trigger = {
-			is_machine_empire = yes
-		}
+		name = ancrel.4038.dismiss
+		custom_tooltip = "ancrel.4038.c"
 		add_resource = {
 			alloys = 1000
 			engineering_research = 3500
 			influence = 250
 		}
-	}
-	option = {
-		name = "ancrel.4038.d"
-		trigger = {
-			is_gestalt = yes
-			is_machine_empire = no
-		}
-		add_resource = {
-			alloys = 1000
-			engineering_research = 3500
-			influence = 250
+		tag = dismiss_leader
+		hidden_effect = {
+			event_target:oracle_leader = {
+				kill_leader = { show_notification = no }
+			}
 		}
 	}
 	option = {
-		name = "ancrel.4038.e"
-		add_modifier = {
-			modifier = oracle_administration
-		}
-	}
-	option = {
-		name = ancrel.4038.b
 		trigger = {
 			is_machine_empire = no
 		}
+		name = ancrel.4038.dismiss
+		custom_tooltip = "ancrel.4038.b"
 		add_resource = {
 			alloys = 1000
 			engineering_research = 3500
 			influence = 250
+		}
+		tag = dismiss_leader
+		hidden_effect = {
+			event_target:oracle_leader = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+	option = {
+		allow = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+		name = {
+			trigger = {
+				is_machine_empire = no
+			}
+			text = "ancrel.4038.a"
+		}
+		name = {
+			trigger = {
+				is_machine_empire = yes
+			}
+			text = "ancrel.4038.e"
+		}
+		tag = hire_leader
+		custom_tooltip = "ancrel.4036.d.tooltip"
+		hidden_effect = {
+			hire_event_leader_effect = {
+				LEADER = oracle_leader
+			}
 		}
 	}
 }
@@ -6868,8 +6800,29 @@ fleet_event = {
 
 	immediate = {
 		fromfromfrom = { set_site_progress_locked = yes }
-		leader = { unassign_leader = this }
-		set_leader = event_target:missing_archaeologist
+		if = {
+			limit = {
+				event_target:missing_archaeologist = {
+					has_leader_flag = azaryn
+				}
+				exists = event_target:azaryn_ship
+				event_target:azaryn_ship = {
+					exists = fleet
+					fleet = {
+						NOT = { exists = leader }
+					}
+				}
+			}
+			event_target:azaryn_ship = {
+				fleet = {
+					set_leader = event_target:missing_archaeologist
+				}
+			}
+		}
+		else = {
+			leader = { unassign_leader = this }
+			set_leader = event_target:missing_archaeologist
+		}
 	}
 
 	option = {
@@ -7110,7 +7063,7 @@ country_event = {
 		name = "ancrel.7006.a"
 		custom_tooltip = relic_zro_crystal_knowledge
 		hidden_effect = {
-			ruler = { add_skill = 1 }
+			ruler = { add_skill_without_trait_selection = 1 }
 		}
 	}
 

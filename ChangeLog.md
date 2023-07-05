@@ -1,5 +1,101 @@
 # ChangeLog
 
+## June 20th
+
+- Reverted gene tailoring requirements for AI as it caused a bug and was no longer necessary.
+- Made sure AI void dwellers can get their habitat tech.
+
+## June 16th
+
+Paradox Fixes:
+
+- I'm keeping my fix for the Great Khan's traits. Slightly stronger but also a bit more diverse and flavorful. 
+- Also keeping my fix for Paragon ruler's forced authority change. cooldown = no so you aren't forced to live with removed civics.
+
+
+Patch bugfix: 
+
+- Stop enclaves from producing useless constructor or science ships
+
+- Subjects won't ask to join 'you' if you didn't break away from your overlord (Nider001)
+- Restrict number of species most AI will generate.
+- Fix waste reprocessing center economy allocation (17blue17)
+- Fix Doomslayer event (FirePrince)
+- Fix Doorway divination (FirePrince)
+
+## May 30th
+
+- Paradox fixed Chosen being able to get covenent traits even if the wrong class by dropping the class checks entirely. 
+- Paradox finally checks if a leader is psionic before making them a Chosen candidate.
+- Paradox fixed new anomaly scoping.
+
+- I've begun moving more balance-y changes over to a new balance mod. 
+- Laying some groundwork for some more performance improvements.
+- Fixed a potential crash bug if some other mod killed a pop on on_pop_purged.
+
+- You can now merge AH4B into a fleet (finally looking at it, this is clearly a bug).
+- In the event a Chosen somehow regains the psionic trait, they shouldn't get eaten by their patron.
+- Prevent legendary leaders and origin from getting eaten similarly.
+- Shroud manifestations shouldn't mutate Chosen. And homicidal empires should be less understanding.
+- Fixed the Think Tank events for 3.8 (they should skip your ruler, legendary leaders have other priorities, etc.)
+
+## May 14th
+
+- Made a mistake with trying to block Baol from getting generated in black hole systems, instead forcing it to them. Apologies to those affected.
+
+- Chosen don't get 'healthcare expert'
+- Upped some Marauder regen as they didn't handle getting whittled down well.
+- Fixed puddle technician drones (Melor Seltic)
+- Enigmatic Cache should now eventually finally leave.
+
+## May 13th
+
+- Imperial/Dictatorial rulers can get the shroud age modifier.
+- Shroud age removed on becoming Chosen (it just takes up space)
+- Shroud age applies to all mortal psionic leaders, rather than checking species.
+- Upscaling the lessenger actually works.
+- Fanatic xenophobe AI won't try to make market nominations.
+- Fixed a rare bug with wormholes where 'root' somehow fails
+- Failed divination situations will actually end properly.
+- Galactic Emperor can use community catapults.
+- Removed the ability to colonize consecrated worlds. (Lets you remove it from the planner).
+- (Hopefully) fixed enigmatic ascension not properly changing your dominant species.
+- Fixed an error from jaunting traveler due to the dummy country having no name.
+- Allow chosen ones to get the covenant trait even if they are the wrong class (probably are ruler or angling for it anyhow).
+- The Khan now has traits as an admiral.
+
+## May 11th
+
+- Patch issue: Reduced minimum-wanted scientists from 4 to 2 (vanilla default is still 1).
+- Restored original can_leader_get_normal_trait rule as Paradox fixed the issue.
+
+- Fixed fallen empire gift events.
+- Materialist FE won't demand your ruler or paragon/legendary scientists.
+- Made Zroni try to first spawn from your borders.
+- Remove inappropriate civics on paragon origin switching to imperial.
+- AI blocked from building habitats on any world potentially capable of supporting a ring (terraformable, etc).
+- Started a project to get the AI to build hyper relays in a sensible, restrained fashion.
+- AI is somewhat delayed from gatting habitats, hyper relays, and gene tailoring (unless hivemind)
+- Machines only get one chance to rebel against a given preftl.
+
+## May 9th
+
+- Paradox fixed a number of leader trait issues by removing class distinctions.
+
+- Can't get both psionic and chosen on a ruler with Caravaneer boxes.
+- Prevent <spoiler> from becoming Chosen, for the same reason.
+- Make it so <spoiler> can't die a normal death from attempting to become Chosen. If there are going to be bugs they should at least be showy.
+- Pruned some cases where immortal leaders can be killed.
+- Some scope fixes.
+- Made an English version of anomaly.144.desc. Fixed the description ids for the chain.
+- Egalitarian councilors no longer promote authoritarian ethics.
+- Block death events when handing over a scientist to the materialist FE.
+- End the Manifesti chain after crackdown.
+- Don't spam toast on shroud age.
+- Fixed some breach resolutions.
+- Removed old opinion-based code for resolutions.
+
+
 ## May 4th
 
 - Fix AI triggering a divide by zero error.

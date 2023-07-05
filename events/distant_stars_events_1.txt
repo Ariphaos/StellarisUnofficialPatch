@@ -342,7 +342,13 @@ ship_event = {
 		}
 		leader = {
 			IF = {
-				limit = { has_trait = leader_trait_expertise_field_manipulation	}
+				limit = {
+					OR = {
+						has_trait = leader_trait_expertise_field_manipulation
+						has_trait = leader_trait_expertise_field_manipulation_2
+						has_trait = leader_trait_expertise_field_manipulation_3
+					}
+				}
 				add_skill = 1
 			}
 			else = {
@@ -3528,7 +3534,7 @@ ship_event = {
 				add_modifier = { modifier = life_electric days = -1 }
 			}
 		}
-		leader = { add_skill = 1 }
+		leader = { add_skill_without_trait_selection = 1 }
 	}
 
 	option = {
@@ -3547,7 +3553,7 @@ ship_event = {
 				add_modifier = { modifier = life_electric days = -1 }
 			}
 		}
-		leader = { add_skill = 1 }
+		leader = { add_skill_without_trait_selection = 1 }
 	}
 }
 
@@ -3853,7 +3859,13 @@ ship_event = { #Vacuum Collapse
 		}
 		leader = {
 			IF = {
-				limit = { has_trait = leader_trait_expertise_particles	}
+				limit = {
+					OR = {
+						has_trait = leader_trait_expertise_particles
+						has_trait = leader_trait_expertise_particles_2
+						has_trait = leader_trait_expertise_particles_3
+					}
+				}
 				add_experience = 200
 			}
 			else = {
@@ -4383,6 +4395,7 @@ ship_event = { #The Big Friendly Warform
 			owner = { NOR = { has_policy_flag = ai_outlawed is_machine_empire = yes } }
 		}
 		name = "distar.155.b"
+		custom_tooltip = distar.155.machine.tt
 	}
 	option = {
 		trigger = {
@@ -4409,6 +4422,7 @@ ship_event = { #The Big Friendly Warform
 			owner = { is_machine_empire = yes }
 		}
 		name = "distar.155.machi_2"
+		custom_tooltip = distar.155.machine.tt
 	}
 }
 
@@ -4451,46 +4465,46 @@ ship_event = {
 				set_neutral = no
 				set_friendly = yes
 			}
-			IF = {
-				LIMIT = { host_has_dlc = "Synthetic Dawn Story Pack" }
-				create_species = {
-					name = "NAME_S8751"
-					class = ROBOT
-					portrait = sd_rep_robot
-					namelist = "AI"
-					traits = {
-						trait = trait_mechanical
-						trait = random_traits
-					}
-					effect = {
-						save_event_target_as = warform_species
-					}
+			create_species = {
+				name = "NAME_S8751"
+				class = ROBOT
+				portrait = cpl_03
+				namelist = "AI"
+				traits = {
+					trait = trait_machine_unit
+					trait = random_traits
 				}
-			}
-			ELSE = {
-				create_species = {
-					name = "NAME_S8751"
-					class = ROBOT
-					portrait = default_robot
-					namelist = "AI"
-					traits = {
-						trait = trait_mechanical
-						trait = random_traits
-					}
-					effect = {
-						save_event_target_as = warform_species
-					}
+				effect = {
+					save_event_target_as = warform_species
 				}
 			}
 			create_leader = {
 				class = admiral
 				species = event_target:warform_species
-				name = "NAME_S8751"
-				skill = 3
-				event_leader = yes
-			}
-			last_created_leader = {
-				save_event_target_as = warform_leader
+				name = NAME_S8751
+				skill = 5
+				gender = indeterminable
+				event_leader = no # Leader is allowed to lead factions and win elections
+				background_ethic = ethic_gestalt_consciousness
+				skip_background_generation = yes
+				custom_description = warform_leader_desc
+				custom_catch_phrase = warform_leader_catch_phrase
+				immortal = yes
+				hide_age = no
+
+				randomize_traits = no
+				effect = {
+					set_skill = 5
+					set_leader_flag = renowned_leader
+					set_leader_flag = is_in_recruit_window
+					save_event_target_as = warform_leader
+					add_trait = leader_trait_admiral_warform
+					add_trait = subclass_admiral_tactician
+					add_trait = leader_trait_skirmisher_2
+					add_trait = leader_trait_scout
+					save_global_event_target_as = warform_leader
+					set_age = 1578
+				}
 			}
 		}
 		ship_event = {
@@ -4531,7 +4545,7 @@ ship_event = {
 						name = "NAME_S8751"
 						design = "NAME_S8751"
 						prefix = no
-						upgradable = no
+						upgradable = yes
 					}
 					set_location = {
 						target = root
@@ -4546,9 +4560,8 @@ ship_event = {
 				}
 				settings = {
 					can_upgrade = yes
-					can_change_composition = no
 					can_change_leader = no
-					uses_naval_capacity = no
+					uses_naval_capacity = yes
 					spawn_debris = yes
 				}
 			}
@@ -4797,153 +4810,163 @@ country_event = {
 
 country_event = {
 	id = distar.164
-	title = "distar.158.name"
+	title = "NAME_S8751"
 	desc = "distar.164.desc"
-	location = event_target:repaired_warform
-
-	diplomatic = yes
-
+	show_sound = event_ai_started
 	is_triggered_only = yes
 
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
 	picture_event_data = {
 		portrait = event_target:warform_leader
 		room = ethic_spaceship_room
 	}
-
 	option = {
-		name = "distar.164.a"
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-				has_ethic = ethic_pacifist
-				has_ethic = ethic_fanatic_pacifist
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-				is_gestalt = yes
-			}
-		}
-		hidden_effect = {
-			clone_leader = {
-				target = event_target:warform_leader
-				class = admiral
-				effect = {
-					save_event_target_as = warform_leader
-				}
-			}
-		}
-		event_target:repaired_warform = {
-			set_owner = root
-			hidden_effect = { set_leader = event_target:warform_leader }
-		}
-	}
-
-	option = {
-		name = "distar.164.b"
-		trigger = {
-			OR = {
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-				has_ethic = ethic_spiritualist
-				has_ethic = ethic_fanatic_spiritualist
-				is_gestalt = yes
-			}
-		}
-		hidden_effect = {
-			clone_leader = {
-				target = event_target:warform_leader
-				class = admiral
-				effect = {
-					save_event_target_as = warform_leader
-				}
-			}
-		}
-		event_target:repaired_warform = {
-			set_owner = root
-			hidden_effect = { set_leader = event_target:warform_leader }
-		}
-	}
-
-	option = {
-		trigger = {
-			NOT = { has_policy_flag = ai_full_rights }
-		}
-		name = "distar.164.c"
+		name = distar.165.dismiss
+		tag = dismiss_leader
 		hidden_effect = { country_event = { id = distar.165 } }
 	}
-
 	option = {
-		exclusive_trigger = {
-			is_machine_empire = yes
+		tag = hire_leader
+		allow = {
+			NOR = {
+				has_civic = civic_fanatic_purifiers
+				has_civic = civic_hive_devouring_swarm
+			}
 		}
-		name = "distar.164.machi"
-		hidden_effect = {
-			clone_leader = {
-				target = event_target:warform_leader
-				class = admiral
-				effect = {
-					save_event_target_as = warform_leader
+		name = {
+			trigger = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+					has_ethic = ethic_egalitarian
+					has_ethic = ethic_fanatic_egalitarian
+					has_ethic = ethic_gestalt_consciousness
 				}
 			}
-			event_target:warform_leader = {
-				modify_species = {
-					species = this
-					add_trait = trait_machine_unit
-					add_traits_at_start_of_list = yes
+			text =  "distar.164.a"
+		}
+		name = {
+			trigger = {
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+					has_ethic = ethic_gestalt_consciousness
 				}
+			}
+			text = "distar.164.b"
+		}
+		name = {
+			trigger = {
+				has_authority = auth_machine_intelligence
+			}
+			text = "distar.164.machi"
+		}
+		if = {
+			limit = {
+				is_gestalt = yes
+			}
+			random_owned_leader = {
+				limit = {
+					is_councilor_type = councilor_gestalt_admiral
+				}
+				add_trait = leader_trait_admiral_warform_node
+			}
+		}
+		hidden_effect = {
+			hire_event_leader_effect = {
+				LEADER = warform_leader
 			}
 		}
 		event_target:repaired_warform = {
 			set_owner = root
-			hidden_effect = { set_leader = event_target:warform_leader }
+			hidden_effect = { set_leader = last_created_leader }
 		}
+		if = {
+			limit = {
+				is_gestalt = yes
+			}
+			random_owned_leader = {
+				limit = {
+					is_councilor_type = councilor_gestalt_admiral
+				}
+				add_trait = leader_trait_admiral_warform_node
+			}
+		}
+	}
+	option = {
+		name = "distar.164.d"
+		response_text = distar.164.d.response
+		is_dialog_only = yes
 	}
 }
 
-
 country_event = {
 	id = distar.165
-	title = "distar.158.name"
+	title = "NAME_S8751"
 	desc = "distar.165.desc"
-	location = event_target:repaired_warform
-
-	diplomatic = yes
-
+	show_sound = event_ai_started
+	event_window_type = leader_recruit
+	picture = GFX_leader_recruitment_bg_renowned
 	is_triggered_only = yes
-
 	picture_event_data = {
 		portrait = event_target:warform_leader
 		room = ethic_spaceship_room
 	}
-
+	option = {
+		name = distar.165.dismiss
+		custom_tooltip = "distar.165.b"
+		tag = dismiss_leader
+		hidden_effect = {
+			hidden_effect = { country_event = { id = distar.166 } }
+		}
+	}
 	option = {
 		name = "distar.165.a"
+		tag = hire_leader
+		allow = {
+			NOR = {
+				has_civic = civic_fanatic_purifiers
+				has_civic = civic_hive_devouring_swarm
+			}
+		}
 		hidden_effect = {
-			clone_leader = {
-				target = event_target:warform_leader
-				class = admiral
-				effect = {
-					save_event_target_as = warform_leader
-				}
+			hire_event_leader_effect = {
+				LEADER = warform_leader
 			}
 		}
 		event_target:repaired_warform = {
 			set_owner = root
-			hidden_effect = { set_leader = event_target:warform_leader }
+			hidden_effect = { set_leader = last_created_leader }
+		}
+		if = {
+			limit = {
+				is_gestalt = yes
+			}
+			random_owned_leader = {
+				limit = {
+					is_councilor_type = councilor_gestalt_admiral
+				}
+				add_trait = leader_trait_admiral_warform_node
+			}
 		}
 	}
-
 	option = {
-		name = "distar.165.b"
-		hidden_effect = { country_event = { id = distar.166 } }
+		name = "distar.165.c"
+		response_text = distar.165.c.response
+		is_dialog_only = yes
 	}
 }
 
@@ -4951,16 +4974,15 @@ country_event = {
 	id = distar.166
 	title = "distar.158.name"
 	desc = "distar.166.desc"
-	location = event_target:repaired_warform
-
-	diplomatic = yes
-
-	is_triggered_only = yes
-
+	show_sound = event_life_support_fail
+	picture = GFX_evt_sapient_AI
+	event_window_type = leader_story
 	picture_event_data = {
 		portrait = event_target:warform_leader
 		room = ethic_spaceship_room
 	}
+
+	is_triggered_only = yes
 
 	option = {
 		name = OOPS
@@ -5012,6 +5034,48 @@ ship_event = {
 				value = @tier4researchreward
 				min = @tier4researchmin
 				max = @tier4researchmax
+			}
+		}
+	}
+}
+
+# Executed as a leader has been fired
+# This = Country
+# From = Leader
+country_event = {
+	id = distar.168
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		from = {
+			OR = {
+				has_trait = leader_trait_admiral_warform
+				has_trait = leader_trait_govenor_caretaker
+			}
+		}
+		is_gestalt = yes
+	}
+
+	immediate = {
+		from = {
+			switch = {
+				trigger = has_trait
+				leader_trait_admiral_warform = {
+					random_owned_leader = {
+						limit = {
+							has_trait = leader_trait_admiral_warform_node
+						}
+						remove_trait = leader_trait_admiral_warform_node
+					}
+				}
+				leader_trait_govenor_caretaker = {
+					random_owned_leader = {
+						limit = {
+							has_trait = leader_trait_govenor_caretaker_node
+						}
+						remove_trait = leader_trait_govenor_caretaker_node
+					}
+				}
 			}
 		}
 	}
@@ -5166,8 +5230,7 @@ ship_event = {
 
 	immediate = {
 		leader = {
-			add_trait = leader_trait_scientist_brainslug
-			add_ruler_trait = leader_trait_ruler_brainslug
+			add_trait = leader_trait_brainslug
 		}
 		owner = {
 			set_country_flag = finished_brainslug_chain
@@ -5228,8 +5291,7 @@ ship_event = {
 								}
 							}
 						}
-						add_trait = leader_trait_scientist_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
+						add_trait = leader_trait_brainslug
 					}
 				}
 				random_owned_leader = {
@@ -5244,8 +5306,7 @@ ship_event = {
 							}
 						}
 					}
-					add_trait = leader_trait_governor_brainslug
-					add_ruler_trait = leader_trait_ruler_brainslug
+					add_trait = leader_trait_brainslug
 				}
 				country_event = { id = distar.174 } #Pool leaders get trait
 				country_event = { id = distar.175 } #Unrest is generated
@@ -5339,7 +5400,6 @@ country_event = { #New leaders get Brainslug Trait
 		from = {
 			if = {
 				limit = {
-					leader_class = general
 					species = {
 						NOR = {
 							has_trait = trait_cybernetic
@@ -5352,102 +5412,10 @@ country_event = { #New leaders get Brainslug Trait
 				random_list = {
 					80 = {
 						#Nothing
+						#Ariphaos TODO: Leaders have ethics now
 					}
 					20 = {
-						add_trait = leader_trait_general_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-				break = yes
-			}
-			if = {
-				limit = {
-					leader_class = admiral
-					species = {
-						NOR = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_admiral_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-				break = yes
-			}
-			if = {
-				limit = {
-					leader_class = governor
-					species = {
-						NOR = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_governor_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-				break = yes
-			}
-			if = {
-				limit = {
-					leader_class = scientist
-					species = {
-						NOR = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_scientist_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-				break = yes
-			}
-			if = {
-				limit = {
-					leader_class = ruler
-					species = {
-						NOR = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_ruler_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
+						add_trait = leader_trait_brainslug
 					}
 				}
 				break = yes
@@ -5466,9 +5434,8 @@ country_event = { #Pool leaders get Brainslug Trait
 		every_pool_leader = {
 			if = {
 				limit = {
-					leader_class = general
 					NOR = {
-						has_trait = leader_trait_general_brainslug
+						has_trait = leader_trait_brainslug
 						species = {
 							has_trait = trait_cybernetic
 							has_trait = trait_mechanical
@@ -5480,102 +5447,10 @@ country_event = { #Pool leaders get Brainslug Trait
 				random_list = {
 					80 = {
 						#Nothing
+						#Ariphaos TODO: Leaders have ethics now
 					}
 					20 = {
-						add_trait = leader_trait_general_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-			}
-			if = {
-				limit = {
-					leader_class = admiral
-					NOR = {
-						has_trait = leader_trait_admiral_brainslug
-						species = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_admiral_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-			}
-			if = {
-				limit = {
-					leader_class = governor
-					NOR = {
-						has_trait = leader_trait_governor_brainslug
-						species = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_governor_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-			}
-			if = {
-				limit = {
-					leader_class = scientist
-					NOR = {
-						has_trait = leader_trait_scientist_brainslug
-						species = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_scientist_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
-					}
-				}
-			}
-			if = {
-				limit = {
-					leader_class = ruler
-					NOR = {
-						has_trait = leader_trait_ruler_brainslug
-						species = {
-							has_trait = trait_cybernetic
-							has_trait = trait_mechanical
-							has_trait = trait_machine_unit
-							is_species_class = ROBOT
-						}
-					}
-				}
-				random_list = {
-					80 = {
-						#Nothing
-					}
-					20 = {
-						add_trait = leader_trait_ruler_brainslug
-						add_ruler_trait = leader_trait_ruler_brainslug
+						add_trait = leader_trait_brainslug
 					}
 				}
 			}
@@ -5603,9 +5478,8 @@ country_event = { #Cohabitants of Brainslugged pops generate initial Unrest
 					OR = {
 						any_owned_pop = { has_trait = trait_brainslug }
 						AND = {
-							exists = sector
-							sector = { exists = leader }
-							sector.leader = { has_trait = leader_trait_governor_brainslug }
+							exists = leader
+							leader = { has_trait = leader_trait_brainslug }
 						}
 					}
 				}
@@ -5621,16 +5495,16 @@ country_event = { #Cohabitants of Brainslugged pops generate initial Unrest
 		ELSE_IF = { #Xenophobes result in higher unrest
 			LIMIT = { has_ethic = ethic_xenophobe }
 			every_owned_planet = {
-			# When I got this as a xenophobe the limited reaction seemed odd.
-#				limit = {
-#					OR = {
-#						any_owned_pop = { has_trait = trait_brainslug }
-#						leader = {
-#							has_trait = leader_trait_governor_brainslug
-#						}
-#					}
-#				}
-				add_modifier = { modifier = brainslug_woes_phobe days = 7300 }
+				limit = {
+					OR = {
+						any_owned_pop = { has_trait = trait_brainslug }
+						AND = {
+							exists = leader
+							leader = { has_trait = leader_trait_brainslug }
+						}
+					}
+				}
+				add_modifier = { modifier = brainslug_woes_phobe days = 7200 }
 			}
 		}
 		ELSE = { # Fanatic xenophobes even more so.
@@ -5978,14 +5852,14 @@ country_event = { #Scientist dies
 				max = @tier4researchmax
 			}
 		}
-		end_event_chain = "living_planet_chain"
-		clear_global_event_target = living_planet_tar
-		clear_global_event_target = living_planet_scientist
 		hidden_effect = {
 			event_target:living_planet_tar = {
 				remove_modifier = pm_study_the_sea
 			}
 		}
+		end_event_chain = "living_planet_chain"
+		clear_global_event_target = living_planet_tar
+		clear_global_event_target = living_planet_scientist
 	}
 }
 
@@ -6548,12 +6422,14 @@ country_event = {
 				set_neutral = no
 				set_friendly = yes
 			}
-			IF = {
-				LIMIT = { host_has_dlc = "Humanoids Species Pack" }
+			if = {
+				limit = {
+					root = { species_portrait = cpl_02_02}
+				}
 				create_species = {
 					name = "NAME_Unknown"
 					class = HUM
-					portrait = humanoid_hp_12
+					portrait = cpl_02_01
 					namelist = "PRT1"
 					traits = random
 					effect = {
@@ -6561,29 +6437,73 @@ country_event = {
 					}
 				}
 			}
-			ELSE = {
+			else_if = {
+				limit = {
+					root = { species_portrait = cpl_02_01 }
+				}
 				create_species = {
 					name = "NAME_Unknown"
 					class = MAM
-					portrait = mam14
+					portrait = cpl_02_02
 					namelist = "PRT1"
 					traits = random
 					effect = {
 						save_event_target_as = captain_species
+					}
+				}
+			}
+			else = {
+				random_list = {
+					1 = {
+						create_species = {
+							name = "NAME_Unknown"
+							class = HUM
+							portrait = cpl_02_01
+							namelist = "PRT1"
+							traits = random
+							effect = {
+								save_event_target_as = captain_species
+							}
+						}
+					}
+					1 = {
+						create_species = {
+							name = "NAME_Unknown"
+							class = MAM
+							portrait = cpl_02_02
+							namelist = "PRT1"
+							traits = random
+							effect = {
+								save_event_target_as = captain_species
+							}
+						}
 					}
 				}
 			}
 			create_leader = {
 				class = admiral
 				species = event_target:captain_species
-				name = "NAME_Reth_Unddol"
+				name = NAME_Reth_Unddol
 				skill = 5
 				gender = male
-				event_leader = no
-			}
-			last_created_leader = {
-				add_trait = leader_trait_admiral_hells_heart
-				save_event_target_as = captain_reth
+				background_ethic = ethic_materialist
+				skip_background_generation = yes
+				custom_description = reth_leader_desc
+				custom_catch_phrase = reth_leader_catch_phrase
+				hide_age = no
+
+				randomize_traits = no
+				effect = {
+					set_skill = 5
+					set_leader_flag = renowned_leader
+					set_leader_flag = is_in_recruit_window
+					save_event_target_as = captain_reth
+					add_trait = leader_trait_admiral_hells_heart
+					add_trait = subclass_admiral_aggressor
+					add_trait = leader_trait_corsair_2
+					add_trait = leader_trait_shipbreaker_2
+					set_age = 58 #Ahab's age!
+				}
 			}
 		}
 		country_event = {
@@ -6627,10 +6547,7 @@ country_event = {
 					save_event_target_as = ahab_fleet
 				}
 				settings = {
-					can_upgrade = yes
-					can_change_composition = no
 					can_change_leader = yes
-					uses_naval_capacity = no
 					spawn_debris = no
 				}
 			}
@@ -6647,12 +6564,12 @@ country_event = {
 
 country_event = {
 	id = distar.215
-	title = "distar.215.name"
+	title = NAME_Reth_Unddol
 	desc = "distar.215.desc"
 	location = event_target:ahab_fleet
-
-	diplomatic = yes
-
+	show_sound = event_custodian_greeting
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
 	is_triggered_only = yes
 
 	picture_event_data = {
@@ -6661,79 +6578,84 @@ country_event = {
 	}
 
 	option = {
-		name = distar.215.a
-		trigger = {
-			is_gestalt = no
+		allow = {
+			is_homicidal = no
+		}
+		tag = hire_leader
+		name = {
+			trigger = {
+				NOT = { has_ethic = ethic_gestalt_consciousness }
+			}
+			text = distar.215.a
+		}
+		name = {
+			trigger = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+			text = distar.215.a.gesta
 		}
 		event_target:ahab_fleet = {
 			set_owner = root
 			hidden_effect = { set_leader = event_target:captain_reth }
 		}
-	}
-
-	option = {
-		name = distar.215.b
 		hidden_effect = {
-			clone_leader = {
-				target = event_target:captain_reth
-				class = admiral
+			hire_event_leader_message = {
+				LEADER = captain_reth
 			}
 		}
-		event_target:ahab_fleet = {
-			destroy_fleet = this
-		}
-		add_resource = { minerals = 1500 }
 	}
 
 	option = {
-		name = distar.215.c
-		event_target:ahab_fleet = {
-			set_owner = root
+		allow = {
+			values_others = no
+		}
+		name = distar.215.dismiss
+		if = {
+			limit = {
+				is_homicidal = no
+			}
+			custom_tooltip = distar.215.c
+		}
+		else_if = {
+			limit = {
+				has_civic = civic_machine_terminator
+			}
+			custom_tooltip = distar.215.a.exter
+		}
+		else_if = {
+			limit = {
+				has_civic = civic_hive_devouring_swarm
+			}
+			custom_tooltip = distar.215.a.swarm
+		}
+		else = {
+			custom_tooltip = distar.215.a.fp
+		}
+		tag = dismiss_leader
+		if = {
+			limit = {
+				is_homicidal = no
+			}
+			event_target:ahab_fleet = {
+				set_owner = root
+			}
 		}
 		hidden_effect = {
-			country_event = { id = distar.217 }
+			if = {
+				limit = {
+					is_homicidal = no
+				}
+				country_event = { id = distar.217 }
+			}
+			else = {
+				country_event = { id = distar.216 }
+			}
 		}
 	}
-
 	option = {
-		name = distar.215.a.gesta
-		trigger = {
-			is_gestalt = yes
-		}
-		event_target:ahab_fleet = {
-			set_owner = root
-			hidden_effect = { set_leader = event_target:captain_reth }
-		}
-	}
-
-	option = {
-		name = distar.215.a.exter
-		exclusive_trigger = {
-			has_civic = civic_machine_terminator
-		}
-		hidden_effect = {
-			country_event = { id = distar.216 }
-		}
-	}
-
-	option = {
-		name = distar.215.a.swarm
-		exclusive_trigger = {
-			has_civic = civic_hive_devouring_swarm
-		}
-		hidden_effect = {
-			country_event = { id = distar.216 }
-		}
-	}
-
-	option = {
-		name = distar.215.a.fp
-		exclusive_trigger = {
-			has_civic = civic_fanatic_purifiers
-		}
-		hidden_effect = {
-			country_event = { id = distar.216 }
-		}
+		name = distar.215.d
+		response_text = distar.215.d.response
+		is_dialog_only = yes
 	}
 }
 
@@ -8655,54 +8577,25 @@ ship_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		IF = {
-			LIMIT = { host_has_dlc = "Synthetic Dawn Story Pack" }
-			create_species = {
-				name = "NAME_Caretaker"
-				class = ROBOT
-				portrait = "sd_mam_robot"
-				namelist = "AI"
-				traits = {
-					trait = trait_machine_unit
-					trait = trait_robot_enhanced_memory
-					trait = trait_robot_emotion_emulators
-				}
-				effect = {
-					save_event_target_as = caretaker_species
-				}
-			}
+		ethic_leader_creator = {
+			SPECIES_CLASS = AI
+			LEADER_PORTRAIT = cpl_04
+			CLASS = governor
+			NAME = NAME_Caretaker
+			LEVEL = 4
+			GENDER = indeterminable
+			IMMORTAL = no
+			ETHIC = gestalt_consciousness
+			DESC = caretaker_leader_desc
+			CATCH_PHRASE = caretaker_leader_catch_phrase
 		}
-		ELSE = {
-			create_species = {
-				name = "NAME_Caretaker"
-				class = ROBOT
-				portrait = "default_robot"
-				namelist = "AI"
-				traits = random
-				effect = {
-					save_event_target_as = caretaker_species
-				}
-			}
-		}
-		owner = {
-			create_saved_leader = {
-				creator = this
-				key = caretaker_leader
-				event_leader = no
-				class = governor
-				species = event_target:caretaker_species
-				name = "NAME_Caretaker"
-				skill = 4
-				traits = {
-					trait = leader_trait_analytical
-					trait = leader_trait_ai_aided_design
-				}
-				gender = indeterminable
-				set_age = 709
-				effect = {
-					save_event_target_as = caretaker_leader_tar
-				}
-			}
+		last_created_leader = {
+			add_trait = subclass_governor_pioneer
+			add_trait = leader_trait_govenor_caretaker
+			add_trait = leader_trait_intellectual
+			add_trait = leader_trait_settler
+			save_event_target_as = caretaker_leader_tar
+			set_age = 709
 		}
 	}
 
@@ -8731,8 +8624,11 @@ country_event = {
 	desc = "distar.246.desc"
 	location = event_target:droppod_tar
 
-	diplomatic = yes
-
+	show_sound = event_administrative_work
+	location = fromfrom
+	is_triggered_only = yes
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
 	is_triggered_only = yes
 
 	picture_event_data = {
@@ -8741,21 +8637,45 @@ country_event = {
 	}
 
 	option = {	#Accept the leader
-		name = "distar.246.a"
-		trigger = {
+		tag = hire_leader
+		name = {
+			trigger = {
+				NOT = { has_authority = auth_machine_intelligence }
+			}
+			text = "distar.246.a"
+		}
+		name = {
+			trigger = {
+				has_authority = auth_machine_intelligence
+			}
+			text = "distar.246.machi"
+		}
+		allow = {
 			NOR = {
 				is_machine_empire = yes
 				has_policy_flag = ai_outlawed
 				has_civic = civic_fanatic_purifiers
+				has_civic = civic_hive_devouring_swarm
 			}
 		}
-		custom_tooltip = "distar.246.a.tooltip"
-		activate_saved_leader = {
-			add_to_owned = yes
-			key = caretaker_leader
-		}
 		hidden_effect = {
-			country_event = { id = distar.249 }
+			hire_event_leader_effect = {
+				LEADER = caretaker_leader_tar
+			}
+			event_target:droppod_tar = {
+				destroy_ambient_object = this
+			}
+		}
+		if = {
+			limit = {
+				is_gestalt = yes
+			}
+			random_owned_leader = {
+				limit = {
+					is_councilor_type = councilor_gestalt_governor
+				}
+				add_trait = leader_trait_govenor_caretaker_node
+			}
 		}
 	}
 
@@ -8767,6 +8687,7 @@ country_event = {
 				has_policy_flag = ai_outlawed
 			}
 		}
+		tag = dismiss_leader
 		custom_tooltip = "distar.246.b.tooltip"
 		tooltip = {
 			add_monthly_resource_mult = {
@@ -8779,33 +8700,14 @@ country_event = {
 		hidden_effect = {
 			country_event = { id = distar.247 }
 		}
-		default_hide_option = yes
 	}
-
-	option = { #Ignore the leader
-		name = "distar.246.c"
+	option = { #Destroy the leader
+		name = distar.246.d.destroy
+		custom_tooltip = "distar.246.d"
 		trigger = {
 			has_policy_flag = ai_outlawed
 		}
-		tooltip = {
-			add_monthly_resource_mult = {
-				resource = unity
-				value = @tier1unityreward
-				min = @tier1unitymin
-				max = @tier1unitymax
-			}
-		}
-		default_hide_option = yes
-	}
-
-	option = { #Destroy the leader
-		name = "distar.246.d"
-		trigger = {
-			NOR = {
-				has_policy_flag = ai_full_rights
-				is_machine_empire = yes
-			}
-		}
+		tag = dismiss_leader
 		tooltip = {
 			add_monthly_resource_mult = {
 				resource = influence
@@ -8819,27 +8721,11 @@ country_event = {
 		}
 	}
 
-	option = {	#Accept the leader (MI)
-		trigger = {
-			is_machine_empire = yes
-		}
-		name = "distar.246.machi"
-		custom_tooltip = "distar.246.a.tooltip"
-		activate_saved_leader = {
-			add_to_owned = yes
-			key = caretaker_leader
-		}
-		hidden_effect = {
-			event_target:droppod_tar = {
-				destroy_ambient_object = this
-			}
-		}
-	}
-
 	option = {	#Repurpose the leader (MI)
 		trigger = {
 			is_machine_empire = yes
 		}
+		tag = dismiss_leader
 		name = "distar.246.machi.b"
 		custom_tooltip = "distar.246.b.tooltip"
 		tooltip = {
@@ -8855,6 +8741,16 @@ country_event = {
 			country_event = { id = distar.248 }
 		}
 	}
+	option = {
+		name = distar.246.f
+		is_dialog_only = yes
+		response_text = distar.246.f.response
+	}
+	option = {
+		name = distar.247.e
+		is_dialog_only = yes
+		response_text = distar.247.e.response
+	}
 }
 
 country_event = { #Examining the leader
@@ -8863,7 +8759,8 @@ country_event = { #Examining the leader
 	desc = "distar.247.desc"
 	location = event_target:droppod_tar
 
-	diplomatic = yes
+	picture = GFX_evt_robot_encounter
+	event_window_type = leader_story
 
 	is_triggered_only = yes
 
@@ -8896,7 +8793,8 @@ country_event = { #Destroying the leader
 	}
 	location = event_target:droppod_tar
 
-	diplomatic = yes
+	picture = GFX_evt_exploding_ship
+	event_window_type = leader_story
 
 	is_triggered_only = yes
 

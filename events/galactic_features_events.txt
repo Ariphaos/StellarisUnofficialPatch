@@ -340,11 +340,68 @@ ship_event = {
 			}
 			reroll_planet = yes
 		}
+		set_global_flag = met_tuborek
 	}
 
 	option = {
 		name = "galactic_features.303.a"
 		hidden_effect = {
+			create_country = {
+				name = "NAME_Tuborek"
+				type = faction
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = tuborek_country
+				}
+			}
+			event_target:tuborek_country = {
+				create_leader = {
+					class = admiral
+					species = event_target:fallen_4_species
+					name = NAME_Tuborek
+					skill = 10
+					background_ethic = ethic_xenophobe
+					skip_background_generation = yes
+					custom_description = tuborek_leader_desc
+					custom_catch_phrase = galactic_features.304.c.response
+					hide_age = no
+					randomize_traits = no
+					event_leader = yes	# prevents this leader from leading factions and winning elections
+						
+					effect = {
+						set_age = 65
+						save_event_target_as = tuborek_leader
+						set_leader_flag = renowned_leader
+						set_leader_flag = is_in_recruit_window
+						add_trait = subclass_admiral_aggressor
+						add_trait = leader_trait_fanatic
+						add_trait = leader_trait_aggressive_2
+						add_trait = leader_trait_wrecker_3
+						add_trait = leader_trait_commanding_presence_3
+						add_trait = leader_trait_resilient_2
+					}
+				}
+			}
+			last_created_leader = {
+				set_owner = root
+				exile_leader_as = tuborek_exiled
+			}
 			owner = {
 				country_event = { id = galactic_features.304 }
 			}
@@ -355,15 +412,16 @@ ship_event = {
 # The Admiral
 country_event = {
 	id = galactic_features.304
-	title = "TRANSMISSION"
+	title = "NAME_Tuborek"
 	desc = "galactic_features.304.desc"
-
-	diplomatic = yes
+	show_sound = event_custodian_greeting
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
+	is_triggered_only = yes
 
 	picture_event_data = {
-		portrait = event_target:fallen_4_species
-		planet_background = event_target:shield_planet
-		city_level = event_target:shield_planet
+		portrait = event_target:tuborek_leader
+		room = ethic_spaceship_room
 	}
 
 	is_triggered_only = yes
@@ -379,29 +437,18 @@ country_event = {
 		is_dialog_only = yes
 	}
 	option = {
+		tag = hire_leader
 		name = "galactic_features.304.c"
-		response_text = "galactic_features.304.c.response"
 		hidden_effect = {
-			create_leader = {
-				class = admiral
-				species = event_target:fallen_4_species
-				name = "NAME_Tuborek"
-				skill = 10
-				traits = {
-					trait = leader_trait_gale_speed
-					trait = leader_trait_fleet_logistician
-					trait = leader_trait_resilient
-				}
-				event_leader = yes	# prevents this leader from leading factions and winning elections
-			}
-			last_created_leader = {
-				set_age = 65
+			hire_event_leader_effect = {
+				LEADER = tuborek_leader
 			}
 		}
 	}
 	option = {
-		name = "galactic_features.304.d"
-		response_text = "galactic_features.304.d.response"
+		name = galactic_features.304.notinterested
+		custom_tooltip = "galactic_features.304.d"
+		tag = dismiss_leader
 		hidden_effect = { event_target:shield_planet = { change_pc = pc_shielded } }
 	}
 }
@@ -3572,6 +3619,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = fromfrom.solar_system
 		NOT = { has_global_flag = tiyanki_graveyard_access }
 		fromfrom.solar_system = {
 			has_star_flag = tiyanki_graveyard_system

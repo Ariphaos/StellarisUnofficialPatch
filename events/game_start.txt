@@ -322,6 +322,12 @@ event = {
 			fear_of_the_dark_binary_planets = yes
 		}
 
+		# Legendary Leader
+		every_playable_country = {
+			limit = { has_origin = origin_legendary_leader }
+			country_event = { id = paragon.5000 }
+		}
+
 		# Eagar Explorers
 		every_playable_country = {
 			limit = {
@@ -782,11 +788,22 @@ country_event = {
 							species = owner_main_species
 						}
 					}
-					last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
 					set_leader = last_created_leader
 				}
 			}
 		}
+		else_if = {
+			limit = {
+				has_origin = origin_payback
+			}
+			create_leader = {
+				class = scientist
+				name = random
+				species = owner_main_species
+			}
+		}
+		
+		last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
 
 		if = {
 			limit = {
@@ -826,20 +843,8 @@ country_event = {
 							}
 						}
 						else = {
-							if = {
-								limit = {
-									root = {
-										is_machine_empire = no
-									}
-								}
-								last_created_leader = {
-									add_trait = leader_trait_roamer
-								}
-							}
-							else = {
-								last_created_leader = {
-									add_trait = leader_trait_cataloger
-								}
+							last_created_leader = {
+								add_trait = leader_trait_roamer
 							}
 						}
 						last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
@@ -918,7 +923,6 @@ country_event = {
 			}
 
 			create_fleet = {
-				set_take_point = yes
 				effect = {
 					set_owner = prev
 					if = {
@@ -980,6 +984,14 @@ country_event = {
 						}
 						set_location = prev.capital_star
 					}
+					owner = {
+						create_leader = {
+							class = admiral
+							name = random
+							species = owner_main_species
+						}
+					}
+					set_leader = last_created_leader
 				}
 			}
 		}
@@ -1002,9 +1014,33 @@ country_event = {
 						}
 					}
 					set_location = prev.capital_star
+					owner = {
+						create_leader = {
+							class = admiral
+							name = random
+							species = owner_main_species
+						}
+					}
+					set_leader = last_created_leader
 				}
 			}
 		}
+
+		else_if = {
+			limit = {
+				NOT = {
+					has_origin = origin_broken_shackles
+					# Assigned in origin.110 instead
+				}
+			}
+			create_leader = {
+				class = admiral
+				name = random
+				species = owner_main_species
+			}
+		}
+		
+		last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
 	}
 }
 
@@ -1121,6 +1157,7 @@ planet_event = {
 					}
 				}
 				generate_earth_deposits_and_blockers = yes
+				set_earth_entity = yes
 			}
 			generate_start_buildings_and_districts = yes
 			generate_start_pops = yes
@@ -2218,6 +2255,284 @@ event = {
 					}
 				}
 			}
+		}
+	}
+}
+
+country_event = {
+	id = game_start.60
+	hide_window = yes
+	trigger = {
+		is_country_type = default
+		#selectable = { host_has_dlc = "Galactic Paragons" }
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_variable = {
+			which = paragon_chance_negative
+			value = 0
+		}
+
+		# Give Empire the starting Council Agenda, and progress it to about 1-2 years from finishing.
+		if = {
+			limit = { is_gestalt = yes }
+			set_council_agenda = agenda_infinite_opportunities_gestalt
+		}
+		else = {
+			set_council_agenda = agenda_infinite_opportunities
+
+			# Prefer a Scientist as Head of Research (otherwise picks your Home planet Governor).
+			random_owned_leader = {
+				limit = {
+					leader_class = scientist
+					is_ruler = no
+				}
+				set_council_position = councilor_research
+			}
+		}
+		add_council_agenda_progress = 6000
+	}
+}
+
+# Create Gestalt Council.
+country_event = {
+	id = game_start.61
+	hide_window = yes
+	trigger = {
+		OR = {
+			is_country_type = default
+			is_country_type = fallen_empire
+		}
+		is_gestalt = yes
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		country_create_gestalt_councilor = {
+			CLASS = governor
+			COUNCIL_POS = councilor_gestalt_governor
+			DESC = councilor_gestalt_governor_desc
+		}
+		country_create_gestalt_councilor = {
+			CLASS = scientist
+			COUNCIL_POS = councilor_gestalt_scientist
+			DESC = councilor_gestalt_scientist_desc
+		}
+		country_create_gestalt_councilor = {
+			CLASS = admiral
+			COUNCIL_POS = councilor_gestalt_admiral
+			DESC = councilor_gestalt_admiral_desc
+		}
+		country_create_gestalt_councilor = {
+			CLASS = general
+			COUNCIL_POS = councilor_gestalt_general
+			DESC = councilor_gestalt_general_desc
+		}
+		if = {
+			limit = {
+				is_country_type = fallen_empire
+			}
+			every_owned_leader = {
+				limit = {
+					is_councilor = yes
+					is_ruler = no
+				}
+				add_skill = 9
+				set_gestalt_node_protrait_effect = yes
+			}
+		}
+	}
+}
+
+#Place Memory Vault building if you have the civic at game start
+country_event = {
+	id = game_start.62
+	hide_window = yes
+	trigger = {
+		is_country_type = default
+		is_memory_vault_empire = yes
+		NOR = {
+			has_origin = origin_broken_shackles
+			has_origin = origin_payback
+			has_origin = origin_void_dwellers
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			if = {
+				limit = {
+					free_building_slots <= 0
+					has_district = district_generator
+					has_district = district_city
+				}
+				remove_district = district_generator
+				add_district = district_city
+			}
+			set_variable = {
+				which = paragon_memory_vault
+				value = 0
+			}
+			add_building = building_paragon_memory_vaults
+		}
+	}
+}
+
+# Change Ethic of first Ruler to empire's fanatic ethic.
+# More likely they would've been elected, and easier to re-elect them.
+country_event = {
+	id = game_start.63
+	hide_window = yes
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		switch = {
+			trigger = has_ethic
+			ethic_fanatic_pacifist = {
+				ruler = { change_background_ethic = ethic_pacifist }
+			}
+			ethic_fanatic_militarist = {
+				ruler = { change_background_ethic = ethic_militarist }
+			}
+			ethic_fanatic_xenophile = {
+				ruler = { change_background_ethic = ethic_xenophile }
+			}
+			ethic_fanatic_xenophobe = {
+				ruler = { change_background_ethic = ethic_xenophobe }
+			}
+			ethic_fanatic_egalitarian = {
+				ruler = { change_background_ethic = ethic_egalitarian }
+			}
+			ethic_fanatic_authoritarian = {
+				ruler = { change_background_ethic = ethic_authoritarian }
+			}
+			ethic_fanatic_spiritualist = {
+				ruler = { change_background_ethic = ethic_spiritualist }
+			}
+			ethic_fanatic_materialist = {
+				ruler = { change_background_ethic = ethic_materialist }
+			}
+		}
+	}
+}
+
+#Place Clinic building if you have the Pharma civic at game start
+country_event = {
+	id = game_start.64
+	hide_window = yes
+	trigger = {
+		exists = owner
+		has_civic = civic_private_healthcare_corporate
+		is_country_type = default
+		NOT = {
+			# Done in 01_start_of_game_effects.txt instead.
+			has_origin = origin_void_dwellers
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			if = {
+				limit = {
+					has_building = building_commercial_zone
+				}
+				remove_building = building_commercial_zone
+			}
+			if = {
+				limit = {
+					free_building_slots <= 0
+					has_district = district_generator
+					has_district = district_city
+				}
+				remove_district = district_generator
+				add_district = district_city
+			}
+			add_building = building_clinic
+		}
+		give_technology = { message = no tech = tech_frontier_health }
+		add_research_option = tech_subdermal_stimulation
+	}
+}
+
+#Place additional cop building, if you have Dystopian Society
+country_event = {
+	id = game_start.65
+	hide_window = yes
+	trigger = {
+		exists = owner
+		has_civic = civic_dystopian_society
+		is_country_type = default
+		NOR = {
+			has_origin = origin_broken_shackles
+			has_origin = origin_payback
+			has_origin = origin_void_dwellers
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			switch = {
+				trigger = has_building
+				building_commercial_zone = {
+					remove_building = building_commercial_zone
+				}
+				building_temple = {
+					remove_building = building_temple
+				}
+			}
+			if = {
+				limit = {
+					free_building_slots <= 0
+					has_district = district_generator
+					has_district = district_city
+				}
+				remove_district = district_generator
+				add_district = district_city
+			}
+			add_building = building_precinct_house
+		}
+	}
+}
+
+#Xenolinguistic tech for some Origins
+country_event = {
+	id = game_start.66
+	hide_window = yes
+	trigger = {
+		has_paragon_dlc = yes
+		exists = owner
+		is_country_type = default
+		OR = {
+			has_origin = origin_broken_shackles
+			has_origin = origin_payback
+			has_origin = origin_scion
+			has_origin = origin_common_ground
+			has_origin = origin_hegemon
+			has_origin = origin_imperial_vassal
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_research_option = tech_xeno_linguistics
+		add_tech_progress = {
+			tech = tech_xeno_linguistics
+			progress = 0.50
 		}
 	}
 }

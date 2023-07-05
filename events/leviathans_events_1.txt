@@ -4347,6 +4347,7 @@ country_event = {
 # leviathans.508,510,515-556,4000	Guardians/Leviathans info
 # leviathans.511					Think Tank
 # leviathans.590					Scientist
+# leviathans.598					Scientist Trait for Gestalts
 # leviathans.599					Intel (on empires)
 # leviathans.600					L-Cluster Clue
 # leviathans.592-597				Curators attacked
@@ -4513,7 +4514,10 @@ country_event = {
 	# Scientist
 	option = {
 		name = leviathans.500.d
-		trigger = { is_homicidal = no }
+		trigger = {
+			is_homicidal = no
+			is_gestalt = no
+		}
 		allow = {
 			custom_tooltip = {
 				fail_text = leviathans.500.d.opinion
@@ -4533,6 +4537,34 @@ country_event = {
 		}
 		hidden_effect = {
 			country_event = { id = leviathans.590 }
+		}
+	}
+	# Gestalt Trait
+	option = {
+		name = leviathans.500.e
+		trigger = {
+			is_homicidal = no
+			is_gestalt = yes
+		}
+		allow = {
+			custom_tooltip = {
+				fail_text = leviathans.500.e.opinion
+				event_target:curator_enclave_country = {
+					trust = {
+						who = root
+						value >= 50
+					}
+				}
+			}
+			custom_tooltip = {
+				fail_text = leviathans.500.e.alreadyshared
+				NOT = {
+					any_owned_leader = { has_trait = leader_trait_curator }
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = leviathans.598 }
 		}
 	}
 	# Intel
@@ -4769,6 +4801,13 @@ country_event = {
 	option = {
 		name = GOODBYE
 		default_hide_option = yes
+	}
+	# Fear of the Dark fallback in case you have an ongoing deal.
+	option = {
+		exclusive_trigger = {
+			has_civic = civic_fanatic_purifiers
+		}
+		name = SCUM
 	}
 }
 
@@ -6098,6 +6137,69 @@ country_event = {
 	base = leviathans.500
 	desc_clear = yes
 	desc = leviathans.590.a.reply
+}
+
+# Gestalt share Trait
+country_event = {
+	id = leviathans.598
+	base = leviathans.500
+	desc_clear = yes
+	option_clear = yes
+
+	title = leviathans.598.name
+	desc = leviathans.598.desc
+
+	immediate = {
+		event_target:curator_enclave_country = {
+			owner_species = { save_event_target_as = curator_species }
+		}
+	}
+
+	option = {
+		name = leviathans.598.a
+		allow = {
+			resource_stockpile_compare = { resource = energy value >= 1000 }
+			hidden_trigger = {
+				NOR = {
+					has_country_flag = attacked_curators
+					any_owned_leader = {
+						has_trait = leader_trait_curator
+					}
+				}
+			}
+			custom_tooltip = leviathans.598.tt_principles
+		}
+		add_resource = { energy = -1000 }
+		custom_tooltip = opinion20
+		hidden_effect = {
+			#set_country_flag = curator_scientist_recruited # Achievement
+			event_target:curator_enclave_country = {
+				add_trust = {
+					who = root
+					amount = 20
+				}
+			}
+			random_owned_leader = {
+				limit = {
+					is_councilor_type = councilor_gestalt_scientist
+				}
+				add_trait = leader_trait_curator
+			}
+			country_event = { id = leviathans.591 } # Post-sale thanks
+		}
+	}
+	# Back to main menu
+	option = {
+		name = leviathans.506.d
+		hidden_effect = {
+			country_event = { id = leviathans.500 }
+		}
+	}
+	# Goodbye
+	option = {
+		name = GOODBYE
+		default_hide_option = yes
+	}
 }
 
 # BUY INTEL

@@ -174,6 +174,22 @@ can_get_claim_from_lost_system = {
 	}
 }
 
+# Root = Bombarding country
+# This = Receiving country
+should_surrender_planets_to = {
+	is_country_type = default
+	is_gestalt = no
+	is_homicidal = no
+	is_crisis_faction = no
+	is_primitive = no
+	root = {
+		is_homicidal = no
+		is_crisis_faction = no
+		is_primitive = no
+		is_country_type = default
+	}
+}
+
 #Root = country
 #This = species
 species_has_citizenship = {
@@ -243,6 +259,19 @@ can_vote_in_democratic_election = {
 	is_sapient = yes
 	is_enslaved = no
 	is_being_purged = no
+}
+
+#This = leader
+should_pay_for_leader_upkeep = {
+	NOT = {
+		AND = {
+			exists = owner
+			owner = {
+				is_gestalt = yes
+			}
+			is_councilor = yes
+		}
+	}
 }
 
 #Checks whether any leaders (scientists etc) can be formed from this pop
@@ -369,6 +398,8 @@ can_release_vassal_from_species = {
 			}
 			has_trait = trait_mechanical
 			can_think = no
+			has_trait = trait_clone_soldier_infertile
+			has_trait = trait_clone_soldier_infertile_full_potential
 		}
 	}
 }
@@ -393,6 +424,45 @@ can_generate_army_from_species = {
 # Root = country
 # This = species
 can_modify_species = {
+	root.owner = {
+		OR = {
+			is_ai = no
+			is_synthetic_empire = yes
+			count_exact_species = {
+				count < 3
+				limit = {
+					OR = {
+						is_same_species = prevprev
+						is_subspecies = prevprev
+					}
+				}
+			}
+			AND = {
+				owner_species = { is_same_species = prevprev }
+				OR = {
+					has_ascension_perk = ap_engineered_evolution
+					has_ascension_perk = ap_the_flesh_is_weak
+				}
+			}
+			AND = {
+				OR = {
+					owner_species = { is_same_species = prevprev }
+					has_ascension_perk = ap_engineered_evolution
+					has_ascension_perk = ap_the_flesh_is_weak
+				}
+				has_technology = tech_gene_expressions
+				count_exact_species = {
+					count < 6
+					limit = {
+						OR = {
+							is_same_species = prevprev
+							is_subspecies = prevprev
+						}
+					}
+				}
+			}
+		}
+	}
 	OR = {
 		NOT = { has_trait = trait_self_modified }
 		is_same_species = root
@@ -582,7 +652,11 @@ can_declare_war = {
 #Root = country
 #This = planet
 can_colonize_planet = {
-	always = yes
+	custom_tooltip = {
+		fail_text = "ariphaos_patch_consecrated_world"
+		exists = space_owner
+		NOT = { has_planet_flag = consecrated@space_owner }
+	}
 }
 
 #Root = country
@@ -608,6 +682,13 @@ can_terraform_planet = {
 		fail_text = "requires_actor_not_devouring_swarm_lithoid"
 		exists = root
 		root = { is_lithoid_devouring_swarm = no }
+	}
+	custom_tooltip = {
+		fail_text = "legendary_leader_planet_no_terraform"
+		exists = root
+		this = {
+			NOT = { has_planet_flag = legendary_leader_planet }
+		}
 	}
 
 	custom_tooltip = {
@@ -1267,6 +1348,59 @@ can_subjugate_empires = {
 	always = yes
 }
 
+# this = leader
+can_leader_get_council_trait = {
+	NAND = {
+		exists = owner
+		owner = { is_gestalt = yes }
+		is_councilor = no
+	}
+}
+
+# this = leader
+can_leader_get_normal_trait = {
+	NOR = {
+		AND = {
+			exists = owner
+			owner = { is_gestalt = yes }
+			is_councilor = yes
+		}
+		AND = {
+			is_ruler = yes
+			exists = owner
+			owner = {
+				OR = {
+					has_authority = auth_dictatorial
+					has_authority = auth_imperial
+				}
+			}
+		}
+	}
+}
+
+# this = leader
+can_leader_get_subclass_trait = {
+	NAND = {
+		exists = owner
+		owner = { is_gestalt = yes }
+		is_councilor = yes
+	}
+	has_any_subclass = no
+}
+
+# this = leader
+can_leader_get_destiny_trait = {
+	NAND = {
+		exists = owner
+		owner = { is_gestalt = yes }
+	}
+}
+
+# this = country
+has_extra_council_position = {
+	country_has_extra_council_position = yes
+}
+
 # THIS = Fleet
 can_jump_drive = {
 	always = yes	# Moved cooldown to code
@@ -1320,7 +1454,18 @@ can_resettle_pop = {
 	# Self-modified Pops won't leave
 	custom_tooltip = {
 		fail_text = "self_modified_refuse"
-		NOT = { has_trait = trait_self_modified }
+		NAND = {
+			has_trait = trait_self_modified
+			is_enslaved = no
+		}
+	}
+	custom_tooltip = {
+		fail_text = "origin_egalitarian_refuse"
+		NAND = {
+			pop_has_ethic = ethic_egalitarian
+			is_enslaved = no
+			planet = { has_modifier = paragon_origin_reformists }
+		}
 	}
 	if = { #Done as an IF/ELSE so the tooltip isn't hideous and unreadable
 		limit = { is_shackled_robot = yes }
@@ -1910,18 +2055,14 @@ can_see_galactic_community = {
 # This = country
 can_be_part_of_galactic_council = {
 	is_country_type = default
-	NOR = {
-		has_civic = civic_fanatic_purifiers
-		has_civic = civic_hive_devouring_swarm
-		has_civic = civic_machine_terminator
-	}
+	is_homicidal = no
 }
 
 # If, 'yes', forces an empire to be advanced at game start (overrides game settings)
 # This = country
 must_be_advanced_empire = {
 	OR = {
-	has_country_flag = lost_colony_parent
+		has_country_flag = lost_colony_parent
 		has_country_flag = MSI
 	}
 }
@@ -2022,7 +2163,6 @@ can_planet_auto_migrate = {
 			}
 		}
 	}
-	num_pops > 1
 }
 
 can_planet_receive_auto_migration = {
@@ -2286,19 +2426,27 @@ should_planetary_automate = {
 	always = yes
 }
 
+dismiss_leader_cost = {
+	base = 0
+	modifier = {
+		owner = { has_valid_civic = civic_feudal_realm }
+		add = 100
+	}
+	modifier = {
+		owner = { has_valid_civic = civic_feudal_realm }
+		factor = value:feudal_realm_civic_dimissal_cost #Multiplier for Feudal dismissal
+	}
+}
+
 # this = leader
 can_dismiss_leader = {
-	custom_tooltip = {
-		fail_text = "requires_actor_not_feudal_society"
-		exists = owner
-		owner = {
-			NOT = { has_valid_civic = civic_feudal_realm }
-		}
-	}
 	if = {
 		limit = {
 			leader_class = admiral
 			is_idle = no
+			# Rulers and heirs can't be dismissed any way and can be non-idle
+			is_ruler = no
+			is_heir = no
 		}
 		custom_tooltip = {
 			fail_text = "requires_fleet_control"
@@ -2309,6 +2457,43 @@ can_dismiss_leader = {
 					is_same_value = prevprev.owner
 				}
 			}
+		}
+	}
+	if = {
+		limit = {
+			OR = {
+				is_heir = yes
+				is_ruler = yes
+			}
+		}
+		custom_tooltip = {
+			always = no
+			fail_text = "can_not_dismiss_rulers"
+		}
+	}
+}
+
+# this = country
+can_country_change_councilors = {
+	is_gestalt = no
+}
+
+# this = leader
+should_count_towards_leader_cap = {
+	NOR = {
+		leader_class = envoy
+		AND = {
+			owner = { is_gestalt = yes }
+			is_councilor = yes
+			# We count all rulers as well
+			NOT = { is_ruler = yes }
+		}
+		has_leader_flag = marauder_merc_leader
+		has_leader_flag = hired_admiral_merc_leader
+		has_leader_flag = legendary_leader
+		AND = {
+			has_trait_tier1or2 = { TRAIT = leader_trait_eager }
+			has_skill < 4
 		}
 	}
 }
@@ -2332,6 +2517,100 @@ can_country_connect_to_relay_network = {
 			can_control_access_for = from
 		}
 		NOT = { is_at_war_with = from }
+	}
+}
+
+# this = planet
+should_ai_build_stronghold_on_vulnerable_planet = {
+	planet_stability > 50
+	OR = {
+		AND = {
+			num_pops <= 5
+			num_buildings = { type = building_stronghold value < 1 }
+		}
+		AND = {
+			num_pops <= 10
+			num_buildings = { type = building_stronghold value < 2  }
+		}
+		AND = {
+			num_pops <= 15
+			num_buildings = { type = building_stronghold value < 3  }
+		}
+		AND = {
+			num_pops <= 25
+			num_buildings = { type = building_stronghold value < 4  }
+		}
+	}
+
+	exists = sector
+	sector = {
+		NOT = { has_sector_type = core_sector }
+	}
+
+	IF = {
+		LIMIT = {
+			exists = owner
+			owner = { is_gestalt = yes }
+		}
+		NOT = { has_available_jobs = warrior_drone }
+		any_owned_pop = { 
+			is_unemployed = yes
+			can_work_specific_job = warrior_drone 
+		}
+	}
+	ELSE = {
+		NOT = { has_available_jobs = soldier }
+		any_owned_pop = { 
+			is_unemployed = yes
+			can_work_specific_job = soldier 
+		}
+	}
+}
+
+# This = leader
+will_leader_retire = {
+	exists = owner
+	not = { has_leader_flag = use_unspecific_death_reason }
+	owner = {
+		not = { has_ethic = ethic_gestalt_consciousness }
+	}
+	has_leader_flag = retirement_is_default # Randomized retirement instead of death in paragon.590
+}
+
+# This = country, Country that wants to get an external leader
+# From = country, country that we are trying to get from
+can_get_external_leader_pool_candidate = {
+	OR = {
+		has_diplo_migration_treaty = from
+		is_in_federation_with = from
+		is_overlord_to = from
+	}
+	# Both empires must be regular empires, machine intelligences or hive-minds.
+	OR = {
+		AND = {
+			ROOT = {
+				is_regular_empire = yes
+			}
+			FROM = {
+				is_regular_empire = yes
+			}
+		}
+		AND = {
+			ROOT = {
+				has_authority = auth_machine_intelligence
+			}
+			FROM = {
+				has_authority = auth_machine_intelligence
+			}
+		}
+		AND = {
+			ROOT = {
+				has_authority = auth_hive_mind
+			}
+			FROM = {
+				has_authority = auth_hive_mind
+			}
+		}
 	}
 }
 
@@ -2396,6 +2675,214 @@ can_trade_fleet = {
 				is_country_type = awakened_fallen_empire
 			}
 		}
+	}
+}
+
+chance_for_external_leader_pool = {
+	base = 10
+	modifier = {
+		is_xenophile = yes
+		add = 30
+	}
+	modifier = {
+		is_xenophobe = yes
+		mult = 0.5
+	}
+}
+
+# this = country scope
+council_agenda_early_activation_cost = {
+	# At 10% progress, returns 1, 2000 * Empire Size
+	# At 50% progress, returns 0.12, Or 250 * Empire Size
+	# At 70% progress, returns 0.03. Cost tweaked to be 64 * Empire Size
+	# At 90% progress, returns 0.015. Or 30 * Empire Size
+	# Cost = MIN(EmpireSize - 100, 10) * 2000 * (0.008 + 1 / (POW(progress * 3, 5) + 1.008))
+	base = -100
+	add = trigger:empire_size
+	min = 0
+	add = 10
+	mult = 0.1	# Ceil up to even 10.
+	ceiling = yes
+	mult = 10
+	mult = 2000	# Tweaked multiplier.
+
+	# Apply curve multiplier, depending on current Agenda's progress.
+	mult = value:council_agenda_early_activation_cost_curve
+
+	# Rounded to closest 100
+	divide = 100
+	round = yes
+	mult = 100
+}
+
+# this = leader scope
+# from = country scope
+leader_election_elect_cost = {
+	# Cost = (1 + election_cost_mult) * empire_size * 10
+	base = 1
+	add = modifier:country_election_cost_mult
+	mult = from.trigger:empire_size
+
+	# Rounded to closest 10, by applying x10 last.
+	round = yes
+	mult = 10
+}
+
+# this = country scope
+emergency_election_cost_rule = {
+	# Cost = (1 + election_cost_mult) * empire_size * 5
+	base = 1
+	add = modifier:country_election_cost_mult
+	mult = trigger:empire_size
+	mult = 5
+
+	# Rounded to closest 50.
+	divide = 50
+	round = yes
+	mult = 50
+}
+
+# this = leader scope (not valid in UI if no leader is selected)
+# from = country scope
+leader_election_support_cost = {
+	# Cost = (1 + election_cost_mult) * empire_size * 4 * (1 + TimesSupported * 0.5)
+	base = 1
+	add = modifier:country_election_cost_mult
+	mult = from.trigger:empire_size
+	mult = 4
+
+	# Rounded to closest 10; before applying TimesSupported, so player understands better how it increases.
+	divide = 10
+	round = yes
+	mult = 10
+
+	# If there's a Valid leader, cost increases if they're already Supported.
+	modifier = {
+		exists = this
+		mult = value:leader_election_candidate_supported_mult
+	}
+}
+# this = leader scope
+leader_election_weight = {
+	base = 0
+
+	# Multiply by Faction support.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.faction_support
+			owner = { has_country_flag = first_faction }
+		}
+		add = value:leader_faction_support_election_bonus
+	}
+
+	# If no Factions formed, fake faction support based on if it's an Empire ethic or not.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.no_faction_empire_ethic
+			NOT = { owner = { has_country_flag = first_faction } }
+			leader_has_empire_ethic = yes
+		}
+		add = 50
+	}
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.no_faction_not_empire_ethic
+			NOT = { owner = { has_country_flag = first_faction } }
+			leader_has_empire_ethic = no
+		}
+		add = 25
+	}
+
+	# Not changing Ruler should be slightly preferred.
+	modifier = {
+		is_ruler = yes
+		mult = 1.1
+	}
+
+	# Bonus if Leader was Councilor when election started. Or if no Election, is a Councilor now.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.iswas_councilor
+			if = {
+				limit = {
+					owner = { has_country_flag = election_under_way }
+				}
+				has_leader_flag = councilor_at_election_start
+			}
+			else = {
+				is_councilor = yes
+				is_ruler = no
+			}
+		}
+		mult = 1.05
+	}
+
+	# Governments (based on Ethics and Civics) might prefer certain Leader classes. Hide if +/- 0%.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.leader_class_government_approves
+			check_variable_arithmetic = {
+				which = value:leader_class_government_match_bonus_mult
+				value != 1
+			}
+		}
+		mult = value:leader_class_government_match_bonus_mult
+	}
+
+	# Extra bonus for Councilor Subclass (which is a Trait).
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.leader_councilor_subclass
+			has_council_subclass = yes
+		}
+		mult = 1.2
+	}
+	
+	# Penalty for Non-Councilor Subclass (which is a Trait).
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.leader_councilor_subclass
+			has_non_council_subclass = yes
+		}
+		mult = 0.8
+	}
+	
+	# Bonus/penalty from Traits.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.leader_traits
+			check_variable_arithmetic = {
+				which = value:leader_traits_election_bonus_mult
+				value != 1
+			}
+		}
+		mult = value:leader_traits_election_bonus_mult
+	}
+
+	# Bonus from Skill level.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.leader_skill
+			check_variable_arithmetic = {
+				which = value:leader_skill_election_bonus_mult
+				value != 1
+			}
+		}
+		mult = value:leader_skill_election_bonus_mult
+	}
+
+	# Penalty from old Age, unless already ruler or immortal.
+	modifier = {
+		custom_tooltip = {
+			success_text = election_weight.leader_age
+			is_immortal = no
+			is_ruler = no
+			check_variable_arithmetic = {
+				which = value:leader_age_percentage_of_lifespan
+				value > 0.9
+			}
+		}
+		mult = 0.5
 	}
 }
 
