@@ -1,0 +1,750 @@
+################################
+#
+# Awareness Events created by
+# Byron Aytoun
+#
+################################
+
+namespace = awareness
+
+# awareness.100 - Uncloaked fleet enters system, chance to gain 1 awareness.
+#				- Also fires if a fleet decloaks in a pre-ftl system.
+# awareness.105 - Space battle concluded, chance to gain 5 awareness.
+# awareness.110 - Yearly pulse event - uncloaked observation post in orbit, chance to gain 2 awareness.
+# awareness.115 - Uncloaked science ship surveys pre-ftl planet, chance to gain 2 awareness.
+#				- Also fired by building an observation post in orbit of a pre-ftl planet.
+# awareness.120 - Outpost, mining or research station built, chance to gain 1 awareness.
+# awareness.125 - Pre-ftl planet bombarded or invaded, sets awareness to 100.
+# awareness.130 - Fleet engages emergency FTL, chance to gain 2 awareness.
+# awareness.135 - Planet colonised in pre-ftl system, chance to gain 5 awareness.
+# awareness.140 - Colony in pre-ftl system, chance to gain 2 awareness.
+# awareness.145 - Megastructure built or upgraded in pre-ftl system, chance to gain 5 awareness.
+# awareness.150 - Planet cracker used OR planet terraformed, chance to gain 20 awareness.
+# awareness.155 - Neighbouring system destroyed, chance to gain 20 awareness.
+# awareness.160 - Increased awareness to next threshold, fire a notification for any observer.
+# awareness.165 - Decreased awareness to previous threshold, fire a notification for any observer.
+# awareness.170 - Clears the current observation mission ensuring that the "No Mission" is selected.
+# awareness.200 - Passive awareness decay. Chance to reduce awareness by 1
+#				- Fired monthly from the pre-ftl technological development situation.
+# awareness.900 - Establish communications if they reach full awareness
+
+# Uncloaked fleet enters system, chance to gain 1 awareness.
+fleet_event = {
+	id = awareness.100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_first_contact_dlc = yes
+		is_cloaked = no
+		exists = solar_system # wat.
+		solar_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+					NOT = {
+						has_country_flag = recent_awareness_gain
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+						NOT = {
+							has_country_flag = recent_awareness_gain
+						}
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 1
+					}
+					set_timed_country_flag = {
+						# This can only trigger once every six months
+						flag = recent_awareness_gain
+						days = 180
+					}
+				}
+			}
+		}
+	}
+}
+
+# Ship destroyed or disengaged in battle, chance to gain 1 awareness.
+country_event = {
+	id = awareness.105
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		FROMFROM.solar_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		FROMFROM.solar_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 5
+					}
+				}
+			}
+		}
+	}
+}
+
+# Yearly pulse event - uncloaked observation post in orbit, chance to gain 2 awareness.
+event = {
+	id = awareness.110
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_first_contact_dlc = yes
+		any_country = {
+			is_primitive = yes
+			has_awareness < 100
+			capital_scope = {
+				has_observation_outpost = yes
+				observation_outpost = {
+					is_cloaked = no
+				}
+			}
+		}
+	}
+
+	immediate = {
+		every_country = {
+			limit = {
+				is_primitive = yes
+				has_awareness < 100
+				capital_scope = {
+					has_observation_outpost = yes
+					observation_outpost = {
+						is_cloaked = no
+					}
+				}
+			}
+			add_age_based_awareness_effect = {
+				AWARENESS = 2
+			}
+		}
+	}
+}
+
+# Uncloaked science ship surveys pre-ftl planet, chance to gain 2 awareness.
+# Also fired by building an observation post in orbit of a pre-ftl world.
+ship_event = {
+	id = awareness.115
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_first_contact_dlc = yes
+		is_cloaked = no
+		from = {
+			exists = owner
+			owner = {
+				is_primitive = yes
+				has_awareness < 100
+			}
+		}
+	}
+
+	immediate = {
+		from.owner = {
+			add_age_based_awareness_effect = {
+				AWARENESS = 2
+			}
+		}
+	}
+}
+
+# Outpost, mining or research station built, chance to gain 1 awareness.
+ship_event = {
+	id = awareness.120
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			solar_system = {
+				any_system_colony = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			solar_system = {
+				every_system_colony = {
+					limit = {
+						exists = owner
+						owner = {
+							is_primitive = yes
+							has_awareness < 100
+						}
+					}
+					owner = {
+						add_age_based_awareness_effect = {
+							AWARENESS = 1
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Pre-ftl planet bombarded or invaded, sets awareness to 100 and establish diplomatic contact.
+# This = planet
+# From = country attacking
+planet_event = {
+	id = awareness.125
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			is_primitive = yes
+			has_awareness < 100
+		}
+		# The robot uprising doesn't increase awareness, as they're not aliens
+		from = {
+			NOT = { has_country_flag = pre_ftl_robot_uprising }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = pre_ftl_being_invaded
+			save_event_target_as = contact_empire
+			set_country_flag = first_contact_completed@from
+			set_awareness = 100
+		}
+		from = {
+			set_country_flag = first_contact_completed@event_target:contact_empire
+			country_event = { id = action.2 }
+		}
+	}
+}
+
+# Fleet engages emergency FTL, chance to gain 2 awareness.
+fleet_event = {
+	id = awareness.130
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_first_contact_dlc = yes
+		is_cloaked = no
+		from = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 2
+					}
+				}
+			}
+		}
+	}
+}
+
+# Planet colonised in pre-ftl system, chance to gain 5 awareness.
+planet_event = {
+	id = awareness.135
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		solar_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 5
+					}
+				}
+			}
+		}
+	}
+}
+
+# Yearly pulse event - colony in pre-ftl system, chance to gain 2 awareness.
+planet_event = {
+	id = awareness.140
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		solar_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 1
+					}
+				}
+			}
+		}
+	}
+}
+
+# Megastructure built or upgraded in pre-ftl system, chance to gain 5 awareness.
+country_event = {
+	id = awareness.145
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from.solar_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from.solar_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 5
+					}
+				}
+			}
+		}
+	}
+}
+
+# Planet cracker used OR planet terraformed, chance to gain 20 awareness.
+planet_event = {
+	id = awareness.150
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		solar_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 20
+					}
+				}
+			}
+		}
+	}
+}
+
+# Neighbouring system destroyed, chance to gain 20 awareness.
+system_event = {
+	id = awareness.155
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		exists = from
+		any_neighbor_system = {
+			any_system_colony = {
+				exists = owner
+				owner = {
+					is_primitive = yes
+					has_awareness < 100
+				}
+			}
+		}
+	}
+
+	immediate = {
+		every_neighbor_system = {
+			every_system_colony = {
+				limit = {
+					exists = owner
+					owner = {
+						is_primitive = yes
+						has_awareness < 100
+					}
+				}
+				owner = {
+					add_age_based_awareness_effect = {
+						AWARENESS = 20
+					}
+				}
+			}
+		}
+	}
+}
+
+# Increased awareness to next threshold, fire a notification for any observer.
+country_event = {
+	id = awareness.160
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		capital_scope = {
+			has_observation_outpost = yes
+			exists = observation_outpost_owner
+		}
+	}
+
+	immediate = {
+		from = {
+			create_pre_ftl_awareness_increased_message = {
+				SYSTEM			= root.capital_scope.solar_system
+				COUNTRY			= root
+			}
+		}
+	}
+}
+
+# Decreased awareness to previous threshold, fire a notification for any observer.
+country_event = {
+	id = awareness.165
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		capital_scope = {
+			has_observation_outpost = yes
+			exists = observation_outpost_owner
+		}
+	}
+
+	immediate = {
+		from = {
+			create_pre_ftl_awareness_decreased_message = {
+				SYSTEM			= root.capital_scope.solar_system
+				COUNTRY			= root
+			}
+		}
+	}
+}
+
+
+# Clear Observation missions
+country_event = {
+	id = awareness.170
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = primitive
+		current_awareness_level = full
+		any_owned_planet = {
+			has_observation_outpost = yes
+		}
+	}
+
+	immediate = {
+		every_owned_planet = {
+			limit = {
+				has_observation_outpost = yes
+			}
+			observation_outpost = {
+				set_mission = no_observation
+			}
+		}
+	}
+}
+
+# Yearly pulse event - branch office on planet, chance to gain 2 awareness.
+event = {
+	id = awareness.175
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_first_contact_dlc = yes
+		any_country = {
+			is_primitive = yes
+			has_awareness < 100
+			capital_scope = {
+				has_branch_office = yes
+			}
+		}
+	}
+
+	immediate = {
+		every_country = {
+			limit = {
+				is_primitive = yes
+				has_awareness < 100
+				capital_scope = {
+					has_branch_office = yes
+				}
+			}
+			add_age_based_awareness_effect = {
+				AWARENESS = 2
+			}
+		}
+	}
+}
+
+situation_event = {
+	id = awareness.200
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = recent_awareness_decay
+			}
+			is_primitive = yes
+			has_awareness > 10
+			has_awareness < 100
+			NOT = {
+				has_country_flag = freeze_awareness_decay
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			subtract_age_based_awareness_effect = {
+				AWARENESS = 1
+			}
+		}
+	}
+}
+
+# Pre-FTLs reached max Awareness by their own, and we are observing them
+# fired by on_awareness_level_increase
+# This = PreFTL Country
+# From = Observing Country
+country_event = {
+	id = awareness.900
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = primitive
+		current_awareness_level = full
+		NOR = {
+			has_country_flag = pre_ftl_being_invaded
+			has_country_flag = first_contact_completed@from
+		}
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost_owner = {
+				is_same_value = from
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = contact_empire
+		set_country_flag = reached_full_awareness_once
+		set_country_flag = first_contact_completed@from
+		from = {
+			country_event = { id = awareness.910 }
+		}
+	}
+}
+
+# They are reaching out to us
+country_event = {
+	id = awareness.910
+	title = awareness.910.name
+	desc = awareness.910.desc
+	picture = GFX_evt_failed_observation
+	show_sound = evn_fc_observation
+	is_triggered_only = yes
+	location = event_target:contact_empire.capital_scope
+
+	trigger = {
+		NOT = {
+			has_country_flag = first_contact_completed@event_target:contact_empire
+		}
+		OR = {
+			is_country_type = default
+			is_country_type = fallen_empire
+			is_country_type = awakened_fallen_empire
+		}
+	}
+
+	immediate = {
+		event_target:contact_empire = {
+			set_country_flag = pre_ftl_initiating_contact
+			capital_scope.solar_system = {
+				save_event_target_as = contact_empire_system
+			}
+		}
+		set_country_flag = first_contact_completed@event_target:contact_empire
+	}
+
+	option = {
+		name = UNFORTUNATE
+		hidden_effect = {
+			country_event = { id = action.2 }
+		}
+	}
+}
+
+# We built an observation post only to realize the observed pre-FTLs already have full awareness
+country_event = {
+	id = awareness.920
+	title = awareness.920.name
+	desc = awareness.920.desc
+	picture = GFX_evt_observation
+	show_sound = evn_fc_observation
+	is_triggered_only = yes
+	location = fromfrom
+
+	trigger = {
+		NOT = {
+			has_country_flag = first_contact_completed@event_target:contact_empire
+		}
+		OR = {
+			is_country_type = default
+			is_country_type = fallen_empire
+			is_country_type = awakened_fallen_empire
+		}
+	}
+
+	immediate = {
+		set_country_flag = first_contact_completed@event_target:contact_empire
+		event_target:contact_empire = {
+			set_country_flag = pre_ftl_initiating_contact
+		}
+	}
+
+	option = {
+		name = ACKNOWLEDGED
+		hidden_effect = {
+			country_event = { id = action.2 }
+		}
+	}
+}

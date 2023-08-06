@@ -1,0 +1,439 @@
+############################
+#
+# Spread of communications
+#
+# Written by Martin Anward
+#
+############################
+
+namespace = communications_spread
+
+# Communications - neighbor
+country_event = {
+	id = communications_spread.1
+	title = "communications_spread.1.name"
+	desc = "communications_spread.1.desc"
+	picture = GFX_evt_star_chart
+	show_sound = event_alien_signal
+
+	trigger = {
+		is_country_type = default
+		is_homicidal = no
+		NOT = { has_valid_civic = civic_inwards_perfection }
+		any_neighbor_country = {
+			is_country_type = default
+			NOT = { is_country = ROOT }
+			has_communications = ROOT
+			is_homicidal = no
+			is_ai = yes
+			NOT = { has_valid_civic = civic_inwards_perfection }
+			any_neighbor_country = {
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
+				}
+				NOT = { is_country = ROOT }
+				has_communications = PREV
+				NOT = { has_communications = ROOT }
+			}
+		}
+	}
+
+	immediate = {
+		random_neighbor_country = {
+			limit = {
+				is_country_type = default
+				NOT = { is_country = ROOT }
+				has_communications = ROOT
+				is_homicidal = no
+				is_ai = yes
+				NOT = { has_valid_civic = civic_inwards_perfection }
+				any_neighbor_country = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+					}
+					NOT = { is_country = ROOT }
+					has_communications = PREV
+					NOT = { has_communications = ROOT }
+				}
+			}
+			save_event_target_as = CommSpreader
+			random_neighbor_country = {
+				limit = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+					}
+					NOT = { is_country = ROOT }
+					has_communications = PREV
+					NOT = { has_communications = ROOT }
+				}
+				save_event_target_as = contact_empire
+				establish_communications_no_message = root
+			}
+		}
+	}
+
+	mean_time_to_happen = {
+		months = 120
+		modifier = {
+			factor = 0.5
+			check_modifier_value = {
+				modifier = intel_decryption_add
+				value >= 4
+			}
+		}
+		modifier = {
+			factor = 2
+			check_modifier_value = {
+				modifier = intel_decryption_add
+				value < 2
+			}
+		}
+		modifier = {
+			factor = 2
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+		}
+		modifier = {
+			factor = 0.5
+			is_xenophile = yes
+		}
+		modifier = {
+			factor = 2
+			is_gestalt = yes
+			NOT = { has_civic = civic_machine_servitor }
+			NOT = { has_civic = civic_hive_empath }
+		}
+		modifier = {
+			factor = 0.5
+			OR = {
+				is_xenophile = yes
+				has_civic = civic_machine_servitor
+				has_civic = civic_hive_empath
+			}
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 40
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 70
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 100
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 120
+		}
+	}
+
+	option = {
+		name = "communications_spread.1.a"
+		custom_tooltip = communications_spread.1.tooltip
+		hidden_effect = {
+			country_event = { id = action.1 }
+			event_target:contact_empire = {
+				country_event = { id = communications_spread.2 }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = communications_spread.2
+	title = "communications_spread.2.name"
+	desc = "communications_spread.2.desc"
+	picture = GFX_evt_star_chart
+	show_sound = event_alien_signal
+
+	is_triggered_only = yes
+
+	option = {
+		name = "communications_spread.2.a"
+		custom_tooltip = communications_spread.2.tooltip
+		hidden_effect = {
+			FROM = { save_event_target_as = contact_empire }
+			country_event = { id = action.1 }
+		}
+	}
+}
+
+# Communications - any
+country_event = {
+	id = communications_spread.3
+	title = "communications_spread.1.name"
+	desc = "communications_spread.1.desc"
+	picture = GFX_evt_star_chart
+	show_sound = event_alien_signal
+
+	trigger = {
+		is_country_type = default
+		is_homicidal = no
+		NOT = { has_ethic = ethic_fanatic_xenophobe }
+		NOT = { has_valid_civic = civic_inwards_perfection }
+		any_relation = {
+			is_country_type = default
+			is_homicidal = no
+			is_ai = yes
+			OR = {
+				is_gestalt = no
+				has_civic = civic_machine_servitor
+				has_civic = civic_hive_empath
+			}
+			NOT = { has_ethic = ethic_fanatic_xenophobe }
+			NOT = { has_valid_civic = civic_inwards_perfection }
+			NOT = { is_country = ROOT }
+			has_communications = ROOT
+			OR = { # stops Scions spreading knowledge across the galaxy quite so much (FE can be anywhere, if you establish comms with the FE then you get them with the Scion, then you soon find out about the whole opposite side of the galaxy)
+				NOT = { has_origin = origin_scion }
+				any_neighbor_country = {
+					has_communications = root
+				}
+			}
+			any_neighbor_country = {
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
+				}
+				NOT = { is_country = ROOT }
+				has_communications = PREV
+				NOT = { has_communications = ROOT }
+			}
+		}
+	}
+
+	immediate = {
+		random_relation = {
+			limit = {
+				is_country_type = default
+				is_homicidal = no
+				is_ai = yes
+				OR = {
+					is_gestalt = no
+					has_civic = civic_machine_servitor
+					has_civic = civic_hive_empath
+				}
+				NOT = { has_ethic = ethic_fanatic_xenophobe }
+				NOT = { has_valid_civic = civic_inwards_perfection }
+				NOT = { is_country = ROOT }
+				has_communications = ROOT
+				OR = { # stops Scions spreading knowledge across the galaxy quite so much (FE can be anywhere, if you establish comms with the FE then you get them with the Scion, then you soon find out about the whole opposite side of the galaxy)
+					NOT = { has_origin = origin_scion }
+					any_neighbor_country = {
+						has_communications = root
+					}
+				}
+				any_neighbor_country = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+					}
+					NOT = { is_country = ROOT }
+					has_communications = PREV
+					NOT = { has_communications = ROOT }
+				}
+			}
+			save_event_target_as = CommSpreader
+			random_neighbor_country = {
+				limit = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+					}
+					NOT = { is_country = ROOT }
+					has_communications = PREV
+					NOT = { has_communications = ROOT }
+				}
+				save_event_target_as = contact_empire
+				establish_communications_no_message = root
+			}
+		}
+	}
+
+	mean_time_to_happen = {
+		months = 240
+		modifier = {
+			factor = 2
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		modifier = {
+			factor = 2
+			is_xenophobe = yes
+		}
+		modifier = {
+			factor = 0.5
+			is_xenophile = yes
+		}
+		modifier = {
+			factor = 2
+			is_gestalt = yes
+			NOT = { has_civic = civic_machine_servitor }
+			NOT = { has_civic = civic_hive_empath }
+		}
+		modifier = {
+			factor = 0.5
+			OR = {
+				is_xenophile = yes
+				has_civic = civic_machine_servitor
+				has_civic = civic_hive_empath
+			}
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 40
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 70
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 100
+		}
+		modifier = {
+			factor = 0.5
+			years_passed > 120
+		}
+		modifier = {
+			factor = 0.5
+			check_modifier_value = {
+				modifier = intel_decryption_add
+				value >= 4
+			}
+		}
+		modifier = {
+			factor = 2
+			check_modifier_value = {
+				modifier = intel_decryption_add
+				value < 2
+			}
+		}
+	}
+
+	option = {
+		name = "communications_spread.1.a"
+		custom_tooltip = communications_spread.1.tooltip
+		hidden_effect = {
+			country_event = { id = action.1 }
+			event_target:contact_empire = {
+				country_event = { id = communications_spread.2 }
+			}
+		}
+	}
+}
+
+# Communications with primitives can be established after observation station is built
+# This = construction ship or observation station
+# From = planet it is built on
+ship_event = {
+	id = communications_spread.4
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = controller
+		from = {
+			exists = owner
+			owner = {
+				is_country_type = primitive
+			}
+		}
+	}
+
+	immediate = {
+		from.owner = { establish_communications = root.controller }
+		owner = {
+			add_intel = {
+				amount = 100
+				who = from.owner
+			}
+		}
+	}
+}
+
+#When a system changes owner, establish contact with any faction controlling planets in the system. (Usually stuff like the Mechanocalibrator)
+country_event = {
+	id = communications_spread.5
+	is_triggered_only = yes
+	hide_window = yes
+
+	immediate = {
+		from = {
+			every_system_planet = {
+				limit = {
+					exists = controller
+					controller = {
+						NOR = {
+							is_same_value = root
+							is_same_value = root.fromfrom
+							is_country_type = primitive
+						}
+					}
+				}
+				controller = {
+					establish_communications_no_message = root
+				}
+			}
+		}
+	}
+}
+
+# Communications with primitives should be removed after observation station is destroyed/lost to another empire
+# This = station
+# From = planet it was built on
+ship_event = {
+	id = communications_spread.6
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ship_size = observation_station
+		exists = controller
+		from = {
+			exists = owner
+			owner = {
+				is_country_type = primitive
+				NOT = {
+					has_country_flag = was_enlightened
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from.owner = { 
+			remove_communications = root.controller
+			clear_relations = {
+				target = root.controller
+				relations = {
+					is_under_societal_enlightenment
+					is_under_open_technological_enlightenment
+					is_under_stratified_technological_enlightenment
+					has_pre_ftl_trade
+				}
+			}
+		}
+	}
+}
+
+# MTTH events with modifiers are checked daily. 
+country_event = {
+	id = communications_spread.111
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = default
+	}
+	
+	immediate = {
+	}
+}

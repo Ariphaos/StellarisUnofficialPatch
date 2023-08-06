@@ -1,0 +1,4370 @@
+#root = planet
+
+@stickiness = 10
+@stickiness_low = 5
+
+# Colony
+col_default = {
+	icon = GFX_colony_type_normal_colony
+
+	potential = {
+		exists = owner
+		owner = { is_regular_empire = yes}
+		has_upgraded_capital = no
+		is_special_colony_type = no
+		num_sapient_pops < 5
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+		pop_happiness = 0.10
+		planet_resettlement_unemployed_destination_mult = 0.25
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 100
+	}
+}
+
+# Colony Machine
+col_default_machine = {
+	icon = GFX_colony_type_normal_colony
+
+	potential = {
+		exists = owner
+		owner = { is_machine_empire = yes }
+		has_upgraded_capital = no
+		is_special_colony_type = no
+		num_sapient_pops < 5 # Non-sapient machines are included
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_no_happiness_add = 10
+		planet_resettlement_unemployed_destination_mult = 0.25
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 100
+	}
+}
+
+# Urban Planet
+col_city = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		exists = owner
+		owner = { is_regular_empire = yes }
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_structures_upkeep_mult = -0.10
+		planet_district_city_build_speed_mult = 0.25
+		trade_value_mult = 0.20
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_city
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_city
+			}
+			mode = add
+		}
+		complex_trigger_modifier = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = merchant # merchant jobs act as a pretty decent proxy for "this is a trade planet"
+			}
+			mode = add
+			mult = 2
+		}
+	}
+}
+
+# Mining Planet
+col_mining = {
+	icon = GFX_colony_type_mine
+
+	potential = {
+		exists = owner
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_mining_build_speed_mult = 0.25
+		planet_miners_produces_mult = 0.25
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_mining
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_mining
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_mining_uncapped
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_free_districts
+			parameters = {
+				type = district_mining
+			}
+			mode = add
+		}
+		modifier = {
+			add = 5
+			OR = {
+				has_modifier = asteroid_belt
+				has_modifier = mineral_rich
+				has_modifier = ultra_rich
+				has_modifier = extensive_moon_system
+				has_modifier = asteroid_impacts
+				has_modifier = carbon_world
+			}
+		}
+		modifier = {
+			add = -10
+			has_modifier = mineral_poor
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "production"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Farming Planet
+col_farming = {
+	icon = GFX_colony_type_farm
+
+	potential = {
+		exists = owner
+		owner = { country_uses_food = yes }
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+			uses_district_set = machine_world
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_farming_build_speed_mult = 0.25
+		planet_farmers_produces_mult = 0.25
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_farming
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_farming
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_farming_uncapped
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_free_districts
+			parameters = {
+				type = district_farming
+			}
+			mode = add
+		}
+		modifier = {
+			add = 5
+			has_modifier = lush_planet
+		}
+		modifier = {
+			add = -10
+			OR = {
+				has_modifier = bleak_planet
+				has_modifier = unbalanced_ecosystem
+				has_modifier = irradiated_planet
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "production"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Generator Planet
+col_generator = {
+	icon = GFX_colony_type_generator
+
+	potential = {
+		exists = owner
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_generator_build_speed_mult = 0.25
+		planet_technician_produces_mult = 0.25
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_generator
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_generator
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_generator_uncapped
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_free_districts
+			parameters = {
+				type = district_generator
+			}
+			mode = add
+		}
+		modifier = {
+			add = 5
+			OR = {
+				has_modifier = hazardous_weather
+				has_modifier = strong_magnetic_field
+			}
+		}
+		modifier = {
+			add = -10
+			has_modifier = energy_poor
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "production"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Hive Planet/Nest planet
+col_hive = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		NOR = {
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		exists = owner
+		owner = { is_hive_empire = yes }
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_structures_upkeep_mult = -0.10
+		planet_jobs_complex_drone_produces_mult = 0.05
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_hive
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hive
+			}
+			mode = add
+			mult = 2
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOT = { has_sector_focus = "balanced" }
+			}
+		}
+	}
+}
+
+# Nexus Planet
+col_nexus = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		NOR = {
+			uses_district_set = machine_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		exists = owner
+		owner = { is_machine_empire = yes }
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_structures_upkeep_mult = -0.10
+		planet_jobs_complex_drone_produces_mult = 0.05
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_nexus
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_nexus
+			}
+			mode = add
+			mult = 2
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOT = { has_sector_focus = "balanced" }
+			}
+		}
+	}
+}
+
+col_industrial = {
+	icon = GFX_colony_type_industrial
+
+	potential = {
+		exists = owner
+		owner = { country_uses_consumer_goods = yes }
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = habitat
+			uses_district_set = machine_world
+			uses_district_set = hive_world
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_artisans_upkeep_mult = -0.10
+		planet_metallurgists_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_industrial
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 15
+			AND = {
+				OR = {
+					has_building = building_factory_1
+					has_building = building_factory_2
+					has_building = building_factory_3
+				}
+				OR = {
+					has_building = building_foundry_1
+					has_building = building_foundry_2
+					has_building = building_foundry_3
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Forge Planet
+col_foundry = {
+	icon = GFX_colony_type_foundry
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 0
+		alloys = 2
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	ai_resource_current_conversion = {
+		alloys = 0.5
+		consumer_goods = -2
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	potential = {
+		exists = owner
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = habitat
+			uses_district_set = machine_world
+			uses_district_set = hive_world
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	custom_tooltip = col_foundry_custom
+	planet_modifier = {
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_metallurgists_upkeep_mult = -0.20
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_foundry
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_industrial value >= 1 }
+			exists = owner
+			owner = {
+				OR = {
+					country_uses_consumer_goods = no
+					has_monthly_income = { resource = consumer_goods value >= 0 }
+				}
+				resource_revenue_compare = {
+					resource = alloys
+					value < trigger:years_passed
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Factory Planet
+col_factory = {
+	icon = GFX_colony_type_factory
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 2
+		alloys = 0
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	# Used by AI to estimate the current effects of this designation
+	ai_resource_current_conversion = {
+		consumer_goods = 0.5
+		alloys = -0.5
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	potential = {
+		exists = owner
+		owner = { country_uses_consumer_goods = yes }
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = habitat
+			uses_district_set = machine_world
+			uses_district_set = hive_world
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	custom_tooltip = col_factory_custom
+	planet_modifier = {
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_artisans_upkeep_mult = -0.20
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_factory
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_industrial value >= 1 }
+			exists = owner
+			owner = {
+				resource_revenue_compare = {
+					resource = alloys
+					value >= trigger:years_passed
+				}
+				has_monthly_income = { resource = consumer_goods value < 0 }
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Unification Center
+col_bureau = {
+	icon = GFX_colony_type_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = {
+			is_regular_empire = yes
+			is_spiritualist = no
+			has_make_spiritualist_perk = no
+		}
+		NOT = {
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner.federation
+			owner.federation = { has_federation_perk = all_the_priests_1 }
+		}
+		job_priest_per_pop = 0.04
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_bureau
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_administrative
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_bureaucratic_1
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_bureaucratic_2
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_bureaucratic_3
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+col_bureau_spiritualist = {
+	icon = GFX_colony_type_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = {
+			is_regular_empire = yes
+			OR = {
+				is_spiritualist = yes
+				has_make_spiritualist_perk = yes
+			}
+		}
+		NOT = {
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner.federation
+			owner.federation = { has_federation_perk = all_the_priests_1 }
+		}
+		job_priest_per_pop = 0.04
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_bureau_spiritualist
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_religious
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_temple
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_holotemple
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacred_nexus
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacrificial_temple_1
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacrificial_temple_2
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacrificial_temple_3
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+col_bureau_hive = {
+	icon = GFX_colony_type_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = { is_hive_empire = yes }
+		NOT = {
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_bureau_hive
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hive_node
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hive_cluster
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hive_confluence
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+col_bureau_machine = {
+	icon = GFX_colony_type_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = {
+			is_machine_empire = yes
+			NOT = { has_valid_civic = civic_machine_servitor }
+		}
+		NOT = {
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_bureau_machine
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_uplink_node
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_network_junction
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_system_conflux
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+# Refinery Planet
+col_refinery = {
+	icon = GFX_colony_type_refinery
+
+	potential = {
+		exists = owner
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_refiners_produces_mult = 0.15
+		planet_translucers_produces_mult = 0.15
+		planet_chemists_produces_mult = 0.15
+		planet_sr_miners_produces_mult = 0.15
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_refiners_produces_mult = 0.1
+			planet_translucers_produces_mult = 0.1
+			planet_chemists_produces_mult = 0.1
+			planet_sr_miners_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_refinery
+		}
+		complex_trigger_modifier = {
+			trigger = count_owned_pop
+			parameters = {
+				limit = {
+					has_sr_producing_job = yes
+				}
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				not = { has_sector_focus = "manufacturing" }
+				not = { has_sector_focus = "balanced" }
+			}
+		}
+	}
+}
+
+# Research Planet
+col_research = {
+	icon = GFX_colony_type_research
+
+	potential = {
+		exists = owner
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_building_research_lab_1_build_speed_mult = 0.25
+		planet_researchers_upkeep_mult = -0.2
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_research
+		}
+		complex_trigger_modifier = {
+			trigger = count_owned_pop
+			parameters = {
+				limit = {
+					has_research_job = yes
+				}
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 5
+			OR = {
+				has_modifier = wild_storms
+				has_modifier = titanic_life
+				has_modifier = atmospheric_hallucinogen
+				has_modifier = liquid_sands
+				has_modifier = dangerous_wildlife
+				has_modifier = unstable_tectonics
+				has_modifier = society_animal_life
+				has_modifier = tamed_nanite_swarm_modifier
+				has_deposit = d_central_spire
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "research"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+
+# Fortress Planet
+col_fortress = {
+	icon = GFX_colony_type_fortress
+
+	potential = {
+		exists = owner
+		NOR = {
+			uses_district_set = city_world
+			uses_district_set = ring_world
+			uses_district_set = habitat
+		}
+		is_capital = no
+		OR = {
+			is_special_colony_type = no
+			has_modifier = slave_colony
+		}
+	}
+
+	planet_modifier = {
+		planet_building_stronghold_build_speed_mult = 0.25
+		planet_orbital_bombardment_damage = -0.10
+		army_defense_damage_mult = 0.20
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_fortress
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_stronghold
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_fortress
+			}
+			mode = add
+			mult = 4
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+			}
+		}
+	}
+}
+
+####################################################
+###		CAPITAL WORLD DESIGNATIONS		    	 ###
+####################################################
+col_capital = {
+	icon = GFX_colony_type_capital
+
+	potential = {
+		is_capital = yes
+		NAND = {
+			exists = owner
+			owner = {
+				OR = {
+					NOT = { is_country_type = default }
+					is_gestalt = yes
+				}
+			}
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+		pop_government_ethic_attraction = 1
+		planet_resettlement_unemployed_destination_mult = 0.1
+		planet_jobs_produces_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_capital_foundry = {
+	icon = GFX_colony_type_capital_foundry
+
+	potential = {
+		is_capital = yes
+
+		exists = owner
+		owner = {
+			AND = {
+				is_country_type = default
+				is_gestalt = no
+				
+				OR = {
+					is_ai = no
+					AND = {
+						years_passed > 25
+						num_owned_planets >= 5
+					}
+				}
+			}
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+		pop_government_ethic_attraction = 1
+		planet_resettlement_unemployed_destination_mult = 0.1
+		planet_metallurgists_produces_mult = 0.15
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 0
+		alloys = 2
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	ai_resource_current_conversion = {
+		alloys = 0.5
+		consumer_goods = -2
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	custom_tooltip = col_foundry_custom
+
+	weight_modifier = {
+		base = 0
+	}
+}
+
+col_capital_factory = {
+	icon = GFX_colony_type_capital_factory
+
+	potential = {
+		is_capital = yes
+
+		exists = owner
+		owner = {
+			AND = {
+				is_country_type = default
+				is_gestalt = no
+				
+				OR = {
+					is_ai = no
+					AND = {
+						years_passed > 25
+						num_owned_planets >= 5
+					}
+				}
+			}
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+		pop_government_ethic_attraction = 1
+		planet_resettlement_unemployed_destination_mult = 0.1
+		planet_artisans_produces_mult = 0.15
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 2
+		alloys = 0
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	custom_tooltip = col_factory_custom
+
+	# Used by AI to estimate the current effects of this designation
+	ai_resource_current_conversion = {
+		consumer_goods = 0.5
+		alloys = -0.5
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	weight_modifier = {
+		base = 0
+	}
+}
+
+col_capital_trade = {
+	icon = GFX_colony_type_capital_trade
+
+	potential = {
+		is_capital = yes
+
+		exists = owner
+		owner = {
+			AND = {
+				is_country_type = default
+				is_gestalt = no
+				
+				OR = {
+					is_ai = no
+					AND = {
+						years_passed > 25
+						num_owned_planets >= 5
+					}
+				}
+			}
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+		pop_government_ethic_attraction = 1
+		planet_resettlement_unemployed_destination_mult = 0.1
+		trade_value_mult = 0.15
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 0
+	}
+}
+
+col_capital_extraction = {
+	icon = GFX_colony_type_capital_extraction
+
+	potential = {
+		is_capital = yes
+
+		exists = owner
+		owner = {
+			AND = {
+				is_country_type = default
+				is_gestalt = no
+				
+				OR = {
+					is_ai = no
+					AND = {
+						years_passed > 25
+						num_owned_planets >= 5
+					}
+				}
+			}
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+		pop_government_ethic_attraction = 1
+		planet_resettlement_unemployed_destination_mult = 0.1
+		planet_jobs_worker_produces_mult = 0.15
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Capital Planet - Hive Mind
+col_capital_hive = {
+	icon = GFX_colony_type_capital
+
+	potential = {
+		is_capital = yes
+		exists = owner
+		owner = {
+			is_country_type = default
+			is_hive_empire = yes
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_no_happiness_add = 10
+		planet_crime_no_happiness_add = -20
+		planet_jobs_produces_mult = 0.1
+		planet_resettlement_unemployed_destination_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 0
+	}
+}
+
+# Capital Planet - Machine Empire
+col_capital_machine = {
+	icon = GFX_colony_type_capital
+
+	potential = {
+		is_capital = yes
+		exists = owner
+		owner = {
+			is_country_type = default
+			is_machine_empire = yes
+		}
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_no_happiness_add = 10
+		planet_crime_no_happiness_add = -20
+		planet_jobs_produces_mult = 0.15
+		planet_resettlement_unemployed_destination_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Habitat
+col_habitat = {
+	icon = GFX_colony_type_habitat
+
+	potential = {
+		uses_district_set = habitat
+		is_capital = no
+		num_sapient_pops < 5
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+		planet_amenities_add = 10
+	}
+
+	weight_modifier = {
+		base = 4
+	}
+}
+
+# Habitat Energy
+col_habitat_energy = {
+	icon = GFX_colony_type_habitat_energy
+
+	potential = {
+		uses_district_set = habitat
+		exists = owner
+		OR = {
+			owner = { is_gestalt = yes }
+			has_planet_flag = energy_habitat
+		}
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_hab_energy_build_speed_mult = 0.25
+		planet_technician_produces_mult = 0.1
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_energy
+		}
+		modifier = {
+			add = 5
+			has_planet_flag = energy_habitat
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_energy
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "production"
+				}
+			}
+		}
+	}
+}
+
+# Habitat Cultural
+col_habitat_leisure = {
+	icon = GFX_colony_type_habitat_leisure
+
+	potential = {
+		uses_district_set = habitat
+		exists = owner
+		owner = {
+			OR = {
+				is_gestalt = no
+				has_valid_civic = civic_machine_servitor
+			}
+		}
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_hab_cultural_build_speed_mult = 0.25
+		pop_happiness = 0.10
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_leisure
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_cultural
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+			}
+		}
+	}
+}
+
+# Habitat Trade
+col_habitat_trade = {
+	icon = GFX_colony_type_habitat_trade
+
+	potential = {
+		uses_district_set = habitat
+		exists = owner
+		owner = { is_gestalt = no }
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_hab_commercial_build_speed_mult = 0.25
+		trade_value_mult = 0.20
+	}
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_trade
+		}
+		complex_trigger_modifier = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = merchant # merchant jobs act as a pretty decent proxy for "this is a trade planet"
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_commercial
+			}
+			mode = add
+			mult = 3
+		}
+	}
+}
+
+# Habitat Research
+col_habitat_research = {
+	icon = GFX_colony_type_habitat_research
+
+	potential = {
+		uses_district_set = habitat
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_hab_science_build_speed_mult = 0.25
+		planet_researchers_produces_mult = 0.1
+	}
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_research
+		}
+		modifier = {
+			add = 5
+			has_planet_flag = research_habitat
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_science
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "research"
+				}
+			}
+		}
+	}
+}
+
+# Habitat Mining
+col_habitat_mining = {
+	icon = GFX_colony_type_habitat_mining
+
+	potential = {
+		uses_district_set = habitat
+		has_planet_flag = mining_habitat
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_hab_mining_build_speed_mult = 0.25
+		planet_miners_produces_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_mining
+		}
+		modifier = {
+			add = 5
+			has_planet_flag = mining_habitat
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_mining
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "production"
+				}
+			}
+		}
+	}
+}
+
+# Habitat Farming
+col_habitat_farming = {
+	icon = GFX_colony_type_habitat_farming
+
+	potential = {
+		uses_district_set = habitat
+		exists = owner
+		owner = {
+			is_gestalt = no
+		}
+		is_capital = no
+	}
+
+	custom_tooltip = col_habitat_farming_custom
+	planet_modifier = {
+		planet_building_hydroponics_farm_build_speed_mult = 0.25
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_farming
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hydroponics_farm
+			}
+			mode = add
+			mult = 4
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "production"
+				}
+			}
+		}
+	}
+}
+
+col_habitat_gestalt_farming = {
+	icon = GFX_colony_type_habitat_farming
+
+	potential = {
+		uses_district_set = habitat
+		exists = owner
+		owner = {
+			is_gestalt = yes
+		}
+		is_capital = no
+	}
+	custom_tooltip = col_habitat_farming_gestalt_custom
+	planet_modifier = {
+		planet_building_hydroponics_farm_build_speed_mult = 0.25
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_gestalt_farming
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hydroponics_farm
+			}
+			mode = add
+			mult = 4
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "production"
+				}
+			}
+		}
+	}
+}
+
+# Habitat Fortress
+col_habitat_fortress = {
+	icon = GFX_colony_type_habitat_fortress
+
+	potential = {
+		uses_district_set = habitat
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_building_stronghold_build_speed_mult = 0.25
+		planet_orbital_bombardment_damage = -0.10
+		army_defense_damage_mult = 0.20
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_building = building_order_keep
+				has_building = building_order_castle
+			}
+		}
+		knights_independent_category_produces_mult = 0.1
+		pop_defense_armies_add = 1
+	}
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_fortress
+		}
+		modifier = {
+			add = 100
+			OR = {
+				has_building = building_order_keep
+				has_building = building_order_castle
+			}
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_stronghold
+			}
+			mode = add
+			mult = 3
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_fortress
+			}
+			mode = add
+			mult = 6
+		}
+	}
+}
+
+# Habitat Industrial
+col_habitat_industrial = {
+	icon = GFX_colony_type_hab_industrial
+
+	potential = {
+		uses_district_set = habitat
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_hab_industrial_build_speed_mult = 0.25
+		planet_metallurgists_upkeep_mult = -0.1
+		planet_artisans_upkeep_mult = -0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_industrial
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 15
+			AND = {
+				OR = {
+					has_building = building_factory_1
+					has_building = building_factory_2
+					has_building = building_factory_3
+				}
+				OR = {
+					has_building = building_foundry_1
+					has_building = building_foundry_2
+					has_building = building_foundry_3
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Habitat Foundry
+col_habitat_foundry = {
+	icon = GFX_colony_type_habitat_foundry
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 0
+		alloys = 2
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	ai_resource_current_conversion = {
+		alloys = 0.5
+		consumer_goods = -2
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	potential = {
+		uses_district_set = habitat
+		is_capital = no
+	}
+
+	custom_tooltip = col_habitat_foundry_custom
+	planet_modifier = {
+		planet_district_hab_industrial_build_speed_mult = 0.25
+		planet_metallurgists_upkeep_mult = -0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_foundry
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_hab_industrial value >= 1 }
+			exists = owner
+			owner = {
+				OR = {
+					country_uses_consumer_goods = no
+					has_monthly_income = { resource = consumer_goods value >= 0 }
+				}
+				resource_revenue_compare = {
+					resource = alloys
+					value < trigger:years_passed
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Habitat Factory
+col_habitat_factory = {
+	icon = GFX_colony_type_habitat_factory
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 2
+		alloys = 0
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	# Used by AI to estimate the current effects of this designation
+	ai_resource_current_conversion = {
+		consumer_goods = 0.5
+		alloys = -0.5
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	potential = {
+		uses_district_set = habitat
+		exists = owner
+		owner = { country_uses_consumer_goods = yes }
+		is_capital = no
+	}
+
+	custom_tooltip = col_habitat_factory_custom
+	planet_modifier = {
+		planet_district_hab_industrial_build_speed_mult = 0.25
+		planet_artisans_upkeep_mult = -0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_factory
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_hab_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_hab_industrial value >= 1 }
+			exists = owner
+			owner = {
+				resource_revenue_compare = {
+					resource = alloys
+					value >= trigger:years_passed
+				}
+				has_monthly_income = { resource = consumer_goods value < 0 }
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+col_habitat_bureau = {
+	icon = GFX_colony_type_hab_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = {
+			is_regular_empire = yes
+			is_spiritualist = no
+			has_make_spiritualist_perk = no
+		}
+		uses_district_set = habitat
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner.federation
+			owner.federation = { has_federation_perk = all_the_priests_1 }
+		}
+		job_priest_per_pop = 0.04
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_bureau
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_bureaucratic_1
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_bureaucratic_2
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_bureaucratic_3
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+	}
+}
+
+col_habitat_bureau_spiritualist = {
+	icon = GFX_colony_type_hab_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = {
+			is_regular_empire = yes
+			OR = {
+				is_spiritualist = yes
+				has_make_spiritualist_perk = yes
+			}
+		}
+		uses_district_set = habitat
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner.federation
+			owner.federation = { has_federation_perk = all_the_priests_1 }
+		}
+		job_priest_per_pop = 0.04
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_bureau_spiritualist
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_temple
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_holotemple
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacred_nexus
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacrificial_temple_1
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacrificial_temple_2
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_sacrificial_temple_3
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+col_habitat_bureau_hive = {
+	icon = GFX_colony_type_hab_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = { is_hive_empire = yes }
+		uses_district_set = habitat
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_bureau_hive
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hive_node
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hive_cluster
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_hive_confluence
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+col_habitat_bureau_machine = {
+	icon = GFX_colony_type_hab_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = { is_machine_empire = yes }
+		uses_district_set = habitat
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_administrators_produces_mult = 0.10
+		planet_administrators_upkeep_mult = -0.10
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_bureau_machine
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_uplink_node
+			}
+			mode = add
+			mult = 2
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_network_junction
+			}
+			mode = add
+			mult = 4
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_system_conflux
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+	}
+}
+
+# Habitat Refinery
+col_habitat_refinery = {
+	icon = GFX_colony_type_habitat_refinery
+
+	potential = {
+		uses_district_set = habitat
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_refiners_produces_mult = 0.15
+		planet_translucers_produces_mult = 0.15
+		planet_chemists_produces_mult = 0.15
+		planet_sr_miners_produces_mult = 0.15
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_refiners_produces_mult = 0.1
+			planet_translucers_produces_mult = 0.1
+			planet_chemists_produces_mult = 0.1
+			planet_sr_miners_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_habitat_refinery
+		}
+		complex_trigger_modifier = {
+			trigger = count_owned_pop
+			parameters = {
+				limit = {
+					has_sr_producing_job = yes
+				}
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				not = { has_sector_focus = "manufacturing" }
+				not = { has_sector_focus = "balanced" }
+			}
+		}
+	}
+}
+
+# Rural Planet - Gestalt
+col_rural_gestalt = {
+	icon = GFX_colony_type_fringe
+
+	potential = {
+		NOR = {
+			uses_district_set = habitat
+			uses_district_set = ring_world
+			uses_district_set = machine_world
+			uses_district_set = hive_world
+		}
+		exists = owner
+		owner = { is_gestalt = yes }
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_farming_build_speed_mult = 0.25
+		planet_district_mining_build_speed_mult = 0.25
+		planet_district_generator_build_speed_mult = 0.25
+		planet_jobs_simple_drone_produces_mult = 0.10
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness_low
+			has_designation = col_rural_gestalt
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "production"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+
+# Rural Planet
+col_rural = {
+	icon = GFX_colony_type_rural
+
+	potential = {
+		exists = owner
+		owner = { is_gestalt = no }
+		NOR = {
+			uses_district_set = habitat
+			uses_district_set = ring_world
+			uses_district_set = city_world
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_farming_build_speed_mult = 0.25
+		planet_district_generator_build_speed_mult = 0.25
+		planet_district_mining_build_speed_mult = 0.25
+		planet_jobs_worker_produces_mult = 0.10
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness_low
+			has_designation = col_rural
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "production"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Ringworld Mixed
+col_ring_mix = {
+	icon = GFX_colony_type_workers
+
+	potential = {
+		uses_district_set = ring_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_immigration_pull_mult = 0.2
+		planet_jobs_produces_mult = 0.05
+		pop_growth_speed = 0.15
+		planet_pop_assembly_mult = 0.15
+		planet_pop_assembly_organic_mult = 0.15
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ring_mix
+		}
+
+		modifier = {
+			add = 10
+			num_sapient_pops < 15
+		}
+	}
+}
+
+col_ring_research = {
+	icon = GFX_colony_type_research
+
+	potential = {
+		uses_district_set = ring_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_jobs_engineering_research_produces_mult = 0.15
+		planet_jobs_physics_research_produces_mult = 0.15
+		planet_jobs_society_research_produces_mult = 0.15
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ring_research
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_rw_science
+			}
+			mode = add
+			mult = 10
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "research"
+				}
+			}
+		}
+	}
+}
+
+col_ring_farming = {
+	icon = GFX_colony_type_farm
+
+	potential = {
+		uses_district_set = ring_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_farmers_food_produces_mult = 0.25
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ring_farming
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_rw_farming
+			}
+			mode = add
+			mult = 10
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "production"
+				}
+			}
+		}
+	}
+}
+
+col_ring_trade = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		uses_district_set = ring_world
+		exists = owner
+		owner = { is_gestalt = no }
+		is_capital = no
+	}
+
+	planet_modifier = {
+		trade_value_mult = 0.2
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ring_trade
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_rw_commercial
+			}
+			mode = add
+			mult = 10
+		}
+	}
+}
+
+col_ring_generator = {
+	icon = GFX_colony_type_generator
+
+	potential = {
+		uses_district_set = ring_world
+		exists = owner
+		owner = { is_gestalt = yes }
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_technician_energy_produces_mult = 0.25
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = no
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_worker_produces_mult = 0.1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+				is_gestalt = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_greatergood_five_year_plans"
+				is_active_resolution = "resolution_greatergood_greater_than_ourselves"
+				is_active_resolution = "resolution_greatergood_balance_in_the_middle"
+				is_active_resolution = "resolution_greatergood_universal_prosperity_mandate"
+			}
+		}
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.1
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ring_generator
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_rw_generator
+			}
+			mode = add
+			mult = 10
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "production"
+				}
+			}
+		}
+	}
+}
+
+# Ecumenpolis
+col_ecu_mix = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		uses_district_set = city_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_structures_upkeep_mult = -0.25
+		trade_value_mult = 0.20
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ecu_mix
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_housing
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = merchant # merchant jobs act as a pretty decent proxy for "this is a trade planet"
+			}
+			mode = add
+			mult = 2
+		}
+	}
+}
+# Ecumenpolis Industrial
+col_ecu_industrial = {
+	icon = GFX_colony_type_industrial
+
+	potential = {
+		exists = owner
+		owner = { country_uses_consumer_goods = yes }
+		uses_district_set = city_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_arcology_arms_industry_build_speed_mult = 0.25
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_artisans_upkeep_mult = -0.10
+		planet_metallurgists_upkeep_mult = -0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ecu_industrial
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_civilian_industry
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_arms_industry
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			add = 8
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = 8
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Ecumenpolis Foundry
+col_ecu_foundry = {
+	icon = GFX_colony_type_foundry
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 0
+		alloys = 2
+
+		trigger = {
+			always = yes
+		}
+	}
+
+	ai_resource_current_conversion = {
+		alloys = 0.5
+		consumer_goods = -2
+
+		trigger = {
+			always = yes
+		}
+	}
+
+	potential = {
+		uses_district_set = city_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_building_foundry_1_build_speed_mult = 0.25
+		planet_district_arcology_arms_industry_build_speed_mult = 0.25
+		planet_metallurgists_upkeep_mult = -0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ecu_foundry
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_arms_industry
+			}
+			mode = add
+			mult = 8
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_civilian_industry
+			}
+			mode = add
+			mult = -3
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_arcology_arms_industry value >= 1 }
+			exists = owner
+			owner = {
+				OR = {
+					country_uses_consumer_goods = no
+					has_monthly_income = { resource = consumer_goods value >= 0 }
+				}
+				resource_revenue_compare = {
+					resource = alloys
+					value < trigger:years_passed
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Ecumenpolis Factory
+col_ecu_factory = {
+	icon = GFX_colony_type_factory
+
+	# used by AI to estimate what will happen when we change the designation
+	ai_resource_conversion = {
+		consumer_goods = 2
+		alloys = 0
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	# Used by AI to estimate the current effects of this designation
+	ai_resource_current_conversion = {
+		consumer_goods = 0.5
+		alloys = -0.5
+
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+	}
+
+	potential = {
+		uses_district_set = city_world
+		exists = owner
+		owner = { country_uses_consumer_goods = yes }
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_building_factory_1_build_speed_mult = 0.25
+		planet_district_arcology_civilian_industry_build_speed_mult = 0.25
+		planet_artisans_upkeep_mult = -0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ecu_factory
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_civilian_industry
+			}
+			mode = add
+			mult = 8
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_arms_industry
+			}
+			mode = add
+			mult = -3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Ecumenpolis Research
+col_ecu_research = {
+	icon = GFX_colony_type_research
+
+	potential = {
+		uses_district_set = city_world
+		is_capital = no
+	}
+
+
+	planet_modifier = {
+		planet_building_research_lab_1_build_speed_mult = 0.25
+		planet_researchers_upkeep_mult = -0.2
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_ecu_research
+		}
+		complex_trigger_modifier = {
+			trigger = count_owned_pop
+			parameters = {
+				limit = {
+					has_research_job = yes
+				}
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "research"
+				}
+			}
+		}
+	}
+}
+
+# Machine World
+col_mac = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		uses_district_set = machine_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_mining_uncapped_build_speed_mult = 0.25
+		planet_district_generator_uncapped_build_speed_mult = 0.25
+		planet_jobs_simple_drone_produces_mult = 0.05
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness_low
+			has_designation = col_mac
+		}
+		modifier = {
+			add = 10
+			num_sapient_pops < 10
+		}
+	}
+}
+
+# Machine World Foundry
+col_mac_foundry = {
+	icon = GFX_colony_type_foundry
+
+	potential = {
+		uses_district_set = machine_world
+		is_capital = no
+	}
+
+	custom_tooltip = col_foundry_custom
+	planet_modifier = {
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_metallurgists_upkeep_mult = -0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_mac_foundry
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_industrial value >= 1 }
+			exists = owner
+			owner = {
+				OR = {
+					country_uses_consumer_goods = no
+					has_monthly_income = { resource = consumer_goods value >= 0 }
+				}
+				resource_revenue_compare = {
+					resource = alloys
+					value < trigger:years_passed
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Machine World Factory
+col_mac_factory = {
+	icon = GFX_colony_type_factory
+
+	potential = {
+		uses_district_set = machine_world
+		owner = { country_uses_consumer_goods = yes }
+		is_capital = no
+	}
+
+	custom_tooltip = col_factory_custom
+	planet_modifier = {
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_artisans_upkeep_mult = -0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_artisans_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_mac_factory
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_factory_1
+				has_building = building_factory_2
+				has_building = building_factory_3
+			}
+		}
+		modifier = {
+			add = -5
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_industrial value >= 1 }
+			exists = owner
+			owner = {
+				resource_revenue_compare = {
+					resource = alloys
+					value >= trigger:years_passed
+				}
+				has_monthly_income = { resource = consumer_goods value < 0 }
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Hive World
+col_hiv = {
+	icon = GFX_colony_type_urban
+
+	potential = {
+		uses_district_set = hive_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_mining_uncapped_build_speed_mult = 0.25
+		planet_district_farming_uncapped_build_speed_mult = 0.25
+		planet_district_generator_uncapped_build_speed_mult = 0.25
+		planet_jobs_simple_drone_produces_mult = 0.05
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness_low
+			has_designation = col_hiv
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "production"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+# Hive World Foundry
+col_hiv_foundry = {
+	icon = GFX_colony_type_foundry
+
+	potential = {
+		uses_district_set = hive_world
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_district_industrial_build_speed_mult = 0.25
+		planet_metallurgists_upkeep_mult = -0.20
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_galactic_community_member = yes
+			}
+			OR = {
+				is_active_resolution = "resolution_industry_environmental_ordinance_waivers"
+				is_active_resolution = "resolution_industry_project_cornucopia"
+			}
+		}
+		modifier = {
+			planet_metallurgists_produces_mult = 0.05
+		}
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_hiv_foundry
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_industrial
+			}
+			mode = add
+			mult = 3
+		}
+		modifier = {
+			add = 10
+			OR = {
+				has_building = building_foundry_1
+				has_building = building_foundry_2
+				has_building = building_foundry_3
+			}
+		}
+		modifier = {
+			add = 10
+			num_districts = { type = district_industrial value >= 1 }
+			exists = owner
+			owner = {
+				resource_revenue_compare = {
+					resource = alloys
+					value < trigger:years_passed
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "manufacturing"
+					has_sector_focus = "balanced"
+				}
+			}
+		}
+	}
+}
+
+col_trophy_machine = {
+	icon = GFX_colony_type_bureaucratic
+
+	potential = {
+		exists = owner
+		owner = { has_valid_civic = civic_machine_servitor }
+		NOT = {
+			uses_district_set = habitat
+		}
+		is_special_colony_type = no
+		is_capital = no
+	}
+
+	planet_modifier = {
+		planet_bio_trophies_produces_mult = 0.10
+		pop_growth_speed = 0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		modifier = {
+			add = @stickiness
+			has_designation = col_trophy_machine
+		}
+		complex_trigger_modifier = {
+			trigger = num_districts
+			parameters = {
+				type = district_arcology_organic_housing
+			}
+			mode = add
+			mult = 6
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_organic_sanctuary
+			}
+			mode = add
+			mult = 3
+		}
+		complex_trigger_modifier = {
+			trigger = num_buildings
+			parameters = {
+				type = building_organic_paradise
+			}
+			mode = add
+			mult = 6
+		}
+		modifier = {
+			add = 10
+			exists = sector
+			sector = {
+				has_sector_focus = "unity"
+			}
+		}
+		modifier = {
+			factor = 0
+			exists = sector
+			sector = {
+				has_any_sector_focus = yes
+				NOR = {
+					has_sector_focus = "balanced"
+					has_sector_focus = "unity"
+				}
+			}
+		}
+	}
+}
+
+# Fallen Empire Capital
+col_fe_capital = {
+	icon = GFX_colony_type_capital
+
+	potential = {
+		is_capital = yes
+		exists = owner
+		owner = { is_fallen_empire = yes }
+	}
+
+	planet_modifier = {
+		planet_stability_add = 10
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Fallen Empire Colony
+col_fe_colony = {
+	icon = GFX_colony_type_normal_colony
+
+	potential = {
+		is_capital = no
+		exists = owner
+		owner = { is_fallen_empire = yes }
+	}
+
+	planet_modifier = {
+		planet_stability_add = 5
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Resort World
+col_resort = {
+	icon = GFX_colony_type_resort
+
+	potential = {
+		has_modifier = resort_colony
+	}
+
+	planet_modifier = {
+		planet_housing_add = 10
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Penal Colony
+col_penal = {
+	icon = GFX_colony_type_penal
+
+	potential = {
+		has_modifier = penal_colony
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Crucible Planet
+col_crucible = {
+	icon = GFX_colony_type_crucible_world
+
+	potential = {
+		has_modifier = crucible_colony
+		is_capital = no
+	}
+	planet_modifier = {
+		pop_growth_speed = 0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = { uses_district_set = ring_world }
+		pop_growth_speed = 0.1
+		planet_pop_assembly_mult = 0.1
+		planet_pop_assembly_organic_mult = 0.1
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# # Primitive World
+# col_primitive = {
+# 	icon = GFX_colony_type_primitive
+
+# 	potential = {
+# 		exists = owner
+# 		owner = { is_country_type = primitive }
+# 	}
+
+# 	weight_modifier = {
+# 		base = 1000
+# 	}
+# }
+
+col_pre_ftl_atomic = {
+	icon = GFX_colony_type_pre_ftl_atomic
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = atomic_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_stone = {
+	icon = GFX_colony_type_pre_ftl_stone
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = stone_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_bronze = {
+	icon = GFX_colony_type_pre_ftl_bronze
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = bronze_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_early_space = {
+	icon = GFX_colony_type_pre_ftl_space
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = early_space_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_industrial = {
+	icon = GFX_colony_type_pre_ftl_industrial
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = industrial_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_iron = {
+	icon = GFX_colony_type_pre_ftl_iron
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = iron_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_machine = {
+	icon = GFX_colony_type_pre_ftl_machine
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = machine_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_medieval = {
+	icon = GFX_colony_type_pre_ftl_medieval
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = late_medieval_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_renaissance = {
+	icon = GFX_colony_type_pre_ftl_renaissance
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = renaissance_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+col_pre_ftl_steam = {
+	icon = GFX_colony_type_pre_ftl_steam
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_pre_ftl_age = steam_age
+		}
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Infested World
+col_infested = {
+	icon = GFX_colony_type_dying
+
+	potential = {
+		exists = owner
+		is_capital = no
+		owner = { is_country_type = swarm }
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Contingency World
+col_contingency = {
+	icon = GFX_colony_type_dying
+
+	potential = {
+		exists = owner
+		owner = { is_country_type = ai_empire }
+		is_capital = no
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}
+
+# Slave-Breeding Colony
+col_slave = {
+	icon = GFX_colony_type_workers
+
+	potential = {
+		has_modifier = slave_colony
+	}
+
+	weight_modifier = {
+		base = 1000
+	}
+}

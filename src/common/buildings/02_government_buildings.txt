@@ -1,0 +1,820 @@
+#############
+# Government buildings
+#############
+building_noble_estates = {
+	base_buildtime = @b2_time
+	icon = building_palace
+	base_cap_amount = 1
+
+	category = government
+
+	potential = {
+		exists = owner
+		planet = {
+			or = {
+				has_building = building_noble_estates
+				owner = { is_ai = no }
+			}
+		}
+		owner = { has_valid_civic = civic_aristocratic_elite }
+		NOT = { has_modifier = slave_colony }
+	}
+
+	allow = {
+		has_upgraded_capital = yes
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			orbital_defence = {
+				exists = starbase
+				starbase = {
+					NOR = {
+						has_starbase_building = ring_noble_estates
+						is_starbase_building_building = ring_noble_estates
+					}
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		exists = owner
+		NOT = {
+			owner = { has_civic = civic_aristocratic_elite }
+		}
+	}
+
+	planet_modifier = {
+		job_noble_add = 1
+		planet_housing_add = 1
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	triggered_desc = {
+		text = job_noble_effect_desc
+	}
+}
+
+building_slave_processing = {
+	base_buildtime = @b1_time
+	base_cap_amount = 1
+
+	category = government
+
+	potential = {
+		owner = { is_gestalt = no }
+		owner = { has_policy_flag = slavery_allowed }
+		NOT = { has_modifier = resort_colony }
+	}
+
+	allow = {
+		has_upgraded_capital = yes
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			orbital_defence = {
+				exists = starbase
+				starbase = {
+					NOR = {
+						has_starbase_building = ring_slave_processing_facility
+						is_starbase_building_building = ring_slave_processing_facility
+					}
+				}
+			}
+		}
+	}
+
+	destroy_trigger = { # destroys if true
+		exists = owner
+		OR = {
+			owner = { is_gestalt = yes }
+			NOT = { owner = { has_policy_flag = slavery_allowed } }
+			has_modifier = resort_colony
+		}
+	}
+
+	planet_modifier = {
+		planet_jobs_slave_produces_mult = 0.05
+		pop_cat_slave_political_power = -0.25
+		planet_resettlement_unemployed_mult = -0.50
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	prerequisites = {
+		"tech_neural_implants"
+	}
+
+	triggered_desc = {
+		text = building_slave_processing_slave_army_effect_desc
+	}
+
+	triggered_desc = {
+		text = building_slave_processing_migrate_effect_desc
+	}
+}
+
+building_precinct_house = {
+	base_buildtime = @b1_time
+
+	category = government
+
+	potential = {
+		owner = { is_gestalt = no }
+		NOT = { has_modifier = slave_colony }
+	}
+
+	allow = {
+		hidden_trigger = {
+			OR = {
+				owner = { is_ai = no }
+				AND = {
+					NOT = { has_forbidden_jobs = enforcer }
+					NOT = { has_available_jobs = enforcer }
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			NOT = {	owner = { is_gestalt = no }	}
+			AND = {
+				owner = { is_ai = yes } #Players dont like random buildings blowing up
+				planet = { has_building = building_hall_judgment }
+			}#This way the AI gets to reclaim its building slots that it sunk into this expense
+		}
+	}
+
+	planet_modifier = {
+		job_enforcer_add = 2
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	prerequisites = {
+		"tech_planetary_government"
+	}
+
+	triggered_desc = {
+		text = job_enforcer_effect_desc
+	}
+
+	show_tech_unlock_if = {
+		is_gestalt = no
+	}
+
+	upgrades = {
+		building_hall_judgment
+	}
+}
+
+building_hall_judgment = {
+	base_buildtime = @b2_time
+
+	category = government
+	can_build = no
+
+	potential = {
+		owner = { is_gestalt = no }
+		NOT = { has_modifier = slave_colony }
+		if = {
+			limit = {
+				owner = { is_ai = yes }
+			}
+			NOT = { has_forbidden_jobs = enforcer }
+			NOT = { has_available_jobs = enforcer }
+		}
+	}
+
+	destroy_trigger = {
+		exists = owner
+		owner = { is_gestalt = yes }
+	}
+
+	planet_modifier = {
+		job_enforcer_add = 5
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			volatile_motes = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b1_upkeep
+			volatile_motes = @b2_rare_upkeep
+		}
+	}
+
+	prerequisites = {
+		"tech_colonial_centralization"
+	}
+
+	triggered_desc = {
+		text = job_enforcer_effect_desc
+	}
+
+	show_tech_unlock_if = {
+		is_gestalt = no
+	}
+}
+
+building_sentinel_posts = {
+	base_buildtime = @b1_time
+
+	category = government
+
+	potential = {
+		exists = owner
+		owner = { is_gestalt = yes }
+	}
+
+	allow = {
+		hidden_trigger = {
+			OR = {
+				owner = { is_ai = no }
+				AND = {
+					NOT = { has_building = building_sentinel_posts }
+					NOT = { has_forbidden_jobs = patrol_drone }
+					NOT = { has_available_jobs = patrol_drone }
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		exists = owner
+		NOT = {
+			owner = { is_gestalt = yes }
+		}
+	}
+
+	planet_modifier = {
+		job_patrol_drone_add = 2
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	prerequisites = {
+		"tech_planetary_government"
+	}
+
+	triggered_desc = {
+		text = job_patrol_drone_effect_desc
+	}
+
+	show_tech_unlock_if = {
+		is_gestalt = yes
+	}
+}
+
+building_order_keep = {
+	base_buildtime = 180
+
+	can_demolish = no
+	can_be_disabled = no
+
+	empire_limit = {
+	 	base = 1
+	}
+
+	category = government
+
+	potential = {
+		owner = { has_origin = origin_toxic_knights }
+		has_planet_flag = toxic_knights_habitat
+		owner = { NOT = { has_country_flag = quest_abandoned } }
+	}
+
+	destroy_trigger = {
+		OR = {
+			NOT = { exists = owner }
+			NOT = { owner = { has_origin = origin_toxic_knights } }
+		}
+	}
+
+	planet_modifier = {
+		job_squire_add = 1
+		job_knight_add = 1
+		job_knight_per_pop = 0.05 # 1 for every 10 pop while quest active. 1 for 20 after quest.
+
+		planet_immigration_pull_add = 5
+		planet_resettlement_unemployed_destination_mult = 1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { has_country_flag = toxoids_7060_A }
+		}
+		modifier = { job_knight_add = 1 }
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { NOT = { has_country_flag = quest_over } }
+		}
+		modifier = {
+			job_knight_add = 1
+			job_knight_per_pop = 0.05
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { has_country_flag = toxoids_7090_a }
+		}
+		planet_stability_add = 15
+	}
+
+
+	resources = {
+		cost = {
+			minerals = 1000
+		}
+		category = planet_buildings
+	}
+
+	triggered_desc = {
+		text = building_order_keep_effect
+	}
+
+	triggered_desc = {
+		text = job_knight_effect_desc
+	}
+
+	triggered_desc = {
+		text = job_squire_effect_desc
+	}
+}
+
+building_order_castle = {
+	icon = building_order_holding
+	base_buildtime = 180
+	can_demolish = no
+	can_be_disabled = no
+	can_build = no
+
+	category = government
+
+	destroy_trigger = {
+		OR = {
+			NOT = { exists = owner }
+			NOT = { owner = { has_origin = origin_toxic_knights } }
+		}
+	}
+
+	planet_modifier = {
+		job_squire_add = 1
+		job_knight_add = 1
+
+		planet_immigration_pull_add = 1
+		planet_resettlement_unemployed_destination_mult = 0.2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { NOT = { has_country_flag = quest_over } }
+		}
+		modifier = {
+			job_knight_add = 1
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+	}
+
+	triggered_desc = {
+		text = building_order_keep_effect
+	}
+
+	triggered_desc = {
+		text = job_knight_effect_desc
+	}
+
+	triggered_desc = {
+		text = job_squire_effect_desc
+	}
+}
+
+#############
+# Ascension perks
+#############
+
+#Psionic path
+building_psi_corps = {
+	base_buildtime = @b2_time
+
+	category = government
+
+	base_cap_amount = 1
+
+	potential = {
+		host_has_dlc = "Utopia"
+		owner = { has_tradition = tr_psionics_psi_corps }
+		NOT = { has_modifier = resort_colony }
+		NOT = { has_modifier = slave_colony }
+	}
+
+	allow = {
+		has_major_upgraded_capital = yes
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			orbital_defence = {
+				exists = starbase
+				starbase = {
+					NOR = {
+						has_starbase_building = ring_psi_corps
+						is_starbase_building_building = ring_psi_corps
+					}
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		exists = owner
+		NOT = {
+			owner = { has_tradition = tr_psionics_psi_corps }
+		}
+	}
+
+	planet_modifier = {
+		job_telepath_add = 2
+		planet_stability_add = 5
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = 500
+		}
+		upkeep = {
+			energy = @b2_upkeep
+		}
+	}
+
+	triggered_desc = {
+		text = job_telepath_effect_desc
+	}
+}
+
+building_embassy = {
+	base_buildtime = @b2_time
+
+	category = government
+
+	base_cap_amount = 1
+
+	potential = {
+		exists = owner
+		owner = { is_gestalt = no }
+
+		exists = planet
+		planet = { is_capital = yes }
+		NOT = { has_modifier = resort_colony }
+		NOT = { has_modifier = slave_colony }
+	}
+
+	upgrades = {
+		"building_grand_embassy"
+	}
+
+	allow = {
+		has_upgraded_capital = yes
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			orbital_defence = {
+				exists = starbase
+				starbase = {
+					NOR = {
+						has_starbase_building = ring_embassy_complex
+						is_starbase_building_building = ring_embassy_complex
+					}
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			AND = {
+				exists = owner
+				owner = { is_gestalt = yes }
+			}
+			planet = { is_capital = no }
+		}
+	}
+
+	country_modifier = {
+		envoys_add = 1
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			rare_crystals = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			rare_crystals = @b2_rare_upkeep
+		}
+	}
+
+	show_tech_unlock_if = {
+		is_gestalt = no
+	}
+
+	prerequisites = {
+		"tech_xeno_diplomacy"
+	}
+}
+
+building_grand_embassy = {
+	base_buildtime = @b3_time
+	can_build = no
+
+	category = government
+
+	potential = {
+		exists = owner
+		owner = { is_gestalt = no }
+
+		planet = { is_capital = yes }
+		NOT = { has_modifier = resort_colony }
+		NOT = { has_modifier = slave_colony }
+	}
+
+	allow = {
+		has_major_upgraded_capital = yes
+		if = {
+			limit = {
+				exists = orbital_defence
+			}
+			orbital_defence = {
+				exists = starbase
+				starbase = {
+					NOR = {
+						has_starbase_building = ring_embassy_complex
+						is_starbase_building_building = ring_embassy_complex
+					}
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			AND = {
+				exists = owner
+				owner = { is_gestalt = yes }
+			}
+			planet = { is_capital = no }
+		}
+	}
+
+	country_modifier = {
+		envoys_add = 2
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			rare_crystals = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			rare_crystals = @b3_rare_upkeep
+		}
+	}
+
+	prerequisites = {
+		"tech_xeno_relations"
+	}
+
+	show_tech_unlock_if = {
+		is_gestalt = no
+	}
+}
+
+building_gaiaseeders_1 = {
+	base_buildtime = @b2_time
+	base_cap_amount = 1
+	category = government
+	can_be_disabled = no
+	upgrades = { "building_gaiaseeders_2" }
+
+	potential = {
+		exists = owner
+		owner = {
+			is_country_type = default
+			is_idyllic_bloom_empire = yes
+		}
+		NOR = {
+			is_planet_class = pc_gaia
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			is_planet_class = pc_relic
+		}
+		is_artificial = no
+	}
+
+	allow = {
+		has_upgraded_capital = yes
+	}
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_gaia	# No double bonuses if player uses other tools to turn it into a Gaia world.
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			is_planet_class = pc_relic
+			NOT = { exists = owner }
+			owner = {
+				is_idyllic_bloom_empire = no
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			multiplier = value:gaiaseeder_cost_mult
+		}
+		upkeep = {
+			energy = 20
+			multiplier = value:gaiaseeder_upkeep
+		}
+	}
+
+	planet_modifier = {
+		pop_growth_speed = 0.1
+	}
+}
+
+building_gaiaseeders_2 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = government
+	can_be_disabled = no
+	upgrades = { "building_gaiaseeders_3" }
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			exotic_gases = @b2_rare_cost
+		}
+		upkeep = {
+			energy = 20
+			exotic_gases = @b2_rare_upkeep
+			multiplier = value:gaiaseeder_upkeep
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_gaia
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				is_idyllic_bloom_empire = no
+			}
+		}
+	}
+
+	allow = {
+		can_build_gaiaseeder = yes
+	}
+
+	planet_modifier = {
+		pop_growth_speed = 0.05
+		pop_environment_tolerance = 0.1
+	}
+}
+
+building_gaiaseeders_3 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = government
+	can_be_disabled = no
+	upgrades = { "building_gaiaseeders_4" }
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			exotic_gases = @b3_rare_cost
+		}
+		upkeep = {
+			energy = 20
+			exotic_gases = @b3_rare_upkeep
+			multiplier = value:gaiaseeder_upkeep
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_gaia
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				is_idyllic_bloom_empire = no
+			}
+		}
+	}
+
+	allow = {
+		can_build_gaiaseeder = yes
+	}
+
+	planet_modifier = {
+		pop_environment_tolerance = 0.2
+	}
+}
+
+building_gaiaseeders_4 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = government
+	can_be_disabled = no
+
+	destroy_trigger = {
+		OR = {
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			NOT = { exists = owner }
+			owner = {
+				is_idyllic_bloom_empire = no
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			energy = 1500
+			exotic_gases = @b4_rare_cost
+		}
+	}
+
+	allow = {
+		can_build_gaiaseeder = yes
+	}
+
+	triggered_desc = {
+		text = building_gaiaseeders_4_effect_desc
+	}
+}

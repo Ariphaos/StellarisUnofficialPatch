@@ -1,0 +1,158 @@
+namespace = distar
+
+ship_event = { #Found the Capital
+	id = distar.23100
+	title = "distar.231.name"
+	desc = "distar.231.desc"
+	picture = GFX_evt_junkheap
+	show_sound = event_ghost_town
+	location = from
+
+	is_triggered_only = yes
+	# Risa fix
+	trigger = {
+		exists = event_target:ratling_capital
+		from = { is_same_value = event_target:ratling_capital }
+		owner = { NOT = { has_country_flag = ratling_capital_surveyed } }
+	}
+
+	immediate = {
+		owner = { set_country_flag = ratling_capital_surveyed }
+	}
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+			hidden_effect = { pop_lcluster_event = yes }
+		}
+	}
+
+	option = {
+		name = "distar.231.phobe"
+		exclusive_trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_civic = civic_machine_terminator
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+			hidden_effect = { pop_lcluster_event = yes }
+		}
+	}
+}
+
+# Create mining stations
+country_event = { #Create Full Ratling Empire #Root = Global Event Country
+	id = distar.23600
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	immediate = {
+		every_planet_within_border = {
+			limit = {
+				has_deposit_for = shipclass_mining_station
+			}
+			create_mining_station = { owner = root }
+		}
+	}
+}
+
+# Enigmatic Cache Departs the Galaxy
+event = {
+	id = distar.50630
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = event_target:enigmatic_cache_country
+		any_playable_country = {
+			is_country_type = default
+			OR = {
+				has_country_flag = applied_enigmatic_intelligence_failed
+				has_country_flag = applied_enigmatic_intelligence_poor
+				has_country_flag = applied_enigmatic_intelligence
+			}
+		}
+		NOT = {
+			any_playable_country = {
+				has_special_project = ENIGMATIC_CACHE_PROJECT
+			}
+		}
+	}
+	
+	immediate = {
+		event_target:enigmatic_cache_country = { 
+			country_event = {
+				id = distar.50680
+				days = 720
+				random = 720
+			}
+		}
+	}
+}
+
+country_event = {
+	id = distar.50680
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_owned_fleet = {
+			destroy_fleet = this
+		}
+		destroy_country = yes
+		
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				is_country_type = default
+			}
+			country_event = {
+				id = distar.50730
+				days = 1
+			}
+		}
+		every_galaxy_planet = {
+			limit = { has_modifier = enigmatic_cache_in_orbit }
+			remove_modifier = enigmatic_cache_in_orbit
+		}
+	}
+}
+
+# Ariphaos TODO: It should probably move to a gateway system first.
+country_event = {
+	id = distar.50730
+	title = distar.50730.name
+	desc = {
+		text = distar.50730.desc
+	}
+	picture = GFX_evt_enigmatic_cache
+	show_sound = event_mystic_reveal
+	location = root.capital_scope
+
+	is_triggered_only = yes
+
+	option = {
+		name = distar.50730.a
+	}
+	option = {
+		name = distar.50730.b
+	}
+}

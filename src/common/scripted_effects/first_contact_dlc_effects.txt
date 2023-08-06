@@ -1,0 +1,3798 @@
+broken_shackles_start_pop_ethic_effect = {
+	root = {
+		every_owned_pop = {
+			limit = { is_same_species = prevprev }
+			pop_change_ethic = ethic_$ETHIC$
+		}
+	}
+}
+
+# Used for the security drones in the Payback Arc site
+create_slavers_dummy_country = {
+	optimize_memory
+	if = {
+		limit = { NOT = { exists = event_target:slavers_dummy_country } }
+		create_country = {
+			name = "NAME_MSI_country"
+			type = slavers_dummy
+			flag = {
+				icon = {
+					category = "corporate"
+					file = "corporate_07.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "pattern_01.dds"
+				}
+				colors={
+					"mist_blue"
+					"bright_purple"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_global_event_target_as = slavers_dummy_country
+			}
+		}
+	}
+}
+
+create_payback_digsite_fleet = {
+	create_slavers_dummy_country = yes
+	create_fleet = {
+		settings = {
+			spawn_debris = no
+		}
+		name = "NAME_MSI_country"
+		effect = {
+			set_owner = event_target:slavers_dummy_country
+			while = {
+				count = $NUM_DRONES$
+				create_ship = {
+					name = "NAME_Payback_Digsite_Drone"
+					design = "NAME_Payback_Digsite_Drone"
+					graphical_culture = "slaver_01"
+				}
+			}
+			set_location = event_target:payback_capital
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = return_point
+			set_aggro_range = 0
+			queue_actions = {
+				wait = { # Cooldown until they start moving
+					duration = 320
+					random = 80
+				}
+			}
+		}
+	}
+}
+
+create_payback_debt_collectors_fleet = {
+	event_target:payback_debt_collectors_country = {
+		create_leader = {
+			class = admiral
+			species = event_target:debt_collectors_species
+			name = random
+			skill = 3
+			leader_age_min = 25
+			leader_age_max = 45
+			traits = {
+				trait = leader_trait_mercenary_warrior
+			}
+		}
+	}
+	create_fleet = {
+		settings = {
+			spawn_debris = no
+		}
+		name = "NAME_Debt_Collectors_Country"
+		effect = {
+			set_owner = event_target:payback_debt_collectors_country
+			set_variable = {
+				which = debt_collectors_ships
+				value = $NUM_DRONES$
+			}
+			multiply_variable = {
+				which = debt_collectors_ships
+				value = root.debt_collectors_visits
+			}
+			while = {
+				count = debt_collectors_ships
+				create_ship = {
+					name = "NAME_Payback_Digsite_Drone"
+					design = "NAME_Payback_Digsite_Drone"
+					graphical_culture = "slaver_01"
+				}
+			}
+			set_location = event_target:payback_capital
+			set_fleet_stance = aggressive
+			set_fleet_bombardment_stance = raiding
+			set_fleet_flag = debt_collectors_raiding_fleet
+			set_aggro_range_measure_from = self
+			set_aggro_range = 150
+			assign_leader = last_created_leader
+
+			auto_move_to_planet = {
+				target = event_target:payback_capital
+				clear_auto_move_on_arrival = no
+			}
+		}
+	}
+}
+
+create_MSI_effect = {
+	create_species = {
+		name = random
+		class = MSI_SLAVER
+		namelist = HUMAN3
+		portrait = random
+		traits = {
+			trait = "trait_pc_nuked_preference"
+			trait = "trait_charismatic"
+			trait = "trait_intelligent"
+			trait = "trait_decadent"
+			trait = "trait_wasteful"
+		}
+		allow_negative_traits = yes
+	}
+
+	create_country = {
+		name = "NAME_MSI_country"
+		adjective = "ADJ_MSI_country"
+		species = last_created_species
+		type = default
+		flag = {
+			icon = {
+				category = "corporate"
+				file = "corporate_07.dds"
+			}
+			background= {
+				category = "backgrounds"
+				file = "pattern_01.dds"
+			}
+			colors={
+				"mist_blue"
+				"bright_purple"
+				"null"
+				"null"
+			}
+		}
+		origin = "origin_slavers"
+		ethos = {
+			ethic = ethic_fanatic_materialist
+			ethic = ethic_authoritarian
+		}
+		civics = {
+			civic = civic_indentured_assets
+			civic = civic_public_relations_specialists
+		}
+		authority = auth_corporate
+		effect = {
+			save_global_event_target_as = MSI_country
+			set_country_flag = MSI
+
+			every_country = {
+				limit = {
+					has_slave_origin = yes
+					NOT = { has_country_flag = slavers_assigned }
+				}
+				set_country_flag = slavers_assigned
+				event_target:MSI_country = { 
+					set_country_flag = slavers_of_@prev
+					set_country_flag = special_intro_for@prev
+					add_opinion_modifier = {
+						who = prev
+						modifier = opinion_former_slaves
+					}
+				}
+				species = { set_species_flag = victims_of_@event_target:MSI_country }
+				set_country_flag = victims_of_@event_target:MSI_country
+				add_opinion_modifier = {
+					who = event_target:MSI_country
+					modifier = opinion_slavers
+				}
+			}
+		}
+	}
+
+	create_colony = {
+		owner = event_target:MSI_country
+	}
+	generate_start_deposits_and_blockers = yes
+	generate_start_buildings_and_districts = yes
+	generate_start_pops = yes
+	event_target:MSI_country = {
+		create_starting_leaders = yes
+		country_event = { id = game_start.9 }
+		owner_species = { set_species_homeworld = prevprev }
+		log = "MSI CREATED"
+	}
+}
+
+generate_slaver_bonus = {
+	while = {
+		count = 2
+		add_district_and_planet_size_if_needed_effect = {
+			district = district_city
+		}
+	}
+	while = {
+		count = 2
+		add_district_and_planet_size_if_needed_effect = {
+			district = district_mining
+		}
+	}
+	add_district_and_planet_size_if_needed_effect = {
+		district = district_generator
+	}
+	add_district_and_planet_size_if_needed_effect = {
+		district = district_farming
+	}
+	add_district_and_planet_size_if_needed_effect = {
+		district = district_industrial
+	}
+
+	owner = {
+		set_policy = {
+			policy = slavery
+			option = slavery_allowed
+			cooldown = no
+		}
+	}
+
+	while = {
+		limit = { num_pops > 28 }
+		random_owned_pop = {
+			kill_pop = yes
+		}
+	}
+
+	# Checking if there are any other pre-ftls to abduct
+	while = {
+		limit = { num_pops < 36 }
+		if = {
+			limit = {
+				any_country = {
+					species = {
+						ideal_planet_is_special = no
+						NOT = { has_trait = trait_hive_mind }
+					}
+					is_preftl_but_not_special = yes
+				}
+			}
+			random_country = {
+				limit = {
+					species = {
+						ideal_planet_is_special = no
+						NOT = { has_trait = trait_hive_mind }
+					}
+					is_preftl_but_not_special = yes
+				}
+				owner_species = {
+					# first species to get kidnapped becomes the species of the debt collectors
+					save_event_target_as = random_primitive_species
+					if = {
+						limit = {
+							NOT = {
+								exists = event_target:debt_collectors_species
+							}
+						}
+						save_global_event_target_as = debt_collectors_species
+					}
+				}
+
+				prev.owner = {
+					set_visited = prev.capital_scope.solar_system
+				}
+			}
+
+			create_pop = {
+				species = event_target:random_primitive_species
+				ethos = random
+			}
+
+			last_created_pop = {
+				set_citizenship_type = {
+					type = citizenship_slavery
+					cooldown = no
+				}
+			}
+		}
+	}
+
+	while = {
+		limit = { num_pops < 61 }
+
+		random_country = {
+			limit = {
+				has_slave_origin = yes
+			}
+
+			owner_species = {
+				save_event_target_as = random_slave_species
+			}
+
+			prev.owner = {
+				set_visited = prev.capital_scope.solar_system
+			}
+		}
+
+		create_pop = {
+			species = event_target:random_slave_species
+			ethos = random
+		}
+		last_created_pop = {
+			set_citizenship_type = {
+				type = citizenship_slavery
+				cooldown = no
+			}
+		}
+	}
+
+	owner = {
+		# Unlocks slave processing facilities
+		give_technology = {
+			message = no
+			tech = tech_neural_implants
+		}
+		# Unlocks gene clinics
+		give_technology = {
+			message = no
+			tech = tech_frontier_health
+		}
+		give_technology = {
+			message = no
+			tech = tech_food_processing_1
+		}
+		give_technology = {
+			message = no
+			tech = tech_mineral_purification_1
+		}
+		give_technology = {
+			message = no
+			tech = tech_power_hub_1
+		}
+	}
+	add_building = building_slave_processing
+	add_building = building_precinct_house
+	add_building = building_clinic
+
+	owner = {
+		add_resource = {
+			minerals = 2400
+			energy = 2400
+			food = 2400
+			alloys = 800
+			consumer_goods = 1200
+			influence = 600
+		}
+	}
+
+	owner = {
+		create_fleet = {
+			effect = {
+				set_owner = prev
+				create_ship = {
+					name = random
+					random_existing_design = science
+				}
+				set_fleet_stance = evasive
+				set_location = prev.capital_scope.star
+				owner = {
+					create_leader = {
+						class = scientist
+						sub_type = survey
+						name = random
+						species = owner_main_species
+					}
+				}
+				set_leader = last_created_leader
+			}
+		}
+		while = {
+			count = 2
+			create_fleet = {
+				name = "NAME_Payback_Warship_MSI"
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "NAME_Payback_Warship_MSI"
+						design = "NAME_Payback_Warship_MSI"
+						graphical_culture = "slaver_01"
+						upgradable = no
+						effect = {
+							set_ship_flag = payback_flagship
+						}
+					}
+					set_location = prev.capital_scope.star
+				}
+				settings = {
+					spawn_debris = no
+					can_upgrade = no
+					can_change_composition = no
+					uses_naval_capacity = no
+				}
+			}
+		}
+	}
+}
+
+release_subject = { #Made this so that it would be easier to search up the effect
+	set_subject_of = {
+		who = none
+	}
+}
+create_payback_warship_effect = {
+	switch = {
+		trigger = has_technology
+		tech_battleships = {
+			create_fleet = {
+				name = "NAME_Payback_Warship_4"
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "NAME_Payback_Warship_4"
+						design = "NAME_Payback_Warship_4"
+						graphical_culture = "slaver_01"
+						upgradable = no
+						effect = {
+							set_ship_flag = payback_flagship
+						}
+					}
+					set_location = event_target:spawn_location
+				}
+				settings = {
+					spawn_debris = no
+					can_upgrade = no
+					can_change_composition = no
+					uses_naval_capacity = no
+				}
+			}
+		}
+		tech_cruisers = {
+			create_fleet = {
+				name = "NAME_Payback_Warship_3"
+				settings = {
+					spawn_debris = no
+				}
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "NAME_Payback_Warship_3"
+						design = "NAME_Payback_Warship_3"
+						graphical_culture = "slaver_01"
+						upgradable = no
+						effect = {
+							set_ship_flag = payback_flagship
+						}
+					}
+					set_location = event_target:spawn_location
+				}
+				settings = {
+					spawn_debris = no
+					can_upgrade = no
+					can_change_composition = no
+					uses_naval_capacity = no
+				}
+			}
+		}
+		tech_destroyers = {
+			create_fleet = {
+				name = "NAME_Payback_Warship_2"
+				settings = {
+					spawn_debris = no
+				}
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "NAME_Payback_Warship_2"
+						design = "NAME_Payback_Warship_2"
+						graphical_culture = "slaver_01"
+						upgradable = no
+						effect = {
+							set_ship_flag = payback_flagship
+						}
+					}
+					set_location = event_target:spawn_location
+				}
+				settings = {
+					spawn_debris = no
+					can_upgrade = no
+					can_change_composition = no
+					uses_naval_capacity = no
+				}
+			}
+		}
+		tech_corvettes = {
+			create_fleet = {
+				name = "NAME_Payback_Warship_1"
+				settings = {
+					spawn_debris = no
+				}
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "NAME_Payback_Warship_1"
+						design = "NAME_Payback_Warship_1"
+						graphical_culture = "slaver_01"
+						upgradable = no
+						effect = {
+							set_ship_flag = payback_flagship
+						}
+					}
+					set_location = event_target:spawn_location
+				}
+				settings = {
+					spawn_debris = no
+					can_upgrade = no
+					can_change_composition = no
+					uses_naval_capacity = no
+				}
+			}
+		}
+		default = {
+			create_fleet = {
+				name = "NAME_Payback_Warship_1"
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "NAME_Payback_Warship_1"
+						design = "NAME_Payback_Warship_1"
+						graphical_culture = "slaver_01"
+						upgradable = no
+						effect = {
+							set_ship_flag = payback_flagship
+						}
+					}
+					set_location = event_target:spawn_location
+				}
+				settings = {
+					spawn_debris = no
+					can_upgrade = no
+					can_change_composition = no
+					uses_naval_capacity = no
+				}
+			}
+		}
+	}
+	last_created_fleet = {
+		assign_leader = event_target:flagship_leader
+	}
+}
+
+
+spawn_payback_site_habitat = {
+	spawn_planet = {
+		class = "pc_habitat"
+		location = event_target:spawn_planet
+		orbit_location = yes
+		orbit_angle_offset = 45
+		orbit_distance_offset = 9.899
+		size = 10
+		has_ring = no
+
+		init_effect = {
+			set_name = "NAME_Payback_Warship"
+			set_planet_entity = {
+				entity = "fc_01_evil_slaver_hab_entity"
+			}
+			set_surveyed = {
+				surveyed = yes
+				surveyor = FROM
+			}
+			set_all_comms_surveyed = yes
+			clear_blockers = yes
+
+			set_planet_flag = megastructure
+			set_planet_flag = habitat
+			set_planet_flag = advanced_habitat
+			set_planet_flag = advanced_habitat_2
+			set_planet_flag = payback_habitat
+			set_planet_flag = research_habitat
+
+			add_deposit = d_payback_habitat_research
+		}
+	}
+	event_target:spawn_planet = {
+		set_planet_flag = has_megastructure
+		set_planet_flag = has_payback_habitat
+	}
+}
+
+### Fear of the Dark ###
+
+add_fotd_tech = {
+	switch = {
+		trigger = has_country_flag
+		terraforming_tech = {
+			add_terraforming_tech = yes
+		}
+		unity_tech = {
+			add_unity_tech = yes
+		}
+		cloaking_tech = {
+			add_cloaking_tech = yes
+		}
+		laser_tech = {
+			add_laser_tech = yes
+		}
+		mining_tech = {
+			add_mining_tech = yes
+		}
+		building_tech = {
+			add_building_tech = yes
+		}
+	}
+}
+
+add_terraforming_tech = {
+	switch = {
+		trigger = has_technology
+		tech_ecological_adaptation = {
+			locked_random_list = {
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_deep_sinkhole
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_massive_glacier
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_noxious_swamp
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_dense_jungle
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_quicksand_basin
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_toxic_kelp
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_volcano
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_mountain_range
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_dangerous_wildlife
+						PROGRESS = 0.9
+						CATEGORY = society_research
+					}
+				}
+			}
+		}
+		tech_ecological_adaptation = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_climate_restoration
+				PROGRESS = 0.5
+				CATEGORY = society_research
+			}
+		}
+		tech_terrestrial_sculpting = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_ecological_adaptation
+				PROGRESS = 0.5
+				CATEGORY = society_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_terrestrial_sculpting
+				PROGRESS = 0.7
+				CATEGORY = society_research
+			}
+		}
+	}
+}
+
+add_unity_tech = {
+	switch = {
+		trigger = has_technology
+		tech_galactic_bureaucracy = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_repeatable_improved_core_system_cap
+				PROGRESS = 0.5
+				CATEGORY = society_research
+			}
+		}
+		tech_colonial_bureaucracy = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_galactic_bureaucracy
+				PROGRESS = 0.6
+				CATEGORY = society_research
+			}	
+		}
+		tech_adaptive_bureaucracy = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_colonial_bureaucracy
+				PROGRESS = 0.7
+				CATEGORY = society_research
+			}
+		}
+		tech_planetary_unification = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_adaptive_bureaucracy
+				PROGRESS = 0.8
+				CATEGORY = society_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_planetary_unification
+				PROGRESS = 0.9
+				CATEGORY = society_research
+			}
+		}
+	}
+}
+
+add_cloaking_tech = {
+	switch = {
+		trigger = has_technology
+		tech_cloaking_2 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_cloaking_3
+				PROGRESS = 0.5
+				CATEGORY = physics_research
+			}
+		}
+		tech_cloaking_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_cloaking_2
+				PROGRESS = 0.7
+				CATEGORY = physics_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_cloaking_1
+				PROGRESS = 0.9
+				CATEGORY = physics_research
+			}
+		}
+	}
+}
+
+add_laser_tech = {
+	switch = {
+		trigger = has_technology
+		tech_lasers_5 = {
+			locked_random_list = {
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_repeatable_weapon_type_energy_fire_rate
+						PROGRESS = 0.5
+						CATEGORY = physics_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_repeatable_weapon_type_energy_damage
+						PROGRESS = 0.5
+						CATEGORY = physics_research
+					}
+				}
+			}
+		}
+		tech_lasers_4 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_5
+				PROGRESS = 0.5
+				CATEGORY = physics_research
+			}
+		}
+		tech_lasers_3 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_4
+				PROGRESS = 0.6
+				CATEGORY = physics_research
+			}
+		}
+		tech_lasers_2 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_3
+				PROGRESS = 0.7
+				CATEGORY = physics_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_2
+				PROGRESS = 0.8
+				CATEGORY = physics_research
+			}
+		}
+	}
+}
+
+add_mining_tech = {
+	switch = {
+		trigger = has_technology
+		tech_mineral_purification_2 = {
+			if = {
+				limit = {
+					has_technology = tech_mining_3
+				}
+				add_tech_option_or_research_effect = {
+					TECH = tech_repeatable_improved_tile_mineral_output
+					PROGRESS = 0.5
+					CATEGORY = engineering_research
+				}
+			}
+			else = {
+				add_tech_option_or_research_effect = {
+					TECH = tech_mining_3
+					PROGRESS = 0.5
+					CATEGORY = engineering_research
+				}
+			}
+		}
+		tech_mineral_purification_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mineral_purification_2
+				PROGRESS = 0.6
+				CATEGORY = engineering_research
+			}
+		}
+		tech_mining_3 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mineral_purification_1
+				PROGRESS = 0.6
+				CATEGORY = engineering_research
+			}
+		}
+		tech_mining_2 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mining_3
+				PROGRESS = 0.6
+				CATEGORY = engineering_research
+			}
+		}
+		tech_mining_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mining_2
+				PROGRESS = 0.7
+				CATEGORY = engineering_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mining_1
+				PROGRESS = 0.8
+				CATEGORY = engineering_research
+			}
+		}
+	}
+}
+
+add_building_tech = {
+	switch = {
+		trigger = has_technology
+		tech_construction_templates = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_repeatable_reduced_building_time
+				PROGRESS = 0.5
+				CATEGORY = engineering_research
+			}
+		}
+		tech_assembly_pattern = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_construction_templates
+				PROGRESS = 0.6
+				CATEGORY = engineering_research
+			}
+		}
+		tech_engineering_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_assembly_pattern
+				PROGRESS = 0.7
+				CATEGORY = engineering_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_engineering_1
+				PROGRESS = 0.8
+				CATEGORY = engineering_research
+			}
+		}
+	}
+}
+
+add_fotd_tech_progress = {
+	switch = {
+		trigger = has_country_flag
+		terraforming_tech = {
+			add_terraforming_tech_progress = yes
+		}
+		unity_tech = {
+			add_unity_tech_progress = yes
+		}
+		cloaking_tech = {
+			add_cloaking_tech_progress = yes
+		}
+		laser_tech = {
+			add_laser_tech_progress = yes
+		}
+		mining_tech = {
+			add_mining_tech_progress = yes
+		}
+		building_tech = {
+			add_building_tech_progress = yes
+		}
+	}
+}
+
+add_terraforming_tech_progress = {
+	switch = {
+		trigger = has_technology
+		tech_ecological_adaptation = {
+			locked_random_list = {
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_deep_sinkhole
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_massive_glacier
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_noxious_swamp
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_dense_jungle
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_quicksand_basin
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_toxic_kelp
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_volcano
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_mountain_range
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_dangerous_wildlife
+						PROGRESS = 0.1
+						CATEGORY = society_research
+					}
+				}
+			}
+		}
+		tech_ecological_adaptation = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_climate_restoration
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+		tech_ecological_adaptation = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_terrestrial_sculpting
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_terrestrial_sculpting
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+	}
+}
+
+add_unity_tech_progress = {
+	switch = {
+		trigger = has_technology
+		tech_galactic_bureaucracy = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_repeatable_improved_core_system_cap
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+		tech_colonial_bureaucracy = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_galactic_bureaucracy
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+		tech_adaptive_bureaucracy = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_colonial_bureaucracy
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+		tech_planetary_unification = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_adaptive_bureaucracy
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_planetary_unification
+				PROGRESS = 0.1
+				CATEGORY = society_research
+			}
+		}
+	}
+}
+
+add_cloaking_tech_progress = {
+	switch = {
+		trigger = has_technology
+		tech_cloaking_2 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_cloaking_3
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+		tech_cloaking_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_cloaking_2
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_cloaking_1
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+	}
+}
+
+add_laser_tech_progress = {
+	switch = {
+		trigger = has_technology
+		tech_lasers_5 = {
+			locked_random_list = {
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_repeatable_weapon_type_energy_fire_rate
+						PROGRESS = 0.1
+						CATEGORY = physics_research
+					}
+				}
+				1 = {
+					add_tech_option_or_research_effect = {
+						TECH = tech_repeatable_weapon_type_energy_damage
+						PROGRESS = 0.1
+						CATEGORY = physics_research
+					}
+				}
+			}
+		}
+		tech_lasers_4 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_5
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+		tech_lasers_3 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_4
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+		tech_lasers_2 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_3
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_lasers_2
+				PROGRESS = 0.1
+				CATEGORY = physics_research
+			}
+		}
+	}
+}
+
+add_mining_tech_progress = {
+	switch = {
+		trigger = has_technology
+		tech_mineral_purification_2 = {
+			if = {
+				limit = {
+					has_technology = tech_mining_3
+				}
+				add_tech_option_or_research_effect = {
+					TECH = tech_repeatable_improved_tile_mineral_output
+					PROGRESS = 0.1
+					CATEGORY = engineering_research
+				}
+			}
+			else = {
+				add_tech_option_or_research_effect = {
+					TECH = tech_mining_3
+					PROGRESS = 0.1
+					CATEGORY = engineering_research
+				}
+			}
+		}
+		tech_mineral_purification_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mineral_purification_2
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		tech_mining_3 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mineral_purification_1
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		tech_mining_2 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mining_3
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		tech_mining_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mining_2
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_mining_1
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+	}
+}
+
+add_building_tech_progress = {
+	switch = {
+		trigger = has_technology
+		tech_construction_templates = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_repeatable_reduced_building_time
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		tech_assembly_pattern = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_construction_templates
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		tech_engineering_1 = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_assembly_pattern
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+		default = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_engineering_1
+				PROGRESS = 0.1
+				CATEGORY = engineering_research
+			}
+		}
+	}
+}
+
+fotd_tech_cost = {
+	switch = {
+		trigger = has_country_flag
+		slowed_science_ships = {
+			add_modifier = {
+				modifier = slowed_science_ships
+				years = 10
+			}
+		}
+		slowed_first_contact = {
+			add_modifier = {
+				modifier = slowed_first_contact
+				years = 8
+			}
+		}
+		break_defensive_pact = {
+			random_country = {
+				limit = {
+					has_defensive_pact = root
+				}
+				clear_relations = {
+					target = root
+					relations = {
+						defensive_pact
+					}
+				}
+			}
+		}
+		break_migration_pact = {
+			random_country = {
+				limit = {
+					has_diplo_migration_treaty = root
+				}
+				clear_relations = {
+					target = root
+					relations = {
+						migration_access
+					}
+				}
+			}
+		}
+		support_speratists = {
+			add_modifier = {
+				modifier = supporting_haven
+				years = 5
+			}
+		}
+		stop_communing_with_shroud = {
+			add_modifier = {
+				modifier = promised_no_shroud
+				years = 10
+			}
+		}
+		leave_federation = {
+			remove_from_federation = yes
+		}
+		have_no_voice = {
+			add_modifier = {
+				modifier = have_no_voice
+				years = 10
+			}
+		}
+	}
+}
+
+create_fear_of_the_dark_country = {
+	create_country = {
+		name = {
+			key = "NAME_fotd_seperatists"
+			variable_string = "\\[fotd_country.GetSpeciesName\\]"
+		}
+		authority = auth_democratic
+		civics = {
+			civic = civic_idealistic_foundation
+			civic = civic_environmentalist
+		}
+		species = event_target:fotd_country.species
+		ethos = {
+			ethic = ethic_fanatic_xenophobe
+			ethic = ethic_egalitarian
+		}
+
+		flag = random
+		origin = "origin_fear_of_the_dark" # Should only be visible if they become spacefaring
+		type = primitive
+		effect = {
+			set_country_flag = early_space_age
+			set_country_flag = fotd_seperatist_country@event_target:fotd_country
+			set_country_flag = fotd_seperatist_country
+			save_event_target_as = fotd_seperatist_country
+			establish_communications_no_message = event_target:fotd_country
+			set_faction_hostility = {
+				target = event_target:fotd_country
+				set_hostile = no
+				set_neutral = no
+				set_friendly = yes
+			}
+		}
+	}
+	event_target:fotd_country = {
+		add_intel = {
+			amount = 100
+			who = event_target:fotd_seperatist_country
+		}
+	}
+}
+
+setup_fear_of_the_dark_pre_ftl = {
+	set_owner = event_target:fotd_seperatist_country
+	set_capital = yes
+	owner.species = {
+		switch = {
+			trigger = is_species_class
+			HUM = {
+				prev = {
+					set_name = NAME_Haven
+				}
+			}
+			MAM = {
+				prev = {
+					set_name = NAME_Den
+				}
+			}
+			REP = {
+				prev = {
+					set_name = NAME_Burrow
+				}
+			}
+			AVI = {
+				prev = {
+					set_name = NAME_Nest
+				}
+			}
+			ART = {
+				prev = {
+					set_name = NAME_Hidden_Web
+				}
+			}
+			MOL = {
+				prev = {
+					set_name = NAME_Mantle
+				}
+			}
+			FUN = {
+				prev = {
+					set_name = NAME_Hyphae
+				}
+			}
+			PLANT = {
+				prev = {
+					set_name = NAME_Pyrophyte
+				}
+			}
+			LITHOID = {
+				prev = {
+					set_name = NAME_Geode
+				}
+			}
+			NECROID = {
+				prev = {
+					set_name = NAME_Necropolis
+				}
+			}
+			AQUATIC = {
+				prev = {
+					set_name = NAME_Aquatic
+				}
+			}
+			TOX = {
+				prev = {
+					set_name = NAME_Bunker
+				}
+			}
+			default = {
+				prev = {
+					set_name = NAME_Haven
+				}
+			}
+		}
+	}
+	event_target:fotd_country.home_planet = {
+		switch = {
+			trigger = has_climate
+			dry = {
+				prev = {
+					change_pc = pc_ocean
+				}
+			}
+			cold = {
+				prev = {
+					change_pc = pc_tropical
+				}
+			}
+			wet = {
+				prev = {
+					change_pc = pc_desert
+				}
+			}
+		}
+	}
+	while = {
+		count = 2
+		add_district_and_planet_size_if_needed_effect = {
+			district = district_city
+		}
+	}
+	while = {
+		count = 1
+		add_district_and_planet_size_if_needed_effect = {
+			district = district_industrial
+		}
+	}
+	while = {
+		count = 1
+		add_district_and_planet_size_if_needed_effect = {
+			district = district_farming
+		}
+	}
+	remove_building = building_colony_shelter
+	add_building = building_primitive_capital
+	add_building = building_research_lab_1
+	while = {
+		count = 10
+		create_pop = {
+			species = event_target:fotd_country.species
+		}
+	}
+	event_target:fotd_seperatist_country = {
+		start_situation = {
+			type = situation_fotd_terraforming
+			target = prev
+		}
+		set_country_flag = early_space_age
+		set_pre_ftl_age = early_space_age
+		change_country_flag = {
+			icon = {
+				category = "pre_ftl"
+				file = "preftl_early_space_age.dds"
+			}
+			background= {
+				category = "backgrounds"
+				file = "new_dawn.dds"
+			}
+			colors={
+				"orange"
+				"blue"
+				"null"
+				"null"
+			}
+		}
+		set_country_flag = tech_frozen
+		add_awareness = 100
+	}
+}
+
+uplift_pre_ftl_with_origin_effect = {
+	random_country = {
+		limit = {
+			is_hive_empire = no
+			species = {
+				ideal_planet_is_special = no
+				NOt = { is_same_value = root.species }
+			}
+			is_preftl_but_not_special = yes
+		}
+		if = {
+			limit = {
+				is_xenophobe = yes
+			}
+			shift_ethic = ethic_xenophile
+		}
+		if = {
+			limit = {
+				is_authoritarian = yes
+			}
+			shift_ethic = ethic_egalitarian
+		}
+		save_event_target_as = uplifted_country
+		remove_pre_ftl_flags = yes
+		set_country_type = default
+		change_country_flag = random
+		set_species_graphical_culture = yes
+		change_government = {
+			authority = random
+			civics = random
+		}
+		set_name = random
+		capital_scope = {
+			every_deposit = {
+				remove_deposit = yes
+			}
+			remove_all_districts = yes
+			remove_all_buildings = yes
+		}
+		set_origin = $ORIGIN$
+		capital_scope = {
+			solar_system = {
+				generate_home_system_resources = yes
+				create_starbase = {
+					size = starbase_starport
+					module = shipyard
+					building = crew_quarters
+					owner = event_target:uplifted_country
+					effect = {
+						set_starbase_module = {
+							slot = 1
+							module = trading_hub
+						}
+					}
+				}
+			}
+			generate_start_deposits_and_blockers = yes
+			generate_start_buildings_and_districts = yes
+			generate_start_pops = yes
+			generate_home_planet_final_pass = yes
+		}
+		switch = {
+			trigger = has_origin
+			origin_broken_shackles = {
+				country_event = { id = origin.110 }
+				capital_scope = {
+					while = {
+						limit = { num_pops > 28 }
+						random_owned_pop = {
+							kill_pop = yes
+						}
+					}
+				}
+			}
+			origin_payback = {
+				country_event = { id = origin.4000 }
+				capital_scope = {
+					while = {
+						limit = { num_pops > 18 }
+						random_owned_pop = {
+							kill_pop = yes
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+replace_building_with_district_effect = {
+	if = {
+		limit = {
+			has_building = $BUILDING$
+		}
+		while = {
+			count = $NUM_BUILDINGS$
+			remove_building = $BUILDING$
+		}
+		while = {
+			count = $NUM_DISTRICTS$
+			add_district_if_possible_effect = {
+				district = $DISTRICT$
+			}
+		}
+	}
+}
+
+replace_building_with_multiple_districts_effect = {
+	if = {
+		limit = {
+			has_building = $BUILDING$
+		}
+		while = {
+			count = $NUM_BUILDINGS$
+			remove_building = $BUILDING$
+		}
+		while = {
+			count = $NUM_DISTRICTS_1$
+			add_district_if_possible_effect = {
+				district = $DISTRICT_1$
+			}
+		}
+		while = {
+			count = $NUM_DISTRICTS_2$
+			add_district_if_possible_effect = {
+				district = $DISTRICT_2$
+			}
+		}
+	}
+}
+
+#This effect is used to predict if you are going over 10 insights or not when you gain insights because locked random lists.
+set_predictive_observation_insight = {
+	set_variable = {
+		which = observation_predictive_insight_change
+		value = $VALUE$
+	}
+	if = {
+		limit = {
+			has_ethic = ethic_fanatic_xenophile
+		}
+		multiply_variable = {
+			which = observation_predictive_insight_change
+			value = 2
+		}
+	}
+	if = {
+		limit = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_valid_civic = civic_machine_exploration_protocol
+			}
+		}
+		multiply_variable = {
+			which = observation_predictive_insight_change
+			value = 1.5
+		}
+	}
+	if = {
+		limit = {
+			has_modifier = hands_off_approach
+		}
+		multiply_variable = {
+			which = observation_predictive_insight_change
+			value = 1.25
+		}
+	}
+	if = {
+		limit = {
+			is_galactic_community_formed = yes
+			is_galactic_community_member = yes
+			is_active_resolution = resolution_pre_ftl_stances_non_interference
+		}
+		multiply_variable = {
+			which = observation_insight_change
+			value = 1.25
+		}
+	}
+	if = {
+		limit = {
+			any_situation = {
+				is_situation_type = situation_observation_insight
+			}
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = situation_observation_insight
+			}
+			save_event_target_as = insight_situation
+		}
+		set_variable = {
+			which = observation_predictive_insight_change_comparator
+			value = observation_predictive_insight_change
+		}
+		subtract_variable = {
+			which = observation_predictive_insight_change_comparator
+			value = 100
+		}
+		multiply_variable = {
+			which = observation_predictive_insight_change_comparator
+			value = -1
+		}
+		if = {
+			limit = {
+				event_target:insight_situation = {
+					situation_progress >= prev.observation_predictive_insight_change_comparator
+				}
+			}
+			set_variable = {
+				which = observation_prediction_insight_variable
+				value = 101
+			}
+		}
+		clear_variable = observation_predictive_insight_change_comparator
+		change_variable = {
+			which = observation_prediction_insight_variable
+			value = observation_predictive_insight_change
+		}
+	}
+	clear_variable = observation_predictive_insight_change
+}
+
+add_observation_insight_effect = {
+	# Accepts the following parameters:
+	# VALUE = int, amount of observation insights gained.
+	# OUTPOST is the scope of the outpost around the planet that this insight occured on.
+	# Whenever 10 observation insights are gained, a random Observation Technology is granted.
+	# When calling this effect, you can set a country flag of physics_insight, society_insights or engineering_insights to determine the tech granted.
+	hidden_effect = {
+		set_variable = {
+			which = observation_insight_change
+			value = $VALUE$
+		}
+		if = {
+			limit = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+			multiply_variable = {
+				which = observation_insight_change
+				value = 2
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_valid_civic = civic_machine_exploration_protocol
+				}
+			}
+			multiply_variable = {
+				which = observation_insight_change
+				value = 1.5
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = hands_off_approach
+			}
+			multiply_variable = {
+				which = observation_insight_change
+				value = 1.25
+			}
+		}
+		if = {
+			limit = {
+				is_galactic_community_formed = yes
+				is_galactic_community_member = yes
+				is_active_resolution = resolution_pre_ftl_stances_non_interference
+			}
+			multiply_variable = {
+				which = observation_insight_change
+				value = 1.25
+			}
+		}
+		set_variable = {
+			which = observation_insight_change_comparator
+			value = observation_insight_change
+		}
+		if = {
+			limit = {
+				any_situation = {
+					is_situation_type = situation_observation_insight
+				}
+			}
+			random_situation = {
+				limit = {
+					is_situation_type = situation_observation_insight
+				}
+				save_event_target_as = insight_situation
+			}
+			subtract_variable = {
+				which = observation_insight_change_comparator
+				value = 100
+			}
+			multiply_variable = {
+				which = observation_insight_change_comparator
+				value = -1
+			}
+			if = {
+				limit = {
+					event_target:insight_situation = {
+						situation_progress >= prev.observation_insight_change_comparator
+					}
+				}
+				set_variable = {
+					which = observation_insight_variable
+					value = 101
+				}
+			}
+			else = {
+				set_variable = {
+					which = observation_insight_variable
+					value = 9
+				}
+			}
+			set_variable = {
+				which = observation_insight_change_comparator
+				value = 0
+			}
+		}
+		if = {
+			limit = {
+				any_situation = {
+					is_situation_type = situation_observation_insight
+				}
+				check_variable = {
+					which = observation_insight_variable
+					value < 100
+				}
+			}
+			random_situation = {
+				limit = {
+					is_situation_type = situation_observation_insight
+				}
+				add_situation_progress = prev.observation_insight_change
+			}
+		}
+	}
+	if = {
+		# Check that you have discovered 10 insights.
+		limit = {
+			OR = {
+				check_variable = {
+					which = observation_prediction_insight_variable
+					value >= 100
+				}
+				check_variable = {
+					which = observation_insight_variable
+					value >= 100
+				}
+				has_country_flag = pending_insight_tech
+			}
+			has_first_contact_dlc = yes
+		}
+		if = {
+			limit = {
+				has_all_insights = no
+			}
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							has_country_flag = physics_insights
+							has_all_physics_insights = no
+						}
+						AND = {
+							has_country_flag = engineering_insights
+							has_all_engineering_insights = yes
+						}
+						AND = {
+							has_country_flag = society_insights
+							has_all_society_insights = yes
+						}
+					}
+				}
+				custom_tooltip = gained_physics_insight
+				hidden_effect = {
+					random_list = {
+						1 = {
+							#modifier = {
+							#	factor = 0
+							#	NOT = { has_technology = tech_detection_array }
+							#}
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_unusual_senses
+									has_tech_option = tech_unusual_senses
+								}
+							}
+							add_research_option = tech_unusual_senses
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_new_numbers
+									has_tech_option = tech_new_numbers
+								}
+							}
+							add_research_option = tech_new_numbers
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_trinary_computing
+									has_tech_option = tech_trinary_computing
+								}
+							}
+							add_research_option = tech_trinary_computing
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_atmospheric_orbital_mechanics
+									has_tech_option = tech_atmospheric_orbital_mechanics
+								}
+							}
+							add_research_option = tech_atmospheric_orbital_mechanics
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					OR = {
+						AND = {
+							has_country_flag = society_insights
+							has_all_society_insights = no
+						}
+						AND = {
+							has_country_flag = engineering_insights
+							has_all_engineering_insights = yes
+						}
+						AND = {
+							has_country_flag = physics_insights
+							has_all_physics_insights = yes
+						}
+					}
+				}
+				custom_tooltip = gained_society_insight
+				hidden_effect = {
+					random_list = {
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_predatory_tactics
+									has_tech_option = tech_predatory_tactics
+								}
+							}
+							#modifier = {
+							#	factor = 0
+							#	NOT = { has_technology = tech_cloaking_1 }
+							#}
+							add_research_option = tech_predatory_tactics
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_satisfying_insults
+									has_tech_option = tech_satisfying_insults
+								}
+							}
+							add_research_option = tech_satisfying_insults
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_compact_living
+									has_tech_option = tech_compact_living
+								}
+							}
+							add_research_option = tech_compact_living
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_alien_topography
+									has_tech_option = tech_alien_topography
+								}
+							}
+							add_research_option = tech_alien_topography
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_xeno_aesthetics
+									has_tech_option = tech_xeno_aesthetics
+								}
+							}
+							add_research_option = tech_xeno_aesthetics
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					OR = {
+						AND = {
+							has_country_flag = engineering_insights
+							has_all_engineering_insights = no
+						}
+						AND = {
+							has_country_flag = society_insights
+							has_all_society_insights = yes
+						}
+						AND = {
+							has_country_flag = physics_insights
+							has_all_physics_insights = yes
+						}
+					}
+				}
+				custom_tooltip = gained_engineering_insight
+				hidden_effect = {
+					random_list = {
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_lost_building_methods
+									has_tech_option = tech_lost_building_methods
+								}
+							}
+							add_research_option = tech_lost_building_methods
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_supreme_alloy
+									has_tech_option = tech_supreme_alloy
+								}
+							}
+							add_research_option = tech_supreme_alloy
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_ordered_retreat
+									has_tech_option = tech_ordered_retreat
+								}
+							}
+							add_research_option = tech_ordered_retreat
+						}
+						1 = {
+							modifier = {
+								factor = 0
+								OR = {
+									has_technology = tech_temple_of_transportation
+									has_tech_option = tech_temple_of_transportation
+								}
+							}
+							#modifier = {
+							#	factor = 0
+							#	NOT = { has_technology = tech_hyper_relays }
+							#}
+							add_research_option = tech_temple_of_transportation
+						}
+					}
+				}
+			}
+		}
+		else = {
+			custom_tooltip = gained_insight_modifier
+			locked_random_list = {
+				0 = {
+					modifier = {
+						add = 1
+						OR = {
+							has_country_flag = physics_insights
+							has_country_flag = society_insights
+							has_country_flag = engineering_insights
+						}
+					}
+					modifier = {
+						factor = 0
+						$OUTPOST$ = {
+							has_modifier = insight_unity_5
+						}
+					}
+					$OUTPOST$ = {
+						add_modifier = {
+							modifier = insight_unity_5
+							days = -1
+						}
+					}
+				}
+				0 = {
+					modifier = {
+						add = 1
+						OR = {
+							has_country_flag = physics_insights
+							has_country_flag = society_insights
+							has_country_flag = engineering_insights
+						}
+					}
+					modifier = {
+						factor = 0
+						$OUTPOST$ = {
+							has_modifier = insight_influence_01
+						}
+					}
+					$OUTPOST$ = {
+						add_modifier = {
+							modifier = insight_influence_01
+							days = -1
+						}
+					}
+				}
+				0 = {
+					modifier = {
+						add = 1
+						has_country_flag = physics_insights
+					}
+					modifier = {
+						factor = 0
+						$OUTPOST$ = {
+							has_modifier = insight_physics_5
+						}
+					}
+					$OUTPOST$ = {
+						add_modifier = {
+							modifier = insight_physics_5
+							days = -1
+						}
+					}
+				}
+				0 = {
+					modifier = {
+						add = 1
+						has_country_flag = society_insights
+					}
+					modifier = {
+						factor = 0
+						$OUTPOST$ = {
+							has_modifier = insight_society_5
+						}
+					}
+					$OUTPOST$ = {
+						add_modifier = {
+							modifier = insight_society_5
+							days = -1
+						}
+					}
+				}
+				0 = {
+					modifier = {
+						add = 1
+						OR = {
+							has_country_flag = engineering_insights
+						}
+					}
+					modifier = {
+						factor = 0
+						$OUTPOST$ = {
+							has_modifier = insight_engineering_5
+						}
+					}
+					$OUTPOST$ = {
+						add_modifier = {
+							modifier = insight_engineering_5
+							days = -1
+						}
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			clear_variable = observation_insight_variable
+			clear_variable = observation_prediction_insight_variable
+			remove_country_flag = pending_insight_tech
+			random_situation = {
+				limit = {
+					is_situation_type = situation_observation_insight
+				}
+				destroy_situation = this
+			}
+		}
+	}
+	else = {
+		custom_tooltip = gained_insight_progress
+	}
+	remove_country_flag = physics_insights
+	remove_country_flag = society_insights
+	remove_country_flag = engineering_insights
+}
+
+integrate_country_effect = {
+	every_owned_army = {
+		set_owner = $OWNER$
+	}
+	every_owned_fleet = {
+		set_owner = $OWNER$
+	}
+	every_owned_leader = {
+		set_owner = $OWNER$
+	}
+	every_owned_planet = {
+		set_owner = $OWNER$
+	}
+	every_owned_starbase = {
+		set_owner = $OWNER$
+	}
+	every_owned_megastructure = {
+		set_owner = $OWNER$
+	}
+}
+
+align_pre_FTL_country_ethics = {
+	switch = {
+		trigger = has_ethic
+		ethic_fanatic_materialist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_materialist 
+			}
+		}
+		ethic_fanatic_spiritualist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		ethic_fanatic_militarist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_militarist
+			}
+		}
+		ethic_fanatic_pacifist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_pacifist 
+			}
+		}
+		ethic_fanatic_xenophile = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_xenophile
+			}
+		}
+		ethic_fanatic_xenophobe = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_xenophobe 
+			}
+		}
+		ethic_fanatic_authoritarian = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_authoritarian
+			}
+		}
+		ethic_fanatic_egalitarian = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_fanatic_egalitarian
+			}
+		}
+		ethic_materialist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_materialist 
+			}
+		}
+		ethic_spiritualist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_spiritualist
+			}
+		}
+		ethic_militarist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_militarist
+			}
+		}
+		ethic_pacifist = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_pacifist 
+			}
+		}
+		ethic_xenophile = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_xenophile
+			}
+		}
+		ethic_xenophobe = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_xenophobe 
+			}
+		}
+		ethic_authoritarian = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_authoritarian
+			}
+		}
+		ethic_egalitarian = { 
+			event_target:pre_ftl_country = {
+				shift_ethic = ethic_egalitarian
+			}
+		}
+	}
+}
+
+set_observation_event_flags = {
+	owner = {
+		set_country_flag = fircon_$EVENT$_fired
+	}
+}
+
+# (Instigating) country scope
+pre_ftl_indoctrinate_operation_result = {
+	if = { # if your empire is fanatic, always shift the pre-FTLs to your main ethic
+		limit = {
+			is_fanatic = yes
+		}
+		switch = {
+			trigger = has_ethic
+			ethic_fanatic_spiritualist = {
+				shift_pre_ftl_pop_ethic = { ETHIC = spiritualist BONUS = $BONUS$ }
+			}
+			ethic_fanatic_militarist = {
+				shift_pre_ftl_pop_ethic = { ETHIC = militarist BONUS = $BONUS$ }
+			}
+			ethic_fanatic_xenophobe = {
+				shift_pre_ftl_pop_ethic = { ETHIC = xenophobe BONUS = $BONUS$ }
+			}
+			ethic_fanatic_egalitarian = {
+				shift_pre_ftl_pop_ethic = { ETHIC = egalitarian BONUS = $BONUS$ }
+			}
+			ethic_fanatic_materialist = {
+				shift_pre_ftl_pop_ethic = { ETHIC = materialist BONUS = $BONUS$ }
+			}
+			ethic_fanatic_pacifist = {
+				shift_pre_ftl_pop_ethic = { ETHIC = pacifist BONUS = $BONUS$ }
+			}
+			ethic_fanatic_xenophile = {
+				shift_pre_ftl_pop_ethic = { ETHIC = xenophile BONUS = $BONUS$ }
+			}
+			ethic_fanatic_authoritarian = {
+				shift_pre_ftl_pop_ethic = { ETHIC = authoritarian BONUS = $BONUS$ }
+			}
+		}
+	}
+	else = { # if not fanatic, shift to one of your ethics
+		random_list = {
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = spiritualist BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_spiritualist = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = militarist BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_militarist = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = xenophobe BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_xenophobe = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = egalitarian BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_egalitarian = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = materialist BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_materialist = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = pacifist BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_pacifist = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = xenophile BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_xenophile = no
+				}
+			}
+			1 = {
+				shift_pre_ftl_pop_ethic = { ETHIC = authoritarian BONUS = $BONUS$ }
+				modifier = {
+					mult = 0
+					is_authoritarian = no
+				}
+			}
+		}
+	}
+
+}
+
+# (Instigating) country scope | from = Espionage Operation
+shift_pre_ftl_pop_ethic = {
+	set_country_flag = shifting_pre_ftl_ethic_to_$ETHIC$
+	hidden_effect = {
+		from.target = {
+			set_timed_country_flag = {
+				flag = preftl_espionage_operation_recent_shift_ethic_target
+				days = 1800 # 5 years
+			}
+			capital_scope = {
+				add_modifier = {
+					modifier = espionage_pre_ftl_indoctrination_$ETHIC$
+					years = 5
+				}
+			}
+			while = {
+				count = value:pre_ftl_pops_shifting_ethic|BONUS|$BONUS$|
+				random_owned_pop = {
+					limit = {
+						is_$ETHIC$ = no
+					}
+					pop_change_ethic = ethic_$ETHIC$
+				}
+			}
+		}
+	}
+}
+
+get_random_active_pre_ftl_agreement = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			OR = {
+				is_under_open_technological_enlightenment = root
+				is_under_societal_enlightenment = root
+				has_pre_ftl_trade = root
+			}
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_active_pre_ftl_agreement_no_gestalt = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_gestalt = no
+			OR = {
+				is_under_open_technological_enlightenment = root
+				is_under_societal_enlightenment = root
+				has_pre_ftl_trade = root
+			}
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_tech_enlightenment_agreement = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_under_open_technological_enlightenment = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+
+get_random_pre_ftl_tech_enlightenment_agreement_no_gestalt = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_gestalt = no
+			is_under_open_technological_enlightenment = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_societal_enlightenment_agreement = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_under_societal_enlightenment = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_societal_enlightenment_agreement_no_gestalt = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_gestalt = no
+			is_under_societal_enlightenment = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_trade_agreement = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			has_pre_ftl_trade = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_trade_agreement_no_gestalt = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_gestalt = no
+			has_pre_ftl_trade = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_trade_agreement_gestalt = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			is_gestalt = yes
+			has_pre_ftl_trade = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+get_random_pre_ftl_trade_agreement_no_broken_shackles = {
+	random_observed_pre_ftl_within_border = {
+		limit = {
+			NOT = {
+				is_broken_shackles_pre_ftl_to_scope = { SCOPE = root }
+			}
+			has_pre_ftl_trade = root
+		}
+		save_event_target_as = $EVENT$_country
+		set_country_flag = $EVENT$_flag
+		species = {
+			save_event_target_as = $EVENT$_species
+		}
+		home_planet = {
+			save_event_target_as = $EVENT$_planet
+		}
+	}
+}
+
+advance_pre_ftl_tech = {
+	random_situation = {
+		limit = {
+			is_situation_type = pre_ftl_tech_progress_situation
+		}
+		abort_situation = this # Aborting the situation 'forces' technological progress
+	}
+}
+
+asteroid_impact_pre_ftl_effect = {
+	add_deposit = d_impact_crater
+	while = {
+		limit = {
+			num_pops > 2
+		}
+		random_owned_pop = {
+			kill_pop = yes
+		}
+	}
+	owner = {
+		switch = {
+			trigger = has_pre_ftl_age
+			stone_age = { }
+			bronze_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = stone_age
+				}
+			}
+			iron_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = bronze_age
+				}
+			}
+			late_medieval_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = iron_age
+				}
+			}
+			renaissance_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = late_medieval_age
+				}
+			}
+			steam_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = renaissance_age
+				}
+			}
+			industrial_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = steam_age
+				}
+			}
+			machine_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = industrial_age
+				}
+			}
+			atomic_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = machine_age
+				}
+			}
+			early_space_age = {
+				set_pre_ftl_age_effect = {
+					PRE_FTL_AGE = atomic_age
+				}
+			}
+		}
+	}
+}
+
+add_age_based_awareness_effect = {
+	# Random chance of gaining $AWARENESS$ awareness based
+	# off of technological era:
+	#	1% for ancient
+	#	5% for medieval
+	#	15% for victorian
+	#	75% for modern, 90% if a radio telescope array is present.
+	if = {
+		limit = {
+			pre_ftl_ancient_era = yes
+		}
+		random_list = {
+			99 = {}
+			1 = {
+				add_awareness = $AWARENESS$
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			pre_ftl_medieval_era = yes
+		}
+		random_list = {
+			95 = {}
+			5 = {
+				add_awareness = $AWARENESS$
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			pre_ftl_victorian_era = yes
+		}
+		random_list = {
+			85 = {}
+			15 = {
+				add_awareness = $AWARENESS$
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			pre_ftl_modern_era = yes
+		}
+		random_list = {
+			25 = {}
+			75 = {
+				modifier = {
+					factor = 3
+					capital_scope = {
+						has_building = building_pre_ftl_radio_telescope
+					}
+				}
+				add_awareness = $AWARENESS$
+			}
+		}
+	}
+}
+
+subtract_age_based_awareness_effect = {
+	# Random chance of losing $AWARENESS$ awareness based
+	# off of technological era:
+	#	90% for ancient
+	#	75% for medieval
+	#	50% for victorian
+	#	25% for modern, 10% if a radio telescope array is present.
+	if = {
+		limit = {
+			pre_ftl_ancient_era = yes
+		}
+		random_list = {
+			90 = {
+				add_awareness = -$AWARENESS$
+			}
+			10 = {}
+		}
+	}
+	else_if = {
+		limit = {
+			pre_ftl_medieval_era = yes
+		}
+		random_list = {
+			75 = {
+				add_awareness = -$AWARENESS$
+				set_timed_country_flag = {
+					flag = recent_awareness_decay
+					days = 90
+				}
+			}
+			25 = {}
+		}
+	}
+	else_if = {
+		limit = {
+			pre_ftl_victorian_era = yes
+		}
+		random_list = {
+			50 = {
+				add_awareness = -$AWARENESS$
+				set_timed_country_flag = {
+					flag = recent_awareness_decay
+					days = 180
+				}
+			}
+			50 = {}
+		}
+	}
+	else_if = {
+		limit = {
+			pre_ftl_modern_era = yes
+		}
+		random_list = {
+			25 = {
+				add_awareness = -$AWARENESS$
+				set_timed_country_flag = {
+					flag = recent_awareness_decay
+					days = 360
+				}
+			}
+			75 = {
+				modifier = {
+					factor = 3
+					capital_scope = {
+						has_building = building_pre_ftl_radio_telescope
+					}
+				}
+			}
+		}
+	}
+}
+
+create_pre_ftl_awareness_increased_message = {
+	create_message = {
+		type = MESSAGE_PRE_FTL_AWARENESS_INCREASED
+		localization = MESSAGE_PRE_FTL_AWARENESS_INCREASED_DESC
+		days = 30
+		target = root.capital_scope
+		variable = {
+			type = name
+			localization = SYSTEM
+			scope = $SYSTEM$
+		}
+		variable = {
+			type = name
+			localization = COUNTRY
+			scope = $COUNTRY$
+		}
+	}
+}
+
+create_pre_ftl_awareness_decreased_message = {
+	create_message = {
+		type = MESSAGE_PRE_FTL_AWARENESS_DECREASED
+		localization = MESSAGE_PRE_FTL_AWARENESS_DECREASED_DESC
+		days = 30
+		target = root.capital_scope
+		variable = {
+			type = name
+			localization = SYSTEM
+			scope = $SYSTEM$
+		}
+		variable = {
+			type = name
+			localization = COUNTRY
+			scope = $COUNTRY$
+		}
+	}
+}
+
+support_seperatist_deficit_effect = {
+	switch = {
+		trigger = has_country_flag
+		mineral_seperatist_deficit = {
+			add_resource = { 
+				minerals = -6 
+				mult = value:fotd_support_cost|RESOURCE|minerals|
+			}
+		}
+		food_seperatist_deficit = {
+			add_resource = { 
+				food = -6 
+				mult = value:fotd_support_cost|RESOURCE|food|
+			}
+		}
+		energy_seperatist_deficit = {
+			add_resource = { 
+				energy = -6 
+				mult = value:fotd_support_cost|RESOURCE|energy|
+			}
+		}
+		alloy_seperatist_deficit = {
+			add_resource = { 
+				alloys = -6 
+				mult = value:fotd_support_cost|RESOURCE|alloys|
+			}
+		}
+		consumer_goods_seperatist_deficit = {
+			add_resource = { 
+				consumer_goods = -6 
+				mult = value:fotd_support_cost|RESOURCE|consumer_goods|
+			}
+		}
+	}
+}
+
+seperatist_help_player_deficit_effect = {
+	random_situation = {
+		limit = {
+			OR = {
+				current_stage = deficit_second
+				current_stage = deficit_third
+				current_stage = deficit_fourth
+			}
+		}
+		switch = {
+			trigger = is_situation_type
+			situation_energy_deficit = {
+				owner = {
+					add_resource = { 
+						energy = 24
+						mult = value:fotd_support_cost|RESOURCE|energy|
+					}
+				}
+			}
+			situation_mineral_deficit = {
+				owner = {
+					add_resource = { 
+						minerals = 24
+						mult = value:fotd_support_cost|RESOURCE|minerals|
+					}
+				}
+			}
+			situation_food_deficit = {
+				owner = {
+					add_resource = { 
+						food = 24
+						mult = value:fotd_support_cost|RESOURCE|food|
+					}
+				}
+			}
+			situation_alloys_deficit = {
+				owner = {
+					add_resource = { 
+						alloys = 24
+						mult = value:fotd_support_cost|RESOURCE|alloys|
+					}
+				}
+			}
+			situation_exotic_gases_deficit = {
+				owner = {
+					add_resource = { 
+						exotic_gases = 24
+						mult = value:fotd_support_cost|RESOURCE|exotic_gases|
+					}
+				}
+			}
+			situation_consumer_goods_deficit = {
+				owner = {
+					add_resource = { 
+						consumer_goods = 12
+						mult = value:fotd_support_cost|RESOURCE|consumer_goods|
+					}
+				}
+			}
+			situation_volatile_motes_deficit = {
+				owner = {
+					add_resource = { 
+						volatile_motes = 12
+						mult = value:fotd_support_cost|RESOURCE|volatile_motes|
+					}
+				}
+			}
+			situation_rare_crystals_deficit = {
+				owner = {
+					add_resource = { 
+						rare_crystals = 12
+						mult = value:fotd_support_cost|RESOURCE|rare_crystals|
+					}
+				}
+			}
+		}
+	}
+}
+
+# used federations3.115 as a reference
+create_debt_collectors_country = {
+	optimize_memory
+	if = {
+		limit = {
+			NOT = {
+				any_country = {
+					is_country_type = debt_collectors
+					has_country_flag = payback_debt_collectors_country
+				}
+			}
+		}
+		create_species = {
+			name = "NAME_Debt_Collectors"
+			plural = "NAME_Debt_Collectors_plural"
+			class = MAM
+			portrait = mol17
+			namelist = "AI"
+			traits = {
+				trait = random_traits
+			}
+		}
+		create_country = {
+			name = "NAME_Debt_Collectors_Country"
+			type = debt_collectors
+			species = last_created_species
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "corporate"
+					file = "corporate_11.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "pattern_01.dds"
+				}
+				colors={
+					"mist_blue"
+					"bright_purple"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				set_country_flag = payback_debt_collectors_country
+				save_global_event_target_as = payback_debt_collectors_country
+				set_graphical_culture = mammalian_01
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { exists = event_target:payback_debt_collectors_country }
+		}
+		random_country = {
+			limit = {
+				is_country_type = debt_collectors
+				has_country_flag = payback_debt_collectors_country
+			}
+			save_global_event_target_as = payback_debt_collectors_country
+		}
+	}
+}
+
+# Espionage Operation scope
+evaluate_pre_ftl_operation_success = {
+	if = {
+		limit = {
+			check_variable = {
+				which = pre_ftl_operation_success
+				value > 2
+			}
+		}
+		owner = {
+			country_event = { id = $EVENT_GREAT$ } # Excellent outcome
+		}
+	}
+	else_if = {
+		limit = {
+			check_variable = {
+				which = pre_ftl_operation_success
+				value > 0
+			}
+		}
+		owner = {
+			country_event = { id = $EVENT_GOOD$ } # Good outcome
+		}
+	}
+	else_if = {
+		limit = {
+			check_variable = {
+				which = pre_ftl_operation_success
+				value < 0
+			}
+		}
+		owner = {
+			country_event = { id = $EVENT_POOR$ } # Poor outcome
+		}
+	}
+	else = {
+		owner = {
+			country_event = { id = $EVENT_DEFAULT$ } # Standard outcome
+		}
+	}
+}
+
+# from.target scope | root = instigating (player) empire
+infiltrate_government_annexation_effect = {
+	if = {
+		limit = {
+			is_species_class = REP
+			root = { is_species_class = HUM }
+		}
+		root = { set_country_flag = reverse_v } # "Payback" achievement
+	}
+	capital_scope = {
+		save_event_target_as = annexed_planet
+		if = {
+			limit = {
+				root = {
+					is_hive_empire = no
+				}
+			}
+			add_modifier = {
+				modifier = infiltration_happiness
+				days = 7300
+			}
+		}
+
+		random_owned_pop = {
+			save_event_target_as = prim_species
+		}
+		observation_outpost = {
+			dismantle = yes
+		}
+		set_owner = ROOT
+		# Update armies
+		remove_all_armies = yes
+		create_army = {
+			name = random
+			owner = ROOT
+			species = owner_main_species
+			type = "defense_army"
+		}
+		# Update buildings
+		remove_all_buildings = yes
+		if = {
+			limit = {
+				root = {
+					is_hive_empire = no
+				}
+			}
+			add_building = building_capital
+			# Add districts
+			if = {
+				limit = {
+					NOT = { is_planet_class = pc_ringworld_habitable }
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_city
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 2
+					add_district = {
+						district_type = district_industrial
+						ignore_cap = yes
+					}
+				}
+				# Add food/mining districts
+				if = {
+					limit = {
+						prev = {
+							is_lithoid_empire = no
+						}
+					}
+					while = {
+						count = 3
+						add_district = {
+							district_type = district_farming
+							ignore_cap = yes
+						}
+					}
+				}
+				else = {
+					while = {
+						count = 3
+						add_district = {
+							district_type = district_mining
+							ignore_cap = yes
+						}
+					}
+				}
+				# Resume adding starter districts
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_mining
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_generator
+						ignore_cap = yes
+					}
+				}
+				# Phototrophic variant (if applicable)
+				if = {
+					limit = {
+						root = { is_phototrophic = yes }
+					}
+					while = {
+						count = 2
+						add_district = {
+							district_type = district_generator
+							ignore_cap = yes
+						}
+					}
+				}
+				add_building = building_research_lab_1
+				add_building = building_commercial_zone
+			}
+		}
+		else = {
+			add_building = building_hive_capital
+			if = {
+				limit = {
+					root = {
+						has_origin = origin_progenitor_hive
+					}
+				}
+				add_building = building_offspring_nest	
+			}
+			else = {
+				add_building = building_spawning_pool
+			}
+			# Add districts
+			if = {
+				limit = {
+					NOT = { is_planet_class = pc_ringworld_habitable }
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_hive
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 2
+					add_district = {
+						district_type = district_industrial
+						ignore_cap = yes
+					}
+				}
+				# Add food/mining districts
+				if = {
+					limit = {
+						prev = {
+							is_lithoid_empire = no
+						}
+					}
+					while = {
+						count = 3
+						add_district = {
+							district_type = district_farming
+							ignore_cap = yes
+						}
+					}
+				}
+				else = {
+					while = {
+						count = 3
+						add_district = {
+							district_type = district_mining
+							ignore_cap = yes
+						}
+					}
+				}
+				# Resume adding starter districts
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_mining
+						ignore_cap = yes
+					}
+				}
+				while = {
+					count = 3
+					add_district = {
+						district_type = district_generator
+						ignore_cap = yes
+					}
+				}
+				# Phototrophic variant (if applicable)
+				if = {
+					limit = {
+						root = { is_phototrophic = yes }
+					}
+					while = {
+						count = 2
+						add_district = {
+							district_type = district_generator
+							ignore_cap = yes
+						}
+					}
+				}
+				add_building = building_research_lab_1
+			}
+		}
+	}
+}
+
+populate_solarpunk_planet = {
+	clear_blockers = yes
+	set_owner = event_target:solarpunk_country
+	add_building = building_primitive_capital
+	add_building = building_solarpunk_organic_paradise
+	add_building = building_solarpunk_sapling
+	add_building = building_solarpunk_ranger_lodge
+	add_building = building_solarpunk_gaiaseeder
+	while = {
+		count = 16
+		create_pop = {
+			species = event_target:solarpunk_country
+		}
+	}
+	while = {
+		count = 2
+		add_district = {
+			district_type = district_farming
+			ignore_cap = yes
+		}
+	}
+	while = {
+		count = 2
+		add_district = {
+			district_type = district_city
+			ignore_cap = yes
+		}
+	}
+	if = {
+		limit = {
+			planet_size > 10
+		}
+		add_building = building_solarpunk_organic_paradise
+		add_building = building_solarpunk_sapling
+		add_building = building_solarpunk_ranger_lodge
+		add_building = building_solarpunk_gaiaseeder
+		while = {
+			count = 16
+			create_pop = {
+				species = event_target:solarpunk_country
+			}
+		}
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_farming
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+	}
+	if = {
+		limit = {
+			planet_size > 15
+		}
+		add_building = building_solarpunk_organic_paradise
+		add_building = building_solarpunk_sapling
+		while = {
+			count = 16
+			create_pop = {
+				species = event_target:solarpunk_country
+			}
+		}
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_farming
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+	}
+	if = {
+		limit = {
+			has_planet_flag = solarpunk_capital
+		}
+		while = {
+			count = 32
+			create_pop = {
+				species = event_target:solarpunk_country
+			}
+		}
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_farming
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+		add_building = building_pre_ftl_radio_telescope
+	}
+}
+
+industrialize_solarpunk = {
+	remove_all_buildings = yes
+	remove_all_districts = yes
+	add_building = building_capital
+	add_building = building_holo_theatres
+	if = {
+		limit = {
+			has_planet_flag = solarpunk_capital
+		}
+		set_colony_type = col_capital
+		while = {
+			count = 8
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 8
+			add_district = {
+				district_type = district_industrial
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 7
+			add_building = building_research_lab_1
+		}
+		add_building = building_institute
+		add_building = building_holo_theatres
+	}
+	if = {
+		limit = {
+			has_planet_flag = solar_mining_world
+		}
+		set_colony_type = col_mining
+		while = {
+			count = 5
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 10
+			add_district = {
+				district_type = district_mining
+				ignore_cap = yes
+			}
+		}
+		add_building = building_mineral_purification_plant
+		add_building = building_holo_theatres
+	}
+	if = {
+		limit = {
+			has_planet_flag = solar_industrial_world
+		}
+		set_colony_type = col_industrial
+		while = {
+			count = 5
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 10
+			add_district = {
+				district_type = district_industrial
+				ignore_cap = yes
+			}
+		}
+		add_building = building_holo_theatres
+	}
+	if = {
+		limit = {
+			has_planet_flag = solar_small_world
+		}
+		set_colony_type = col_farming
+		while = {
+			count = 2
+			add_district = {
+				district_type = district_city
+				ignore_cap = yes
+			}
+		}
+		while = {
+			count = 3
+			add_district = {
+				district_type = district_farming
+				ignore_cap = yes
+			}
+		}
+	}
+	every_owned_pop = {
+		clear_pop_category = yes 
+	}
+}
+
+nebula_cloaking_effect = {
+	if = {
+		limit = {
+			has_first_contact_dlc = yes
+		}
+		add_modifier = { modifier = nebula_cloaking }
+	}
+}
+
+# Espionage Operation scope
+# Not suitable for when the player is self-reporting a violation; see 'self_reported_pre_ftl_espionage_violation_effect'
+evaluate_pre_ftl_espionage_violation_effect = {
+	if = { # GalCom has been formed
+		limit = {
+			owner = {
+				is_galactic_community_formed = yes
+				is_galactic_community_member = yes
+			}
+		}
+		if = { # this contradicts a Non-Interference Resolution
+			limit = {
+				is_active_resolution = resolution_pre_ftl_stances_non_interference
+			}
+			target = {
+				set_country_flag = violation_of_non_interference@prev.owner
+			}
+			if = { # the target is fully Aware
+				limit = {
+					target = {
+						current_awareness_level = full
+					}
+				}
+				owner = {
+					country_event = {
+						id = preftl.10150 # Violation of Non-Interference (rapid response)
+						days = 3
+					}
+				}
+			}
+			# else the violation will be noticed via 'on_five_year_pulse_country'
+		}
+		if = { # this contradicts an Equal Standing Resolution
+			limit = {
+				is_active_resolution = resolution_pre_ftl_stances_equal_standing
+			}
+			target = {
+				set_country_flag = violation_of_equal_standing@prev.owner
+			}
+			if = { # the target is fully Aware
+				limit = {
+					target = {
+						current_awareness_level = full
+					}
+				}
+				owner = {
+					country_event = {
+						id = preftl.10050 # Violation of Equal Standing (rapid response)
+						days = 3
+					}
+				}
+			}
+			# else the violation will be noticed via 'on_five_year_pulse_country'
+		}
+	}
+}
+
+# Espionage Operation scope
+self_reported_pre_ftl_espionage_violation_effect = {
+	if = {
+		limit = { # Failsafe checks: ensure the GalCom is still relevant
+			owner = {
+				is_galactic_community_formed = yes
+				is_galactic_community_member = yes
+			}
+		}
+		# Non-Interference Resolution
+		if = {
+			limit = {
+				is_active_resolution = resolution_pre_ftl_stances_non_interference
+			}
+			target = {
+				set_country_flag = violation_of_non_interference_self_report_target
+				save_event_target_as = pre_ftl_country
+			}
+			owner = {
+				country_event = {
+					id = preftl.10155
+					days = 3
+				}
+			}
+		}
+		# Equal Standing Resolution
+		else_if = {
+			limit = {
+				is_active_resolution = resolution_pre_ftl_stances_equal_standing
+			}
+			target = {
+				set_country_flag = violation_of_equal_standing_self_report_target
+				save_event_target_as = pre_ftl_country
+			}
+			owner = {
+				country_event = {
+					id = preftl.10055
+					days = 3
+				}
+			}
+		}
+	}
+}
+
+payback_resolution_counters_check = {
+	# if it's the first time you pass something, celebrate!				
+	if = {
+		limit = {
+			NOT = { has_country_flag = payback_revenge_words_first_resolution_passed }
+		}
+		country_event = { id = origin.4052 }
+	}
+	# if you passed everything, celebrate more!!!
+	if = {
+		limit = {
+			has_completed_event_chain_counter = {
+				event_chain = $CHAIN$
+				counter = "sanctions_passed"
+			}
+			has_completed_event_chain_counter = {
+				event_chain = $CHAIN$
+				counter = $RESOLUTION$
+			}
+		}
+		country_event = { id = origin.4055 }
+	}
+}
+
+payback_words_chain_counters_check_joining_galcom = {
+	# Sanctions
+	if = {
+		limit = {
+			is_active_resolution = resolution_sanctions_tech_1
+		}
+		add_event_chain_counter = {
+			event_chain = $CHAIN$
+			counter = "sanctions_passed"
+			amount = 1
+		}
+	}
+	if = {
+		limit = {
+			is_active_resolution = resolution_sanctions_economic_1
+		}
+		add_event_chain_counter = {
+			event_chain = $CHAIN$
+			counter = "sanctions_passed"
+			amount = 1
+		}
+	}
+	if = {
+		limit = {
+			is_active_resolution = resolution_sanctions_military_1
+		}
+		add_event_chain_counter = {
+			event_chain = $CHAIN$
+			counter = "sanctions_passed"
+			amount = 1
+		}
+	}
+	if = {
+		limit = {
+			is_active_resolution = resolution_sanctions_administrative_1 
+		}
+		add_event_chain_counter = {
+			event_chain = $CHAIN$
+			counter = "sanctions_passed"
+			amount = 1
+		}
+	}
+	# Equal standing/non-interference
+	if = {
+		limit = {
+			has_event_chain = payback_make_them_pay_words_1_chain
+			is_active_resolution = resolution_pre_ftl_stances_equal_standing 
+		}
+		add_event_chain_counter = {
+			event_chain = "payback_make_them_pay_words_1_chain"
+			counter = "equal_standing_passed"
+			amount = 1
+		}
+	}
+	if = {
+		limit = {
+			has_event_chain = payback_make_them_pay_words_2_chain
+			is_active_resolution = resolution_pre_ftl_stances_non_interference 
+		}
+		add_event_chain_counter = {
+			event_chain = "payback_make_them_pay_words_2_chain"
+			counter = "non_interference_passed"
+			amount = 1
+		}
+	}
+}
+
+observation_breach_effect = {
+	# We use observation_post_owner to avoid issues when the scripted effect
+	# is not called in the country scope of the observation post owner.
+	if = {
+		limit = {
+			is_galactic_community_formed = yes
+			is_galactic_community_member = yes
+			is_active_resolution = $RESOLUTION$ 
+		}
+		if = {
+			limit = {
+				event_target:observation_post_owner_country = {
+					NOT = {
+						in_breach_of = $RESOLUTION$
+					}
+				}
+			}
+			custom_tooltip = breach_$RESOLUTION$_tt
+		}
+		hidden_effect = {
+			event_target:pre_ftl_country = {
+				switch = {
+					trigger = is_active_resolution
+					resolution_pre_ftl_stances_equal_standing = {
+						set_timed_country_flag = {
+							flag = violation_of_equal_standing@event_target:observation_post_owner
+							years = 10
+						}
+					}
+					resolution_pre_ftl_stances_non_interference = {
+						set_timed_country_flag = {
+							flag = violation_of_non_interference@event_target:observation_post_owner
+							years = 10
+						}
+					}
+					resolution_pre_ftl_stances_exploitation = {
+						set_timed_country_flag = {
+							flag = violation_of_exploitation@event_target:observation_post_owner
+							years = 10
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+set_observation_events_locked = {
+	hidden_effect = {
+		event_target:pre_ftl_country = {
+			random_situation = {
+				limit = {
+					is_situation_type = pre_ftl_tech_progress_situation
+				}
+				set_situation_flag = has_ongoing_observation_event_chain
+			}
+			capital_scope.observation_outpost = {
+				set_event_locked = yes
+			}
+		}
+	}
+}
+
+set_observation_events_unlocked = {
+	hidden_effect = {
+		event_target:pre_ftl_country = {
+			random_situation = {
+				limit = {
+					is_situation_type = pre_ftl_tech_progress_situation
+				}
+				remove_situation_flag = has_ongoing_observation_event_chain
+			}
+			capital_scope.observation_outpost = {
+				set_event_locked = no
+			}
+		}
+	}
+}

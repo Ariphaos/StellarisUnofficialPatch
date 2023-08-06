@@ -1,0 +1,304 @@
+#
+# These define the type of bypasses that exist in game. This is only the logical connection between systems.
+# These can be added to megastructures.
+#
+# bypass_type = {
+#	name = GATEWAY_GALACTIC		# the localization key used in triggers and effects for the type
+#	is_pathfind = yes			# whether this type can be automatically used by the pathfinding (otherwise you'll have to right click the object containing it)
+#	requires_exploration = no	# whether this bypass type needs to be 'seen' before it can be used
+#	uses_action = no			# whether this type needs an action or can be used automagically
+#	always_active = no			# whether bypasses of these types are automatically active on creation, or if they need to be researched/upgraded to be activated
+#	windup_time = 0.0			# days preparing before travel, translated into ticks on load.
+#	winddown_time = 0.0			# days preparing after travel, translated into ticks on load.
+#	ftl_multiplier = 0			# 0 is supposed to mean instant, WARNING: not implemented correctly.
+#	extends_sensors = yes		# whether you can "see through" the bypass and extends your sensor range to the other side
+#	icon_frame = 25
+#	remember_instances = no	# whether countries remember meeting a specific instance of that type, or if they just remember seeing the type in general
+#	galactic_map_tooltip_header=GATEWAY_GALACTIC
+#	galactic_map_tooltip_desc=GATEWAY_GALACTIC_DESC
+#	connection_type = any_other
+#	ftl_ship_effect	= "gateway_ftl_ship_effect_entity"		# what effect to spawn on the ship when they jump through the bypass
+#	ftl_bypass_effect	= "gateway_ftl_bypass_effect_entity"	# what effect to spawn on the bypass when a ship jumps through
+#	bypass_effect		= ""
+#	animation_time = 3				# number of days to wait for the jump animation to be played
+#	prerequisites = {
+#		tech_gateway_activation
+#	}
+#	on_pre_explore = {					# an effect that is called just before the jump of a right click "explore" action of a fleet
+#
+#	}
+#	country_can_use = {					# trigger to evaluate if a country can use bypasses of this type. this: country, from: (optional) system owner; default: { always = yes }
+#	}
+#	on_action = "on_entering_bypass"	# The name of the on-action event that will be fired upon entering FTL (if set)
+#										# THIS = Fleet
+#										# FROM = System jumping to
+#										# FROMFROM = System jumped from
+# }
+
+gateway = {
+	name = GATEWAY_GALACTIC
+	is_pathfind = yes
+	uses_action = no
+	requires_exploration = no
+	always_active = no
+	windup_time = 0
+	winddown_time = 0
+	ftl_multiplier = 0			# 0 means instant
+	icon_frame = 25
+	remember_instances = no	# whether countries remember meeting a specific instance of that type, or if they just remember seeing the type in general
+	galactic_map_tooltip_header=GATEWAY_GALACTIC
+	galactic_map_tooltip_desc=GATEWAY_GALACTIC_DESC
+	connection_type = any_other
+	animation_time = 1
+	ftl_ship_effect = "gateway_ftl_ship_effect_entity"
+	ftl_bypass_effect = "gateway_ftl_bypass_effect_entity"
+	prerequisites = {
+		tech_gateway_activation
+	}
+	on_pre_explore = {
+		activate_gateway = fromfrom
+		if = {
+			limit = { num_active_gateways = 1 }
+			random_megastructure = {
+				limit = { is_megastructure_type = gateway_ruined }
+				upgrade_megastructure_to = gateway_restored
+				finish_upgrade = yes
+			}
+		}
+	}
+
+	respect_closed_borders = yes
+	block_access_if_hostile = yes
+
+	country_can_use = {
+		is_primitive = no
+		is_guardian_country = no
+		is_amoeba_country_type = no
+		is_tiyanki_country_type = no
+		is_crystal_country_type = no
+		is_drone_country_type = no
+		NOR = {
+			is_country_type = caravaneer_fleet
+			is_country_type = feral_prethoryn
+			is_country_type = ldragon_country
+			is_country_type = origin_dragon
+			is_country_type = vluur
+			is_country_type = primitive
+			is_country_type = nomad
+		}
+	}
+	on_action = "on_entering_gateway"
+}
+
+wormhole = {
+	name = NATURAL_WORMHOLE_GALACTIC
+	is_pathfind = yes
+	uses_action = no
+	requires_exploration = yes
+	always_active = yes
+	windup_time = 0
+	winddown_time = 0
+	ftl_multiplier = 0
+	extends_sensors = yes
+	icon_frame = 12
+	remember_instances = yes
+	animation_time = 1
+	galactic_map_tooltip_header=NATURAL_WORMHOLE_GALACTIC
+	galactic_map_tooltip_desc=NATURAL_WORMHOLE_DESC
+	connection_type = one_to_one
+	ftl_ship_effect = "wormhole_ftl_ship_effect_entity"
+	ftl_bypass_effect = "wormhole_ftl_bypass_effect_entity"
+	prerequisites = {
+		tech_wormhole_stabilization
+	}
+
+	potential = {
+		always = yes
+	}
+
+	country_can_use = {
+		# Border access handles this fine.
+		always = yes
+	}
+	on_action = "on_entering_wormhole"
+}
+
+lgate = {
+	name = LGATE_GALACTIC
+	is_pathfind = yes
+	uses_action = no
+	always_active = no
+	windup_time = 0
+	winddown_time = 0
+	ftl_multiplier = 0			# 0 means instant
+	icon_frame = 30
+	remember_instances = no	# whether countries remember meeting a specific instance of that type, or if they just remember seeing the type in general
+	galactic_map_tooltip_header = LGATE_GALACTIC
+	galactic_map_tooltip_desc = LGATE_GALACTIC_DESC
+	connection_type = scripted_connection
+	animation_time = 1
+	ftl_ship_effect = "gateway_ftl_ship_effect_entity"
+	ftl_bypass_effect = "gateway_ftl_bypass_effect_entity"
+
+	country_can_use = {
+		custom_tooltip = {
+			fail_text = LGATE_COUNTRY_CANNOT_USE
+			has_global_flag = lgates_activated_globally
+			is_primitive = no
+			is_guardian_country = no
+			is_amoeba_country_type = no
+			is_tiyanki_country_type = no
+			is_crystal_country_type = no
+			is_drone_country_type = no
+			NOR = {
+				is_country_type = caravaneer_fleet
+				is_country_type = feral_prethoryn
+				is_country_type = ldragon_country
+				is_country_type = origin_dragon
+				is_country_type = vluur
+				is_country_type = primitive
+				is_country_type = nomad
+			}
+		}
+	}
+
+	scripted_connection = {
+
+		# defines endpoints that can only reach the "nexus"
+		node = {
+			# system scope
+			has_star_flag = lgate
+		}
+
+		# defines endpoint(s) that can reach all "nodes" (but not other nexuses)
+		nexus = {
+			# system scope
+			has_star_flag = lcluster1
+		}
+	}
+}
+
+relay_bypass = {
+	name = HYPER_RELAY_GALACTIC
+	is_pathfind = yes
+	uses_action = no
+	always_active = yes
+	windup_time = 10
+	winddown_time = 0
+	icon_frame = 30
+	remember_instances = no
+	galactic_map_tooltip_header = HYPER_RELAY_GALACTIC
+	galactic_map_tooltip_desc = HYPER_RELAY_GALACTIC_DESC
+	connection_type = hyper_relay
+	animation_time = 1
+	ftl_ship_effect = "gateway_ftl_ship_effect_entity"
+	ftl_bypass_effect = "gateway_ftl_bypass_effect_entity"
+
+	respect_closed_borders = yes
+	block_access_if_hostile = yes
+	
+	country_can_use = {
+		is_primitive = no
+		is_guardian_country = no
+		is_amoeba_country_type = no
+		is_tiyanki_country_type = no
+		is_crystal_country_type = no
+		is_drone_country_type = no
+		NOR = {
+			is_country_type = caravaneer_fleet
+			is_country_type = feral_prethoryn
+			is_country_type = ldragon_country
+			is_country_type = origin_dragon
+			is_country_type = vluur
+			is_country_type = primitive
+			is_country_type = nomad
+		}
+	}
+}
+
+quantum_catapult = {
+	name = quantum_catapult_BYPASS
+	is_pathfind = no
+	uses_action = no
+	requires_exploration = no
+	always_active = yes
+	windup_time = 30
+	winddown_time = 360
+	ftl_multiplier = 0			# 0 means instant
+	icon_frame = 25
+	remember_instances = no	# whether countries remember meeting a specific instance of that type, or if they just remember seeing the type in general
+	galactic_map_tooltip_header=quantum_catapult_BYPASS
+	galactic_map_tooltip_desc=quantum_catapult_BYPASS_DESC
+	connection_type = to_any_system
+	animation_time = 1
+	ftl_ship_effect = "gateway_ftl_ship_effect_entity"
+	ftl_bypass_effect = "gateway_ftl_bypass_effect_entity"
+	prerequisites = {
+		tech_quantum_catapult
+	}
+	country_can_use = {
+		custom_tooltip = {
+			fail_text = QUANTUM_CATAPULT_COUNTRY_CANNOT_USE
+			OR = {
+				NOT = { exists = from }
+				is_same_value = from
+				is_in_federation_with = from
+				is_overlord_to = from
+				from = { is_overlord_to = root }
+				AND = {
+					root = { is_galactic_emperor = yes }
+					from = { is_galactic_community_member = yes }
+				}
+			}
+		}
+	}
+	on_action = "on_entering_quantum_catapult"
+}
+
+shroud_tunnel = {
+	name = SHROUD_TUNNEL_GALACTIC
+	is_pathfind = yes
+	requires_exploration = no
+	uses_action = yes #opt-in to risky Shroud transit
+	always_active = yes
+	windup_time = 40
+	winddown_time = 20
+	ftl_multiplier = 0 #instant
+	extends_sensors = no
+	icon_frame = 25
+	remember_instances = no
+	galactic_map_tooltip_header = SHROUD_TUNNEL_GALACTIC
+	galactic_map_tooltip_desc = SHROUD_TUNNEL_GALACTIC_DESC
+	connection_type = scripted_connection
+
+	scripted_connection = {
+		node = { #system scope
+			starbase = {
+				has_starbase_building = shroud_beacon
+			}
+		}
+		nexus = { #system scope
+			has_star_flag = shroud_tunnel_nexus
+		}
+	}
+
+	ftl_ship_effect	= "gateway_ftl_ship_effect_entity"
+	ftl_bypass_effect = "gateway_ftl_bypass_effect_entity"
+	animation_time = 3 # number of days to wait for the jump animation to be played
+
+	country_can_use = { # this = country; from = system owner | default = yes
+		OR = {
+			has_technology = tech_psionic_theory
+			custom_tooltip = {
+				text = shroud_beacon_active_tooltip
+				has_country_flag = shroudwalker_enclave_bought_shroud_beacon
+					any_system_within_border = {
+					starbase = {
+						has_starbase_building = shroud_beacon
+					}
+				}
+			}
+		}
+	}
+	on_action = "on_entering_shroud_tunnel" # To be fired upon entering FTL into this bypass | this = fleet; from = system being jumped to; fromfrom = system being jumped from
+}

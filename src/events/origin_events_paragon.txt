@@ -1,0 +1,4819 @@
+#########################
+
+# Galactic Paragons - Origins
+# Legendary Leader
+# By Marek Kozlowski
+# And Linus Dilen
+
+#########################
+
+namespace = paragon
+
+# Origin Events
+
+country_event = { #Give trait to the leader
+	id = paragon.5000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_legendary_leader
+	}
+
+	immediate = {
+		set_origin = origin_legendary_leader_dictatorial
+		set_government_cooldown = default
+		ruler = {
+			add_trait_no_notify = leader_trait_legendary_leader
+			set_skill = 4
+			set_leader_flag = leader_death_events_blocked
+			set_leader_flag = paragon_origin_legendary_leader
+			set_leader_flag = immune_to_negative_traits
+			set_variable = {
+				which = paragon_origin_story_ruling
+				value = 2
+			}
+			set_variable = {
+				which = paragon_origin_delusion_tier
+				value = 1
+			}
+		}
+		country_event = {
+			id = paragon.5001
+		}
+		country_event = {
+			id = paragon.5004 days = 180 random = 360
+		}
+	}
+}
+
+###############
+#Origin Events#
+###############
+
+country_event = { # UTILITY - SUBCLASS PICKER
+	id = paragon.5001
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+	}
+
+	immediate = {
+		ruler = {
+			switch = {
+				trigger = leader_class
+				scientist = {
+					add_trait_no_notify = subclass_scientist_researcher
+				}
+				admiral = {
+					add_trait_no_notify = subclass_admiral_strategist
+				}
+				governor = {
+					add_trait_no_notify = subclass_governor_visionary
+				}
+				general = {
+					add_trait_no_notify = subclass_general_marshall
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Start the situation
+	id = paragon.5004
+	title = "paragon.5004.name"
+	desc = "paragon.5004.desc"
+	picture = GFX_evt_board_meeting
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = increase_leader_upkeep }
+	}
+
+	immediate = {
+		start_situation = {
+			type = paragon_origin_promise
+		}
+	}
+
+	option = {
+		name = "paragon.5004.a"
+		custom_tooltip = paragon.5004.a.tt
+	}
+
+	after = {
+		begin_event_chain = {
+			event_chain = paragon_origin_promise_chain
+			target = root
+		}
+	}
+}
+
+planet_event = { # Colonization event - Celebration for starting a colony
+	id = paragon.5005
+	title = "paragon.5005.name"
+	desc = "paragon.5005.desc"
+	picture = GFX_evt_big_landing_ship
+	show_sound = event_celebration
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			exists = ruler
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			NOT = {
+				has_country_flag = increase_leader_upkeep
+				has_country_flag = first_colony
+			}
+			OR = {
+				has_origin = origin_legendary_leader_dictatorial
+				has_origin = origin_legendary_leader_imperial
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = first_colony
+		}
+		set_planet_flag = first_colonized_planet
+	}
+
+	option = {
+		name = EXCELLENT
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+situation_event = { #calculation utility event
+	id = paragon.5006
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner = {
+			reset_event_chain_counter = {
+				event_chain = paragon_origin_promise_chain
+				counter = promises_delivered
+			}
+			add_event_chain_counter = {
+				event_chain = paragon_origin_promise_chain
+				counter = promises_delivered
+				amount = owner.value:origin_promise_reward_count
+			}
+		}
+	}
+}
+
+situation_event = { # situation finished - calculation
+	id = paragon.5007
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner = {
+			set_variable = {
+				which = origin_reward_calculation
+				value = value:origin_promise_reward_count
+			}
+			divide_variable = {
+				which = origin_reward_calculation
+				value = 15
+			}
+			round_variable = origin_reward_calculation
+			end_event_chain = paragon_origin_promise_chain
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = prev.origin_reward_calculation
+				}
+			}
+			if = {
+				limit = {
+					check_variable = {
+						which = origin_reward_calculation
+						value >= 1
+					}
+				}
+				country_event = { id = paragon.5009 }
+				clear_variable = origin_reward_calculation
+			}
+			else = {
+				country_event = { id = paragon.5008 }
+				clear_variable = origin_reward_calculation
+			}
+		}
+	}
+}
+
+country_event = { # situation finished - bad
+	id = paragon.5008
+	title = "paragon.5008.name"
+	desc = "paragon.5008.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_factions
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.5020 days = 180 random = 360
+		}
+	}
+
+	option = {
+		name = paragon.5008.a
+		custom_tooltip = paragon.5008.a.tt
+		add_modifier = {
+			modifier = media_coverage_negative_low
+			days = 1800
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_delusion_tier
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+country_event = { # situation finished - good
+	id = paragon.5009
+	title = "paragon.5009.name"
+	desc = "paragon.5009.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.5020 days = 180 random = 360
+		}
+	}
+
+	option = {
+		name = paragon.5009.a
+		custom_tooltip = paragon.5009.a.tt
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 1800
+		}
+	}
+}
+
+planet_event = { # Colonization event - Celebration for finishing colony
+	id = paragon.5010
+	title = "paragon.5010.name"
+	desc = "paragon.5010.desc"
+	picture = GFX_evt_busy_spaceport
+	show_sound = event_celebration
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_planet_flag = first_colonized_planet
+		owner = {
+			exists = ruler
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			NOT = { has_country_flag = increase_leader_upkeep }
+		}
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5010.a
+		custom_tooltip = paragon.5010.a_tt
+		planet_event = {
+			id = paragon.5011 days = 180 random = 180
+		}
+	}
+	option = {
+		name = paragon.5010.b
+		custom_tooltip = paragon.5010.b_tt
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = alloys value >= 400 }
+				resource_stockpile_compare = { resource = minerals value >= 800 }
+			}
+		}
+		owner = {
+			add_resource = {
+				minerals = -800
+				alloys = -400
+			}
+		}
+		planet_event = {
+			id = paragon.5012 days = 180 random = 360
+		}
+	}
+	option = {
+		name = paragon.5010.c
+		custom_tooltip = paragon.5010.c_tt
+		planet_event = {
+			id = paragon.5013 days = 120 random = 60
+		}
+	}
+}
+
+planet_event = {
+	id = paragon.5011
+	title = "paragon.5011.name"
+	desc = "paragon.5011.desc"
+	show_sound = event_celebration
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+
+	trigger = {
+		owner = {
+			exists = ruler
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			NOT = { has_country_flag = increase_leader_upkeep }
+		}
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5011.a
+		response_text = paragon.5011.a.response
+		add_modifier = { modifier = paragon_origin_humble_monument days = -1 }
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_positive_low
+				days = 720
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = paragon.5012
+	title = "paragon.5012.name"
+	desc = "paragon.5012.desc"
+	show_sound = event_celebration
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+
+	trigger = {
+		owner = {
+			exists = ruler
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			NOT = { has_country_flag = increase_leader_upkeep }
+		}
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5012.a
+		custom_tooltip = paragon.leader.growth.positive
+		response_text = paragon.5012.a.response
+		add_modifier = { modifier = paragon_origin_rich_monument days = -1 }
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_positive_low
+				days = 720
+			}
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = paragon.5013
+	title = "paragon.5013.name"
+	desc = "paragon.5013.desc"
+	show_sound = event_celebration
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+
+	trigger = {
+		owner = {
+			exists = ruler
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			NOT = { has_country_flag = increase_leader_upkeep }
+		}
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5013.a
+		custom_tooltip = paragon.leader.growth.positive
+		response_text = paragon.5013.a.response
+		add_modifier = { modifier = paragon_origin_residential_monument days = -1 }
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_positive_low
+				days = 720
+			}
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+# Country problems event chain
+
+country_event = {
+	id = paragon.5014
+	title = "paragon.5014.name"
+	desc = "paragon.5014.desc"
+	picture = GFX_evt_board_meeting
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = paragon_origin_small_problems }
+		any_situation = { is_situation_type = paragon_origin_promise }
+	}
+
+	immediate = {
+		set_country_flag = paragon_origin_small_problems
+	}
+
+	option = {
+		name = paragon.5014.a
+		owner = {
+			add_modifier = {
+				modifier = council_in_tatter
+				days = -1
+			}
+		}
+	}
+}
+
+situation_event = {
+	id = paragon.5110
+	title = "paragon.5110.name"
+	desc = "paragon.5110.desc"
+	picture = GFX_evt_pirate_armada
+	show_sound = event_ship_bridge
+	location = event_target:ship_location
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			any_system_within_border = {
+				is_capital_system = no
+			}
+			has_country_flag = paragon_origin_small_problems
+		}
+	}
+
+	immediate = {
+		owner = {
+			random_system_within_border = {
+				limit = {
+					is_capital_system = no
+				}
+				paragon_origin_create_pirates = yes
+			}
+		}
+	}
+
+	option = {
+		name = paragon.5110.a
+		owner = {
+			add_modifier = {
+				modifier = paragon_origin_pirates
+				days = 1800
+			}
+		}
+	}
+}
+
+situation_event = { # some planets can't recieve signal and they want to have it
+	id = paragon.5120
+	title = "paragon.5120.name"
+	desc = "paragon.5120.desc"
+	picture = GFX_evt_mysterious_signal
+	show_sound = event_planetary_riot
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_comms_problem }
+		owner = { has_country_flag = paragon_origin_small_problems }
+	}
+
+	immediate = {
+		set_situation_flag = origin_comms_problem
+	}
+
+	option = {
+		name = paragon.5120.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = "PARAGON_ORIGIN_SPIRITUALIST_PROJECT"
+					location = this
+					owner = root
+				}
+			}
+			add_modifier = {
+				modifier = paragon_origin_comms_down
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5121
+	title = "paragon.5121.name"
+	desc = "paragon.5121.desc"
+	picture = GFX_evt_communication_event
+	show_sound = event_sensor_ping
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5121.a
+		remove_modifier = paragon_origin_comms_down
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+	}
+}
+
+situation_event = { # workers want more power, protests
+	id = paragon.5130
+	title = "paragon.5130.name"
+	desc = "paragon.5130.desc"
+	picture = GFX_evt_civil_action
+	show_sound = event_planetary_riot
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_protests_problem }
+		owner = { has_country_flag = paragon_origin_small_problems }
+	}
+
+	immediate = {
+		set_situation_flag = origin_protests_problem
+	}
+
+	option = {
+		name = paragon.5130.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = "PARAGON_ORIGIN_AUTHORITARIAN_PROJECT"
+					location = this
+					owner = root
+				}
+			}
+			add_modifier = {
+				modifier = paragon_origin_worker_strike
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5131
+	title = "paragon.5131.name"
+	desc = "paragon.5131.desc"
+	picture = GFX_evt_coronation
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5131.a
+		remove_modifier = paragon_origin_worker_strike
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+	}
+}
+
+situation_event = { # military forces are on the rise
+	id = paragon.5140
+	title = "paragon.5140.name"
+	desc = "paragon.5140.desc"
+	picture = GFX_evt_salute
+	show_sound = event_planetary_riot
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_military_problem }
+		owner = { has_country_flag = paragon_origin_small_problems }
+	}
+
+	immediate = {
+		set_situation_flag = origin_military_problem
+	}
+
+	option = {
+		name = paragon.5140.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = "PARAGON_ORIGIN_PACIFIST_PROJECT"
+					location = this
+					owner = root
+				}
+			}
+			add_modifier = {
+				modifier = paragon_origin_military_dissidents
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = { # found military dissidents
+	id = paragon.5141
+	title = "paragon.5141.name"
+	desc = "paragon.5141.desc"
+	picture = GFX_evt_spy_network
+	show_sound = event_mystic_reveal
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5141.a
+		remove_modifier = paragon_origin_military_dissidents
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+	}
+}
+
+situation_event = { # nepotism on the rise
+	id = paragon.5150
+	title = "paragon.5150.name"
+	desc = "paragon.5150.desc"
+	picture = GFX_evt_tradedeal
+	show_sound = event_planetary_riot
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_nepotism_problem }
+		owner = { has_country_flag = paragon_origin_small_problems }
+	}
+
+	immediate = {
+		set_situation_flag = origin_nepotism_problem
+	}
+
+	option = {
+		name = paragon.5150.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = "PARAGON_ORIGIN_MATERIALIST_PROJECT"
+					location = this
+					owner = root
+				}
+			}
+			add_modifier = {
+				modifier = paragon_origin_nepotism
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5151
+	title = "paragon.5151.name"
+	desc = "paragon.5151.desc"
+	picture = GFX_evt_bribery
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5151.a
+		every_planet_within_border = {
+			limit = {
+			}
+			random_owned_pop = {
+				limit = { is_pop_category = ruler }
+				unemploy_pop = yes
+			}
+		}
+		remove_modifier = paragon_origin_nepotism
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+	}
+}
+
+
+country_event = { #Little conclusion of first situation
+	id = paragon.5020
+	title = "paragon.5020.name"
+	desc = "paragon.5020.desc"
+	picture = GFX_evt_enclave_overlord
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = { #Change to Imperial 
+		name = paragon.5020.a
+		custom_tooltip = paragon.5020.a.tt
+		hidden_effect = {
+			set_origin = origin_legendary_leader_imperial
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+			country_event = {
+				id = paragon.5021 days = 90
+			}
+		}
+		# Authority change will get blocked if a civic disallows it
+		change_government = {
+			authority = auth_imperial
+			cooldown = no
+			remove_invalid_civics = yes
+		}
+	}
+	option = { #Stay Dictatorship
+		name = paragon.5020.b
+		custom_tooltip = paragon.5020.b.tt
+		hidden_effect = {
+			country_event = {
+				id = paragon.5059 days = 3600 random = 3600
+			}
+			country_event = {
+				id = paragon.5058 days = 7200 random = 3600
+			}
+			country_event = {
+				id = paragon.5201 days = 12600 random = 14400
+			}
+		}
+	}
+}
+
+country_event = { #Coronation
+	id = paragon.5021
+	title = "paragon.5021.name"
+	desc = "paragon.5021.desc"
+	picture = GFX_evt_coronation
+	show_sound = event_coronation
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.5050 days = 1800 random = 3600
+		}
+		while = {
+			count = value:paragon_take_10pr_pops
+			random_owned_pop = {
+				limit = {
+					NOT = { pop_has_ethic = ethic_egalitarian }
+				}
+				pop_change_ethic = ethic_egalitarian
+			}
+		}
+	}
+
+	option = {
+		name = paragon.5021.a
+		trigger = {
+			is_militarist = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_military_knowledge }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_foe_hammer }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_military_knowledge }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_military_knowledge }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_foe_hammer }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_foe_hammer }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.b
+		trigger = {
+			is_spiritualist = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_great_teacher }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_pious_ascet }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_great_teacher }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_great_teacher }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_pious_ascet }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_pious_ascet }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.c
+		trigger = {
+			is_authoritarian = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_commanding_presence }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_high_king }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_commanding_presence }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_commanding_presence }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_high_king }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_high_king }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.d
+		trigger = {
+			is_xenophile = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_gunboat_diplomacy }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_scientific_diplomacy }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_gunboat_diplomacy }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_gunboat_diplomacy }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_scientific_diplomacy }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_scientific_diplomacy }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.e
+		trigger = {
+			is_pacifist = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_autarky }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_natural_ruler }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_autarky }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_autarky }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_natural_ruler }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_natural_ruler }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.f
+		trigger = {
+			is_materialist = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_industry_titan }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_great_inventor }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_industry_titan }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_industry_titan }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_great_inventor }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_great_inventor }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.g
+		trigger = {
+			is_xenophobe = yes
+			NOT = {
+				ruler = {
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_genetic_purist }
+					has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_evervigilant }
+				}
+			}
+		}
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_genetic_purist }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_genetic_purist }
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					ruler = {
+						has_trait_tier1or2or3 = { TRAIT = leader_trait_legendary_evervigilant }
+					}
+				}
+				ruler = { add_trait = leader_trait_legendary_evervigilant }
+			}
+		}
+	}
+	option = {
+		name = paragon.5021.h
+		paragon_origin_gain_modifier = yes
+	}
+
+	after = {
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 360
+		}
+	}
+}
+
+# Diplomatic Milestones Events
+
+country_event = { #Made Federation
+	id = paragon.5023
+	title = "paragon.5023.name"
+	desc = "paragon.5023.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = first_federation_event
+		}
+		federation = {
+			any_member = {
+				NOR = {
+					is_galactic_emperor = yes
+					has_country_flag = empire_rebel
+					has_country_flag = empire_loyalist
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = first_federation_event
+		random_country = {
+			limit = {
+				is_country_type = default
+				is_in_federation_with = root
+			}
+			save_event_target_as = your_ally
+		}
+	}
+
+	option = {
+		name = paragon.5023.a
+		custom_tooltip = paragon.leader.growth.positive
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Become Overlord
+	id = paragon.5024
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			NOR = {
+				has_country_flag = increase_leader_upkeep
+				has_country_flag = made_paragon_speech_vassal
+			}
+			exists = ruler
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		}
+	}
+
+	immediate = {
+		from = {
+			country_event = {
+				id = paragon.5025 days = 30 random = 30
+			}
+			set_country_flag = made_paragon_speech_vassal
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5025
+	title = "paragon.5025.name"
+	desc = "paragon.5025.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = increase_leader_upkeep }
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = default
+				has_overlord = root
+			}
+			save_event_target_as = your_ally
+		}
+	}
+
+	option = {
+		name = paragon.5025.a
+		custom_tooltip = paragon.leader.growth.positive
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Won a war
+	id = paragon.5026
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = made_paragon_speech_win
+		}
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		OR = {
+			NOT = {
+				any_country = { has_country_flag = rebel_empire_@root }
+			}
+			has_country_flag = won_civil_war
+		}
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.5027
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5027
+	title = "paragon.5027.name"
+	desc = "paragon.5027.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = made_paragon_speech_win
+		}
+	}
+
+	immediate = {
+		set_country_flag = made_paragon_speech_win
+	}
+
+	option = {
+		name = paragon.5027.a
+		custom_tooltip = paragon.leader.growth.positive
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Lost a war
+	id = paragon.5028
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = made_paragon_speech_lost
+		}
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		OR = {
+			NOT = {
+				any_country = { has_country_flag = rebel_empire_@root }
+			}
+			has_country_flag = won_civil_war
+		}
+	}
+
+	immediate = {
+		country_event = { id = paragon.5029 }
+	}
+}
+
+country_event = {
+	id = paragon.5029
+	title = "paragon.5029.name"
+	desc = "paragon.5029.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_bad_omen
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = made_paragon_speech_lost
+		}
+	}
+
+	immediate = {
+		set_country_flag = made_paragon_speech_lost
+	}
+
+	option = {
+		name = paragon.5029.a
+		custom_tooltip = paragon.leader.growth.negative
+		locked_random_list = {
+			10 = {
+				add_modifier = {
+					modifier = media_coverage_negative_low
+					days = 1200
+				}
+			}
+			90 = { }
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = -2
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Become Vassal
+	id = paragon.5032
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = made_paragon_speech_overlord
+		}
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.5033 days = 30 random = 30
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5033
+	title = "paragon.5033.name"
+	desc = "paragon.5033.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_bad_omen
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOR = {
+			has_country_flag = increase_leader_upkeep
+			has_country_flag = made_paragon_speech_overlord
+		}
+	}
+
+	immediate = {
+		set_country_flag = made_paragon_speech_overlord
+		random_country = {
+			limit = {
+				is_country_type = default
+				is_overlord_to = root
+			}
+			save_event_target_as = your_ally
+		}
+	}
+
+	option = {
+		name = paragon.5033.a
+		custom_tooltip = paragon.leader.growth.negative
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = -3
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Become Emperor
+	id = paragon.5034
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		is_galactic_emperor = yes
+		NOR = {
+			has_country_flag = made_paragon_speech_emperor
+			has_country_flag = increase_leader_upkeep
+		}
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		set_country_flag = made_paragon_speech_emperor
+		country_event = {
+			id = paragon.5039 days = 30 random = 30
+		}
+	}
+}
+
+country_event = { # Become Custodian
+	id = paragon.5037
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		NOR = {
+			has_country_flag = made_paragon_speech_custodian
+			has_country_flag = increase_leader_upkeep
+		}
+		is_galactic_custodian = yes
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		set_country_flag = made_paragon_speech_custodian
+		country_event = {
+			id = paragon.5038 days = 30 random = 30
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5038
+	title = "paragon.5038.name"
+	desc = "paragon.5038.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = increase_leader_upkeep }
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5038.a
+		custom_tooltip = paragon.leader.growth.positive
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = paragon.5039
+	title = "paragon.5039.name"
+	desc = "paragon.5039.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = increase_leader_upkeep }
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5039.a
+		custom_tooltip = paragon.leader.growth.positive
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 720
+		}
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 2
+				}
+			}
+		}
+	}
+}
+
+# Forgotten event chain
+
+country_event = { # Release the Forgotten
+	id = paragon.5050
+	title = "paragon.5050.name"
+	desc = "paragon.5050.desc"
+	picture = GFX_evt_board_meeting
+	show_sound = event_conversation
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		while = {
+			count = value:paragon_take_10pr_pops
+			random_owned_pop = {
+				limit = {
+					NOT = { pop_has_ethic = ethic_egalitarian }
+				}
+				pop_change_ethic = ethic_egalitarian
+			}
+		}
+	}
+
+	option = {
+		name = paragon.5050.a
+		start_situation = {
+			type = paragon_origin_forgotten
+		}
+		add_modifier = {
+			modifier = paragon_origin_reformists_empire
+			days = -1
+		}
+	}
+}
+
+situation_event = { # 1st
+	id = paragon.5054
+	title = "paragon.5054.name"
+	desc = "paragon.5054.desc"
+	picture = GFX_evt_civil_action
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner = {
+			random_owned_pop = {
+				limit = {
+					NOT = { pop_has_ethic = ethic_egalitarian }
+				}
+				pop_change_ethic = ethic_egalitarian
+			}
+			switch = {
+				trigger = has_modifier
+				paragon_origin_strengthened_government_i = {
+					set_variable = {
+						which = clampdown_costs_mult
+						value = 0.6
+					}
+				}
+				paragon_origin_strengthened_government_ii = {
+					set_variable = {
+						which = clampdown_costs_mult
+						value = 0.3
+					}
+				}
+				default = {
+					set_variable = {
+						which = clampdown_costs_mult
+						value = 1
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = WORRYING
+		custom_tooltip = paragon.leader.growth.negative
+		hidden_effect = {
+			owner.ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = -1
+				}
+			}
+		}
+	}
+	option = {
+		name = paragon.forgotten.a
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = unity
+					value >= 5000
+					mult = clampdown_costs_mult
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				unity = -5000
+				mult = clampdown_costs_mult
+			}
+			hidden_effect = {
+				multiply_variable = {
+					which = clampdown_costs_mult
+					value = 1.5
+				}
+			}
+		}
+	}
+}
+
+situation_event = { # 2nd
+	id = paragon.5055
+	title = "paragon.5055.name"
+	desc = "paragon.5055.desc"
+	picture = GFX_evt_assembly_fight
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner = {
+			random_owned_pop = {
+				limit = {
+					NOT = { pop_has_ethic = ethic_egalitarian }
+				}
+				pop_change_ethic = ethic_egalitarian
+			}
+		}
+	}
+
+	option = {
+		name = DISTURBING
+		custom_tooltip = paragon.leader.growth.negative
+		hidden_effect = {
+			owner.ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = -1
+				}
+			}
+		}
+	}
+	option = {
+		name = paragon.forgotten.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 10000
+					mult = clampdown_costs_mult
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				energy = -10000
+				mult = clampdown_costs_mult
+			}
+			hidden_effect = {
+				multiply_variable = {
+					which = clampdown_costs_mult
+					value = 1.5
+				}
+			}
+		}
+	}
+}
+
+situation_event = { # 3rd
+	id = paragon.5056
+	title = "paragon.5056.name"
+	desc = "paragon.5056.desc"
+	picture = GFX_evt_smear_campaign
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner = {
+			random_owned_pop = {
+				limit = {
+					NOT = { pop_has_ethic = ethic_egalitarian }
+				}
+				pop_change_ethic = ethic_egalitarian
+			}
+		}
+	}
+
+	option = {
+		name = DISCONCERTING
+		custom_tooltip = paragon.leader.growth.negative
+		hidden_effect = {
+			owner.ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = -1
+				}
+			}
+		}
+	}
+	option = {
+		name = paragon.forgotten.c
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = unity
+					value >= 5000
+					mult = clampdown_costs_mult
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				unity = -5000
+				mult = clampdown_costs_mult
+			}
+			hidden_effect = {
+				multiply_variable = {
+					which = clampdown_costs_mult
+					value = 1.5
+				}
+			}
+		}
+	}
+}
+
+situation_event = { #Situation ended
+	id = paragon.5057
+	title = "paragon.5057.name"
+	desc = "paragon.5057.desc"
+	picture = GFX_evt_one_sided_deal
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = { #Imprison them
+		name = paragon.5057.a
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_negative_low
+				days = 180
+			}
+			hidden_effect = {
+				set_country_flag = forgotten_imprisoned
+				country_event = {
+					id = paragon.5060 days = 30 random = 30
+				}
+			}
+		}
+		destroy_situation = this
+		custom_tooltip = paragon.5057.a.tt
+	}
+	option = { #Negotiate a deal
+		name = paragon.5057.b
+		owner = {
+			add_modifier = {
+				modifier = paragon_origin_forgotten_deal
+				days = -1
+			}
+			hidden_effect = {
+				set_country_flag = forgotten_negotiated
+				country_event = {
+					id = paragon.5060 days = 30 random = 30
+				}
+			}
+		}
+		destroy_situation = this
+		custom_tooltip = paragon.5057.b.tt
+	}
+	option = { #Execute leaders
+		name = paragon.5057.c
+		owner = {
+			random_owned_pop = {
+				limit = { pop_has_ethic = ethic_egalitarian }
+				kill_pop = yes
+			}
+			hidden_effect = {
+				ruler = {
+					change_variable = {
+						which = paragon_origin_delusion_tier
+						value = 1
+					}
+				}
+				set_country_flag = forgotten_destroyed
+				country_event = {
+					id = paragon.5060 days = 30 random = 30
+				}
+			}
+		}
+		destroy_situation = this
+		custom_tooltip = paragon.5057.c.tt
+	}
+}
+
+country_event = { #Negative Trait
+	id = paragon.5058
+	title = "paragon.5058.name"
+	desc = "paragon.5058.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5058.a
+		paragon_origin_bad_trait_giver = yes
+	}
+}
+
+country_event = { #Positive Trait
+	id = paragon.5059
+	title = "paragon.5059.name"
+	desc = "paragon.5059.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5059.a
+		ruler = { paragon_origin_legendary_leader_trait_giver = yes }
+	}
+}
+
+country_event = { # Forgotten are crushed - speech
+	id = paragon.5060
+	title = "paragon.5060.name"
+	desc = {
+		trigger = { has_country_flag = forgotten_negotiated }
+		text = paragon.5060.desc.negotiated
+	}
+	desc = {
+		trigger = { has_country_flag = forgotten_imprisoned }
+		text = paragon.5060.desc.imprisioned
+	}
+	desc = {
+		trigger = { has_country_flag = forgotten_destroyed }
+		text = paragon.5060.desc.destroyed
+	}
+	show_sound = event_celebration
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		country_event = {
+			id = paragon.5061 days = 1800 random = 1800
+		}
+		country_event = {
+			id = paragon.5058 days = 180 random = 360
+		}
+	}
+
+	option = {
+		name = paragon.5060.a
+		ruler = {
+			paragon_origin_legendary_leader_trait_giver = yes
+		}
+		custom_tooltip = paragon.5060.a.tt
+	}
+	option = {
+		name = paragon.5060.b
+		paragon_origin_gain_modifier = yes
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = -1
+				}
+			}
+		}
+		custom_tooltip = paragon.5060.b.tt
+	}
+	
+	after = {
+		add_modifier = {
+			modifier = media_coverage_positive_low
+			days = 180
+		}
+	}
+}
+
+#Mid Story Events
+
+country_event = {
+	id = paragon.5061
+	title = "paragon.5061.name"
+	desc = "paragon.5061.desc"
+	picture = GFX_evt_zro_2
+	show_sound = event_bad_omen
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = paragon_origin_purges }
+	}
+
+	immediate = {
+		ruler = {
+			change_variable = {
+				which = paragon_origin_delusion_tier
+				value = 1
+			}
+		}
+		set_country_flag = paragon_origin_purges
+	}
+
+	option = {
+		name = WORRYING
+		custom_tooltip = paragon.leader.delusion.negative
+		ruler = { paragon_origin_gain_delusion = yes }
+		random_owned_leader = {
+			limit = { is_heir = yes }
+			kill_leader = { show_notification = yes }
+		}
+		country_event = {
+			id = paragon.5062 days = 30 random = 30
+		}
+		hidden_effect = { set_country_flag = paragon_origin_purges }
+	}
+}
+
+country_event = {
+	id = paragon.5062
+	title = "paragon.5062.name"
+	desc = "paragon.5062.desc"
+	picture = GFX_evt_zro_2
+	show_sound = event_bad_omen
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		while = {
+			count = value:paragon_take_10pr_pops
+			random_owned_pop = {
+				limit = {
+					NOT = { pop_has_ethic = ethic_egalitarian }
+				}
+				pop_change_ethic = ethic_egalitarian
+			}
+		}
+		export_trigger_value_to_variable = {
+			trigger = count_owned_planet
+			variable = max_reformists_planets
+		}
+		change_variable = {
+			which = max_reformists_planets
+			value = -1
+		}
+		divide_variable = {
+			which = max_reformists_planets
+			value = 2.1
+		}
+		ceiling_variable = max_reformists_planets
+		if = {
+			limit = {
+				any_system_within_border = {
+					is_capital_system = no
+					any_system_planet = {
+						is_colony = yes
+						has_owner = yes
+						is_owned_by	= root
+						is_controlled_by = root
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					is_capital_system = no
+					any_system_planet = {
+						is_colony = yes
+						has_owner = yes
+						is_owned_by	= root
+						is_controlled_by = root
+					}
+				}
+				random_system_colony = {
+					save_event_target_as = first_reformist_planet
+				}
+			}
+		}
+		else = {
+			capital_scope = { save_event_target_as = first_reformist_planet }
+		}
+	}
+
+	option = {
+		name = paragon.5062.a
+		custom_tooltip = paragon.5062.a.tt
+		event_target:first_reformist_planet = {
+			hidden_effect = {
+				while = {
+					count = 2
+					random_owned_pop = {
+						limit = {
+							NOT = { pop_has_ethic = ethic_egalitarian }
+						}
+						pop_change_ethic = ethic_egalitarian
+					}
+				}
+			}
+			add_modifier = {
+				modifier = paragon_origin_reformists
+				clear_on_owner_change = yes
+				days = -1
+			}
+		}
+		while = {
+			count = max_reformists_planets
+			random_system_within_border = {
+				limit = {
+					is_capital_system = no
+					any_system_planet = {
+						is_colony = yes
+						has_owner = yes
+						is_owned_by	= root
+						is_controlled_by = root
+						NOT = { has_modifier = paragon_origin_reformists }
+						any_owned_pop = { pop_has_ethic = ethic_egalitarian }
+					}
+				}
+				random_system_colony = {
+					limit = {
+						is_colony = yes
+						has_owner = yes
+						is_owned_by	= root
+						is_controlled_by = root
+						NOT = { has_modifier = paragon_origin_reformists }
+						any_owned_pop = { pop_has_ethic = ethic_egalitarian }
+					}
+					add_modifier = {
+						modifier = paragon_origin_reformists
+						clear_on_owner_change = yes
+						days = -1
+					}
+				}
+			}
+		}
+		start_situation = { type = paragon_origin_reformists_struggle }
+	}
+}
+
+country_event = { #Situation Aborted in unnatural way
+	id = paragon.5063
+	title = "paragon.5063.name"
+	picture = GFX_evt_announcement
+	show_sound = event_administrative_work
+	desc = {
+		trigger = {
+			NOT = {
+				ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			}
+		}
+		text = paragon.5063.death.desc
+	}
+	desc = {
+		trigger = {
+			NOR = {
+				any_owned_planet = { has_modifier = paragon_origin_reformists }
+				any_owned_pop = { pop_has_ethic = ethic_egalitarian }
+			}
+		}
+		text = paragon.5063.norebel.desc
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5063.death.a
+		trigger = {
+			NOT = {
+				ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			}
+		}
+		remove_modifier = paragon_origin_reformists_empire
+		every_owned_planet = {
+			limit = { has_modifier = paragon_origin_reformists }
+			remove_modifier = paragon_origin_reformists
+		}
+	}
+	option = {
+		name = paragon.5063.norebel.b
+		custom_tooltip = paragon.leader.growth.positive
+		trigger = {
+			ruler = { has_leader_flag = paragon_origin_legendary_leader }
+			NOR = {
+				any_owned_planet = { has_modifier = paragon_origin_reformists }
+				any_owned_pop = { pop_has_ethic = ethic_egalitarian }
+			}
+		}
+		remove_modifier = paragon_origin_reformists_empire
+		every_owned_planet = {
+			limit = { has_modifier = paragon_origin_reformists }
+			remove_modifier = paragon_origin_reformists
+		}
+		hidden_effect = {
+			country_event = {
+				id = paragon.5201 days = 3600 random = 7200
+			}
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 2
+				}
+			}	
+		}
+	}
+}
+
+#PURGE EVENTS
+
+situation_event = { #Delusion
+	id = paragon.5064
+	title = "paragon.5064.name"
+	desc = "paragon.5064.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_bad_omen
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+		owner = {
+			any_owned_leader = {
+				is_heir = no
+				is_ruler = no
+			}
+		}
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = paragon.5064.a
+		add_situation_progress = 8
+	}
+	option = {
+		name = paragon.5064.b
+		custom_tooltip = paragon.leader.delusion.negative
+		add_situation_progress = -8
+		owner = {
+			random_owned_leader = {
+				limit = {
+					is_heir = no
+					is_ruler = no
+				}
+				set_leader_flag = leader_death_events_blocked
+				kill_leader = { show_notification = yes }
+			}
+			ruler = { paragon_origin_gain_delusion = yes }
+		}
+	}
+}
+
+situation_event = { #Tyranny
+	id = paragon.5065
+	title = "paragon.5065.name"
+	desc = "paragon.5065.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_bad_omen
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+		owner = {
+			any_owned_pop = {
+				pop_has_ethic = ethic_egalitarian
+			}
+		}
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = paragon.5065.a
+		add_situation_progress = 8
+	}
+	option = {
+		name = paragon.5065.b
+		custom_tooltip = paragon.leader.delusion.negative
+		add_situation_progress = -8
+		owner = {
+			ruler = { paragon_origin_gain_delusion = yes }
+			random_owned_pop = {
+				limit = { pop_has_ethic = ethic_egalitarian }
+				kill_pop = yes
+			}
+		}
+	}
+}
+
+situation_event = { #Foreign Aid
+	id = paragon.5071
+	title = "paragon.5071.name"
+	desc = "paragon.5071.desc"
+	picture = GFX_evt_acquire_asset
+	show_sound = event_administrative_work
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_playable_country = {
+			is_improving_relations_with = root.owner
+		}
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				is_improving_relations_with = root.owner
+			}
+			save_event_target_as = friendly_nation
+		}
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = paragon.5071.a
+		trigger = {
+			owner = {
+				is_xenophobe = no
+			}
+		}
+		add_situation_progress = 4
+		owner = {
+			add_resource = {
+				alloys = 500
+			}
+			add_modifier = {
+				modifier = media_coverage_positive_low
+				days = 120
+			}
+		}
+	}
+	option = {
+		name = paragon.5071.b
+		trigger = {
+			owner = {
+				is_xenophile = no
+			}
+		}
+		add_situation_progress = -6
+		owner = {
+			add_resource = {
+				unity = 100
+			}
+			event_target:friendly_nation = {
+				add_trust = {
+					who = root.owner
+					amount = -50
+				}
+			}
+			add_trust = {
+				who = event_target:friendly_nation
+				amount = -50
+			}
+		}
+	}
+}
+
+situation_event = { #Pirates!
+	id = paragon.5070
+	title = "paragon.5070.name"
+	desc = "paragon.5070.desc"
+	picture = GFX_evt_pirates_attacking_cargo
+	show_sound = event_red_alert
+	location = event_target:ship_location
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		owner = {
+			random_system_within_border = {
+				paragon_origin_create_pirates = yes
+			}
+		}
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = WORRYING
+		add_situation_progress = 1
+	}
+}
+
+situation_event = { # cell neutralized
+	id = paragon.5072
+	title = "paragon.5072.name"
+	desc = "paragon.5072.desc"
+	picture = GFX_evt_interior_battle
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = GOOD
+		add_situation_progress = -4
+	}
+}
+
+situation_event = { # cell escaped
+	id = paragon.5073
+	title = "paragon.5073.name"
+	desc = "paragon.5073.desc"
+	picture = GFX_evt_archaeologists_escaping
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = WORRYING
+		locked_random_list = {
+			1 = {
+				add_situation_progress = 4
+				owner = {
+					random_owned_planet = {
+						limit = {
+							has_district = yes
+						}
+						remove_last_built_district = yes
+					}
+				}
+			}
+			1 = {
+				add_situation_progress = 2
+			}
+		}
+	}
+}
+
+situation_event = { # firefight
+	id = paragon.5074
+	title = "paragon.5074.name"
+	desc = "paragon.5074.desc"
+	picture = GFX_evt_ground_combat
+	show_sound = event_ground_battle
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = DISTURBING
+		locked_random_list = {
+			1 = {
+				add_situation_progress = -8
+				owner = {
+					random_owned_pop = {
+						kill_pop = yes
+					}
+				}
+			}
+			1 = {
+				add_situation_progress = 4
+				owner = {
+					random_owned_pop = {
+						kill_pop = yes
+					}
+				}
+			}
+			1 = {
+				add_situation_progress = 2
+			}
+		}
+	}
+}
+
+situation_event = { #Loyal Populace
+	id = paragon.5075
+	title = "paragon.5075.name"
+	desc = "paragon.5075.desc"
+	picture = GFX_evt_grand_speech
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = MARVELOUS
+		add_situation_progress = -2
+		owner = {
+			add_modifier = {
+				modifier = media_coverage_positive_low
+				days = 120
+			}
+		}
+	}
+}
+
+situation_event = { #Reformists Gathering
+	id = paragon.5090
+	title = "paragon.5090.name"
+	desc = "paragon.5090.desc"
+	picture = GFX_evt_alien_propaganda
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_situation_flag = origin_recent_random_event }
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = origin_recent_random_event
+			days = 360
+		}
+	}
+
+	option = {
+		name = DISTURBING
+		add_situation_progress = 1
+	}
+}
+
+country_event = { #Finished Agenda
+	id = paragon.5095
+	title = "paragon.5095.name"
+	desc = "paragon.5095.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_factions
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5095.a
+		random_situation = {
+			limit = { is_situation_type = paragon_origin_reformists_struggle }
+			destroy_situation = this
+		}
+		country_event = { id = paragon.5200 days = 15 random = 15 }
+	}
+}
+
+#REFORMATION AND THE FALL
+
+country_event = { #Preparation to negotiations
+	id = paragon.5200
+	title = "paragon.5200.name"
+	desc = "paragon.5200.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_factions
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		has_country_flag = paragon_origin_purges
+	}
+
+	immediate = {
+		remove_country_flag = paragon_origin_purges
+	}
+
+	option = {
+		name = GOOD
+		country_event = {
+			id = paragon.5210 days = 30 random = 90
+		}
+	}
+}
+
+country_event = { #Ruler Address The Nation - The Speech
+	id = paragon.5201
+	title = "paragon.5201.name"
+	desc = "paragon.5201.desc"
+	show_sound = event_factions
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+
+	trigger = {
+		exists = ruler
+		ruler = { 
+			has_leader_flag = paragon_origin_legendary_leader 
+			has_chosen_one_leader_trait = no
+		}
+	}
+
+	option = {
+		name = paragon.5201.a
+		country_event = {
+			id = paragon.5202
+			days = 30
+		}
+	}
+}
+
+country_event = { #Ruler Address The Nation - The Fall
+	id = paragon.5202
+	title = "paragon.5202.name"
+	desc = {
+		text = paragon.5202.regular
+		trigger = {
+			NOT = {	
+				has_country_flag = synthetic_empire	
+			}
+		}
+	}
+	desc = {
+		text = paragon.5202.synth
+		trigger = {
+			has_country_flag = synthetic_empire	
+		}
+	}
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.5202.a
+		custom_tooltip = paragon.5202.a.tt
+		hidden_effect = {
+			country_event = {
+				id = paragon.6000
+				days = 30
+			}
+		}
+	}
+	option = {
+		name = paragon.5202.b
+		custom_tooltip = paragon.5202.b.tooltip
+		paragon_origin_gain_modifier = yes
+		random_owned_leader = {
+			limit = { is_ruler = yes }
+			kill_leader = { show_notification = yes }
+		}
+	}
+}
+
+country_event = { #After the Fall - First negotiation batch - with Reformists
+	id = paragon.5210
+	title = "paragon.5210.name"
+	desc = "paragon.5210.desc"
+	picture = GFX_evt_galactic_senate
+	show_sound = event_factions
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		set_country_flag = main_player_empire_@this
+	}
+
+	option = {
+		name = paragon.5210.a
+		paragon_origin_reformists_negotiations_effect = yes
+		country_event = {
+			id = paragon.5220 days = 15 random = 30
+		}
+	}
+	option = {
+		name = paragon.5210.b
+		country_event = {
+			id = paragon.5221 days = 15 random = 15
+		}
+		custom_tooltip = paragon.5210.b.tt
+	}
+	option = {
+		trigger = {
+			ruler = {
+				check_variable = {
+					which = paragon_origin_delusion_tier
+					value >= 10
+				}
+			}
+		}
+		name = paragon.5210.c
+		hidden_effect = {
+			ruler = {
+				while = {
+					count = 5
+					paragon_origin_gain_delusion = yes
+				}	
+			}
+		}
+		country_event = {
+			id = paragon.5222 days = 15 random = 15
+		}
+		custom_tooltip = paragon.5210.c.tt
+	}
+	option = {
+		name = paragon.5210.d
+		trigger = {
+			any_system_within_border = {
+				is_capital_system = no
+				any_system_colony = { has_modifier = paragon_origin_reformists }
+			}
+			NOT = { has_valid_civic = civic_fanatic_purifiers }
+		}
+		hidden_effect = {
+			random_owned_leader = {
+				remove_leader_flag = paragon_origin_legendary_leader
+				limit = { is_ruler = yes }
+				kill_leader = { show_notification = no }
+			}
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_player
+			days = -1
+		}
+		set_origin = origin_legendary_leader_death
+		shift_ethic = ethic_fanatic_egalitarian
+		hidden_effect = {
+			paragon_origin_launch_rebelion = yes
+			country_event = {
+				id = paragon.5211 days = 15 random = 15
+			}
+		}
+		if = {
+			limit = { host_has_dlc = "Megacorp" }
+			hidden_effect = {
+				force_remove_civic = 2
+			}
+			change_government = {
+				authority = auth_democratic
+				remove_invalid_civics = yes
+				civics = {
+					civic = civic_idealistic_foundation
+					civic = civic_shared_burden
+				}
+			}
+		}
+		else = {
+			hidden_effect = {
+				force_remove_civic = 2
+			}
+			change_government = {
+				authority = auth_democratic
+				remove_invalid_civics = yes
+				civics = {
+					civic = civic_meritocracy
+					civic = civic_idealistic_foundation
+				}
+			}
+		}
+		set_policy = {
+			policy = war_philosophy
+			option = liberation_wars
+			cooldown = yes
+		}
+		custom_tooltip = paragon.5210.d.tt
+	}
+	option = {
+		name = paragon.5210.e
+		trigger = {
+			any_system_within_border = {
+				is_capital_system = no
+				any_system_colony = { has_modifier = paragon_origin_reformists }
+			}
+			has_valid_civic = civic_fanatic_purifiers
+		}
+		hidden_effect = {
+			random_owned_leader = {
+				remove_leader_flag = paragon_origin_legendary_leader
+				limit = { is_ruler = yes }
+				kill_leader = { show_notification = no }
+			}
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_player
+			days = -1
+		}
+		set_origin = origin_legendary_leader_death
+		hidden_effect = {
+			clear_ethos = yes
+			paragon_origin_launch_rebelion = yes
+			force_remove_civic = 3
+			country_event = {
+				id = paragon.5211 days = 15 random = 30
+			}
+		}
+		country_add_ethic = ethic_fanatic_xenophobe
+		country_add_ethic = ethic_militarist
+		change_government = {
+			authority = auth_democratic
+			remove_invalid_civics = yes
+			civics = {
+				civic = civic_distinguished_admiralty
+				civic = civic_fanatic_purifiers
+				civic = civic_citizen_service
+			}
+		}
+		custom_tooltip = paragon.5210.d.tt
+	}
+}
+
+country_event = { #Started the war
+	id = paragon.5211
+	title = "paragon.5211.name"
+	desc = "paragon.5211.desc"
+	picture = GFX_evt_open_revolt
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = this
+		has_modifier = paragon_origin_rebel_player
+	}
+
+	immediate = {
+		set_country_flag = won_with_1
+	}
+
+	option = {
+		name = paragon.5211.a
+	}
+	option = {
+		name = paragon.5211.b
+		trigger = {
+			NOT = { is_xenophobe = yes }
+		}
+		switch = {
+			trigger = has_ethic
+			ethic_xenophile = {
+				shift_ethic = ethic_xenophobe
+			}
+			ethic_xenophobe = {
+				shift_ethic = ethic_xenophile
+			}
+			ethic_militarist = {
+				shift_ethic = ethic_pacifist
+			}
+			ethic_pacifist = {
+				shift_ethic = ethic_militarist
+			}
+			ethic_spiritualist = {
+				shift_ethic = ethic_materialist
+			}
+			ethic_materialist = {
+				shift_ethic = ethic_spiritualist
+			}
+		}
+	}
+}
+
+country_event = { #Won the civil war
+	id = paragon.5213
+	title = "paragon.5213.name"
+	desc = "paragon.5213.desc"
+	picture = GFX_evt_crisis_defeated
+	show_sound = event_radio_chatter
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = this
+		NOT = { has_country_flag = won_civil_war }
+		has_modifier = paragon_origin_rebel_player
+		OR = {
+			has_global_flag = rebel_empire_killed_@this
+			AND = {
+				exists = from
+				from = { has_country_flag = rebel_empire_@root }
+			}
+		}
+	}
+
+	immediate = {
+		remove_country_flag = main_player_empire_@this
+		remove_global_flag = rebel_empire_killed_@this
+		set_country_flag = won_civil_war
+		set_country_flag = equality_democracy_freedom_achievement
+		remove_modifier = paragon_origin_reformists_empire
+		every_owned_planet = {
+			limit = { has_modifier = paragon_origin_reformists }
+			remove_modifier = paragon_origin_reformists
+		}
+	}
+
+	option = {
+		name = paragon.5213.a
+		trigger = {
+			is_xenophile = yes
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_xenophile
+			days = -1
+		}
+	}
+	option = {
+		name = paragon.5213.b
+		trigger = {
+			is_xenophobe = yes
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_xenophobe
+			days = -1
+		}
+	}
+	option = {
+		name = paragon.5213.c
+		trigger = {
+			is_militarist = yes
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_militarist
+			days = -1
+		}
+	}
+	option = {
+		name = paragon.5213.d
+		trigger = {
+			is_pacifist = yes
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_pacifist
+			days = -1
+		}
+	}
+		option = {
+		name = paragon.5213.e
+		trigger = {
+			is_materialist = yes
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_materialist
+			days = -1
+		}
+	}
+	option = {
+		name = paragon.5213.f
+		trigger = {
+			is_spiritualist = yes
+		}
+		add_modifier = {
+			modifier = paragon_origin_rebel_spiritualist
+			days = -1
+		}
+	}
+	after = {
+		paragon_origin_gain_modifier = yes
+		hidden_effect = {
+			set_government_cooldown = no	
+			remove_modifier = paragon_origin_rebel_player
+		}
+	}
+}
+
+country_event = { #After the negotiations - peace
+	id = paragon.5220
+	title = "paragon.5220.name"
+	desc = "paragon.5220.desc.peace"
+	picture = GFX_evt_crisis_defeated
+	show_sound = event_celebration
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		set_country_flag = paragon_origin_reformists_gone
+		set_variable = {
+			which = paragon_origin_ascension
+			value = 0
+		}
+		switch = {
+			trigger = has_authority
+			auth_dictatorial = {
+				set_variable = {
+					which = paragon_origin_max_ascension
+					value = 2
+				}
+			}
+			auth_imperial = {
+				if = {
+					limit = {
+						ruler = {
+							check_variable = {
+								which = paragon_origin_delusion_tier
+								value >= 20
+							}
+						}
+					}
+					set_variable = {
+						which = paragon_origin_max_ascension
+						value = 4
+					}
+				}
+				else = {
+					set_variable = {
+						which = paragon_origin_max_ascension
+						value = 3
+					}
+				}
+			}
+		}
+		country_event = {
+			id = paragon.5201 days = 1800 random = 3600
+		}
+	}
+
+	option = {
+		name = paragon.5220.a
+		custom_tooltip = paragon.5220.a.tt
+		remove_modifier = paragon_origin_reformists_empire
+		hidden_effect = {
+			every_owned_planet = {
+				limit = {
+					has_owner = yes
+					is_controlled_by = root
+					has_modifier = paragon_origin_reformists
+				}
+				remove_modifier = paragon_origin_reformists
+			}
+			remove_country_flag = paragon_origin_reformists_war
+		}
+	}
+}
+
+country_event = { #After the negotiations - war
+	id = paragon.5221
+	title = "paragon.5221.name"
+	desc = "paragon.5220.desc.war" #This is correct
+	picture = GFX_evt_crisis_declared
+	show_sound = event_ground_battle
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.5221.a
+		custom_tooltip = paragon.5221.a.tt
+		hidden_effect = {
+			paragon_origin_civil_war = yes
+			every_owned_planet = {
+				limit = {
+					has_owner = yes
+					is_controlled_by = root
+					has_modifier = paragon_origin_reformists
+				}
+				remove_modifier = paragon_origin_reformists
+			}
+			remove_modifier = paragon_origin_reformists_empire
+		}
+	}
+}
+
+country_event = { #After the negotiations - blood!
+	id = paragon.5222
+	title = "paragon.5222.name"
+	desc = "paragon.5222.desc"
+	picture = GFX_evt_gladiators
+	show_sound = event_faceoff_in_space
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		set_country_flag = paragon_origin_reformists_gone
+		set_variable = {
+			which = paragon_origin_ascension
+			value = 0
+		}
+		switch = {
+			trigger = has_authority
+			auth_dictatorial = {
+				set_variable = {
+					which = paragon_origin_max_ascension
+					value = 2
+				}
+			}
+			auth_imperial = {
+				if = {
+					limit = {
+						ruler = {
+							check_variable = {
+								which = paragon_origin_delusion_tier
+								value >= 20
+							}
+						}
+					}
+					set_variable = {
+						which = paragon_origin_max_ascension
+						value = 4
+					}
+				}
+				else = {
+					set_variable = {
+						which = paragon_origin_max_ascension
+						value = 3
+					}
+				}
+			}
+		}
+		country_event = {
+			id = paragon.5201 days = 1800 random = 3600
+		}
+	}
+
+	option = {
+		name = paragon.5222.a
+		custom_tooltip = paragon.leader.growth.positive
+		remove_modifier = paragon_origin_reformists_empire
+		hidden_effect = {
+			every_owned_planet = {
+				limit = {
+					has_owner = yes
+					is_controlled_by = root
+					has_modifier = paragon_origin_reformists
+				}
+				remove_modifier = paragon_origin_reformists
+			}
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 8
+				}
+			}
+		}
+	}
+}
+
+country_event = { #After the negotiations - civil war won
+	id = paragon.5223
+	title = "paragon.5223.name"
+	desc = "paragon.5223.desc"
+	picture = GFX_evt_burning_city
+	show_sound = event_celebration
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = this
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+		NOT = { has_country_flag = won_civil_war }
+		OR = {
+			has_country_flag = one_planet_civil_war
+			has_global_flag = rebel_empire_killed_@this
+			AND = {
+				exists = from
+				from = { has_country_flag = rebel_empire_@root }
+			}
+		}
+	}
+
+	immediate = {
+		remove_country_flag = main_player_empire_@this
+		remove_global_flag = rebel_empire_killed_@this
+		set_country_flag = paragon_origin_reformists_gone
+		set_country_flag = won_civil_war
+		set_variable = {
+			which = paragon_origin_ascension
+			value = 0
+		}
+		switch = {
+			trigger = has_authority
+			auth_dictatorial = {
+				set_variable = {
+					which = paragon_origin_max_ascension
+					value = 2
+				}
+			}
+			auth_imperial = {
+				if = {
+					limit = {
+						ruler = {
+							check_variable = {
+								which = paragon_origin_delusion_tier
+								value >= 20
+							}
+						}
+					}
+					set_variable = {
+						which = paragon_origin_max_ascension
+						value = 4
+					}
+				}
+				else = {
+					set_variable = {
+						which = paragon_origin_max_ascension
+						value = 3
+					}
+				}
+			}
+		}
+		random_country = {
+			limit = { has_country_flag = rebel_empire_@root }
+			every_owned_starbase = {
+				set_owner = root
+			}
+			every_owned_planet = {
+				set_owner = root
+			}
+		}
+		country_event = {
+			id = paragon.5201 days = 1800 random = 3600
+		}
+	}
+
+	option = {
+		name = paragon.5223.a
+		add_modifier = {
+			modifier = paragon_origin_united_through_war
+			days = -1
+		}
+		hidden_effect = {
+			every_owned_planet = {
+				limit = {
+					has_owner = yes
+					is_controlled_by = root
+					has_modifier = paragon_origin_reformists
+				}
+				remove_modifier = paragon_origin_reformists
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Terraform
+	id = paragon.5305
+	title = "paragon.5305.name"
+	desc = "paragon.5305.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+	
+	immediate = {
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			random_system_within_border = {
+				limit = {
+					any_system_planet = {
+						is_colonizable = yes
+						is_colony = no
+						habitability = {
+							who = root.owner.owner_species
+							value < 0.6
+						}
+					}
+				}
+				random_system_planet = {
+					limit = {
+						is_colonizable = yes
+						is_colony = no
+						habitability = {
+							who = root.owner.owner_species
+							value < 0.6
+						}
+					}
+					change_pc = root.owner_species
+				}
+			}
+			if = {
+				limit = {
+					NOT = { has_technology = tech_terrestrial_sculpting }
+				}
+				add_research_option = tech_terrestrial_sculpting
+				add_tech_progress = {
+					tech = tech_terrestrial_sculpting
+					progress = 0.05
+				}
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Exceptional ship
+	id = paragon.5310
+	title = "paragon.5310.name"
+	desc = "paragon.5310.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner.capital_scope.solar_system = { save_event_target_as = planet_to_spawn_fleet }
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		custom_tooltip = paragon.5310.tt
+		owner = {
+			create_fleet = {
+				name = NAME_PARAGON_ORIGIN_CRUISER_FLEET
+				effect = {
+					set_owner = root
+					create_ship = {
+						name = "NAME_PARAGON_ORIGIN_CRUISER"
+						design = NAME_MavenCruiser
+					}
+					set_location = {
+						target = event_target:planet_to_spawn_fleet
+						distance = 10
+						angle = random
+					}
+					set_fleet_stance = passive
+				}
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Some Research
+	id = paragon.5315
+	title = "paragon.5315.name"
+	desc = "paragon.5315.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			locked_random_list = {
+				1 = {
+					add_monthly_resource_mult = {
+						resource = physics_research
+						value = 9
+					}
+				}
+				1 = {
+					add_monthly_resource_mult = {
+						resource = society_research
+						value = 9
+					}
+				}
+				1 = {
+					add_monthly_resource_mult = {
+						resource = engineering_research
+						value = 9
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - All Leaders exp gain (not Ruler) 
+	id = paragon.5320
+	title = "paragon.5320.name"
+	desc = "paragon.5320.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			every_owned_leader = {
+				limit = {
+					is_ruler = no
+				}
+				add_experience = 450
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Upgrade Starbase
+	id = paragon.5325
+	title = "paragon.5325.name"
+	desc = "paragon.5325.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			random_owned_starbase = {
+				limit = {
+					NOT = { has_starbase_size = starbase_outpost }
+				}
+				if = {
+					limit = {
+						has_starbase_size = starbase_starport
+					}
+					set_starbase_size = starbase_starhold
+				}
+				else_if = {
+					limit = {
+						has_starbase_size = starbase_starhold
+					}
+					set_starbase_size = starbase_starfortress
+				}
+				else = {
+					set_starbase_size = starbase_citadel
+					owner = {
+						add_resource = { engineering_research = 1000 }
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Make Living Metal
+	id = paragon.5330
+	title = "paragon.5330.name"
+	desc = "paragon.5330.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_planet_within_border = {
+			has_deposit = no
+			is_colonizable = no
+			is_colony = no
+			has_any_strategic_resource = no
+			OR = {
+				is_planet_class = pc_barren
+				is_planet_class = pc_barren_cold
+				is_asteroid = yes
+			}
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = living_metal_found }
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			random_planet_within_border = {
+				limit = {
+					has_deposit = no
+					is_colonizable = no
+					is_colony = no
+					has_any_strategic_resource = no
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+						is_asteroid = yes
+					}
+				}
+				clear_deposits = yes
+				set_deposit = d_living_metal_deposit
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Make Dark Matter
+	id = paragon.5335
+	title = "paragon.5335.name"
+	desc = "paragon.5335.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_planet_within_border = {
+			is_star = yes
+			is_colonizable = no
+			is_colony = no
+			has_any_strategic_resource = no
+			OR = {
+				is_star_class = sc_black_hole
+				is_star_class = sc_pulsar
+				is_star_class = sc_neutron_star	
+			}
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = dark_matter_found }
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			random_planet_within_border = {
+				limit = {
+					is_star = yes
+					is_colonizable = no
+					is_colony = no
+					has_any_strategic_resource = no
+					OR = {
+						is_star_class = sc_black_hole
+						is_star_class = sc_pulsar
+						is_star_class = sc_neutron_star	
+					}
+				}
+				hidden_effect = { clear_deposits = yes }
+				set_deposit = d_dark_matter_deposit_1
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Ascend Your Planet
+	id = paragon.5340
+	title = "paragon.5340.name"
+	desc = "paragon.5340.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			capital_scope = { has_planetary_ascension_tier < 10 }
+		}
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		custom_tooltip = paragon.5340.tt
+		hidden_effect = {
+			owner = {
+				capital_scope = { set_planetary_ascension_tier = value:add_planet_ascension_tier }
+			}
+		}
+	}
+}
+
+country_event = { #Slap Unique Modifier On Capital
+	id = paragon.5345
+	title = "paragon.5345.name"
+	desc = "paragon.5345.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			capital_scope = { add_deposit = d_arcane_device }
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Slap Strategic Resource Somewhere (Crystal, Gas, Mote)
+	id = paragon.5360
+	title = "paragon.5360.name"
+	desc = "paragon.5360.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+	}
+
+	immediate = {
+		owner = { set_country_flag = strategic_resource_found }
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		locked_random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					any_planet_within_border = {
+						OR = {
+							has_deposit_for = shipclass_mining_station
+							has_deposit = no
+						}
+						is_colonizable = no
+						is_colony = no
+						has_any_strategic_resource = no
+						OR = {
+							is_planet_class = pc_frozen
+							is_planet_class = pc_ice_asteroid
+							is_inside_nebula = yes
+						}			
+					}
+				}
+				owner = {
+					set_country_flag = exotic_gases_found
+					random_planet_within_border = {
+						limit = {
+							OR = {
+								has_deposit_for = shipclass_mining_station
+								has_deposit = no
+							}
+							is_colonizable = no
+							is_colony = no
+							has_any_strategic_resource = no
+							OR = {
+								is_planet_class = pc_frozen
+								is_planet_class = pc_ice_asteroid
+								is_inside_nebula = yes
+							}		
+						}
+						add_deposit = d_exotic_gases_1
+					}
+					add_resource = { exotic_gases = 250 }
+				}
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					any_planet_within_border = {
+						OR = {
+							has_deposit_for = shipclass_mining_station
+							has_deposit = no
+						}
+						is_colonizable = no
+						is_colony = no
+						has_any_strategic_resource = no
+						OR = {
+							is_planet_class = pc_gas_giant
+							is_planet_class = pc_toxic
+						}
+					}
+				}
+				owner = {
+					set_country_flag = rare_crystals_found
+					random_planet_within_border = {
+						limit = {
+							OR = {
+								has_deposit_for = shipclass_mining_station
+								has_deposit = no
+							}
+							is_colonizable = no
+							is_colony = no
+							has_any_strategic_resource = no
+							OR = {
+								is_planet_class = pc_gas_giant
+								is_planet_class = pc_toxic
+							}
+						}
+						add_deposit = d_rare_crystals_1
+					}
+					add_resource = { rare_crystals = 250 }
+				}
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					any_planet_within_border = {
+						OR = {
+							has_deposit_for = shipclass_mining_station
+							has_deposit = no
+						}
+						is_colonizable = no
+						is_colony = no
+						has_any_strategic_resource = no
+						OR = {
+							is_planet_class = pc_molten
+							is_planet_class = pc_asteroid
+						}
+					}
+				}
+				owner = {
+					set_country_flag = volatile_motes_found
+					random_planet_within_border = {
+						limit = {
+							OR = {
+								has_deposit_for = shipclass_mining_station
+								has_deposit = no
+							}
+							is_colonizable = no
+							is_colony = no
+							has_any_strategic_resource = no
+							OR = {
+								is_planet_class = pc_molten
+								is_planet_class = pc_asteroid
+							}
+						}
+						add_deposit = d_volatile_motes_1
+					}
+					add_resource = { volatile_motes = 250 }
+				}
+			}
+			0 = {
+				modifier = {
+					add = 1
+					any_planet_within_border = {
+						NOR = {
+							is_planet_class = pc_molten
+							is_planet_class = pc_asteroid
+							is_planet_class = pc_gas_giant
+							is_planet_class = pc_toxic
+							is_planet_class = pc_frozen
+							is_planet_class = pc_ice_asteroid
+							is_inside_nebula = yes
+						}
+					}
+				}
+				owner = {
+					set_country_flag = volatile_motes_found
+					set_country_flag = rare_crystals_found
+					set_country_flag = exotic_gases_found
+					add_advanced_resources_effect = { VALUE = 350 }
+				}
+			}
+		}
+	}
+}
+
+country_event = { #Ruler Insight - Tech Orbital Rings
+	id = paragon.5370
+	title = "paragon.5370.name"
+	desc = "paragon.5370.desc"
+	picture = GFX_evt_legendary_leader
+	show_sound = event_celebration
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.owner.ruler
+		room = root.owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_overlord_dlc = yes
+	}
+
+	immediate = {
+		owner = { set_country_flag = paragon_origin_orbital_rings }
+	}
+
+	option = {
+		name = paragon.origin.insight
+	}
+	after = {
+		owner = {
+			if = {
+				limit = {
+					NOT = { has_technology = tech_orbital_ring_tier_1 }
+				}
+				add_research_option = tech_orbital_ring_tier_1
+			}
+		}
+	}
+}
+
+country_event = { #UTILITY - On Legendary Leader Death
+	id = paragon.5900
+	title = "paragon.5900.name"
+	desc = {
+		trigger = {
+			NOR = {
+				has_modifier = paragon_origin_strengthened_government_i
+				has_modifier = paragon_origin_strengthened_government_ii
+				has_modifier = paragon_origin_strengthened_government_iii
+			}
+		}
+		text = paragon.5900.desc
+	}
+	desc = {
+		trigger = {
+			OR = {
+				has_modifier = paragon_origin_strengthened_government_i
+				has_modifier = paragon_origin_strengthened_government_ii
+			}
+		}
+		text = paragon.5900.desc.50years
+	}
+	desc = {
+		trigger = {
+			has_modifier = paragon_origin_strengthened_government_iii
+		}
+		text = paragon.5900.desc.100years
+	}
+	picture = GFX_evt_announcement
+	show_sound = event_life_support_fail
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_origin = origin_legendary_leader_dictatorial
+			has_origin = origin_legendary_leader_imperial
+		}
+		FROM = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	immediate = {
+		set_country_flag = paragon_origin_reformists_gone
+		every_owned_planet = {
+			limit = {
+				has_owner = yes
+				is_controlled_by = root
+				has_modifier = paragon_origin_reformists
+			}
+			remove_modifier = paragon_origin_reformists
+		}
+	}
+
+	option = {
+		name = paragon.5900.a
+		trigger = {
+			NOR = {
+				has_modifier = paragon_origin_strengthened_government_i
+				has_modifier = paragon_origin_strengthened_government_ii
+				has_modifier = paragon_origin_strengthened_government_iii
+			}
+		}
+		add_modifier = {
+			modifier = paragon_origin_saddening_grief
+			days = 3600
+		}
+		set_origin = origin_legendary_leader_death
+		hidden_effect = {
+			remove_country_flag = increase_leader_upkeep
+		}
+	}
+	option = {
+		name = paragon.5900.a.50years
+		trigger = {
+			OR = {
+				has_modifier = paragon_origin_strengthened_government_i
+				has_modifier = paragon_origin_strengthened_government_ii
+			}
+		}
+		add_modifier = {
+			modifier = paragon_origin_saddening_grief
+			days = 1800
+		}
+		paragon_origin_gain_modifier = yes
+		set_origin = origin_legendary_leader_death
+		hidden_effect = {
+			remove_country_flag = increase_leader_upkeep
+		}
+	}
+	option = {
+		name = paragon.5900.a.100years
+		trigger = {
+			has_modifier = paragon_origin_strengthened_government_iii
+		}
+		add_modifier = {
+			modifier = paragon_origin_fresh_start
+			multiplier = 2
+			days = -1
+		}
+		set_origin = origin_legendary_leader_death
+		hidden_effect = {
+			remove_country_flag = increase_leader_upkeep
+		}
+	}
+}
+
+country_event = { #UTILITY - Ascended Leader Upkeep Tick
+	id = paragon.5905
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = {
+			has_leader_flag = paragon_origin_legendary_leader
+			OR = {
+				has_leader_flag = paragon_origin_genetic_ascension
+				has_leader_flag = paragon_origin_psionic_ascension
+			}
+		}
+		has_country_flag = paragon_origin_finished_story
+		OR = {
+			has_origin = origin_legendary_leader_dictatorial
+			has_origin = origin_legendary_leader_imperial
+		}
+	}
+
+	immediate = {
+		while = {
+			count = paragon_origin_ascension
+			random_owned_pop = {
+				kill_pop = yes
+			}
+		}
+	}
+}
+
+planet_event = { #UTILITY - killing leader when life sustaining apparatus is lost
+	id = paragon.5930
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		this = { has_modifier = sustaining_apparatus }
+		fromfrom = {
+			OR = {
+				NOT = { exists = this }
+				has_origin = origin_legendary_leader_dictatorial
+				has_origin = origin_legendary_leader_imperial
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			random_owned_leader = {
+				limit = { is_ruler = yes }
+				kill_leader = { show_notification = yes }
+			}
+		}
+		remove_modifier = sustaining_apparatus
+	}
+}
+
+country_event = { #UTILITY - removing planet modifier if country destroyed
+	id = paragon.5935
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_origin = origin_legendary_leader_dictatorial
+			has_origin = origin_legendary_leader_imperial
+		}
+		this.capital_scope = { has_modifier = sustaining_apparatus }
+	}
+
+	immediate = {
+		this.capital_scope = { remove_modifier = sustaining_apparatus }
+	}
+}
+
+# fires when a country releases a sector as a vassal
+# This = released vassal
+# From = overlord
+country_event = { #UTILITY - removing vassals during reformists will make them Egalitarians
+	id = paragon.5940
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			any_situation = { is_situation_type = paragon_origin_reformists_struggle }
+		}
+	}
+
+	immediate = {
+		clear_ethos = yes
+		shift_ethic = ethic_militarist
+		shift_ethic = ethic_fanatic_egalitarian
+		set_origin = origin_legendary_leader_death
+		force_remove_civic = 3
+		change_government = {
+			authority = auth_democratic
+			civics = {
+				civic = civic_distinguished_admiralty
+				civic = civic_idealistic_foundation
+				civic = civic_citizen_service
+			}
+			remove_invalid_civics = yes
+		}
+	}
+}
+
+situation_event = { #UTILITY - check if there are reformists planet still in the empire
+	id = paragon.5945
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			owner = {
+				OR = {
+					any_owned_planet = { has_modifier = paragon_origin_reformists }
+					any_owned_pop = { pop_has_ethic = ethic_egalitarian }
+				}
+			}
+		}
+	}
+
+	immediate = {
+		abort_situation = this
+	}
+}
+
+#This = destroyed country
+#From = optional, destroyer (country)
+country_event = { #UTILIT - failsafe if the civil war country gets completely destroyed
+	id = paragon.5950
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = origin_rebel_empire
+		any_country = {
+			is_country_type = default
+			has_country_flag = main_player_empire_@this
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = main_player_empire_@this
+			}
+			if = {
+				limit = {
+					root = {
+						has_country_flag = rebel_empire_@prev
+					}
+				}
+				random_country = {
+					limit = {
+						has_country_flag = main_player_empire_@this
+					}
+					set_global_flag = rebel_empire_killed_@this
+					country_event = {
+						id = paragon.5213
+					}
+					country_event = {
+						id = paragon.5223
+					}
+				}
+			}
+		}
+	}
+}
+
+#Ruler Immortality Event
+country_event = { 
+	id = paragon.6000
+	title = "paragon.6000.name"
+	desc = {
+		text = paragon.6000.desc
+		trigger = {
+			NOR = {
+				has_tradition = tr_psionics_finish
+				has_tradition = tr_cybernetics_finish
+				has_country_flag = synthetic_empire
+				has_tradition = tr_genetics_finish
+			}
+		}
+	}
+	desc = {
+		text = paragon.6000.desc.ap_mind_over_matter
+		trigger = {
+			has_tradition = tr_psionics_finish
+		}
+	}
+	desc = {
+		text = paragon.6000.desc.ap_the_flesh_is_weak
+		trigger = {
+			has_tradition = tr_cybernetics_finish
+		}
+	}
+	desc = {
+		text = paragon.6000.desc.ap_synthetic_evolution
+		trigger = {
+			has_country_flag = synthetic_empire
+		}
+	}
+	desc = {
+		text = paragon.6000.desc.ap_engineered_evolution
+		trigger = {
+			has_tradition = tr_genetics_finish
+		}
+	}
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.6000.a
+		trigger = {
+			NOT = { has_country_flag = synthetic_empire }
+		}
+		custom_tooltip = paragon.6000.a.tooltip
+		allow = {	
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 1500
+				}
+				resource_stockpile_compare = {
+					resource = minerals
+					value >= 1500
+				}
+			}
+		}	
+		owner = {
+			add_resource = {
+				energy = -1500
+				minerals = -1500
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = paragon.6005
+				days = 90 
+			}
+		}
+	}
+	option = {
+		name = paragon.6000.b
+		custom_tooltip = paragon.6000.b.tooltip
+		trigger = {
+			has_tradition = tr_cybernetics_finish
+		}
+		allow = {	
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 1000
+				}
+				resource_stockpile_compare = {
+					resource = alloys
+					value >= 500
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				energy = -1000
+				alloys = -500
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = paragon.6010
+				days = 90
+			}
+		}
+	}
+	option = {
+		name = paragon.6000.c
+		custom_tooltip = paragon.6000.c.tooltip
+		trigger = {
+			has_tradition = tr_psionics_finish
+		}
+		allow = {	
+			owner = {
+				resource_stockpile_compare = {
+					resource = sr_zro
+					value >= 250
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				sr_zro = -250
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = paragon.6015
+				days = 90
+			}
+		}
+	}
+	option = {
+		name = paragon.6000.d
+		custom_tooltip = paragon.6000.d.tooltip
+		trigger = {
+			has_country_flag = synthetic_empire
+		}
+		allow = {	
+			owner = {
+				resource_stockpile_compare = {
+					resource = alloys
+					value >= 500
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				alloys = -500
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = paragon.6020
+				days = 90
+			}
+		}
+	}
+	option = {
+		name = paragon.6000.e
+		custom_tooltip = paragon.6000.e.tooltip
+		trigger = {
+			has_tradition = tr_genetics_finish
+		}
+		allow = {	
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 1000
+				}
+				resource_stockpile_compare = {
+					resource = food
+					value >= 1000
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				energy = -1000
+				food = -1000
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = paragon.6025
+				days = 90
+			}
+		}
+	}
+
+	option = {
+		name = paragon.6000.f
+		custom_tooltip = paragon.6000.f.tooltip
+		paragon_origin_gain_modifier = yes
+		random_owned_leader = {
+			limit = { is_ruler = yes }
+			kill_leader = { show_notification = yes }
+		}
+	}
+}
+
+#The Apparatus is built / he gets installed into a room
+country_event = { 
+	id = paragon.6005
+	title = "paragon.6005.name"
+	desc = paragon.6005.desc
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.6005.a
+		custom_tooltip = paragon.leader.growth.positive
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}	
+		}
+		ruler = {
+			add_trait = leader_trait_the_apparatus_luminary
+		}
+	}
+}
+
+#Cybernetic
+country_event = { 
+	id = paragon.6010
+	title = "paragon.6010.name"
+	desc = paragon.6010.desc
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.6010.a
+		custom_tooltip = paragon.leader.growth.positive
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}	
+		}
+		ruler = {
+			add_trait = leader_trait_the_cybernetic_luminary
+		}
+	}
+}
+
+#Psionic
+country_event = { 
+	id = paragon.6015
+	title = "paragon.6015.name"
+	desc = paragon.6015.desc
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.6015.a
+		custom_tooltip = paragon.leader.growth.positive
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}	
+		}
+		ruler = {
+			add_trait = leader_trait_the_psionic_luminary
+		}
+	}
+}
+
+#Synth
+country_event = { 
+	id = paragon.6020
+	title = "paragon.6020.name"
+	desc = paragon.6020.desc
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.6020.a
+		custom_tooltip = paragon.leader.growth.positive
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}	
+		}
+		ruler = {
+			add_trait = leader_trait_the_synth_luminary
+		}
+	}
+}
+
+#Genetics
+country_event = { 
+	id = paragon.6025
+	title = "paragon.6025.name"
+	desc = paragon.6025.desc
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { has_leader_flag = paragon_origin_legendary_leader }
+	}
+
+	option = {
+		name = paragon.6025.a
+		custom_tooltip = paragon.leader.growth.positive
+		hidden_effect = {
+			ruler = {
+				change_variable = {
+					which = paragon_origin_story_ruling
+					value = 1
+				}
+			}	
+		}
+		ruler = {
+			add_trait = leader_trait_the_genetic_luminary
+		}
+	}
+}
+
+#No More Zro
+country_event = { 
+	id = paragon.6030
+	title = "paragon.6030.name"
+	desc = paragon.6030.desc
+	picture = GFX_evt_legendary_leader
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = owner.ruler
+		room = owner
+	}
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = ruler
+		ruler = { 
+			has_leader_flag = paragon_origin_legendary_leader 
+			has_trait = leader_trait_the_psionic_luminary
+		}
+		resource_stockpile_compare = {
+			resource = sr_zro
+			value = 0
+		}
+	}
+
+	option = {
+		name = paragon.6030.a
+		allow = {	
+			owner = {
+				resource_stockpile_compare = {
+					resource = sr_zro
+					value >= 3
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				sr_zro = -3
+			}
+		}
+	}
+	option = {
+		name = paragon.6030.b
+		random_owned_leader = {
+			limit = { is_ruler = yes }
+			kill_leader = { show_notification = yes }
+		}
+	}
+}

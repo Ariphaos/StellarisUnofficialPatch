@@ -1,0 +1,664 @@
+automate_crime_management = {
+	should_ai_use_job_micro = yes
+
+	available = {
+		exists = owner
+		owner = { is_gestalt = no }
+	}
+
+	emergency = yes
+	category = "planet_automation_crime"
+
+	buildings = {
+		precinct = {
+			building = building_precinct_house
+			available = {
+				planet_crime > 30
+				NOT = { has_available_jobs = enforcer }
+				NOT = { has_forbidden_jobs = enforcer }
+				any_owned_pop = { can_work_specific_job = enforcer }
+
+				NOR = {
+					AND = {
+						has_building = building_precinct_house
+						owner = { has_technology = tech_colonial_centralization }
+					}
+					has_building = building_hall_judgment
+					num_buildings = { type = building_precinct_house value >= 3 }
+				}
+			}
+		}
+
+		overseer = {
+			building = building_overseer_homes
+			available = {
+				has_modifier = slave_colony
+				NOT = { has_available_jobs = slave_overseer }
+				any_owned_pop = { can_work_specific_job = slave_overseer }
+
+				NOT = { num_buildings = { type = building_overseer_homes value >= 3 } }
+			}
+		}
+	}
+
+	job_changes = {
+		enforcer_reduce = {
+			available = {
+				planet_crime < 1
+			}
+
+			job = enforcer
+			amount = -1
+		}
+
+		enforcer_increase = {
+			available = {
+				planet_crime > 27
+			}
+
+			job = enforcer
+			amount = 1
+		}
+	}
+}
+
+automate_crime_management_gestalt = {
+	should_ai_use_job_micro = yes
+	
+	available = {
+		owner = {
+			is_gestalt = yes
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_crime"
+
+	buildings = {
+		precinct = {
+			available = {
+				planet_crime > 30
+				NOT = { has_available_jobs = patrol_drone }
+				NOT = { has_forbidden_jobs = patrol_drone }
+			}
+
+			building = building_sentinel_posts
+		}
+	}
+
+	job_changes = {
+		job_patrol_drone_add_reduce = {
+			available = {
+				planet_crime < 1
+			}
+
+			job = patrol_drone
+			amount = -1
+		}
+
+		job_patrol_drone_add_increase = {
+			available = {
+				planet_crime > 27
+			}
+
+			job = patrol_drone
+			amount = 1
+		}
+	}
+}
+
+automate_building_housing = {
+	available = {
+		free_housing < 0
+	}
+
+	emergency = yes
+	category = "planet_automation_housing"
+
+	prio_districts = {
+		district_hab_housing
+		district_arcology_housing
+		district_rw_nexus
+		district_city
+		district_hive
+		district_nexus
+	}
+
+	# Added
+	buildings = {
+		# Thrall-World
+		huts = {
+			building = building_slave_huts
+			available = {
+				has_modifier = slave_colony
+				OR = { # Can get +2 housing from rural districts instead
+					free_housing < -1
+					free_district_slots < 1
+				}
+			}
+		}
+		# Resort World
+		residence = {
+			building = building_luxury_residence
+			available = {
+				has_modifier = resort_colony
+				exists = owner
+				owner = { NOT = { has_valid_civic = civic_shared_burden } }
+
+				NAND = {
+					has_building = building_luxury_residence
+					owner = { has_technology = tech_paradise_dome }
+				}
+			}
+		}
+		communal = {
+			building = building_communal_housing
+			available = {
+				has_modifier = resort_colony
+				exists = owner
+				owner = { has_valid_civic = civic_shared_burden }
+
+				NAND = {
+					has_building = building_communal_housing
+					owner = { has_technology = tech_paradise_dome }
+				}
+			}
+		}
+	}
+}
+
+automate_building_slot_management = {
+	available = {
+		free_building_slots < 1
+		num_buildings = { type = any value < 12 }
+	}
+
+	emergency = yes
+	category = "planet_automation_building_slot"
+
+	prio_districts = {
+		district_city
+		district_hive
+		district_nexus
+	}
+}
+
+automate_biotrophy_management_servitor_ecu = {
+	available = {
+		owner = {
+			has_authority = auth_machine_intelligence
+			has_valid_civic = civic_machine_servitor
+		}
+
+		uses_district_set = city_world
+		free_district_slots > 0
+		any_owned_pop = {
+			is_unemployed = yes
+			has_citizenship_type = { type = citizenship_organic_trophy country = owner }
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_biotrophy_management"
+
+	prio_districts = {
+		district_arcology_organic_housing
+	}
+}
+
+automate_biotrophy_management_servitor_hab = {
+	available = {
+		owner = {
+			has_authority = auth_machine_intelligence
+			has_valid_civic = civic_machine_servitor
+		}
+
+		uses_district_set = habitat
+		free_district_slots > 0
+		any_owned_pop = {
+			is_unemployed = yes
+			has_citizenship_type = { type = citizenship_organic_trophy country = owner }
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_biotrophy_management"
+
+	prio_districts = {
+		district_hab_cultural
+	}
+}
+
+automate_hive_spawning_pool = {
+	available = {
+		owner = { is_hive_empire = yes }
+	}
+
+	emergency = yes
+	category = "planet_automation_pop_assembly"
+
+	buildings = {
+		assembly = {
+			building = building_spawning_pool
+		}
+	}
+}
+
+automate_machine_assembly = {
+	available = {
+		owner = { is_machine_empire = yes }
+	}
+
+	emergency = yes
+	category = "planet_automation_pop_assembly"
+
+	buildings = {
+		assembly = {
+			building = building_machine_assembly_plant
+		}
+	}
+}
+
+automate_robotic_pop_assembly = {
+	available = {
+		can_assemble_robot = yes
+		owner = {
+			NOT = { has_policy_flag = robots_outlawed }
+			NOT = { has_ascension_perk = ap_engineered_evolution }
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_pop_assembly"
+
+	buildings = {
+		assembly = {
+			building = building_robot_assembly_plant
+		}
+	}
+}
+
+automate_bio_cloning = {
+	available = {
+		can_assemble_bio_pop = yes
+		owner = { has_ascension_perk = ap_engineered_evolution }
+	}
+
+	emergency = yes
+	category = "planet_automation_pop_assembly"
+
+	buildings = {
+		assembly = {
+			building = building_clone_vats
+		}
+	}
+}
+
+automate_biotrophy_management_servitor = {
+	available = {
+		owner = {
+			has_authority = auth_machine_intelligence
+			has_valid_civic = civic_machine_servitor
+		}
+		free_building_slots > 1
+		any_owned_pop = {
+			is_unemployed = yes
+			has_citizenship_type = { type = citizenship_organic_trophy country = owner }
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_biotrophy_management"
+
+	buildings = {
+		sanctuary = {
+			building = building_organic_sanctuary
+		}
+	}
+}
+
+automate_amenity_management = {
+	available = {
+		free_amenities <= -0
+		owner = {
+			is_gestalt = no
+		}
+		NOT = {	has_modifier = slave_colony	}
+	}
+
+	emergency = yes
+	category = "planet_automation_amenities"
+
+	buildings = {
+		clinic = {
+			building = building_clinic
+			available = {
+				owner = { is_synthetic_empire = no }
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_available_jobs = healthcare }
+				NOT = { has_forbidden_jobs = entertainer }
+				NOT = { has_forbidden_jobs = healthcare }
+				any_owned_pop = { can_work_specific_job = healthcare }
+			}
+
+			upgrade_trigger = {
+				owner = { is_synthetic_empire = no }
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_available_jobs = healthcare }
+				NOT = { has_forbidden_jobs = entertainer }
+				NOT = { has_forbidden_jobs = healthcare }
+				any_owned_pop = { can_work_specific_job = healthcare }
+			}
+		}
+
+		holo = {
+			building = building_holo_theatres
+			available = {
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_available_jobs = healthcare }
+				NOT = { has_forbidden_jobs = entertainer }
+				NOT = { has_forbidden_jobs = healthcare }
+				any_owned_pop = { can_work_specific_job = entertainer }
+			}
+
+			upgrade_trigger = {
+				NOT = { has_available_jobs = entertainer }
+				NOT = { has_available_jobs = healthcare }
+				NOT = { has_forbidden_jobs = entertainer }
+				NOT = { has_forbidden_jobs = healthcare }
+				any_owned_pop = { can_work_specific_job = entertainer }
+			}
+		}
+		
+		zoo = { building = building_xeno_zoo }
+	}
+}
+
+automate_hive_amenity_management = {
+	available = {
+		free_amenities <= -0
+		owner = {
+			is_gestalt = yes
+		}
+		NOT = { has_available_jobs = maintenance_drone }
+		NOT = { has_forbidden_jobs = maintenance_drone }
+	}
+
+	emergency = yes
+	category = "planet_automation_amenities"
+
+	prio_districts = {
+		district_hab_housing
+		district_arcology_housing
+		district_rw_nexus
+		district_city
+		district_hive
+		district_nexus
+	}
+}
+
+automate_amenity_management_ecu = {
+	available = {
+		free_amenities <= -0
+		owner = {
+			is_gestalt = no
+		}
+		uses_district_set = city_world
+		free_district_slots > 0
+		NOT = { has_available_jobs = entertainer }
+		NOT = { has_forbidden_jobs = entertainer }
+
+		owner = {
+			has_resource = { type = exotic_gases amount >= 75 }
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_amenities"
+
+	prio_districts = {
+		district_arcology_leisure
+	}
+}
+
+automate_worm_love = {
+	available = {
+		owner = {
+			has_technology = tech_akx_worm_3
+			has_event_chain = WORM_CHAIN_1
+			NOT = { has_country_flag = alignment_built }
+		}
+		is_capital = yes
+		NOT = { has_building = building_akx_worm_3 }
+	}
+
+	emergency = yes
+	category = "planet_automation_worm"
+
+	buildings = {
+		worm = {
+			building = building_akx_worm_3
+			available = { always = yes }
+		}
+	}
+}
+
+automate_crystal_deficit_management = {
+	available = {
+		owner = { has_monthly_income = { resource = rare_crystals value < 3 } }
+		free_building_slots > 0
+	}
+
+	empire_wide_emergency = yes
+	category = "planet_automation_rare_resources"
+
+	buildings = {
+		crystal_deposit = {
+			building = building_crystal_mines
+		}
+
+		crystal_plant = {
+			building = building_crystal_plant
+			available = { #you really want to be building science/unity buildings instead of refineries on those designations
+				has_research_designation = no
+				has_unity_designation = no
+				has_fortress_designation = no
+			}
+		}
+	}
+}
+
+automate_mote_deficit_management = {
+	available = {
+		owner = { has_monthly_income = { resource = volatile_motes value < 3 } }
+		free_building_slots > 0
+	}
+
+	empire_wide_emergency = yes
+	category = "planet_automation_rare_resources"
+
+	buildings = {
+		mote_deposit = {
+			building = building_mote_harvesters
+		}
+
+		chem_plant = {
+			building = building_chemical_plant
+			available = { #you really want to be building science/unity buildings instead of refineries on those designations
+				has_research_designation = no
+				has_unity_designation = no
+				has_fortress_designation = no
+			}
+		}
+	}
+}
+
+automate_gas_deficit_management = {
+	available = {
+		owner = { has_monthly_income = { resource = exotic_gases value < 3 } }
+		free_building_slots > 0
+	}
+
+	empire_wide_emergency = yes
+	category = "planet_automation_rare_resources"
+
+	buildings = {
+		gas_deposit = {
+			building = building_gas_extractors
+		}
+
+		refinery = {
+			building = building_refinery
+			available = { #you really want to be building science/unity buildings instead of refineries on those designations
+				has_research_designation = no
+				has_unity_designation = no
+				has_fortress_designation = no
+			}
+		}
+	}
+}
+
+automate_permanent_employment_building = {
+	available = {
+		owner = { has_valid_civic = civic_permanent_employment }
+		NOT = { has_building = building_posthumous_employment_center }
+		free_building_slots > 1
+		NOR = {
+			colony_type = col_default
+			colony_type = col_industrial
+			colony_type = col_foundry
+			colony_type = col_factory
+			colony_type = col_refinery
+			colony_type = col_research
+			colony_type = col_habitat_leisure
+			colony_type = col_habitat_trade
+			colony_type = col_habitat_foundry
+			colony_type = col_habitat_factory
+			colony_type = col_habitat_refinery
+			colony_type = col_habitat_research
+			colony_type = col_habitat_industrial
+			colony_type = col_resort
+			colony_type = col_penal
+			colony_type = col_ring_research
+			colony_type = col_ring_trade
+			colony_type = col_ecu_industrial
+			colony_type = col_ecu_factory
+			colony_type = col_ecu_foundry
+			colony_type = col_ecu_research
+			colony_type = col_bureau
+			colony_type = col_habitat_bureau
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_permanent_employment_center"
+
+	buildings = {
+		posthumus = {
+			building = building_posthumous_employment_center
+		}
+	}
+}
+
+automate_amenity_management_hab = {
+	available = {
+		free_amenities <= 0
+		owner = {
+			is_gestalt = no
+		}
+		uses_district_set = habitat
+		free_district_slots > 0
+	}
+
+	emergency = yes
+	category = "planet_automation_amenities"
+
+	prio_districts = { district_hab_cultural }
+}
+
+automate_psi_corps_building = {
+	available = {
+		owner = {
+			OR = {
+				has_ascension_perk = ap_mind_over_matter
+				has_origin = origin_shroudwalker_apprentice
+			}
+		}
+	}
+
+	emergency = yes
+	category = "planet_automation_psi_corps_building"
+
+	buildings = {
+		psi_corps = {
+			building = building_psi_corps
+		}
+	}
+}
+
+automate_capital_building = {
+	available = {
+		owner = {
+			NOR = {
+				has_authority = auth_machine_intelligence
+				has_authority = auth_hive_mind
+			}
+		}
+	}
+	emergency = yes
+	category = "planet_automation_upgrade_buildings"
+
+	buildings = {
+		colony_shelter = {
+			building = building_colony_shelter
+		}
+
+		hab_capital = {
+			building = building_hab_capital
+		}
+
+		slave_capital = {
+			building = building_slave_capital
+		}
+	}
+}
+
+automate_capital_building_machine = {
+	available = {
+		owner = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	emergency = yes
+	category = "planet_automation_upgrade_buildings"
+
+	buildings = {
+		deployment_post = {
+			building = building_deployment_post
+		}
+
+		hab_capital = {
+			building = building_hab_capital
+		}
+	}
+}
+
+automate_capital_building_hive = {
+	available = {
+		owner = {
+			has_authority = auth_hive_mind
+		}
+	}
+	emergency = yes
+	category = "planet_automation_upgrade_buildings"
+
+	buildings = {
+		hive_capital = {
+			building = building_hive_capital
+		}
+
+		hab_capital = {
+			building = building_hab_capital
+		}
+	}
+}
