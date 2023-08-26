@@ -1,0 +1,3649 @@
+#################################
+#
+# Envoy Events
+# by Pierre du Plessis
+#
+#################################
+
+@envoy_punishment_cooldown = 1080 #three years
+
+namespace = envoy_events
+
+#event_target offended_party is for operation_diplomatic_incident purposes via set_espionage_diplo_incident_success_flag. Safer than retrospectively trying to make all the event targets the same.
+
+#insulting envoy software event (operation_diplomatic_incident-safe)
+country_event = {
+	id = envoy_events.1001
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		is_country_type = default
+		NOT = { has_country_flag = recent_envoy_event }
+		any_envoy = {
+			has_envoy_task = {
+				task = improve_relations
+			}
+		}
+		any_relation = {
+			is_country_type = default
+			exists = ruler
+			root = {
+				is_improving_relations_with = prev
+				NOT = { has_country_flag = recent_envoy_event }
+				NOT = { is_same_species = prev }
+				NOT = { is_same_species = prev.ruler }
+				any_envoy = {
+					has_envoy_task = {
+						task = improve_relations
+						target = prevprev
+					}
+					NOT = { is_same_species = prevprev }
+					NOT = { is_same_species = prevprev.ruler }
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_relation = {
+			limit = {
+				is_country_type = default
+				exists = ruler
+				root = {
+					is_improving_relations_with = prev
+					NOT = { has_country_flag = recent_envoy_event }
+					NOT = { is_same_species = prev }
+					NOT = { is_same_species = prev.ruler }
+					any_envoy = {
+						has_envoy_task = {
+							task = improve_relations
+							target = prevprev
+						}
+						NOT = { is_same_species = prevprev }
+						NOT = { is_same_species = prevprev.ruler }
+					}
+				}
+			}
+			country_event = {
+				id = envoy_events.1
+				scopes = { from = from } #i.e. don't push back one From. That would break EVERYTHING.
+			}
+			save_event_target_as = offended_party
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = insulting_envoy
+		}
+	}
+}
+
+#insulting envoy software event
+country_event = {
+	id = envoy_events.1
+	title = envoy_events.1.name
+	desc = envoy_events.1.desc
+	picture = GFX_evt_assembly_fight
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		exists = root.ruler
+		any_relation = {
+			is_improving_relations_with = root
+			NOT = { has_country_flag = recent_envoy_event }
+			NOT = { is_same_species = root }
+			NOT = { is_same_species = root.ruler }
+			any_envoy = {
+				has_envoy_task = {
+					task = improve_relations
+					target = root
+				}
+				NOT = { is_same_species = root }
+				NOT = { is_same_species = root.ruler }
+			}
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_relation = {
+			limit = {
+				is_improving_relations_with = root
+				NOT = { has_country_flag = recent_envoy_event }
+				NOT = { is_same_species = root }
+				NOT = { is_same_species = root.ruler }
+				any_envoy = {
+					has_envoy_task = {
+						task = improve_relations
+						target = root
+					}
+					NOT = { is_same_species = root }
+					NOT = { is_same_species = root.ruler }
+				}
+			}
+			set_timed_country_flag = {
+				flag = recent_envoy_event
+				days = 5400
+			}
+			save_event_target_as = envoy_source
+			random_envoy = {
+				limit = {
+					has_envoy_task = {
+						task = improve_relations
+						target = root
+					}
+					NOT = { is_same_species = root }
+					NOT = { is_same_species = root.ruler }
+				}
+				save_event_target_as = event_envoy
+			}
+		}
+		ruler.species = {
+			save_event_target_as = ruler_species
+		}
+	}
+
+	option = {
+		name = envoy_events.1.A
+		add_resource = {
+			influence = 30
+		}
+		tooltip = {
+			add_opinion_modifier = {
+				who = event_target:envoy_source
+				modifier = opinion_envoy_insult_taken
+			}
+		}
+		hidden_effect = { set_country_flag = envoy_insult_taken }
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 0.25
+				OR = {
+					has_defensive_pact = event_target:envoy_source
+					is_in_federation_with = event_target:envoy_source
+				}
+			}
+			modifier = {
+				factor = 0.5
+				opinion_level = {
+					who = event_target:envoy_source
+					level >= good
+				}
+			}
+			modifier = {
+				factor = 2
+				opinion_level = {
+					who = event_target:envoy_source
+					level <= poor
+				}
+			}
+			modifier = {
+				factor = 2
+				is_rival = event_target:envoy_source
+			}
+		}
+	}
+	option = {
+		name = envoy_events.1.B
+
+		add_modifier = {
+			modifier = xeno_comedy_envoy
+			days = 3600
+		}
+
+		tooltip = {
+			add_opinion_modifier = {
+				who = event_target:envoy_source
+				modifier = opinion_envoy_insult_laughed_at
+			}
+		}
+		hidden_effect = { set_country_flag = envoy_insult_laughed_at }
+	}
+
+	after = {
+		hidden_effect = {
+			event_target:envoy_source = {
+				country_event = { id = envoy_events.2 }
+			}
+		}
+	}
+}
+
+#insulting envoy software event
+country_event = {
+	id = envoy_events.2
+	title = envoy_events.2.name
+	desc = {
+		text = envoy_events.2.desc.neg
+		trigger = {
+			from = { has_country_flag = envoy_insult_taken }
+		}
+	}
+	desc = {
+		text = envoy_events.2.desc.pos
+		trigger = {
+			from = { has_country_flag = envoy_insult_laughed_at }
+		}
+	}
+	picture = GFX_evt_assembly_fight
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = UNFORTUNATE
+		trigger = {
+			from = { has_country_flag = envoy_insult_taken }
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_envoy_insult_taken
+			}
+		}
+		add_intel = {
+			who = from
+			amount = -10
+		}
+	}
+	option = {
+		name = envoy_events.2.B
+		trigger = {
+			from = { has_country_flag = envoy_insult_laughed_at }
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_envoy_insult_laughed_at
+			}
+		}
+		add_intel = {
+			who = from
+			amount = 10
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			from = {
+				remove_country_flag = envoy_insult_taken
+				remove_country_flag = envoy_insult_laughed_at
+			}
+		}
+	}
+}
+
+# A Contribution to Galactic Comedy
+country_event = {
+	id = envoy_events.3
+	title = envoy_events.3.name
+	desc = {
+		text = envoy_events.3.desc
+		trigger = {
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	desc = {
+		text = envoy_events.3.desc.hive
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	desc = {
+		text = envoy_events.3.desc.machine
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	picture = GFX_evt_galactic_community
+	show_sound = event_galactic_community
+
+	trigger = {
+		is_country_type = default
+		NOT = { has_country_flag = recent_envoy_event }
+		is_galactic_community_member = yes
+		any_country = {
+			is_part_of_galactic_council = yes
+			NOT = { is_same_species = root }
+			NOT = { is_in_federation_with = root }
+			NOT = { has_defensive_pact = root }
+			NOT = { is_overlord_to = root }
+			NOT = {
+				root = {
+					intel = {
+						who = prev
+						value >= 80
+					}
+				}
+			}
+		}
+		any_country = {
+			is_galactic_community_member = yes
+			is_part_of_galactic_council = no
+			relative_power = {
+				who = root
+				value < equivalent
+			}
+			NOT = { is_same_species = root }
+			NOT = { is_in_federation_with = root }
+			NOT = { has_defensive_pact = root }
+			NOT = { has_overlord = root }
+			NOT = {
+				root = {
+					intel = {
+						who = prev
+						value >= 80
+					}
+				}
+			}
+		}
+		any_envoy = {
+			leader_age < 50
+			has_envoy_cooldown = yes #fairly limiting trigger
+			has_envoy_task = {
+				task = galactic_community
+			}
+			NOT = { has_leader_flag = respected_envoy }
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_country = {
+			limit = {
+				is_part_of_galactic_council = yes
+				NOT = { is_same_species = root }
+				NOT = { is_in_federation_with = root }
+				NOT = { has_defensive_pact = root }
+				NOT = { is_overlord_to = root }
+				NOT = {
+					root = {
+						intel = {
+							who = prev
+							value >= 80
+						}
+					}
+				}
+			}
+			save_event_target_as = council_country
+		}
+		random_country = {
+			limit = {
+				is_galactic_community_member = yes
+				is_part_of_galactic_council = no
+				relative_power = {
+					who = root
+					value < equivalent
+				}
+				NOT = { is_same_species = root }
+				NOT = { is_in_federation_with = root }
+				NOT = { has_defensive_pact = root }
+				NOT = { has_overlord = root }
+				NOT = {
+					root = {
+						intel = {
+							who = prev
+							value >= 80
+						}
+					}
+				}
+			}
+			save_event_target_as = pathetic_country
+		}
+		random_envoy = {
+			limit = {
+				leader_age < 50
+				has_envoy_task = {
+					task = galactic_community
+				}
+				NOT = { has_leader_flag = respected_envoy }
+			}
+			save_event_target_as = event_envoy
+			set_leader_flag = silly_envoy
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = galactic_comedy
+		}
+	}
+
+	option = {
+		name = {
+			text = envoy_events.3.A
+			trigger = {
+				OR = {
+					is_militarist = yes
+					is_xenophobe = yes
+					is_authoritarian = yes
+					is_gestalt = yes
+				}
+				is_pacifist = no
+			}
+		}
+		name = {
+			text = envoy_events.3.B
+			trigger = {
+				OR = {
+					AND = {
+						is_militarist = no
+						is_xenophobe = no
+						is_authoritarian = no
+						is_gestalt = no
+					}
+					is_pacifist = yes
+				}
+			}
+		}
+
+		add_modifier = {
+			modifier = galactic_community_diplo_corps_is_a_joke
+			days = 3600
+		}
+	}
+	option = {
+		name = {
+			text = envoy_events.3.C1
+			trigger = {
+				is_gestalt = no
+			}
+		}
+		name = {
+			text = envoy_events.3.C2
+			trigger = {
+				is_hive_empire = yes
+			}
+		}
+		name = {
+			text = envoy_events.3.C3
+			trigger = {
+				is_machine_empire = yes
+			}
+		}
+		event_target:event_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+}
+
+# Respected Envoy to Galactic Community
+country_event = {
+	id = envoy_events.4
+	title = envoy_events.4.name
+	desc = {
+		text = envoy_events.4.desc
+		trigger = {
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	desc = {
+		text = envoy_events.4.desc.hive
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	desc = {
+		text = envoy_events.4.desc.machine
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	picture = GFX_evt_galactic_community
+	show_sound = event_galactic_community
+
+	trigger = {
+		is_country_type = default
+		NOT = { has_country_flag = recent_envoy_event }
+		is_galactic_community_member = yes
+		is_part_of_galactic_council = no
+		galactic_community_rank >= 5
+		any_envoy = {
+			leader_age > 60
+			has_envoy_task = {
+				task = galactic_community
+			}
+			NOT = { has_leader_flag = silly_envoy }
+			NOT = { has_leader_flag = respected_envoy }
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				leader_age > 60
+				has_envoy_task = {
+					task = galactic_community
+				}
+				NOT = { has_leader_flag = silly_envoy }
+				NOT = { has_leader_flag = respected_envoy }
+			}
+			save_event_target_as = event_envoy
+			set_leader_flag = respected_envoy
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+
+		add_modifier = {
+			modifier = galactic_community_diplo_corps_respected
+			days = 3600
+		}
+	}
+}
+
+
+# Irritating Envoy Must Die
+country_event = {
+	id = envoy_events.5
+	title = envoy_events.5.name
+	desc = envoy_events.5.desc
+	picture = GFX_evt_assembly_fight
+	show_sound = event_assembly_fight
+	situation = from #this will only do anything if from is actually a situation
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		NOT = { has_ethic = ethic_fanatic_egalitarian } #just a bit weird
+		NOT = { has_country_flag = recent_envoy_event }
+		any_relation = {
+			is_harming_relations_with = root
+			any_envoy = {
+				has_envoy_task = {
+					task = harm_relations
+					target = root
+				}
+			}
+			is_gestalt = no
+			NOT = { has_country_flag = recent_envoy_event }
+		}
+		any_pop_faction = {
+			NOT = { is_pop_faction_type = progressive }
+			NOT = { is_pop_faction_type = prosperity }
+			NOT = { is_pop_faction_type = xenoist }
+			is_owner_ethic_pop_faction = yes
+		}
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_relation = {
+			limit = {
+				is_harming_relations_with = root
+				any_envoy = {
+					has_envoy_task = {
+						task = harm_relations
+						target = root
+					}
+				}
+				is_gestalt = no
+				NOT = { has_country_flag = recent_envoy_event }
+			}
+			save_event_target_as = envoy_source
+			random_envoy = {
+				limit = {
+					has_envoy_task = {
+						task = harm_relations
+						target = root
+					}
+				}
+				save_event_target_as = event_envoy
+			}
+		}
+	}
+
+	option = {
+		name = envoy_events.5.A
+		add_resource = {
+			influence = -30
+		}
+
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 2
+				OR = {
+					is_egalitarian = yes
+					is_xenophile = yes
+					is_pacifist = yes
+				}
+			}
+		}
+	}
+	option = {
+		name = envoy_events.5.B
+
+		tooltip = {
+			add_modifier = {
+				modifier = kills_envoys
+				days = 3600
+			}
+		}
+
+		random_pop_faction = {
+			limit = {
+				NOT = { is_pop_faction_type = progressive }
+				NOT = { is_pop_faction_type = prosperity }
+				NOT = { is_pop_faction_type = xenoist }
+				is_owner_ethic_pop_faction = yes
+			}
+			add_modifier = {
+				modifier = faction_modifier_protected_interests
+				days = 3600
+			}
+		}
+
+		event_target:envoy_source = {
+			tooltip = {
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_kills_envoys
+				}
+			}
+			hidden_effect = {
+				country_event = { id = envoy_events.6 days = 5 }
+				set_timed_country_flag = {
+					flag = recent_envoy_event
+					days = 5400
+				}
+			}
+		}
+
+		tooltip = {
+			if = {
+				limit = {
+					is_in_federation_with = event_target:envoy_source
+				}
+				federation = {
+					add_cohesion = -50
+				}
+			}
+			event_target:event_envoy = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 2
+				OR = {
+					is_authoritarian = yes
+					is_xenophobe = yes
+					is_militarist = yes
+				}
+			}
+			modifier = {
+				factor = 2
+				is_rival = event_target:envoy_source
+			}
+		}
+	}
+}
+
+# Irritating Envoy Must Die - envoy country
+country_event = {
+	id = envoy_events.6
+	title = envoy_events.6.name
+	desc = envoy_events.6.desc
+	picture = GFX_evt_assembly_fight
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.6.A
+
+		add_opinion_modifier = {
+			who = from
+			modifier = opinion_kills_envoys
+		}
+		if = {
+			limit = {
+				is_in_federation_with = from
+			}
+			federation = {
+				add_cohesion = -50
+			}
+		}
+		from = {
+			add_modifier = {
+				modifier = kills_envoys
+				days = 3600
+			}
+		}
+		event_target:event_envoy = {
+			kill_leader = {
+				show_notification = yes
+			}
+		}
+	}
+}
+
+
+# Xenophobe Envoy Elopes
+country_event = {
+	id = envoy_events.7
+	title = envoy_events.7.name
+	desc = envoy_events.7.desc
+
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_default
+
+	trigger = {
+		is_country_type = default
+		is_xenophobe = yes
+		NOT = { has_valid_civic = civic_fanatic_purifiers }
+		NOT = { has_country_flag = recent_envoy_event }
+		any_envoy = {
+			NOT = {
+				has_envoy_task = {
+					task = none
+				}
+			}
+			OR = {
+				AND = {
+					OR = {
+						has_envoy_task = {
+							task = harm_relations
+						}
+						has_envoy_task = {
+							task = improve_relations
+						}
+					}
+					envoy_location_country = {
+						is_country_type = default
+						is_gestalt = no
+						NOT = { is_same_species = prev }
+						NOT = { is_same_species = root }
+						any_relation = {
+							is_country_type = default
+							is_xenophile = yes
+							has_communications = root
+							is_at_war = no
+							NOT = { has_country_flag = recent_envoy_event }
+							has_policy_flag = refugees_allowed
+						}
+					}
+				}
+				AND = {
+					has_envoy_task = {
+						task = federation
+					}
+					root.federation = {
+						any_member = {
+							is_country_type = default
+							is_gestalt = no
+							NOT = { is_same_species = root }
+							NOT = { is_same_species = prevprev }
+							any_relation = {
+								is_country_type = default
+								is_xenophile = yes
+								has_communications = root
+								is_at_war = no
+								NOT = { has_country_flag = recent_envoy_event }
+								has_policy_flag = refugees_allowed
+							}
+						}
+					}
+				}
+				AND = {
+					has_envoy_task = {
+						task = galactic_community
+					}
+					any_country = {
+						is_country_type = default
+						is_gestalt = no
+						is_galactic_community_member = yes
+						NOT = { is_same_species = root }
+						NOT = { is_same_species = prev }
+						any_relation = {
+							is_country_type = default
+							is_xenophile = yes
+							has_communications = root
+							is_at_war = no
+							NOT = { has_country_flag = recent_envoy_event }
+							has_policy_flag = refugees_allowed
+						}
+					}
+				}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+
+		random_envoy = {
+			limit = {
+				NOT = {
+					has_envoy_task = {
+						task = none
+					}
+				}
+				OR = {
+					AND = {
+						OR = {
+							has_envoy_task = {
+								task = harm_relations
+							}
+							has_envoy_task = {
+								task = improve_relations
+							}
+						}
+						envoy_location_country = {
+							is_country_type = default
+							is_gestalt = no
+							NOT = { is_same_species = prev }
+							NOT = { is_same_species = root }
+							any_relation = {
+								is_country_type = default
+								is_xenophile = yes
+								has_communications = root
+								is_at_war = no
+								NOT = { has_country_flag = recent_envoy_event }
+								has_policy_flag = refugees_allowed
+							}
+						}
+					}
+					AND = {
+						has_envoy_task = {
+							task = federation
+						}
+						root.federation = {
+							any_member = {
+								is_country_type = default
+								is_gestalt = no
+								NOT = { is_same_species = root }
+								NOT = { is_same_species = prevprev }
+								any_relation = {
+									is_country_type = default
+									is_xenophile = yes
+									has_communications = root
+									is_at_war = no
+									NOT = { has_country_flag = recent_envoy_event }
+									has_policy_flag = refugees_allowed
+								}
+							}
+						}
+					}
+					AND = {
+						has_envoy_task = {
+							task = galactic_community
+						}
+						any_country = {
+							is_country_type = default
+							is_gestalt = no
+							is_galactic_community_member = yes
+							NOT = { is_same_species = root }
+							NOT = { is_same_species = prev }
+							any_relation = {
+								is_country_type = default
+								is_xenophile = yes
+								has_communications = root
+								is_at_war = no
+								NOT = { has_country_flag = recent_envoy_event }
+								has_policy_flag = refugees_allowed
+							}
+						}
+					}
+				}
+			}
+			save_event_target_as = event_envoy
+			if = {
+				limit = {
+					OR = {
+						has_envoy_task = {
+							task = harm_relations
+						}
+						has_envoy_task = {
+							task = improve_relations
+						}
+					}
+					envoy_location_country = {
+						is_country_type = default
+						is_gestalt = no
+						NOT = { is_same_species = prev }
+						NOT = { is_same_species = root }
+						any_relation = {
+							is_country_type = default
+							is_xenophile = yes
+							has_communications = root
+							is_at_war = no
+							NOT = { has_country_flag = recent_envoy_event }
+							has_policy_flag = refugees_allowed
+						}
+					}
+				}
+				envoy_location_country = {
+					save_event_target_as = other_species_nation
+				}
+			}
+			else_if = {
+				limit = {
+					has_envoy_task = {
+						task = federation
+					}
+					root.federation = {
+						any_member = {
+							is_country_type = default
+							is_gestalt = no
+							NOT = { is_same_species = root }
+							NOT = { is_same_species = prevprev }
+							any_relation = {
+								is_country_type = default
+								is_xenophile = yes
+								has_communications = root
+								is_at_war = no
+								NOT = { has_country_flag = recent_envoy_event }
+								has_policy_flag = refugees_allowed
+							}
+						}
+					}
+				}
+				root.federation = {
+					random_member = {
+						limit = {
+							is_country_type = default
+							is_gestalt = no
+							NOT = { is_same_species = root }
+							NOT = { is_same_species = prevprev }
+							any_relation = {
+								is_country_type = default
+								is_xenophile = yes
+								has_communications = root
+								is_at_war = no
+								NOT = { has_country_flag = recent_envoy_event }
+								has_policy_flag = refugees_allowed
+							}
+						}
+						save_event_target_as = other_species_nation
+					}
+				}
+			}
+			else = {
+				random_country = {
+					limit = {
+						is_country_type = default
+						is_gestalt = no
+						is_galactic_community_member = yes
+						NOT = { is_same_species = root }
+						NOT = { is_same_species = prev }
+						any_relation = {
+							is_country_type = default
+							is_xenophile = yes
+							has_communications = root
+							is_at_war = no
+							NOT = { has_country_flag = recent_envoy_event }
+							has_policy_flag = refugees_allowed
+						}
+					}
+					save_event_target_as = other_species_nation
+				}
+			}
+			exile_leader_as = star_crossed_lover_envoy
+		}
+		event_target:other_species_nation = {
+			random_relation = {
+				limit = {
+					is_country_type = default
+					is_xenophile = yes
+					has_communications = root
+					is_at_war = no
+					NOT = { has_country_flag = recent_envoy_event }
+					has_policy_flag = refugees_allowed
+				}
+				save_event_target_as = third_party
+			}
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = eloping_envoy
+		}
+	}
+	option = {
+		name = envoy_events.7.A
+		trigger = {
+			num_favors = {
+				target = event_target:third_party
+				value >= 2
+			}
+		}
+		remove_favors = {
+			target = event_target:third_party
+			value = 2
+		}
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 0.5
+				event_target:third_party = {
+					relative_power = {
+						who = root
+						value >= superior
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				event_target:third_party = {
+					relative_power = {
+						who = root
+						value = overwhelming
+					}
+				}
+			}
+			modifier = {
+				factor = 2
+				event_target:third_party = {
+					relative_power = {
+						who = root
+						value = pathetic
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = envoy_events.7.B
+		custom_tooltip = envoy_events.7.B.tooltip
+		hidden_effect = {
+			event_target:third_party = {
+				country_event = { id = envoy_events.8 days = 15 }
+			}
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 0
+				event_target:third_party = {
+					opinion_level = {
+						who = root
+						level <= poor
+					}
+				}
+			}
+			modifier = {
+				factor = 2
+				event_target:third_party = {
+					opinion_level = {
+						who = root
+						level >= good
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = envoy_events.7.D
+		add_modifier = {
+			modifier = diplo_corps_lost_control
+			days = 3600
+		}
+		ai_chance = {
+			factor = 0.5
+		}
+	}
+}
+
+# Approached asked to extradite the envoy
+country_event = {
+	id = envoy_events.8
+	title = TRANSMISSION
+	desc = envoy_events.8.desc
+	show_sound = event_default
+	diplomatic = yes
+	picture_event_data = {
+		portrait = from
+		planet_background = from
+		graphical_culture = from
+		city_level = from
+		room = from.ruler
+	}
+	is_triggered_only = yes
+	trigger = {
+		exists = from
+	}
+
+	option = {
+		name = envoy_events.8.A
+
+		tooltip = {
+			add_favors = {
+				target = from
+				value = 2
+			}
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_extradited_envoy
+			}
+			hidden_effect = {
+				country_event = { id = envoy_events.9 }
+			}
+		}
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 0.33
+				opinion_level = {
+					who = from
+					level <= poor
+				}
+			}
+			modifier = {
+				factor = 0.33
+				opinion_level = {
+					who = from
+					level <= terrible
+				}
+			}
+			modifier = {
+				factor = 2
+				opinion_level = {
+					who = from
+					level >= good
+				}
+			}
+			modifier = {
+				factor = 2
+				opinion_level = {
+					who = from
+					level >= excellent
+				}
+			}
+		}
+	}
+	option = {
+		name = envoy_events.8.B
+
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_refused_extradited_envoy
+			}
+			hidden_effect = {
+				country_event = { id = envoy_events.10 }
+			}
+		}
+		add_intel = {
+			who = from
+			amount = 20
+		}
+		ai_chance = {
+			factor = 1
+		}
+	}
+}
+
+# Positive Response
+country_event = {
+	id = envoy_events.9
+	title = THEIR_RESPONSE
+	desc = envoy_events.9.desc
+	show_sound = event_default
+	diplomatic = yes
+	picture_event_data = {
+		portrait = from
+		planet_background = from
+		graphical_culture = from
+		city_level = from
+		room = from.ruler
+	}
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.9.A
+		from = {
+			add_favors = {
+				target = root
+				value = 2
+			}
+		}
+	}
+}
+
+# Negative Response
+country_event = {
+	id = envoy_events.10
+	title = THEIR_RESPONSE
+	desc = envoy_events.10.desc
+	show_sound = event_default
+	diplomatic = yes
+	picture_event_data = {
+		portrait = from
+		planet_background = from
+		graphical_culture = from
+		city_level = from
+		room = from.ruler
+	}
+	is_triggered_only = yes
+
+	option = { #ah well
+		name = envoy_events.10.A
+		add_modifier = {
+			modifier = diplo_corps_lost_control
+			days = 3600
+		}
+		ai_chance = {
+			factor = 2
+		}
+	}
+
+	option = { #send in the special ops
+		name = envoy_events.10.B
+		custom_tooltip = envoy_events.10.B.tooltip1
+
+		random_list = {
+			2 = { #success
+				custom_tooltip = envoy_events.10.B.success_tooltip
+				tooltip = {
+					add_resource = {
+						influence = 30
+					}
+				}
+				hidden_effect = { event_target:third_party = { country_event = { id = envoy_events.11 days = 63 } } }
+				modifier = {
+					factor = 1.5
+					is_militarist = yes
+				}
+				modifier = {
+					factor = 0.75
+					is_pacifist = yes
+				}
+				modifier = {
+					factor = 0.75
+					event_target:third_party = { is_militarist = yes }
+				}
+				modifier = {
+					factor = 1.5
+					event_target:third_party = { is_pacifist = yes }
+				}
+				modifier = {
+					factor = 1.5
+					relative_power = {
+						who = event_target:third_party
+						value >= superior
+					}
+				}
+				modifier = {
+					factor = 1.5
+					relative_power = {
+						who = event_target:third_party
+						value = overwhelming
+					}
+				}
+				modifier = {
+					factor = 0.75
+					relative_power = {
+						who = event_target:third_party
+						value <= inferior
+					}
+				}
+				modifier = {
+					factor = 0.75
+					relative_power = {
+						who = event_target:third_party
+						value = pathetic
+					}
+				}
+				modifier = {
+					factor = 1.5
+					event_target:third_party = {
+						opinion_level = {
+							who = root
+							level >= good #less suspicious
+						}
+					}
+				}
+				modifier = {
+					factor = 0.75
+					event_target:third_party = {
+						opinion_level = {
+							who = root
+							level <= poor #more suspicious
+						}
+					}
+				}
+			}
+			1 = { #failure
+				custom_tooltip = envoy_events.10.B.fail_tooltip
+				tooltip = {
+					add_modifier = {
+						modifier = failed_special_ops_mission
+						days = 3600
+					}
+				}
+				hidden_effect = { event_target:third_party = { country_event = { id = envoy_events.13 days = 63 } } }
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 2
+				event_target:third_party = {
+					opinion_level = {
+						who = root
+						level <= poor
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				event_target:third_party = {
+					opinion_level = {
+						who = root
+						level >= good
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				is_pacifist = yes
+			}
+			modifier = {
+				factor = 1.5
+				relative_power = {
+					who = event_target:third_party
+					value >= superior
+				}
+			}
+			modifier = {
+				factor = 0.75
+				relative_power = {
+					who = event_target:third_party
+					value <= inferior
+				}
+			}
+		}
+	}
+}
+
+#Successful special ops mission - third party
+country_event = {
+	id = envoy_events.11
+	title = envoy_events.11.name
+	desc = envoy_events.11.desc
+	picture = GFX_evt_operative_chase
+	show_sound = event_default
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.11.A
+		add_modifier = {
+			modifier = cannot_protect_asylum
+			days = 3600
+		}
+		add_intel = {
+			who = from
+			amount = -20
+		}
+		hidden_effect = {
+			from = { country_event = { id = envoy_events.12 } }
+		}
+	}
+}
+
+#Successful special ops mission - starter country
+country_event = {
+	id = envoy_events.12
+	title = envoy_events.12.name
+	desc = envoy_events.12.desc
+	picture = GFX_evt_operative_chase
+	show_sound = event_celebration
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_resource = {
+			influence = 30
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_special_ops_vs_us
+			}
+		}
+	}
+}
+
+
+#Failed special ops mission - third party
+country_event = {
+	id = envoy_events.13
+	title = envoy_events.13.name
+	desc = envoy_events.13.desc
+
+	picture = GFX_evt_operative_chase
+	show_sound = event_default
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.13.A
+		tooltip = {
+			from = {
+				add_modifier = {
+					modifier = failed_special_ops_mission
+					days = 3600
+				}
+			}
+		}
+		hidden_effect = {
+			from = { country_event = { id = envoy_events.14 } }
+		}
+	}
+}
+
+#Failed special ops mission - starter country
+country_event = {
+	id = envoy_events.14
+	title = envoy_events.14.name
+	desc = envoy_events.14.desc
+	picture = GFX_evt_operative_chase
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+
+	option = {
+		name = UNFORTUNATE
+		add_modifier = {
+			modifier = failed_special_ops_mission
+			days = 3600
+		}
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_special_ops_vs_us
+			}
+		}
+	}
+}
+
+
+# Miaow
+country_event = {
+	id = envoy_events.15
+	title = envoy_events.15.name
+	desc = envoy_events.15.desc
+
+	picture = GFX_evt_galactic_community
+	show_sound = event_galactic_community
+
+	trigger = {
+		is_country_type = default
+		NOT = { has_country_flag = recent_envoy_event }
+		is_galactic_community_member = yes
+		is_gestalt = no
+		NOR = {
+			is_human_species = yes
+			has_country_flag = human_1
+			has_country_flag = human_2
+		}
+		any_country = {
+			is_galactic_community_member = yes
+			NOT = { is_in_federation_with = root }
+			NOT = { is_overlord_to = root }
+			NOT = { root = { is_overlord_to = prev } }
+			OR = {
+				has_country_flag = human_1
+				has_country_flag = human_2
+			}
+		}
+		any_envoy = {
+			is_same_species = root
+			has_envoy_task = {
+				task = galactic_community
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				is_same_species = root
+				has_envoy_task = {
+					task = galactic_community
+				}
+			}
+			save_event_target_as = event_envoy
+		}
+	}
+
+	option = {
+		name = envoy_events.15.A
+
+		every_country = {
+			limit = {
+				is_country_type = default
+				OR = {
+					has_country_flag = human_1
+					has_country_flag = human_2
+					is_xenophile = yes
+				}
+				is_galactic_community_member = yes
+			}
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_feline_affection
+			}
+		}
+	}
+}
+
+
+#Ideological Disputes in the Federation
+country_event = {
+	id = envoy_events.16
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		any_envoy = {
+			has_envoy_task = {
+				task = federation
+			}
+		}
+		federation = {
+			any_member = {
+				is_gestalt = no
+				opposing_ethics_divergence = {
+					steps >= 3
+					who = root
+				}
+				any_envoy = {
+					has_envoy_task = {
+						task = federation
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = dispute_member_1
+		federation = {
+			random_member = {
+				limit = {
+					is_gestalt = no
+					opposing_ethics_divergence = {
+						steps >= 3
+						who = root
+					}
+					any_envoy = {
+						has_envoy_task = {
+							task = federation
+						}
+					}
+				}
+				save_event_target_as = dispute_member_2
+			}
+		}
+		random_list = {
+			1 = {
+				save_event_target_as = dispute_winner
+				random_envoy = {
+					limit = {
+						has_envoy_task = {
+							task = federation
+						}
+					}
+					save_event_target_as = dispute_winner_envoy
+				}
+				event_target:dispute_member_2 = {
+					save_event_target_as = dispute_loser
+					random_envoy = {
+						limit = {
+							has_envoy_task = {
+								task = federation
+							}
+						}
+						save_event_target_as = dispute_loser_envoy
+					}
+					country_event = { id = envoy_events.17 }
+				}
+
+				modifier = {
+					factor = 0.75
+					event_target:dispute_member_2 = { is_federation_leader = yes }
+				}
+				modifier = {
+					factor = 0.25
+					event_target:dispute_member_2 = { is_federation_leader = yes }
+					federation = {
+						has_federation_type = hegemony_federation
+					}
+				}
+				modifier = {
+					factor = 0.85
+					federation = {
+						count_member = {
+							count >= 2
+							limit = {
+								opposing_ethics_divergence = {
+									steps <= 1
+									who = event_target:dispute_member_2
+								}
+							}
+						}
+					}
+				}
+				modifier = {
+					factor = 0.75
+					federation = {
+						count_member = {
+							count >= 3
+							limit = {
+								opposing_ethics_divergence = {
+									steps <= 1
+									who = event_target:dispute_member_2
+								}
+							}
+						}
+					}
+				}
+			}
+			1 = {
+				save_event_target_as = dispute_loser
+				random_envoy = {
+					limit = {
+						has_envoy_task = {
+							task = federation
+						}
+					}
+					save_event_target_as = dispute_loser_envoy
+				}
+				event_target:dispute_member_2 = {
+					save_event_target_as = dispute_winner
+					random_envoy = {
+						limit = {
+							has_envoy_task = {
+								task = federation
+							}
+						}
+						save_event_target_as = dispute_winner_envoy
+					}
+				}
+				country_event = { id = envoy_events.17 }
+
+				modifier = {
+					factor = 0.75
+					is_federation_leader = yes
+				}
+				modifier = {
+					factor = 0.25
+					is_federation_leader = yes
+					federation = {
+						has_federation_type = hegemony_federation
+					}
+				}
+				modifier = {
+					factor = 0.85
+					federation = {
+						count_member = {
+							count >= 2
+							limit = {
+								opposing_ethics_divergence = {
+									steps <= 1
+									who = root
+								}
+							}
+						}
+					}
+				}
+				modifier = {
+					factor = 0.75
+					federation = {
+						count_member = {
+							count >= 3
+							limit = {
+								opposing_ethics_divergence = {
+									steps <= 1
+									who = root
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = envoy_events.17
+	title = envoy_events.17.name
+	desc = {
+		text = envoy_events.17.desc.militarist
+		trigger = {
+			is_militarist = yes
+			event_target:dispute_winner = {
+				is_pacifist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.pacifist
+		trigger = {
+			is_pacifist = yes
+			event_target:dispute_winner = {
+				is_militarist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.spiritualist
+		trigger = {
+			is_spiritualist = yes
+			event_target:dispute_winner = {
+				is_materialist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.materialist
+		trigger = {
+			is_materialist = yes
+			event_target:dispute_winner = {
+				is_spiritualist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.xenophile
+		trigger = {
+			is_xenophile = yes
+			event_target:dispute_winner = {
+				is_xenophobe = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.xenophobe
+		trigger = {
+			is_xenophobe = yes
+			event_target:dispute_winner = {
+				is_xenophile = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.egalitarian
+		trigger = {
+			is_egalitarian = yes
+			event_target:dispute_winner = {
+				is_authoritarian = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.17.desc.authoritarian
+		trigger = {
+			is_authoritarian = yes
+			event_target:dispute_winner = {
+				is_egalitarian = yes
+			}
+		}
+	}
+	picture = GFX_evt_voting
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.17.A
+		tooltip = {
+			federation = {
+				add_cohesion = -25
+			}
+		}
+
+		hidden_effect = {
+			event_target:dispute_winner = {
+				country_event = { id = envoy_events.18 }
+			}
+		}
+	}
+	option = {
+		name = envoy_events.17.B
+
+		federation = {
+			add_cohesion = 25
+		}
+
+		if = {
+			limit = {
+				is_militarist = yes
+				event_target:dispute_winner = {
+					is_pacifist = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_militarist_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_pacifist = yes
+				event_target:dispute_winner = {
+					is_militarist = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_pacifist_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_spiritualist = yes
+				event_target:dispute_winner = {
+					is_materialist = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_materialist_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_materialist = yes
+				event_target:dispute_winner = {
+					is_spiritualist = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_spiritualist_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_xenophile = yes
+				event_target:dispute_winner = {
+					is_xenophobe = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_xenophobe_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_xenophobe = yes
+				event_target:dispute_winner = {
+					is_xenophile = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_xenophile_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_egalitarian = yes
+				event_target:dispute_winner = {
+					is_authoritarian = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_authoritarian_ideology
+				days = 5400
+			}
+		}
+		else_if = {
+			limit = {
+				is_authoritarian = yes
+				event_target:dispute_winner = {
+					is_egalitarian = yes
+				}
+			}
+			add_modifier = {
+				modifier = federation_egalitarian_ideology
+				days = 5400
+			}
+		}
+
+		hidden_effect = {
+			event_target:dispute_winner = {
+				country_event = { id = envoy_events.19 }
+			}
+		}
+	}
+	option = {
+		name = {
+			text = envoy_events.17.C1
+			trigger = {
+				is_gestalt = no
+			}
+		}
+		name = {
+			text = envoy_events.17.C2
+			trigger = {
+				is_hive_empire = yes
+			}
+		}
+		name = {
+			text = envoy_events.17.C3
+			trigger = {
+				is_machine_empire = yes
+			}
+		}
+		event_target:dispute_loser_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+}
+
+country_event = {
+	id = envoy_events.18
+	title = envoy_events.18.name
+	desc = {
+		text = envoy_events.18.desc.militarist
+		trigger = {
+			is_militarist = yes
+			event_target:dispute_loser = {
+				is_pacifist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.pacifist
+		trigger = {
+			is_pacifist = yes
+			event_target:dispute_loser = {
+				is_militarist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.spiritualist
+		trigger = {
+			is_spiritualist = yes
+			event_target:dispute_loser = {
+				is_materialist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.materialist
+		trigger = {
+			is_materialist = yes
+			event_target:dispute_loser = {
+				is_spiritualist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.xenophile
+		trigger = {
+			is_xenophile = yes
+			event_target:dispute_loser = {
+				is_xenophobe = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.xenophobe
+		trigger = {
+			is_xenophobe = yes
+			event_target:dispute_loser = {
+				is_xenophile = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.egalitarian
+		trigger = {
+			is_egalitarian = yes
+			event_target:dispute_loser = {
+				is_authoritarian = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.18.desc.authoritarian
+		trigger = {
+			is_authoritarian = yes
+			event_target:dispute_loser = {
+				is_egalitarian = yes
+			}
+		}
+	}
+	picture = GFX_evt_voting
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.18.A
+		from = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_ideological_dispute
+			}
+		}
+		federation = {
+			add_cohesion = -30
+		}
+	}
+}
+
+country_event = {
+	id = envoy_events.19
+	title = envoy_events.19.name
+	desc = {
+		text = envoy_events.19.desc.militarist
+		trigger = {
+			is_militarist = yes
+			event_target:dispute_loser = {
+				is_pacifist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.pacifist
+		trigger = {
+			is_pacifist = yes
+			event_target:dispute_loser = {
+				is_militarist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.spiritualist
+		trigger = {
+			is_spiritualist = yes
+			event_target:dispute_loser = {
+				is_materialist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.materialist
+		trigger = {
+			is_materialist = yes
+			event_target:dispute_loser = {
+				is_spiritualist = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.xenophile
+		trigger = {
+			is_xenophile = yes
+			event_target:dispute_loser = {
+				is_xenophobe = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.xenophobe
+		trigger = {
+			is_xenophobe = yes
+			event_target:dispute_loser = {
+				is_xenophile = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.egalitarian
+		trigger = {
+			is_egalitarian = yes
+			event_target:dispute_loser = {
+				is_authoritarian = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.19.desc.authoritarian
+		trigger = {
+			is_authoritarian = yes
+			event_target:dispute_loser = {
+				is_egalitarian = yes
+			}
+		}
+	}
+	picture = GFX_evt_voting
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = envoy_events.19.A
+
+		add_resource = {
+			influence = 25
+		}
+
+		tooltip = {
+			from = {
+				if = {
+					limit = {
+						is_militarist = yes
+						event_target:dispute_winner = {
+							is_pacifist = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_militarist_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_pacifist = yes
+						event_target:dispute_winner = {
+							is_militarist = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_pacifist_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_spiritualist = yes
+						event_target:dispute_winner = {
+							is_materialist = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_materialist_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_materialist = yes
+						event_target:dispute_winner = {
+							is_spiritualist = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_spiritualist_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_xenophile = yes
+						event_target:dispute_winner = {
+							is_xenophobe = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_xenophobe_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_xenophobe = yes
+						event_target:dispute_winner = {
+							is_xenophile = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_xenophile_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_egalitarian = yes
+						event_target:dispute_winner = {
+							is_authoritarian = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_authoritarian_ideology
+						days = 5400
+					}
+				}
+				else_if = {
+					limit = {
+						is_authoritarian = yes
+						event_target:dispute_winner = {
+							is_egalitarian = yes
+						}
+					}
+					add_modifier = {
+						modifier = federation_egalitarian_ideology
+						days = 5400
+					}
+				}
+			}
+		}
+	}
+}
+
+# Scandalous Insult (by Gemma Thomson)
+# Triggered by on_five_year_pulse_country/action.221
+country_event = {
+	id = envoy_events.100
+	title = envoy_events.100.name
+	desc = {
+		text = envoy_events.100.desc.regular
+		trigger = {
+			NOR = {
+				is_unfriendly = yes
+				is_xenophobe = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+			event_target:scandalous_insult_country = {
+				is_gestalt = no
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.100.desc.gestalt
+		trigger = {
+			NOR = {
+				is_unfriendly = yes
+				is_xenophobe = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+			event_target:scandalous_insult_country = {
+				is_gestalt = yes
+			}
+		}
+	}
+	desc = {
+		text = envoy_events.100.desc.hostile
+		trigger = {
+			OR = {
+				is_unfriendly = yes
+				is_xenophobe = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+		}
+	}
+	picture = GFX_evt_assembly_fight
+	show_sound = event_assembly_fight
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		OR = {
+			exists = event_target:scandalous_insult_country
+			AND = {
+				NOT = { exists = event_target:scandalous_insult_country }
+				NOT = { has_country_flag = recent_envoy_event }
+			}
+		}
+		OR = {
+			exists = event_target:scandalous_insult_country
+			any_playable_country = {
+				NOT = { is_same_value = root } #galcom check would return true for root
+				OR = {
+					AND = {
+						is_galactic_community_member = yes
+						ROOT = { is_galactic_community_member = yes }
+						any_envoy = {
+							has_envoy_task = {
+								task = galactic_community
+							}
+						}
+					}
+					AND = {
+						has_federation = yes
+						federation = { is_same_value = root.federation }
+						any_envoy = {
+							has_envoy_task = {
+								task = federation
+							}
+						}
+					}
+					is_improving_relations_with = root
+				}
+			}
+		}
+	}
+
+	immediate = {
+		if = { #not fired by Smear Campaign
+			limit = {
+				NOT = { exists = event_target:scandalous_insult_country }
+			}
+			random_playable_country = {
+				limit = {
+					NOT = { is_same_value = root } #galcom check would return true for root
+					OR = {
+						AND = {
+							is_galactic_community_member = yes
+							ROOT = { is_galactic_community_member = yes }
+							any_envoy = {
+								has_envoy_task = {
+									task = galactic_community
+								}
+							}
+						}
+						AND = {
+							has_federation = yes
+							federation = { is_same_value = root.federation }
+							any_envoy = {
+								has_envoy_task = {
+									task = federation
+								}
+							}
+						}
+						is_improving_relations_with = root
+					}
+				}
+				save_event_target_as = scandalous_insult_country
+			}
+		}
+		event_target:scandalous_insult_country = { #For diplo incident operation
+			save_event_target_as = offended_party #actually not, but the player really doesn't need to know this
+		}
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 2160 #6 years; shorter than usual
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = insulting_envoy
+		}
+	}
+
+	option = { #Take offence (mirrors operation.3011)
+		name = envoy_events.100.a
+		add_opinion_modifier = {
+			who = event_target:scandalous_insult_country
+			modifier = opinion_smear_campaign_insulted
+		}
+		if = {
+			limit = {
+				event_target:scandalous_insult_country = {
+					has_federation = yes
+					federation = { is_same_value = root.federation }
+				}
+			}
+			federation = { add_cohesion = -15 }
+		}
+		if = {
+			limit = {
+				root = { is_overlord_to = event_target:scandalous_insult_country }
+			}
+			random_agreement = {
+				limit = {
+					owner = { is_same_value = root }
+					target = { is_same_value = event_target:scandalous_insult_country }
+				}
+				add_loyalty = -15
+			}
+		}
+		if = {
+			limit = {
+				event_target:scandalous_insult_country = { is_overlord_to = root }
+			}
+			random_agreement = {
+				limit = {
+					owner = { is_same_value = event_target:scandalous_insult_country }
+					target = { is_same_value = root }
+				}
+				add_loyalty = -15
+			}
+		}
+		hidden_effect = {
+			event_target:scandalous_insult_country = {
+				country_event = { id = envoy_events.101 days = 1 }
+			}
+		}
+	}
+	option = { #Ignore
+		name = {
+			text = envoy_events.100.b
+			trigger = {
+				NOR = {
+					is_unfriendly = yes
+					is_spiritualist = yes
+				}
+			}
+		}
+		name = {
+			text = envoy_events.100.c
+			trigger = {
+				OR = {
+					is_unfriendly = yes
+					is_spiritualist = yes
+				}
+			}
+		}
+		trigger = {
+			OR = {
+				is_xenophile = yes
+				is_pacifist = yes
+				is_spiritualist = yes
+				is_gestalt = yes
+			}
+		}
+		add_resource = { influence = -10 }
+	}
+}
+#Offence has been taken | from = offended country
+#May be triggered by Operation: Smear Campaign
+country_event = {
+	id = envoy_events.101
+	title = envoy_events.101.name
+	desc = envoy_events.101.desc
+	picture = GFX_evt_alien_segregation
+	show_sound = event_assembly_fight
+	is_triggered_only = yes
+
+	trigger = {
+		exists = from
+	}
+
+	option = {
+		name = {
+			text = envoy_events.101.a
+			trigger = { is_unfriendly = no }
+		}
+		name = {
+			text = INTRIGUING
+			trigger = { is_unfriendly = yes }
+		}
+		tooltip = {
+			from = {
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_smear_campaign_insulted
+				}
+			}
+		}
+		if = {
+			limit = {
+				root = { is_overlord_to = from }
+			}
+			tooltip = {
+				random_agreement = {
+					limit = {
+						owner = { is_same_value = root }
+						target = { is_same_value = from }
+					}
+					add_loyalty = -15
+				}
+			}
+
+		}
+		if = {
+			limit = {
+				from = { is_overlord_to = root }
+			}
+			tooltip = {
+				random_agreement = {
+					limit = {
+						owner = { is_same_value = from }
+						target = { is_same_value = root }
+					}
+					add_loyalty = -15
+				}
+			}
+		}
+	}
+}
+
+
+### Moar scandals (by Pierre du Plessis)
+
+#Galcom: Lobbyists
+country_event = {
+	id = envoy_events.200
+	title = envoy_events.200.name
+	desc = envoy_events.200.desc
+	picture = GFX_evt_smear_campaign
+	show_sound = event_administrative_work
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		any_envoy = {
+			has_envoy_task = {
+				task = galactic_community
+			}
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				has_envoy_task = {
+					task = galactic_community
+				}
+			}
+			save_event_target_as = event_envoy
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = galcom_lobbying
+		}
+	}
+
+	option = {
+		name = envoy_events.200.A
+
+		add_monthly_resource_mult = {
+			resource = energy
+			value = @tier1materialreward
+			min = @tier1materialmin
+		}
+		add_modifier = {
+			modifier = beholden_to_special_interests
+			years = 10
+		}
+	}
+
+	option = {
+		name = envoy_events.3.C1
+		event_target:event_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+}
+
+#Seriously violating local norms
+country_event = {
+	id = envoy_events.205
+	title = envoy_events.205.name
+	desc = envoy_events.205.desc
+	picture = GFX_evt_smear_campaign
+	show_sound = event_administrative_work
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		any_envoy = {
+			NOT = {
+				has_envoy_task = { #just in case
+					task = first_contact
+				}
+			}
+			NOT = { has_leader_flag = respected_envoy }
+			OR = {
+				AND = {
+					exists = envoy_location_country
+					envoy_location_country = {
+						is_scope_type = country #future-proofing, just in case we do anything funky
+						NOR = {
+							is_same_value = root
+							is_same_species = root
+							is_same_species = prev
+							is_gestalt = yes
+						}
+						is_primitive = no # Blocks event from firing on pre-FTL planet
+					}
+				}
+				AND = {
+					has_envoy_task = {
+						task = federation
+					}
+					exists = root.federation.federation_leader
+					root.federation.federation_leader = {
+						NOR = {
+							is_same_value = root
+							is_same_species = root
+							is_same_species = prev
+							is_gestalt = yes
+						}
+					}
+				}
+			}
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				NOT = {
+					has_envoy_task = { #just in case
+						task = first_contact
+					}
+				}
+				NOT = { has_leader_flag = respected_envoy }
+				OR = {
+					AND = {
+						exists = envoy_location_country
+						envoy_location_country = {
+							is_scope_type = country #future-proofing, just in case we do anything funky
+							NOR = {
+								is_same_value = root
+								is_same_species = root
+								is_same_species = prev
+								is_gestalt = yes
+							}
+						}
+					}
+					AND = {
+						has_envoy_task = {
+							task = federation
+						}
+						exists = root.federation.federation_leader
+						root.federation.federation_leader = {
+							NOR = {
+								is_same_value = root
+								is_same_species = root
+								is_same_species = prev
+								is_gestalt = yes
+							}
+						}
+					}
+				}
+			}
+			save_event_target_as = event_envoy
+			if = {
+				limit = {
+					has_envoy_task = {
+						task = federation
+					}
+					exists = root.federation.federation_leader
+				}
+				root.federation.federation_leader = {
+					save_event_target_as = envoy_country
+					save_event_target_as = offended_party
+				}
+			}
+			else = {
+				envoy_location_country = {
+					save_event_target_as = envoy_country
+					save_event_target_as = offended_party
+				}
+			}
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = insulting_envoy
+		}
+	}
+
+	option = {
+		name = {
+			trigger = {
+				is_xenophobe = no
+				is_gestalt = no
+			}
+			text = envoy_events.205.A
+		}
+		name = {
+			trigger = {
+				OR = {
+					is_xenophobe = yes
+					is_gestalt = yes
+				}
+			}
+			text = envoy_events.205.A.xenophobe
+		}
+
+		event_target:envoy_country = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_envoy_insult_taken
+			}
+		}
+
+		if = {
+			limit = {
+				OR = {
+					is_homicidal = yes
+					is_xenophobe = yes
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+			}
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 0
+				NOR = {
+					is_homicidal = yes
+					is_xenophobe = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = envoy_events.3.C1
+		event_target:event_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+}
+
+#Deviation from own empire norms
+country_event = {
+	id = envoy_events.210
+	title = envoy_events.210.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				envoy_event_authoritarian = { text = envoy_events.210.desc.authoritarian }
+				envoy_event_egalitarian = { text = envoy_events.210.desc.egalitarian }
+				envoy_event_xenophile = { text = envoy_events.210.desc.xenophile }
+				envoy_event_xenophobe = { text = envoy_events.210.desc.xenophobe }
+				envoy_event_materialist = { text = envoy_events.210.desc.materialist }
+				envoy_event_spiritualist = { text = envoy_events.210.desc.spiritualist }
+				envoy_event_pacifist = { text = envoy_events.210.desc.pacifist }
+				envoy_event_militarist = { text = envoy_events.210.desc.militarist }
+			}
+		}
+	}
+	picture = GFX_evt_acquire_asset
+	show_sound = event_default
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		count_pop_faction = {
+			count >= 3 #i.e. has ruling factions
+		}
+		any_envoy = {
+			NOT = {
+				has_envoy_task = { #just in case
+					task = first_contact
+				}
+			}
+			NOT = { has_leader_flag = respected_envoy }
+
+			exists = envoy_location_country
+			envoy_location_country = {
+				is_scope_type = country #future-proofing, just in case we do anything funky
+				has_opposing_ethics = {
+					COUNTRY1 = this
+					COUNTRY2 = root
+				}
+			}
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				NOT = {
+					has_envoy_task = { #just in case
+						task = first_contact
+					}
+				}
+				NOT = { has_leader_flag = respected_envoy }
+
+				exists = envoy_location_country
+				envoy_location_country = {
+					is_scope_type = country #future-proofing, just in case we do anything funky
+					has_opposing_ethics = {
+						COUNTRY1 = this
+						COUNTRY2 = root
+					}
+					is_primitive = no # Blocks event from firing on pre-FTL planet
+				}
+			}
+			save_event_target_as = event_envoy
+			envoy_location_country = {
+				save_event_target_as = envoy_country
+			}
+		}
+		random_list = {
+			1 = {
+				set_country_flag = envoy_event_materialist
+				modifier = {
+					factor = 0
+					NAND = {
+						is_materialist = yes
+						event_target:envoy_country = {
+							is_spiritualist = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = technologist }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_materialist
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_spiritualist
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_spiritualist
+				modifier = {
+					factor = 0
+					NAND = {
+						is_spiritualist = yes
+						event_target:envoy_country = {
+							is_materialist = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = traditionalist }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_spiritualist
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_materialist
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_authoritarian
+				modifier = {
+					factor = 0
+					NAND = {
+						is_authoritarian = yes
+						event_target:envoy_country = {
+							is_egalitarian = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = totalitarian }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_authoritarian
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_egalitarian
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_egalitarian
+				modifier = {
+					factor = 0
+					NAND = {
+						is_egalitarian = yes
+						event_target:envoy_country = {
+							is_authoritarian = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = progressive }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_egalitarian
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_authoritarian
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_xenophile
+				modifier = {
+					factor = 0
+					NAND = {
+						is_xenophile = yes
+						event_target:envoy_country = {
+							is_xenophobe = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = xenoist }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_xenophile
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_xenophobe
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_xenophobe
+				modifier = {
+					factor = 0
+					NAND = {
+						is_xenophobe = yes
+						event_target:envoy_country = {
+							is_xenophile = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.1
+					is_same_species = event_target:envoy_country
+				}
+				modifier = {
+					factor = 0.01
+					NOR = {
+						has_faction = supremacist
+						has_faction = isolationist
+					}
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_xenophobe
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_xenophile
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_militarist
+				modifier = {
+					factor = 0
+					NAND = {
+						is_militarist = yes
+						event_target:envoy_country = {
+							is_pacifist = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = imperialist }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_militarist
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_pacifist
+						}
+					}
+				}
+			}
+			1 = {
+				set_country_flag = envoy_event_pacifist
+				modifier = {
+					factor = 0
+					NAND = {
+						is_pacifist = yes
+						event_target:envoy_country = {
+							is_militarist = yes
+						}
+					}
+				}
+				modifier = {
+					factor = 0.01
+					NOT = { has_faction = prosperity }
+				}
+				modifier = {
+					factor = 3
+					OR = {
+						has_ethic = ethic_fanatic_pacifist
+						event_target:envoy_country = {
+							has_ethic = ethic_fanatic_militarist
+						}
+					}
+				}
+			}
+		}
+
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = wayward_envoy
+		}
+	}
+
+	option = {
+		name = envoy_events.210.A
+
+
+		switch = {
+			trigger = has_country_flag
+			envoy_event_authoritarian = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = totalitarian }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_egalitarian = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = progressive }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_xenophile = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = xenoist }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_xenophobe = {
+				random_pop_faction = {
+					limit = {
+						OR = {
+							is_pop_faction_type = supremacist
+							is_pop_faction_type = isolationist
+						}
+					}
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_materialist = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = technologist }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_spiritualist = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = traditionalist }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_pacifist = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = progressive }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+			envoy_event_militarist = {
+				random_pop_faction = {
+					limit = { is_pop_faction_type = imperialist }
+					add_modifier = {
+						modifier = faction_upset
+						years = 10
+					}
+				}
+			}
+		}
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+
+	option = {
+		name = envoy_events.3.C1
+		event_target:event_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+
+	after = {
+		remove_country_flag = envoy_event_authoritarian
+		remove_country_flag = envoy_event_egalitarian
+		remove_country_flag = envoy_event_xenophile
+		remove_country_flag = envoy_event_xenophobe
+		remove_country_flag = envoy_event_materialist
+		remove_country_flag = envoy_event_spiritualist
+		remove_country_flag = envoy_event_pacifist
+		remove_country_flag = envoy_event_militarist
+	}
+}
+
+#Substance Abuse
+country_event = {
+	id = envoy_events.215
+	title = envoy_events.215.name
+	desc = envoy_events.215.desc
+	picture = GFX_evt_cover_blown
+	show_sound = event_default
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		any_envoy = {
+			species = { is_robotic = no }
+			OR = {
+				AND = {
+					has_envoy_task = {
+						task = federation
+					}
+					root.federation = {
+						any_member = {
+							NOR = {
+								is_same_value = root
+								is_same_species = root
+								is_same_species = prevprev
+								is_gestalt = yes
+							}
+						}
+					}
+				}
+				AND = {
+					has_envoy_task = {
+						task = galactic_community
+					}
+					any_country = {
+						is_galactic_community_member = yes
+						NOR = {
+							is_same_value = root
+							is_same_species = root
+							is_same_species = prevprev
+							is_gestalt = yes
+						}
+					}
+				}
+			}
+			NOT = { has_leader_flag = respected_envoy }
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				species = { is_robotic = no }
+				OR = {
+					AND = {
+						has_envoy_task = {
+							task = federation
+						}
+						root.federation = {
+							any_member = {
+								NOR = {
+									is_same_value = root
+									is_same_species = root
+									is_same_species = prevprev
+									is_gestalt = yes
+								}
+							}
+						}
+					}
+					AND = {
+						has_envoy_task = {
+							task = galactic_community
+						}
+						any_country = {
+							is_galactic_community_member = yes
+							NOR = {
+								is_same_value = root
+								is_same_species = root
+								is_same_species = prevprev
+								is_gestalt = yes
+							}
+						}
+					}
+				}
+				NOT = { has_leader_flag = respected_envoy }
+			}
+			save_event_target_as = event_envoy
+
+			if = {
+				limit = {
+					has_envoy_task = {
+						task = federation
+					}
+				}
+				root.federation = {
+					random_member = {
+						limit = {
+							NOR = {
+								is_same_value = root
+								is_same_species = root
+								is_same_species = prevprev
+								is_gestalt = yes
+							}
+						}
+						save_event_target_as = provider_country
+					}
+				}
+			}
+			else = {
+				random_country = {
+					limit = {
+						is_galactic_community_member = yes
+						NOR = {
+							is_same_value = root
+							is_same_species = root
+							is_same_species = prevprev
+							is_gestalt = yes
+						}
+					}
+					save_event_target_as = provider_country
+				}
+			}
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = substance_abuse
+		}
+	}
+
+	option = {
+		name = envoy_events.215.A
+		custom_tooltip = envoy_events.215.A.tooltip
+		hidden_effect = {
+			event_target:event_envoy = {
+				kill_leader = { show_notification = no }
+			}
+		}
+		add_modifier = {
+			modifier = diplo_corps_lost_control
+			days = 3600
+		}
+	}
+
+	option = {
+		name = envoy_events.3.C1
+		event_target:event_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+}
+
+#Yet another insult event
+country_event = {
+	id = envoy_events.220
+	title = envoy_events.220.name
+	desc = {
+		trigger = {
+			hidden:event_target:offended_party = {
+				switch = {
+					trigger = is_species_class
+					HUM = { text = envoy_events.220.desc.hum }
+					MAM = { text = envoy_events.220.desc.mam }
+					FUN = { text = envoy_events.220.desc.fun }
+					AVI = { text = envoy_events.220.desc.avi }
+					PLANT = { text = envoy_events.220.desc.plant }
+					ART = { text = envoy_events.220.desc.art }
+					REP = { text = envoy_events.220.desc.rep }
+					MOL = { text = envoy_events.220.desc.mol }
+					LITHOID = { text = envoy_events.220.desc.lit }
+					NECROID = { text = envoy_events.220.desc.nec }
+					AQUATIC = { text = envoy_events.220.desc.aqu }
+					MACHINE = { text = envoy_events.220.desc.robot }
+					ROBOT = { text = envoy_events.220.desc.robot }
+					default = { text = envoy_events.220.desc.hum }
+				}
+			}
+		}
+	}
+	picture = GFX_evt_alien_segregation
+	show_sound = event_administrative_work
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		any_envoy = {
+			NOT = {
+				has_envoy_task = { #just in case
+					task = first_contact
+				}
+			}
+			NOT = { has_leader_flag = respected_envoy }
+			exists = envoy_location_country
+			envoy_location_country = {
+				is_scope_type = country
+				exists = ruler
+				NOR = {
+					is_same_value = root
+					is_same_species = root
+					is_same_species = prev
+				}
+				is_primitive = no # Blocks event from firing on pre-FTL planet
+			}
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				NOT = {
+					has_envoy_task = { #just in case
+						task = first_contact
+					}
+				}
+				NOT = { has_leader_flag = respected_envoy }
+				exists = envoy_location_country
+				envoy_location_country = {
+					is_scope_type = country
+					exists = ruler
+					NOR = {
+						is_same_value = root
+						is_same_species = root
+						is_same_species = prev
+					}
+				}
+			}
+			save_event_target_as = event_envoy
+			envoy_location_country = {
+				save_event_target_as = offended_party
+			}
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = insulting_envoy
+		}
+	}
+
+	option = {
+		name = {
+			trigger = {
+				is_xenophobe = no
+				is_gestalt = no
+			}
+			text = envoy_events.205.A
+		}
+		name = {
+			trigger = {
+				OR = {
+					is_xenophobe = yes
+					is_gestalt = yes
+				}
+			}
+			text = envoy_events.205.A.xenophobe
+		}
+
+		event_target:offended_party = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_envoy_insult_taken
+			}
+		}
+
+		if = {
+			limit = {
+				OR = {
+					is_homicidal = yes
+					is_xenophobe = yes
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+			}
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 0
+				NOR = {
+					is_homicidal = yes
+					is_xenophobe = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = envoy_events.3.C1
+		event_target:event_envoy = {
+			unassign_leader = this
+			set_cooldown = @envoy_punishment_cooldown
+		}
+	}
+}
+
+#Salacious Affair
+
+country_event = {
+	id = envoy_events.225
+	title = envoy_events.225.name
+	desc = envoy_events.225.desc
+	picture = GFX_evt_cover_blown
+	show_sound = event_bad_omen
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		is_gestalt = no
+		any_envoy = {
+			NOT = {
+				has_envoy_task = { #just in case
+					task = first_contact
+				}
+			}
+			NOT = { has_leader_flag = respected_envoy }
+			exists = envoy_location_country
+			envoy_location_country = {
+				is_scope_type = country #future-proofing, just in case we do anything funky
+				NOR = {
+					is_same_value = root
+					is_gestalt = yes
+				}
+				is_primitive = no # Blocks event from firing on pre-FTL planet
+			}
+		}
+		NOT = { has_country_flag = recent_envoy_event }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = recent_envoy_event
+			days = 5400
+		}
+		random_envoy = {
+			limit = {
+				NOT = {
+					has_envoy_task = { #just in case
+						task = first_contact
+					}
+				}
+				NOT = { has_leader_flag = respected_envoy }
+				exists = envoy_location_country
+				envoy_location_country = {
+					NOR = {
+						is_same_value = root
+						is_gestalt = yes
+					}
+				}
+			}
+			save_event_target_as = event_envoy
+			envoy_location_country = {
+				save_event_target_as = scandal_empire
+				save_event_target_as = offended_party #for espionage purposes
+			}
+		}
+		set_espionage_diplo_incident_success_flag = {
+			FLAG = salacious_affair
+		}
+	}
+
+	option = {
+		name = envoy_events.225.A
+		custom_tooltip = envoy_events.225.A.tooltip
+		hidden_effect = {
+			event_target:event_envoy = {
+				kill_leader = {
+					show_notification = no
+					fire = yes
+				}
+			}
+		}
+		if = {
+			limit = {
+				resource_stockpile_compare = {
+					resource = influence
+					value >= 30
+				}
+			}
+			add_resource = {
+				influence = -30
+			}
+		}
+		else = {
+			add_modifier = {
+				modifier = galactic_community_diplo_corps_is_a_joke
+				days = 3600
+			}
+		}
+		ai_chance = {
+			factor = 3
+		}
+	}
+
+	option = {
+		name = envoy_events.225.B
+		event_target:event_envoy = {
+			unassign_leader = this
+			hidden_effect = {
+				set_cooldown = 0
+				set_leader_flag = fugitive_envoy@event_target:scandal_empire
+			}
+		}
+
+		event_target:scandal_empire = {
+			add_opinion_modifier = {
+				who = root
+				modifier = opinion_envoy_murder_scandal
+			}
+		}
+	}
+}
+
+
+leader_event = {
+	id = envoy_events.230
+	title = envoy_events.230.name
+	desc = envoy_events.230.desc
+	picture = GFX_evt_cover_blown
+	show_sound = event_bad_omen
+
+	is_triggered_only = yes
+
+	trigger = {
+		leader_class = envoy
+		exists = envoy_location_country
+		has_leader_flag = fugitive_envoy@envoy_location_country
+	}
+
+	immediate = { if = { limit = { NOT = { exists = event_target:event_envoy } } save_event_target_as = event_envoy } } # vfix
+	option = {
+		name = envoy_events.230.A
+
+		custom_tooltip = envoy_events.225.A.tooltip
+		hidden_effect = {
+			kill_leader = {
+				show_notification = no
+				fire = yes
+			}
+		}
+		owner = {
+			if = {
+				limit = {
+					resource_stockpile_compare = {
+						resource = influence
+						value >= 30
+					}
+				}
+				add_resource = {
+					influence = -30
+				}
+			}
+			else = {
+				add_modifier = {
+					modifier = galactic_community_diplo_corps_is_a_joke
+					days = 3600
+				}
+			}
+		}
+	}
+}

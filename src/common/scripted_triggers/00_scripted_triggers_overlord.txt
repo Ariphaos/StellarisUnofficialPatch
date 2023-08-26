@@ -1,0 +1,246 @@
+#######################
+# SPECIALIST SUBJECTS #
+#######################
+
+has_specialist_subject = {
+	is_overlord = yes
+	any_agreement = { has_active_specialization = any }
+}
+
+has_specialist_subject_type = {
+	is_overlord = yes
+	any_agreement = { has_active_specialization = specialist_$TYPE$ }
+}
+
+has_specialist_subject_tier = {
+	is_overlord = yes
+	any_agreement = {
+		has_active_specialization = specialist_$TYPE$
+		specialist_tier >= $TIER$
+	}
+}
+
+is_subject_with_preset = {
+	is_subject = yes
+	any_agreement = { agreement_preset = $PRESET$ }
+}
+
+is_specialist_subject = {
+	is_subject = yes
+	any_agreement = { has_active_specialization = any }
+}
+
+is_specialist_subject_type = {
+	is_subject = yes
+	any_agreement = { has_active_specialization = specialist_$TYPE$ }
+}
+
+is_specialist_subject_tier = {
+	is_subject = yes
+	any_agreement = {
+		has_active_specialization = specialist_$TYPE$
+		specialist_tier >= $TIER$
+	}
+}
+
+is_near_specialist_subject = {
+	exists = owner
+	solar_system = {
+		closest_system = {
+			max_steps = 2
+			limit = {
+				exists = owner
+				owner = {
+					has_overlord = ROOT.owner
+					is_specialist_subject_type = { TYPE = $TYPE$ }
+				}
+			}
+		}
+	}
+}
+
+overlord_has_num_armies_on_planet = {
+	count_planet_army = {
+		count = $NUM$
+		limit = {
+			exists = owner
+			exists = ROOT.owner
+			ROOT.owner = { has_overlord = PREV.owner }
+		}
+	}
+}
+
+overlord_has_more_than_num_armies_on_planet = {
+	count_planet_army = {
+		count > $NUM$
+		limit = {
+			exists = owner
+			exists = ROOT.owner
+			ROOT.owner = { has_overlord = PREV.owner }
+		}
+	}
+}
+
+valid_for_scholarium_sensors = {
+	is_colony = no
+	is_preventing_anomaly = no
+	can_have_sensory_readings = yes
+}
+
+valid_for_prospectorium_discovery = {
+	has_deposit = no
+	has_anomaly = no
+	is_preventing_anomaly = no
+	NOT = { has_planet_flag = resource_discovery_flag }
+	can_have_resource_discovery = yes
+}
+
+federation_check_for_subject_trigger = {
+	custom_tooltip = {
+		fail_text = same_federation_as_overlord
+		OR = {
+			has_federation = no
+			is_subject = no
+			AND = {
+				is_subject = yes
+				is_in_federation_with = overlord
+			}
+		}
+	}
+}
+
+#fleet scope
+is_merc_enclave_founding_allowed = {
+	owner = {
+		NOT = {
+			has_ethic = ethic_gestalt_consciousness
+			has_civic = civic_fanatic_purifiers
+		}
+	}
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.a
+		success_text = enclave.2.tooltip.aa
+		exists = owner
+		exists = leader
+		is_ship_class = shipclass_military
+	}
+	fleet_size >= 50
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.cloak
+		count_owned_ship = {
+			limit = { has_cloaking_strength > 0 }
+			count = 0
+		}
+	}
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.c
+		success_text = enclave.2.tooltip.cc
+		exists = solar_system
+		solar_system = {
+			exists = owner
+			owner = {
+				is_same_value = root.owner
+				is_same_value = root.controller
+			}
+			NOT = {
+				any_fleet_in_system = {
+					owner = {
+						is_hostile = root.owner
+					}
+				}
+			}	
+		}
+	}
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.b
+		success_text = enclave.2.tooltip.bb
+		exists = solar_system # vfix
+		solar_system = {
+			NOR = {
+				any_fleet_in_system = {
+					is_ship_size = enclave_mercenary_station
+				}
+				has_star_flag = enclave
+			}
+		}
+	}
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.e
+		success_text = enclave.2.tooltip.ee
+		exists = solar_system # vfix
+		solar_system = {
+			OR = {
+				any_system_planet = {
+					is_moon = yes
+				}
+				any_system_planet = {
+					is_asteroid = yes
+				}
+			}
+		}
+	}
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.d
+		success_text = enclave.2.tooltip.dd
+		controller = {
+			enclave_capacity_left >= 1
+		}
+	}
+	custom_tooltip = {
+		fail_text = enclave.2.tooltip.f
+		NOR = {
+			has_ship_owner_type = federation
+			has_ship_owner_type = galactic_community
+		}
+	}
+}
+
+######################
+# More Shroudwalking #
+######################
+shroudwalker_insight_purchasing_trigger = {
+	custom_tooltip = {
+		fail_text = shroudwalker_insight_cooldown_tt
+		NOT = { has_country_flag = shroudwalker_insight_cooldown }
+	}
+	resource_stockpile_compare = {
+		resource = influence
+		value >= 50
+	}
+	resource_stockpile_compare = {
+		resource = energy
+		value >= 10
+		mult = $TARGET$.trigger:empire_size
+	}
+}
+
+shroudwalker_insight_save_spynetwork_trigger = {
+	OR = {
+		NOT = { exists = event_target:$EVENT_TARGET$ }
+		target = { is_same_value = event_target:$EVENT_TARGET$ }
+		root = {
+			NOT = {
+				any_spynetwork = {
+					owner = { is_same_value = root }
+					target = { 
+						is_country_type = default
+						is_same_value = event_target:$EVENT_TARGET$
+					}
+					exists = leader
+				}
+			}
+		}
+	}
+}
+
+##########
+# Galcom #
+##########
+not_allowed_for_galcom_resolution_trigger = {
+	OR = {
+		NOT = { owner = { is_galactic_community_member = yes } }
+		NOT = { target = { is_galactic_community_member = yes } }
+		NOT = { is_active_resolution = $RESOLUTION$ }
+	}
+}
+
