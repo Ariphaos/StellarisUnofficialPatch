@@ -1,5 +1,16 @@
 # ChangeLog
 
+## August 26th
+
+Imported fixes from Vanilla Fixes that I didn't already fix:
+
+- Lots of missing scope checks (what else is new)
+- A few scope resolution errors
+- Don't get mad at yourself for killing your own pops
+- Handful of localization fixes
+- Basically everything not in Vanilla Fixes fixed that I haven't fixed already that isn't in gfx
+- gfx skipped because it's significantly harder to track that folder.
+
 ## August 5th
 
 A couple of in-patch bugs:
