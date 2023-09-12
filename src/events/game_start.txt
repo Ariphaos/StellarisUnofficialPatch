@@ -15,7 +15,70 @@ event = {
 			country_event = { id = country.900 days = 460 random = 60 }
 		}
 
-		### SPAWN UNIQUE SYSTEMS
+		### HUMAN SPAWNS
+		if = { #FTP spawner
+			limit = {
+				has_lithoids = yes
+				num_ai_empires_setting >= 1
+				any_country = { #First check that UNE has spawned
+					has_country_flag = human_1
+					is_human_species = yes
+					NOT = { has_origin = origin_lost_colony }
+					NOT = { has_origin = origin_broken_shackles }
+				}
+				any_country = { #Then check that FTP isn't around
+					NOR = {
+						species_portrait = lith_human
+						has_country_flag = human_lithoid
+					}
+				}
+			}
+			random_list = {
+				20 = {
+					modifier = {
+						any_country = { #If the UNE is spawned and is a human we increase the chance. This means it's only a 20% if you are playing as the CoM
+							has_country_flag = human_1
+							is_ai = no
+						}
+						factor = 5
+					}
+					random_system = {
+						limit = {
+							has_owner = no
+							has_special_star_flag_trigger = no
+						}
+						spawn_system = { initializer = "ai_titawin_init" }
+					}
+				}
+				80 = {}
+			}
+		}
+		if = { #If someone is playing human lithoids and there is no UNE lets give it a chance to spawn
+			limit = {
+				any_country = {
+					has_country_flag = human_lithoid
+					species_portrait = lith_human
+				}
+				NOT = {
+					any_country = {
+						has_country_flag = human_1
+					}
+				}
+				num_ai_empires_setting >= 1
+			}
+			random_list = {
+				80 = {
+					random_system = {
+						limit = {
+							has_owner = no
+							has_special_star_flag_trigger = no
+						}
+						spawn_system = { initializer = "ai_sol_system" }
+					}
+				}
+				20 = {}
+			}
+		}
 		if = {
 			# If there are no Sols
 			limit = {
@@ -200,7 +263,9 @@ event = {
 			every_playable_country = {
 				limit = {
 					has_origin = origin_lost_colony
-					NOT = { has_country_flag = human_2 }
+					NOT = {has_country_flag = human_2 }
+					# no need to change the planet class of your planets if you're a machine
+					is_machine_empire = no
 				}
 				country_event = { id = origin.100 }
 			}
@@ -264,11 +329,17 @@ event = {
 			}
 			imperial_origin_start_effect = yes
 		}
-		
+
 		# Payback
 		every_playable_country = {
 			limit = { has_origin = origin_payback }
 			country_event = { id = origin.4000 }
+		}
+
+		# Fruitful Partnership
+		every_playable_country = {
+			limit = { has_origin = origin_fruitful }
+			fruitful_start_effect = yes
 		}
 
 		## Payback/Escaped Slaves Slaver empire
@@ -336,6 +407,15 @@ event = {
 			give_technology = { message = no tech = tech_subspace_drive }
 			low_tech_start_add_research_options_effect = yes
 			add_research_option = tech_hyper_drive_1
+		}
+
+		every_playable_country = {
+			limit = {
+				is_ascensionist_empire = yes
+			}
+			every_owned_planet = {
+				set_planetary_ascension_tier = 1
+			}
 		}
 	}
 }
@@ -576,6 +656,7 @@ event = {
 						}
 						NOT = { has_planet_flag = prescripted_ideal }
 						NOT = { has_planet_flag = ratling_planet }
+						NOT = { has_planet_flag = pre_sapients_forbidden }
 					}
 				}
 				save_event_target_as = pre_sapient_planet
@@ -635,9 +716,9 @@ event = {
 			limit = { is_ai = no }
 			random_list = {
 				#1 = { country_event = { id = nomad.1 days = 1 } } # DEBUG
-				20 = { country_event = { id = nomad.1 days = 7300 random = 500 } } # 25 years
-				25 = { country_event = { id = nomad.1 days = 14600 random = 500 } } # 40 years
-				25 = { country_event = { id = nomad.1 days = 20075 random = 500 } } # 55 years
+				20 = { country_event = { id = nomad.1 days = 7200 random = 500 } } # 25 years
+				25 = { country_event = { id = nomad.1 days = 14400 random = 500 } } # 40 years
+				25 = { country_event = { id = nomad.1 days = 1980 random = 500 } } # 55 years
 				30 = { } # No nomads
 			}
 		}
@@ -814,15 +895,15 @@ country_event = {
 				create_fleet = {
 					effect = {
 						set_owner = prev
-	
+
 						create_ship = {
 							name = random
 							random_existing_design = explorer_vessel
 						}
-	
+
 						set_fleet_stance = passive
 						set_location = prev.capital_scope.star
-	
+
 						owner = {
 							create_leader = {
 								class = scientist
@@ -1076,7 +1157,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 			}
 			random_list = {
 				66 = { set_country_flag = fallen_machine_empire_awaken_1 }	# Custodian
@@ -1085,7 +1166,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				is_machine_empire = no
+				NOT = { has_authority = auth_machine_intelligence }
 			}
 			every_owned_pop = {
 				set_pop_flag = organic_fallen_empire_pop
@@ -1240,12 +1321,12 @@ planet_event = {
 			add_district_and_planet_size_if_needed_effect = { district = district_generator }
 
 			if = {
-				limit = { owner = { is_machine_empire = yes } }
+				limit = { owner = { has_authority = auth_machine_intelligence } }
 				add_district_and_planet_size_if_needed_effect = { district = district_nexus }
 				add_district_and_planet_size_if_needed_effect = { district = district_nexus }
 			}
 			else_if = {
-				limit = { owner = { is_hive_empire = yes } }
+				limit = { owner = { has_authority = auth_hive_mind } }
 				add_district_and_planet_size_if_needed_effect = { district = district_hive }
 				add_district_and_planet_size_if_needed_effect = { district = district_hive }
 			}
@@ -1257,7 +1338,7 @@ planet_event = {
 			if = {
 				limit = {
 					owner = {
-						is_machine_empire = no
+						NOT = { has_authority = auth_machine_intelligence }
 						is_anglers_empire = yes
 					}
 					is_planet_class = pc_ocean
@@ -1267,14 +1348,14 @@ planet_event = {
 			}
 			else_if = {
 				limit = {
-					owner = { is_machine_empire = no }
+					owner = { NOT = { has_authority = auth_machine_intelligence } }
 				}
 				add_district_and_planet_size_if_needed_effect = { district = district_farming }
 				add_district_and_planet_size_if_needed_effect = { district = district_farming }
 			}
 			if = {
 				limit = {
-					owner = { is_machine_empire = yes }
+					owner = { has_authority = auth_machine_intelligence }
 				}
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
@@ -1335,7 +1416,7 @@ planet_event = {
 				}
 				if = {
 					limit = {
-						owner = { 
+						owner = {
 							is_lithoid_empire = yes
 						}
 					}
@@ -1433,13 +1514,13 @@ planet_event = {
 			add_district_and_planet_size_if_needed_effect = { district = district_mining }
 
 			if = {
-				limit = { owner = { is_machine_empire = yes } }
+				limit = { owner = { has_authority = auth_machine_intelligence } }
 				add_district_and_planet_size_if_needed_effect = { district = district_nexus }
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
 				add_district_and_planet_size_if_needed_effect = { district = district_generator }
 			}
 			else_if = {
-				limit = { owner = { is_hive_empire = yes } }
+				limit = { owner = { has_authority = auth_hive_mind } }
 				add_district_and_planet_size_if_needed_effect = { district = district_hive }
 				add_district_and_planet_size_if_needed_effect = { district = district_farming }
 			}
@@ -1486,14 +1567,14 @@ planet_event = {
 			limit = { is_capital = yes }
 
 			if = {
-				limit = { owner = { is_machine_empire = yes } }
+				limit = { owner = { has_authority = auth_machine_intelligence } }
 				while = {
 					count = 13
 					create_pop = { species = owner_main_species }
 				}
 			}
 			else_if = {
-				limit = { owner = { is_hive_empire = yes } }
+				limit = { owner = { has_authority = auth_hive_mind } }
 				while = {
 					count = 16
 					create_pop = { species = owner_main_species }
@@ -1551,14 +1632,14 @@ planet_event = {
 		}
 		else = {
 			if = {
-				limit = { owner = { is_machine_empire = yes } }
+				limit = { owner = { has_authority = auth_machine_intelligence } }
 				while = {
 					count = 15
 					create_pop = { species = owner_main_species }
 				}
 			}
 			else_if = {
-				limit = { owner = { is_hive_empire = yes } }
+				limit = { owner = { has_authority = auth_hive_mind } }
 				while = {
 					count = 18
 					create_pop = { species = owner_main_species }
@@ -2357,7 +2438,6 @@ country_event = {
 		NOR = {
 			has_origin = origin_broken_shackles
 			has_origin = origin_payback
-			has_origin = origin_void_dwellers
 		}
 	}
 
@@ -2524,6 +2604,7 @@ country_event = {
 			has_origin = origin_hegemon
 			has_origin = origin_imperial_vassal
 		}
+		is_gestalt = no
 	}
 
 	is_triggered_only = yes
@@ -2533,6 +2614,32 @@ country_event = {
 		add_tech_progress = {
 			tech = tech_xeno_linguistics
 			progress = 0.50
+		}
+	}
+}
+
+# Bonus scientist trait for Remnants
+country_event = {
+	id = game_start.67
+	hide_window = yes
+	trigger = {
+		has_ancrel = yes
+		is_country_type = default
+		has_origin = origin_remnants
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		every_owned_leader = {
+			limit = {
+				leader_class = scientist
+				OR = {
+					is_councilor_type = councilor_research
+					is_councilor_type = councilor_gestalt_scientist
+				}
+			}
+			add_trait_no_notify = leader_trait_expertise_archaeostudies
 		}
 	}
 }

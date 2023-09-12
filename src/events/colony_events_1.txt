@@ -4379,44 +4379,46 @@ country_event = {
 }
 
 # Colony Consumed
-country_event = {
+situation_event = {
 	id = colony.185
 	title = "colony.185.name"
 	desc = "colony.185.desc"
+	picture = GFX_evt_shattered_planet
+	show_sound = event_super_explosion
+	situation = this
+	location = target
 
 	is_triggered_only = yes
-
-	show_sound = event_super_explosion
-
 	trigger = {
 		owner = {
 			is_lithoid_devouring_swarm = yes
 		}
-
-		from = {
-			num_free_districts = { type = any value <= 0 }
-		}
 	}
-
-	picture = GFX_evt_shattered_planet
 
 	immediate = {
 		if = {
 			limit = {
-				from = {
+				target = {
 					is_planet_class = pc_desert # You can't eat your desert if it isn't a desert!
 					has_planet_flag = tasty_desert
 				}
 			}
-			set_country_flag = room_for_desert_achievement
+			owner = {
+				set_country_flag = room_for_desert_achievement
+			}
 		}
-		from = {
+		target = {
+			while = {
+				count = value:terravore_renaming_districts
+				consume_world = yes
+			}
 			every_owned_pop = {
 				resettle_pop = {
 					pop = this
 					planet = owner.capital_scope
 				}
 			}
+			destroy_colony = yes
 			change_pc = pc_shattered
 			clear_deposits = yes
 		}
@@ -4427,9 +4429,29 @@ country_event = {
 		custom_tooltip = colony.185.a.tooltip
 		if = {
 			limit = {
-				has_ascension_perk = ap_become_the_crisis
+				owner = {
+					has_ascension_perk = ap_become_the_crisis
+				}
 			}
-			complete_crisis_objective = crisobj_destroy_worlds
+			owner = {
+				complete_crisis_objective = crisobj_destroy_worlds
+			}
+		}
+	}
+}
+
+situation_event = { #Every 6 months event terravoring a planet
+	id = colony.190
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		target = { NOT = { has_planet_flag = recently_eaten_planet } }
+	}
+	
+	immediate = {
+		target = {
+			consume_world = yes
 		}
 	}
 }

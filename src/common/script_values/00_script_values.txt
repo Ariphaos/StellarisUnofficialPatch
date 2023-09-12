@@ -388,6 +388,31 @@ desired_science_ships_system_mult = { #this is mainly to allow for assisting res
 	}
 }
 
+max_science_ships = {
+	base = 1
+	add = value:count_leaders_of_class|CLASS|scientist|
+	max = 5
+	modifier = { #they shouldn't ever need it, but just in case
+		set = 1
+		is_country_type = awakened_fallen_empire
+	}
+}
+
+count_leaders_of_class = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_owned_leader
+		parameters = {
+			limit = {
+				leader_class = $CLASS$
+				is_ruler = no
+				is_gestalt_node = no
+			}
+		}
+		mode = add
+	}
+}
+
 job_weights_manual_corrections = {
 	#What comes below fixes an annoying logical problem in the system:
 	#check_economic_production_modifier_for_job checks the economic modifiers the current pop would get if it worked that job
@@ -558,6 +583,8 @@ job_total_output_modifier = {
 		}
 		mode = add
 	}
+	round_to = 0.01 #DO NOT REMOVE. It is here to stop modifiers perpetually being recalculated because complex dependency
+					#orders can ensure there is always a 0.00001 difference
 }
 
 job_total_research_output_modifier = {
@@ -575,6 +602,8 @@ job_total_research_output_modifier = {
 		}
 		mode = add
 	}
+	round_to = 0.01 #DO NOT REMOVE. It is here to stop modifiers perpetually being recalculated because complex dependency
+					#orders can ensure there is always a 0.00001 difference
 }
 
 knights_unity_output_modifier = {
@@ -723,7 +752,7 @@ gaiaseeder_cost_mult = {
 	modifier = {
 		add = value:gaiaseeder_councilor_mult
 		owner = {
-			has_councilor = { COUNCILOR = "councilor_idyllic_bloom" } 
+			has_councilor = { COUNCILOR = "councilor_idyllic_bloom" }
 		}
 	}
 }
@@ -845,7 +874,7 @@ gaiaseeder_upkeep = {
 	modifier = {
 		mult = value:gaiaseeder_cost_mult
 		owner = {
-			has_councilor = { COUNCILOR = "councilor_idyllic_bloom" } 
+			has_councilor = { COUNCILOR = "councilor_idyllic_bloom" }
 		}
 	}
 }
@@ -1132,6 +1161,11 @@ scripted_modifier_mult = {
 	min = 0
 }
 
+scripted_modifier_add = {
+	base = 0
+	add = modifier:$MODIFIER$
+}
+
 scripted_ethics_weight_mult = {
 	base = 0
 	modifier = {
@@ -1329,6 +1363,20 @@ consquences_damn_you = {
 	}
 }
 
+kaleidoscope_negative_events_value = { # result = (20 - kaleidoscope mood(1-20)) / 2
+	base = 20
+	subtract = event_target:global_event_country.kaleidoscope_global_mood
+	divide = 2
+	min = 1
+}
+
+kaleidoscope_positive_events_value = { # result = (1 + kaleidoscope mood(1-20)) / 2
+	base = 1
+	add = event_target:global_event_country.kaleidoscope_global_mood
+	divide = 2
+	min = 1
+}
+
 zarqlan_fervor_three = {
 	base = 0
 	modifier = {
@@ -1377,6 +1425,7 @@ conclave_election_value = {
 					has_job = death_priest
 					has_job = mortal_initiate
 					has_job = preacher
+					has_job = numistic_priest
 				}
 			}
 		}
@@ -2190,6 +2239,413 @@ hells_heart_effect = {
 		mult = 1.5
 		prev = {
 			has_trait = leader_trait_admiral_hells_heart
+		}
+	}
+}
+
+kaleidoscope_good_ending_chances = {
+	base = 0
+	add = event_target:global_event_country.kaleidoscope_global_mood
+	mult = 4
+	min = 1
+}
+
+terravore_progress = {
+	base = 6
+	modifier = {
+		mult = target.num_districts_terravore
+	}
+	pow = -1
+	mult = 1000
+}
+
+terravore_renaming_districts = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_free_districts
+		parameters = {
+			type = any
+		}
+		mode = add
+	}
+	divide = 2
+	ceiling = yes
+}
+
+lithoid_trait_mult = {
+	base = 1
+	modifier = {
+		add = 0.5
+		planet = {
+			has_deposit = d_lithoid_crater
+		}
+	}
+}
+
+budding_multiplier = {
+	base = 1
+	modifier = {
+		add = 0.5
+		has_trait = trait_lithoid_budding
+		planet = {
+			has_deposit = d_lithoid_crater
+		}
+	}
+	modifier = {
+		add = 0.5
+		OR = {
+			has_trait = trait_plantoid_budding
+			has_trait = trait_advanced_budding
+		}
+		planet = {
+			has_active_building = building_gaiaseeders_4
+		}
+	}
+}
+
+agenda_mind_over_matter_cost = {
+	base = 3500
+	modifier = {
+		mult = 0.75
+		is_spiritualist = yes
+	}
+	modifier = {
+		mult = 2
+		is_materialist = yes
+	}
+}
+
+living_standard_trade_value = {
+	base = 0
+	modifier = {
+		is_pop_category = ruler
+		add = modifier:living_standard_trade_value_rulers_add
+	}
+	modifier = {
+		is_pop_category = specialist
+		add = modifier:living_standard_trade_value_specialists_add
+	}
+	modifier = {
+		is_pop_category = worker
+		add = modifier:living_standard_trade_value_workers_add
+	}
+	modifier = {
+		is_pop_category = slave
+		add = modifier:living_standard_trade_value_criminals_add
+	}
+	modifier = {
+		is_pop_category = criminal
+		add = modifier:living_standard_trade_value_criminals_add
+	}
+	mult = value:scripted_modifier_mult|MODIFIER|pop_lifestyle_trade_mult|
+}
+
+rise_to_the_occasion_value = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_rivals
+		mode = add
+	}
+	divide = 2
+	floor = yes
+}
+
+reaffirmed_superiority_value = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_rivals
+		mode = add
+	}
+	mult = 2
+}
+
+habitat_build_cost_mult = {
+	base = 1
+	add = modifier:megastructures_habitat_cost_mult
+	add = modifier:megastructures_cost_mult
+}
+
+num_major_orbitals_type = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_fleet_in_system
+		parameters = {
+			limit = {
+				is_ship_size = major_orbital_resource
+				has_fleet_flag = $TYPE$_orbital
+			}
+		}
+		mode = add
+	}
+}
+
+num_major_orbitals_class = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_fleet_in_system
+		parameters = {
+			limit = {
+				is_ship_size = major_orbital_$CLASS$
+			}
+		}
+		mode = add
+	}
+}
+
+num_minor_orbitals_type = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_fleet_in_system
+		parameters = {
+			limit = {
+				is_ship_size = minor_orbital_resource
+				has_fleet_flag = $TYPE$_orbital
+			}
+		}
+		mode = add
+	}
+}
+
+num_minor_orbitals_class = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_fleet_in_system
+		parameters = {
+			limit = {
+				is_ship_size = minor_orbital_$CLASS$
+			}
+		}
+		mode = add
+	}
+}
+
+num_major_and_minor_orbitals_type = {
+	base = 0
+	add = value:num_major_orbitals_type|TYPE|$TYPE$|
+	add = value:num_minor_orbitals_type|TYPE|$TYPE$|
+}
+
+num_major_and_minor_orbitals_class = {
+	base = 0
+	add = value:num_major_orbitals_class|CLASS|$CLASS$|
+	add = value:num_minor_orbitals_class|CLASS|$CLASS$|
+}
+
+habitat_district_value = {
+	base = 0
+	add = solar_system.value:num_major_and_minor_orbitals_type|TYPE|$TYPE$|
+	mult = 3
+}
+
+num_major_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_fleet_in_system
+		parameters = {
+			limit = {
+				is_ship_class = shipclass_habitat_station
+				NOR = {
+					is_ship_size = minor_orbital_resource
+					is_ship_size = minor_orbital_generic
+				}
+			}
+		}
+		mode = add
+	}
+}
+
+num_minor_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_fleet_in_system
+		parameters = {
+			limit = {
+				is_ship_class = shipclass_habitat_station
+				OR = {
+					is_ship_size = minor_orbital_resource
+					is_ship_size = minor_orbital_generic
+				}
+			}
+		}
+		mode = add
+	}
+}
+
+hab_void_dweller_jobs = {
+	base = 2
+	modifier = {
+		add = 1
+		is_void_dweller_empire = yes
+	}
+}
+
+max_major_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system_planet
+		parameters = {
+			limit = {
+				is_asteroid = no
+				is_moon = no
+				is_artificial = no
+			}
+		}
+		mode = add
+	}
+}
+
+max_minor_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system_planet
+		parameters = {
+			limit = {
+				is_artificial = no
+				is_star = no
+				OR = {
+					is_asteroid = yes
+					is_moon = yes
+				}
+			}
+		}
+		mode = add
+	}
+}
+
+max_research_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system_planet
+		parameters = {
+			limit = {
+				has_deposit_for = shipclass_research_station
+			}
+		}
+		mode = add
+	}
+}
+
+max_energy_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system_planet
+		parameters = {
+			limit = {
+				has_orbital_energy_deposit = yes
+			}
+		}
+		mode = add
+	}
+}
+
+max_mining_orbitals = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system_planet
+		parameters = {
+			limit = {
+				has_orbital_mining_deposit = yes
+			}
+		}
+		mode = add
+	}
+}
+
+num_orbital_sites = {
+	base = 1
+	complex_trigger_modifier = {
+		trigger = count_system_planet
+		parameters = {
+			limit = {
+				is_star = no
+				OR = {
+					has_deposit_for = shipclass_research_station
+					has_deposit_for = shipclass_mining_station
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 2
+}
+
+count_traits = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_traits
+		trigger_scope = from
+		mode = add
+	}
+}
+
+count_positive_traits = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_positive_traits
+		trigger_scope = from
+		mode = add
+	}
+}
+
+count_negative_traits = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_negative_traits
+		trigger_scope = from
+		mode = add
+	}
+}
+
+enclave_cancel_trade_trust = {
+	base = 0
+	modifier = {
+		add = -5
+		root = {
+			OR = {
+				has_modifier = enclave_trade_1_rig
+				has_modifier = enclave_trade_1_xur
+				has_modifier = enclave_trade_1_mut
+			}
+		}
+	}
+	modifier = {
+		add = -10
+		root = {
+			OR = {
+				has_modifier = enclave_trade_2_rig
+				has_modifier = enclave_trade_2_xur
+				has_modifier = enclave_trade_2_mut
+			}
+		}
+	}
+	modifier = {
+		add = -15
+		root = {
+			OR = {
+				has_modifier = enclave_trade_3_rig
+				has_modifier = enclave_trade_3_xur
+				has_modifier = enclave_trade_3_mut
+			}
+		}
+	}
+	modifier = {
+		add = -20
+		root = {
+			OR = {
+				has_modifier = enclave_trade_4_rig
+				has_modifier = enclave_trade_4_xur
+				has_modifier = enclave_trade_4_mut
+			}
+		}
+	}
+	modifier = {
+		add = -25
+		root = {
+			OR = {
+				has_modifier = enclave_trade_5_rig
+				has_modifier = enclave_trade_5_xur
+				has_modifier = enclave_trade_5_mut
+			}
 		}
 	}
 }

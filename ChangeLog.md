@@ -1,5 +1,39 @@
 # ChangeLog
 
+## September 12th
+
+3.9 Update
+
+Patch Bugs Paradox fixed in 3.9:
+
+- Some ghost pop bugs were fixed.
+- Prevent various Become the Crisis shenanigans with Unaligned League
+- Synth exposed will no longer hit Legendary or Renowned leaders
+- LGate tech is dangerous
+- Corrected a bunch of improper breach logic in resolutions.
+- Erronious FROZ_BASE_CAT blocker removed (Risa bug!)
+- Destroyed habitats no longer leave ghost megastructures behind.
+- Bubbles no longer hates you from the start.
+
+Patch changes
+
+- Moved more balancey-things over to balance patch. 
+- The only thing that should remain is vassalization acceptance. All else is either a bug on my end or is actually there for a reason. Feel free to submit bug reports accordingly. 
+- Vassalization acceptance should get moved once the balance patch is released.
+
+New bugfixes
+
+- Fixed broken destroy trigger for hyper entertainment forum
+- Disallow buildings while planet is occupied (severe AI planning bug)
+- Should now block Enigmatic Fortress event spam if you don't choose to start the chain. (Had already blocked it before)
+- Non-AE factions should also avoid the Great Wound system
+- Default empires will be more skittish about really dangerous systems
+- Added some more flexible logic to some fleet calculation strengths
+- Fixed economic category for some FE buildings
+- Pruned a few more spammy notifications (rivalry declarations, etc)
+- Fixed more scope errors
+- Applied 'nice faction' to some more appropriate ships.
+
 ## August 26th
 
 Imported fixes from Vanilla Fixes that I didn't already fix:

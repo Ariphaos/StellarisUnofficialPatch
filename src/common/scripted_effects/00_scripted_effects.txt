@@ -1880,6 +1880,38 @@ spawn_habitat_cracker_effect = {
 		entity_scale_to_size = yes
 		scale = 0.10
 	}
+	save_event_target_as = target_habitat
+	solar_system = {
+		spawn_megastructure = {
+			type = habitat_central_complex_ruined
+			owner = this.owner
+			coords_from = PREV
+		}
+		random_system_planet = {
+			limit = {
+				has_planet_flag = habitat@event_target:target_habitat
+			}
+			remove_planet_flag = habitat@event_target:target_habitat
+			set_planet_flag = habitat_build_site
+		}
+		every_fleet_in_system = {
+			limit = {
+				is_ship_class = shipclass_habitat_station
+			}
+			orbit = {
+				if = {
+					limit = {
+						NOT = {
+							has_planet_flag = habitat_build_site
+						}
+					}
+					remove_planet_flag = has_megastructure
+				}
+			}
+			delete_fleet = this
+		}
+	}
+	remove_planet = yes
 }
 
 spawn_ringworld_cracker_effect = {
@@ -1914,6 +1946,25 @@ spawn_habitat_pacifier_effect = {
 
 		entity_scale_to_size = yes
 		scale = 0.10
+	}
+	save_event_target_as = target_habitat
+	solar_system = {
+		every_fleet_in_system = {
+			limit = {
+				is_ship_class = shipclass_habitat_station
+			}
+			orbit = {
+				if = {
+					limit = {
+						NOT = {
+							has_planet_flag = habitat@event_target:target_habitat
+						}
+					}
+					remove_planet_flag = has_megastructure
+				}
+			}
+			delete_fleet = this
+		}
 	}
 }
 
@@ -4169,7 +4220,6 @@ destroy_star_system = {
 		if = {
 			limit = { is_planet_class = pc_habitat } # uncolonized
 			spawn_habitat_cracker_effect = yes
-			remove_planet = yes
 		}
 		if = {
 			limit = { is_colony = yes }
@@ -4184,7 +4234,6 @@ destroy_star_system = {
 			if = {
 				limit = { is_planet_class = pc_habitat }
 				spawn_habitat_cracker_effect = yes
-				remove_planet = yes
 			}
 			else_if = {
 				limit = { is_ringworld = yes }
@@ -6677,6 +6726,27 @@ set_merchant_government_effect = {
 			}
 		}
 	}
+	else_if = {
+		limit = { has_civic = civic_worker_coop }
+		shift_ethic = ethic_fanatic_egalitarian
+		if = {
+			limit = { has_technology = tech_galactic_administration }
+			change_government = {
+				authority = auth_democratic
+				cooldown = no
+				remove_invalid_civics = yes
+				civics = { civic = civic_merchant_guilds civic = civic_shared_burden civic = random }
+			}
+		}
+		else = {
+			change_government = {
+				authority = auth_democratic
+				cooldown = no
+				remove_invalid_civics = yes
+				civics = { civic = civic_merchant_guilds civic = civic_shared_burden }
+			}
+		}
+	}
 	else = {
 		if = {
 			limit = { has_technology = tech_galactic_administration }
@@ -6754,7 +6824,7 @@ impose_ideology_effect = {
 		force_remove_civic = 1
 		force_add_civic = civic_crusader_spirit
 	}
-	add_modifier = { modifier = recently_liberated days = 7300 }
+	add_modifier = { modifier = recently_liberated days = 7200 }
 	add_opinion_modifier = { modifier = opinion_liberated_us who = root }
 	root = {
 		add_opinion_modifier = { modifier = opinion_we_liberated who = from }
@@ -7339,6 +7409,303 @@ set_mars_entity = {
 				set_planet_entity = {
 					entity = arid_planet_mars_entity
 				}
+			}
+		}
+	}
+}
+
+consume_world = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				num_districts = { type = district_hive value = 0 }
+			}
+			remove_district = district_hive
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				num_districts = { type = district_generator value = 0 }
+			}
+			remove_district = district_generator
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				num_districts = { type = district_mining value = 0 }
+			}
+			remove_district = district_mining
+		}
+		3 = {
+			modifier = {
+				factor = 0
+				num_districts = { type = district_farming value = 0 }
+			}
+			remove_district = district_farming
+		}
+	}
+	random_list = {
+		10 = {
+			modifier = {
+				factor = 0
+				num_free_districts = { type = any value < 2 }
+			}
+			add_deposit = d_lithoid_devastation
+			add_deposit = d_lithoid_devastation
+			create_pop = {
+				species = root.owner.owner_main_species
+			}
+			add_planet_devastation = 20
+
+			if = {
+				limit = { owner = { is_ai = yes } }
+				random_owned_pop = {
+					limit = {
+						is_being_purged = no
+					}
+					resettle_pop = {
+						pop = this
+						planet = owner.capital_scope
+					}
+				}
+			}
+			owner = {
+				create_message = {
+					type = MESSAGE_TERRAVORE_CONSUME_WORLD
+					localization = MESSAGE_TERRAVORE_CONSUME_WORLD_POP_TEXT
+					days = 30
+					target = prev
+
+					variable = {
+						type = name
+						localization = PLANET
+						scope = prev
+					}
+				}
+			}
+		}
+		10 = {
+			modifier = {
+				factor = 0
+				num_free_districts = { type = any value < 2 }
+			}
+			add_deposit = d_lithoid_devastation
+			add_deposit = d_lithoid_devastation
+			owner = {
+				add_monthly_resource_mult = {
+					resource = minerals
+					value = 5
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+				create_message = {
+					type = MESSAGE_TERRAVORE_CONSUME_WORLD
+					localization = MESSAGE_TERRAVORE_CONSUME_WORLD_MINERALS_TEXT
+					days = 30
+					target = prev
+
+					variable = {
+						type = name
+						localization = PLANET
+						scope = prev
+					}
+				}
+			}
+			add_planet_devastation = 20
+		}
+		10 = {
+			modifier = {
+				factor = 0
+				num_free_districts = { type = any value < 2 }
+			}
+			add_deposit = d_lithoid_devastation
+			add_deposit = d_lithoid_devastation
+			owner = {
+				add_monthly_resource_mult = {
+					resource = alloys
+					value = 3
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+				create_message = {
+					type = MESSAGE_TERRAVORE_CONSUME_WORLD
+					localization = MESSAGE_TERRAVORE_CONSUME_WORLD_ALLOYS_TEXT
+					days = 30
+					target = prev
+
+					variable = {
+						type = name
+						localization = PLANET
+						scope = prev
+					}
+				}
+			}
+			add_planet_devastation = 20
+		}
+		10 = {
+			# There's only one district slot left on the planet
+			modifier = {
+				factor = 0
+				num_free_districts = { type = any value >= 2 }
+			}
+			add_deposit = d_lithoid_devastation
+			owner = {
+				add_monthly_resource_mult = {
+					resource = minerals
+					value = 3
+					min = @tier1materialmin
+					max = @tier1materialmax
+				}
+				create_message = {
+					type = MESSAGE_TERRAVORE_CONSUME_WORLD
+					localization = MESSAGE_TERRAVORE_CONSUME_WORLD_MINERALS_TEXT
+					days = 30
+					target = prev
+
+					variable = {
+						type = name
+						localization = PLANET
+						scope = prev
+					}
+				}
+			}
+			add_planet_devastation = 10
+		}
+	}
+	set_timed_planet_flag = {
+		days = 360
+		flag = recently_eaten_planet
+	}
+}
+
+# Removes all life-related planet modifiers when nuking a planet.
+tomb_world_modifier_cleanup = {
+	remove_modifier = "natural_beauty"
+	remove_modifier = "atmospheric_aphrodisiac"
+	remove_modifier = "atmospheric_hallucinogen"
+	remove_modifier = "lush_planet"
+	remove_modifier = "dangerous_wildlife"
+	remove_modifier = "planet_myrmeku_attacks"
+	remove_modifier = "planet_myrmeku_seal_colony"
+	remove_modifier = "planet_myrmeku_upgrade_robots"
+	remove_modifier = "planet_myrmeku_pest_control"
+	remove_modifier = "planet_myrmeku_lured"
+}
+
+fruitful_add_seed_to_critter = {
+	# There is no trigger to check a fleet's name, so we're using flags instead
+	switch = {
+		trigger = has_fleet_flag
+		NAME_Tiyanki_Space_Whale = {
+			set_name = NAME_Tiyanki_Space_Whale_seed
+			set_fleet_flag = NAME_Tiyanki_Space_Whale_seed
+			remove_fleet_flag = NAME_Tiyanki_Space_Whale
+		}
+		NAME_Grazing_Tiyanki = {
+			set_name = NAME_Grazing_Tiyanki_seed
+			set_fleet_flag = NAME_Grazing_Tiyanki_seed
+			remove_fleet_flag = NAME_Grazing_Tiyanki
+		}
+		NAME_Amoeba_Swarm = {
+			set_name = NAME_Amoeba_Swarm_seed
+			set_fleet_flag = NAME_Amoeba_Swarm_seed
+			remove_fleet_flag = NAME_Amoeba_Swarm
+		}
+		NAME_Space_Amoeba_Hunters = {
+			set_name = NAME_Space_Amoeba_Hunters_seed
+			set_fleet_flag = NAME_Space_Amoeba_Hunters_seed
+			remove_fleet_flag = NAME_Space_Amoeba_Hunters
+		}
+		NAME_Space_Amoeba_plural = {
+			set_name = NAME_Space_Amoeba_plural_seed
+			set_fleet_flag = NAME_Space_Amoeba_plural_seed
+			remove_fleet_flag = NAME_Space_Amoeba_plural
+		}
+		# Bubbles
+		NAME_Bubbles = {
+			set_name = NAME_Bubbles_seed
+			set_fleet_flag = NAME_Bubbles_seed
+			remove_fleet_flag = NAME_Bubbles
+		}
+		NAME_Nyx = {
+			set_name = NAME_Nyx_seed
+			set_fleet_flag = NAME_Nyx_seed
+			remove_fleet_flag = NAME_Nyx
+		}
+		NAME_Renegade = {
+			set_name = NAME_Renegade_seed
+			set_fleet_flag = NAME_Renegade_seed
+			remove_fleet_flag = NAME_Renegade
+		}
+		NAME_Cyto = {
+			set_name = NAME_Cyto_seed
+			set_fleet_flag = NAME_Cyto_seed
+			remove_fleet_flag = NAME_Cyto
+		}
+		NAME_Boomer = {
+			set_name = NAME_Boomer_seed
+			set_fleet_flag = NAME_Boomer_seed
+			remove_fleet_flag = NAME_Boomer
+		}
+	}
+}
+
+fruitful_remove_seed_to_critter = {
+	# There is no trigger to check a fleet's name, so we're using flags instead
+	switch = {
+		trigger = has_fleet_flag
+		NAME_Tiyanki_Space_Whale_seed = {
+			set_name = NAME_Tiyanki_Space_Whale
+			set_fleet_flag = NAME_Tiyanki_Space_Whale
+			remove_fleet_flag = NAME_Tiyanki_Space_Whale_seed
+		}
+		NAME_Grazing_Tiyanki_seed = {
+			set_name = NAME_Grazing_Tiyanki
+			set_fleet_flag = NAME_Grazing_Tiyanki
+			remove_fleet_flag = NAME_Grazing_Tiyanki_seed
+		}
+		NAME_Amoeba_Swarm_seed = {
+			set_name = NAME_Amoeba_Swarm
+			set_fleet_flag = NAME_Amoeba_Swarm
+			remove_fleet_flag = NAME_Amoeba_Swarm_seed
+		}
+		NAME_Space_Amoeba_Hunters_seed = {
+			set_name = NAME_Space_Amoeba_Hunters
+			set_fleet_flag = NAME_Space_Amoeba_Hunters
+			remove_fleet_flag = NAME_Space_Amoeba_Hunters_seed
+		}
+		NAME_Space_Amoeba_plural_seed = {
+			set_name = NAME_Space_Amoeba_plural
+			set_fleet_flag = NAME_Space_Amoeba_plural
+			remove_fleet_flag = NAME_Space_Amoeba_plural_seed
+		}
+	}
+}
+
+initialize_kaleidoscope = {
+	event_target:global_event_country = {
+		if = {
+			limit = {
+				NOT = { is_variable_set = kaleidoscope_global_progress }
+			}
+			# global situation progress tracker
+			set_variable = {
+				which = kaleidoscope_global_progress
+				value = 0
+			}
+			# mood (0-20, influences random events, chances of disappearing and of getting the final reward)
+			# 1-6 angry
+			# 7-14 neutral
+			# 15-20 happy
+			set_variable = {
+				which = kaleidoscope_global_mood
+				value = 10
+			}
+			# Sets a hard limit of 25 years (60 months) so it won't stay around forever
+			set_timed_country_flag = {
+				flag = kaleidoscope_global_lifetime
+				years = 25
 			}
 		}
 	}

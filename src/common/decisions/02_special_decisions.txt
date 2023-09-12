@@ -109,9 +109,9 @@ decision_prospect = {
 # 						}
 # 					}
 # 				}
-	
+
 # 				40 = {
-	
+
 # 				}
 # 			}
 # 			set_planet_flag = planet_geologist_prospected
@@ -124,122 +124,6 @@ decision_prospect = {
 # 		weight = 10
 # 	}
 # }
-
-decision_prospect_void = {
-	owned_planets_only = yes
-
-	enactment_time = 180
-	resources = {
-		category = decisions
-		cost = {
-			unity = 250
-			energy = 500
-		}
-	}
-
-	potential = {
-		is_planet_class = pc_habitat
-		owner = {
-			has_active_tradition = tr_adaptability_void_finish
-		}
-		NOR = {
-			has_planet_flag = energy_habitat
-			has_planet_flag = mining_habitat
-			has_planet_flag = research_habitat
-		}
-		exists = orbit
-		# no need for checking exactly what it is orbiting, because all planets can have resources
-	}
-
-	effect = {
-		custom_tooltip = decision_prospect_void_short
-		hidden_effect = {
-			random_list = {
-				33 = {
-					modifier = {
-						factor = 0
-						orbit = {
-							habitable_planet = no
-							can_have_energy_deposits = no
-						}
-					}
-					set_planet_flag = energy_habitat
-					create_message = {
-						type = MESSAGE_TYPE_HABITAT_PROSPECTED
-						localization = MESSAGE_HABITAT_PROSPECTED_ENERGY
-						days = 30
-						target = this
-						variable = {
-							type = name
-							localization = HABITAT
-							scope = this
-						}
-					}
-				}
-
-				33 = {
-					modifier = {
-						factor = 0
-						orbit = {
-							habitable_planet = no
-							can_have_mineral_deposits = no
-							OR = { #just in case, for careless mods or whatever
-								can_have_energy_deposits = yes
-								can_have_society_deposits = yes
-								can_have_physics_deposits = yes
-								can_have_engineering_deposits = yes
-							}
-						}
-					}
-					set_planet_flag = mining_habitat
-					create_message = {
-						type = MESSAGE_TYPE_HABITAT_PROSPECTED
-						localization = MESSAGE_HABITAT_PROSPECTED_MINERALS
-						days = 30
-						target = this
-						variable = {
-							type = name
-							localization = HABITAT
-							scope = this
-						}
-					}
-				}
-
-				33 = {
-					modifier = {
-						factor = 0
-						orbit = {
-							habitable_planet = no
-							can_have_society_deposits = no
-							can_have_physics_deposits = no
-							can_have_engineering_deposits = no
-						}
-					}
-					set_planet_flag = research_habitat
-					create_message = {
-						type = MESSAGE_TYPE_HABITAT_PROSPECTED
-						localization = MESSAGE_HABITAT_PROSPECTED_SCIENCE
-						days = 30
-						target = this
-						variable = {
-							type = name
-							localization = HABITAT
-							scope = this
-						}
-					}
-				}
-			}
-		}
-	}
-
-	ai_weight = {
-		weight = 1
-		modifier = {
-			factor = 0
-			num_pops < 10
-		}
-	}
-}
 
 # Penal Colony
 decision_penal_colony = {
@@ -1521,7 +1405,7 @@ decision_market_nomination = {
 					}
 					modifier = {
 						factor = 1.5
-						from = { is_gestalt = yes }
+						from = { has_ethic = ethic_gestalt_consciousness }
 					}
 				}
 				6 = {
@@ -1543,7 +1427,7 @@ decision_market_nomination = {
 					}
 					modifier = {
 						factor = 9
-						from = { is_megacorp = yes }
+						from = { has_authority = auth_corporate }
 					}
 					modifier = {
 						factor = 2
@@ -1735,7 +1619,7 @@ decision_boost_market_nomination = {
 		}
 		modifier = {
 			factor = 2
-			from = { is_megacorp = yes }
+			from = { has_authority = auth_corporate }
 		}
 	}
 }
@@ -1974,7 +1858,7 @@ decision_lithoid_swarm_consume_world = {
 	icon = decision_burning_settlement
 	sound = event_structural_collapse
 
-	enactment_time = 360
+	#enactment_time = 360
 	resources = {
 		category = decisions
 	}
@@ -1987,185 +1871,44 @@ decision_lithoid_swarm_consume_world = {
 		}
 		can_have_habitable_deposits = yes
 		is_capital = no
-	}
-
-	allow = {
-		num_free_districts = { type = any value > 0 }
+		NOT = {
+			has_planet_flag = being_devoured
+		}
 	}
 
 	effect = {
 		custom_tooltip = decision_lithoid_swarm_consume_world_effect_desc
-
-		if = {
-			limit = { num_districts = { type = any value > 0 } }
-			custom_tooltip = decision_lithoid_swarm_consume_world_destroy_district_desc
-
-			hidden_effect = {
-				random_list = {
-					1 = {
-						modifier = {
-							factor = 0
-							num_districts = { type = district_hive value = 0 }
-						}
-						remove_district = district_hive
-					}
-					1 = {
-						modifier = {
-							factor = 0
-							num_districts = { type = district_generator value = 0 }
-						}
-						remove_district = district_generator
-					}
-					1 = {
-						modifier = {
-							factor = 0
-							num_districts = { type = district_mining value = 0 }
-						}
-						remove_district = district_mining
-					}
-					3 = {
-						modifier = {
-							factor = 0
-							num_districts = { type = district_farming value = 0 }
-						}
-						remove_district = district_farming
-					}
+		set_timed_planet_flag = {
+			days = 360
+			flag = recently_eaten_planet
+		}
+		hidden_effect = {
+			set_planet_flag = colony_event
+			set_planet_flag = being_devoured
+			add_modifier = {
+				modifier = being_devoured_modifier
+				days = -1
+			}
+			export_trigger_value_to_variable = {
+				trigger = planet_size
+				variable = num_districts_terravore
+			}
+			export_trigger_value_to_variable = {
+				trigger = count_deposits
+				parameters = {
+					type = d_lithoid_devastation
 				}
+				variable = num_lithoid_blockers
+			}
+			subtract_variable = {
+				which = num_districts_terravore
+				value = num_lithoid_blockers
 			}
 		}
-
-		hidden_effect = {
-			random_list = {
-				10 = {
-					modifier = {
-						factor = 0
-						num_free_districts = { type = any value < 2 }
-					}
-					add_deposit = d_lithoid_devastation
-					add_deposit = d_lithoid_devastation
-					create_pop = {
-						species = owner_main_species
-					}
-					add_planet_devastation = 20
-
-					if = {
-						limit = { owner = { is_ai = yes } }
-						random_owned_pop = {
-							resettle_pop = {
-								pop = this
-								planet = owner.capital_scope
-							}
-						}
-					}
-
-					create_message = {
-						type = MESSAGE_TERRAVORE_CONSUME_WORLD
-						localization = MESSAGE_TERRAVORE_CONSUME_WORLD_POP_TEXT
-						days = 30
-						target = this
-
-						variable = {
-							type = name
-							localization = PLANET
-							scope = this
-						}
-					}
-				}
-				10 = {
-					modifier = {
-						factor = 0
-						num_free_districts = { type = any value < 2 }
-					}
-					add_deposit = d_lithoid_devastation
-					add_deposit = d_lithoid_devastation
-					owner = {
-						add_monthly_resource_mult = {
-							resource = minerals
-							value = 5
-							min = @tier1materialmin
-							max = @tier1materialmax
-						}
-					}
-					add_planet_devastation = 20
-
-					create_message = {
-						type = MESSAGE_TERRAVORE_CONSUME_WORLD
-						localization = MESSAGE_TERRAVORE_CONSUME_WORLD_MINERALS_TEXT
-						days = 30
-						target = this
-
-						variable = {
-							type = name
-							localization = PLANET
-							scope = this
-						}
-					}
-				}
-				10 = {
-					modifier = {
-						factor = 0
-						num_free_districts = { type = any value < 2 }
-					}
-					add_deposit = d_lithoid_devastation
-					add_deposit = d_lithoid_devastation
-					owner = {
-						add_monthly_resource_mult = {
-							resource = alloys
-							value = 3
-							min = @tier1materialmin
-							max = @tier1materialmax
-						}
-					}
-					add_planet_devastation = 20
-
-					create_message = {
-						type = MESSAGE_TERRAVORE_CONSUME_WORLD
-						localization = MESSAGE_TERRAVORE_CONSUME_WORLD_ALLOYS_TEXT
-						days = 30
-						target = this
-
-						variable = {
-							type = name
-							localization = PLANET
-							scope = this
-						}
-					}
-				}
-				10 = {
-					# There's only one district slot left on the planet
-					modifier = {
-						factor = 0
-						num_free_districts = { type = any value >= 2 }
-					}
-					add_deposit = d_lithoid_devastation
-					owner = {
-						add_monthly_resource_mult = {
-							resource = minerals
-							value = 3
-							min = @tier1materialmin
-							max = @tier1materialmax
-						}
-					}
-					add_planet_devastation = 10
-
-					create_message = {
-						type = MESSAGE_TERRAVORE_CONSUME_WORLD
-						localization = MESSAGE_TERRAVORE_CONSUME_WORLD_MINERALS_TEXT
-						days = 30
-						target = this
-
-						variable = {
-							type = name
-							localization = PLANET
-							scope = this
-						}
-					}
-				}
-			}
-
-			# Abandon the planet if we've finished consuming the planet
-			if = {
-				owner = { country_event = { id = colony.185 days = 1 } }
+		owner = {
+			start_situation = {
+				type = situation_terravore_consume_planet
+				target = root
 			}
 		}
 	}
@@ -2246,32 +1989,16 @@ decision_upgrade_habitat = {
 	resources = {
 		category = decisions
 		cost = {
-			trigger = {
-				owner = {
-					NOT = {
-						has_active_tradition = tr_expansion_finish_void
-					}
-				}
-			}
 			influence = 25
 			alloys = 1000
-		}
-		cost = {
-			trigger = {
-				owner = {
-					has_active_tradition = tr_expansion_finish_void
-				}
-			}
-			influence = 20
-			alloys = 800
+			mult = owner.value:habitat_build_cost_mult
 		}
 	}
 
 	potential = {
 		is_planet_class = pc_habitat
-		NOR = {
+		NOT = {
 			has_planet_flag = advanced_habitat
-			has_planet_flag = payback_habitat
 		}
 		exists = owner
 		owner = {
@@ -2280,29 +2007,32 @@ decision_upgrade_habitat = {
 	}
 
 	allow = {
-		free_district_slots = 0
+		custom_tooltip = {
+			fail_text = requires_orbital
+			solar_system = {
+				any_ship_in_system = {
+					is_ship_class = shipclass_habitat_station
+				}
+			}
+		}
 	}
 
 	effect = {
+		custom_tooltip = decision_upgrade_habitat_effects_short
 		hidden_effect = {
-			set_planet_entity = {
-				entity = "habitat_phase_02_entity"
-				graphical_culture = owner
-			}
 			set_planet_flag = advanced_habitat
-		}
-		set_planet_size = 6
-
-		if = {
-			limit = {
-				owner = {
-					has_ascension_perk = ap_voidborn
-					NOT = { has_technology = tech_habitat_3 }
-					NOT = { has_tech_option = tech_habitat_3 }
+			increase_habitat_level_effect = yes
+			if = {
+				limit = {
+					owner = {
+						has_ascension_perk = ap_voidborn
+						NOT = { has_technology = tech_habitat_3 }
+						NOT = { has_tech_option = tech_habitat_3 }
+					}
 				}
-			}
-			owner = {
-				add_research_option = tech_habitat_3
+				owner = {
+					add_research_option = tech_habitat_3
+				}
 			}
 		}
 	}
@@ -2320,33 +2050,17 @@ decision_upgrade_habitat_2 = {
 	resources = {
 		category = decisions
 		cost = {
-			trigger = {
-				owner = {
-					NOT = {
-						has_active_tradition = tr_expansion_finish_void
-					}
-				}
-			}
 			influence = 50
 			alloys = 1500
-		}
-		cost = {
-			trigger = {
-				owner = {
-					has_active_tradition = tr_expansion_finish_void
-				}
-			}
-			influence = 40
-			alloys = 1200
+			mult = owner.value:habitat_build_cost_mult
 		}
 	}
 
 	potential = {
 		is_planet_class = pc_habitat
 		has_planet_flag = advanced_habitat
-		NOR = {
+		NOT = {
 			has_planet_flag = advanced_habitat_2
-			has_planet_flag = payback_habitat
 		}
 		exists = owner
 		owner = {
@@ -2355,20 +2069,23 @@ decision_upgrade_habitat_2 = {
 	}
 
 	allow = {
-		free_district_slots = 0
 		has_major_upgraded_capital = yes
+		custom_tooltip = {
+			fail_text = requires_orbital
+			solar_system = {
+				any_ship_in_system = {
+					is_ship_class = shipclass_habitat_station
+				}
+			}
+		}
 	}
 
 	effect = {
+		custom_tooltip = decision_upgrade_habitat_2_effects_short
 		hidden_effect = {
-			set_planet_entity = {
-				entity = "habitat_phase_03_entity"
-				graphical_culture = owner
-			}
-
 			set_planet_flag = advanced_habitat_2
+			increase_habitat_level_effect = yes
 		}
-		set_planet_size = 8
 	}
 
 	ai_weight = {
@@ -3006,14 +2723,6 @@ decision_flood_habitat = {
 	}
 	ai_weight = {
 		weight = 1
-		modifier = {
-			factor = 2
-			has_planet_flag = advanced_habitat
-		}
-		modifier = {
-			factor = 3
-			has_planet_flag = advanced_habitat_2
-		}
 	}
 }
 
@@ -3185,5 +2894,36 @@ decision_consecrate_habitat_knights = {
 	effect = {
 		add_building = building_order_castle
 		custom_tooltip = decision_consecrate_habitat_knights_effect
+	}
+}
+
+decision_expand_preserves = {
+	owned_planets_only = yes
+	icon = decision_animal_wildlife
+
+	enactment_time = 1800
+	resources = {
+		category = decisions
+		cost = {
+			minerals = 500
+		}
+	}
+	potential = {
+		exists = owner
+		owner = {
+			has_valid_civic = civic_environmentalist
+		}
+		has_deposit = d_big_nature_preserve_blocker
+		free_district_slots > 0
+	}
+
+	effect = {
+		custom_tooltip = decision_expand_preserves_short
+		hidden_effect = {
+			add_deposit = d_big_nature_preserve_blocker
+		}
+	}
+	ai_weight = {
+		weight = 0
 	}
 }

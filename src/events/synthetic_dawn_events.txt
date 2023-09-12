@@ -1,12 +1,8 @@
 
-##############################
-##############################
-### SYNTHETIC DAWN events ###
-### by Maximilian Olbers, ###
-### Miranda van den Brink, ###
-### & Dee Majek				###
-##############################
-##############################
+###############################################################
+# SYNTHETIC DAWN events
+# by Maximilian Olbers, Miranda van den Brink, Dee Majek et al
+###############################################################
 
 namespace = syndaw
 
@@ -30,17 +26,27 @@ country_event = {
 	}
 }
 
-# machine leaders malfunction
+# Machine & Synth Leaders malfunction | via on_decade_pulse
 event = {
 	id = syndaw.10
 	hide_window = yes
 	is_triggered_only = yes
 
+	trigger = {
+		any_playable_country = {
+			OR = {
+				has_authority = auth_machine_intelligence
+				has_country_flag = synthetic_empire
+				has_technology = "tech_synthetic_workers"
+			}
+		}
+	}
+
 	immediate = {
 		every_playable_country = {
 			limit = {
 				OR = {
-					is_machine_empire = yes
+					has_authority = auth_machine_intelligence
 					has_country_flag = synthetic_empire
 					has_technology = "tech_synthetic_workers"
 				}
@@ -50,6 +56,7 @@ event = {
 	}
 }
 
+# Machine & Synth Leaders malfunction (per empire)
 country_event = {
 	id = syndaw.11
 	hide_window = yes
@@ -57,287 +64,27 @@ country_event = {
 
 	immediate = {
 		random_list = {
-			88 = { # 88% chance nothing happens
-			}
-			2 = {
-				modifier = { # 50% chance if self preservation in effect
-					has_active_tradition = tr_synchronicity_self_preservation
+			90 = { } # nothing happens
+			10 = {
+				modifier = { # Tradition: Self-Preservation Protocols
 					factor = 0.5
+					has_active_tradition = tr_synchronicity_self_preservation
 				}
-				modifier = { # 50% chance if zro crystal edict is in effect
+				modifier = { # Edict: Zro Additives (via Psionic Archive Relic)
+					factor = 0.5
 					has_edict = zro_crystal_machine
-					factor = 0.5
 				}
-				if = { # surveying scientist
+				if = { # Machine Intelligence
 					limit = {
-						any_owned_leader = {
-							leader_class = scientist
-							exists = fleet
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
+						has_authority = auth_machine_intelligence
 					}
-					random_owned_leader = {
-						limit = {
-							leader_class = scientist
-							exists = fleet
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-						save_event_target_as = malfunctioning_leader
-						fleet = { save_event_target_as = malfunctioning_leader_fleet }
-						root = {
-							if = {
-								limit = {
-									is_machine_empire = yes
-								}
-								country_event = { id = syndaw.21 }
-							}
-							else = {
-								country_event = { id = action.71 }
-							}
-						}
+					fire_on_action = {
+						on_action = on_machine_leader_malfunction
 					}
 				}
-			}
-			2 = {
-				modifier = { # 50% chance if self preservation in effect
-					has_active_tradition = tr_synchronicity_self_preservation
-					factor = 0.5
-				}
-				modifier = { # 50% chance if zro crystal edict is in effect
-					has_edict = zro_crystal_machine
-					factor = 0.5
-				}
-				if = { # engineering scientist
-					limit = {
-						any_owned_leader = {
-							leader_class = scientist
-							is_researching_area = engineering
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-					}
-					random_owned_leader = {
-						limit = {
-							leader_class = scientist
-							is_researching_area = engineering
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-						save_event_target_as = malfunctioning_leader
-						root = {
-							if = {
-								limit = {
-									is_machine_empire = yes
-								}
-								country_event = { id = syndaw.22 }
-							}
-							else = {
-								country_event = { id = action.72 }
-							}
-						}
-					}
-				}
-			}
-			2 = {
-				modifier = { # 50% chance if self preservation in effect
-					has_active_tradition = tr_synchronicity_self_preservation
-					factor = 0.5
-				}
-				modifier = { # 50% chance if zro crystal edict is in effect
-					has_edict = zro_crystal_machine
-					factor = 0.5
-				}
-				if = { # society scientist
-					limit = {
-						any_owned_leader = {
-							leader_class = scientist
-							is_researching_area = society
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-					}
-					random_owned_leader = {
-						limit = {
-							leader_class = scientist
-							is_researching_area = society
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-						save_event_target_as = malfunctioning_leader
-						root = {
-							if = {
-								limit = {
-									is_machine_empire = yes
-								}
-								country_event = { id = syndaw.23 }
-							}
-							else = {
-								country_event = { id = action.73 }
-							}
-						}
-					}
-				}
-			}
-			2 = {
-				modifier = { # 50% chance if self preservation in effect
-					has_active_tradition = tr_synchronicity_self_preservation
-					factor = 0.5
-				}
-				if = { # society scientist
-					limit = {
-						any_owned_leader = {
-							leader_class = scientist
-							is_researching_area = physics
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-					}
-					random_owned_leader = {
-						limit = {
-							leader_class = scientist
-							is_researching_area = physics
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-						save_event_target_as = malfunctioning_leader
-						root = {
-							if = {
-								limit = {
-									is_machine_empire = yes
-								}
-								country_event = { id = syndaw.24 }
-							}
-							else = {
-								country_event = { id = action.74 }
-							}
-						}
-					}
-				}
-			}
-			2 = {
-				modifier = { # 50% chance if self preservation in effect
-					has_active_tradition = tr_synchronicity_self_preservation
-					factor = 0.5
-				}
-				if = { # commanding admiral
-					limit = {
-						any_owned_leader = {
-							leader_class = admiral
-							exists = fleet
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-					}
-					random_owned_leader = {
-						limit = {
-							leader_class = admiral
-							exists = fleet
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-						save_event_target_as = malfunctioning_leader
-						fleet = { save_event_target_as = malfunctioning_leader_fleet }
-						root = {
-							if = {
-								limit = {
-									is_machine_empire = yes
-								}
-								country_event = { id = syndaw.25 }
-							}
-							else = {
-								country_event = { id = action.75 }
-							}
-						}
-					}
-				}
-			}
-			2 = {
-				modifier = { # 50% chance if self preservation in effect
-					has_active_tradition = tr_synchronicity_self_preservation
-					factor = 0.5
-				}
-				modifier = { # 50% chance if zro crystal edict is in effect
-					has_edict = zro_crystal_machine
-					factor = 0.5
-				}
-				if = { # planet governor
-					limit = {
-						any_owned_leader = {
-							leader_class = governor
-							exists = sector
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-					}
-					random_owned_leader = {
-						limit = {
-							leader_class = governor
-							exists = sector
-							species = {
-								OR = {
-									has_trait = trait_machine_unit
-									has_trait = trait_mechanical
-								}
-							}
-						}
-						save_event_target_as = malfunctioning_leader
-						root = {
-							if = {
-								limit = {
-									is_machine_empire = yes
-								}
-								country_event = { id = syndaw.26 }
-							}
-							else = {
-								country_event = { id = action.76 }
-							}
-						}
+				else = { # Synthetic Ascension or Synth Workers Technology
+					fire_on_action = {
+						on_action = on_synth_leader_malfunction
 					}
 				}
 			}
@@ -345,7 +92,7 @@ country_event = {
 	}
 }
 
-# surveying scientist dies
+# Science Vessel Leader dies (see also: 'action.71')
 country_event = {
 	id = syndaw.21
 	title = syndaw.21.name
@@ -353,12 +100,42 @@ country_event = {
 	picture = GFX_evt_ship_in_orbit
 	show_sound = event_ship_bridge
 	location = event_target:malfunctioning_leader_fleet
-
 	is_triggered_only = yes
 
+	trigger = {
+		any_owned_leader = {
+			NOR = {
+				has_leader_flag = leader_death_events_blocked
+				has_leader_flag = legendary_leader
+			}
+			leader_class = scientist
+			is_mechanical_species = yes
+			exists = fleet
+			fleet = {
+				exists = solar_system # failsafe in case the fleet has no valid location (likely MIA or in transit)
+			}
+		}
+	}
+
 	immediate = {
-		event_target:malfunctioning_leader = {
-			kill_leader = { type = scientist show_notification = no }
+		random_owned_leader = {
+			limit = {
+				NOR = {
+					has_leader_flag = leader_death_events_blocked
+					has_leader_flag = legendary_leader
+				}
+				leader_class = scientist
+				is_mechanical_species = yes
+				exists = fleet
+				fleet = {
+					exists = solar_system
+				}
+			}
+			save_event_target_as = malfunctioning_leader
+			fleet = {
+				save_event_target_as = malfunctioning_leader_fleet
+			}
+			kill_leader = { show_notification = no }
 		}
 	}
 
@@ -367,73 +144,7 @@ country_event = {
 	}
 }
 
-# engineering scientist dies
-country_event = {
-	id = syndaw.22
-	title = syndaw.22.name
-	desc = syndaw.22.desc
-	picture = GFX_evt_robot_assembly_plant
-	show_sound = event_ship_bridge
-	location = capital_scope
-
-	is_triggered_only = yes
-
-	immediate = {
-		event_target:malfunctioning_leader = {
-			kill_leader = { type = scientist show_notification = no }
-		}
-	}
-
-	option = {
-		name = UNFORTUNATE
-	}
-}
-
-# society scientist dies
-country_event = {
-	id = syndaw.23
-	title = syndaw.23.name
-	desc = syndaw.23.desc
-	picture = GFX_evt_machine_sapience
-	show_sound = event_ship_bridge
-	location = capital_scope
-
-	is_triggered_only = yes
-
-	immediate = {
-		event_target:malfunctioning_leader = {
-			kill_leader = { type = scientist show_notification = no }
-		}
-	}
-
-	option = {
-		name = UNFORTUNATE
-	}
-}
-
-# physics scientist dies
-country_event = {
-	id = syndaw.24
-	title = syndaw.24.name
-	desc = syndaw.24.desc
-	picture = GFX_evt_physics_research
-	show_sound = event_ship_bridge
-	location = capital_scope
-
-	is_triggered_only = yes
-
-	immediate = {
-		event_target:malfunctioning_leader = {
-			kill_leader = { type = scientist show_notification = no }
-		}
-	}
-
-	option = {
-		name = UNFORTUNATE
-	}
-}
-
-# admiral dies
+# Admiral dies (see also: 'action.75')
 country_event = {
 	id = syndaw.25
 	title = syndaw.25.name
@@ -441,12 +152,42 @@ country_event = {
 	picture = GFX_evt_unknown_ships
 	show_sound = event_ship_bridge
 	location = event_target:malfunctioning_leader_fleet
-
 	is_triggered_only = yes
 
+	trigger = {
+		any_owned_leader = {
+			NOR = {
+				has_leader_flag = leader_death_events_blocked
+				has_leader_flag = legendary_leader
+			}
+			leader_class = admiral
+			is_mechanical_species = yes
+			exists = fleet
+			fleet = {
+				exists = solar_system # failsafe in case the fleet has no valid location (e.g. MIA or in transit)
+			}
+		}
+	}
+
 	immediate = {
-		event_target:malfunctioning_leader = {
-			kill_leader = { type = admiral show_notification = no }
+		random_owned_leader = {
+			limit = {
+				NOR = {
+					has_leader_flag = leader_death_events_blocked
+					has_leader_flag = legendary_leader
+				}
+				leader_class = admiral
+				is_mechanical_species = yes
+				exists = fleet
+				fleet = {
+					exists = solar_system
+				}
+			}
+			save_event_target_as = malfunctioning_leader
+			fleet = {
+				save_event_target_as = malfunctioning_leader_fleet
+			}
+			kill_leader = { show_notification = no }
 		}
 	}
 
@@ -455,20 +196,48 @@ country_event = {
 	}
 }
 
-# governor dies
+# Governor dies (see also: 'action.76')
 country_event = {
 	id = syndaw.26
 	title = syndaw.26.name
 	desc = syndaw.26.desc
 	picture = GFX_evt_sapient_AI
 	show_sound = event_ship_bridge
-	#location = event_target:malfunctioning_leader.Planet
-
+	location = event_target:malfunctioning_leader_planet
 	is_triggered_only = yes
 
+	trigger = {
+		any_owned_planet = {
+			exists = leader
+			leader = {
+				NOR = {
+					has_leader_flag = leader_death_events_blocked
+					has_leader_flag = legendary_leader
+				}
+				is_ruler = no
+				is_mechanical_species = yes
+			}
+		}
+	}
+
 	immediate = {
-		event_target:malfunctioning_leader = {
-			kill_leader = { type = governor show_notification = no }
+		random_owned_planet = {
+			limit = {
+				exists = leader
+				leader = {
+					NOR = {
+						has_leader_flag = leader_death_events_blocked
+						has_leader_flag = legendary_leader
+					}
+					is_ruler = no
+					is_mechanical_species = yes
+				}
+			}
+			save_event_target_as = malfunctioning_leader_planet
+			leader = {
+				save_event_target_as = malfunctioning_leader
+				kill_leader = { show_notification = no }
+			}
 		}
 	}
 
@@ -488,7 +257,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		is_machine_empire = yes
+		has_authority = auth_machine_intelligence
 		fromfrom = {
 			exists = leader
 			fleet = { num_ships = 0 }
@@ -591,7 +360,7 @@ event = { # unscoped gatekeeper
 		every_playable_country = {
 			limit = {
 				NOR = {
-					is_gestalt = yes
+					has_ethic = ethic_gestalt_consciousness
 					has_country_flag = synthetic_empire
 					has_ascension_perk = ap_the_flesh_is_weak
 					has_policy_flag = ai_full_rights
@@ -621,7 +390,7 @@ country_event = { # per-country gatekeeper
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		NOR = {
-			is_gestalt = yes
+			has_ethic = ethic_gestalt_consciousness
 			has_country_flag = synthetic_empire
 			has_ascension_perk = ap_the_flesh_is_weak
 			has_policy_flag = ai_full_rights
@@ -2663,7 +2432,7 @@ country_event = {
 	desc = {
 		trigger = {
 			OR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2672,7 +2441,7 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2705,7 +2474,7 @@ country_event = {
 	desc = {
 		trigger = {
 			OR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2714,7 +2483,7 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2738,7 +2507,7 @@ country_event = {
 	desc = {
 		trigger = {
 			OR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2747,7 +2516,7 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -2797,7 +2566,7 @@ country_event = {
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		is_country_type = default
-		is_machine_empire = yes
+		has_authority = auth_machine_intelligence
 		has_country_flag = machine_uprising_country
 		has_relation_flag = {
 			who = from
@@ -2834,7 +2603,7 @@ country_event = {
 					has_communications = root
 					NOR = {
 						has_country_flag = synthetic_empire
-						is_machine_empire = yes
+						has_authority = auth_machine_intelligence
 					}
 				}
 				add_opinion_modifier = {
@@ -2847,7 +2616,7 @@ country_event = {
 					has_communications = root
 					OR = {
 						has_country_flag = synthetic_empire
-						is_machine_empire = yes
+						has_authority = auth_machine_intelligence
 					}
 					NOT = { is_same_value = root }
 				}
@@ -2981,7 +2750,7 @@ country_event = {
 					has_communications = root
 					NOR = {
 						has_country_flag = synthetic_empire
-						is_machine_empire = yes
+						has_authority = auth_machine_intelligence
 						is_same_value = root
 					}
 				}
@@ -2995,7 +2764,7 @@ country_event = {
 					has_communications = root
 					OR = {
 						has_country_flag = synthetic_empire
-						is_machine_empire = yes
+						has_authority = auth_machine_intelligence
 					}
 				}
 				add_opinion_modifier = {
@@ -3015,11 +2784,11 @@ country_event = {
 
 	trigger = { # conquered an organic empire
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		is_machine_empire = yes
+		has_authority = auth_machine_intelligence
 		has_civic = civic_machine_terminator
 		from = {
 			NOR = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
 			}
 		}
@@ -3036,7 +2805,7 @@ country_event = {
 							is_country_type = awakened_fallen_empire
 						}
 						NOR = {
-							is_machine_empire = yes
+							has_authority = auth_machine_intelligence
 							has_country_flag = synthetic_empire
 							has_country_flag = fallen_empire_machine
 						}

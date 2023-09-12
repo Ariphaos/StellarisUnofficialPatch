@@ -8,11 +8,11 @@ planet_event = { #Irradiated
 	id = colony_mod.1
 	title = "colony_mod.1.name"
 	desc = {
-		trigger = { owner = { is_machine_empire = no } }
+		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
 		text = "colony_mod.1.desc"
 	}
 	desc = {
-		trigger = { owner = { is_machine_empire = yes } }
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
 		text = "colony_mod.1.desc_mach"
 	}
 	picture = GFX_evt_alien_city
@@ -353,7 +353,7 @@ planet_event = {
 		name = colony_mod.3.a
 		add_modifier = {
 			modifier = "recent_quake"
-			days = 365
+			days = 360
 		}
 		custom_tooltip = quake_report_tooltip
 		hidden_effect = {
@@ -1275,9 +1275,15 @@ planet_event = { #hell
 			reroll_random = yes
 			random_list = {
 				15 = { }
-				25 = { planet_event = { id = colony.3050 days = 3600 random = 900 } }
-				20 = { planet_event = { id = colony.3060 days = 3600 random = 900 } }
-				40 = { planet_event = { id = colony.3055 days = 3600 random = 900 } }
+				25 = { 
+					modifier = {
+						factor = 0
+						blocks_disruptive_gameplay = yes
+					}
+					planet_event = { id = colony.3050 days = 3600 random = 900 } # Daemonic Incursion
+				}
+				20 = { planet_event = { id = colony.3060 days = 3600 random = 900 } } # Quest Complete
+				40 = { planet_event = { id = colony.3055 days = 3600 random = 900 } } # Daemon Refugees
 			}
 		}
 	}
@@ -4908,15 +4914,9 @@ planet_event = {
 	}
 }
 
-############################
-#
-#
-#
+########################################
 # Colony Event: "Ancient Manufactorium"
-#
-#
-#
-############################
+########################################
 
 planet_event = { # starting event - finding the ancient vaults
 	id = colony.9200
@@ -6093,7 +6093,7 @@ planet_event = { # fourth problem - working conditions - bad modifier to pop hap
 				is_gestalt = no
 			}
 		}
-		set_planet_flag = manufactorium_work_hapipiness
+		set_planet_flag = manufactorium_work_happiness
 		hidden_effect = {
 			planet_event = {
 				id = colony.9270
@@ -6429,7 +6429,8 @@ planet_event = { # Ending - grand opening and the last opportunity
 		custom_tooltip = colony.9290.d.desc
 		trigger = {
 			owner = {
-				is_megacorp = yes
+				has_authority = auth_corporate
+				is_worker_coop_empire = no
 			}
 		}
 		set_planet_flag = manufactorium_traders
@@ -6665,6 +6666,689 @@ planet_event = {
 			add_deposit = d_metallic_puddles_gestalt
 		}
 		else = { add_deposit = d_metallic_puddles }
+	}
+}
+
+#Junkyard Orbit
+planet_event = {
+	id = colony.9310
+	title = colony.9310.name
+	desc = colony.9310.desc
+	picture = GFX_evt_early_space_age
+	show_sound = event_galactic_market
+	location = root
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = colony_junkyard_orbit
+			}
+		}
+		num_pops > 0
+		NOT = {
+			has_planet_flag = colony_event
+		}
+		is_artificial = no
+
+	}
+	
+	immediate = {
+		set_planet_flag = colony_event
+		owner = { set_country_flag = colony_junkyard_orbit }	
+	}	
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9310.a
+		custom_tooltip = colony.9310.a.tooltip
+		add_blocker = {
+			type = d_sprawling_landfill_blocker
+			blocked_deposit = random
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9315 days = 360 random = 20 }
+		}
+	}
+}
+planet_event = {
+	id = colony.9315
+	title = colony.9315.name
+	desc = colony.9315.desc
+	picture = GFX_evt_debris
+	show_sound = event_air_raid_siren
+	location = root
+	is_triggered_only = yes
+
+	trigger = {
+		has_deposit = d_sprawling_landfill_blocker
+	}
+
+	option = {
+		name = colony.9315.a
+		custom_tooltip = colony.9315.a.tooltip
+		add_deposit = d_astrogarbage_collector
+		add_modifier = {
+			modifier = "trash_rings"
+			days = -1
+		}
+		enable_special_project = {
+			name = "orbital_cleanup"
+			location = this
+			owner = root
+		}
+	}
+
+	option = {
+		name = colony.9315.b
+		custom_tooltip = colony.9315.b.tooltip
+		add_modifier = {
+			modifier = "trash_rings"
+			days = -1
+		}
+		hidden_effect = {
+			random_list = {
+				60 = { planet_event = { id = colony.9325 days = 180 random = 20 } }
+				40 = { planet_event = { id = colony.9330 days = 180 random = 20 } }
+			}
+		}
+	}
+
+	option = {
+		name = colony.9315.c
+		custom_tooltip = colony.9315.c.tooltip
+		trigger = {
+			OR = {
+				owner.species = {
+					has_trait = trait_conservational
+				}
+				owner = {
+					species = { NOT = { has_trait = trait_conservational } }
+					OR = {
+						has_valid_civic = civic_environmentalist
+						has_valid_civic = civic_idyllic_bloom
+						has_valid_civic = civic_scavengers
+						has_valid_civic = civic_eager_explorers
+						has_valid_civic = civic_corporate_scavengers
+						has_valid_civic = civic_hive_stargazers
+						has_valid_civic = civic_machine_zero_waste_protocols
+					}
+				}
+			}	
+		}
+		add_deposit = d_astrogarbage_collector
+		add_modifier = {
+			modifier = "trash_rings"
+			days = -1
+		}
+		enable_special_project = {
+			name = "orbital_cleanup_intense"
+			location = this
+			owner = root
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9320
+	title = colony.9320.name
+	desc = colony.9320.desc
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_coronation
+	location = root
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9320.a
+		owner = { 
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2unityreward
+				min = @tier2unitymin
+				max = @tier2unitymax
+			}
+		}
+		remove_modifier = "trash_rings"
+	}
+}
+
+planet_event = {
+	id = colony.9325
+	title = colony.9325.name
+	desc = colony.9325.desc
+	picture = GFX_evt_space_debris
+	show_sound = event_burning_city
+	location = root
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9325.a
+		add_modifier = {
+			modifier = "ground_locked"
+			years = 5
+		}
+	}
+}
+
+planet_event = {
+	id = colony.9330
+	title = colony.9330.name
+	desc = colony.9330.desc
+	picture = GFX_evt_slingshot_stars
+	show_sound = event_conversation
+	location = root
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9330.a
+		add_modifier = {
+			modifier = "shooting_stars"
+			years = 5
+		}
+		remove_modifier = "trash_rings"
+	}
+}
+
+planet_event = {
+	id = colony.9335
+	title = colony.9335.name
+	desc = colony.9335.desc
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_coronation
+	location = root
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9335.a
+		add_modifier = {
+			modifier = "clear_skies"
+			years = 5
+		}
+		remove_modifier = "trash_rings"
+	}
+}
+
+### MYRMEKU
+planet_event = { # Myrmeku Activity
+	id = colony.9350
+	title = colony.9350.name
+	desc = colony.9350.desc
+	picture = GFX_evt_animal_wildlife
+	show_sound = event_scanner
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_robot_empire = yes
+		}
+		NOR = {
+			has_planet_flag = nuked_planet_anomalies_disabled
+			has_planet_flag = colony_event
+			is_planet_class = pc_nuked
+			is_artificial = yes
+			has_global_flag = myrmeku
+		}
+	}
+	immediate = {
+		owner = {
+			set_country_flag = myrmeku_flag@root
+		}
+		set_planet_flag = colony_event # Prevent other colony event chains
+		set_planet_flag = myrmeku_planet # Checked if planet changes owner
+		set_global_flag = myrmeku # Prevent others from getting the same chain
+		save_event_target_as = myrmeku_planet
+		begin_event_chain = {
+			event_chain = myrmeku_chain
+			target = this
+		}
+	}
+	option = {
+		name = ACKNOWLEDGED
+		hidden_effect = {
+			planet_event = {
+				id = colony.9355 days = 180 random = 30
+			}
+		}
+	}
+	option = {
+		name = colony.9350.a.mem_vault
+		trigger = {
+			owner = {
+				is_memory_vault_empire = yes
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9355 days = 180 random = 30
+			}
+		}
+	}
+	option = {
+		name = colony.9350.a.exp_prot
+		trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_machine_exploration_protocol
+					has_civic = civic_environmentalist
+				}
+				
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9355 days = 180 random = 30
+			}
+		}
+	}
+}
+
+planet_event = { # Colonists Attacked
+	id = colony.9355
+	title = colony.9355.name
+	desc = colony.9355.desc
+	picture = GFX_evt_animal_wildlife
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+	
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			is_planet_class = pc_nuked
+		}
+		owner = {
+			has_country_flag = myrmeku_flag@root
+		}
+	}
+	immediate = {
+		add_modifier = {
+			modifier = "planet_myrmeku_attacks"
+			days = -1
+		}
+	}
+	option = {
+		name = colony.9355.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9360 days = 120 random = 30
+			}
+		}
+		tooltip = {
+			add_modifier = {
+				modifier = "planet_myrmeku_attacks"
+				days = -1
+			}
+		}
+	}
+}
+
+planet_event = { # Memory Eaters
+	id = colony.9360
+	title = colony.9360.name
+	desc = colony.9360.desc
+	picture = GFX_evt_infested
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			is_planet_class = pc_nuked
+		}
+		owner = {
+			has_country_flag = myrmeku_flag@root
+		}
+	}
+	option = { # Hermetic Seal
+		name = colony.9360.a
+		custom_tooltip = colony.9360.a.tt
+		hidden_effect = {
+			remove_modifier = "planet_myrmeku_attacks"
+			add_modifier = {
+				modifier = "planet_myrmeku_seal_colony"
+				days = -1
+			}
+			planet_event = {
+				id = colony.9365 days = 720 random = 30
+			}
+		}
+	}
+	option = { # The Upgrades Do Nothing
+		name = colony.9360.b
+		custom_tooltip = colony.9360.b.tt
+		hidden_effect = {
+			remove_modifier = "planet_myrmeku_attacks"
+			add_modifier = {
+				modifier = "planet_myrmeku_upgrade_robots"
+				days = -1
+			}
+			planet_event = {
+				id = colony.9365 days = 180 random = 30
+			}
+		}
+	}
+	option = { # Pest Control
+		name = colony.9360.c
+		custom_tooltip = colony.9360.c.tt
+		hidden_effect = {
+			remove_modifier = "planet_myrmeku_attacks"
+			add_modifier = {
+				modifier = "planet_myrmeku_pest_control"
+				days = -1
+			}
+			set_planet_flag = "myrmeku_pest_control"
+			planet_event = {
+				id = colony.9365 days = 180 random = 30
+			}
+		}
+	}
+	option = { # The Harvest
+		name = colony.9360.d.org_repro
+		custom_tooltip = colony.9360.d.tt
+		trigger = {
+			owner = {
+				is_catalytic_empire = yes
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = alloys
+				value = @tier2materialreward
+				min = @tier2materialmin
+				max = @tier2materialmax
+			}
+		}
+		hidden_effect = {
+			remove_modifier = "planet_myrmeku_attacks"
+			add_modifier = {
+				modifier = "planet_myrmeku_pest_control"
+				days = -1
+			}
+			set_planet_flag = "myrmeku_harvest"
+			planet_event = {
+				id = colony.9365 days = 360 random = 30
+			}
+		}
+	}
+	option = { # Nuclear Option
+		name = colony.9360.e.purifier
+		custom_tooltip = colony.9360.e.tt
+		trigger = {
+			owner = {
+				has_civic = civic_machine_terminator
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9370 days = 30
+			}
+		}
+	}
+}
+
+# Four similar events in one:
+#  Hermetic Seal
+#  The Upgrades Do Nothing
+#  Pest Control
+#  The Harvest
+planet_event = { 
+	id = colony.9365
+	title = colony.9365.desc
+	desc = {
+		trigger = {
+			has_modifier = "planet_myrmeku_seal_colony"
+		}
+		text = colony.9365.desc.seal_colony
+	}
+	desc = {
+		trigger = {
+			has_modifier = "planet_myrmeku_upgrade_robots"
+		}
+		text = colony.9365.desc.upgrade_robots
+	}
+	desc = {
+		trigger = {
+			has_modifier = "planet_myrmeku_pest_control"
+			has_planet_flag = "myrmeku_pest_control"
+		}
+		text = colony.9365.desc.pest_control
+	}
+	desc = {
+		trigger = {
+			has_modifier = "planet_myrmeku_pest_control"
+			has_planet_flag = "myrmeku_harvest"
+		}
+		text = colony.9365.desc.harvest
+	}
+	picture = GFX_evt_infested
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			is_planet_class = pc_nuked
+		}
+		owner = {
+			has_country_flag = myrmeku_flag@root
+		}
+	}
+	option = {
+		name = colony.9365.a
+		if = {
+			limit = {
+				has_modifier = "planet_myrmeku_pest_control"
+				num_pops > 1
+			}
+			random_owned_pop = {
+				limit = {
+					is_robot_pop = yes
+				}
+				kill_pop = yes
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9375 days = 90 random = 15
+			}
+		}
+	}
+}
+
+planet_event = { # Nuclear Option
+	id = colony.9370
+	title = colony.9370.name
+	desc = colony.9370.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_super_explosion
+	location = ROOT
+	trackable = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			is_planet_class = pc_nuked
+		}
+		owner = {
+			has_country_flag = myrmeku_flag@root
+		}
+	}
+	option = {
+		name = colony.9370.a
+		hidden_effect = {
+			change_pc = pc_nuked
+			set_planet_flag = nuked_planet_anomalies_disabled
+			reroll_deposits = yes
+			tomb_world_modifier_cleanup = yes
+			owner = {
+				remove_country_flag = myrmeku_flag@root
+			}
+		}
+		owner = {
+			end_event_chain = myrmeku_chain
+		}
+	}
+}
+
+planet_event = { # Analysis Subroutine Proposal
+	id = colony.9375
+	title = colony.9375.name
+	desc = colony.9375.desc
+	picture = GFX_evt_infested
+	show_sound = event_swarm
+	location = ROOT
+	trackable = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			is_planet_class = pc_nuked
+		}
+		owner = {
+			has_country_flag = myrmeku_flag@root
+		}
+	}
+	option = { # Resource Diversion
+		name = colony.9375.a
+		
+		custom_tooltip = colony.9375.a.tt
+		owner = {
+			add_monthly_resource_mult = {
+				resource = alloys
+				value = @tier2materialreward
+				min = @tier2materialmin
+				max = @tier2materialmax
+			}
+		}
+		hidden_effect = {
+			# Only one of the following modifiers will be present depending on player choices
+			remove_modifier = "planet_myrmeku_seal_colony"
+			remove_modifier = "planet_myrmeku_upgrade_robots"
+			remove_modifier = "planet_myrmeku_pest_control"
+			add_modifier = {
+				modifier = "planet_myrmeku_lured"
+				days = -1
+			}
+			owner = {
+				remove_country_flag = myrmeku_flag@root
+			}
+		}
+		owner = {
+			end_event_chain = myrmeku_chain
+		}
+	}
+	option = { # Special Research Project
+		name = colony.9375.b
+		enable_special_project = {
+			name = MYRMEKU_STUDY_PROJECT
+			location = this
+			owner = root.owner
+		}
+	}
+}
+
+planet_event = { # Powerful Results
+	id = colony.9380
+	title = colony.9380.name
+	desc = colony.9380.desc
+	picture = GFX_evt_infested
+	show_sound = event_energy_field
+	location = ROOT
+	trackable = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			is_planet_class = pc_nuked
+		}
+		owner = {
+			has_country_flag = myrmeku_flag@root
+		}
+	}
+	immediate = {
+		add_deposit = d_myrmeku_power_farms
+		# Only one of the following modifiers will be present depending on player choices
+		remove_modifier = "planet_myrmeku_seal_colony"
+		remove_modifier = "planet_myrmeku_upgrade_robots"
+		remove_modifier = "planet_myrmeku_pest_control"
+	}
+	option = {
+		name = colony.9380.a
+		tooltip = {
+			add_deposit = d_myrmeku_power_farms
+		}
+		hidden_effect = {
+			owner = {
+				remove_country_flag = myrmeku_flag@root
+			}
+		}
+		custom_tooltip = t # Adds a blank line between the tooltips
+		owner = {
+			end_event_chain = myrmeku_chain
+		}
+	}
+}
+
+# Clean up ongoing planet modifiers if planet changes owner.
+# If the previous owner has finished the special project in
+# the Myrmeku event chain, the deposit stays.
+# Called from on_action: on_planet_transfer
+planet_event = { 
+	id = colony.9385
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_planet_flag = myrmeku_planet
+	}
+	immediate = {
+		# Only one of the following modifiers will be present depending on player choices
+		remove_modifier = "planet_myrmeku_attacks"
+		remove_modifier = "planet_myrmeku_seal_colony"
+		remove_modifier = "planet_myrmeku_upgrade_robots"
+		remove_modifier = "planet_myrmeku_pest_control"
+		remove_modifier = "planet_myrmeku_lured"
+		remove_planet_flag = myrmeku_planet
+		fromfrom = {
+			remove_country_flag = myrmeku_flag@root
+		}
 	}
 }
 
@@ -8055,7 +8739,7 @@ country_event = {
 		from = {
 			country_event = { 
 				id = colony.9890  
-				days = 0 
+				days = 0
 				scopes = {
 					fromfrom = fromfrom
 					from = root
@@ -8125,6 +8809,763 @@ planet_event = {
 				is_deposit_type = d_decrepit_dwellings 
 			}
 			clear_blocker = yes
+		}
+	}
+}
+
+####Stasis Prison
+#Missed The Morning Check In
+#this = Planet
+planet_event = {
+	id = colony.9900
+	title = "colony.9900.name"
+	desc = "colony.9900.desc"
+	picture = GFX_evt_worrying_signal
+	show_sound = event_planetary_riot
+	location = ROOT
+	trackable = yes
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+		is_occupied_flag = no
+	}
+
+	trigger = {
+		num_pops > 4
+		is_moon = no
+		has_moon = yes
+		is_artificial = no
+		NOT = { has_global_flag = dimensional_prison_colony }
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_planet_flag = colony_event
+		set_global_flag = dimensional_prison_colony
+	}
+
+	option = {
+		name = colony.9900.a
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 500
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				energy = -500
+			}
+		}
+		custom_tooltip = colony.9900.a.tooltip
+		add_modifier = {
+			modifier = "reassured_tracking"
+			days = -1
+		}
+		hidden_effect = {
+			planet_event = { id = colony.9905
+				days = 180
+				random = 180
+			}
+			random_owned_pop = {
+				kill_pop = yes
+			}
+		}
+	}
+
+	option = {
+		name = colony.9900.b
+		custom_tooltip = colony.9900.b.tooltip
+		add_modifier = {
+			modifier = "collective_autophobia"
+			days = -1
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9905
+				days = 360
+				random = 360
+			}
+			random_owned_pop = {
+				kill_pop = yes
+			}
+		}
+	}
+}
+
+#Lucky Scan
+#this = Planet
+planet_event = {
+	id = colony.9905
+	title = "colony.9905.name"
+	desc = {
+		trigger = {
+			has_modifier = reassured_tracking
+		}
+		text = colony.9905.desc.a
+	}
+	desc = {
+		trigger = {
+			has_modifier = collective_autophobia
+		}
+		text = colony.9905.desc.b
+	}
+	picture = GFX_evt_ongoing_disaster
+	show_sound = event_laboratory_sound
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9905.a
+		custom_tooltip = colony.9905.a.tooltip
+		enable_special_project = {
+			name = STASIS_PRISON_PROJECT
+		}
+		hidden_effect = {
+			random_owned_pop = {
+				kill_pop = yes
+			}
+		}
+	}
+}
+
+#Holding Pattern
+#this = Planet
+planet_event = {
+	id = colony.9910
+	title = "colony.9910.name"
+	desc = "colony.9910.desc"
+	picture = GFX_evt_ancient_databank
+	show_sound = event_mystic_reveal
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9910.a
+		hidden_effect = {
+			planet_event = {
+				id = colony.9915
+				days = 60
+				random = 60
+			}
+		}
+	}
+}
+
+#Escape From The Moon
+#this = Planet
+planet_event = {
+	id = colony.9915
+	title = "colony.9915.name"
+	desc = "colony.9915.desc"
+	picture = GFX_evt_happy_reunion
+	show_sound = event_conversation
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		while = {
+			count = 2
+			create_pop = {
+				species = owner_main_species
+			}
+		}	
+		remove_modifier = reassured_tracking
+		remove_modifier = collective_autophobia
+	}
+
+	option = {
+		name = colony.9915.a
+		custom_tooltip = colony.9915.a.tooltip
+		add_deposit = d_stasis_prison
+	}
+
+	option = {
+		name = colony.9915.b
+		trigger = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		custom_tooltip = colony.9915.b.tooltip
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+		hidden_effect = {
+			random_list = {
+				25 = {
+					modifier = {
+						add = -15
+						owner = { 
+							OR = {
+								has_ethic = ethic_xenophile
+								has_ethic = ethic_fanatic_xenophile
+							}
+						}
+					}
+					modifier = {
+						add = 15
+						owner = { 
+							OR = {
+								has_ethic = ethic_xenophobe
+								has_ethic = ethic_fanatic_xenophobe
+							}
+						}
+					}
+					planet_event = { id = colony.9920 days = 60 random = 60 }
+				}	
+				50 = {
+					planet_event = { id = colony.9925 days = 60 random = 60 }
+				}
+				25 = {
+					modifier = {
+						add = 15
+						owner = { 
+							OR = {
+								has_ethic = ethic_xenophile
+								has_ethic = ethic_fanatic_xenophile
+							}
+						}
+					}
+					modifier = {
+						add = -15
+						owner = { 
+							OR = {
+								has_ethic = ethic_xenophobe
+								has_ethic = ethic_fanatic_xenophobe
+							}
+						}
+					}
+					planet_event = { id = colony.9930 days = 60 random = 60 }
+				}
+			}
+		}
+	}
+
+	option = {
+		name = colony.9915.c
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+					has_ethic = ethic_egalitarian
+					has_ethic = ethic_fanatic_egalitarian
+					has_civic = civic_police_state
+				}
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = minerals
+					value >= 1000
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				minerals = 1000
+			}
+		}
+		add_deposit = d_prisoner_intergration
+		custom_tooltip = colony.9915.c.tooltip
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_unruly
+					trait = trait_communal
+				}
+				homeworld = root
+			}
+			while = {
+				count = 2
+				create_pop = {
+					species = last_created_species
+				}
+			}
+		}
+	}
+
+	option = {
+		name = colony.9915.d
+		trigger = {
+			owner = {
+				has_civic = civic_hive_devouring_swarm
+				country_uses_food = yes
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = minerals
+					value >= 1000
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				minerals = -1000
+			}
+		}
+		add_deposit = d_meals_in_pods
+		custom_tooltip = colony.9915.d.tooltip
+	}
+}
+
+#Hardened Criminals
+#this = Planet
+planet_event = {
+	id = colony.9920
+	title = "colony.9920.name"
+	desc = "colony.9920.desc"
+	picture = GFX_evt_dark_alley
+	show_sound = event_whispering
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9920.a
+		add_modifier = {
+			modifier = freed_stasis_criminals
+			days = 1800
+		}
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_unruly
+					trait = trait_communal
+				}
+				homeworld = root
+			}
+			while = {
+				count = 4
+				create_pop = {
+					species = last_created_species
+				}
+			}
+		}
+	}
+}
+
+#Mixed Bag
+#this = Planet
+planet_event = {
+	id = colony.9925
+	title = "colony.9925.name"
+	desc = "colony.9925.desc"
+	picture = GFX_evt_grand_speech
+	show_sound = event_celebration
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9925.a
+		add_modifier = {
+			modifier = freed_stasis_criminals
+			days = 1800
+		}
+		add_modifier = {
+			modifier = freed_stasis_dissidents
+			days = -1
+		}
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_unruly
+					trait = trait_communal
+				}
+				homeworld = root
+			}
+			while = {
+				count = 4
+				create_pop = {
+					species = last_created_species
+				}
+			}
+		}
+	}
+}
+
+#Friendly Prisoners
+#this = Planet
+planet_event = {
+	id = colony.9930
+	title = "colony.9930.name"
+	desc = "colony.9930.desc"
+	picture = GFX_evt_grand_speech
+	show_sound = event_celebration
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = colony.9930.a
+		add_modifier = {
+			modifier = freed_stasis_dissidents
+			days = -1
+		}
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_unruly
+					trait = trait_communal
+				}
+				homeworld = root
+			}
+			while = {
+				count = 4
+				create_pop = {
+					species = last_created_species
+				}
+			}
+		}
+	}
+}
+
+### STRATOSPHERIC VENTS -----------------------------------------------------------------------------------------------------------
+
+#Stratospheric Vents
+planet_event = {
+	id = colony.9950
+	title = "colony.9950.name"
+	desc = "colony.9950.desc"
+	picture = GFX_evt_alien_nature
+	show_sound = evn_ove_tiyanki_family
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		original_owner = yes
+		is_ai = no
+		has_ground_combat = no
+		is_capital = no
+	}
+
+	trigger = {
+		has_modifier = "stratovents"
+		num_pops > 0
+		NOR = {
+			has_planet_flag = colony_event
+			has_planet_flag = stratovent_world_colony
+			owner = { has_country_flag = stratovents_event_started }
+			owner = { has_ethic = ethic_gestalt_consciousness } #Static modifiers and gestalt don't mix easily, have to check later (PDT?) how this could be added
+		}
+		OR = {
+			owner = { has_communications = event_target:tiyanki_garrison_country }
+			owner = { has_communications = event_target:tiyanki_country }
+		}
+	}
+
+	immediate = {
+		set_planet_flag = colony_event
+		set_planet_flag = stratovent_world_colony
+		owner = { set_country_flag = stratovents_event_started }
+		#add_modifier = {  TODO CD: TO BE ADDED LATER IN PDT - AUG-40363
+		#	modifier = "stratovent_world_modifier_basic"
+		#	days = -1
+		#}
+			#while = {
+			#Spawn grazing tiyanki and have them patrol the system semi-randomly
+			#	create_tiyanki_country = yes
+			#	random_system_planet = {
+			#		limit = {
+			#			is_star = no
+			#			is_moon = no
+			#		}
+			#		save_event_target_as = stratovent_world_colony
+			#	}
+			#	random_system_planet = {
+			#		limit = {
+			#			is_star = no
+			#			is_moon = no
+			#			NOT = {
+			#				is_same_value = event_target:stratovent_world_colony
+			#			}
+			#		}
+			#		save_event_target_as = stratovent_world_colony
+			#	}
+			#	random_system_planet = {
+			#		limit = {
+			#			is_star = no
+			#			is_moon = no
+			#			NOR = {
+			#				is_same_value = event_target:fumongus_trigger_1
+			#				is_same_value = event_target:fumongus_trigger_2
+			#			}
+			#		}
+			#		save_event_target_as = fumongus_trigger_3
+			#	}
+			#	event_target:tiyanki_country = {
+			#		create_fleet = {
+			#			name = "NAME_Grazing_Tiyanki"
+			#			effect = {
+			#				set_owner = event_target:tiyanki_country
+			#				create_ship = {
+			#					name = ""
+			#					design = "NAME_Tiyanki_Cow"
+			#				}
+			#				while = {
+			#					count = 1
+			#					create_ship = {
+			#						name = ""
+			#						design = "NAME_Tiyanki_Bull"
+			#					}
+			#				}
+			#				while = {
+			#					count = 2
+			#					create_ship = {
+			#						name = ""
+			#						design = "NAME_Tiyanki_Calf"
+			#					}
+			#				}
+			#				set_location = event_target:stratovent_world_colony
+			#				set_fleet_stance = passive
+			#				set_aggro_range_measure_from = self
+			#				set_aggro_range = 5
+			#				set_fleet_flag = NAME_Grazing_Tiyanki
+			#			}
+			#		}
+			#	}
+			#}
+		}
+
+	option = {#Investigate the vents
+		name = "colony.9950.a"
+
+		enable_special_project = {
+			name = "STRATOVENTS_PROJECT"
+			location = this
+			owner = root.owner
+		}
+	}
+
+	option = {#ignore the vents
+		name = "colony.9950.b"
+	}
+}
+
+#Use vents for tourism or refining
+planet_event = {
+	id = colony.9955
+	title = "colony.9955.name"
+	desc = "colony.9955.desc"
+	picture = GFX_evt_alien_planet
+	show_sound = evn_ove_tiyanki_family
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			remove_modifier = "stratovents"
+		}		
+	}
+
+	option = {#TOURISM
+		name = colony.9955.a
+		trigger ={
+			owner = {
+				NOT = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+		add_modifier = {
+			modifier = "stratovent_world_modifier_tourism"
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9960 days = 700 random = 100
+			}
+		}
+	}
+	option = {#REFINING
+		name = colony.9955.b
+		trigger ={
+			owner = {
+				NOT = {
+					has_civic = civic_environmentalist
+				}
+			}
+		}
+		add_modifier = {
+			modifier = "stratovent_world_modifier_refining"
+		}
+		hidden_effect = {
+			planet_event = {
+				id = colony.9965 days = 700 random = 100
+			}
+		}
+	}	
+}
+
+#Build viewing platforms
+planet_event = {
+	id = colony.9960
+	title = "colony.9960.name"
+	desc = "colony.9960.desc"
+	picture = GFX_evt_tiyanki_observation
+	show_sound = event_construction
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	
+
+	option = {#BUILD
+		name = colony.9960.a
+		allow = {
+			owner = {
+				resource_stockpile_compare = { resource = alloys value >= 200 }
+			}
+		}
+		remove_modifier = "stratovent_world_modifier_tourism"
+		add_modifier = {
+			modifier = "stratovent_world_modifier_tourism_boost"
+		}
+		owner = {
+			add_resource = {
+				alloys = -200
+			}
+		}
+	}
+	option = {#IGNORE
+		name = colony.9960.b
+	}
+}
+
+#Expand the vents with explosives
+planet_event = {
+	id = colony.9965
+	title = "colony.9965.name"
+	desc = "colony.9965.desc"
+	picture = GFX_evt_undertaker
+	show_sound = event_scanner
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {#AUTHORIZE USE OF EXPLOSIVES
+		name = colony.9965.a
+		hidden_effect = {
+			random_list = { #50/50 chance for outcome
+				50 = { planet_event = { id = colony.9970 } } #Vents expanded, more eGas
+				50 = { planet_event = { id = colony.9975 } } #Some vents collapsed, minerals
+			}
+		}	
+		
+	}
+	option = {#LEAVE THE VENTS BE
+		name = colony.9965.b
+	}
+	option = {#AUTHORIZE EXPLOSIVES (MINING GUILDS)
+		name = colony.9965.c
+		trigger = {
+			owner = {
+					has_civic = civic_mining_guilds
+				}
+			}
+		hidden_effect = {
+			random_list = { #75/25 chance for outcome
+				75 = { planet_event = { id = colony.9970 } }#Vents expanded, more eGas
+				25 = { planet_event = { id = colony.9975 } }#Some vents collapsed, minerals
+			}
+		}	
+	}
+
+
+}
+
+#EXPLOSIVE USE: SUCCESS
+planet_event = {
+	id = colony.9970
+	title = "colony.9970.name"
+	desc = "colony.9970.desc"
+	picture = GFX_evt_mining_operations
+	show_sound = event_construction
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_planet_devastation = 10
+		hidden_effect = {
+			remove_modifier = "stratovent_world_modifier_refining"
+			add_modifier = {
+				modifier = "stratovent_world_modifier_refining_upg"
+			}
+		}
+
+	}
+
+}
+
+#EXPLOSIVE USE: FAILURE
+planet_event = {
+	id = colony.9975
+	title = "colony.9975.name"
+	desc = "colony.9975.desc"
+	picture = GFX_evt_night_raid
+	show_sound = event_collapsing_ruins
+	location = ROOT
+	trackable = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = UNFORTUNATE
+		add_planet_devastation = 20
+		hidden_effect = {
+			remove_modifier = "stratovent_world_modifier_refining"
+			add_modifier = {
+				modifier = "stratovent_world_modifier_refining_minerals"
+			}
 		}
 	}
 }

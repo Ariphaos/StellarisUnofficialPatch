@@ -2840,17 +2840,20 @@ ship_event = {
 
 	trigger = {
 		has_ship_flag = fortress_vault
+		exists = owner
+		owner = { NOT = { has_country_flag = ariphaos_patch_fortress_block } }
+		exists = from.owner
 		from.owner = {
 			OR = {
 				is_country_type = default
 				is_ai = no
 			}
-			NOT = { has_event_chain = "enigmatic_fortress_chain" }
 		}
 	}
 
 	immediate = {
 		from.owner = { country_event = { id = leviathans.2101 } }
+		owner = { set_timed_country_flag = { flag = ariphaos_patch_fortress_block days = 180 } }
 	}
 }
 
@@ -2860,11 +2863,11 @@ country_event = {
 	title = "leviathans.2101.name"
 	desc = {
 		text = "leviathans.2101.desc"
-		trigger = { is_gestalt = no }
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
 	}
 	desc = {
 		text = "leviathans.2101.desc.gesta"
-		trigger = { is_gestalt = yes }
+		trigger = { has_ethic = ethic_gestalt_consciousness }
 	}
 	picture = GFX_evt_enigmatic_fortress
 	show_sound = event_space_battle
@@ -2877,7 +2880,7 @@ country_event = {
 		exists = event_target:fortress_country
 		from = { is_same_value = event_target:fortress_country }
 		exists = event_target:fortress_vault_core
-		NOT = { has_event_chain = "enigmatic_fortress_chain" }
+		NOT = { has_country_flag = ariphaos_patch_enigmatic_block }
 		event_target:fortress_country = {
 			count_controlled_ship = { # Check that all ships are disabled
 				limit = { is_disabled = no }
@@ -2888,7 +2891,6 @@ country_event = {
 
 	immediate = {
 		country_event = { id = story.8 days = 15 }
-		set_timed_global_flag = { flag = enigmatic_fortress_disabled days = 180 }
 		establish_communications_no_message = event_target:fortress_country
 		#event_target:fortress_country = {
 			event_target:fortress_vault_core = {
@@ -2900,6 +2902,7 @@ country_event = {
 			limit = { has_event_chain = "enigmatic_fortress_chain" }
 			end_event_chain = "enigmatic_fortress_chain"
 		}
+		set_timed_country_flag = { flag = ariphaos_patch_enigmatic_block days = 180 }
 	}
 
 	option = {
@@ -2909,18 +2912,18 @@ country_event = {
 			target = root
 		}
 		hidden_effect = { country_event = { id = leviathans.2111 } }
-		trigger = { is_gestalt = no }
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
 	}
 
 	option = {
 		name = "leviathans.2101.b"
 		hidden_effect = { country_event = { id = leviathans.2160 days = 360 } }
-		trigger = { is_gestalt = no }
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
 	}
 
 	option = {
 		name = leviathans.2101.c.gesta
-		trigger = { is_gestalt = yes }
+		trigger = { has_ethic = ethic_gestalt_consciousness }
 		add_monthly_resource_mult = {
 			resource = engineering_research
 			value = 24
@@ -3014,6 +3017,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = from.owner
 		from.owner = { is_same_value = event_target:fortress_country }
 		event_target:fortress_country = {
 			count_controlled_ship = { # Check that all ships are disabled
@@ -4487,6 +4491,7 @@ country_event = {
 	trigger = {
 		is_country_type = default
 		has_country_flag = built_hiver_mine
+		NOT = { has_country_flag = pacified_hiver_mine }
 		any_planet_within_border = {
 			OR = {
 				has_planet_flag = hiver_asteroid_1
@@ -4554,7 +4559,18 @@ country_event = {
 country_event = {
 	id = leviathans.3201
 	title = "leviathans.3201"
-	desc = "leviathans.3201.desc"
+	desc = {
+		trigger = {
+			NOT = { has_valid_civic = civic_void_hive }
+		}
+		text = "leviathans.3201.desc"
+	}
+	desc = {
+		trigger = {
+			has_valid_civic = civic_void_hive
+		}
+		text = "leviathans.3201.desc.void_hive"
+	}
 	picture = GFX_evt_hive
 	show_sound = event_red_alert
 	location = event_target:hiver_system
@@ -4705,7 +4721,24 @@ country_event = {
 ship_event = {
 	id = leviathans.3202
 	title = "leviathans.3202"
-	desc = "leviathans.3202.desc"
+	desc = {
+		trigger = {
+			owner = {
+				NOT = {
+					has_valid_civic = civic_void_hive
+				}
+			}
+		}
+		text = leviathans.3202.desc
+	}
+	desc = {
+		trigger = {
+			owner = {
+				has_valid_civic = civic_void_hive
+			}
+		}
+		text = leviathans.3202.desc.void_hive
+	}
 	picture = GFX_evt_hive
 	show_sound = event_ship_bridge
 	location = FROM
@@ -4728,7 +4761,40 @@ ship_event = {
 	}
 
 	option = {
+		trigger = {
+			NOT = { owner = { has_valid_civic = civic_void_hive } }
+		}
 		name = "leviathans.3202.a"
+	}
+	option = {
+		trigger = {
+			owner = { has_valid_civic = civic_void_hive }
+		}
+		name = "leviathans.3202.b"
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					is_asteroid = yes
+				}
+				enable_special_project = {
+					name = EXPLOIT_HIVERS
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+		owner = {
+			set_timed_country_flag = {
+				flag = pacified_hiver_mine
+				years = 3
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = { has_valid_civic = civic_void_hive }
+		}
+		name = "leviathans.3202.c"
 	}
 }
 
@@ -4844,6 +4910,161 @@ ship_event = {
 				destroy_ambient_object = this
 			}
 		}
+	}
+}
+
+ship_event = {
+	id = leviathans.3230
+	title = leviathans.3230.name
+	desc = leviathans.3230.desc
+	picture = GFX_evt_hive
+	show_sound = event_crystal_ship
+	location = from
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_global_flag = hivers_appeared
+		event_target:hiver_system = {
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = hive_asteroid_1 }
+				save_event_target_as = ambient_hive_1
+			}
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = hive_asteroid_2 }
+				save_event_target_as = ambient_hive_2
+			}
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = hive_asteroid_3 }
+				save_event_target_as = ambient_hive_3
+			}
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = hive_asteroid_4 }
+				save_event_target_as = ambient_hive_4
+			}
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = hive_asteroid_5 }
+				save_event_target_as = ambient_hive_5
+			}
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = hive_asteroid_6 }
+				save_event_target_as = ambient_hive_6
+			}
+		}
+		create_country = {
+			name = "NAME_Alien_Hive"
+			type = guardian_hiver
+			flag = {
+				icon = {
+					category = "spherical"
+					file = "flag_spherical_6.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors={
+					"red"
+					"red"
+					"null"
+					"null"
+				}
+			}
+		}
+		last_created_country = {
+			save_global_event_target_as = hive_country
+			set_country_flag = hive_country
+			set_faction_hostility = {
+				target = root.owner
+				set_hostile = no
+				set_friendly = yes
+			}
+		}
+		every_playable_country = {
+			establish_communications_no_message = event_target:hive_country
+		}
+		create_fleet = {
+			name = "NAME_Hiver_Nest"
+			settings = { spawn_debris = no }
+			effect = {
+				set_owner = event_target:hive_country
+				create_ship = {
+					name = "NAME_Hiver_Nest"
+					design = "NAME_Hive_Asteroid"
+				}
+				set_location = event_target:ambient_hive_1
+			}
+		}
+		event_target:ambient_hive_1 = { destroy_ambient_object = this }
+		create_fleet = {
+			name = "NAME_Hiver_Nest"
+			settings = { spawn_debris = no }
+			effect = {
+				set_owner = event_target:hive_country
+				create_ship = {
+					name = "NAME_Hiver_Nest"
+					design = "NAME_Hive_Asteroid"
+				}
+				set_location = event_target:ambient_hive_2
+			}
+		}
+		event_target:ambient_hive_2 = { destroy_ambient_object = this }
+		create_fleet = {
+			name = "NAME_Hiver_Nest"
+			settings = { spawn_debris = no }
+			effect = {
+				set_owner = event_target:hive_country
+				create_ship = {
+					name = "NAME_Hiver_Nest"
+					design = "NAME_Hive_Asteroid"
+				}
+				set_location = event_target:ambient_hive_3
+			}
+		}
+		event_target:ambient_hive_3 = { destroy_ambient_object = this }
+		create_fleet = {
+			name = "NAME_Hiver_Nest"
+			settings = { spawn_debris = no }
+			effect = {
+				set_owner = event_target:hive_country
+				create_ship = {
+					name = "NAME_Hiver_Nest"
+					design = "NAME_Hive_Asteroid"
+				}
+				set_location = event_target:ambient_hive_4
+			}
+		}
+		event_target:ambient_hive_4 = { destroy_ambient_object = this }
+		create_fleet = {
+			name = "NAME_Hiver_Nest"
+			settings = { spawn_debris = no }
+			effect = {
+				set_owner = event_target:hive_country
+				create_ship = {
+					name = "NAME_Hiver_Nest"
+					design = "NAME_Hive_Asteroid"
+				}
+				set_location = event_target:ambient_hive_5
+			}
+		}
+		event_target:ambient_hive_5 = { destroy_ambient_object = this }
+		create_fleet = {
+			name = "NAME_Hiver_Nest"
+			settings = { spawn_debris = no }
+			effect = {
+				set_owner = event_target:hive_country
+				create_ship = {
+					name = "NAME_Hiver_Nest"
+					design = "NAME_Hive_Asteroid"
+				}
+				set_location = event_target:ambient_hive_6
+			}
+		}
+		event_target:ambient_hive_6 = { destroy_ambient_object = this }
+	}
+
+	option = {
+		name = EXCELLENT
 	}
 }
 

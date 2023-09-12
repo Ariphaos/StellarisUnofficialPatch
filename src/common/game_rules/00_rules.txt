@@ -13,7 +13,10 @@ is_valid_rival = {
 				prev = { NOT = { is_country_type = default } }
 				AND = {
 					relative_power = { who = prev value >= inferior }
-					relative_power = { who = prev value <= superior }
+					OR = {
+						relative_power = { who = prev value <= superior }
+						prev = { has_policy_flag = diplo_stance_animosity }
+					}
 				}
 			}
 		}
@@ -99,7 +102,7 @@ can_add_claim = {
 				NOR = {
 					is_same_species = root
 					has_country_flag = synthetic_empire
-					is_machine_empire = yes
+					has_authority = auth_machine_intelligence
 				}
 			}
 		}
@@ -168,7 +171,7 @@ can_get_claim_from_lost_system = {
 			NOR = {
 				is_same_species = root
 				has_country_flag = synthetic_empire
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 			}
 		}
 	}
@@ -227,8 +230,11 @@ species_can_live_on_planet = {
 				has_trait = trait_cybernetic
 				exists = root.owner
 				root.owner = {
-					is_machine_empire = yes
-					has_civic = civic_machine_assimilator # Assimilator empire
+					has_authority = auth_machine_intelligence
+					OR = {
+						has_civic = civic_machine_assimilator # Assimilator empire
+						has_ascension_perk = ap_mechromancy
+					}
 				}
 			}
 		}
@@ -272,6 +278,10 @@ should_pay_for_leader_upkeep = {
 			is_councilor = yes
 		}
 	}
+	NOR = {
+		has_leader_flag = marauder_merc_leader
+		has_leader_flag = hired_admiral_merc_leader
+	}
 }
 
 #Checks whether any leaders (scientists etc) can be formed from this pop
@@ -286,7 +296,7 @@ can_generate_leader_from_pop = {
 		root = {
 			OR = {
 				has_technology = tech_synthetic_leaders
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				is_mechanical_empire = yes
 			}
 		}
@@ -335,7 +345,7 @@ can_generate_military_leader_from_pop = {
 		root = {
 			OR = {
 				has_technology = tech_synthetic_leaders
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				is_mechanical_empire = yes
 			}
 		}
@@ -394,7 +404,7 @@ can_release_vassal_from_species = {
 			}
 			AND = {
 				NOT = { has_trait = trait_hive_mind }
-				prev.this = { is_hive_empire = yes }
+				prev.this = { has_authority = auth_hive_mind }
 			}
 			has_trait = trait_mechanical
 			can_think = no
@@ -435,6 +445,7 @@ can_modify_species = {
 						is_same_species = prevprev
 						is_subspecies = prevprev
 					}
+					NOT = { has_trait = trait_self_modified }
 				}
 			}
 			AND = {
@@ -458,6 +469,7 @@ can_modify_species = {
 							is_same_species = prevprev
 							is_subspecies = prevprev
 						}
+						NOT = { has_trait = trait_self_modified }
 					}
 				}
 			}
@@ -789,7 +801,7 @@ species_has_happiness = {
 			has_trait = trait_mechanical
 			OR = {
 				NOT = { exists = from }
-				from = { is_machine_empire = yes }
+				from = { has_authority = auth_machine_intelligence }
 				from = { NOT = { has_technology = tech_synthetic_workers } }
 				from = { has_policy_flag = ai_outlawed }
 			}
@@ -798,7 +810,7 @@ species_has_happiness = {
 			has_trait = trait_cybernetic
 			exists = from
 			from = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 				has_civic = civic_machine_assimilator # Assimilator empire
 			}
 		}
@@ -1050,8 +1062,7 @@ show_notification_for_ground_combat = {
 # Determines if the "per_neighbor_rival" static modifier should be applied to an empire
 # this: country
 should_apply_neighbor_rival_modifier = {
-	#has_tradition = tr_supremacy_great_game
-	always = no
+	has_tradition = tr_enmity_adopt
 }
 
 #Root: Rebelling against country
@@ -1127,7 +1138,7 @@ will_anger_fallen_empire = {
 # root: country
 can_have_robot_pops = {
 	exists = this
-	is_hive_empire = no
+	NOT = { has_authority = auth_hive_mind }
 	NOT = { has_policy_flag = robots_outlawed }
 }
 
@@ -1153,7 +1164,7 @@ can_purge_pop_manually = {
 		OR = {
 			is_robot_pop = yes
 			is_sapient = no
-			owner = { is_hive_empire = yes }
+			owner = { has_authority = auth_hive_mind }
 			has_citizenship_type = { type = citizenship_slavery country = owner }
 			has_citizenship_type = { type = citizenship_full_machine country = owner }
 		}
@@ -1167,7 +1178,7 @@ can_purge_pop_manually = {
 				is_sapient = no
 				owner = { NOT = { has_policy_flag = pre_sapients_protect } }
 			}
-			owner = { is_gestalt = yes }
+			owner = { has_ethic = ethic_gestalt_consciousness }
 			owner = { has_policy_flag = purge_allowed }
 		}
 	}
@@ -1176,7 +1187,7 @@ can_purge_pop_manually = {
 		exists = owner
 		OR = {
 			is_robot_pop = no
-			owner = { is_hive_empire = yes }
+			owner = { has_authority = auth_hive_mind }
 			NAND = {
 				has_trait = trait_mechanical
 				owner = { has_policy_flag = ai_full_rights }
@@ -1265,6 +1276,7 @@ ai_should_restrict_system = {
 					is_country_type = awakened_marauders
 					is_country_type = marauder_raiders
 					is_country_type = caravaneer_fleet
+					ariphaos_patch_is_threat_to_guardians = no
 				}
 			}
 			OR = {
@@ -1272,21 +1284,40 @@ ai_should_restrict_system = {
 					has_star_flag = crystal_home_system
 					any_fleet_in_system = {
 						exists = owner
-						owner = { is_country_type = crystal }
+						owner = {
+							is_country_type = crystal
+							is_hostile_to = root
+						}
+					}
+				}
+				AND = {
+					has_star_flag = great_wound_system
+					any_fleet_in_system = {
+						exists = owner
+						owner = {
+							is_hostile_to = root
+							is_country_type = cloud
+						}
 					}
 				}
 				AND = {
 					has_star_flag = amoeba_home_system
 					any_fleet_in_system = {
 						exists = owner
-						owner = { is_country_type = amoeba_garrison }
+						owner = {
+							is_hostile_to = root
+							is_country_type = amoeba_garrison
+						}
 					}
 				}
 				AND = {
 					has_star_flag = drone_home_system
 					any_fleet_in_system = {
 						exists = owner
-						owner = { is_country_type = drone }
+						owner = {
+							is_hostile_to = root
+							is_country_type = drone
+						}
 					}
 				}
 				AND = {
@@ -1295,6 +1326,7 @@ ai_should_restrict_system = {
 						exists = owner
 						owner = {
 							is_guardian_country = yes
+							is_hostile_to = root
 						}
 					}
 				}
@@ -1305,6 +1337,7 @@ ai_should_restrict_system = {
 				OR = {
 					is_crisis_faction = yes
 					is_country_type = awakened_fallen_empire
+					is_country_type = default
 				}
 			}
 			has_star_flag = guardian
@@ -1321,18 +1354,8 @@ ai_should_restrict_system = {
 					is_country_type = fallen_empire
 					is_country_type = marauder_raiders
 					is_country_type = caravaneer_fleet
+					ariphaos_patch_is_threat_to_crisis = no
 				}
-			}
-			OR = {
-				has_star_flag = lgate
-				has_star_flag = lcluster
-			}
-			has_global_flag = gray_goo_crisis_active
-		}
-		AND = {
-			root = {
-				is_country_type = default
-				fleet_power < 30000
 			}
 			OR = {
 				has_star_flag = lgate
@@ -1350,10 +1373,13 @@ can_subjugate_empires = {
 
 # this = leader
 can_leader_get_council_trait = {
-	NAND = {
-		exists = owner
-		owner = { is_gestalt = yes }
-		is_councilor = no
+	OR = {
+		NAND = {
+			exists = owner
+			owner = { is_gestalt = yes }
+			is_councilor = no
+		}
+		has_leader_flag = restored_node
 	}
 }
 
@@ -1363,7 +1389,10 @@ can_leader_get_normal_trait = {
 		AND = {
 			exists = owner
 			owner = { is_gestalt = yes }
-			is_councilor = yes
+			OR = {
+				is_councilor = yes
+				has_leader_flag = restored_node
+			}
 		}
 		AND = {
 			is_ruler = yes
@@ -1383,7 +1412,10 @@ can_leader_get_subclass_trait = {
 	NAND = {
 		exists = owner
 		owner = { is_gestalt = yes }
-		is_councilor = yes
+		OR = {
+			is_councilor = yes
+			has_leader_flag = restored_node
+		}
 	}
 	has_any_subclass = no
 }
@@ -1691,7 +1723,7 @@ can_build_branch_offices = {
 	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_MEGACORP
 		OR = {
-			is_megacorp = yes
+			has_authority = auth_corporate
 			has_civic = civic_galactic_sovereign_megacorp
 		}
 	}
@@ -1709,7 +1741,7 @@ can_support_branch_offices = {
 	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_ON_MEGACORP_PLANET
 		NOR = {
-			is_megacorp = yes
+			has_authority = auth_corporate
 			has_civic = civic_galactic_sovereign_megacorp
 		}
 	}
@@ -1776,7 +1808,7 @@ can_build_branch_office_on_planet = {
 			root = {
 				is_subject = yes
 				OR = {
-					is_megacorp = yes
+					has_authority = auth_corporate
 					has_civic = civic_galactic_sovereign_megacorp
 				}
 				overlord = {
@@ -1794,7 +1826,7 @@ can_build_branch_office_on_planet = {
 						is_same_value = root.overlord
 					}
 					OR = {
-						is_megacorp = yes
+						has_authority = auth_corporate
 						has_civic = civic_galactic_sovereign_megacorp
 					}
 				}
@@ -1826,7 +1858,7 @@ can_build_branch_office_on_planet = {
 						is_subject = yes
 						overlord = {
 							NOR = {
-								is_megacorp = yes
+								has_authority = auth_corporate
 								has_civic = civic_galactic_sovereign_megacorp
 							}
 						}
@@ -1841,7 +1873,7 @@ can_build_branch_office_on_planet = {
 					is_subject = yes
 					overlord = {
 						OR = {
-							is_megacorp = yes
+							has_authority = auth_corporate
 							has_civic = civic_galactic_sovereign_megacorp
 						}
 					}
@@ -1888,7 +1920,7 @@ can_build_branch_office_on_planet = {
 # Checked by is_criminal_syndicate trigger
 is_criminal_syndicate_rule = {
 	OR = {
-		is_megacorp = yes
+		has_authority = auth_corporate
 		has_valid_civic = civic_galactic_sovereign_megacorp
 	}
 	has_valid_civic = civic_criminal_heritage
@@ -2152,7 +2184,7 @@ can_planet_auto_migrate = {
 	}
 	custom_tooltip = {
 		fail_text = AUTO_MIGRATE_ONLY_HAS_ONE_POP
-		num_sapient_pops > 1 
+		num_sapient_pops > 1
 	}
 	hidden_trigger = {
 		exists = owner
@@ -2219,9 +2251,8 @@ can_modify_organic_portraits = {
 	has_tradition = tr_genetics_enhanced_expression
 }
 
-# This = country contacting
-# From = target country
-## Final check for whether there should be a first contact site spawned. Main check is via country type contact_rule, in code.
+# This = country establishing contact | From = target country
+# Final check for whether there should be a first contact site spawned. Main check is via country type 'contact_rule', in code. See also: error-logging/fixing event 'action.240', which duplicates this trigger.
 can_have_first_contact = {
 	if = {
 		limit = { from = { is_amoeba_country_type = yes } }
@@ -2348,7 +2379,7 @@ can_fill_drone_job = {
 can_fill_worker_job = {
 	custom_tooltip = WORKER_JOB_TRIGGER
 	hidden_trigger = {
-		is_gestalt = no
+		NOT = { has_ethic = ethic_gestalt_consciousness }
 		exists = owner
 		is_being_purged = no
 		is_being_assimilated = no
@@ -2394,7 +2425,7 @@ can_fill_ruler_job = {
 	else = {
 		custom_tooltip = RULER_JOB_TRIGGER
 		hidden_trigger = {
-			is_gestalt = no
+			NOT = { has_ethic = ethic_gestalt_consciousness }
 			exists = owner
 			is_enslaved = no
 			is_being_purged = no
@@ -2428,18 +2459,17 @@ should_planetary_automate = {
 
 dismiss_leader_cost = {
 	base = 0
-	modifier = {
-		owner = { has_valid_civic = civic_feudal_realm }
-		add = 100
-	}
-	modifier = {
-		owner = { has_valid_civic = civic_feudal_realm }
-		factor = value:feudal_realm_civic_dimissal_cost #Multiplier for Feudal dismissal
-	}
 }
 
 # this = leader
 can_dismiss_leader = {
+	custom_tooltip = {
+		fail_text = "requires_actor_not_feudal_society"
+		exists = owner
+		owner = {
+			NOT = { has_valid_civic = civic_feudal_realm }
+		}
+	}
 	if = {
 		limit = {
 			leader_class = admiral
@@ -2482,13 +2512,7 @@ can_country_change_councilors = {
 should_count_towards_leader_cap = {
 	NOR = {
 		leader_class = envoy
-		AND = {
-			owner = { is_gestalt = yes }
-			is_councilor = yes
-			# We count all rulers as well
-			NOT = { is_ruler = yes }
-		}
-		has_leader_flag = marauder_merc_leader
+		is_hidden = yes
 		has_leader_flag = hired_admiral_merc_leader
 		has_leader_flag = legendary_leader
 		AND = {
@@ -2553,16 +2577,16 @@ should_ai_build_stronghold_on_vulnerable_planet = {
 			owner = { is_gestalt = yes }
 		}
 		NOT = { has_available_jobs = warrior_drone }
-		any_owned_pop = { 
+		any_owned_pop = {
 			is_unemployed = yes
-			can_work_specific_job = warrior_drone 
+			can_work_specific_job = warrior_drone
 		}
 	}
 	ELSE = {
 		NOT = { has_available_jobs = soldier }
-		any_owned_pop = { 
+		any_owned_pop = {
 			is_unemployed = yes
-			can_work_specific_job = soldier 
+			can_work_specific_job = soldier
 		}
 	}
 }
@@ -2619,7 +2643,10 @@ can_get_external_leader_pool_candidate = {
 # From = country, country that would receive the leader
 can_trade_leader = {
 	# The leader must have a trait from a specialist subject type.
-	this = { has_specialist_subject_leader_trait = yes }
+	this = {
+		has_specialist_subject_leader_trait = yes
+		is_heir = no
+	}
 	# The subject and overlord must both be regular empires, machine intelligences or hive-minds.
 	OR = {
 		AND = {
@@ -2632,18 +2659,18 @@ can_trade_leader = {
 		}
 		AND = {
 			ROOT = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 			}
 			FROM = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 			}
 		}
 		AND = {
 			ROOT = {
-				is_hive_empire = yes
+				has_authority = auth_hive_mind
 			}
 			FROM = {
-				is_hive_empire = yes
+				has_authority = auth_hive_mind
 			}
 		}
 	}
@@ -2657,7 +2684,7 @@ can_trade_leader = {
 			}
 		}
 	}
-	NOR = { 
+	NOR = {
 		has_trait = leader_trait_fotd_scientist
 		has_trait = leader_trait_fotd_admiral
 	}
@@ -2837,7 +2864,7 @@ leader_election_weight = {
 		}
 		mult = 1.2
 	}
-	
+
 	# Penalty for Non-Councilor Subclass (which is a Trait).
 	modifier = {
 		custom_tooltip = {
@@ -2846,7 +2873,7 @@ leader_election_weight = {
 		}
 		mult = 0.8
 	}
-	
+
 	# Bonus/penalty from Traits.
 	modifier = {
 		custom_tooltip = {
@@ -2899,7 +2926,7 @@ are_pre_ftls_unaware = {
 # This = planet
 # Checked if planet is a terraforming candidate
 is_terraforming_candidate = {
-	OR = { 
+	OR = {
 		has_modifier = terraforming_candidate
 		has_modifier = frozen_terraforming_candidate
 		has_modifier = toxic_terraforming_candidate

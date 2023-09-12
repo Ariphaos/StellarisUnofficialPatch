@@ -1575,12 +1575,27 @@ country_event = {
 			}
 		}
 	}
-	option = { #Sack an executive (corporates)
+	option = { #Sack an Executive or Steward (Corporates)
 		name = espionage.1060.b
 		trigger = {
-			has_authority = auth_corporate
-			capital_scope = {
-				any_owned_pop = { has_job = executive }
+			OR = {
+				AND = { # has an Executive
+					has_authority = auth_corporate # failsafe check, which also causes a flavorful event icon to appear
+					is_worker_coop_empire = no
+					capital_scope = {
+						any_owned_pop = {
+							has_job = executive
+						}
+					}
+				}
+				AND = { # has a Steward
+					is_worker_coop_empire = yes
+					capital_scope = {
+						any_owned_pop = {
+							has_job = steward
+						}
+					}
+				}
 			}
 		}
 		allow = {
@@ -1588,11 +1603,29 @@ country_event = {
 		}
 		add_resource = { energy = -250 }
 		custom_tooltip = espionage.1060.b.tooltip
-		capital_scope = {
-			random_owned_pop = {
-				limit = { has_job = executive }
-				unemploy_pop = yes
-				clear_pop_category = yes #Drops them to worker-class
+		if = {
+			limit = {
+				is_worker_coop_empire = yes
+			}
+			capital_scope = {
+				random_owned_pop = {
+					limit = {
+						has_job = steward
+					}
+					unemploy_pop = yes
+					clear_pop_category = yes # Drops them to worker-class
+				}
+			}
+		}
+		else = {
+			capital_scope = {
+				random_owned_pop = {
+					limit = {
+						has_job = executive
+					}
+					unemploy_pop = yes
+					clear_pop_category = yes # Drops them to worker-class
+				}
 			}
 		}
 		root = {
@@ -2305,6 +2338,7 @@ country_event = {
 					any_playable_country = {
 						NOT = { is_same_value = root }
 						has_communications = root
+						is_primitive = no
 						OR = {
 							is_friendly_to = event_target:insidious_plot_spynetwork
 							is_protective_to = event_target:insidious_plot_spynetwork
@@ -2315,6 +2349,7 @@ country_event = {
 					limit = {
 						NOT = { is_same_value = root }
 						has_communications = root
+						is_primitive  = no
 						OR = {
 							is_friendly_to = event_target:insidious_plot_spynetwork
 							is_protective_to = event_target:insidious_plot_spynetwork
@@ -2330,13 +2365,19 @@ country_event = {
 					}
 				}
 				random_playable_country = {
-					limit = { has_country_flag = espionage_operation_targeted_by@root }
+					limit = { 
+						has_country_flag = espionage_operation_targeted_by@root
+						is_primitive = no
+					}
 					save_event_target_as = insidious_plot_country
 				}
 			}
 			else = {
 				random_playable_country = {
-					limit = { has_communications = root }
+					limit = {
+						has_communications = root
+						is_primitive = no
+					}
 					save_event_target_as = insidious_plot_country
 				}
 			}

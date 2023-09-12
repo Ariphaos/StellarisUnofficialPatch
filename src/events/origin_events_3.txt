@@ -381,21 +381,6 @@ country_event = {
 				which = experience_bonus
 				value = random_factor
 			}
-			if = {
-				limit = {
-					has_skill <= 6
-				}
-				multiply_variable = {
-					which = experience_bonus
-					value = 0.7
-				}
-			}
-			else = {
-				multiply_variable = {
-					which = experience_bonus
-					value = 0.5
-				}
-			}
 			add_experience = experience_bonus
 
 			clear_variable = experience_bonus
@@ -877,10 +862,6 @@ country_event = {
 			}
 		}
 		set_country_flag = slingshot_origin_arcsite_owner
-		add_modifier = {
-			modifier = into_the_unknown
-			days = -1
-		}
 		set_visited = event_target:quantum_catapult_system
 		event_target:quantum_catapult_system = {
 			set_star_class = sc_pulsar
@@ -1985,7 +1966,6 @@ country_event = {
 # Pre-Event
 country_event = { # Overlord
 	id = origin.5715
-
 	hide_window = yes
 	is_triggered_only = yes
 
@@ -1997,7 +1977,7 @@ country_event = { # Overlord
 	immediate = {
 		country_event = {
 			id = origin.5720
-			days = 1825
+			days = 1800
 			random = 9125
 		}
 	}
@@ -2006,7 +1986,6 @@ country_event = { # Overlord
 # Previous Leader dies, succession crisis
 country_event = { # Overlord version
 	id = origin.5720
-
 	hide_window = yes
 	is_triggered_only = yes
 
@@ -2024,8 +2003,8 @@ country_event = { # Overlord version
 		}
 		country_event = {
 			id = origin.5730
-			days = 365
-			random = 1825
+			days = 360
+			random = 1800
 		}
 		every_subject = {
 			country_event = {
@@ -2055,7 +2034,6 @@ country_event = { # Vassal version
 # Dissolution of the Empire
 country_event = { # Overlord Version
 	id = origin.5730
-
 	hide_window = yes
 	is_triggered_only = yes
 
@@ -2093,7 +2071,9 @@ country_event = { # Overlord Version
 			country_event = { id = origin.5735 }
 		}
 		while = { # iterate through all splintering worlds
-			limit = { any_owned_planet = { is_capital = no } }
+			limit = {
+				any_owned_planet = { is_capital = no }
+			}
 			random_system_within_border = { # we want a country per colonized system
 				limit = { is_capital_system = no }
 				random_system_planet = {
@@ -2112,8 +2092,8 @@ country_event = { # Overlord Version
 							set_country_flag = origin_imperial_vassal_ex_overlord@event_target:previous_overlord # also unique in case of MP (while the overlord survives...)
 							set_timed_country_flag = { flag = day_0 days = 7 } # suppresses the contact events, but not notifications
 							save_event_target_as = current_splinter
-
-							every_playable_country = { # Establish Contact with previous vassals
+							# Establish Contact with previous vassals
+							every_playable_country = {
 								limit = {
 									has_communications = root
 									NOT = { has_communications = event_target:current_splinter }
@@ -2130,18 +2110,16 @@ country_event = { # Overlord Version
 									location = event_target:current_splinter.capital_star
 								}
 							}
-
-							root = { # Give them one of the previous Overlord's fleets
+							# Give them one of the previous Overlord's fleets
+							root = {
 								random_owned_fleet = {
 									set_owner = event_target:current_splinter
 								}
 							}
-
 							# Give them tech from previous Overlord
 							copy_techs_from = {
 								target = event_target:previous_overlord
 							}
-
 							# Give them a fleet of their own
 							create_fleet = {
 								effect = {
@@ -2156,13 +2134,12 @@ country_event = { # Overlord Version
 									set_location = event_target:current_splinter.capital_star
 								}
 							}
-
 							# Give them some starting resources
 							add_basic_resources_effect = { VALUE = 3000 }
 							add_manufactured_resources_effect = { VALUE = 1500 }
 							add_advanced_resources_effect = { VALUE = 1000 }
-
-							declare_war = { # Start a war with the previous Overlord
+							# Start a war with the previous Overlord
+							declare_war = {
 								target = root
 								name = {
 									key = "NAME_Imperial_War"
@@ -2188,13 +2165,14 @@ country_event = { # Vassal Version
 	title = origin.5735.title
 	desc = origin.5735.desc
 	picture = GFX_evt_burning_settlement
-
+	show_sound = event_collapsing_ruins
 	is_triggered_only = yes
 
 	trigger = {
 		has_origin = origin_imperial_vassal
 	}
 
+	# "Free once more"
 	option = {
 		name = origin.5735.a
 		trigger = {
@@ -2204,9 +2182,12 @@ country_event = { # Vassal Version
 				is_xenophobe = no
 			}
 		}
-		set_subject_of = { who = none }
+		custom_tooltip = SET_SUBJECT_OF_EFFECT_NONE_WE_VERBOSE
+		hidden_effect = {
+			set_subject_of = { who = none }
+		}
 	}
-
+	# Take leadership
 	option = {
 		name = origin.5735.b
 		trigger = {
@@ -2216,12 +2197,11 @@ country_event = { # Vassal Version
 				is_xenophobe = yes
 			}
 		}
-
-		set_subject_of = { who = none }
-
 		add_resource = { influence = -100 }
+		custom_tooltip = SET_SUBJECT_OF_EFFECT_NONE_WE_VERBOSE
 		custom_tooltip = origin.5735.b.tt
 		hidden_effect = {
+			set_subject_of = { who = none }
 			every_playable_country = {
 				limit = {
 					OR = {
@@ -2250,11 +2230,14 @@ country_event = { # Vassal Version
 			}
 		}
 	}
-
+	# "We remain loyal"
 	option = {
 		name = origin.5735.c
 		trigger = {
 			is_ai = no
+			NOT = {
+				is_at_war_with = event_target:previous_overlord
+			}
 		}
 		custom_tooltip = origin.5735.c.tt
 		add_resource = { influence = 100 }
@@ -2483,6 +2466,7 @@ country_event = { # Tombola, fired every year
 	trigger = {
 		has_origin = origin_fear_of_the_dark
 		event_target:fotd_seperatist_planet@root = {
+			exists = owner
 			owner = {
 				has_country_flag = fotd_seperatist_country@root
 			}
@@ -4858,12 +4842,6 @@ country_event = {
 				}
 				remove_modifier = salvager_insight
 			}
-			if = {
-				limit = {
-					has_modifier = salvage_overseer
-				}
-				remove_modifier = salvage_overseer
-			}
 			every_playable_country = {
 				limit = {
 					exists = overlord
@@ -6184,6 +6162,9 @@ country_event = {
 		if = {
 			limit = {
 				has_origin = origin_fear_of_the_dark
+				event_target:fotd_seperatist_planet@root = {
+					exists = owner
+				}
 			}
 			event_target:fotd_seperatist_planet@root = {
 				owner = {

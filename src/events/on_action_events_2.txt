@@ -419,7 +419,18 @@ country_event = {
 	is_triggered_only = yes
 
 	option = {
-		name = OK
+		name = {
+			trigger = {
+				NOT = { has_valid_civic = civic_worker_coop }
+			}
+			text = OK
+		}
+		name = {
+			trigger = {
+				has_valid_civic = civic_worker_coop
+			}
+			text = UNDERSTOOD
+		}
 		tooltip = { end_event_chain = market_founding_chain }
 	}
 }
@@ -1807,7 +1818,12 @@ starbase_event = {
 					planet = event_target:ruined_orbital_ring_planet
 
 					init_effect = {
-						set_owner = prev.owner
+						if = {
+							limit = {
+								exists = prev.owner
+							}
+							set_owner = prev.owner
+						}
 						create_ambient_object = {
 							type = "medium_debris_01_object"
 							location = this
@@ -1946,8 +1962,8 @@ country_event = {
 	}
 }
 
-# on_decade_pulse_country
-# Event for misc error logging of broken gamestates that probably can't be done better in code
+# Via 'on_decade_pulse_country'
+# Event for error-logging broken communications: flagging empires which have met each other, but failed to established communications nor are engaged in first contact.
 country_event = {
 	id = action.240
 	is_triggered_only = yes
@@ -1963,7 +1979,7 @@ country_event = {
 					NOR = {
 						is_same_value = root
 						has_communications = root
-						has_country_flag = suppress_first_contact_comms
+						has_country_flag = suppress_first_contact_comms # i.e. The Shroud
 						is_primitive = yes
 					}
 					root = {
@@ -1979,7 +1995,7 @@ country_event = {
 								flag = just_encountered
 							}
 						}
-						#matches game rule can_have_first_contact
+						# The following triggers should match game rule 'can_have_first_contact'
 						if = {
 							limit = { prev = { is_amoeba_country_type = yes } }
 							NOT = {
@@ -2039,6 +2055,19 @@ country_event = {
 									}
 								}
 							}
+						}
+						else_if = {
+							limit = {
+								prev = { is_country_type = dragon_dummy }
+							}
+							has_origin = origin_here_be_dragons
+							prev = { has_country_flag = dragon_of@root }
+						}
+						else_if = {
+							limit = {
+								prev = { is_country_type = jaunting_traveler_dummy }
+							}
+							prev = { has_country_flag = jaunting_traveler_of@root }
 						}
 					}
 				}
@@ -2734,6 +2763,7 @@ country_event = {
 					# Variable "leader_pending_negative_traits_unmodified" doesn't exist yet, can't reduce it yet. Checked now made in paragon_2.2200.
 					modifier = {
 						factor = 0
+						exists = owner
 						owner = { has_valid_civic = civic_philosopher_king }
 					}
 				}
@@ -2945,7 +2975,7 @@ leader_event = {
 				owner = {
 					has_valid_civic = civic_technocracy
 				}
-				leader_class = scientist 
+				leader_class = scientist
 			}
 			add_random_expertise_trait_effect = yes
 		}
@@ -2966,7 +2996,7 @@ leader_event = {
 				owner = {
 					has_valid_civic = civic_crusader_spirit
 				}
-				leader_class = admiral 
+				leader_class = admiral
 			}
 			add_trait_no_notify = leader_trait_par_zealot
 		}
@@ -2977,7 +3007,7 @@ leader_event = {
 				owner = {
 					has_valid_civic = civic_crusader_spirit
 				}
-				leader_class = general 
+				leader_class = general
 			}
 			add_trait_no_notify = leader_trait_crusader
 		}
@@ -2988,7 +3018,7 @@ leader_event = {
 				owner = {
 					has_valid_civic = civic_crusader_spirit_corporate
 				}
-				leader_class = admiral 
+				leader_class = admiral
 			}
 			add_trait_no_notify = leader_trait_corsair
 		}
@@ -3278,7 +3308,7 @@ country_event = {
 				option = orbital_bombardment_surrender_forbidden
 			}
 		}
-		
+
 		set_policy = {
 			policy = orbital_bombardment_accept_surrender
 			option = orbital_bombardment_surrender_forbidden
@@ -3551,6 +3581,342 @@ planet_event = {
 		}
 		else = {
 			set_colony_type = col_default
+		}
+	}
+}
+
+event = {
+	id = action.720
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_lithoids = yes
+		any_playable_country = {
+			has_valid_civic = civic_void_hive
+		}
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				has_valid_civic = civic_void_hive
+				NOT = { has_country_flag = void_hive_cooldown }
+			}
+			random_system_within_border = {
+				limit = {
+					any_system_planet = {
+						NOT = {
+							has_planet_flag = has_megastructure
+						}
+						OR = {
+							AND = {
+								has_deposit_for = shipclass_mining_station
+								has_mining_station = no
+							}
+							AND = {
+								has_deposit_for = shipclass_research_station
+								has_research_station = no
+							}
+						}
+					}
+				}
+				system_event = { id = action.725 }
+			}
+			set_timed_country_flag = {
+				flag = void_hive_cooldown
+				days = 95
+			}
+		}
+	}
+}
+
+system_event = {
+	id = action.725
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_planet = {
+			limit = {
+				NOT = {
+					has_planet_flag = has_megastructure
+				}
+				OR = {
+					AND = {
+						has_deposit_for = shipclass_mining_station
+						has_mining_station = no
+					}
+					AND = {
+						has_deposit_for = shipclass_research_station
+						has_research_station = no
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_deposit_for = shipclass_mining_station
+				}
+				create_mining_station = { owner = space_owner }
+				if = {
+					limit = {
+						has_resource = { type = exotic_gases amount > 0 }
+						space_owner = {
+							NOR = {
+								has_technology = tech_mine_exotic_gases
+								has_modifier = reduce_gas_output
+							}
+						}
+					}
+					space_owner = {
+						add_modifier = { modifier = reduce_gas_output }
+					}
+				}
+				if = {
+					limit = {
+						has_resource = { type = rare_crystals amount > 0 }
+						space_owner = {
+							NOR = {
+								has_technology = tech_mine_rare_crystals
+								has_modifier = reduce_crystal_output
+							}
+						}
+					}
+					space_owner = {
+						add_modifier = { modifier = reduce_crystal_output }
+					}
+				}
+				if = {
+					limit = {
+						has_resource = { type = volatile_motes amount > 0 }
+						space_owner = {
+							NOR = {
+								has_technology = tech_mine_volatile_motes
+								has_modifier = reduce_motes_output
+							}
+						}
+					}
+					space_owner = {
+						add_modifier = { modifier = reduce_motes_output }
+					}
+				}
+				if = {
+					limit = {
+						has_resource = { type = sr_living_metal amount > 0 }
+						space_owner = {
+							NOR = {
+								has_technology = tech_mine_living_metal
+								has_modifier = reduce_living_metal_output
+							}
+						}
+					}
+					space_owner = {
+						add_modifier = { modifier = reduce_living_metal_output }
+					}
+				}
+			}
+			else = {
+				create_research_station = { owner = space_owner }
+				if = {
+					limit = {
+						has_resource = { type = sr_zro amount > 0 }
+						space_owner = {
+							NOR = {
+								has_technology = tech_mine_zro
+								has_modifier = reduce_zro_output
+							}
+						}
+					}
+					space_owner = {
+						add_modifier = { modifier = reduce_zro_output }
+					}
+				}
+				if = {
+					limit = {
+						has_resource = { type = sr_dark_matter amount > 0 }
+						space_owner = {
+							NOR = {
+								has_technology = tech_mine_dark_matter
+								has_modifier = reduce_dark_matter_output
+							}
+						}
+					}
+					space_owner = {
+						add_modifier = { modifier = reduce_dark_matter_output }
+					}
+				}
+			}
+		}
+	}
+}
+
+# A country has increased the level of a tech, use last_increased_tech trigger to check tech and level.
+# This = Country
+country_event = {
+	id = action.730
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		has_valid_civic = civic_void_hive
+		OR = {
+			last_increased_tech = tech_mine_exotic_gases
+			last_increased_tech = tech_mine_rare_crystals
+			last_increased_tech = tech_mine_volatile_motes
+			last_increased_tech = tech_mine_zro
+			last_increased_tech = tech_mine_dark_matter
+			last_increased_tech = tech_mine_living_metal
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				last_increased_tech = tech_mine_exotic_gases
+			}
+			remove_modifier = reduce_gas_output
+		}
+		if = {
+			limit = {
+				last_increased_tech = tech_mine_rare_crystals
+			}
+			remove_modifier = reduce_crystal_output
+		}
+		if = {
+			limit = {
+				last_increased_tech = tech_mine_volatile_motes
+			}
+			remove_modifier = reduce_motes_output
+		}
+		if = {
+			limit = {
+				last_increased_tech = tech_mine_zro
+			}
+			remove_modifier = reduce_zro_output
+		}
+		if = {
+			limit = {
+				last_increased_tech = tech_mine_dark_matter
+			}
+			remove_modifier = reduce_dark_matter_output
+		}
+		if = {
+			limit = {
+				last_increased_tech = tech_mine_living_metal
+			}
+			remove_modifier = reduce_living_metal_output
+		}
+	}
+}
+
+country_event = {
+	id = action.735
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		NOT = {
+			has_valid_civic = civic_void_hive
+		}
+		OR = {
+			has_modifier = reduce_gas_output
+			has_modifier = reduce_crystal_output
+			has_modifier = reduce_motes_output
+			has_modifier = reduce_zro_output
+			has_modifier = reduce_dark_matter_output
+			has_modifier = reduce_living_metal_output
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				has_modifier = reduce_gas_output
+			}
+			every_planet_within_border = {
+				limit = {
+					has_mining_station = yes
+					has_resource = { type = exotic_gases amount > 0 }
+				}
+				mining_station = {
+					dismantle = yes
+				}
+			}
+			remove_modifier = reduce_gas_output
+		}
+		if = {
+			limit = {
+				has_modifier = reduce_crystal_output
+			}
+			every_planet_within_border = {
+				limit = {
+					has_mining_station = yes
+					has_resource = { type = rare_crystals amount > 0 }
+				}
+				mining_station = {
+					dismantle = yes
+				}
+			}
+			remove_modifier = reduce_crystal_output
+		}
+		if = {
+			limit = {
+				has_modifier = reduce_motes_output
+			}
+			every_planet_within_border = {
+				limit = {
+					has_mining_station = yes
+					has_resource = { type = volatile_motes amount > 0 }
+				}
+				mining_station = {
+					dismantle = yes
+				}
+			}
+			remove_modifier = reduce_motes_output
+		}
+		if = {
+			limit = {
+				has_modifier = reduce_zro_output
+			}
+			every_planet_within_border = {
+				limit = {
+					has_mining_station = yes
+					has_resource = { type = sr_zro amount > 0 }
+				}
+				mining_station = {
+					dismantle = yes
+				}
+			}
+			remove_modifier = reduce_zro_output
+		}
+		if = {
+			limit = {
+				has_modifier = reduce_dark_matter_output
+			}
+			every_planet_within_border = {
+				limit = {
+					has_mining_station = yes
+					has_resource = { type = sr_dark_matter amount > 0 }
+				}
+				mining_station = {
+					dismantle = yes
+				}
+			}
+			remove_modifier = reduce_dark_matter_output
+		}
+		if = {
+			limit = {
+				has_modifier = reduce_living_metal_output
+			}
+			every_planet_within_border = {
+				limit = {
+					has_mining_station = yes
+					has_resource = { type = sr_living_metal amount > 0 }
+				}
+				mining_station = {
+					dismantle = yes
+				}
+			}
+			remove_modifier = reduce_living_metal_output
 		}
 	}
 }

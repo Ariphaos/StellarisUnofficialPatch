@@ -1,6 +1,80 @@
 ###################
 # Basic Jobs
 ###################
+colonist = {
+	category = worker
+	exempt_from_ai_amenity_prioritization = yes
+	condition_string = WORKER_JOB_TRIGGER
+	building_icon = building_colony_shelter
+	clothes_texture_index = 3
+
+	possible_pre_triggers = {
+		has_owner = yes
+		is_being_purged = no
+		is_being_assimilated = no
+		is_sapient = yes
+	}
+
+	possible_precalc = can_fill_worker_job
+
+	planet_modifier = {
+		planet_building_build_speed_mult = 0.10
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
+		planet_amenities_add = 3
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
+	}
+
+	resources = {
+		category = planet_jobs
+		produces = {
+			trigger = {
+				is_lithoid = no
+			}
+			food = 1
+		}
+		produces = {
+			trigger = {
+				is_lithoid = yes
+			}
+			minerals = 1
+		}
+	}
+
+	weight = {
+		weight = @colonist_job_weight # Higher prio
+		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_amenities_mult|
+		modifier = {
+			factor = 0.1
+			can_take_servant_job = yes
+		}
+		modifier = {
+			factor = 1.5
+			has_job = colonist
+		}
+		modifier = {
+			factor = 0
+			NOT = { has_job = colonist }
+			exists = planet
+			planet = {
+				owner = { is_ai = yes }
+				count_owned_pop = { limit = { is_sapient = yes }count < 4 }
+				any_owned_pop = {
+					has_job = colonist
+				}
+			}
+		}
+		modifier = {
+			factor = 0.8
+			is_enslaved = yes
+			has_slavery_type = { type = slavery_indentured }
+		}
+	}
+}
 
 clerk = {
 	category = worker
@@ -26,23 +100,18 @@ clerk = {
 		category = planet_clerks
 	}
 
+	planet_modifier = {
+		trade_value_mult = 0.01
+	}
+
 	triggered_planet_modifier = {
 		potential = {
 			planet = {
 				NOT = { has_planet_flag = has_franchise_headquarters }
 			}
 		}
-		trade_value_add = 4
+		trade_value_add = 3
 		mult = value:scripted_modifier_mult|MODIFIER|pop_job_trade_mult|
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			has_councilor = { COUNCILOR = "councilor_merchant_guilds" }
-		}
-
-		trade_value_add = 0.4
-		mult = value:scripted_modifier_councilor_level_mult|MODIFIER|pop_job_trade_mult|TYPE|councilor_merchant_guilds|
 	}
 
 	triggered_planet_modifier = {
@@ -51,7 +120,7 @@ clerk = {
 				has_planet_flag = has_franchise_headquarters
 			}
 		}
-		trade_value_add = 3
+		trade_value_add = 2
 		mult = value:scripted_modifier_mult|MODIFIER|pop_job_trade_mult|
 	}
 
@@ -67,9 +136,23 @@ clerk = {
 		}
 	}
 
+	triggered_pop_modifier = {
+		potential = {
+			owner = { has_modifier = paragon_origin_strengthened_government_ii }
+		}
+		pop_political_power = 0.25
+	}
+
+	triggered_pop_modifier = {
+		potential = {
+			owner = { has_modifier = paragon_origin_strengthened_government_iii }
+		}
+		pop_political_power = 0.50
+	}
+
 	triggered_planet_modifier = {
 		potential = { always = yes }
-		planet_amenities_add = 2
+		planet_amenities_add = 3
 		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
 	}
 
@@ -96,6 +179,15 @@ clerk = {
 		}
 		trade_value_add = 1
 		mult = value:scripted_modifier_mult|MODIFIER|pop_job_trade_mult|
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_tradition = tr_mercantile_trickle_up_economics }
+		}
+		planet_amenities_add = 1
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
 	}
 
 	triggered_country_modifier = {
@@ -704,14 +796,14 @@ soldier = {
 	}
 
 	triggered_country_modifier = {
-	  	potential = {
-	  		exists = owner
-	  		owner = {
+		potential = {
+			exists = owner
+			owner = {
 				any_owned_leader = {
 					is_councilor = yes
 					has_trait = leader_trait_bellicose
 				}
-	  		}
+			}
 		}
 
 		modifier = {
@@ -725,14 +817,14 @@ soldier = {
 	}
 
 	triggered_pop_modifier = {
-	  	potential = {
-	  		exists = owner
-	  		owner = {
+		potential = {
+			exists = owner
+			owner = {
 				any_owned_leader = {
 					is_councilor = yes
 					has_trait = leader_trait_bellicose
 				}
-	  		}
+			}
 		}
 
 		modifier = {
@@ -1065,7 +1157,7 @@ angler = {
 		}
 		produces = {
 			trigger = {
-				has_councilor = { COUNCILOR = "councilor_anglers" } 
+				has_councilor = { COUNCILOR = "councilor_anglers" }
 			}
 
 			food = @councilor_anglers_angler_food_bonus
@@ -1103,7 +1195,7 @@ angler = {
 
 	triggered_planet_modifier = {
 		potential = {
-			has_councilor = { COUNCILOR = "councilor_corporate_anglers" } 
+			has_councilor = { COUNCILOR = "councilor_corporate_anglers" }
 		}
 
 		trade_value_add = @councilor_corporate_anglers_angler_trade_value_bonus
@@ -1160,7 +1252,7 @@ ranger = {
 	possible_precalc = can_fill_worker_job
 
 	resources = {
-		category = planet_culture_workers
+		category = planet_rangers
 		produces = {
 			society_research = 2
 		}

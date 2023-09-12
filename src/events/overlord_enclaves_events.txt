@@ -360,7 +360,10 @@ country_event = {
 
 	immediate = {
 		FROMFROM = {
-			solar_system = { save_event_target_as = merc_system }
+			solar_system = {
+				save_event_target_as = merc_system
+				remove_star_flag = enclave
+			}
 		}
 		FROM = {
 			country_event = { id = enclave.25 }
@@ -4174,10 +4177,10 @@ event = {
 		NOT = { has_global_flag = great_khan_dead }
 		any_country = {
 			is_country_type = enclave_mercenary
-			NOT = { 
+			NOT = {
 				any_owned_fleet = {
 					is_leased = yes
-				} 
+				}
 			}
 		}
 	}
@@ -4198,10 +4201,10 @@ event = {
 		random_country = {
 			limit = {
 				is_country_type = enclave_mercenary
-				NOT = { 
+				NOT = {
 					any_owned_fleet = {
 						is_leased = yes
-					} 
+					}
 				}
 			}
 			save_event_target_as = mercenary_enclave_country
@@ -4313,16 +4316,16 @@ country_event = {
 
 	trigger = {
 		event_target:mercenary_enclave_country = {
-			NOT = { 
+			NOT = {
 				any_owned_fleet = {
 					is_leased = yes
-				} 
+				}
 			}
 		}
 	}
 
 	immediate = {
-		event_target:mercenary_enclave_country = {	
+		event_target:mercenary_enclave_country = {
 			ordered_controlled_fleet = {
 				limit = {
 					is_ship_class = shipclass_military
@@ -4362,7 +4365,7 @@ event = {
 				controller = {
 					is_country_type = awakened_marauders
 				}
-			} 
+			}
 		}
 	}
 
@@ -4373,7 +4376,7 @@ event = {
 			}
 			save_event_target_as = khan_country
 		}
-		
+
 		random_country = {
 			limit = {
 				is_country_type = enclave_mercenary
@@ -4534,7 +4537,7 @@ country_event = {
 			}
 			position = 0
 			order_by = trigger:fleet_power
-			auto_follow_fleet = { 
+			auto_follow_fleet = {
 				target = event_target:mercenary_enclave_station
 			}
 		}
@@ -4596,8 +4599,13 @@ fleet_event = {
 	}
 
 	immediate = {
-		leader = {
-			set_owner = fromfrom
+		if = {
+			limit = {
+				exists = leader
+			}
+			leader = {
+				set_owner = fromfrom
+			}
 		}
 	}
 }
@@ -4619,9 +4627,14 @@ fleet_event = {
 	}
 
 	immediate = {
-		leader = {
-			set_leader_flag = hired_admiral_merc_leader
-			set_owner = from
+		if = {
+			limit = {
+				exists = leader
+			}
+			leader = {
+				set_leader_flag = hired_admiral_merc_leader
+				set_owner = from
+			}
 		}
 	}
 }
@@ -4933,19 +4946,28 @@ country_event = {
 			country_event = { id = enclave.345 }
 		}
 	}
-	#Salvage Overseer Modifier
+	#Master Salvager
 	option = {
 		name = enclave.305.g
 		trigger = {
 			NOR = {
 				is_hostile = event_target:salvager_enclave_country
 				is_homicidal = yes
-				has_modifier = salvage_overseer
 			}
 			event_target:salvager_enclave_country = {
 				trust = {
 					who = root
 					value >= 20
+				}
+			}
+		}
+		allow = {
+			custom_tooltip = {
+				fail_text = master_salvager_already_bought
+				NOT = {
+					any_owned_leader = {
+						has_leader_flag = master_salvager
+					}
 				}
 			}
 		}
@@ -5629,7 +5651,7 @@ country_event = {
 			}
 		}
 		set_country_flag = adopted_amoeba
-		# country_event = { id = distar.304 days = 36500 } #Evolve into Centenarian (untested)
+		# country_event = { id = distar.304 days = 36000 } #Evolve into Centenarian (untested)
 	}
 }
 
@@ -6624,7 +6646,7 @@ country_event = {
 	}
 }
 
-# Salvager Enclave: SALVAGE OVERSEER empire modifier
+# Salvager Enclave: Master Salvager
 # This = player country; event_target:salvager_enclave_country = enclave country
 country_event = {
 	id = enclave.350
@@ -6674,24 +6696,34 @@ country_event = {
 				resource = energy
 				value >= 2000
 			}
+			resource_stockpile_compare = {
+				resource = influence
+				value >= 50
+			}
 		}
-		custom_tooltip = opinion5
-		add_resource = {
-			energy = -2000
-		}
-		add_modifier = {
-			modifier = salvage_overseer
-			years = 5
+		add_resource = { energy = -2000 }
+		add_resource = { influence = -50 }
+		custom_tooltip = opinion10
+		custom_tooltip = master_salvager_explanation
+		if = {
+			limit = {
+				has_paragon_dlc = yes
+				is_gestalt = no
+			}
+			custom_tooltip = unlocks_salvager_council_position
 		}
 		hidden_effect = {
 			event_target:salvager_enclave_country = {
 				add_trust = {
 					who = root
-					amount = 5
+					amount = 10
+				}
+				species = {
+					save_event_target_as = salvager_species
 				}
 			}
-			country_event = { id = enclave.325 }
-			country_event = { id = enclave.352 days = 1801 }
+			create_master_salvager_effect = yes
+			country_event = { id = enclave.325 } # Post-Sale Message
 		}
 	}
 	option = {
@@ -6707,6 +6739,10 @@ country_event = {
 				resource = energy
 				value < 2000
 			}
+			resource_stockpile_compare = {
+				resource = influence
+				value <= 50
+			}
 		}
 		hidden_effect = {
 			country_event = { id = enclave.305 }
@@ -6715,24 +6751,6 @@ country_event = {
 	option = {
 		name = GOODBYE
 		default_hide_option = yes
-	}
-}
-# Salvager Enclave: SALVAGE OVERSEER empire modifier reminder
-# This = player country; event_target:salvager_enclave_country = enclave country
-country_event = {
-	id = enclave.352
-	base = enclave.350
-	desc_clear = yes
-	desc = enclave.352.desc
-
-	trigger = {
-		exists = event_target:salvager_enclave_country
-		NOR = {
-			is_hostile = event_target:salvager_enclave_country
-			is_homicidal = yes
-			has_modifier = salvage_overseer
-		}
-		has_salvager_event = no
 	}
 }
 
@@ -7055,6 +7073,41 @@ country_event = {
 	}
 }
 
+# Revoke Master Salvager upon attacking the Salvagers
+# via on_entering_battle | from = attacked country (Salvagers)
+country_event = {
+	id = enclave.390
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:salvager_enclave_country
+		from = { is_same_value = event_target:salvager_enclave_country }
+		any_owned_leader = {
+			has_leader_flag = master_salvager
+		}
+		NOT = {
+			has_country_flag = attacked_salvagers
+		}
+	}
+
+	immediate = {
+		set_country_flag = attacked_salvagers
+		random_owned_leader = {
+			limit = {
+				has_leader_flag = master_salvager
+			}
+			leader_event = {
+				id = enclave.8000
+				days = 5
+				scopes = {
+					FROM = event_target:salvager_enclave_country
+				}
+			}
+		}
+	}
+}
+
 ########################
 # SHROUDWALKER ENCLAVES
 ########################
@@ -7253,6 +7306,14 @@ country_event = {
 			custom_tooltip = {
 				fail_text = shroudwalker_teacher_cooldown_tt
 				NOT = { has_country_flag = shroudwalker_teacher_cooldown }
+			}
+			custom_tooltip = {
+				fail_text = shroudwalker_teacher_already_bought
+				NOT = {
+					any_owned_leader = {
+						has_leader_flag = shroudwalker_teacher
+					}
+				}
 			}
 		}
 		hidden_effect = {
@@ -8701,12 +8762,9 @@ country_event = {
 			name = "NAME_Unshrouded_Science_Ship"
 			effect = {
 				set_owner = prev
-				create_ship_design = {
-					design = "NAME_Unshrouded"
-				}
 				create_ship = {
 					name = "NAME_Conceptual_Ship"
-					design = last_created_design
+					random_existing_design = science
 					graphical_culture = owner_main_species
 					prefix = no
 					upgradable = no
@@ -12829,7 +12887,7 @@ country_event = { # Purchased Insight
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7055.desc
 
 	option = {
@@ -12842,7 +12900,7 @@ country_event = { # Insight - Asset
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7060.desc
 
 	trigger = {
@@ -12899,7 +12957,7 @@ country_event = { # Insight - Spy Network Level
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7065.desc
 
 	trigger = {
@@ -12934,7 +12992,7 @@ country_event = { # Insight - Intel
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7070.desc
 
 	trigger = {
@@ -12965,7 +13023,7 @@ country_event = { # Insight - Nothing
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7075.desc
 
 	option = {
@@ -12979,7 +13037,7 @@ country_event = {
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7100.desc
 
 	#Back to menu
@@ -12998,7 +13056,11 @@ country_event = {
 			}
 			custom_tooltip = {
 				fail_text = shroudwalker_teacher_already_bought
-				NOT = { has_country_flag = shroudwalker_teacher_acquired }
+				NOT = {
+					any_owned_leader = {
+						has_leader_flag = shroudwalker_teacher
+					}
+				}
 			}
 			resource_stockpile_compare = {
 				resource = influence
@@ -13010,14 +13072,6 @@ country_event = {
 				mult = root.trigger:empire_size
 			}
 		}
-		if = {
-			limit = {
-				any_owned_planet = {
-					has_modifier = pm_shroudwalker_teacher
-				}
-			}
-			custom_tooltip = shroudwalker_teacher_buy_more_than_one
-		}
 		add_resource = { influence = -50 }
 		add_resource = {
 			energy = -10
@@ -13025,14 +13079,24 @@ country_event = {
 		}
 		custom_tooltip = opinion10
 		custom_tooltip = shroudwalker_teacher_explanation
+		if = {
+			limit = {
+				has_paragon_dlc = yes
+				is_gestalt = no
+			}
+			custom_tooltip = unlocks_shroudwalker_council_position
+		}
 		hidden_effect = {
 			event_target:shroudwalker_enclave_country = {
 				add_trust = {
 					who = root
 					amount = 10
 				}
+				species = {
+					save_event_target_as = shroudwalker_species
+				}
 			}
-			set_country_flag = shroudwalker_teacher_acquired
+			create_shroudwalker_teacher_effect = yes
 			set_timed_country_flag = {
 				flag = shroudwalker_teacher_cooldown
 				days = 720
@@ -13095,14 +13159,27 @@ country_event = {
 	trigger = {
 		exists = event_target:shroudwalker_enclave_country
 		from = { is_same_value = event_target:shroudwalker_enclave_country }
+		any_owned_leader = {
+			has_leader_flag = shroudwalker_teacher
+		}
+		NOT = {
+			has_country_flag = attacked_shroudwalkers
+		}
 	}
 
 	immediate = {
-		every_owned_planet = {
+		set_country_flag = attacked_shroudwalkers
+		random_owned_leader = {
 			limit = {
-				has_modifier = pm_shroudwalker_teacher
+				has_leader_flag = shroudwalker_teacher
 			}
-			remove_modifier = pm_shroudwalker_teacher
+			leader_event = {
+				id = enclave.8000
+				days = 5
+				scopes = {
+					FROM = event_target:shroudwalker_enclave_country
+				}
+			}
 		}
 	}
 }
@@ -13113,7 +13190,7 @@ country_event = {
 	base = enclave.405
 	desc_clear = yes
 	option_clear = yes
-	
+
 	desc = enclave.7250.desc
 
 	#Back to menu
@@ -13167,4 +13244,160 @@ country_event = {
 	base = enclave.405
 	desc_clear = yes
 	desc = enclave.7255.desc
+}
+
+leader_event = {
+	id = enclave.8000
+	title = enclave.8000.name
+	picture = {
+		picture = GFX_evt_shroudwalker_enclave
+		trigger = {
+			has_leader_flag = shroudwalker_teacher
+		}
+	}
+	desc = {
+		text = enclave.8000.shroudwalker_teacher.desc.councilor
+		trigger = {
+			has_leader_flag = shroudwalker_teacher
+			is_councilor = yes
+		}
+	}
+	desc = {
+		text = enclave.8000.shroudwalker_teacher.desc
+		trigger = {
+			has_leader_flag = shroudwalker_teacher
+			is_councilor = no
+		}
+	}
+	picture = {
+		picture = GFX_evt_salvager_enclave_disassembly
+		trigger = {
+			has_leader_flag = master_salvager
+		}
+	}
+	desc = {
+		text = enclave.8000.master_salvager.desc.councilor
+		trigger = {
+			has_leader_flag = master_salvager
+			is_councilor = yes
+		}
+	}
+	desc = {
+		text = enclave.8000.master_salvager.desc
+		trigger = {
+			has_leader_flag = master_salvager
+			is_councilor = no
+		}
+	}
+	picture = {
+		picture = GFX_evt_physics_research
+		trigger = {
+			has_leader_flag = curator_archivist
+		}
+	}
+	desc = {
+		text = enclave.8000.curator_archivist.desc.councilor
+		trigger = {
+			has_leader_flag = curator_archivist
+			is_councilor = yes
+		}
+	}
+	desc = {
+		text = enclave.8000.curator_archivist.desc
+		trigger = {
+			has_leader_flag = curator_archivist
+			is_councilor = no
+		}
+	}
+	picture = {
+		picture = GFX_evt_cargoship_caravan
+		trigger = {
+			has_leader_flag = trader_leader
+		}
+	}
+	desc = {
+		text = enclave.8000.trader_leader.desc.councilor
+		trigger = {
+			has_leader_flag = trader_leader
+			is_councilor = yes
+		}
+	}
+	desc = {
+		text = enclave.8000.trader_leader.desc
+		trigger = {
+			has_leader_flag = trader_leader
+			is_councilor = no
+		}
+	}
+	show_sound = event_default
+	is_triggered_only = yes
+
+	event_window_type = leader_story
+
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+
+	picture_event_data = {
+		portrait = root
+	}
+
+	immediate = {
+		switch = {
+			trigger = has_trait
+			leader_trait_shroudwalker = {
+				owner = {
+					remove_country_flag = attacked_shroudwalkers
+				}
+			}
+			leader_trait_master_salvager = {
+				owner = {
+					remove_country_flag = attacked_salvagers
+				}
+			}
+			leader_trait_curator = {
+				owner = {
+					remove_country_flag = remove_curator_archivist
+				}
+			}
+			leader_trait_xuracorp_liaison = {
+				owner = {
+					remove_country_flag = attacked_trader_enclave_country_1
+				}
+			}
+			leader_trait_riggan_liaison = {
+				owner = {
+					remove_country_flag = attacked_trader_enclave_country_2
+				}
+			}
+			leader_trait_muutagan_liaison = {
+				owner = {
+					remove_country_flag = attacked_trader_enclave_country_3
+				}
+			}
+		}
+	}
+
+	option = {
+		name = DISAPPOINTING
+		if = {
+			limit = {
+				is_councilor = yes
+			}
+			owner = {
+				add_council_agenda_progress_percent = -0.20
+			}
+		}
+		if = {
+			limit = {
+				is_councilor = yes
+				is_enclave_councilor_type = yes
+			}
+			owner = {
+				unlock_council_selection = yes
+			}
+		}
+		custom_tooltip = leader_leaves_tt
+		hidden_effect = {
+			exile_leader_as = exiled_enclave_leader@root.@this
+		}
+	}
 }

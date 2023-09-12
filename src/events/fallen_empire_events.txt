@@ -1,10 +1,9 @@
-############################
+##################################
 #
 # Fallen Empire Events
+# Written by Martin Anward et al.
 #
-# Written by Martin Anward
-#
-############################
+##################################
 
 namespace = fallen_empires
 
@@ -675,5 +674,216 @@ country_event = {
 
 	immediate = {
 		set_country_flag = fallen_empire_lost_war
+	}
+}
+
+# Encountered Holy World (via on_survey)
+# this = Science vessel | from = planet
+ship_event = {
+	id = fallen_empires.100
+	title = fallen_empires.100.name
+	# Owner has yet to make contact with the FE (string type A)
+	desc = {
+		trigger = {
+			owner = {
+				is_gestalt = no
+				is_spiritualist = no
+				NOT = { has_communications = event_target:spi_fallen_empire }
+			}
+		}
+		text = fallen_empires.100.A.desc
+	}
+	desc = {
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+				NOT = { has_communications = event_target:spi_fallen_empire }
+			}
+		}
+		text = fallen_empires.100.A.desc.spi
+	}
+	desc = {
+		trigger = {
+			owner = {
+				is_gestalt = yes
+				NOT = { has_communications = event_target:spi_fallen_empire }
+			}
+		}
+		text = fallen_empires.100.A.desc.gestalt
+	}
+	# Owner has met the Spiritualist Fallen Empire (string type B)
+	desc = {
+		trigger = {
+			owner = {
+				is_gestalt = no
+				is_spiritualist = no
+				has_communications = event_target:spi_fallen_empire
+			}
+		}
+		text = fallen_empires.100.B.desc
+	}
+	desc = {
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+				has_communications = event_target:spi_fallen_empire
+			}
+		}
+		text = fallen_empires.100.B.desc.spi
+	}
+	desc = {
+		trigger = {
+			owner = {
+				is_gestalt = yes
+				has_communications = event_target:spi_fallen_empire
+			}
+		}
+		text = fallen_empires.100.B.desc.gestalt
+	}
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_mystic_reveal_light
+	location = from
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			NOR = {
+				is_ai = yes
+				has_country_flag = encountered_holy_world
+				has_origin = origin_scion # see 'origin.11'
+			}
+		}
+		any_country = {
+			is_country_type = fallen_empire # excludes 'awakened_fallen_empire'
+			has_country_flag = fallen_empire_2
+		}
+		from = {
+			has_modifier = holy_planet
+			is_colony = no
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = fallen_empire
+				has_country_flag = fallen_empire_2
+			}
+			save_event_target_as = spi_fallen_empire
+		}
+		owner = {
+			set_country_flag = encountered_holy_world
+		}
+	}
+
+	option = { # "Curious."
+		name = CURIOUS
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
+	}
+	option = { # Respectful
+		name = fallen_empires.100.a
+		trigger = {
+			owner = {
+				OR = {
+					is_spiritualist = yes
+					has_policy_flag = diplo_stance_cooperative
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
+	}
+	option = { # "Ours for the taking."
+		name = fallen_empires.100.b
+		trigger = {
+			owner = {
+				OR = {
+					has_policy_flag = diplo_stance_expansionist
+					is_gestalt = yes
+				}
+				has_communications = event_target:spi_fallen_empire
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier1influencereward
+				min = @tier1influencemin
+				max = @tier1influencemax
+			}
+		}
+	}
+	option = { # "We could thrive there."
+		name = fallen_empires.100.c
+		trigger = {
+			owner = {
+				has_policy_flag = diplo_stance_expansionist
+				NOT = { has_communications = event_target:spi_fallen_empire }
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
+			}
+		}
+	}
+	option = { # Insult
+		name = fallen_empires.100.d
+		trigger = {
+			owner = {
+				is_spiritualist = no
+				has_communications = event_target:spi_fallen_empire
+				OR = {
+					has_policy_flag = diplo_stance_belligerent
+					is_xenophobe = yes
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier1influencereward
+				min = @tier1influencemin
+				max = @tier1influencemax
+			}
+		}
+	}
+	option = { # Spiritualist insult
+		name = fallen_empires.100.e
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+				has_communications = event_target:spi_fallen_empire
+				OR = {
+					has_policy_flag = diplo_stance_belligerent
+					is_xenophobe = yes
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier1influencereward
+				min = @tier1influencemin
+				max = @tier1influencemax
+			}
+		}
 	}
 }
