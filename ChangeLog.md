@@ -33,6 +33,7 @@ New bugfixes
 - Pruned a few more spammy notifications (rivalry declarations, etc)
 - Fixed more scope errors
 - Applied 'nice faction' to some more appropriate ships.
+- Applied new Habitat destruction effect to other cases where habitat is destroyed
 
 ## August 26th
 
