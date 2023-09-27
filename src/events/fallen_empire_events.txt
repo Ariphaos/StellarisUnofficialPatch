@@ -8,28 +8,26 @@
 namespace = fallen_empires
 
 # Fallen Empire gets some fleet back
-country_event = {
+situation_event = {
 	id = fallen_empires.1
-	title = OK
-	desc = OK
-
 	hide_window = yes
-
-	mean_time_to_happen = {
-		months = 1
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		is_country_type = fallen_empire
-		is_at_war = no
-		fleet_power < 5000
-		NOT = { has_country_flag = fallen_empire_fleet_spawn }
+		owner = {
+			is_country_type = fallen_empire
+			is_at_war = no
+			fleet_power < 5000
+			NOT = { has_country_flag = fallen_empire_fleet_spawn }
+		}
 	}
 
 	immediate = {
-		set_timed_country_flag = { flag = fallen_empire_fleet_spawn days = 3600 }
-		capital_scope = {
-			create_fallen_empire_reinforcements = yes
+		owner = {
+			set_timed_country_flag = { flag = fallen_empire_fleet_spawn days = 3600 }
+			capital_scope = {
+				create_fallen_empire_reinforcements = yes
+			}
 		}
 	}
 }
@@ -85,90 +83,83 @@ country_event = {
 }
 
 # Fallen Empire sends a warning
-country_event = {
+situation_event = {
 	id = fallen_empires.3
-	title = OK
-	desc = OK
-
 	hide_window = yes
-
-	mean_time_to_happen = {
-		months = 1
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		is_country_type = fallen_empire
-		is_at_war = no
-		NOT = { has_country_flag = fallen_empire_lost_war }
-		NOT = { has_country_flag = fallen_empire_sent_warning }
-		fleet_power > 20000
-		any_country = {
-			is_country_type = default
-			has_communications = root
-			root = { opinion = { who = prev value < -99 } }
-			NOT = { root = { has_opinion_modifier = { who = prev modifier = opinion_refused_fallen_empire_demand } } }
-			# Let multiple FE make demands at the same time, if necessary.
-			NOT = { has_country_flag = fe_demand_made@root }
+		owner = {
+			is_country_type = fallen_empire
+			is_at_war = no
+			NOT = { has_country_flag = fallen_empire_lost_war }
+			NOT = { has_country_flag = fallen_empire_sent_warning }
+			fleet_power > 20000
+			any_playable_country = {
+				is_country_type = default
+				has_communications = root.owner
+				root.owner = { opinion = { who = prev value < -99 } }
+				NOT = { root.owner = { has_opinion_modifier = { who = prev modifier = opinion_refused_fallen_empire_demand } } }
+				NOT = { has_country_flag = fe_demand_made@root.owner }
+			}
 		}
 	}
 
 	immediate = {
-		set_timed_country_flag = { flag = fallen_empire_sent_warning days = 360 }
+		owner = { set_timed_country_flag = { flag = fallen_empire_sent_warning days = 360 } }
 		random_playable_country = {
 			limit = {
 				is_country_type = default
-				has_communications = root
-				root = { opinion = { who = prev value < -99 } }
-				NOT = { root = { has_opinion_modifier = { who = prev modifier = opinion_refused_fallen_empire_demand } } }
-				NOT = { has_country_flag = fe_demand_made@root }
+				has_communications = root.owner
+				root.owner = { opinion = { who = prev value < -99 } }
+				NOT = { root.owner = { has_opinion_modifier = { who = prev modifier = opinion_refused_fallen_empire_demand } } }
+				NOT = { has_country_flag = fe_demand_made@root.owner }
 			}
 
-			# Risa fix. root is the fallen empire.
-			set_country_flag = fe_demand_made@root
+			# Ariphaos TODO: This was never working properly and should probably need more thinking.
+			set_country_flag = fe_demand_made@root.owner
+
 			# Demand - abandon holy worlds (spiritualist)
 			if = {
 				limit = {
-					root = {
+					root.owner = {
 						has_ai_personality_behaviour = holy_planets
 					}
 					is_valid_target_fe_cleanse_holy_worlds = yes
 				}
-				country_event = { id = fallen_empires.4 }
-				break = yes
+				country_event = { id = fallen_empires.4 scopes = { from = root.owner } }
 			}
 
 			# Demand - ban AI research (spiritualist)
-			if = {
+			else_if = {
 				limit = {
-					root = {
+					root.owner = {
 						has_ethic = ethic_fanatic_spiritualist
 					}
 					is_valid_target_fe_stop_ai = yes
 				}
-				country_event = { id = fallen_empires.5 }
-				break = yes
+				country_event = { id = fallen_empires.5 scopes = { from = root.owner } }
 			}
 
 			# Demand - ban slavery and purging (xenophile)
-			if = {
+			else_if = {
 				limit = {
-					root = {
+					root.owner = {
 						has_ethic = ethic_fanatic_xenophile
 					}
 					is_valid_target_fe_stop_atrocities = yes
 				}
-				country_event = { id = fallen_empires.6 }
-				break = yes
+				country_event = { id = fallen_empires.6 scopes = { from = root.owner } }
 			}
 
 			# Demand - abandon colonies nearby (xenophobe)
-			if = {
+			else_if = {
 				limit = {
-					root = {
+					root.owner = {
 						has_ai_personality_behaviour = demands_clear_borders
 					}
 					any_system_within_border = {
-						root = {
+						root.owner = {
 							any_system_within_border = {
 								has_hyperlane_to = prevprev
 							}
@@ -176,13 +167,12 @@ country_event = {
 					}
 				}
 				country_event = { id = fallen_empires.7 }
-				break = yes
 			}
 
 			# Demand - prostrate yourself, mere mortal!
-			if = {
+			else_if = {
 				limit = { NOT = { has_modifier = humiliated } }
-				country_event = { id = fallen_empires.8 }
+				country_event = { id = fallen_empires.8 scopes = { from = root.owner } }
 			}
 		}
 	}
@@ -424,56 +414,52 @@ country_event = {
 }
 
 # Fallen Empire establishes communications
-country_event = {
+situation_event = {
 	id = fallen_empires.10
-	title = OK
-	desc = OK
-
 	hide_window = yes
-
-	mean_time_to_happen = {
-		months = 3
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		OR = {
-			is_country_type = fallen_empire
-			is_country_type = awakened_fallen_empire
-		}
-		is_at_war = no
-		any_country = {
+		owner = {
 			OR = {
-				is_country_type = default
 				is_country_type = fallen_empire
+				is_country_type = awakened_fallen_empire
 			}
-			NOT = { has_communications = root }
-			OR = {
-				AND = {
-					root = { has_ai_personality = fallen_empire_spiritualist }
-					any_owned_planet = {
-						has_modifier = "holy_planet"
-					}
+			is_at_war = no
+			any_playable_country = {
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
 				}
-				AND = {
-					root = { has_ai_personality = fallen_empire_materialist }
-					OR = {
-						has_technology = tech_sapient_ai
-						has_technology = tech_synthetic_workers
-					}
-					any_system_within_border = {
-						distance = {
-							source = root.capital_scope
-							max_distance <= 200
+				NOT = { has_communications = root.owner }
+				OR = {
+					AND = {
+						root.owner = { has_ai_personality = fallen_empire_spiritualist }
+						any_owned_planet = {
+							has_modifier = "holy_planet"
 						}
 					}
-				}
-				# if we're both fallen empires, we know of each other
-				is_country_type = fallen_empire
-				# also contact if we border them
-				any_system_within_border = {
-					any_neighbor_system = {
-						has_hyperlane_to = prev
-						is_owned_by = root
+					AND = {
+						root.owner = { has_ai_personality = fallen_empire_materialist }
+						OR = {
+							has_technology = tech_sapient_ai
+							has_technology = tech_synthetic_workers
+						}
+						any_system_within_border = {
+							distance = {
+								source = root.owner.capital_scope
+								max_distance <= 200
+							}
+						}
+					}
+					# if we're both fallen empires, we know of each other
+					is_country_type = fallen_empire
+					# also contact if we border them
+					any_system_within_border = {
+						any_neighbor_system = {
+							has_hyperlane_to = prev
+							is_owned_by = root.owner
+						}
 					}
 				}
 			}
@@ -481,22 +467,22 @@ country_event = {
 	}
 
 	immediate = {
-		random_country = {
+		random_playable_country = {
 			limit = {
 				OR = {
 					is_country_type = default
 					is_country_type = fallen_empire
 				}
-				NOT = { has_communications = root }
+				NOT = { has_communications = root.owner }
 				OR = {
 					AND = {
-						root = { has_ai_personality = fallen_empire_spiritualist }
+						root.owner = { has_ai_personality = fallen_empire_spiritualist }
 						any_owned_planet = {
 							has_modifier = "holy_planet"
 						}
 					}
 					AND = {
-						root = { has_ai_personality = fallen_empire_materialist }
+						root.owner = { has_ai_personality = fallen_empire_materialist }
 						OR = {
 							has_technology = tech_sapient_ai
 							has_technology = tech_synthetic_workers
@@ -520,94 +506,94 @@ country_event = {
 				}
 			}
 
-			establish_communications_no_message = root
-			root = { save_event_target_as = contact_empire }
+			establish_communications_no_message = root.owner
+			root.owner = { save_event_target_as = contact_empire }
 			country_event = { id = action.1 }
 		}
 	}
 }
 
 # Fallen Empire gets a construction ship if it's lost all construction ships
-country_event = {
+situation_event = {
 	id = fallen_empires.11
 	title = OK
 	desc = OK
-
 	hide_window = yes
-
-	mean_time_to_happen = {
-		months = 1
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		is_country_type = fallen_empire
-		is_at_war = no
-		count_controlled_ship = {
-			limit = { is_ship_size = constructor }
-			count < 1
+		owner = {
+			is_country_type = fallen_empire
+			is_at_war = no
+			count_controlled_ship = {
+				limit = { is_ship_size = constructor }
+				count < 1
+			}
+			NOT = { has_country_flag = fallen_empire_constructor_spawn }
 		}
-		NOT = { has_country_flag = fallen_empire_constructor_spawn }
 	}
 
 	immediate = {
-		set_timed_country_flag = { flag = fallen_empire_constructor_spawn days = 1800 }
-		capital_scope = {
-			create_fleet = {
-				effect = {
-					set_owner = ROOT
-					if = {
-						limit = {
-							ROOT = { has_ethic = ethic_fanatic_xenophobe }
+		owner = {
+			set_timed_country_flag = { flag = fallen_empire_constructor_spawn days = 1800 }
+			capital_scope = {
+				create_fleet = {
+					effect = {
+						set_owner = root.owner
+						if = {
+							limit = {
+								root.owner = { has_ethic = ethic_fanatic_xenophobe }
+							}
+							create_ship = {
+								name = random
+								design = "NAME_Servitor"
+								graphical_culture = "fallen_empire_04"
+							}
 						}
-						create_ship = {
-							name = random
-							design = "NAME_Servitor"
-							graphical_culture = "fallen_empire_04"
+						if = {
+							limit = {
+								root.owner = { has_ethic = ethic_fanatic_xenophile }
+							}
+							create_ship = {
+								name = random
+								design = "NAME_Builder"
+								graphical_culture = "fallen_empire_03"
+							}
 						}
-					}
-					if = {
-						limit = {
-							ROOT = { has_ethic = ethic_fanatic_xenophile }
+						if = {
+							limit = {
+								root.owner = { has_ethic = ethic_fanatic_spiritualist }
+							}
+							create_ship = {
+								name = random
+								design = "NAME_Penitent"
+								graphical_culture = "fallen_empire_01"
+							}
 						}
-						create_ship = {
-							name = random
-							design = "NAME_Builder"
-							graphical_culture = "fallen_empire_03"
+						if = {
+							limit = {
+								root.owner = { has_ethic = ethic_fanatic_materialist }
+							}
+							create_ship = {
+								name = random
+								design = "NAME_Librarian"
+								graphical_culture = "fallen_empire_02"
+							}
 						}
-					}
-					if = {
-						limit = {
-							ROOT = { has_ethic = ethic_fanatic_spiritualist }
+						if = {
+							limit = {
+								root.owner = { has_authority = auth_machine_intelligence }
+							}
+							create_ship = {
+								name = random
+								design = "NAME_Theta"
+								graphical_culture = "fallen_empire_02"
+							}
 						}
-						create_ship = {
-							name = random
-							design = "NAME_Penitent"
-							graphical_culture = "fallen_empire_01"
+						set_location = {
+							target = PREV
+							distance = 80
 						}
-					}
-					if = {
-						limit = {
-							ROOT = { has_ethic = ethic_fanatic_materialist }
-						}
-						create_ship = {
-							name = random
-							design = "NAME_Librarian"
-							graphical_culture = "fallen_empire_02"
-						}
-					}
-					if = {
-						limit = {
-							ROOT = { is_machine_empire = yes }
-						}
-						create_ship = {
-							name = random
-							design = "NAME_Theta"
-							graphical_culture = "fallen_empire_02"
-						}
-					}
-					set_location = {
-						target = PREV
-						distance = 80
 					}
 				}
 			}
@@ -617,11 +603,7 @@ country_event = {
 
 country_event = {
 	id = fallen_empires.12
-	title = OK
-	desc = OK
-
 	hide_window = yes
-
 	is_triggered_only = yes
 
 	trigger = {
@@ -637,11 +619,7 @@ country_event = {
 # Fallen Empire fleet spawning event
 country_event = {
 	id = fallen_empires.13
-	title = OK
-	desc = OK
-
 	hide_window = yes
-
 	is_triggered_only = yes
 
 	immediate = {
@@ -654,11 +632,7 @@ country_event = {
 # Fallen Empire lost planets - should stop making ultimatums
 country_event = {
 	id = fallen_empires.14
-	title = OK
-	desc = OK
-
 	hide_window = yes
-
 	is_triggered_only = yes
 
 	trigger = {

@@ -1,5 +1,11 @@
 # ChangeLog
 
+## September 26th
+
+3.9.2 Update
+
+- Paradox has finally removed "Mean Time To Happen" from Stellaris, which clobbers one of my projects and a few fixes. 
+
 ## September 12th
 
 3.9 Update

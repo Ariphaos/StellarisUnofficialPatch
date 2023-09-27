@@ -274,13 +274,13 @@ country_event = {
 # NOTE: all three Trader enclaves use essentially the same diplomacy screen. However, each one (XuraCorp, Riggans and Muutagans) is established as its own instance so that e.g. all XuraCorp events inherit their properties from the XuraCorp menu.
 
 # leviathans.97-102		Communications established
-# leviathans.105?107	Main menus
+# leviathans.105–107	Main menus
 # leviathans.121-122	Opinion gain from active Strategic Resource deals
 # leviathans.123-128	Hire a Governor
 # leviathans.130-135	Strategic Resource deals
 # leviathans.140-144	Trader Enclave destroyed
 # leviathans.150-152	Strategic Resource deal elapses
-# leviathans.155?163	Attacking a Trader Enclave
+# leviathans.155–163	Attacking a Trader Enclave
 # leviathans.170-171	Defaulting on Strategic Resource deal
 
 # NOTE: any changes to these event IDs should be reflected in the has_trader_event = {} scripted effect.
@@ -3442,8 +3442,7 @@ country_event = {
 		hidden_effect = {
 			country_event = { id = leviathans.313 } # Post-sale Thanks
 			country_event = { id = leviathans.311 } # Patron events
-			country_event = { id = leviathans.312 days = 360 } # Yearly counter
-			country_event = { id = leviathans.315 days = 3600 } # Renew Patronage
+			country_event = { id = leviathans.315 days = 3599 } # Renew Patronage
 			event_target:artist_enclave_country = {
 				add_trust = {
 					who = root
@@ -3569,65 +3568,6 @@ country_event = {
 	}
 }
 
-# Yearly counter (for achievement)
-country_event = {
-	id = leviathans.312
-	hide_window = yes
-	is_triggered_only = yes
-
-	# No need to run this check after the achievement has been granted
-	trigger = {
-		NOT = { has_country_flag = 10yr_patronage }
-	}
-
-	immediate = {
-		# If the counter ticks over into 10 years, grant the achievement
-		if = {
-			limit = {
-				has_modifier = enclave_artist_patron
-				check_variable = {
-					which = patronage_duration
-					value = 9
-				}
-			}
-			set_country_flag = 10yr_patronage
-		}
-		# If no longer a patreon, reset the counter to 0
-		else_if = {
-			limit = {
-				NOT = { has_modifier = enclave_artist_patron }
-			}
-			set_variable = {
-				which = patronage_duration
-				value = 0
-			}
-		}
-		# Increment the counter if it's been running less than 10 years
-		else_if = {
-			limit = { has_modifier = enclave_artist_patron }
-			if = {
-				limit = {
-					check_variable = {
-						which = patronage_duration
-						value < 1
-					}
-				}
-				set_variable = {
-					which = patronage_duration
-					value = 1
-				}
-			}
-			else = {
-				change_variable = {
-					which = patronage_duration
-					value = 1
-				}
-			}
-			country_event = { id = leviathans.312 days = 360 }
-		}
-	}
-}
-
 # Post-Sale Thanks
 country_event = {
 	id = leviathans.313
@@ -3642,6 +3582,22 @@ country_event = {
 	base = leviathans.310
 	desc_clear = yes
 	desc = leviathans.315.desc
+
+	trigger = {
+		has_modifier = enclave_artist_patron
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = 10yr_patronage
+				}
+			}
+			set_country_flag = 10yr_patronage
+		}
+		remove_modifier = enclave_artist_patron
+	}
 }
 
 # Patron Newsletter
@@ -7863,30 +7819,33 @@ country_event = {
 	}
 }
 
-planet_event = {
+# Fired by | on_building_mining_station
+# This = construction ship
+# From = planet it is built on
+ship_event = {
 	id = leviathans.660
 	hide_window = yes
-	mean_time_to_happen = {
-		years = 50
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		has_planet_flag = hoard_planet
-		#has_deposit = d_guardian_dragon_hoard
-		NOT = {
-			has_planet_flag = deboned
+		exists = event_target:guardian_dragon_planet
+		from = {
+			is_same_value = event_target:guardian_dragon_planet
+			NOR = {
+				has_planet_flag = deboned
+				has_planet_flag = deegged
+			}
 		}
-		has_mining_station = yes
-		exists = controller
-		controller = {
+		exists = owner
+		owner = {
 			is_country_type = default
 		}
 	}
 
 	immediate = {
-		set_planet_flag = deboned
-		controller = {
-			country_event = { id = leviathans.661 }
+		owner = {
+			country_event = { id = leviathans.661 days = 1 random = 18000 } # 50 years
+			country_event = { id = leviathans.663 days = 1 random = 18000 } # 50 years
 		}
 	}
 }
@@ -7897,10 +7856,28 @@ country_event = {
 	title = "leviathans.660.name"
 	desc = "leviathans.660.desc"
 	picture = GFX_evt_archaeological_dig
-	location = from
+	location = event_target:guardian_dragon_planet
 	show_sound = event_mystic_reveal
 
 	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:guardian_dragon_planet
+		event_target:guardian_dragon_planet = {
+			NOT = { has_planet_flag = deboned }
+			has_mining_station = yes
+			exists = controller
+			controller = {
+				is_same_value = root
+			}
+		}
+	}
+
+	immediate = {
+		event_target:guardian_dragon_planet = {
+			set_planet_flag = deboned
+		}
+	}
 
 	option = {
 		name = leviathans.660.a
@@ -7924,32 +7901,33 @@ country_event = {
 	}
 }
 
-planet_event = {
+# Fire events if ownership flipped - Fired by | on_system_gained
+# From = system
+# FromFrom = country (new owner)
+# This = country (previous owner)
+country_event = {
 	id = leviathans.662
 	hide_window = yes
-
-	mean_time_to_happen = {
-		years = 50
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		has_planet_flag = hoard_planet
-		#has_deposit = d_guardian_dragon_hoard
-		NOT = {
-			has_planet_flag = deegged
-		}
-		has_mining_station = yes
-		exists = controller
-		controller = {
-			is_country_type = default
+		exists = event_target:guardian_dragon_planet
+		from = {
+			has_star_flag = guardians_dragon_system
+			any_system_planet = {
+				is_same_value = event_target:guardian_dragon_planet
+				has_mining_station = yes
+				exists = controller
+				controller = {
+					is_same_value = root
+				}
+			}
 		}
 	}
 
 	immediate = {
-		set_planet_flag = deegged
-		controller = {
-			country_event = { id = leviathans.663 }
-		}
+		country_event = { id = leviathans.661 days = 1 random = 18000 } # 50 years
+		country_event = { id = leviathans.663 days = 1 random = 18000 } # 50 years
 	}
 }
 
@@ -7959,11 +7937,29 @@ country_event = {
 	title = "leviathans.661.name"
 	desc = "leviathans.661.desc"
 	picture = GFX_evt_archaeological_dig
-	location = root
+	location = event_target:guardian_dragon_planet
 	show_sound = event_mystic_reveal
 	trackable = yes
 
 	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:guardian_dragon_planet
+		event_target:guardian_dragon_planet = {
+			NOT = { has_planet_flag = deegged }
+			has_mining_station = yes
+			exists = controller
+			controller = {
+				is_same_value = root
+			}
+		}
+	}
+
+	immediate = {
+		event_target:guardian_dragon_planet = {
+			set_planet_flag = deegged
+		}
+	}
 
 	option = {
 		name = leviathans.661.a
