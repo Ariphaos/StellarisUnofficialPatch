@@ -1,5 +1,25 @@
 # ChangeLog
 
+## November 9th
+
+- Implemented some fixes for modded galaxy sizes. The game now calculates this based on the number of existing systems, not by setup string.
+- Implemented a policy to disable military ship production in juggernauts. Ship production is disabled by default.
+- Some fleet strength checks for AI and curator evaluation of your fleet now account for game difficulty.
+- Living Sea will not survive on machine or hive worlds.
+- Alien pets and titanic life will not survive on machine worlds.
+- Fixed a trigger for a Cascading Catastrophe anomaly option.
+- Pulled in some more AI improvements from StarNet.
+
+- I have begun a much more comprehensive AI rebuild.
+
+## October 26th
+
+- Fixed a bug (my fault) that blocked sythetic traits from ascended machine empires.
+
+## October 20th
+
+- 3.9.3 update
+
 ## September 26th
 
 3.9.2 Update

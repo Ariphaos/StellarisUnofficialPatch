@@ -1,0 +1,855 @@
+############################
+#
+# Necroids Events
+#
+# Written by Pierre du Plessis
+#
+############################
+
+namespace = necroids
+
+# Consumption event for necrophage
+planet_event = {
+	id = necroids.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_building = building_necrophage_elevation_chamber
+			has_building = building_necrophage_house_of_apotheosis
+		}
+		exists = owner
+		owner = {
+			has_origin = origin_necrophage
+			has_trait = trait_necrophage
+		}
+		num_assigned_jobs = {
+			job = necro_apprentice
+			value >= 1
+		}
+	}
+
+	immediate = {
+		set_timed_planet_flag = {
+			flag = necrophage_alert_timer
+			days = 2880
+		}
+		set_saved_date = {
+			key = necrophage_elevation_timer
+			days_from_present = 3600
+			expires = 3600
+		}
+		random_owned_pop = {
+			limit = {
+				is_same_species = owner_species
+				has_trait = trait_necrophage
+			}
+			species = { save_event_target_as = necrophage_pop_species }
+		}
+		every_owned_pop = {
+			limit = { has_job = necro_apprentice }
+			root.owner = {
+				if = {
+					limit = { has_ascension_perk = ap_become_the_crisis }
+					complete_crisis_objective = crisobj_purge_pops
+				}
+			}
+			root = {
+				change_variable = {
+					which = var_necrophaged_pops
+					value = 1
+				}
+				if = {
+					limit = {
+						exists = event_target:necrophage_pop_species
+					}
+					create_pop = {
+						species = event_target:necrophage_pop_species
+					}
+				}
+				else = {
+					create_pop = {
+						species = owner_species
+					}
+				}
+				if = {
+					limit = {
+						last_created_pop = {
+							NOT = { ideal_planet_class = root }
+						}
+						NOR = {
+							uses_district_set = habitat
+							uses_district_set = ring_world
+							uses_district_set = city_world
+							uses_district_set = hive_world
+							uses_district_set = machine_world
+							is_planet_class = pc_gaia
+							is_planet_class = pc_relic
+						}
+						owner = {
+							has_technology = tech_glandular_acclimation
+							NOT = { ideal_planet_class = root }
+						}
+					}
+					last_created_pop = {
+						modify_species = {
+							ideal_planet_class = root
+						}
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_communications = root.owner
+					NOT = { is_country = root.owner }
+					NOT = { is_same_species = prev }
+					NOT = { has_ai_personality_behaviour = purger }
+					NOT = { has_origin = origin_necrophage }
+					NOT = { has_ethic = ethic_gestalt_consciousness }
+					NOR = {
+						has_valid_civic = civic_death_cult
+						has_valid_civic = civic_death_cult_corporate
+					}
+					OR = {
+						is_country_type = default
+						has_ai_personality = awakened_fallen_empire_xenophile
+					}
+					has_intel_level = {
+						who = FROM
+						category = economy
+						level >= 2
+					}
+				}
+				add_opinion_modifier = { who = root.owner modifier = opinion_necrophage }
+			}
+			every_country = {
+				limit = {
+					has_communications = root.owner
+					NOT = { is_country = root.owner }
+					is_same_species = prev
+					has_intel_level = {
+						who = FROM
+						category = economy
+						level >= 1 #lower because you'd hear from a friend of a friend
+					}
+				}
+				add_opinion_modifier = { who = root.owner modifier = opinion_necrophage_our_species }
+			}
+			kill_pop = yes
+		}
+		create_message = {
+			type = MESSAGE_NECROPHAGE_POPS_NECROPHAGED
+			localization = MESSAGE_NECROPHAGE_POPS_NECROPHAGED
+			days = 30
+			target = this
+			variable = {
+				type = name
+				localization = PLANET
+				scope = this
+			}
+			variable = {
+				type = variable
+				varname = var_necrophaged_pops
+				localization = VALUE
+				scope = this
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					OR = {
+						has_active_tradition = tr_harmony_unity_of_self
+						has_active_tradition = tr_synchronicity_unity_of_mind
+					}
+				}
+			}
+			owner = {
+				add_monthly_resource_mult = {
+					resource = unity
+					value = 1.5
+					min = 5
+					max = 100
+				}
+			}
+		}
+		set_variable = {
+			which = var_necrophaged_pops
+			value = 0
+		}
+	}
+}
+
+#necroids.2 Tell player about necrophage mechanic 180 days before it happens
+country_event = {
+	id = necroids.2
+	title = necroids.2.name
+	desc = {
+		trigger = { is_hive_empire = no }
+		text = necroids.2.desc
+	}
+	desc = {
+		trigger = { is_hive_empire = yes }
+		text = necroids.2.desc.gestalt
+	}
+	show_sound = event_necrophage
+	picture = GFX_evt_necrophage
+	is_triggered_only = yes
+
+	trigger = {
+		capital_scope = {
+			colony_age > 8
+			has_building = building_necrophage_elevation_chamber
+			num_assigned_jobs = {
+				job = necro_apprentice
+				value >= 1
+			}
+		}
+	}
+
+	immediate = {
+		capital_scope = {
+			random_owned_species = {
+				limit = { species_can_be_necrophaged = yes }
+				save_event_target_as = necrophage_species
+			}
+		}
+	}
+
+	option = {
+		name = necroids.2.A
+		custom_tooltip = necroids.2.A.tooltip
+	}
+}
+
+# AI help for getting secondary necrophage species on the planet
+planet_event = {
+	id = necroids.3
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			is_ai = yes
+			has_origin = origin_necrophage
+			has_trait = trait_necrophage
+			any_owned_species = {
+				species_can_be_necrophaged = yes
+				NOT = {
+					has_citizenship_type = { type = citizenship_purge country = root.owner }
+				}
+			}
+		}
+		OR = {
+			AND = {
+				any_owned_species = {
+					is_same_species = root.owner_species
+				}
+				NOT = {
+					any_owned_species = {
+						species_can_be_necrophaged = yes
+					}
+				}
+			}
+			AND = {
+				NOT = {
+					any_owned_species = {
+						is_same_species = root.owner_species
+					}
+				}
+				any_owned_species = {
+					species_can_be_necrophaged = yes
+				}
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_owned_species = {
+					is_same_species = root.owner_species
+				}
+				NOT = {
+					any_owned_species = {
+						species_can_be_necrophaged = yes
+					}
+				}
+			}
+			owner = {
+				random_owned_planet = {
+					limit = {
+						any_owned_species = {
+							species_can_be_necrophaged = yes
+							NOT = {
+								has_citizenship_type = { type = citizenship_purge country = root.owner }
+							}
+						}
+						count_owned_pop = {
+							count > 1
+							limit = {
+								species = {
+									species_can_be_necrophaged = yes
+									NOT = {
+										has_citizenship_type = { type = citizenship_purge country = root.owner }
+									}
+								}
+							}
+						}
+					}
+					random_owned_pop = {
+						limit = {
+							species = {
+								species_can_be_necrophaged = yes
+								NOT = {
+									has_citizenship_type = { type = citizenship_purge country = root.owner }
+								}
+							}
+						}
+						resettle_pop = {
+							pop = this
+							planet = root
+						}
+					}
+				}
+			}
+		}
+		else = {
+			owner = {
+				random_owned_planet = {
+					limit = {
+						any_owned_species = {
+							is_same_species = root.owner_species
+						}
+						count_owned_pop = {
+							count > 1
+							limit = {
+								species = {
+									is_same_species = root.owner_species
+								}
+							}
+						}
+					}
+					random_owned_pop = {
+						limit = {
+							species = {
+								is_same_species = root.owner_species
+							}
+						}
+						resettle_pop = {
+							pop = this
+							planet = root
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Make starting colonisables be Primitives
+country_event = {
+	id = necroids.4
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		has_origin = origin_necrophage
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				is_ai = yes
+				has_country_flag = necrophage_start_empire
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_militarist
+			}
+			force_remove_civic = civic_cutthroat_politics
+			force_add_civic = civic_fanatic_purifiers
+		}
+		capital_scope.solar_system = {
+			closest_system = {
+				limit = { has_star_flag = neighbor_t1_first_colony }
+				max_steps = 3
+				random_system_planet = {
+					limit = {
+						is_colonizable = yes
+						is_colony = no
+						has_planet_flag = prescripted_ideal
+					}
+					if = {
+						limit = {
+							root = {
+								is_hive_empire = no
+							}
+						}
+						generate_very_early_pre_ftls_on_planet = yes
+						set_name = random
+						change_colony_foundation_date = -461
+
+						while = {
+							count = 4
+							create_army = {
+								owner = last_created_country
+								type = primitive_additional_army
+								species = last_created_country
+							}
+						}
+					}
+					else = {
+						set_planet_flag = pre_ftl_hive_mind
+						generate_very_early_pre_ftl_hive_on_planet = yes
+						set_name = random
+						change_colony_foundation_date = -461
+
+						while = {
+							count = 4
+							create_army = {
+								owner = last_created_country
+								type = primitive_additional_army
+								species = last_created_country
+							}
+						}
+					}
+				}
+			}
+			reroll_random = yes
+			closest_system = {
+				limit = { has_star_flag = neighbor_t2_second_colony }
+				max_steps = 6
+				random_system_planet = {
+					limit = {
+						is_colonizable = yes
+						is_colony = no
+						has_planet_flag = prescripted_ideal
+					}
+					if = {
+						limit = {
+							root = {
+								is_hive_empire = no
+							}
+						}
+						set_planet_flag = pre_ftl_hive_mind
+						generate_very_early_pre_ftls_on_planet = yes
+						set_name = random
+						change_colony_foundation_date = -1275
+
+						while = {
+							count = 4
+							create_army = {
+								owner = last_created_country
+								type = primitive_additional_army
+								species = last_created_country
+							}
+						}
+					}
+					else = {
+						generate_very_early_pre_ftl_hive_on_planet = yes
+						set_name = random
+						change_colony_foundation_date = -1275
+
+						while = {
+							count = 4
+							create_army = {
+								owner = last_created_country
+								type = primitive_additional_army
+								species = last_created_country
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Necrophage Purge
+
+# on_pop_purged
+# This = Planet scope
+# From = Country
+# FromFrom = Pop
+planet_event = {
+	id = necroids.5
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		exists = fromfrom #crisis.202 can remove the last pop
+		fromfrom = {
+			has_purge_type = {
+				type = purge_necrophage
+			}
+		}
+	}
+
+	immediate = {
+		random_owned_pop = {
+			limit = {
+				is_same_species = owner_species
+			}
+			species = { save_event_target_as = necrophage_pop_species }
+		}
+		if = {
+			limit = {
+				exists = event_target:necrophage_pop_species
+			}
+			create_pop = {
+				species = event_target:necrophage_pop_species
+			}
+		}
+		else = {
+			create_pop = {
+				species = owner_species
+			}
+		}
+		if = {
+			limit = {
+				last_created_pop = {
+					NOT = { ideal_planet_class = root }
+				}
+				NOR = {
+					uses_district_set = habitat
+					uses_district_set = ring_world
+					uses_district_set = city_world
+					uses_district_set = hive_world
+					uses_district_set = machine_world
+					is_planet_class = pc_gaia
+					is_planet_class = pc_relic
+				}
+				owner = {
+					has_technology = tech_glandular_acclimation
+					NOT = { ideal_planet_class = root }
+				}
+			}
+			last_created_pop = {
+				modify_species = {
+					ideal_planet_class = root
+				}
+			}
+		}
+		if = {
+			limit = {
+				from = {
+					OR = {
+						has_active_tradition = tr_harmony_unity_of_self
+						has_active_tradition = tr_synchronicity_unity_of_mind
+					}
+				}
+			}
+			from = {
+				add_monthly_resource_mult = {
+					resource = unity
+					value = 1.5
+					min = 5
+					max = 100
+				}
+			}
+		}
+		every_country = {
+			limit = {
+				has_communications = FROM
+				NOT = { is_country = FROM }
+				NOT = { is_same_species = FROMFROM }
+				NOT = { has_ai_personality_behaviour = purger }
+				NOT = { has_origin = origin_necrophage }
+				NOT = { has_ethic = ethic_gestalt_consciousness }
+				NOR = {
+					has_valid_civic = civic_death_cult
+					has_valid_civic = civic_death_cult_corporate
+				}
+				OR = {
+					is_country_type = default
+					has_ai_personality = awakened_fallen_empire_xenophile
+				}
+				has_intel_level = {
+					who = FROM
+					category = economy
+					level >= 2
+				}
+			}
+			add_opinion_modifier = { who = FROM modifier = opinion_necrophage }
+		}
+		every_country = {
+			limit = {
+				has_communications = FROM
+				NOT = { is_country = FROM }
+				is_same_species = FROMFROM
+				has_intel_level = {
+					who = FROM
+					category = economy
+					level >= 1 #lower because you'd hear from a friend of a friend
+				}
+			}
+			add_opinion_modifier = { who = FROM modifier = opinion_necrophage_our_species }
+		}
+	}
+}
+
+# AI help event
+country_event = {
+	id = necroids.6
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_ai = yes
+	}
+
+	immediate = {
+		every_owned_planet = {
+			limit = {
+				has_modifier = planet_culture_shock
+				count_owned_pop = {
+					count <= 1
+					limit = {
+						is_same_species = root
+					}
+				}
+			}
+			while = {
+				count = 3
+				limit = {
+					count_owned_pop = {
+						count < 3
+						limit = {
+							is_same_species = root
+						}
+					}
+				}
+				root = {
+					capital_scope = {
+						random_owned_pop = {
+							limit = {
+								species = { is_same_species = root }
+							}
+							resettle_pop = {
+								pop = this
+								planet = prevprevprev
+							}
+						}
+					}
+				}
+			}
+			add_district = district_city
+		}
+		every_planet_within_border = {
+			limit = {
+				is_colony = yes
+				owner = {
+					is_country_type = primitive
+				}
+			}
+			if = {
+				limit = {
+					has_observation_outpost = yes
+				}
+				observation_outpost = {
+					dismantle = yes
+				}
+			}
+			add_modifier = {
+				modifier = planet_culture_shock
+				years = 10
+			}
+			set_owner = ROOT
+
+			# From Starnet. Replicate events. Placed before making
+			# new pops as action.140 triggers constructions off of it.
+			planet_event = { # Crisis Menace Objective: Conquer a Colony
+				id = crisis.5010
+				scopes = {
+					from = ROOT
+				}
+			}
+			planet_event = { id = action.84 } # Imperialists are pleased
+			ariphaos_patch_primitive_world_conquered = yes
+			while = {
+				count = 3
+				root = {
+					capital_scope = {
+						random_owned_pop = {
+							limit = {
+								species = { is_same_species = root }
+							}
+							resettle_pop = {
+								pop = this
+								planet = prevprevprev
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#FromFrom = Former Owner
+#From = Country scope (new owner)
+#This = Planet scope
+planet_event = {
+	id = necroids.10
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_origin = origin_necrophage
+			is_hive_empire = yes
+		}
+		any_owned_species = {
+			has_trait = trait_hive_mind
+			has_citizenship_type = { country = from type = citizenship_purge }
+		}
+	}
+
+	immediate = {
+		every_owned_species = {
+			limit = {
+				has_trait = trait_hive_mind
+				has_citizenship_type = { country = from type = citizenship_purge }
+			}
+			species = {
+				set_citizenship_type = { country = from type = citizenship_full }
+			}
+		}
+	}
+}
+
+
+#Reanimated Armies: Reanimating the enemy's army as your own
+#An army has been killed in ground combat
+# This = owner
+# From = army
+# FromFrom = opponent
+# FromFromFrom = planet
+country_event = {
+	id = necroids.15
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = fromfrom
+		fromfrom = {
+			has_valid_civic = civic_reanimated_armies
+		}
+		from = {
+			exists = species
+			species = {
+				is_robotic = no
+			}
+		}
+		NOT = { is_country_type = "gate_builders" }
+	}
+
+	immediate = {
+		random_list = {
+			2 = { }
+			1 = {
+				fromfromfrom = {
+					create_army = {
+						owner = root.fromfrom
+						type = undead_army
+						species = root.from.species
+					}
+				}
+			}
+		}
+	}
+}
+
+# Mechromancy AP event: Machine Empire can now be Reanimators
+
+country_event = {
+	id = necroids.20
+	title = necroids.20.name
+	show_sound = event_necrophage
+	picture = GFX_evt_mechromancy # TODO to be replaced with event art from Jira AUG-39910
+	is_triggered_only = yes
+
+	desc = necroids.20.desc
+
+	option = {
+		name = necroids.20.a
+	}
+}
+
+# on_pop_purged
+# This = Planet scope
+# From = Country
+# FromFrom = Pop
+# Mechromancy - CyberZombies
+planet_event = {
+	id = necroids.25
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		from = {
+			has_ascension_perk = ap_mechromancy
+		}
+		exists = fromfrom #crisis.202 can remove the last pop
+		fromfrom = {
+			NOT = {
+				has_purge_type = {
+					type = purge_displacement
+				}
+			}
+			is_robotic_species = no
+			NAND = {
+				is_archetype = PRESAPIENT
+				has_trait = trait_cybernetic
+				has_trait = trait_zombie
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+		#	66 = {	}
+			# 33% Chance to create a cyber-zombie per pop.
+			33 = {
+				create_pop = {
+					species = fromfrom.species
+				}
+				last_created_pop = {
+					modify_species = {
+						species = this
+						add_trait = trait_cybernetic
+						add_trait = trait_zombie
+						add_traits_at_start_of_list = yes
+						remove_trait = trait_self_modified
+						remove_trait = trait_latent_psionic
+						remove_trait = trait_psionic
+					}
+					set_citizenship_type = {
+						country = root.owner
+						type = citizenship_full_machine
+					}
+					if = { # assimilator empire
+						limit = {
+							root.owner = {
+								has_authority = auth_machine_intelligence
+								has_civic = civic_machine_assimilator
+								NOT = { has_tradition = tr_cybernetics_assimilator_adopt }
+							}
+						}
+						root.owner = { generate_cyborg_treats = yes } # scripted effect
+					}
+					else_if = {
+						limit = {
+							root.owner = {
+								has_authority = auth_machine_intelligence
+								has_civic = civic_machine_assimilator
+								has_tradition = tr_cybernetics_assimilator_adopt
+							}
+						}
+						root.owner = { generate_cyborg_extra_treats = yes } # scripted effect
+					}
+				}
+			}
+		}
+	}
+}

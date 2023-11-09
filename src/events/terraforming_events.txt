@@ -1,0 +1,1356 @@
+############################
+#
+# Terraforming Events
+# By Victor Haeggman
+#
+############################
+
+namespace = terra
+
+# Set textures for Earth or Mars
+planet_event = {
+	id = terra.0
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_planet_flag = planet_earth
+			has_planet_flag = planet_mars
+		}
+	}
+
+	immediate = {
+		# We need a one day delay to set the right texture.
+		planet_event = {
+			id = terra.1
+			days = 1
+		}
+	}
+}
+
+planet_event = {
+	id = terra.1
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_planet_flag = planet_earth
+			has_planet_flag = planet_mars
+		}
+	}
+
+	immediate = {
+		switch = {
+			trigger = has_planet_flag
+			planet_earth = {
+				set_earth_entity = yes
+			}
+			planet_mars = {
+				set_mars_entity = yes
+			}
+		}
+	}
+}
+
+#Saving the original planet flag
+planet_event = {
+	id = terra.5
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_planet_flag = has_terraformflag }
+	}
+
+	immediate = {
+		set_planet_flag = has_terraformflag
+		switch = {
+			trigger = is_planet_class
+			pc_desert = {
+				set_planet_flag = desert_terraform
+			}
+			pc_arid = {
+				set_planet_flag = arid_terraform
+			}
+			pc_savannah = {
+				set_planet_flag = savannah_terraform
+			}
+			pc_tropical = {
+				set_planet_flag = tropical_terraform
+			}
+			pc_ocean = {
+				set_planet_flag = ocean_terraform
+			}
+			pc_continental = {
+				set_planet_flag = continental_terraform
+			}
+			pc_tundra = {
+				set_planet_flag = tundra_terraform
+			}
+			pc_arctic = {
+				set_planet_flag = arctic_terraform
+			}
+			pc_alpine = {
+				set_planet_flag = alpine_terraform
+			}
+			pc_nuked = {
+				set_planet_flag = nuked_terraform
+			}
+			pc_barren = {
+				set_planet_flag = barren_terraform
+			}
+			pc_barren_cold = {
+				set_planet_flag = barren_cold_terraform
+			}
+			default = {
+				set_planet_flag = no_terraform_event
+			}
+		}
+	}
+}
+
+#Firing
+planet_event = {
+	id = terra.10
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = space_owner
+		NOR = {
+			has_planet_flag = terraformed_once
+			has_planet_flag = no_terraform_event
+			is_planet_class = pc_relic
+			is_planet_class = pc_city
+		}
+		can_have_habitable_deposits = yes
+	}
+	# All the NAND modifiers in here set up like a trigger, if anything in the NAND is not true then the event will have 0 chance of firing
+	immediate = {
+		set_planet_flag = terraformed_once
+		random_list = {
+			3 = {
+				modifier = {
+					factor = 0
+					free_district_slots = 0
+				}
+				modifier = {
+					factor = 0
+					is_colony = no
+				}
+				space_owner = { country_event = { id = terra.15 } } # Superfluous Terraforming Equipment
+			}
+			3 = {
+				modifier = {
+					factor = 0
+					is_planet_class = pc_nuked
+				}
+				space_owner = { country_event = { id = terra.20 } } # Engineered Beauty
+			}
+			3 = {
+				modifier = {
+					factor = 0
+					free_district_slots >= 4
+				}
+				space_owner = { country_event = { id = terra.25 } } # Terraforming Complications
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					OR = {
+						is_ideal_planet_class = {
+							who = space_owner
+							status = no
+						}
+						space_owner = { has_country_flag = terraformed_homeworld_2 }
+					}
+				}
+				space_owner = { country_event = { id = terra.35 } } # Homeworld 2
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					OR = {
+						has_planet_flag = nuked_terraform
+						has_planet_flag = barren_terraform
+						has_planet_flag = barren_cold_terraform
+						is_planet_class = pc_gaia
+						is_planet_class = pc_nuked
+						is_colony = yes
+					}
+				}
+				space_owner = { country_event = { id = terra.40 } } # Intentionally Tidally Locked
+			}
+			3 = {
+				modifier = {
+					factor = 0
+					OR = {
+						has_planet_flag = barren_terraform
+						has_planet_flag = barren_cold_terraform
+						is_planet_class = pc_gaia
+					}
+				}
+				space_owner = { country_event = { id = terra.45 } } # Add relevant deposit
+			}
+			1 = {
+				modifier = { #Cannot use decimal places in the base for random_list
+					factor = 0.5
+					always = yes
+				}
+				modifier = {
+					factor = 0
+					OR = {
+						space_owner = { is_gestalt = no }
+						has_planet_flag = barren_terraform
+						has_planet_flag = barren_cold_terraform
+						has_planet_flag = nuked_terraform
+						is_planet_class = pc_nuked
+					}
+				}
+				space_owner = { country_event = { id = terra.50 } } # Free Hiveworld
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					OR = {
+						space_owner = { is_gestalt = no }
+						has_planet_flag = barren_terraform
+						has_planet_flag = barren_cold_terraform
+						is_planet_class = pc_nuked
+					}
+				}
+				space_owner = { country_event = { id = terra.55 } } # Perfect Organization
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					NAND = {
+						OR = {
+							has_planet_flag = barren_terraform
+							has_planet_flag = barren_cold_terraform
+						}
+						has_overlord_dlc = yes
+					}
+				}
+				space_owner = { country_event = { id = terra.60 } } # Pre-FTLs
+			}
+			3 = {
+				modifier = {
+					factor = 0
+					NOR = {
+						has_planet_flag = barren_terraform
+						has_planet_flag = barren_cold_terraform
+					}
+				}
+				space_owner = { country_event = { id = terra.65 } } # Refund and Gas
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					NAND = {
+						is_planet_class = pc_gaia
+						is_colony = yes
+						space_owner = {
+							country_uses_consumer_goods = yes
+							NOT = { has_origin = origin_life_seeded }
+						}
+					}
+				}
+				space_owner = { country_event = { id = terra.70 } } # Gain Gaia Preference
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					NAND = {
+						is_planet_class = pc_gaia
+						space_owner = {
+							is_gestalt = no
+							NOT  = { has_country_flag = made_paradise }
+						}
+						is_homeworld = no
+					}
+				}
+				space_owner = { country_event = { id = terra.75 } } # Make Paradise
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					NAND = {
+						has_planet_flag = nuked_terraform
+						host_has_dlc = "Plantoids Species Pack"
+						space_owner = {
+							NOT  = { has_country_flag = harvested_radiotrophic_dna }
+							species = { NOT = { has_trait = trait_plantoid_radiotrophic } }
+						}
+						is_homeworld = no
+					}
+				}
+				space_owner = { country_event = { id = terra.80 } } # Radiotrophic presapients
+			}
+			2 = {
+				modifier = {
+					factor = 0
+					NAND = {
+						has_planet_flag = nuked_terraform
+						host_has_dlc = "Ancient Relics Story Pack"
+						space_owner = {
+							NOT = { has_country_flag = tombworld_weapon_cache_spawned }
+						}
+						is_homeworld = no
+					}
+				}
+				modifier = {
+					factor = 50
+					OR = {
+						has_planet_flag = planet_earth
+						has_planet_flag = nuked_earth
+					}
+				}
+				space_owner = { country_event = { id = terra.90 } } # Weapon Cache
+			}
+			20 = {} # Do nothing
+		}
+	}
+}
+
+
+country_event = {
+	id = terra.15
+	title = terra.15.name
+	desc = terra.15.desc
+	picture = GFX_evt_drilling_for_gas
+	is_triggered_only = yes
+	location = from
+	show_sound = event_activating_unknown_technology
+
+	option = {
+		name = terra.15.a
+		trigger = {	From = { free_district_slots >= 1 } }
+		if = {
+			limit = { is_gestalt = no }
+			From = { add_district = district_city }
+		}
+		else_if = {
+			limit = { is_machine_empire = yes }
+			From = { add_district = district_nexus }
+		}
+		else_if = {
+			limit = { is_hive_empire = yes }
+			From = { add_district = district_hive }
+		}
+	}
+	option = {
+		name = terra.15.b
+		trigger = {	From = { free_district_slots >= 1 } }
+		From = { add_district = district_industrial }
+	}
+	option = {
+		name = terra.15.c
+		trigger = {	From = { free_district_slots >= 2 } }
+		custom_tooltip = terra.15.c.tooltip
+		hidden_effect = {
+			From = {
+				add_district = district_generator
+				add_district = district_generator
+			}
+		}
+	}
+	option = {
+		name = terra.15.d
+		trigger = { From = { free_district_slots >= 2 } }
+		custom_tooltip = terra.15.d.tooltip
+		From = {
+			hidden_effect = {
+				add_district = district_mining
+				add_district = district_mining
+			}
+		}
+	}
+	option = {
+		name = terra.15.e
+		trigger = {
+			is_anglers_empire = no
+			From = { free_district_slots >= 2 }
+		}
+		custom_tooltip = terra.15.e.tooltip
+		From = {
+			hidden_effect = {
+				add_district = district_farming
+				add_district = district_farming
+			}
+		}
+	}
+	option = {
+		name = terra.15.f
+		add_resource = { minerals = 300 }
+	}
+}
+
+country_event = {
+	id = terra.20
+	title = terra.20.name
+	desc = terra.20.desc
+
+	picture = {
+		trigger = {
+			From = { is_wet = yes }
+		}
+		picture = GFX_evt_alien_nature
+	}
+	picture = {
+		trigger = {
+			From = { is_dry = yes }
+		}
+		picture = GFX_evt_landing_ship
+	}
+	picture = {
+		trigger = {
+			From = { is_cold = yes }
+		}
+		picture = GFX_evt_arctic
+	}
+	picture = {
+		trigger = {
+			From = {  is_planet_class = pc_gaia }
+		}
+		picture = GFX_evt_gaia
+	}
+
+	is_triggered_only = yes
+	location = from
+
+	option = {
+		name = terra.20.a
+		From = { add_modifier = { modifier =  engineered_nature } }
+	}
+	option = {
+		trigger = {
+			is_gestalt = no
+		}
+		name = terra.20.b
+		From = { add_modifier = { modifier = natural_beauty } }
+	}
+}
+
+country_event = {
+	id = terra.25
+	title = terra.25.name
+	desc = terra.25.desc
+	picture = GFX_evt_aggressive_flora
+	location = from
+	is_triggered_only = yes
+
+	show_sound = event_bad_omen
+
+	immediate = {
+		From = { set_planet_flag = terraform_blocker_flag }
+	}
+
+	option = {
+		name = terra.25.a
+		From = {
+			add_deposit = d_terraforming_blocker
+			add_deposit = d_terraforming_blocker
+			add_deposit = d_terraforming_blocker
+		}
+	}
+}
+
+planet_event = {
+	id = terra.30
+	title = terra.30.name
+	desc = terra.30.desc
+	picture = {
+		trigger = {
+			is_planet_class = pc_desert
+		}
+		picture = GFX_evt_desert
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_tropical
+		}
+		picture = GFX_evt_tropical
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_arid
+		}
+		picture = GFX_evt_arid
+	}
+	picture = {
+		trigger = {
+			OR = {
+				is_planet_class = pc_continental
+				is_planet_class = pc_alpine
+				is_planet_class = pc_savannah
+			}
+		}
+		picture = GFX_evt_continental
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_ocean
+		}
+		picture = GFX_evt_ocean
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_tundra
+		}
+		picture = GFX_evt_tundra
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_arctic
+		}
+		picture = GFX_evt_arctic
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_gaia
+		}
+		picture = GFX_evt_gaia
+	}
+	picture = {
+		trigger = {
+			is_planet_class = pc_nuked
+		}
+		picture = GFX_evt_tomb_world
+	}
+	show_sound = event_administrative_work
+	is_triggered_only = yes
+	location = this
+
+	trigger = {
+		has_planet_flag = terraform_blocker_flag
+		NOT = {
+			any_deposit = {
+				NOT = { is_same_value = From }
+				is_deposit_type = d_terraforming_blocker
+			}
+		}
+	}
+
+	immediate = {
+		remove_planet_flag = terraform_blocker_flag
+	}
+
+	option = {
+		name = terra.30.a
+		owner = {
+			switch = {
+				trigger = has_technology
+				tech_ecological_adaptation = {
+					add_tech_option_or_research_effect = {
+   						TECH = tech_climate_restoration
+   						PROGRESS = 0.2
+   						CATEGORY = society_research
+					}
+				}
+				tech_terrestrial_sculpting = {
+					add_tech_option_or_research_effect = {
+   						TECH = tech_ecological_adaptation
+   						PROGRESS = 0.4
+   						CATEGORY = society_research
+					}
+				}
+				default = {
+					add_tech_option_or_research_effect = {
+   						TECH = tech_terrestrial_sculpting
+   						PROGRESS = 0.8
+   						CATEGORY = society_research
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = terra.35
+	title = terra.35.name
+	desc = terra.35.desc
+	picture = GFX_evt_atmospheric_flight
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+	location = from
+
+	immediate = {
+		set_country_flag = terraformed_homeworld_2
+		from = { set_planet_flag = second_home@root }
+	}
+
+	option = {
+		name = terra.35.a
+		From = { add_modifier = { modifier = second_home } }
+		custom_tooltip = terra.35.a.tooltip
+		hidden_effect = {
+			From = {
+				set_name = {
+					key = NAME_Homeworld_Two
+					variable_string = "[Space_Owner.GetHomeWorldName]"
+				}
+			}
+		}
+	}
+	option = {
+		name = terra.35.b
+		From = { add_modifier = { modifier = second_home } }
+	}
+}
+
+country_event = {
+	id = terra.40
+	title = terra.40.name
+	desc = terra.40.desc
+	picture = GFX_evt_satellite_in_orbit
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = terra.40.a
+	}
+	option = {
+		name = terra.40.b
+		From = { add_modifier = { modifier = intentionally_tidally_locked } }
+		From = { set_planet_flag = tidally_locked_world }
+		custom_tooltip = terra.40.b.tooltip
+	}
+}
+
+country_event = {
+	id = terra.45
+	title = terra.45.name
+	desc = terra.45.desc
+	picture = GFX_evt_drilling_for_gas
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = terra.45.a # Generator
+		if = {
+			limit = {
+				From = {
+					OR = {
+						is_dry = yes
+						is_planet_class = pc_nuked
+					}
+				}
+			}
+			From = { add_deposit = d_searing_desert }
+		}
+		else_if = {
+			limit = { From = { is_cold = yes } }
+			From = { add_deposit = d_frozen_gas_lake }
+		}
+		else_if = {
+			limit = { From = { is_wet = yes } }
+			From = { add_deposit = d_rushing_waterfalls }
+		}
+	}
+	option = {
+		name = terra.45.b # Mining
+		if = {
+			limit = {
+				From = {
+					OR = {
+						is_planet_class = pc_continental
+						is_planet_class = pc_tropical
+						is_planet_class = pc_savannah
+						is_planet_class = pc_desert
+					}
+				}
+			}
+			From = { add_deposit = d_prosperous_mesa }
+		}
+		else_if = {
+			limit = {
+				From = {
+					OR = {
+						is_planet_class = pc_ocean
+						is_planet_class = pc_alpine
+						is_planet_class = pc_arctic
+						is_planet_class = pc_arid
+						is_planet_class = pc_tundra
+						is_planet_class = pc_nuked
+					}
+				}
+			}
+			From = { add_deposit = d_ore_rich_caverns }
+		}
+	}
+	option = {
+		name = terra.45.c # Farming
+		trigger = {
+			is_anglers_empire = no
+		}
+		if = {
+			limit = {
+				From = {
+					OR = {
+						is_planet_class = pc_tropical
+						is_planet_class = pc_ocean
+					}
+				}
+			}
+			From = { add_deposit = d_lush_jungle }
+		}
+		else_if = {
+			limit = {
+				From = {
+					OR = {
+						is_planet_class = pc_nuked
+						is_cold = yes
+					}
+				}
+			}
+			From = { add_deposit = d_fungal_caves }
+		}
+		else_if = {
+			limit = {
+				From = {
+					OR = {
+						is_planet_class = pc_savannah
+						is_planet_class = pc_continental
+					}
+				}
+			}
+			From = { add_deposit = d_fertile_lands }
+		}
+		else_if = {
+			limit = {
+				From = {
+					OR = {
+						is_planet_class = pc_arid
+						is_planet_class = pc_desert
+					}
+				}
+			}
+			From = { add_deposit = d_great_river }
+		}
+	}
+}
+
+country_event = {
+	id = terra.50
+	title = terra.50.name
+	desc = terra.50.desc
+	picture = GFX_evt_hive_mind
+	show_sound = event_activating_unknown_technology
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = terra.50.a
+		ai_chance = {
+			factor = 100
+		}
+		From = { change_pc = pc_hive }
+	}
+	option = {
+		name = terra.50.b
+		add_resource = { influence = 200 }
+	}
+
+}
+
+country_event = {
+	id = terra.55
+	title = terra.55.name
+	desc = terra.55.desc
+	picture = GFX_evt_fleet_from_surface
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = terra.55.a
+		From = {
+			add_modifier = { modifier = perfect_organization_modifier }
+			set_planet_flag = perfect_organization
+		}
+	}
+}
+
+country_event = {
+	id = terra.60
+	title = terra.60.name
+	desc = terra.60.desc
+	picture = GFX_evt_underground_city
+	location = from
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { generate_subterranean_pre_ftls_on_planet = yes }
+		from = {
+			add_deposit = d_ore_rich_caverns
+			add_deposit = d_ore_rich_caverns
+		}
+	}
+
+	option = {
+		name = terra.60.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+	option = {
+		name = terra.60.b
+		exclusive_trigger = { is_homicidal = yes }
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+	option = {
+		exclusive_trigger = { has_origin = origin_subterranean }
+		name = terra.60.c
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+country_event = {
+	id = terra.65
+	title = terra.65.name
+	desc = terra.65.desc
+	picture = GFX_evt_drilling_for_gas
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = terra.65.a
+
+		From = {
+			add_deposit = d_fuming_bog
+			switch = {
+				trigger = has_planet_flag
+				barren_terraform = {
+					if = {
+						limit = { is_dry = yes }
+						Root = { add_resource = { energy = 2500 } }
+					}
+					else_if = {
+						limit = { is_wet = yes }
+						Root = { add_resource = { energy = 5000 } }
+					}
+					else_if = {
+						limit = { is_cold = yes }
+						Root = { add_resource = { energy = 7500 } }
+					}
+				}
+				barren_cold_terraform = {
+					if = {
+						limit = { is_cold = yes }
+						Root = { add_resource = { energy = 2500 } }
+					}
+					else_if = {
+						limit = { is_wet = yes }
+						Root = { add_resource = { energy = 5000 } }
+					}
+					else_if = {
+						limit = { is_dry = yes }
+						Root = { add_resource = { energy = 7500 } }
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = terra.70
+	title = terra.70.name
+	desc = terra.70.desc
+	picture = GFX_evt_gaia
+	show_sound = event_activating_unknown_technology
+	location = from
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			every_owned_pop = {
+				limit = { is_robot_pop = no }
+				modify_species = {
+					species = this
+					ideal_planet_class = pc_nuked
+				}
+				modify_species = {
+					species = this
+					remove_trait = trait_pc_nuked_preference
+					add_trait = trait_pc_gaia_preference_terraforming
+				}
+			}
+		}
+	}
+
+	option = {
+		name = terra.70.a
+	}
+}
+
+country_event = {
+	id = terra.75
+	title = terra.75.name
+	desc = {
+		trigger = {
+			NOR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		text = terra.75.desc_regular
+	}
+	desc = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		text = terra.75.desc_spirit
+	}
+
+	picture = GFX_evt_gaia
+	location = from
+
+	is_triggered_only = yes
+	immediate = {
+		set_country_flag = made_paradise
+	}
+
+	option = {
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		name = terra.75.a
+		From = { add_modifier = { modifier = paradise_made } }
+	}
+	option = {
+		trigger = {
+			is_materialist = yes
+		}
+		ai_chance = {
+			factor = 1
+		}
+		name = terra.75.b
+		add_resource = { influence = 100 }
+
+
+	}
+}
+
+country_event = {
+	id = terra.80
+	title = terra.80.name
+	desc = terra.80.desc
+	picture = GFX_evt_tomb_world
+	is_triggered_only = yes
+	location = from
+
+	immediate = {
+		set_country_flag = found_radio_plants
+	}
+
+	option = {
+		name = terra.80.a
+		allow = {
+			is_homicidal = no
+			is_xenophobe = no
+		}
+		from = {
+			add_deposit = d_radiotrophic_preserve
+			custom_tooltip = terra.80.a.tooltip
+			hidden_effect = {
+				create_species = {
+					name = random
+					class = PLANT
+					portrait = random
+					homeworld = from
+					namelist = "FUN4"
+					sapient = no
+					traits = {
+						ideal_planet_class = "pc_nuked"
+						trait = "trait_plantoid_radiotrophic"
+						trait = "trait_ingenious"
+						trait = "trait_fleeting"
+						trait = "trait_deviants"
+					}
+					effect = {
+						save_event_target_as = radio_plants
+					}
+				}
+				while = {
+					count = 3
+					create_pop = {
+						species = event_target:radio_plants
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = terra.80.b
+		allow = { has_policy_flag = enlightenment_allowed }
+		enable_special_project = {
+			name = ENLIGHTEN_RADIO
+			location = from
+			owner = this
+		}
+
+	}
+	option = {
+		trigger = {
+			OR = {
+				is_machine_empire = no
+				has_valid_civic = civic_machine_servitor
+				has_valid_civic = civic_machine_assimilator
+			}
+		}
+		allow = {
+			species = {
+				NOR = {
+					is_species_class = FUN
+					is_species_class = PLANT
+				}
+			}
+		}
+		name = {
+			text = terra.80.c.indifferent
+			trigger = {
+				is_xenophile = no
+				is_machine_empire = no
+				is_lithoid_empire = no
+			}
+		}
+		name = {
+			text = terra.80.c.xenophile
+			trigger = {
+				is_xenophile = yes
+				is_machine_empire = no
+				is_lithoid_empire = no
+			}
+		}
+		name = {
+			text = terra.80.c.cantuse
+			trigger = {
+				OR = {
+					is_machine_empire = yes
+					is_lithoid_empire = yes
+				}
+			}
+		}
+		custom_tooltip = terra.80.c.tooltip
+		hidden_effect = {
+			set_country_flag = harvested_radiotrophic_dna
+		}
+	}
+	option = {
+		name = terra.80.d
+		if = {
+			limit = { country_uses_food = yes }
+			add_resource = { food = 5 }
+		}
+	}
+}
+
+country_event = {
+	id = terra.85
+	title = terra.85.name
+	desc = terra.85.desc
+	picture = GFX_evt_hand_shake
+	is_triggered_only = yes
+	location = this
+
+	option = {
+		name = terra.85.a
+		custom_tooltip = terra.85.a.tooltip
+		hidden_effect = {
+			if = {
+				limit = { fromfromfrom = { is_colony = yes } }
+				fromfromfrom = {
+					create_species = {
+						name = random
+						class = PLANT
+						portrait = random
+						homeworld = fromfromfrom
+						namelist = "FUN4"
+						traits = {
+							ideal_planet_class ="pc_nuked"
+							trait = "trait_plantoid_radiotrophic"
+							trait = "trait_ingenious"
+							trait = "trait_fleeting"
+							trait = "trait_deviants"
+						}
+						effect = {
+							save_event_target_as = radio_plants
+						}
+					}
+					while = {
+						count = 6
+						create_pop = {
+							species = event_target:radio_plants
+						}
+					}
+				}
+			}
+			else = {
+				capital_scope = {
+					create_species = {
+						name = random
+						class = PLANT
+						portrait = random
+						homeworld = fromfromfrom
+						namelist = "FUN4"
+						traits = {
+							ideal_planet_class = "pc_nuked"
+							trait = "trait_plantoid_radiotrophic"
+							trait = "trait_ingenious"
+							trait = "trait_fleeting"
+							trait = "trait_deviants"
+						}
+						effect = {
+							save_event_target_as = radio_plants
+						}
+					}
+					while = {
+						count = 6
+						create_pop = {
+							species = event_target:radio_plants
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = terra.90
+	title = terra.90.name
+	desc = terra.90.desc
+	picture = GFX_evt_tomb_world
+	show_sound = event_bad_omen
+	is_triggered_only = yes
+	location = from
+
+	immediate = {
+		set_country_flag = tombworld_weapon_cache_spawned
+	}
+
+	option = {
+		name = terra.90.a
+		From = { create_archaeological_site = site_tombworld_weapon_cache }
+	}
+}
+
+fleet_event = {
+	id = terra.95
+	title = terra.95.name
+	desc = terra.95.desc
+	picture = GFX_evt_habitable_dig_site
+	show_sound = event_dig_site
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+fleet_event = {
+	id = terra.100
+	title = terra.100.name
+	desc = terra.100.desc
+	picture = GFX_evt_discovered_hidden_door
+	show_sound = event_dig_site
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = EXCELLENT
+		medium_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = terra.105
+	title = terra.105.name
+	desc = {
+		trigger = {
+			from.planet = {
+				NOR = {
+					has_planet_flag = planet_earth
+					has_planet_flag = nuked_earth
+				}
+			}
+		}
+		text = terra.105.desc.generic
+	}
+	desc = {
+		trigger = {
+			from.planet = {
+				OR = {
+					has_planet_flag = planet_earth
+					has_planet_flag = nuked_earth
+				}
+			}
+		}
+		text = terra.105.desc.earth
+	}
+	picture = GFX_evt_clocks
+	show_sound = event_dig_site
+	location = from
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		trigger = {
+			owner = {
+				values_others = yes
+			}
+		}
+		name = terra.105.a
+		medium_artifact_reward = yes
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier4unityreward
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				values_others = no
+			}
+		}
+		name = terra.105.b
+		medium_artifact_reward = yes
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+			}
+		}
+	}
+	option = {
+		exclusive_trigger = {
+			owner = {
+				OR = {
+					is_xenophobe = yes
+					AND = {
+						is_gestalt = yes
+						NOR = {
+							has_valid_civic = civic_hive_empath
+							has_valid_civic = civic_machine_servitor
+						}
+					}
+				}
+			}
+		}
+		name = terra.105.c
+		owner = {
+			add_monthly_resource_mult = {
+				resource = alloys
+				value = 5
+				min = @tier2materialmin
+				max = @tier2materialmax
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = terra.110
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_modifier = second_home
+		NOT = { has_planet_flag = second_home@from }
+	}
+
+	immediate = { remove_modifier = second_home }
+}
+
+planet_event = {
+	id = terra.115
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		NOT = { has_modifier = second_home }
+		has_planet_flag = second_home@from
+		is_ideal_planet_class = {
+			who = from
+			status = yes
+		}
+	}
+
+	immediate = {
+		add_modifier = { modifier = second_home days = -1 }
+	}
+}

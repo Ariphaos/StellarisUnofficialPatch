@@ -1,18 +1,5 @@
 
 
-ariphaos_patch_remove_habitat = {
-	# spawn_habitat_cracker_effect now handles destruction.
-	#save_event_target_as = habitat_to_remove
-	#solar_system= { 
-	#	random_system_planet = { 
-	#	limit = { any_moon = { is_planet = event_target:habitat_to_remove } } 
-	#		remove_planet_flag = has_megastructure 
-	#	} 
-	#}
-	#destroy_colony = yes
-	#remove_planet = yes
-}
-
 # We basically reimplement the on_action here.
 ariphaos_patch_purge_pop = {
 	planet = {
@@ -22,6 +9,121 @@ ariphaos_patch_purge_pop = {
 		limit = { exists = pop }
 		kill_pop = yes
 	}
+}
+
+ariphaos_patch_primitive_world_conquered = {
+			# Add appropriate capital
+			if = {
+				limit = {
+					is_planet_class = pc_habitat
+					has_building = building_capital
+				}
+				remove_building = building_capital
+				add_building = building_hab_capital
+			}
+			# Add districts (Ringworlds & Habitats first)
+			if = {
+				limit = {
+					is_planet_class = pc_ringworld_habitable
+				}
+				add_district = district_rw_city
+				break = yes
+			}
+			if = {
+				limit = {
+					is_planet_class = pc_habitat
+				}
+				break = yes
+			}
+			# Add districts (planets)
+			if = {
+				limit = {
+					num_pops <= 5
+				}
+				add_district = district_city
+				add_district = district_farming
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops >= 5
+					num_pops <= 10
+				}
+				add_district = district_city
+				add_district = district_farming
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops >= 10
+					num_pops <= 15
+				}
+				add_district = district_city
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_mining
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops >= 15
+					num_pops <= 20
+				}
+				add_district = district_city
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_farming
+				add_district = district_mining
+				add_district = district_mining
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops >= 20
+					num_pops <= 25
+				}
+				add_district = district_city
+				add_district = district_city
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_farming
+				add_district = district_mining
+				add_district = district_mining
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops >= 25
+					num_pops <= 30
+				}
+				add_district = district_city
+				add_district = district_city
+				add_district = district_city
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_farming
+				add_district = district_mining
+				add_district = district_mining
+				add_district = district_generator
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops >= 30
+					#num_pops <= 35
+				}
+				add_district = district_city
+				add_district = district_city
+				add_district = district_city
+				add_district = district_city
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_farming
+				add_district = district_mining
+				add_district = district_mining
+				add_district = district_generator
+				break = yes
+			}
 }
 
 ariphaos_patch_leader_change_traits = {
@@ -113,7 +215,10 @@ ariphaos_patch_leader_change_traits = {
 	if = {
 		limit = {
 			species = { 
-				has_trait = trait_mechanical
+				OR = {
+					has_trait = trait_machine_unit
+					has_trait = trait_mechanical
+				}
 			}
 			NOR = {
 				has_trait = leader_trait_synthetic
@@ -129,8 +234,9 @@ ariphaos_patch_leader_change_traits = {
 		limit = {
 			has_trait = leader_trait_synthetic
 			species = {
-				OR = {
-					NOT = { has_trait = trait_mechanical }
+				NOR = {
+					has_trait = trait_mechanical
+					has_trait = trait_machine_unit
 				}
 			}
 			NOR = {

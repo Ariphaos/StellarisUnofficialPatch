@@ -1,0 +1,1044 @@
+######################################
+#									#
+# Nemesis Become the Crisis Events #
+#	 Written by Douglas Furen		#
+#									#
+######################################
+
+namespace = crisis
+
+# Crisis Ship Test
+country_event = {
+	id = crisis.4097
+	hide_window = yes
+	is_test_event = yes
+
+	trigger = {
+		always = no
+	}
+
+	immediate = {
+		can_build_crisis_star_eater = yes
+	}
+}
+
+
+# Repeal Crisis Test (Used on Crisis Empire)
+country_event = {
+	id = crisis.4098
+	hide_window = yes
+	is_test_event = yes
+
+	trigger = {
+		always = no
+	}
+
+	immediate = {
+		remove_country_flag = declared_crisis
+		save_event_target_as = former_crisis
+		random_war = {
+			limit = {
+				using_war_goal = {
+					type = wg_declared_crisis
+					owner = event_target:former_crisis
+				}
+			}
+			every_war_participant = {
+				limit = {
+					NOT = { is_same_value = event_target:former_crisis }
+				}
+				country_event = { id = crisis.4110 }
+			}
+			every_war_participant = {
+				prev = {
+					remove_war_participant = prev
+				}
+			}
+		}
+		country_event = { id = crisis.4111 }
+	}
+}
+
+# Declare Crisis Test (Used on desired Crisis Empire)
+country_event = {
+	id = crisis.4099
+	hide_window = yes
+	is_test_event = yes
+
+	trigger = {
+		always = no
+	}
+
+	immediate = {
+		set_country_flag = declared_crisis
+		save_event_target_as = new_crisis
+		country_event = { id = crisis.4105 }
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				NOT = { is_same_value = prev }
+			}
+			country_event = { id = crisis.4100 }
+		}
+		if = {
+			limit = { has_galactic_custodian = yes }
+			random_playable_country = {
+				limit = { is_galactic_custodian = yes }
+				save_event_target_as = community_war_leader
+				declare_war = {
+					target = event_target:new_crisis
+					name = {
+						key = "NAME_Declared_Crisis_War"
+						variable_string = "[This.MainDefender.GetAdj]"
+					}
+					attacker_war_goal = "wg_declared_crisis"
+				}
+			}
+			every_playable_country = {
+				limit = {
+					is_galactic_custodian = no
+					is_galactic_community_member = yes
+				}
+				join_war = event_target:community_war_leader # Should use different effect to ensure they only join the correct war
+			}
+		}
+		else = {
+			random_playable_country = {
+				limit = {
+					is_galactic_community_member = yes
+					galactic_community_rank = 1
+				}
+				save_event_target_as = community_war_leader
+				declare_war = {
+					target = event_target:new_crisis
+					name = {
+						key = "NAME_Declared_Crisis_War"
+						variable_string = "[This.MainDefender.GetAdj]"
+					}
+					attacker_war_goal = "wg_declared_crisis"
+				}
+				every_playable_country = {
+					limit = {
+						is_galactic_community_member = yes
+						NOT = { is_same_value = event_target:community_war_leader }
+					}
+					join_war = event_target:community_war_leader # Should use different	 effect to ensure they only join the correct war
+				}
+			}
+		}
+	}
+}
+
+# Crisis Declared (Community)
+country_event = {
+	id = crisis.4100
+	title = "crisis.4100.name"
+	desc = {
+		trigger = {
+			any_playable_country = { is_galactic_custodian = yes }
+		}
+		text = "crisis.4100.desc.a"
+	}
+	desc = {
+		trigger = {
+			NOT = {
+				any_playable_country = { is_galactic_custodian = yes }
+			}
+		}
+		text = "crisis.4100.desc.b"
+	}
+	picture = GFX_evt_crisis_declared
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4100.a
+	}
+}
+
+# Crisis Declared (Empire)
+country_event = {
+	id = crisis.4101
+	title = "crisis.4100.name"
+	desc = "crisis.4101.desc"
+	picture = GFX_evt_crisis_declared
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4100.a
+	}
+}
+
+# Crisis Informed (Community)
+country_event = {
+	id = crisis.4105
+	title = "crisis.4105.name"
+	desc = {
+		trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+			any_playable_country = { is_galactic_custodian = yes }
+		}
+		text = "crisis.4105.desc.a"
+	}
+	desc = {
+		trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+			NOT = {
+				any_playable_country = { is_galactic_custodian = yes }
+			}
+		}
+		text = "crisis.4105.desc.b"
+	}
+	 desc = {
+		trigger = {
+			is_homicidal = no
+			NOT = { has_ascension_perk = ap_become_the_crisis }
+		}
+		 text = "crisis.4105.desc.c"
+	}
+	picture = GFX_evt_crisis_declared
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_playable_country = { is_galactic_custodian = yes }
+			}
+			random_playable_country = {
+				limit = { is_galactic_custodian = yes }
+				save_event_target_as = custodian
+			}
+		}
+	}
+
+	option = {
+		name = crisis.4105.a
+		trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+		}
+	}
+	option = {
+		name = crisis.4105.b
+		trigger = {
+			is_homicidal = no
+			NOT = { has_ascension_perk = ap_become_the_crisis }
+		}
+	}
+}
+
+# Crisis Informed (Empire)
+country_event = {
+	id = crisis.4106
+	title = "crisis.4106.name"
+	desc = {
+		trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+		}
+		text = "crisis.4106.desc.a"
+	}
+	desc = {
+		trigger = {
+			is_homicidal = no
+			NOT = { has_ascension_perk = ap_become_the_crisis }
+		}
+		text = "crisis.4106.desc.b"
+	}
+	picture = GFX_evt_crisis_declared
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_playable_country = {
+			limit = { is_galactic_emperor = yes }
+			save_event_target_as = gal_emperor
+		}
+	}
+
+	option = {
+		name = crisis.4105.a
+		trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+		}
+	}
+	option = {
+		name = crisis.4105.b
+		trigger = {
+			is_homicidal = no
+			NOT = { has_ascension_perk = ap_become_the_crisis }
+		}
+	}
+}
+
+# Crisis Repealed (Community members)
+country_event = {
+	id = crisis.4110
+	title = "crisis.4110.name"
+	desc = "crisis.4110.desc"
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4110.a
+	}
+}
+
+# Crisis Repealed (Former Crisis)
+country_event = {
+	id = crisis.4111
+	title = "crisis.4110.name"
+	desc = {
+		trigger = {
+			is_homicidal = no
+			NOT = { has_ascension_perk = ap_become_the_crisis }
+		}
+		text = crisis.4111.intro
+	}
+	desc = {
+		trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+		}
+		text = crisis.4111.desc.b
+	}
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4111.a
+		trigger = { is_homicidal = no }
+	}
+	option = {
+		name = crisis.4111.b
+		 trigger = { is_homicidal = yes }
+	}
+}
+
+# Crisis Repealed (Empire members)
+country_event = {
+	id = crisis.4112
+	title = "crisis.4110.name"
+	desc = "crisis.4112.desc"
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4110.a
+	}
+}
+
+# Crisis Repealed (Former Crisis)
+country_event = {
+	id = crisis.4113
+	title = "crisis.4110.name"
+	desc = "crisis.4113.desc"
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4111.a
+		trigger = {
+			is_homicidal = no
+			NOT = { has_ascension_perk = ap_become_the_crisis }
+		}
+	}
+	option = {
+		name = crisis.4111.b
+		 trigger = {
+			OR = {
+				is_homicidal = yes
+				has_ascension_perk = ap_become_the_crisis
+			}
+		 }
+	}
+}
+
+# Left Community - Leave Crisis Wars and Crusades
+country_event = {
+	id = crisis.4115
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_at_war = yes
+	}
+
+	immediate = {
+		every_war = {
+			limit = {
+				OR = {
+					using_war_goal = {
+						type = wg_declared_crisis
+						owner = attacker
+					}
+					using_war_goal = {
+						type = wg_imperial_crusade
+						owner = attacker
+					}
+				}
+				NOT = { #just in case
+					any_defender = {
+						is_same_value = root
+					}
+				}
+			}
+			remove_war_participant = root
+		}
+	}
+}
+
+# Joins Community - Joins Crisis Wars
+country_event = {
+	id = crisis.4116
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_playable_country = {
+			is_galactic_community_member = yes
+			any_war = {
+				using_war_goal = {
+					type = wg_declared_crisis
+					owner = prev
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				is_galactic_community_member = yes
+				any_war = {
+					using_war_goal = {
+						type = wg_declared_crisis
+						owner = prev
+					}
+				}
+			}
+			save_event_target_as = community_war_leader
+			random_war = {
+				limit = {
+					using_war_goal = {
+						type = wg_declared_crisis
+						owner = event_target:community_war_leader
+					}
+				}
+				save_event_target_as = crisis_war
+			}
+		}
+		join_war_on_side = {
+			war = event_target:crisis_war
+			side = event_target:community_war_leader
+		}
+	}
+}
+
+# Crack Star Event
+planet_event = {
+	id = crisis.4550
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_threat = { who = from.owner amount = 10 }
+		from = {
+			owner = {
+				save_event_target_as = crisis_country
+				add_victory_score = {
+					source = destroyed_stars_score
+					score = 10
+				}
+				switch = {
+					trigger = has_global_flag
+					ariphaos_patch_galaxy_size_20 = { add_resource = { sr_dark_matter = 500 } }
+					ariphaos_patch_galaxy_size_18 = { add_resource = { sr_dark_matter = 600 } }
+					ariphaos_patch_galaxy_size_16 = { add_resource = { sr_dark_matter = 700 } }
+					ariphaos_patch_galaxy_size_14 = { add_resource = { sr_dark_matter = 800 } }
+					ariphaos_patch_galaxy_size_12 = { add_resource = { sr_dark_matter = 900 } }
+					ariphaos_patch_galaxy_size_10 = { add_resource = { sr_dark_matter = 1000 } }
+					ariphaos_patch_galaxy_size_8 = { add_resource = { sr_dark_matter = 1500 } }
+					ariphaos_patch_galaxy_size_6 = { add_resource = { sr_dark_matter = 2000 } }
+					ariphaos_patch_galaxy_size_4 = { add_resource = { sr_dark_matter = 2500 } }
+					ariphaos_patch_galaxy_size_2 = { add_resource = { sr_dark_matter = 3000 } }
+					ariphaos_patch_galaxy_size_0 = { add_resource = { sr_dark_matter = 4000 } }
+					default = {
+						add_resource = { sr_dark_matter = 500 }
+					}
+				}
+				if = {
+					limit = {
+						NOT = { has_country_flag = cracked_first_star }
+					}
+					set_country_flag = cracked_first_star
+				}
+			}
+		}
+		solar_system = { save_event_target_as = destroyed_system }
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				has_communications = event_target:crisis_country
+				NOR = {
+					is_same_value = event_target:crisis_country
+					has_country_flag = can_build_star_eaters
+					has_country_flag = star_eater_alert@event_target:crisis_country
+				}
+				intel_level = {
+					system = event_target:destroyed_system
+					level = none
+				}
+			}
+			country_event = { id = crisis.6180 }
+		}
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				has_communications = event_target:crisis_country
+				NOR = {
+					is_same_value = event_target:crisis_country
+					has_country_flag = can_build_star_eaters
+					has_country_flag = star_eater_alert@event_target:crisis_country
+				}
+				intel_level = {
+					system = event_target:destroyed_system
+					level > none
+				}
+			}
+			country_event = { id = crisis.6181 }
+		}
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				has_communications = event_target:crisis_country
+				NOR = {
+					is_same_value = event_target:crisis_country
+					has_country_flag = star_eater_alert@event_target:crisis_country
+				}
+				has_country_flag = can_build_star_eaters
+			}
+			country_event = { id = crisis.6182 }
+		}
+		every_playable_country = {
+			limit = {
+				has_communications = event_target:crisis_country
+				NOT = {
+					has_opinion_modifier = {
+						who = event_target:crisis_country
+						modifier = opinion_destroying_systems
+					}
+				}
+			}
+			add_opinion_modifier = {
+				who = event_target:crisis_country
+				modifier = opinion_destroying_systems
+			}
+		}
+		solar_system = {
+			random_system_planet = {
+				limit = { has_modifier = holy_planet }
+				planet_event = { id = planet_destruction.605 }
+			}
+			destroy_star_system = yes
+		}
+	}
+}
+
+# Crisis Special Project 1 Completed - Crisis Level 2 Unlocked
+country_event = {
+	id = crisis.4120
+	title = "crisis.4120.name"
+	desc = {
+		text = crisis.4120.desc
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = {
+		text = crisis.4120.mach.desc
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+
+	desc = {
+		text = crisis.4120.hive.desc
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	picture = GFX_evt_surreal_visions
+	show_sound = event_necrophage
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4120.a
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	option = {
+		name = crisis.4120.mach.a
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	option = {
+		name = FASCINATING
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+
+	after = {
+		custom_tooltip = can_advance_crisis_progression
+	}
+}
+
+# Crisis Special Project 2 Completed - Crisis Level 3 Unlocked
+country_event = {
+	id = crisis.4125
+	title = "crisis.4125.name"
+	desc = {
+		text = crisis.4125.desc
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = {
+		text = crisis.4125.mach.desc
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+
+	desc = {
+		text = crisis.4125.hive.desc
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	picture = GFX_evt_shrouded_planet
+	show_sound = event_necrophage
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4125.a
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	option = {
+		name = crisis.4125.mach.a
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	option = {
+		name = crisis.4125.hive.a
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+
+	after = {
+		custom_tooltip = can_advance_crisis_progression
+	}
+}
+
+# Crisis Special Project 3 Completed - Crisis Level 4 Unlocked
+country_event = {
+	id = crisis.4130
+	title = "crisis.4130.name"
+	desc = {
+		text = crisis.4130.desc
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = {
+		text = crisis.4130.mach.desc
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+
+	desc = {
+		text = crisis.4130.hive.desc
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	picture = GFX_evt_physics_research
+	show_sound = event_necrophage
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4130.a
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	option = {
+		name = crisis.4130.mach.a
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	option = {
+		name = crisis.4130.hive.a
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+
+	after = {
+		custom_tooltip = can_advance_crisis_progression
+	}
+}
+
+# Crisis Special Project 4 Completed - Crisis Level 5 Unlocked
+country_event = {
+	id = crisis.4135
+	title = "crisis.4135.name"
+	desc = {
+		text = crisis.4135.desc
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = {
+		text = crisis.4135.mach.desc
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+
+	desc = {
+		text = crisis.4135.hive.desc
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	picture = GFX_evt_dyson_sphere
+	show_sound = event_necrophage
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4135.a
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	option = {
+		name = crisis.4135.mach.a
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	option = {
+		name = crisis.4135.hive.a
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+
+	after = {
+		custom_tooltip = can_advance_crisis_progression_final
+	}
+}
+
+# On becoming a Crisis Empire (Crisis Level 1)
+country_event = {
+	id = crisis.4140
+	title = "crisis.4140.name"
+	desc = {
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		text = crisis.4140.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_machine_intelligence }
+		text = crisis.4140.mach.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_hive_mind }
+		text = crisis.4140.hive.desc
+	}
+	picture = GFX_evt_fleet_from_surface
+	show_sound = event_death_cult
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4140.a
+		begin_event_chain = {
+			event_chain = become_the_crisis_chain
+			target = root
+		}
+		add_event_chain_counter = {
+			event_chain = "become_the_crisis_chain"
+			counter = "crisis_level_reached"
+			amount = 1
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+			enable_special_project = {
+				name = "CRISIS_SPECIAL_PROJECT_1"
+				owner = ROOT
+			}
+		}
+		else_if = {
+			limit = {
+				has_authority = auth_machine_intelligence
+			}
+			enable_special_project = {
+				name = "CRISIS_SPECIAL_PROJECT_MACH_1"
+				owner = ROOT
+			}
+		}
+		else_if = {
+			limit = {
+				has_authority = auth_hive_mind
+			}
+			enable_special_project = {
+				name = "CRISIS_SPECIAL_PROJECT_HIVE_1"
+				owner = ROOT
+			}
+		}
+		custom_tooltip = new_crisis_perks_tt
+	}
+}
+
+# On reaching Crisis Level 2
+country_event = {
+	id = crisis.4145
+	title = "crisis.4145.name"
+	desc = {
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		text = crisis.4145.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_machine_intelligence }
+		text = crisis.4145.mach.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_hive_mind }
+		text = crisis.4145.hive.desc
+	}
+	picture = GFX_evt_victorious_army
+	show_sound = event_death_cult
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4145.a
+		root = {
+			if = {
+				limit = {
+					NOT = {
+						has_ethic = ethic_gestalt_consciousness
+					}
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_2"
+					owner = ROOT
+				}
+			}
+			else_if = {
+				limit = {
+					has_authority = auth_machine_intelligence
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_MACH_2"
+					owner = ROOT
+				}
+			}
+			else_if = {
+				limit = {
+					has_authority = auth_hive_mind
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_HIVE_2"
+					owner = ROOT
+				}
+			}
+		}
+		custom_tooltip = new_crisis_perks_tt
+		custom_tooltip = unlock_crisis_corvette
+	}
+}
+
+# On reaching Crisis Level 3
+country_event = {
+	id = crisis.4150
+	title = "crisis.4150.name"
+	desc = {
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		text = crisis.4150.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_machine_intelligence }
+		text = crisis.4150.mach.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_hive_mind }
+		text = crisis.4150.hive.desc
+	}
+	picture = GFX_evt_death_from_above
+	show_sound = event_death_cult
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4150.a
+		root = {
+			if = {
+				limit = {
+					NOT = {
+						has_ethic = ethic_gestalt_consciousness
+					}
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_3"
+					owner = ROOT
+				}
+			}
+			else_if = {
+				limit = {
+					has_authority = auth_machine_intelligence
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_MACH_3"
+					owner = ROOT
+				}
+			}
+			else_if = {
+				limit = {
+					has_authority = auth_hive_mind
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_HIVE_3"
+					owner = ROOT
+				}
+			}
+		}
+		custom_tooltip = new_crisis_perks_tt
+		custom_tooltip = unlock_crisis_destroyer
+	}
+}
+
+# On reaching Crisis Level 4
+country_event = {
+	id = crisis.4155
+	title = "crisis.4155.name"
+	desc = {
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+		text = crisis.4155.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_machine_intelligence }
+		text = crisis.4155.mach.desc
+	}
+	desc = {
+		trigger = { has_authority = auth_hive_mind }
+		text = crisis.4155.hive.desc
+	}
+	picture = GFX_evt_undertaker
+	show_sound = event_death_cult
+
+	is_triggered_only = yes
+
+	option = {
+		name = crisis.4155.a
+		root = {
+			if = {
+				limit = {
+					NOT = {
+						has_ethic = ethic_gestalt_consciousness
+					}
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_4"
+					owner = ROOT
+				}
+			}
+			else_if = {
+				limit = {
+					has_authority = auth_machine_intelligence
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_MACH_4"
+					owner = ROOT
+				}
+			}
+			else_if = {
+				limit = {
+					has_authority = auth_hive_mind
+				}
+				enable_special_project = {
+					name = "CRISIS_SPECIAL_PROJECT_HIVE_4"
+					owner = ROOT
+				}
+			}
+		}
+		custom_tooltip = new_crisis_perks_tt
+		custom_tooltip = unlock_crisis_cruiser
+	}
+}
