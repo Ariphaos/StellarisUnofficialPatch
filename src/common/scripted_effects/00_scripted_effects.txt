@@ -1345,7 +1345,7 @@ create_ai_planet_defense = {
 	}
 	owner = {
 		create_leader = {
-			class = admiral
+			class = commander
 			species = event_target:contingency_bot
 			name = random
 			skill = 3
@@ -1519,7 +1519,7 @@ create_ai_constructors = {
 create_ai_fleet = {
 	owner = {
 		create_leader = {
-			class = admiral
+			class = commander
 			species = event_target:contingency_bot
 			name = random
 			skill = 3
@@ -3676,10 +3676,8 @@ fire_random_centralisation_flavour_event_effect = {
 		random_member = {
 			limit = {
 				is_gestalt = no
-				any_envoy = {
-					has_envoy_task = {
-						task = federation
-					}
+				any_owned_leader = {
+					is_assigned_to_federation = yes
 				}
 			}
 			random_list = {
@@ -5035,105 +5033,65 @@ create_nivlac_effect = {
 	}
 }
 
-create_nu_baol_effect = {
+create_baol_species_effect = {
+	create_species = {
+		name = $SPECIES_NAME$
+		plural = $SPECIES_NAME$
+		class = "PLANT"
+		portrait = pla16_baol
+		namelist = PLANT2
+		extra_trait_points = 4
+		traits = {
+			trait = trait_agrarian
+			trait = trait_communal
+			trait = trait_venerable
+			trait = trait_delicious
+			trait = trait_slow_breeders
+			trait = trait_pc_gaia_preference
+		}
+		effect = {
+			save_global_event_target_as = $GLOBAL_TARGET$
+		}
+	}
 	if = {
 		limit = {
 			host_has_dlc = "Plantoids Species Pack"
 		}
-		create_species = {
-			name = "NAME_Nu_Baol"
-			plural = "NAME_Nu_Baol"
-			class = "PLANT"
-			portrait = pla16_baol
-			namelist = "PLANT2"
-			extra_trait_points = 4
-			traits = {
-				trait = "trait_plantoid_phototrophic"
-				trait = "trait_agrarian"
-				trait = "trait_communal"
-				trait = "trait_venerable"
-				trait = "trait_delicious"
-				trait = "trait_slow_breeders"
-				trait = "trait_pc_gaia_preference"
-			}
-			effect = {
-				save_global_event_target_as = nu_baol_species
-			}
-		}
-	}
-
-	else = {
-		create_species = {
-			name = "NAME_Nu_Baol"
-			plural = "NAME_Nu_Baol"
-			class = "PLANT"
-			portrait = pla16_baol
-			namelist = "PLANT2"
-			extra_trait_points = 4
-			traits = {
-				trait = "trait_agrarian"
-				trait = "trait_communal"
-				trait = "trait_venerable"
-				trait = "trait_delicious"
-				trait = "trait_slow_breeders"
-				trait = "trait_pc_gaia_preference"
-			}
-			effect = {
-				save_global_event_target_as = nu_baol_species
+		event_target:$GLOBAL_TARGET$ = {
+			modify_species = {
+				species = this
+				add_trait = trait_plantoid_phototrophic
+				add_traits_at_start_of_list = yes
 			}
 		}
 	}
 }
 
-create_hive_nu_baol_effect = {
-	if = {
-		limit = {
-			host_has_dlc = "Plantoids Species Pack"
-		}
-		create_species = {
-			name = "NAME_Nu_Baol"
-			plural = "NAME_Nu_Baol"
-			class = "PLANT"
-			portrait = pla16_baol
-			namelist = "PLANT2"
-			extra_trait_points = 4
-			traits = {
-				trait = "trait_hive_mind"
-				trait = "trait_plantoid_phototrophic"
-				trait = "trait_agrarian"
-				trait = "trait_communal"
-				trait = "trait_venerable"
-				trait = "trait_delicious"
-				trait = "trait_slow_breeders"
-				trait = "trait_pc_gaia_preference"
-			}
-			effect = {
-				save_global_event_target_as = nu_baol_species
-			}
+create_hive_baol_species_effect = {
+	create_baol_species_effect = {
+		SPECIES_NAME = $SPECIES_NAME$
+		GLOBAL_TARGET = $GLOBAL_TARGET$
+	}
+	event_target:$GLOBAL_TARGET$ = {
+		modify_species = {
+			species = this
+			add_trait = trait_hive_mind
+			add_traits_at_start_of_list = yes
 		}
 	}
+}
 
-	else = {
-		create_species = {
-			name = "NAME_Nu_Baol"
-			plural = "NAME_Nu_Baol"
-			class = "PLANT"
-			portrait = pla16_baol
-			namelist = "PLANT2"
-			extra_trait_points = 4
-			traits = {
-				trait = "trait_hive_mind"
-				trait = "trait_agrarian"
-				trait = "trait_communal"
-				trait = "trait_venerable"
-				trait = "trait_delicious"
-				trait = "trait_slow_breeders"
-				trait = "trait_pc_gaia_preference"
-			}
-			effect = {
-				save_global_event_target_as = nu_baol_species
-			}
-		}
+create_nu_baol_effect = {
+	create_baol_species_effect = {
+		SPECIES_NAME = "NAME_Nu_Baol"
+		GLOBAL_TARGET = nu_baol_species
+	}
+}
+
+create_hive_nu_baol_effect = {
+	create_hive_baol_species_effect = {
+		SPECIES_NAME = "NAME_Nu_Baol"
+		GLOBAL_TARGET = nu_baol_species
 	}
 }
 
@@ -7755,4 +7713,24 @@ lure_valid_critter_fleet = {
 		}
 		save_event_target_as = lured_critter
 	}
+}
+
+create_space_storm = {
+	add_modifier = { modifier = space_storm }
+	fire_on_action = {
+		on_action = on_space_storm_created
+	}
+}
+
+destroy_space_storm = {
+	remove_modifier = space_storm
+	fire_on_action = {
+		on_action = on_space_storm_destroyed
+	}
+}
+
+reset_formless_crisis_reward = {
+	remove_country_flag = formless_unbidden_reward
+	remove_country_flag = formless_aberrant_reward
+	remove_country_flag = formless_vehement_reward
 }

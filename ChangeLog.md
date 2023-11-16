@@ -1,5 +1,16 @@
 # ChangeLog
 
+## November 
+
+- 3.10 Update
+
+- Replaced radius = aura properties with system_wide yes/no as the former longer does anything.
+
+Patch fixes Paradox fixed in 3.10:
+
+- Paradox fixed a small performance bug with one of the factions.
+- AI will no longer build habitats if they have one uncolonized (finally).
+
 ## November 9th
 
 - Implemented some fixes for modded galaxy sizes. The game now calculates this based on the number of existing systems, not by setup string.

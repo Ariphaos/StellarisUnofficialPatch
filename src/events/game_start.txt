@@ -869,6 +869,15 @@ country_event = {
 							species = owner_main_species
 						}
 					}
+					last_created_leader = {
+						if = {
+							limit = {
+								has_skill > 1
+								num_traits = 0
+							}
+							add_trait_no_notify = random_common
+						}
+					}
 					set_leader = last_created_leader
 				}
 			}
@@ -881,6 +890,15 @@ country_event = {
 				class = scientist
 				name = random
 				species = owner_main_species
+			}
+			last_created_leader = {
+				if = {
+					limit = {
+						has_skill > 1
+						num_traits = 0
+					}
+					add_trait_no_notify = random_common
+				}
 			}
 		}
 		
@@ -911,6 +929,15 @@ country_event = {
 								name = random
 								species = owner_main_species
 							}
+							last_created_leader = {
+								if = {
+									limit = {
+										has_skill > 1
+										num_traits = 0
+									}
+									add_trait_no_notify = random_common
+								}
+							}
 						}
 						if = {
 							limit = {
@@ -920,12 +947,12 @@ country_event = {
 								set_country_flag = created_first_eager_ship
 							}
 							last_created_leader = {
-								add_trait = leader_trait_meticulous
+								add_trait_no_notify = leader_trait_meticulous
 							}
 						}
 						else = {
 							last_created_leader = {
-								add_trait = leader_trait_roamer
+								add_trait_no_notify = leader_trait_roamer
 							}
 						}
 						last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
@@ -1067,9 +1094,18 @@ country_event = {
 					}
 					owner = {
 						create_leader = {
-							class = admiral
+							class = commander
 							name = random
 							species = owner_main_species
+						}
+					}
+					last_created_leader = {
+						if = {
+							limit = {
+								has_skill > 1
+								num_traits = 0
+							}
+							add_trait_no_notify = random_common
 						}
 					}
 					set_leader = last_created_leader
@@ -1097,9 +1133,18 @@ country_event = {
 					set_location = prev.capital_star
 					owner = {
 						create_leader = {
-							class = admiral
+							class = commander
 							name = random
 							species = owner_main_species
+						}
+					}
+					last_created_leader = {
+						if = {
+							limit = {
+								has_skill > 1
+								num_traits = 0
+							}
+							add_trait_no_notify = random_common
 						}
 					}
 					set_leader = last_created_leader
@@ -1115,9 +1160,18 @@ country_event = {
 				}
 			}
 			create_leader = {
-				class = admiral
+				class = commander
 				name = random
 				species = owner_main_species
+			}
+			last_created_leader = {
+				if = {
+					limit = {
+						has_skill > 1
+						num_traits = 0
+					}
+					add_trait_no_notify = random_common
+				}
 			}
 		}
 		
@@ -2081,7 +2135,10 @@ country_event = {
 		}
 		if = {
 			limit = {
-				has_valid_civic = civic_hive_stargazers
+				OR = {
+					has_valid_civic = civic_hive_stargazers
+					is_hyperspace_specialty_empire = yes
+				}
 			}
 			every_system = {
 				limit = {
@@ -2093,6 +2150,17 @@ country_event = {
 				}
 				root = { set_visited = prev }
 			}
+		}
+
+		if = {
+			limit = {
+				is_ai = yes
+				has_country_flag = necrophage_start_empire
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_militarist
+			}
+			force_remove_civic = civic_cutthroat_politics
+			force_add_civic = civic_fanatic_purifiers
 		}
 	}
 }
@@ -2368,68 +2436,8 @@ country_event = {
 		}
 		else = {
 			set_council_agenda = agenda_infinite_opportunities
-
-			# Prefer a Scientist as Head of Research (otherwise picks your Home planet Governor).
-			random_owned_leader = {
-				limit = {
-					leader_class = scientist
-					is_ruler = no
-				}
-				set_council_position = councilor_research
-			}
 		}
 		add_council_agenda_progress = 6000
-	}
-}
-
-# Create Gestalt Council.
-country_event = {
-	id = game_start.61
-	hide_window = yes
-	trigger = {
-		OR = {
-			is_country_type = default
-			is_country_type = fallen_empire
-		}
-		is_gestalt = yes
-	}
-
-	is_triggered_only = yes
-
-	immediate = {
-		country_create_gestalt_councilor = {
-			CLASS = governor
-			COUNCIL_POS = councilor_gestalt_governor
-			DESC = councilor_gestalt_governor_desc
-		}
-		country_create_gestalt_councilor = {
-			CLASS = scientist
-			COUNCIL_POS = councilor_gestalt_scientist
-			DESC = councilor_gestalt_scientist_desc
-		}
-		country_create_gestalt_councilor = {
-			CLASS = admiral
-			COUNCIL_POS = councilor_gestalt_admiral
-			DESC = councilor_gestalt_admiral_desc
-		}
-		country_create_gestalt_councilor = {
-			CLASS = general
-			COUNCIL_POS = councilor_gestalt_general
-			DESC = councilor_gestalt_general_desc
-		}
-		if = {
-			limit = {
-				is_country_type = fallen_empire
-			}
-			every_owned_leader = {
-				limit = {
-					is_councilor = yes
-					is_ruler = no
-				}
-				add_skill = 9
-				set_gestalt_node_protrait_effect = yes
-			}
-		}
 	}
 }
 
@@ -2623,28 +2631,350 @@ country_event = {
 	}
 }
 
-# Bonus scientist trait for Remnants
+# Create Gestalt Council.
 country_event = {
-	id = game_start.67
+	id = game_start.70
 	hide_window = yes
 	trigger = {
-		has_ancrel = yes
-		is_country_type = default
-		has_origin = origin_remnants
+		is_gestalt = yes
+		OR = {
+			is_country_type = default
+			is_country_type = fallen_empire
+		}
 	}
 
 	is_triggered_only = yes
 
 	immediate = {
+		if = {
+			limit = {
+				has_paragon_dlc = yes
+			}
+			ruler = {
+				assign_gestalt_ruler_subclass_trait = yes
+			}
+		}
+		country_create_gestalt_councilor = {
+			CLASS = official
+			COUNCIL_POS = councilor_gestalt_growth
+			DESC = councilor_gestalt_growth_desc
+		}
+		country_create_gestalt_councilor = {
+			CLASS = scientist
+			COUNCIL_POS = councilor_gestalt_cognitive
+			DESC = councilor_gestalt_cognitive_desc
+		}
+		country_create_gestalt_councilor = {
+			CLASS = commander
+			COUNCIL_POS = councilor_gestalt_legion
+			DESC = councilor_gestalt_legion_desc
+		}
+		country_create_gestalt_councilor = {
+			CLASS = official
+			COUNCIL_POS = councilor_gestalt_regulatory
+			DESC = councilor_gestalt_regulatory_desc
+		}
+		if = {
+			limit = {
+				is_country_type = fallen_empire
+			}
+			every_owned_leader = {
+				limit = {
+					is_councilor = yes
+					is_ruler = no
+				}
+				add_skill = 9
+				set_gestalt_node_protrait_effect = yes
+			}
+		}
+	}
+}
+
+# Set starting planet governors
+country_event = {
+	id = game_start.71
+	hide_window = yes
+	trigger = {
+		is_country_type = default
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		assign_governor_effect = yes
+		every_owned_leader = {
+			limit = {
+				leader_class = commander
+				is_idle = yes
+			}
+			owner = {
+				random_owned_fleet = {
+					limit = {
+						is_ship_class = shipclass_military
+						NOT = {
+							exists = leader
+						}
+					}
+					assign_leader = prevprev
+				}
+			}
+		}
 		every_owned_leader = {
 			limit = {
 				leader_class = scientist
-				OR = {
-					is_councilor_type = councilor_research
-					is_councilor_type = councilor_gestalt_scientist
+				is_idle = yes
+			}
+			owner = {
+				random_owned_fleet = {
+					limit = {
+						is_ship_class = shipclass_science_ship
+						NOT = {
+							exists = leader
+						}
+					}
+					assign_leader = prevprev
 				}
 			}
-			add_trait_no_notify = leader_trait_expertise_archaeostudies
+		}
+		# In case mysterious leaders are spawned.
+		every_owned_leader = {
+			limit = {
+				is_idle = yes
+				is_councilor = no
+			}
+			kill_leader = {
+				show_notification = no
+			}
+		}
+	}
+}
+
+# Create Regular Council.
+country_event = {
+	id = game_start.72
+	hide_window = yes
+	trigger = {
+		is_gestalt = no
+		has_paragon_dlc = yes
+		OR = {
+			is_country_type = default
+			is_country_type = fallen_empire
+		}
+		NOT = {
+			has_origin = origin_broken_shackles
+			# Assigned in origin.110 instead
+		}
+	}
+
+	is_triggered_only = yes
+
+	immediate = {
+		unlock_council_slots = 2
+		# Add Minister of Defense Position
+		set_council_position_to_council = councilor_defense
+		if = {
+			limit = {
+				any_owned_leader = {
+					leader_class = commander
+					is_councilor = no
+					is_ruler = no
+				}
+			}
+			random_owned_leader = {
+				limit = {
+					leader_class = commander
+					is_councilor = no
+					is_ruler = no
+				}
+				set_council_position = councilor_defense
+			}
+		}
+		else = {
+			create_leader = {
+				class = commander
+				name = random
+				species = owner_main_species
+			}
+			last_created_leader = {
+				if = {
+					limit = {
+						has_skill > 1
+						num_traits = 0
+					}
+					add_trait_no_notify = random_common
+				}
+			}
+			last_created_leader = {
+				set_council_position = councilor_defense
+			}
+		}
+
+		# Add Head of Research Position
+		set_council_position_to_council = councilor_research
+		if = {
+			limit = {
+				any_owned_leader = {
+					leader_class = scientist
+					is_councilor = no
+					is_ruler = no
+				}
+			}
+			random_owned_leader = {
+				limit = {
+					leader_class = scientist
+					is_councilor = no
+					is_ruler = no
+				}
+				set_council_position = councilor_research
+			}
+		}
+		else = {
+			create_leader = {
+				class = scientist
+				name = random
+				species = owner_main_species
+			}
+			last_created_leader = {
+				if = {
+					limit = {
+						has_skill > 1
+						num_traits = 0
+					}
+					add_trait_no_notify = random_common
+				}
+			}
+			last_created_leader = {
+				set_council_position = councilor_research
+			}
+		}
+
+		# Add Minister of State Position
+		unlock_council_slots = 1
+		if = {
+			limit = {
+				blocks_minister_of_state = no
+			}
+			set_council_position_to_council = councilor_state
+			if = {
+				limit = {
+					any_owned_leader = {
+						leader_class = official
+						is_councilor = no
+						is_ruler = no
+					}
+				}
+				random_owned_leader = {
+					limit = {
+						leader_class = official
+						is_councilor = no
+						is_ruler = no
+					}
+					set_council_position = councilor_state
+				}
+			}
+			else = {
+				create_leader = {
+					class = official
+					name = random
+					species = owner_main_species
+				}
+				last_created_leader = {
+					if = {
+						limit = {
+							has_skill > 1
+							num_traits = 0
+						}
+						add_trait_no_notify = random_common
+					}
+				}
+				last_created_leader = {
+					set_council_position = councilor_state
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_valid_civic = civic_inwards_perfection
+			}
+			set_council_position_to_council = councilor_inwards_perfection
+			if = {
+				limit = {
+					any_owned_leader = {
+						leader_class = commander
+						is_councilor = no
+						is_ruler = no
+					}
+				}
+				random_owned_leader = {
+					limit = {
+						leader_class = commander
+						is_councilor = no
+						is_ruler = no
+					}
+					set_council_position = councilor_inwards_perfection
+				}
+			}
+			else = {
+				create_leader = {
+					class = commander
+					name = random
+					species = owner_main_species
+				}
+				last_created_leader = {
+					if = {
+						limit = {
+							has_skill > 1
+							num_traits = 0
+						}
+						add_trait_no_notify = random_common
+					}
+				}
+				last_created_leader = {
+					set_council_position = councilor_inwards_perfection
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_valid_civic = civic_fanatic_purifiers
+			}
+			set_council_position_to_council = councilor_fanatic_purifiers
+			if = {
+				limit = {
+					any_owned_leader = {
+						leader_class = commander
+						is_councilor = no
+						is_ruler = no
+					}
+				}
+				random_owned_leader = {
+					limit = {
+						leader_class = commander
+						is_councilor = no
+						is_ruler = no
+					}
+					set_council_position = councilor_fanatic_purifiers
+				}
+			}
+			else = {
+				create_leader = {
+					class = commander
+					name = random
+					species = owner_main_species
+				}
+				last_created_leader = {
+					if = {
+						limit = {
+							has_skill > 1
+							num_traits = 0
+						}
+						add_trait_no_notify = random_common
+					}
+				}
+				last_created_leader = {
+					set_council_position = councilor_fanatic_purifiers
+				}
+			}
 		}
 	}
 }

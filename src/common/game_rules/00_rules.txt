@@ -18,11 +18,11 @@ is_valid_rival = {
 						prev = { has_policy_flag = diplo_stance_animosity }
 					}
 				}
+				is_country_type = mirrored_country # Mirrored Empire doesn't have relative power but we want to be rivals anyway
 			}
 		}
 	}
 }
-
 
 # Root = claimer
 # This = system
@@ -269,7 +269,7 @@ can_vote_in_democratic_election = {
 
 #This = leader
 should_pay_for_leader_upkeep = {
-	NOT = {
+	NOR = {
 		AND = {
 			exists = owner
 			owner = {
@@ -277,6 +277,8 @@ should_pay_for_leader_upkeep = {
 			}
 			is_councilor = yes
 		}
+		has_trait = leader_trait_spacebender
+		has_leader_flag = should_not_have_upkeep
 	}
 	NOR = {
 		has_leader_flag = marauder_merc_leader
@@ -665,6 +667,10 @@ can_declare_war = {
 #This = planet
 can_colonize_planet = {
 	custom_tooltip = {
+		fail_text = "COLONIZATION_IMPOSSIBLE_UNDER_INVESTIGATION"
+		NOT = { has_planet_flag = planet_under_investigation }
+	}
+	custom_tooltip = {
 		fail_text = "ariphaos_patch_consecrated_world"
 		exists = space_owner
 		NOT = { has_planet_flag = consecrated@space_owner }
@@ -877,6 +883,9 @@ can_species_procreate = {
 # Root = Planet
 can_species_be_assembled = {
 	is_sapient = yes
+	NOT = {
+		has_trait = trait_exd
+	}
 	OR = {
 		AND = {
 			is_robotic = yes
@@ -1014,7 +1023,10 @@ can_orbital_bombard = {
 				is_country_type = gray_goo
 				is_country_type = vol
 				AND = {
-					is_country_type = awakened_marauders
+					OR = {
+						is_country_type = awakened_marauders
+						is_country_type = formless
+					}
 					FROM.CONTROLLER = { is_hostile = prev }
 				}
 			}
@@ -1109,6 +1121,7 @@ is_extradimensional_anchor = {
 			is_country_type = extradimensional
 			is_country_type = extradimensional_2
 			is_country_type = extradimensional_3
+			is_country_type = formless
 		}
 	}
 	any_controlled_ship = { is_ship_size = starbase_exd }
@@ -1397,16 +1410,8 @@ can_leader_get_normal_trait = {
 				has_leader_flag = restored_node
 			}
 		}
-		AND = {
-			is_ruler = yes
-			exists = owner
-			owner = {
-				OR = {
-					has_authority = auth_dictatorial
-					has_authority = auth_imperial
-				}
-			}
-		}
+		is_ruler = yes
+		is_heir = yes
 	}
 }
 
@@ -1480,6 +1485,9 @@ can_enter_system_by_jump = {
 
 		# L-Cluster
 		NOT = { has_star_flag = lcluster }
+
+		# Formless system
+		NOT = { has_star_flag = formless_system }
 	}
 }
 
@@ -1697,6 +1705,7 @@ should_force_decline_species = {
 	# Infertile Clone Army pops should decline if in Country that can't have Vats, or there is a Vat shortage.
 	custom_tooltip = {
 		success_text = CLONE_ARMY_FORCE_DECLINE
+		exists = this
 		OR = {
 			has_trait = trait_clone_soldier_infertile
 			has_trait = trait_clone_soldier_infertile_full_potential
@@ -2405,7 +2414,11 @@ can_fill_worker_job = {
 
 #this/root = pop
 #checked if job's possible_precalc = can_fill_specialist_job
-can_fill_specialist_job = { can_fill_specialist_job = yes }
+can_fill_specialist_job = {
+	can_fill_specialist_job_trigger = yes
+	# Defined in 01_scripted_triggers_jobs.txt
+}
+
 #this/root = pop
 #checked if job's possible_precalc = can_fill_ruler_job
 can_fill_ruler_job = {
@@ -2453,6 +2466,16 @@ can_fill_ruler_job = {
 	}
 }
 
+#this/root = pop
+#checked if job's possible_precalc = can_fill_precursor_job
+can_fill_precursor_job = {
+	custom_tooltip = SPECIALIST_JOB_TRIGGER
+	hidden_trigger = {
+		exists = owner
+		owner = { is_fallen_empire = yes }
+	}
+}
+
 # Checks whether the game should try and build a building or district on a planet via scripts in common/colony_automation
 # Does not apply to "emergency building" (colony_automation_exceptions)
 # this = planet
@@ -2466,16 +2489,9 @@ dismiss_leader_cost = {
 
 # this = leader
 can_dismiss_leader = {
-	custom_tooltip = {
-		fail_text = "requires_actor_not_feudal_society"
-		exists = owner
-		owner = {
-			NOT = { has_valid_civic = civic_feudal_realm }
-		}
-	}
 	if = {
 		limit = {
-			leader_class = admiral
+			leader_class = commander
 			is_idle = no
 			# Rulers and heirs can't be dismissed any way and can be non-idle
 			is_ruler = no
@@ -2504,6 +2520,21 @@ can_dismiss_leader = {
 			fail_text = "can_not_dismiss_rulers"
 		}
 	}
+
+	if = {
+		limit = {
+			leader_class = scientist
+		}
+		custom_tooltip = {
+			fail_text = "can_not_dismiss_rift_explorer"
+			NAND = {
+				exists = fleet
+				fleet = {
+					has_fleet_order = explore_astral_rift_fleet_order
+				}
+			}
+		}
+	}
 }
 
 # this = country
@@ -2518,9 +2549,17 @@ should_count_towards_leader_cap = {
 		is_hidden = yes
 		has_leader_flag = hired_admiral_merc_leader
 		has_leader_flag = legendary_leader
+		has_trait = leader_trait_rift_warped
 		AND = {
 			has_trait_tier1or2 = { TRAIT = leader_trait_eager }
 			has_skill < 4
+		}
+		AND = {
+			is_ruler = yes
+			OR = {
+				has_trait = leader_trait_ruler_machine_intelligence
+				has_trait = leader_trait_ruler_hive_mind
+			}
 		}
 	}
 }
@@ -2689,7 +2728,7 @@ can_trade_leader = {
 	}
 	NOR = {
 		has_trait = leader_trait_fotd_scientist
-		has_trait = leader_trait_fotd_admiral
+		has_trait = leader_trait_fotd_commander
 	}
 }
 
@@ -2697,15 +2736,30 @@ can_trade_leader = {
 # Root = country, country that owns the fleet currently
 # From = country, country that would receive the fleet
 can_trade_fleet = {
-	ROOT = {
-		NAND = {
-			is_overlord = yes
-			OR = {
-				is_country_type = fallen_empire
-				is_country_type = awakened_fallen_empire
+	AND = {
+		ROOT = {
+			NAND = {
+				is_overlord = yes
+				OR = {
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire
+				}
 			}
 		}
+		NOT = { has_fleet_flag = dimensional_fleet }
 	}
+}
+
+# this = leader
+# from = country scope
+can_leader_be_ruler = {
+	NOT = { leader_class = envoy }
+}
+
+# this = leader
+# from = country scope
+can_leader_be_councilor = {
+	is_exploring_astral_rift = no
 }
 
 chance_for_external_leader_pool = {
@@ -2974,43 +3028,44 @@ can_be_renamed_by = {
 }
 
 # Root/this = country
-# From = planet
-# Checks if the country is allowed to build any orbital station around this planet/star
+# From = planet OR astral_rift
+# Checks if the country is allowed to build any orbital station around this planet/star/astral_rift
 can_build_station_around = {
 	exists = root
 	always = yes
 }
 
 # Root/this = country
-# From = planet
-# Checks if the country is allowed to build a mining station around this planet/star
+# From = planet OR astral_rift
+# Checks if the country is allowed to build a mining station around this planet/star/astral_rift
 can_build_mining_station_around = {
 	exists = root
 	always = yes
 }
 
 # Root/this = country
-# From = planet
-# Checks if the country is allowed to build a research station around this planet/star
+# From = planet OR astral_rift
+# Checks if the country is allowed to build a research station around this planet/star/astral_rift
 can_build_research_station_around = {
 	exists = root
 	always = yes
 }
 
 # Root/this = country
-# From = planet
-# Checks if the country is allowed to build a military station around this planet/star
+# From = planet OR astral_rift
+# Checks if the country is allowed to build a military station around this planet/star/astral_rift
 can_build_military_station_around = {
 	exists = root
 	always = yes
 }
 
 # Root/this = country
-# From = planet
-# Checks if the country is allowed to build an observation station around this planet/star
+# From = planet OR astral_rift
+# Checks if the country is allowed to build an observation station around this planet/star/astral_rift
 can_build_observation_station_around = {
 	exists = root
 	FROM = {
+		is_scope_type = planet
 		NOR = {
 			has_planet_flag = haven_flag #FotD
 			has_planet_flag = no_observation #Solarpunk
@@ -3019,9 +3074,100 @@ can_build_observation_station_around = {
 }
 
 # Root/this = country
-# From = planet
-# Checks if the country is allowed to build a starbase around this planet/star
+# From = planet OR astral_rift
+# Checks if the country is allowed to build a starbase around this planet/star/astral_rift
 can_build_starbase_around = {
 	exists = root
 	always = yes
+}
+
+# Root/this = country
+# Checks if the country's capital has any kind of relevancy (aka is the capital in the galaxy really theirs)
+has_inworld_capital = {
+	NOT = { is_country_type = mirrored_country }
+}
+
+# Root/this = trading country
+# From = country traded with
+# Checks if target country has economy power relative to begin with
+has_relative_economy_power = {
+	exists = this
+	exists = from
+	NOR = {
+		is_country_type = mirrored_country
+		from = { is_country_type = mirrored_country }
+	}
+}
+
+# Root/this = trading country
+# From = country traded with
+# Checks if the country can trade sensor
+can_trade_sensor = {
+	NOR = {
+		is_country_type = mirrored_country
+		from = { is_country_type = mirrored_country }
+	}
+}
+
+# Root/this = trading country
+# From = country traded with
+# Checks if the country can trade favor
+can_trade_favor = {
+	NOR = {
+		OR = {
+			is_country_type = mirrored_country
+			is_country_type = fallen_empire
+			is_country_type = awakened_fallen_empire
+		}
+		from = {
+			OR = {
+				is_country_type = mirrored_country
+				is_country_type = fallen_empire
+				is_country_type = awakened_fallen_empire
+			}
+		}
+	}
+}
+
+# THIS = country
+# FROM = Astral Rift checked
+can_interact_with_astral_rift = {
+	OR = {
+		from = {
+			is_surveyed = { who = prev status = yes }
+		}
+		intel_level = {
+			level >= low
+			system = from.solar_system
+		}
+		from = {
+			exists = explorer
+			explorer = {
+				is_same_value = prevprev
+			}
+		}
+	}
+}
+
+# THIS = country
+# FROM = Astral Rift checked
+can_explore_astral_rift = {
+	has_technology = tech_rift_sphere
+	hidden_trigger = {
+		is_astral_rift_pool_empty = no
+	}
+}
+
+# THIS = leader
+# FROM = Astral Rift checked
+# Checks if the selected leader can explore the rift
+can_leader_explore_astral_rift = {
+	custom_tooltip = {
+		fail_text = "CANNOT_EXPLORE_WITH_COUNCIL_LEADER"
+		is_councilor = no
+	}
+	custom_tooltip = {
+		fail_text = "CANNOT_EXPLORE_WITH_HEIR_LEADER"
+		is_heir = no
+	}
 }

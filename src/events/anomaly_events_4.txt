@@ -1205,7 +1205,7 @@ ship_event = {
 			is_colonizable = no
 			OR = {
 				has_modifier = chthonian_planet
-				#has_modifier = extensive_moon_system #a better solution is needed.
+				has_modifier = extensive_moon_system
 				#has_modifier = unstable_tectonics
 				#has_modifier = ultra_rich
 				#has_modifier = mineral_rich
@@ -1232,6 +1232,7 @@ ship_event = {
 	}
 }
 
+# Parvus Nanite Swarm
 ship_event = {
 	id = anomaly.6700
 	title = "anomaly.6700.name"
@@ -1239,6 +1240,8 @@ ship_event = {
 	picture = GFX_evt_gray_goo
 	show_sound = event_air_raid_siren
 	location = from
+	event_chain = parvus_III_chain
+
 	is_triggered_only = yes
 
 	immediate = {
@@ -1250,6 +1253,12 @@ ship_event = {
 			set_planet_flag = colony_event
 			save_global_event_target_as = nanite_swarm_planet
 		}
+		owner = {
+			begin_event_chain = {
+				event_chain = parvus_III_chain
+				target = this
+			}
+		}
 	}
 
 	option = {
@@ -1258,6 +1267,12 @@ ship_event = {
 			from = {
 				add_modifier = {
 					modifier = nanite_swarm_modifier
+				}
+			}
+			owner = {
+				begin_event_chain = {
+					event_chain = parvus_III_chain
+					target = this
 				}
 			}
 		}
@@ -1289,6 +1304,7 @@ ship_event = {
 	}
 	picture = GFX_evt_gray_goo
 	show_sound = event_mystic_reveal
+	event_chain = parvus_III_chain
 
 	is_triggered_only = yes
 
@@ -1343,6 +1359,7 @@ ship_event = {
 
 	after = {
 		owner = {
+			end_event_chain = parvus_III_chain
 			country_event = { id = anomaly.6710 days = 80 random = 1000 }
 		}
 	}
@@ -1368,6 +1385,7 @@ country_event = {
 		}
 	}
 	fire_only_once = yes
+	event_chain = parvus_III_chain
 	is_triggered_only = yes
 
 	trigger = {
@@ -1402,13 +1420,16 @@ country_event = {
 	}
 	option =  {
 		name = anomaly.6710.c
-		add_monthly_resource_mult = {
-			resource = physics_research
-			value = @tier5researchreward
-			min = @tier5researchmin
-			max = @tier5researchmax
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier5researchreward
+				min = @tier5researchmin
+				max = @tier5researchmax
+			}
+			add_resource = { influence = 200 }
+			end_event_chain = parvus_III_chain
 		}
-		add_resource = { influence = 200 }
 	}
 }
 
@@ -1418,6 +1439,8 @@ ship_event = {
 	desc = "anomaly.6715.desc"
 	picture = GFX_evt_gray_gooed_planet
 	show_sound = event_laboratory_sound
+	event_chain = parvus_III_chain
+
 	is_triggered_only = yes
 
 	option = {
@@ -1466,12 +1489,19 @@ ship_event = {
 	desc = "anomaly.6720.desc"
 	picture = GFX_evt_death_from_above
 	show_sound = event_space_battle
+	event_chain = parvus_III_chain
+
 	is_triggered_only = yes
+
+
 	option = {
 		name = EXCELLENT
 		event_target:nanite_swarm_planet = {
 			remove_modifier = nanite_swarm_modifier
 			add_deposit = d_nano_corpses
+		}
+		owner = {
+			end_event_chain = parvus_III_chain
 		}
 	}
 }
@@ -1482,6 +1512,7 @@ planet_event = {
 	desc = "anomaly.6725.desc"
 	picture = GFX_evt_dead_city
 	show_sound = event_ghost_town
+	event_chain = parvus_III_chain
 
 	pre_triggers = {
 		has_owner = yes
@@ -2324,7 +2355,7 @@ ship_event = { #Giant Alien Spiders are no Joke
 		name = anomaly.6810.a
 		random_list = {
 			50 = {
-				kill_leader = { type = scientist show_notification = yes }
+				kill_leader = { class = scientist show_notification = yes }
 			}
 			50 = {
 				owner = {
@@ -2855,7 +2886,7 @@ ship_event = {
 			owner = {
 				random_owned_leader = {
 					limit = {
-						is_councilor_type = councilor_gestalt_scientist
+						is_councilor_type = councilor_gestalt_cognitive
 					}
 					add_expertise_trait_effect = {
 						TRAIT = leader_trait_expertise_field_manipulation
@@ -3344,7 +3375,6 @@ ship_event = {
 	location = fromfromfrom
 
 	immediate = {
-		kill_leader = { type = scientist show_notification = yes }
 		fleet = { destroy_fleet = this }
 	}
 
@@ -4189,7 +4219,7 @@ ship_event = {
 			# Ariphaos Balance TODO: This could probably be something custom
 			# set_leader_flag = leader_death_events_blocked
 			kill_leader = {
-				type = scientist show_notification = no
+				class = scientist show_notification = no
 			}
 		}
 		hidden_effect = {
@@ -4201,6 +4231,361 @@ ship_event = {
 				add_deposit = d_society_5
 				add_deposit = d_engineering_5
 			}
+		}
+	}
+}
+
+### Rapid Desertification
+# This = ship
+# From = planet
+ship_event = {
+	id = anomaly.7135
+	title = "anomaly.7135.name"
+	desc = "anomaly.7135.desc"
+	picture = GFX_evt_landing_ship
+	show_sound = event_alien_nature
+	location = FROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		FROM = {
+			save_event_target_as = desertling_planet
+			add_modifier = {
+				modifier = "alien_infestation"
+				days = -1
+			}
+		}
+	}
+	option = {
+		name = anomaly.7135.a
+		enable_special_project = {
+			name = "RAPID_DESERTIFICATION_PROJECT"
+			location = from
+			owner = root.owner
+		}
+	}
+	option = {
+		name = anomaly.7135.b
+		custom_tooltip = anomaly.7135.b.tooltip
+		hidden_effect = {
+			owner = { country_event = { id = anomaly.7145 days = 480 random = 30 }  }
+		}
+	}
+}
+
+country_event = {
+	id = anomaly.7140
+	title = "anomaly.7140.name"
+	desc = "anomaly.7140.desc"
+	picture = GFX_evt_desert
+	show_sound = event_alien_nature
+	location = event_target:desertling_planet
+
+	is_triggered_only = yes
+
+	option = {
+		name = anomaly.7140.a
+		custom_tooltip = anomaly.7140.a.tooltip
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				 }
+			}
+		}
+		owner = {
+			every_owned_planet = {
+				limit = {
+					num_pops > 1
+				}
+				add_modifier = {
+					modifier = "adopted_aliens"
+					days = 3620
+				}
+				hidden_effect = {
+					set_planet_flag = desertling_fauna
+				}
+			}
+			random_owned_planet = {
+			limit = {
+				NOT = {
+					has_planet_flag = rampant_desertlings
+				}
+				num_pops > 1
+			}
+			save_event_target_as = rampant_desertlings
+		}
+		}
+		hidden_effect = {
+			random_list = {
+				60 = { owner = { country_event = { id = colony.7160 days = 3620 } } }
+				40 = { event_target:rampant_desertlings = { planet_event = { id = colony.7166 days = 3620 } } }
+			}
+		}
+	}
+	option = {
+		name = anomaly.7140.b
+		custom_tooltip = anomaly.7140.b.tooltip
+		enable_special_project = {
+			name = "POPULATION_CONTROL_PROJECT"
+			location = event_target:desertling_planet
+		}
+	}
+	option = {
+		name = anomaly.7140.c
+		custom_tooltip = anomaly.7140.c.tooltip
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				 }
+			}
+		}
+		hidden_effect = {
+			owner = { country_event = { id = anomaly.7155 days = 180 } }
+		}
+	}
+	option = {
+		name = anomaly.7140.d
+		custom_tooltip = anomaly.7140.d.tooltip
+		trigger = {
+			has_utopia = yes
+			owner = {
+				has_policy_flag = slavery_allowed
+				#has_policy_flag = pre_sapients_eat
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		hidden_effect = {
+			create_species = {
+				name = "rapid_desertification_species"
+				class = "MAM"
+				portrait = "mam_rat"
+				sapient = no
+				traits = {
+					trait = trait_presapient_unintelligent
+					trait = trait_delicious
+					trait = trait_pc_desert_preference
+				}
+				homeworld = event_target:desertling_planet
+			}
+			owner = {
+				every_owned_planet = {
+					create_pop = { species = last_created_species }
+					create_pop = { species = last_created_species }
+				}
+			}
+		}
+		hidden_effect = {
+			last_created_pop = {
+				set_citizenship_type = {
+					type = citizenship_slavery
+					cooldown = yes
+				}
+				set_slavery_type = {
+					type = slavery_livestock country = prev
+				}
+			}
+			owner = {
+				random_owned_planet = {
+					limit = {
+						num_pops > 1
+					}
+				save_event_target_as = rampant_desertlings
+				}
+			}
+			random_list = {
+				70 = {}
+				30 = { event_target:rampant_desertlings = { planet_event = { id = colony.7166 days = 3620 } } }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = anomaly.7145
+	title = "anomaly.7145.name"
+	desc = { # If planet is owned
+		trigger = {
+			event_target:desertling_planet = {
+				num_pops > 0
+			}
+		}
+		text = anomaly.7145.desc
+	}
+	desc = {
+		trigger = { # If planet is not owned
+			event_target:desertling_planet = {
+				num_pops <= 0
+			}
+		}
+		text = anomaly.7145.b.desc
+	}
+	picture = GFX_evt_warm_barren
+	show_sound = event_wind_ruins
+	location = event_target:desertling_planet
+
+	is_triggered_only = yes
+
+	option = { # If planet is not owned
+		name = anomaly.7145.a
+		trigger = {
+			values_others = yes
+			event_target:desertling_planet = {
+				num_pops <= 0
+			}
+		}
+		event_target:desertling_planet = {
+			change_pc = pc_barren
+			remove_modifier = alien_infestation
+		}
+	}
+
+	option = { # If planet is owned
+		name = anomaly.7145.b
+		trigger = {
+			event_target:desertling_planet = {
+				num_pops > 0
+			}
+		}
+		event_target:desertling_planet = {
+			change_pc = pc_barren
+			remove_modifier = alien_infestation
+			destroy_colony = yes
+		}
+	}
+
+	option = { # If planet is not owned
+		name = ACKNOWLEDGED
+		trigger = {
+			values_others = no
+			event_target:desertling_planet = {
+				num_pops <= 0
+			}
+		}
+		event_target:desertling_planet = {
+			change_pc = pc_barren
+			remove_modifier = alien_infestation
+		}
+	}
+}
+
+country_event = {
+	id = anomaly.7146
+	title = "anomaly.7145.name"
+	desc = {
+		trigger = { # If planet is owned
+			event_target:desertling_planet = {
+				num_pops > 0
+			}
+		}
+		text = anomaly.7145.desc
+	}
+	desc = {
+		trigger = { # If planet is not owned
+			event_target:desertling_planet = {
+				num_pops <= 0
+			}
+		}
+		text = anomaly.7145.b.desc
+	}
+	picture = GFX_evt_warm_barren
+	show_sound = event_wind_ruins
+	location = event_target:desertling_planet
+
+	is_triggered_only = yes
+
+	option = { # If planet is not owned
+		name = anomaly.7145.a
+		trigger = {
+			values_others = yes
+			event_target:desertling_planet = {
+				num_pops <= 0
+			}
+		}
+		event_target:desertling_planet = {
+			change_pc = pc_barren
+			remove_modifier = alien_infestation
+		}
+	}
+
+	option = { # If planet is owned
+		name = anomaly.7145.b
+		trigger = {
+			event_target:desertling_planet = {
+				num_pops > 0
+			}
+		}
+		event_target:desertling_planet = {
+			change_pc = pc_barren
+			remove_modifier = alien_infestation
+			destroy_colony = yes
+		}
+	}
+
+	option = { # If planet is not owned
+		name = ACKNOWLEDGED
+		trigger = {
+			values_others = no
+			event_target:desertling_planet = {
+				num_pops <= 0
+			}
+		}
+		event_target:desertling_planet = {
+			change_pc = pc_barren
+			remove_modifier = alien_infestation
+		}
+	}
+}
+
+country_event = {
+	id = anomaly.7150
+	title = "anomaly.7150.name"
+	desc = "anomaly.7150.desc"
+	picture = GFX_evt_ship_in_orbit_3
+	show_sound = event_mystic_reveal
+	location = event_target:desertling_planet
+
+	is_triggered_only = yes
+
+	option = {
+		name = anomaly.7150.a
+		event_target:desertling_planet =  {
+			remove_modifier = alien_infestation
+			add_modifier = {
+				modifier = "lush_planet"
+				days = -1
+			}
+			add_deposit = d_green_hills
+			add_deposit = d_bountiful_plains
+		}
+	}
+}
+
+country_event = {
+	id = anomaly.7155
+	title = "anomaly.7155.name"
+	desc = "anomaly.7155.desc"
+	picture = GFX_evt_zro_5
+	show_sound = event_ground_battle
+	location = event_target:desertling_planet
+
+	is_triggered_only = yes
+
+	option = {
+		name = anomaly.7155.a
+		owner = { add_resource = { food = 500 } }
+		event_target:desertling_planet = {
+			remove_modifier = alien_infestation
+			add_deposit = d_red_desert
 		}
 	}
 }

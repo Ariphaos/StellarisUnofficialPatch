@@ -160,7 +160,7 @@ event = {
 			every_system = {
 				limit = {
 					has_star_flag = ratling_system
-					NOT = { 
+					NOT = {
 						has_star_flag = ratling_home_system
 						has_hyperlane_to = prev
 					}
@@ -252,6 +252,10 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 				hidden:fromfrom = { has_resource = { type = sr_dark_matter amount > 0 } }
 			}
 			success_text = {
+				text =							 distar.305.astral_threads
+				hidden:fromfrom = { has_resource = { type = astral_threads amount > 0 } }
+			}
+			success_text = {
 				text = action.92.has_tech
 				OR = {
 					AND = {
@@ -277,6 +281,10 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 					AND = {
 						hidden:fromfrom = { has_resource = { type = sr_dark_matter amount > 0 } }
 						hidden:owner = { has_technology = tech_mine_dark_matter }
+					}
+					AND = {
+						hidden:fromfrom = { has_resource = { type = astral_threads amount > 0 } }
+						hidden:owner = { has_technology = tech_astral_harvesting }
 					}
 				}
 			}
@@ -308,6 +316,10 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 						hidden:fromfrom = { has_resource = { type = sr_dark_matter amount > 0 } }
 						hidden:owner = { has_technology = tech_mine_dark_matter }
 					}
+					AND = {
+						hidden:fromfrom = { has_resource = { type = astral_threads amount > 0 } }
+						hidden:owner = { has_technology = tech_astral_harvesting }
+					}
 				}
 			}
 		}
@@ -321,7 +333,12 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 	trigger = {
 		fromfrom = { # basically a pre-trigger
 			has_strategic_resource = yes
-			has_anomaly = no
+			if = {
+				limit = {
+					is_scope_type = planet
+				}
+				has_anomaly = no
+			}
 		}
 		owner = {
 			OR = {
@@ -391,6 +408,17 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 						has_country_flag = dark_matter_found
 					}
 				}
+				AND = {
+					root.fromfrom = {
+						has_resource = {
+							amount > 0
+									type = astral_threads
+						}
+					}
+					NOT = {
+						has_country_flag = astral_threads_found
+					}
+				}
 			}
 		}
 	}
@@ -420,6 +448,10 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 			else_if = {
 				limit = { has_resource = { type = sr_dark_matter amount > 0 } }
 				root.owner = { set_country_flag =	dark_matter_found }
+			}
+			else_if = {
+				limit = { has_resource = { type = astral_threads amount > 0 } }
+				root.owner = { set_country_flag =	astral_threads_found }
 			}
 		}
 	}
@@ -451,6 +483,10 @@ ship_event = { #Duplicated action.94 for SRs that are created by events, not on 
 				else_if = {
 					limit = { has_resource = { type = sr_dark_matter amount > 0 } }
 					custom_tooltip = action.92.dark_matter.tooltip
+				}
+				else_if = {
+					limit = { has_resource = { type = astral_threads amount > 0 } }
+					custom_tooltip = action.92.astral_threads.tooltip
 				}
 			}
 		}
@@ -1414,7 +1450,7 @@ country_event = {
 				cooldown = no
 			}
 			create_leader = {
-				class = admiral
+				class = commander
 				species = event_target:vol
 				name = random
 				skill = 5
@@ -1603,7 +1639,7 @@ country_event = {
 	immediate = {
 		event_target:mardak_vol_haters_country = {
 			create_leader = {
-				class = admiral
+				class = commander
 				species = event_target:vol
 				name = random
 				skill = 4
@@ -8063,7 +8099,7 @@ ship_event = {
 				country_event = { id = distar.3021 days = 60 }
 			}
 			event_target:stranded_scientist_leader = {
-				kill_leader = { type = scientist show_notification = no }
+				kill_leader = { class = scientist show_notification = no }
 			}
 		}
 	}
@@ -8083,7 +8119,7 @@ ship_event = {
 
 		hidden_effect = {
 			event_target:stranded_scientist_leader = {
-				kill_leader = { type = scientist show_notification = no }
+				kill_leader = { class = scientist show_notification = no }
 			}
 		}
 	}
@@ -8947,6 +8983,21 @@ country_event = { # Alien Box opened
 			value = @tier1materialreward
 			min = @tier1materialmin
 			max = @tier1materialmax
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				is_gestalt = yes
+			}
+			every_owned_leader = {
+				limit = {
+					is_councilor = yes
+					is_ruler = no
+				}
+				set_gestalt_node_protrait_effect = yes
+			}
 		}
 	}
 }
