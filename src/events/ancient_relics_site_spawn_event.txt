@@ -1,0 +1,208 @@
+################################
+#
+# Archaeology Site Spawn Event
+#
+###############################
+
+namespace = ancrel
+
+# Archaeology Site On Survey Spawn
+ship_event = {
+	id = ancrel.9999
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		FROM = {
+			NOR = {
+				exists = archaeological_site
+				has_planet_flag = suppress_archaeological_sites
+				solar_system = {
+					has_star_flag = suppress_archaeological_sites
+				}
+				has_deposit = d_trade_value_1 #Not very clean, but trade value deposits are weird and will block minor artifact deposits.
+				has_deposit = d_trade_value_2
+				has_deposit = d_trade_value_3
+				has_deposit = d_trade_value_4
+				has_deposit = d_trade_value_5
+				has_deposit = d_trade_value_6
+				has_deposit = d_trade_value_7
+				has_deposit = d_trade_value_8
+				has_deposit = d_trade_value_9
+				has_deposit = d_trade_value_10
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+			400 = {}
+			5 = {
+				modifier = {
+					factor = 0.2
+					OR = {
+						owner = { is_ai = yes }
+						owner = { has_country_flag = discovered_site }
+					}
+				}
+				from = {
+					prevent_anomaly = yes
+					create_archaeological_site = random
+				}
+				if = { #Not all celestial bodies can have arc sites
+					limit = {
+						exists = from.archaeological_site
+					}
+					owner = {
+						set_timed_country_flag = {
+							flag = discovered_site
+							days = 1800
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Add an artifact deposit on dig site completion
+fleet_event = {
+	id = ancrel.15050
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_ancrel = yes
+		exists = leader
+	}
+
+	immediate = {
+		leader = {
+			save_event_target_as = archaeologist_leader
+		}
+		if = {
+			limit = {
+				from = {
+					planet = {
+						colonizable_planet = no
+						is_terraforming_candidate = no
+						OR = {
+							has_deposit_for = shipclass_research_station
+							has_deposit = no
+						}
+					}
+				}
+			}
+			from = {
+				planet = {
+					inline_script = {
+						script = deposits/minor_artifacts_randomiser
+						TYPE = research
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				from = {
+					planet = {
+						colonizable_planet = no
+						is_terraforming_candidate = no
+						has_deposit_for = shipclass_mining_station
+					}
+				}
+			}
+			from = {
+				planet = {
+					inline_script = {
+						script = deposits/minor_artifacts_randomiser
+						TYPE = mining
+					}
+				}
+			}
+		}
+		else = {
+			from = {
+				planet = {
+					inline_script = {
+						script = deposits/minor_artifacts_randomiser
+						TYPE = planet
+					}
+				}
+			}
+		}
+	}
+}
+
+# Add an artifact deposit on precursor anomaly completion
+# FROMFROMFROM = planet where the anomaly was
+ship_event = {
+	id = ancrel.15055
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_ancrel = yes
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				FROMFROMFROM = {
+					colonizable_planet = no
+					NOR = {
+						has_modifier = terraforming_candidate
+						has_modifier = frozen_terraforming_candidate
+						has_modifier = toxic_terraforming_candidate
+					}
+					OR = {
+						has_deposit_for = shipclass_research_station
+						has_deposit = no
+					}
+				}
+			}
+			FROMFROMFROM = {
+				random_list = {
+					150 = { }
+					40 = { add_deposit = d_artifacts_research_1 }
+					8 = { add_deposit = d_artifacts_research_2 }
+					2 = { add_deposit = d_artifacts_research_3 }
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				FROMFROMFROM = {
+					colonizable_planet = no
+					NOR = {
+						has_modifier = terraforming_candidate
+						has_modifier = frozen_terraforming_candidate
+						has_modifier = toxic_terraforming_candidate
+					}
+					has_deposit_for = shipclass_mining_station
+				}
+			}
+			FROMFROMFROM  = {
+				random_list = {
+					150 = { }
+					40 = { add_deposit = d_artifacts_mining_1 }
+					8 = { add_deposit = d_artifacts_mining_2 }
+					2 = { add_deposit = d_artifacts_mining_3 }
+				}
+			}
+		}
+		else = {
+			FROMFROMFROM  = {
+				random_list = {
+					150 = { }
+					40 = { add_deposit = d_artifacts_planet_1 }
+					8 = { add_deposit = d_artifacts_planet_2 }
+					2 = { add_deposit = d_artifacts_planet_3 }
+				}
+			}
+		}
+	}
+}

@@ -1,6 +1,43 @@
 # ChangeLog
 
-## November 
+## February 21st
+
+- Final 3.10 release.
+
+- Fix for terraforming candidate not being removed on terraforming directly to a machine world.
+
+## December 16th
+
+- 3.10.4 update. 
+
+- Applied a faction 'fix' (making the diplomatic stance condition more visible) to supremacists that I already had for militarists.
+
+## December 9th
+
+- 3.10.3 update. Was in surgery.
+
+- This was a smaller patch on Paradox's part. I only merged about a half dozen changes.
+
+- Fixed some leftover governor/admiral items in my patch, affecting weights of leader choices for certain factions. Thanks @17blue17 
+- Tried to make the AI want more scientists. Will see if it means much.
+
+## December 3rd
+
+- 3.10.2 update. Apologies for lateness.
+
+- Paradox fixed most of the bad leader checks for megastructure events. Even got a couple I missed, though they also missed a few.
+
+
+## November 23rd
+
+- 3.10.1 Update
+
+- Begun excluding astral scars from all sorts of things they should be excluded from. There are literally hundreds of these so will take awhile. Paradox has also done a handful.
+- Removed a couple 'balance' items.
+- Fixed some more scope existence errors.
+- Enabled special_max_amount = yes for influence (for mods)
+
+## November 17th
 
 - 3.10 Update
 
