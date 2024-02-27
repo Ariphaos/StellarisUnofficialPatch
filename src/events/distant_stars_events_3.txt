@@ -1134,8 +1134,8 @@ event = {
 }
 
 # Workaround (temp vanilla fix)
-# This should be fixed so currently unreachable, but leaving
-# the code available if needed again.
+# This should be fixed so currently unreachable, but 
+# leaving the code available if needed again.
 country_event = {
 	id = distar.8001
 	hide_window = yes
@@ -1407,14 +1407,6 @@ country_event = {
 				set_megastructure_flag = lgate_activated
 			}
 		}
-
-		# if = { limit = { mid_game_years_passed < 0 }
-		# Save game workaround fix: must be re-run due strange bug in 3.0 at game_start
-		#if = { limit = { has_global_flag = dragon_season } # only if bug default
-		#	event_target:global_event_country = {
-		#		country_event = { id = distar.8001 }
-		#	}
-		#}
 		# outcome, to be determined at game start
 		if = {
 			limit = { has_global_flag = gray_goo_crisis_set }
@@ -1793,7 +1785,7 @@ country_event = {
 		# add hyperlanes
 		event_target:lcluster5 = {
 			add_hyperlane = {
-				from = event_target:lcluster_factory_system
+				from = event_target:lcluster5
 				to = event_target:lcluster4
 			}
 		}
@@ -2186,11 +2178,21 @@ fleet_event = {
 				}
 			}
 		}
-		solar_system.star = {
-			enable_special_project = {
-				name = TAME_LDRAGON_PROJECT
-				location = this
-				owner = root.owner
+		solar_system = {
+			star = {
+				enable_special_project = {
+					name = TAME_LDRAGON_PROJECT
+					location = this
+					owner = root.owner
+				}
+			}
+			random_fleet_in_system = {
+				limit = {
+					exists = owner
+					owner = { is_country_type = ldragon_country }
+					is_ship_size = nanite_space_dragon_baby
+				}
+				save_global_event_target_as = ldrake@prev
 			}
 		}
 	}
@@ -2211,16 +2213,10 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		from.solar_system = {
-			random_fleet_in_system = {
-				limit = {
-					exists = owner
-					owner = { is_country_type = ldragon_country }
-				}
-				save_event_target_as = new_dragon
-				set_owner = root
-			}
+		event_target:ldrake@fromfrom.solar_system = {
+			set_owner = root
 		}
+		clear_global_event_target = ldrake@fromfrom.solar_system
 	}
 
 	option = {

@@ -1106,7 +1106,7 @@ ship_event = {
 			NOR = {
 				is_tutorial_level = 0
 				has_country_flag = discovered_modifier_planet
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 			}
 		}
 		from = {
@@ -1176,7 +1176,7 @@ ship_event = {
 				is_tutorial_level = 0
 				has_country_flag = discovered_modifier_planet
 			}
-			is_machine_empire = yes
+			has_authority = auth_machine_intelligence
 		}
 		from = {
 			num_modifiers > 0
@@ -2724,7 +2724,7 @@ ship_event = {
 				# Vanilla would only trigger for purifiers and despoilers.
 				NOR = {
 					is_unfriendly = yes
-					is_xenophobe = yes
+					has_ethic = ethic_fanatic_xenophobe
 				}
 			}
 		}
@@ -3001,7 +3001,9 @@ ship_event = {
 	}
 
 	immediate = {
-		from = { clear_deposits = yes }
+		from = {
+			clear_deposits = yes
+		}
 	}
 
 	option = {
@@ -3009,14 +3011,10 @@ ship_event = {
 		owner = { add_resource = { minerals = 100 } }
 		from = {
 			set_deposit = d_rare_crystals_4
-			if = { limit = { exists = mining_station } # vfix
+			tooltip = {
 				mining_station = {
 					dismantle = yes
 				}
-			}
-			hidden_effect = {
-				remove_planet_flag = sleeping_crystal
-				set_planet_flag = annoyed_crystal
 			}
 		}
 	}
@@ -3030,13 +3028,18 @@ ship_event = {
 			location = from
 		}
 		from = {
-			remove_planet_flag = sleeping_crystal
-			set_planet_flag = annoyed_crystal
-			if = { limit = { exists = mining_station } # vfix
+			tooltip = {
 				mining_station = {
 					dismantle = yes
 				}
 			}
+		}
+	}
+
+	after = {
+		from = {
+			remove_planet_flag = sleeping_crystal
+			set_planet_flag = annoyed_crystal
 		}
 	}
 }
@@ -3559,7 +3562,12 @@ country_event = {
 				}
 			}
 			vending_machine_contents_rot = {
-				give_next_tech_society_option_effect = yes
+				add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
 			}
 		}
 	}
@@ -3584,12 +3592,7 @@ ship_event = {
 
 	option = {
 		name = anomaly.7020.a
-		if = {
-			limit = {
-				owner = { is_regular_empire = yes }
-			}
-			from = { create_archaeological_site = site_space_shanty_dig }
-		}
+		from = { create_archaeological_site = site_space_shanty_dig }
 	}
 }
 
@@ -3613,13 +3616,7 @@ ship_event = {
 
 	option = {
 		name = anomaly.7030.desc.a
-		if = {
-			limit = {
-				has_ancrel = yes
-				owner = { is_regular_empire = yes }
-			}
-			from = { create_archaeological_site = site_rage_sage_dig }
-		}
+		from = { create_archaeological_site = site_rage_sage_dig }
 	}
 }
 
@@ -3694,7 +3691,7 @@ ship_event = {
 	option = {
 		trigger = {
 			owner = {
-				is_gestalt = no
+				NOT = { has_ethic = ethic_gestalt_consciousness }
 			}
 		}
 		name = anomaly.7101.a
@@ -3705,7 +3702,7 @@ ship_event = {
 	option = {
 		trigger = {
 			owner = {
-				is_machine_empire = yes
+				has_authority = auth_machine_intelligence
 			}
 		}
 		name = anomaly.7101.b
@@ -3716,7 +3713,7 @@ ship_event = {
 	option = {
 		trigger = {
 			owner = {
-				is_hive_empire = yes
+				has_authority = auth_hive_mind
 			}
 		}
 		name = anomaly.7101.c
@@ -4586,6 +4583,88 @@ country_event = {
 		event_target:desertling_planet = {
 			remove_modifier = alien_infestation
 			add_deposit = d_red_desert
+		}
+	}
+}
+
+ship_event = {
+	id = anomaly.7200
+	title = anomaly.7200.name
+	desc = anomaly.7200.desc
+	picture = GFX_evt_shrouded_planet
+	show_sound = event_mystic_reveal
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = anomaly.7200.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			from.solar_system = {
+				every_system_planet = {
+					switch = {
+						trigger = has_planet_flag
+						planet_Ariph = {
+							change_pc = pc_molten
+							add_deposit = d_alloys_2
+						}
+						planet_Hari_XXIV = {
+							change_pc = pc_molten
+							add_deposit = d_alloys_2
+						}
+						planet_Risasi = {
+							change_pc = pc_asteroid
+							add_deposit = d_rare_crystals_2
+						}
+						planet_Aridder = {
+							change_pc = pc_frozen
+							add_deposit = d_minerals_2
+						}
+						planet_Rover = {
+							change_pc = pc_toxic
+							add_deposit = d_exotic_gases_1
+						}
+						planet_Jasepe = {
+							change_pc = pc_barren
+							add_deposit = d_minerals_3
+						}
+						planet_Blaxe = {
+							change_pc = pc_gas_giant
+							add_deposit = d_energy_3
+						}
+						planet_Glavi = {
+							change_pc = pc_gas_giant
+							add_deposit = d_exotic_gases_1
+						}
+						planet_Glavi = {
+							change_pc = pc_barren_cold
+							add_deposit = d_minerals_2
+						}
+						planet_Glavi = {
+							change_pc = pc_frozen
+							add_deposit = d_minerals_2
+						}
+						star_seddom = {
+							set_planet_size = 33
+							add_deposit = d_energy_5
+						}
+					}
+				}
+				random_ambient_object = {
+					limit = {
+						has_ambient_object_flag = breachsealer_breach
+					}
+					destroy_ambient_object = this
+				}
+			}
 		}
 	}
 }

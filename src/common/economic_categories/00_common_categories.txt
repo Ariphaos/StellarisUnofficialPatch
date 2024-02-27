@@ -33,6 +33,7 @@ country_base = {
 }
 
 trade = {
+	parent = country
 	use_for_ai_budget = yes
 }
 
@@ -138,6 +139,22 @@ megastructures = {
 }
 
 megastructures_habitat = {
+	use_for_ai_budget = yes
+	parent = megastructures
+	generate_mult_modifiers = {
+		cost
+		produces
+		upkeep
+	}
+	generate_add_modifiers = {
+		cost
+		produces
+		upkeep
+	}
+	modifier_category = megastructure
+}
+
+megastructures_gateways = {
 	use_for_ai_budget = yes
 	parent = megastructures
 	generate_mult_modifiers = {
@@ -836,13 +853,13 @@ station_researchers = {
 
 station_observers = {
 	parent = stations
-	
-	generate_mult_modifiers = {
+
+	generate_add_modifiers = {
 		cost
 		upkeep
 		produces
 	}
-	generate_add_modifiers = {
+	generate_mult_modifiers = {
 		cost
 		upkeep
 		produces
@@ -896,7 +913,7 @@ starbase_stations = {
 			is_scope_valid = yes #When called from ship designer the design is not valid yet.
 			OR = {
 				is_ship_size = starbase_outpost
-				is_ship_size = orbital_ring_tier_1 #TODOJM: Remove?
+				is_ship_size = orbital_ring_tier_1
 			}
 		}
 	}
@@ -1030,6 +1047,7 @@ planets = {
 	use_for_ai_budget = yes
 	ai_use_parent_for_resources_upkeep = {
 		energy
+		consumer_goods
 	}
 
 	generate_mult_modifiers = {
@@ -1922,13 +1940,13 @@ planet_jobs_productive = { #this should contain all categories that primarily pr
 
 planet_pop_assemblers = {
 	parent = planet_jobs
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
 	generate_mult_modifiers = {
 		produces
 		upkeep
+	}
+	generate_add_modifiers = {
+		upkeep
+		produces
 	}
 	modifier_category = pop
 }
@@ -1997,6 +2015,33 @@ planet_livestock = {
 		upkeep
 	}
 	modifier_category = pop
+	# Inherited Modifiers
+	triggered_produces_modifier = {
+		key = planet_farmers
+		modifier_types = {
+			mult
+			add
+		}
+		trigger = {
+			has_job = livestock	# This check is done so that livestock working zoo jobs don't inherit the modifier
+			is_organic_species = yes
+			is_lithoid = no
+		}
+		use_parent_icon = yes
+	}
+	triggered_produces_modifier = {
+		key = planet_miners
+		modifier_types = {
+			mult
+			add
+		}
+		trigger = {
+			has_job = livestock	# This check is done so that livestock working zoo jobs don't inherit the modifier
+			is_organic_species = yes
+			is_lithoid = yes
+		}
+		use_parent_icon = yes
+	}
 }
 
 planet_technician = {
@@ -2246,6 +2291,63 @@ planet_squires = {
 	modifier_category = pop
 }
 
+planet_knights = {
+	parent = planet_jobs_productive
+	modifier_category = pop
+	generate_add_modifiers = {
+		produces
+		upkeep
+	}
+	generate_mult_modifiers = {
+		produces
+		upkeep
+	}
+# Inherited Modifiers
+	triggered_produces_modifier = {
+		key = planet_researchers
+		modifier_types = {
+			mult
+			add
+		}
+		trigger = {
+			always = yes
+		}
+		use_parent_icon = yes
+	}
+	triggered_upkeep_modifier = {
+		key = planet_researchers
+		modifier_types = {
+			mult
+			add
+		}
+		trigger = {
+			always = yes
+		}
+		use_parent_icon = yes
+	}
+	triggered_produces_modifier = {
+		key = planet_administrators
+		modifier_types = {
+			mult
+			add
+		}
+		trigger = {
+			always = yes
+		}
+		use_parent_icon = yes
+	}
+	triggered_upkeep_modifier = {
+		key = planet_administrators
+		modifier_types = {
+			mult
+		}
+		trigger = {
+			always = yes
+		}
+		use_parent_icon = yes
+	}
+}
+
 planet_priests = {
 	parent = planet_administrators
 	generate_mult_modifiers = {
@@ -2417,19 +2519,6 @@ planet_bath_attendants_machine = {
 		upkeep
 	}
 	modifier_category = pop
-}
-
-#DO NOT ASSIGN A PARENT TO THIS.
-#It is a special hack. The normal job modifiers apply via knights_unity/research_output_modifier script values in the jobs
-knights_independent_category = {
-	generate_mult_modifiers = {
-		produces
-		upkeep
-	}
-	generate_add_modifiers = {
-		produces
-		upkeep
-	}
 }
 
 planet_pops = {
@@ -3310,11 +3399,13 @@ specialist_subject_conversion = {
 
 relics = {
 	generate_mult_modifiers = {
+		produces
 		cost
 		upkeep
 	}
 
 	generate_add_modifiers = {
+		produces
 		cost
 		upkeep
 	}

@@ -21,7 +21,6 @@ ship_event = {
 
 	is_triggered_only = yes
 
-	# Trigger limits already defined in the anomaly.
 	immediate = {
 		create_ambient_object = {
 			type = "abandoned_ship_object"
@@ -39,15 +38,14 @@ ship_event = {
 			random_neighbor_country = {
 				limit = {
 					is_ai = yes
- 					is_country_type = default
- 					is_homicidal = no
+					is_country_type = default
+					is_homicidal = no
 					has_communications = prev
 					NOR = {
 						is_at_war_with = prev
 						is_country = prev
 					}
-					# Any system means any system, so.
-					ROOT.solar_system = { has_access_fleet = prev }
+					event_target:supply_wreckage_tar.solar_system = { has_access_fleet = prev }
 				}
 				save_event_target_as = wreckage_owner
 			}
@@ -394,7 +392,7 @@ ship_event = {
 	option = {
 		name = FASCINATING
 		from = {
-			add_deposit = d_energy_3
+			add_deposit = d_energy_10
 			hidden_effect = { add_modifier = { modifier = black_hole_energy years = -1 } }
 		}
 	}
@@ -1038,9 +1036,9 @@ planet_event = { #Rage Virus cured
 				}
 			}
 			IF = {
-				limit = { any_owned_leader = { is_researching_area = society } }
+				limit = { any_owned_leader = { is_head_of_research = yes } }
 				random_owned_leader = {
-					limit = { is_researching_area = society }
+					limit = { is_head_of_research = yes }
 					add_skill = 1
 				}
 			}
@@ -1148,10 +1146,6 @@ ship_event = {
 		name = EXCELLENT
 		owner = {
 			if = {
-				limit = { NOT = { has_technology = tech_engineering_1 } }
-				give_technology = { tech = tech_engineering_1 }
-			}
-			else_if = {
 				limit = { NOT = { has_technology = tech_assembly_pattern } }
 				give_technology = { tech = tech_assembly_pattern }
 			}
@@ -4444,7 +4438,23 @@ ship_event = { #The Big Friendly Warform
 
 ship_event = {
 	id = distar.156
-	hide_window = yes
+	title = "distar.156.name"
+	desc = {
+		trigger = {
+			owner = { NOT = { has_authority = auth_machine_intelligence } }
+		}
+		text = "distar.156.desc"
+	}
+	desc = {
+		trigger = {
+			owner = { has_authority = auth_machine_intelligence }
+		}
+		text = "distar.156.desc.machi"
+	}
+	picture = GFX_evt_space_debris
+	show_sound = event_construction
+	location = event_target:repaired_warform
+
 	is_triggered_only = yes
 
 	immediate = {
@@ -4452,7 +4462,7 @@ ship_event = {
 
 		create_country = {
 			name = "NAME_S8751"
-			type = faction
+			type = nice_faction
 			auto_delete = yes
 			flag = {
 				icon = {
@@ -4522,37 +4532,6 @@ ship_event = {
 					set_age = 1578
 				}
 			}
-		}
-		ship_event = {
-			id = distar.15600
-			days = 1
-		}
-	}
-}
-
-ship_event = {
-	id = distar.15600
-	title = "distar.156.name"
-	desc = {
-		trigger = {
-			owner = { is_machine_empire = no }
-		}
-		text = "distar.156.desc"
-	}
-	desc = {
-		trigger = {
-			owner = { is_machine_empire = yes }
-		}
-		text = "distar.156.desc.machi"
-	}
-	picture = GFX_evt_space_debris
-	show_sound = event_construction
-	location = event_target:repaired_warform
-
-	is_triggered_only = yes
-
-	immediate = {
-		event_target:warform_country = {
 			create_fleet = {
 				name = "NAME_S8751"
 				effect = {
@@ -5444,9 +5423,16 @@ country_event = { #New leaders get Brainslug Trait
 				random_list = {
 					80 = {
 						#Nothing
-						#Ariphaos TODO: Leaders have ethics now
 					}
 					20 = {
+						modifier = {
+							factor = 0.5
+							has_ethic = ethic_xenophobe
+						}
+						modifier = {
+							factor = 2
+							has_ethic = ethic_xenophile
+						}
 						add_trait = leader_trait_brainslug
 					}
 				}
@@ -5479,9 +5465,16 @@ country_event = { #Pool leaders get Brainslug Trait
 				random_list = {
 					80 = {
 						#Nothing
-						#Ariphaos TODO: Leaders have ethics now
 					}
 					20 = {
+						modifier = {
+							factor = 0.5
+							has_ethic = ethic_xenophobe
+						}
+						modifier = {
+							factor = 2
+							has_ethic = ethic_xenophile
+						}
 						add_trait = leader_trait_brainslug
 					}
 				}
@@ -5498,12 +5491,9 @@ country_event = { #Cohabitants of Brainslugged pops generate initial Unrest
 	is_triggered_only = yes
 
 	immediate = {
-		IF = {
-			LIMIT = {
-				NOR = {
-					has_ethic = ethic_xenophobe
-					has_ethic = ethic_fanatic_xenophobe
-				}
+		if = {
+			limit = {
+				is_xenophobe = no
 			}
 			every_owned_planet = {
 				limit = {
@@ -5524,8 +5514,8 @@ country_event = { #Cohabitants of Brainslugged pops generate initial Unrest
 				}
 			}
 		}
-		ELSE_IF = { #Xenophobes result in higher unrest
-			LIMIT = { has_ethic = ethic_xenophobe }
+		# Ariphaos TODO: Balance patch should do something about fanatic xenophobes and rulers here.
+		else = { #Xenophobes result in higher unrest
 			every_owned_planet = {
 				limit = {
 					OR = {
@@ -5537,11 +5527,6 @@ country_event = { #Cohabitants of Brainslugged pops generate initial Unrest
 					}
 				}
 				add_modifier = { modifier = brainslug_woes_phobe days = 7200 }
-			}
-		}
-		ELSE = { # Fanatic xenophobes even more so.
-			every_owned_planet = {
-				add_modifier = { modifier = brainslug_woes_phobe days = 15000 }
 			}
 		}
 	}
@@ -6152,6 +6137,7 @@ planet_event = { #If you terraform the planet to a non-seabearing class before c
 			is_planet_class = pc_gaia
 			is_planet_class = pc_ocean
 			is_planet_class = pc_continental
+			is_planet_class = pc_tropical
 		}
 	}
 
@@ -8886,33 +8872,6 @@ country_event = { #Destroying the leader
 				destroy_ambient_object = this
 			}
 		}
-	}
-}
-
-country_event = {
-	id = distar.249
-	title = "distar.246.name"
-	desc = "distar.249.desc"
-	location = event_target:droppod_tar
-
-	diplomatic = yes
-
-	is_triggered_only = yes
-
-	picture_event_data = {
-		portrait = event_target:caretaker_leader_tar
-		room = ethic_spaceship_room
-	}
-
-	option = {
-		name = "distar.249.a"
-	}
-
-	option = {
-		exclusive_trigger = {
-			is_machine_empire = yes
-		}
-		name = "distar.249.a.machi"
 	}
 }
 

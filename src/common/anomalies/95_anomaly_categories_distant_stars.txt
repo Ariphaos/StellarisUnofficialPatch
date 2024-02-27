@@ -47,17 +47,12 @@ DISTAR_RAINBOW_CAT = {
 	picture = "GFX_evt_black_hole"
 	level = 4
 
-	# Note: This has a clear_deposit effect now, but only the Great Wound usually has empty black holes.
-
 	spawn_chance = {
 		modifier = {
-			add = 0.1
+			add = 1
 			has_distar = yes
 			is_star = yes
 			is_star_class = sc_black_hole
-		}
-		modifier = {
-			factor = 20
 			has_any_strategic_resource = no
 		}
 	}
@@ -296,14 +291,10 @@ DISTAR_ELECTRO_CAT = {
 		modifier = {
 			add = 1
 			has_distar = yes
-			NOT = { has_deposit_for = shipclass_mining_station }
+			has_any_strategic_resource = no
 			OR = {
 				is_asteroid = yes
-				is_planet_class = pc_molten
-				is_planet_class = pc_barren
-				is_planet_class = pc_barren_cold
-				is_planet_class = pc_toxic
-				is_planet_class = pc_frozen
+				uninhabitable_regular_planet = yes
 			}
 		}
 	}
@@ -322,26 +313,23 @@ DISTAR_RUM_CAT = {
 			has_distar = yes
 			is_planet_class = pc_gas_giant
 			is_inside_nebula = yes
-			OR = {
-				from.owner = {
-					NOT = {
-						is_gestalt = yes
-					}
-				}
-				from.owner = {
-					is_machine_empire = yes
-					NOR = {
-						has_civic = civic_machine_terminator
-						has_civic = civic_machine_assimilator
-					}
-					any_neighbor_country = {
-						is_ai = yes
-						is_country_type = default
-						has_communications = from.owner
+			from.owner = {
+				OR = {
+					is_gestalt = no
+					AND = {
+						has_authority = auth_machine_intelligence
 						NOR = {
-							is_gestalt = yes
-							is_at_war_with = from.owner
-							is_same_value = from.owner
+							has_civic = civic_machine_terminator
+							has_civic = civic_machine_assimilator
+						}
+						any_neighbor_country = {
+							is_ai = yes
+							is_country_type = default
+							has_communications = from.owner
+							NOR = {
+								is_gestalt = yes
+								is_at_war_with = from.owner
+							}
 						}
 					}
 				}
@@ -353,15 +341,15 @@ DISTAR_RUM_CAT = {
 		1 = {
 			modifier = {
 				factor = 0
-				owner = { is_machine_empire = yes }
+				owner = { has_authority = auth_machine_intelligence }
 			}
 			anomaly_event = distar.90
 		}
-		0 = {
+		1 = {
 			modifier = {
-				add = 1
+				factor = 0
 				owner = {
-					is_machine_empire = yes
+					NOT = { has_authority = auth_machine_intelligence }
 				}
 			}
 			anomaly_event = distar.91
@@ -428,11 +416,6 @@ DISTAR_EXO_CAT = {
 	}
 
 	on_spawn = {
-		#TODO [CD] [BLOCKERS]
-		#every_deposit = {
-		#	limit = { has_blocker = yes	}
-		#	set_blocker = "exofungus_blocker"
-		#}
 		add_modifier = { modifier = exofungus days = -1 }
 	}
 
@@ -545,13 +528,13 @@ DISTAR_DIAMOND_CAT = {
 			add = 1
 			has_distar = yes
 			is_star = yes #Necessary b/c is_star_class actually means is_system_class
-			#is_star_class = sc_f
+			is_planet_class = pc_f_star
+			# Stars without resources are really, really rare.
 			NOT = { has_deposit_for = shipclass_mining_station }
-			is_planet_class = pc_f_star	# so this can be spawned in bi-/trinary system as well
 		}
 	}
 
-	null_spawn_chance = 0.5  # 50% chance to spawn
+	null_spawn_chance = 0.5 # 50% chance to spawn
 
 	on_success = {
 		1 = {
@@ -587,19 +570,14 @@ DISTAR_MERCURY_CAT = {
 	desc = "DISTAR_MERCURY_CAT_DESC"
 	picture = "GFX_evt_ship_in_orbit"
 	level = 7
-	should_ai_and_humans_use = yes
+
+	should_ai_and_humans_use = yes #So that the AI can also find living metal
 
 	spawn_chance = {
 		modifier = {
 			add = 0.1
 			has_distar = yes
-			OR = {
-				is_planet_class = "pc_molten"
-				is_planet_class = "pc_barren"
-				is_planet_class = "pc_barren_cold"
-				is_planet_class = "pc_frozen"
-				is_planet_class = "pc_toxic"
-			}
+			uninhabitable_regular_planet = yes
 			has_any_strategic_resource = no
 		}
 	}
@@ -621,11 +599,19 @@ DISTAR_WARFORM_CAT = {
 			add = 1
 			has_distar = yes
 			is_planet_class = "pc_toxic"
+			OR = {
+				is_multiplayer = no
+				AND = {
+					exists = from.owner
+					from.owner = {
+						NOT = { has_policy_flag = ai_outlawed }
+					}
+				}
+			}
 		}
 	}
 
-	# This doesn't set anything in the global scope. It just gives a ~500 power ship.
-	max_once_global = no
+	max_once_global = yes
 
 	on_success = {
 		1 = {
@@ -694,14 +680,17 @@ DISTAR_FLYTRAP_CAT = {
 		modifier = {
 			add = 10
 			habitable_planet = yes
-			NOR = { is_planet_class = pc_desert is_planet_class = pc_arctic }
+			NOR = { 
+				is_planet_class = pc_desert
+				is_planet_class = pc_arctic
+			}
 		}
 		modifier = {
 			factor = 0
 			OR = {
 				has_distar = no
 				from.owner = {
-					is_machine_empire = yes
+					has_authority = auth_machine_intelligence
 				}
 			}
 		}
@@ -1121,20 +1110,7 @@ abandoned_outpost_category = {
 
 	spawn_chance = {
 		modifier = {
-			add = 0	#4 # added in system initializer
-			has_distar = yes
-			solar_system = { has_star_flag = big_rip_system }
-
-			from.owner = {
-				NOT = {
-					has_global_flag = l_cluster_opened
-					has_completed_event_chain_counter = {
-						event_chain = l_cluster_chain
-						counter = clues
-					}
-				}
-				has_event_chain = l_cluster_chain
-			}
+			add = 0 # added in system initializer
 		}
 	}
 
@@ -1404,8 +1380,6 @@ peculiar_patterns_cat = {
 tomb_world_cat = {
 	picture = "GFX_evt_ship_in_orbit_2"
 	level = 4
-	# This doesn't impact the rest of the galaxy.
-	max_once_global = no
 	spawn_chance = {
 		modifier = {
 			add = 3
@@ -1459,7 +1433,6 @@ tomb_world_cat = {
 alien_life_cat = {
 	picture = GFX_evt_alien_nature
 	level = 3
-	max_once_global = yes
 
 	spawn_chance = {
 		modifier = {
@@ -1621,7 +1594,7 @@ disco_impossible_organism_cat = {
 		modifier = {
 			add = 2
 			is_planet_class = pc_toxic
-			NOT = { has_deposit_for = shipclass_mining_station }
+			has_any_strategic_resource = no
 		}
 		modifier = {
 			factor = 0
@@ -1629,8 +1602,7 @@ disco_impossible_organism_cat = {
 				OR = {
 					has_ethic = ethic_xenophobe
 					has_ethic = ethic_fanatic_xenophobe
-					has_civic = civic_machine_terminator
-					is_hive_empire = yes
+					is_gestalt = yes #mentions inviduals
 				}
 			}
 		}
@@ -1732,7 +1704,7 @@ disco_speed_demon_cat = {
 		modifier = {
 			factor = 0
 			from.owner = {
-				is_machine_empire = yes
+				is_synthetic_empire = yes
 			}
 		}
 	}

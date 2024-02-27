@@ -120,31 +120,15 @@ revolt_situation_rebellion_joiners = {
 	max = 3 #it would feel bad if this were too high
 }
 
+revolt_fleet_power = {
+	base = 0
+	add = event_target:rebel_empire.trigger:fleet_power
+	min = 100 # The division gets cubed, then multiplied by 5.
+}
+
 revolt_fleet_comparison_factor = {
 	add = owner.trigger:fleet_power
-	# Let's not risk a divide by zero.
-	#divide = event_target:rebel_empire.trigger:fleet_power
-
-	# Divide by 100 if too low.
-	modifier = {
-		factor = 0.01
-		event_target:rebel_empire = {
-			fleet_power <= 100
-		}
-	}
-	complex_trigger_modifier = {
-		trigger = fleet_power
-		trigger_scope = event_target:rebel_empire
-		#parameters = {
-		#	limit = { fleet_power > 100 }
-		#}
-		potential = {
-			event_target:rebel_empire = {
-				fleet_power > 100
-			}
-		}
-		mode = divide
-	}
+	divide = value:revolt_fleet_power
 	pow = 3
 }
 
@@ -322,7 +306,7 @@ desired_colonizers_base = {
 
 desired_constructors_min = {
 	modifier = {
-		set = 1
+		set = 2
 		OR = {
 			is_country_type = default
 			is_country_type = awakened_fallen_empire
@@ -620,7 +604,6 @@ knights_unity_output_modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7130_c }
 	}
-	mult = value:job_total_output_modifier|JOB|bureaucrat|RESOURCE|unity|
 }
 
 knights_research_output_modifier = {
@@ -641,7 +624,6 @@ knights_research_output_modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7220_a }
 	}
-	mult = value:job_total_research_output_modifier|JOB|researcher|
 }
 
 knight_commander_unity_output_modifier = {
@@ -662,7 +644,6 @@ knight_commander_unity_output_modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7220_a }
 	}
-	mult = value:job_total_output_modifier|JOB|politician|RESOURCE|unity|
 }
 
 knight_commander_research_output_modifier = {
@@ -679,7 +660,6 @@ knight_commander_research_output_modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7130_b }
 	}
-	mult = value:job_total_research_output_modifier|JOB|head_researcher|
 }
 
 tech_weight_likelihood = {
@@ -1415,6 +1395,19 @@ brood_usage_mult = {
 	base = 0.05
 	modifier = {
 		mult = brood_usage
+	}
+}
+
+federation_xp_from_diplo_tradition = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_member
+		parameters = {
+			limit = {
+				has_tradition = tr_diplomacy_finish
+			}
+		}
+		mode = add
 	}
 }
 
@@ -2367,6 +2360,19 @@ living_standard_trade_value = {
 		add = modifier:living_standard_trade_value_criminals_add
 	}
 	mult = value:scripted_modifier_mult|MODIFIER|pop_lifestyle_trade_mult|
+}
+
+preacher_trade_value = {
+	base = 2
+	add = owner.modifier:job_preacher_trade_value_add
+	# We want to inherit the bonuses from the branch office owner if they exist as well.
+	modifier = {
+		planet = {
+			has_branch_office = yes
+		}
+		add = planet.branch_office_owner.modifier:job_preacher_trade_value_add
+	}
+	mult = value:scripted_modifier_mult|MODIFIER|pop_job_trade_mult|
 }
 
 rise_to_the_occasion_value = {

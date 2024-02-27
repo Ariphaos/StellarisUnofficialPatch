@@ -1,0 +1,76 @@
+
+namespace = anomaly
+
+# vanilla fix on_planet_transfer
+# Originally written by FirePrince for A Deadly Tempest
+ship_event = {
+	id = anomaly.16001
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		exists = solar_system
+		exists = event_target:nanite_swarm_planet
+		solar_system = {
+			# is_bottleneck_system = no
+			any_system_planet = {
+				is_star = no
+				is_asteroid = no
+				has_planet_flag = colony_event
+				is_planet = event_target:nanite_swarm_planet
+				has_modifier = nanite_swarm_modifier
+			}
+		}
+		exists = owner
+		owner = {
+			NOT = { has_special_project = STUDY_NANITE_SWARM }
+		}
+	}
+	immediate = {
+		log="Reenable lost Nanite Swarm Project for [From.GetName]"
+		event_target:nanite_swarm_planet = {
+			planet_event = { id = anomaly.16002 days = 3 scopes = { from = root.owner fromfrom = root } }
+		}
+	}
+}
+
+# Vanilla fix 
+# Special Project Study Nanite Swarm
+# From = Country
+# FromFrom = Fleet of the science ship that surveyed it, if any
+planet_event = {
+	id = anomaly.16002
+	title = "COLONIZABLE_ANOMALY"
+	desc = "NANO_SWARM_CAT_DESC"
+	picture = "GFX_evt_desert"
+	show_sound = event_radio_chatter
+	# hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_planet_flag = colony_event
+		has_modifier = nanite_swarm_modifier
+		is_preventing_anomaly = yes
+		# has_anomaly = no # NANO_SWARM_CAT
+		OR = {
+			NOT = { exists = event_target:nanite_swarm_planet }
+			is_planet = event_target:nanite_swarm_planet
+		}
+		exists = from
+		from = {
+			is_country_type = default
+			NOT = { has_special_project = STUDY_NANITE_SWARM }
+		}
+	}
+	immediate = {
+		log="Reenable Nanite Swarm Project for [From.GetName]"
+		random_playable_country = {
+			limit = { has_special_project = STUDY_NANITE_SWARM }
+			abort_special_project = { type = STUDY_NANITE_SWARM location = root }
+		}
+		add_anomaly = { category = NANO_SWARM_CAT target = from } # ship_event = { id = anomaly.6700 }
+	}
+	option = {
+		name = ANOMALY_VIEW_CLOSE
+		custom_tooltip = ANOMALY_LEAVE_BE_DESC
+	}
+
+}

@@ -1,8 +1,8 @@
-version="3.10.4.1"
+version="3.11.0.0"
 tags={
 	"Fixes"
 }
 picture="thumbnail.png"
-name="~~Ariphaos Unofficial Patch (3.10)"
-supported_version="3.10.4"
+name="~~Ariphaos Unofficial Patch (3.11)"
+supported_version="3.11.1"
 remote_file_id="1995601384"

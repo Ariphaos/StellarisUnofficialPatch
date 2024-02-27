@@ -1,0 +1,3648 @@
+################################
+#
+# Origin Events
+#
+###############################
+
+namespace = origin
+
+#########################
+# PAYBACK
+#########################
+
+# Initial setup
+country_event = {
+	id = origin.4000
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+	}
+
+	immediate = {
+		low_tech_start_add_research_options_effect = yes
+
+		capital_scope = {
+			solar_system = {
+				set_star_flag = payback_system
+			}
+
+			# Dig site + ambient objects, for decoration
+			owner = {
+				set_country_flag = payback_origin_arcsite_owner@prev
+			}
+
+			set_planet_flag = payback_site_planet
+			set_planet_flag = has_orbital_debris
+			create_archaeological_site = payback_digsite
+			create_ambient_object = {
+				type = "payback_site_ship_object"
+				use_3d_location = yes
+				entity_offset_height = 10
+				location = this
+			}
+			create_ambient_object = {
+				type = "ancient_battlefield_02_object"
+				use_3d_location = yes
+				entity_offset_height = 0
+				location = this
+			}
+			while = {
+				count = 5
+				create_ambient_object = {
+					type = "small_debris_object"
+					use_3d_location = yes
+					entity_offset_height = { min = 10 max = -10 }
+					location = this
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 200
+						angle = random
+					}
+				}
+			}
+			while = {
+				count = 5
+				create_ambient_object = {
+					type = "abandoned_ship_2_object"
+					use_3d_location = no
+					entity_offset_height = { min = 20 max = -20 }
+					location = this
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 150
+						angle = random
+					}
+				}
+			}
+		}
+	}
+}
+
+# Assorted setup
+country_event = {
+	id = origin.4005
+	is_triggered_only = yes
+	hide_window = yes
+
+	trigger = {
+		has_origin = origin_payback
+	}
+
+	immediate = {
+
+		# Payback empire is aware of alien life
+		set_country_flag = encountered_first_primitive
+		set_country_flag = first_contact_event
+		set_country_flag = first_alien_life
+		set_country_flag = Story1
+		set_country_flag = Story2
+		set_country_flag = Story3
+		set_country_flag = Story4
+		set_country_flag = Story5
+		set_country_flag = Story6
+		set_country_flag = Story7
+		set_country_flag = has_encountered_other_empire
+
+		# First contact protocols fires between 3 and 6 months.
+		country_event = { id = first_contact.1060 days = 135 random = 45 }
+
+		species = { save_event_target_as = victim_species }
+
+		# Change the planets of the slaver empire
+		random_country = {
+			limit = {
+				has_country_flag = slavers_of_@root
+			}
+			every_owned_planet = {
+				limit = {
+					has_modifier = colonial_remains
+				}
+				change_pc = owner.species
+			}
+		}
+
+		# Debt Collectors event chain
+		country_event = { id = origin.4010 days = 3600 random = 180 }
+		# Arc site
+		country_event = { id = origin.4900 days = 180 }
+	}
+}
+
+# MSI debris
+country_event = {
+	id = origin.4100
+	title = "origin.4100.name"
+	desc = "origin.4100.desc"
+	picture = GFX_evt_relic_shipyard
+	show_sound = event_alien_nature
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
+		locked_random_list = {
+			10 = {
+				add_random_research_option = {
+					add_progress = 0.25
+					area = engineering
+					tier = 1
+					ignore_prereqs = yes
+					fail_effects = {
+						add_monthly_resource_mult = {
+							resource = engineering_research
+							value = @tier5researchreward
+							min = @tier5researchmin
+							max = @tier5researchmax
+						}
+					}
+				}
+			}
+			10 = {
+				add_random_research_option = {
+					add_progress = 0.25
+					area = physics
+					tier = 1
+					ignore_prereqs = yes
+					fail_effects = {
+						add_monthly_resource_mult = {
+							resource = physics_research
+							value = @tier5researchreward
+							min = @tier5researchmin
+							max = @tier5researchmax
+						}
+					}
+				}
+			}
+			10 = {
+				add_random_research_option = {
+					add_progress = 0.25
+					area = society
+					tier = 1
+					ignore_prereqs = yes
+					fail_effects = {
+						add_monthly_resource_mult = {
+							resource = society_research
+							value = @tier5researchreward
+							min = @tier5researchmin
+							max = @tier5researchmax
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = origin.4105
+	title = "origin.4105.name"
+	desc = "origin.4105.desc"
+	picture = GFX_evt_relic_shipyard
+	show_sound = event_alien_nature
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
+		add_resource = {
+			alloys = 150
+		}
+	}
+}
+
+## First Contact with evil slavers
+
+# Comms Study 1
+first_contact_event = {
+	id =  origin.4200
+	title = origin.4200.name
+	desc = origin.4200.desc
+	picture = GFX_evt_arguing_senate
+	show_sound = event_factions
+	is_triggered_only = yes
+	first_contact = yes
+
+	immediate = {
+		set_site_progress_locked = yes
+	}
+
+	after = {
+		set_site_progress_locked = no
+	}
+
+	option = {
+		name = origin.4200.a.auth
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.a.ega
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_egalitarian
+					has_ethic = ethic_fanatic_egalitarian
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.b.mili
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.b.paci
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.c.phobe
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.c.phile
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.d.spiri
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+
+	option = {
+		name = origin.4200.d.mate
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_stage_2
+		}
+	}
+}
+
+# Comms Study 2
+first_contact_event = {
+	id =  origin.4205
+	title = origin.4205.name
+	desc = origin.4205.desc
+	picture = GFX_evt_news_room
+	show_sound = event_planetary_riot
+	is_triggered_only = yes
+	first_contact = yes
+
+	immediate = {
+		set_site_progress_locked = yes
+	}
+
+	after = {
+		set_site_progress_locked = no
+	}
+
+	option = {
+		name = origin.4205.a
+		owner = {
+			add_resource = {
+				unity = 300
+			}
+			capital_scope = {
+				add_modifier = {
+					modifier = payback_freedom_of_speech
+					days = 360
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_finish
+		}
+	}
+
+	option = {
+		name = origin.4205.b
+		owner = {
+			capital_scope = {
+				add_modifier = {
+					modifier = payback_curfew
+					days = 360
+				}
+			}
+		}
+		hidden_effect = {
+			set_first_contact_stage = slavers_finish
+		}
+	}
+}
+
+# Comms Study Finale
+first_contact_event = {
+	id = origin.4210
+	title = origin.4210.name
+	desc = origin.4210.desc
+	picture = GFX_evt_diplomatic_visit
+	show_sound = event_celebration
+	is_triggered_only = yes
+	first_contact = yes
+
+	immediate = {
+		set_site_progress_locked = yes
+	}
+
+	after = {
+		set_site_progress_locked = no
+	}
+
+	option = {
+		name = EXCELLENT
+		finish_first_contact_effect = yes
+		first_contact_inform_intel = yes
+	}
+}
+
+## Debt Collectors
+
+# Starting event
+country_event = {
+	id = origin.4010
+	title = "origin.4010.name"
+	desc = "origin.4010.desc"
+	picture = GFX_evt_enigmatic_cache
+	show_sound = event_ancient_drone
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		NOT = {
+			has_event_chain = "payback_debt_collectors_chain"
+		}
+	}
+
+	immediate = {
+		create_debt_collectors_country = yes
+		# When the debt collectors will arrive
+		set_saved_date = {
+			key = payback_debt_collectors_timer
+			days_from_present = 1800
+			expires = 3180060
+		}
+		# How much you owe them
+		set_variable = {
+			which = debt_collectors_amount
+			value = 1481893
+		}
+		# Number of times they visited you
+		set_variable = {
+			which = debt_collectors_visits
+			value = 1
+		}
+		# Number of times you defeated them
+		set_variable = {
+			which = debt_collectors_defeats
+			value = 0
+		}
+	}
+
+	option = {
+		name = origin.4010.a
+		custom_tooltip = origin.4010.a.tooltip
+		begin_event_chain = {
+			event_chain = "payback_debt_collectors_chain"
+			target = this
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			country_event = { id = origin.4015 days = 1800 }
+		}
+	}
+}
+
+# Debt Collectors arrive (first time)
+country_event = {
+	id = origin.4015
+	title = "origin.4015.name"
+	desc = "origin.4015.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:debt_collectors_species
+		room = ethic_spaceship_room
+	}
+
+	trigger = {
+		exists = event_target:MSI_country
+		has_origin = origin_payback
+		has_event_chain = "payback_debt_collectors_chain"
+	}
+
+	option = { # Pay
+		name = "origin.4015.a"
+		hidden_effect = {
+			country_event = { id = origin.4016 }
+		}
+	}
+
+	option = { # Don't pay
+		name = "origin.4015.b"
+		hidden_effect = {
+			country_event = { id = origin.4019 }
+		}
+	}
+
+	option = { # Give me the lore dump
+		name = "origin.4015.c"
+		response_text = "origin.4015.c.response"
+		is_dialog_only = yes
+	}
+}
+
+# We are willing to settle
+country_event = {
+	id = origin.4016
+	base = origin.4015
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4016.desc
+
+	option = { # pay the full amount
+		name = "origin.4016.a"
+		allow = {
+			resource_stockpile_compare = {
+				resource = energy
+				value >= 1481893
+			}
+		}
+		# should never be possible, but here's a joke response for players who abuse console commands
+		response_text = "origin.4016.a.response"
+		is_dialog_only = yes
+	}
+
+	option = { # pay energy
+		name = "origin.4016.b"
+		hidden_effect = {
+			set_country_flag = debt_collectors_pay_energy
+			country_event = { id = origin.4017 }
+		}
+	}
+
+	option = { # pay consumer goods
+		name = "origin.4016.c"
+		hidden_effect = {
+			set_country_flag = debt_collectors_pay_consumer_goods
+			country_event = { id = origin.4017 }
+		}
+	}
+
+	option = { # pay alloys
+		name = "origin.4016.e"
+		hidden_effect = {
+			set_country_flag = debt_collectors_pay_alloys
+			country_event = { id = origin.4017 }
+		}
+	}
+
+	option = { # other ways to pay
+		name = "origin.4016.d"
+		hidden_effect = {
+			country_event = { id = origin.4018 }
+		}
+	}
+}
+
+# Agreed to pay
+country_event = {
+	id = origin.4017
+	base = origin.4015
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4017.desc
+
+	immediate = {
+		# Reset the timer and fires the follow-up after 15 years
+		hidden_effect = {
+			set_country_flag = debt_collectors_agreed_to_pay
+			set_saved_date = {
+				key = payback_debt_collectors_timer
+				days_from_present = 5400
+				expires = 3180060
+			}
+			country_event = { id = origin.4029 days = 5400 }
+		}
+	}
+
+	option = { # bye
+		name = EXCELLENT
+		custom_tooltip = origin.4017.a.tooltip
+	}
+
+	after = {
+		hidden_effect = {
+			# If this was your second meeting, fire the follow-up event
+			owner = {
+				if = {
+					limit = {
+						check_variable = {
+							which = debt_collectors_visits
+							value = 2
+						}
+					}
+					country_event = { id = origin.4040 days = 15 }
+				}
+			}
+		}
+	}
+}
+
+# Other ways to pay
+country_event = {
+	id = origin.4018
+	base = origin.4015
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4018.desc
+
+	option = { # pay with energy
+		name = "origin.4018.a"
+		hidden_effect = {
+			country_event = { id = origin.4016 }
+		}
+	}
+
+	option = { # pay with slaves
+		name = "origin.4018.b"
+		custom_tooltip = "origin.4018.b.tooltip"
+		hidden_effect = {
+			set_country_flag = debt_collectors_pay_slaves
+			country_event = { id = origin.4017 }
+		}
+	}
+
+	option = { # so you want slaves?
+		name = "origin.4018.c"
+		response_text = origin.4018.c.response
+		is_dialog_only = yes
+	}
+
+	option = { # refuse to pay
+		name = "origin.4018.d"
+		hidden_effect = {
+			country_event = { id = origin.4019 }
+		}
+	}
+}
+
+# Refuse to pay
+country_event = {
+	id = origin.4019
+	base = origin.4015
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4019.desc
+
+	option = { # fight!
+		name = "origin.4019.a"
+		custom_tooltip = "origin.4019.a.tooltip"
+		set_country_flag = is_fighting_debt_collectors
+		set_country_flag = fought_debt_collectors_last_time
+		capital_scope = {
+			save_event_target_as = payback_capital
+		}
+		create_payback_debt_collectors_fleet = {
+			NUM_DRONES = 3
+		}
+	}
+
+	option = { # back
+		name = "origin.4019.b"
+		hidden_effect = {
+			country_event = { id = origin.4016 }
+		}
+	}
+}
+
+# Won battle against the debt collectors
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+# This = owner of fleet 1 (winner)
+# From = owner of fleet 2 (loser)
+country_event = {
+	id = origin.4020
+	title = "origin.4020.name"
+	desc = {
+		trigger = {
+			check_variable = {
+				which = debt_collector_defeats
+				value = 0
+			}
+		}
+		text = "origin.4020.desc"
+	}
+	desc = {
+		trigger = {
+			check_variable = {
+				which = debt_collector_defeats
+				value > 0
+			}
+		}
+		text = "origin.4020.desc.repeat"
+	}
+	picture = GFX_evt_exploding_ship
+	show_sound = event_ship_explosion
+	is_triggered_only = yes
+	location = this.capital_scope
+
+	trigger = {
+		this = { has_origin = origin_payback }
+		from = { is_country_type = debt_collectors }
+		FromFromFrom = { NOT = { has_fleet_flag = marked_for_deletion } }
+	}
+
+	immediate = {
+		remove_country_flag = is_fighting_debt_collectors
+		set_country_flag = payback_debt_collectors_chain_refused_pay_won
+		fromFromFrom = {
+			set_fleet_flag = marked_for_deletion
+			delete_fleet = this
+		}
+		change_variable = {
+			which = debt_collector_defeats
+			value = 1
+		}
+		# Reset the timer and fires the follow-up after 15 years
+		hidden_effect = {
+			set_saved_date = {
+				key = payback_debt_collectors_timer
+				days_from_present = 5400
+				expires = 3180060
+			}
+			country_event = { id = origin.4029 days = 5400 }
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		custom_tooltip = "origin.4017.a.tooltip"
+	}
+
+	after = {
+		hidden_effect = {
+			# If this was your second meeting, fire the follow-up event
+			if = {
+				limit = {
+					check_variable = {
+						which = debt_collectors_visits
+						value = 2
+					}
+				}
+				hidden_effect = {
+					country_event = { id = origin.4040 days = 15 }
+				}
+			}
+			# If you kicked them three times, a very angry MSI contacts you
+			else_if = {
+				limit = {
+					check_variable = {
+						which = debt_collector_defeats
+						value = 3
+					}
+				}
+				hidden_effect = {
+					country_event = { id = origin.4021 days = 15 }
+				}
+			}
+		}
+	}
+}
+
+# MSI is annoyed
+country_event = {
+	id = origin.4021
+	title = "origin.4021.name"
+	desc = "origin.4021.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:MSI_species
+		room = slaver_room
+	}
+
+	trigger = {
+		exists = event_target:MSI_country
+		has_origin = origin_payback
+		has_event_chain = "payback_debt_collectors_chain"
+		check_variable = {
+			which = debt_collector_defeats
+			value = 3
+		}
+	}
+
+	immediate = {
+		# Establish communications in the improbable case you haven't encountered the MSI yet
+		establish_communications_no_message = event_target:MSI_country
+		event_target:MSI_country = {
+			species = {
+				save_event_target_as = MSI_species
+			}
+		}
+	}
+
+	option = {
+		name = "origin.4021.a"
+		# If you're already their vassal, they impose harsher conditions
+		if = {
+			limit = {
+				is_subject = yes
+				has_overlord = event_target:MSI_country
+			}
+			random_agreement = {
+				limit = {
+					owner = { is_same_value = event_target:MSI_country }
+					target = { is_same_value = root }
+				}
+				set_agreement_preset = {
+					preset = preset_payback_subsidiary_oppressive
+					apply_terms = yes
+				}
+			}
+		}
+		# If not, they try to humiliate you
+		else = {
+			event_target:MSI_country = {
+				declare_war = {
+					target = prev
+					attacker_war_goal = wg_payback_msi_humiliation
+				}
+			}
+		}
+	}
+}
+
+# Won battle against the debt collectors - someone else destroyed them for you
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+# This = owner of fleet 1 (winner)
+# From = owner of fleet 2 (loser)
+country_event = {
+	id = origin.4022
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		this = { NOT = { has_origin = origin_payback } }
+		from = { is_country_type = debt_collectors }
+		FromFromFrom = { NOT = { has_fleet_flag = marked_for_deletion } }
+		any_playable_country = {
+			has_origin = origin_payback
+			has_country_flag = is_fighting_debt_collectors
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				has_origin = origin_payback
+				has_country_flag = is_fighting_debt_collectors
+			}
+			country_event = { id = origin.4020 scopes = { FromFrom = FromFrom FromFromFrom = FromFromFrom From = From } }
+		}
+	}
+}
+
+# Debt collectors raiding the planet
+# This = Planet
+# From = Bombarder
+planet_event = {
+	id = origin.4025
+	title = "origin.4025.name"
+	desc = "origin.4025.desc"
+	picture = GFX_evt_burning_city
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+	location = this
+
+	trigger = {
+		planet_devastation >= 15
+		from = { is_country_type = debt_collectors }
+		owner = {
+			has_origin = origin_payback
+			has_event_chain = payback_debt_collectors_chain
+		}
+	}
+
+	immediate = {
+		from = {
+			random_controlled_fleet = {
+				limit = { has_fleet_flag = debt_collectors_raiding_fleet }
+				set_fleet_flag = marked_for_deletion
+				delete_fleet = this
+			}
+		}
+		hidden_effect = {
+			# resettle 5 pops to the MSI capital
+			while = {
+				count = 5
+				random_owned_pop = {
+					limit = {
+						is_same_species = owner_main_species
+					}
+					resettle_pop = {
+						pop = this
+						planet = event_target:MSI_country.capital_scope
+					}
+				}
+			}
+		}
+		owner = {
+			remove_country_flag = is_fighting_debt_collectors
+			# Reset the timer and fires the follow-up after 15 years
+			hidden_effect = {
+				set_saved_date = {
+					key = payback_debt_collectors_timer
+					days_from_present = 5400
+					expires = 3180060
+				}
+				country_event = { id = origin.4029 days = 5400 }
+			}
+			set_country_flag = payback_debt_collectors_chain_refused_pay_lost
+			add_modifier = {
+				modifier = payback_gave_up_pop
+				days = 1800
+			}
+		}
+	}
+
+	option = {
+		name = "origin.4025.a"
+		custom_tooltip = "origin.4025.a.tooltip"
+	}
+
+	after = {
+		hidden_effect = {
+			# If this was your second meeting, fire the follow-up event
+			owner = {
+				if = {
+					limit = {
+						check_variable = {
+							which = debt_collectors_visits
+							value = 2
+						}
+					}
+					country_event = { id = origin.4040 days = 15 }
+				}
+			}
+		}
+	}
+}
+
+# Debt Collectors arrive (subsequent times)
+country_event = {
+	id = origin.4029
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:MSI_country
+		has_origin = origin_payback
+		has_event_chain = payback_debt_collectors_chain
+		NOT = { has_country_flag = payback_revenge_complete }
+	}
+
+	immediate = {
+		# Why the extra hidden event? Because the hub event (origin.4030) is used as a base by other events,
+		# so the immediate/after blocks would get repeated every time an option is picked,
+		# increasing the variable.
+		# We use this variable to scale their fleet power depending on game years, so it gets updated
+		# even if they don't show up because you're at war.
+		change_variable = {
+			which = debt_collectors_visits
+			value = 1
+		}
+		# If you're fighting the MSI, check again after 5 years to see if the war has ended
+		if = {
+			limit = {
+				is_at_war_with = event_target:MSI_country
+			}
+			set_saved_date = {
+				key = payback_debt_collectors_timer
+				days_from_present = 1800
+				expires = 3180060
+			}
+			country_event = { id = origin.4029 days = 1800 }
+
+		}
+		# If you're NOT currently fighting the MSI, the debt collectors show up as normal
+		else = {
+			# Reset some flags
+			remove_country_flag = payback_debt_collectors_chain_refused_pay_won
+			remove_country_flag = payback_debt_collectors_chain_refused_pay_lost
+			# Fire the event
+			country_event = { id = origin.4030 }
+		}
+	}
+}
+
+# Debt Collectors arrive (subsequent times)
+country_event = {
+	id = origin.4030
+	title = "origin.4030.name"
+	desc = {
+		text = "origin.4030.desc.energy"
+		trigger = {
+			has_country_flag = debt_collectors_pay_energy
+		}
+	}
+	desc = {
+		text = "origin.4030.desc.consumer_goods"
+		trigger = {
+			has_country_flag = debt_collectors_pay_consumer_goods
+		}
+	}
+	desc = {
+		text = "origin.4030.desc.alloys"
+		trigger = {
+			has_country_flag = debt_collectors_pay_alloys
+		}
+	}
+	desc = {
+		text = "origin.4030.desc.pops"
+		trigger = {
+			has_country_flag = debt_collectors_pay_slaves
+		}
+	}
+	desc = {
+		text = "origin.4030.desc.defeated"
+		trigger = {
+			has_country_flag = fought_debt_collectors_last_time
+			check_variable = {
+				which = debt_collector_defeats
+				value <= 2
+			}
+		}
+	}
+	desc = {
+		text = "origin.4030.desc.furious"
+		trigger = {
+			has_country_flag = fought_debt_collectors_last_time
+			check_variable = {
+				which = debt_collector_defeats
+				value > 2
+			}
+		}
+	}
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:debt_collectors_species
+		room = ethic_spaceship_room
+	}
+
+	trigger = {
+		has_origin = origin_payback
+		has_event_chain = "payback_debt_collectors_chain"
+	}
+
+	option = { # We are willing to settle this time
+		name = "origin.4030.a"
+		trigger = {
+			NOT = { has_country_flag = debt_collectors_agreed_to_pay }
+		}
+		hidden_effect = {
+			country_event = { id = origin.4016 }
+		}
+	}
+
+	option = { # Pay with energy
+		name = "origin.4030.b"
+		trigger = {
+			has_country_flag = debt_collectors_pay_energy
+		}
+		allow = {
+			resource_stockpile_compare = {
+				resource = energy
+				value >= 5000
+			}
+		}
+		add_resource = {
+			energy = -5000
+		}
+		hidden_effect = {
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # Pay with consumer goods
+		name = "origin.4030.b"
+		trigger = {
+			has_country_flag = debt_collectors_pay_consumer_goods
+		}
+		allow = {
+			resource_stockpile_compare = {
+				resource = consumer_goods
+				value >= 2500
+			}
+		}
+		add_resource = {
+			consumer_goods = -2500
+		}
+		hidden_effect = {
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # Pay with alloys
+		name = "origin.4030.b"
+		trigger = {
+			has_country_flag = debt_collectors_pay_alloys
+		}
+		allow = {
+			resource_stockpile_compare = {
+				resource = alloys
+				value >= 1250
+			}
+		}
+		add_resource = {
+			alloys = -1250
+		}
+		hidden_effect = {
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # Pay with your own people
+		name = "origin.4030.c"
+		trigger = {
+			has_country_flag = debt_collectors_pay_slaves
+		}
+		allow = {
+			count_owned_pop = {
+				limit = {
+					is_same_species = owner_main_species
+				}
+				count > 5
+			}
+		}
+		custom_tooltip = origin.4030.c.tooltip
+		hidden_effect = {
+			# resettle 2 pops to the MSI capital
+			while = {
+				count = 2
+				random_owned_pop = {
+					limit = {
+						is_same_species = owner_main_species
+					}
+					resettle_pop = {
+						pop = this
+						planet = event_target:MSI_country.capital_scope
+					}
+				}
+			}
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # Pay with slaves
+		name = "origin.4030.d"
+		trigger = {
+			has_country_flag = debt_collectors_pay_slaves
+		}
+		allow = {
+			count_owned_pop = {
+				limit = {
+					is_enslaved = yes
+				}
+				count >= 2
+			}
+		}
+		custom_tooltip = origin.4030.d.tooltip
+		hidden_effect = {
+			# resettle 2 pops to the MSI capital
+			while = {
+				count = 2
+				random_owned_pop = {
+					limit = {
+						is_enslaved = yes
+					}
+					resettle_pop = {
+						pop = this
+						planet = event_target:MSI_country.capital_scope
+					}
+				}
+			}
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # Can't pay - energy
+		name = "origin.4030.e"
+		trigger = {
+			OR = {
+				AND = {
+					has_country_flag = debt_collectors_pay_energy
+					resource_stockpile_compare = {
+						resource = energy
+						value < 5000
+					}
+				}
+				AND = {
+					has_country_flag = debt_collectors_pay_alloys
+					resource_stockpile_compare = {
+						resource = alloys
+						value < 1250
+					}
+				}
+				AND = {
+					has_country_flag = debt_collectors_pay_consumer_goods
+					resource_stockpile_compare = {
+						resource = consumer_goods
+						value < 2500
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = origin.4036 }
+		}
+	}
+
+	option = { # Won't pay
+		name = "origin.4030.f"
+		hidden_effect = {
+			country_event = { id = origin.4037 }
+		}
+	}
+
+	option = { # Who are you again?
+		name = "origin.4030.g"
+		response_text = "origin.4015.c.response"
+		is_dialog_only = yes
+	}
+}
+
+# Pay
+country_event = {
+	id = origin.4031
+	base = origin.4030
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4031.desc
+
+	immediate = {
+		change_variable = {
+			which = debt_collectors_amount
+			value = -4500
+		}
+		remove_country_flag = fought_debt_collectors_last_time
+		set_saved_date = {
+			key = payback_debt_collectors_timer
+			days_from_present = 5400
+			expires = 3180060
+		}
+		country_event = { id = origin.4029 days = 5400 }
+	}
+
+	# Second time you realize you're getting scammed, and you get a follow-up event
+	option = {
+		name = origin.4031.a
+		trigger = {
+			check_variable = {
+				which = debt_collectors_visits
+				value = 2
+			}
+		}
+		hidden_effect = {
+			country_event = { id = origin.4032 }
+		}
+	}
+
+	# Subsequent times, everything is normal
+	option = {
+		trigger = {
+			check_variable = {
+				which = debt_collectors_visits
+				value > 2
+			}
+		}
+		name = GOODBYE
+	}
+}
+
+# Agreed to pay - you got scammed!
+country_event = {
+	id = origin.4032
+	base = origin.4030
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4032.desc
+
+	option = { # bye
+		name = origin.4032.a
+		hidden_effect = {
+			country_event = { id = origin.4040 days = 15 }
+		}
+	}
+}
+
+# Can't pay - resources
+country_event = {
+	id = origin.4036
+	base = origin.4030
+	desc_clear = yes
+	option_clear = yes
+
+	desc = origin.4036.desc.energy
+
+	option = { # Pay with your own people
+		name = "origin.4030.c"
+		allow = {
+			count_owned_pop = {
+				limit = {
+					is_same_species = owner_main_species
+				}
+				count > 2
+			}
+		}
+		hidden_effect = {
+			# resettle 2 pops to the MSI capital
+			while = {
+				count = 2
+				random_owned_pop = {
+					limit = {
+						is_same_species = owner_main_species
+					}
+					resettle_pop = {
+						pop = this
+						planet = event_target:MSI_country.capital_scope
+					}
+				}
+			}
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # Pay with slaves
+		name = "origin.4030.d"
+		allow = {
+			count_owned_pop = {
+				limit = {
+					is_enslaved = yes
+				}
+				count > 2
+			}
+		}
+		hidden_effect = {
+			# resettle 2 pops to the MSI capital
+			while = {
+				count = 2
+				random_owned_pop = {
+					limit = {
+						is_enslaved = yes
+					}
+					resettle_pop = {
+						pop = this
+						planet = event_target:MSI_country.capital_scope
+					}
+				}
+			}
+			country_event = { id = origin.4031 }
+		}
+	}
+
+	option = { # fight!
+		name = "origin.4036.desc.a"
+		custom_tooltip = "origin.4036.desc.a.tooltip"
+		set_country_flag = is_fighting_debt_collectors
+		set_country_flag = fought_debt_collectors_last_time
+		capital_scope = {
+			save_event_target_as = payback_capital
+		}
+		create_payback_debt_collectors_fleet = {
+			NUM_DRONES = 3
+		}
+	}
+
+	option = { # so you want slaves?
+		name = "origin.4018.c"
+		response_text = origin.4018.c.response
+		is_dialog_only = yes
+	}
+}
+
+# Won't pay
+country_event = {
+	id = origin.4037
+	base = origin.4030
+	desc_clear = yes
+	option_clear = yes
+
+	desc = {
+		text = "origin.4037.desc.base"
+		trigger = {
+			NOT = { has_country_flag = fought_debt_collectors_last_time }
+		}
+	}
+	desc = {
+		text = "origin.4037.desc.defeated"
+		trigger = {
+			has_country_flag = fought_debt_collectors_last_time
+		}
+	}
+
+	option = { # fight!
+		name = "origin.4019.a"
+		custom_tooltip = "origin.4019.a.tooltip"
+		set_country_flag = is_fighting_debt_collectors
+		set_country_flag = fought_debt_collectors_last_time
+		capital_scope = {
+			save_event_target_as = payback_capital
+		}
+		create_payback_debt_collectors_fleet = {
+			NUM_DRONES = 3
+		}
+	}
+
+	option = { # back
+		name = "origin.4019.b"
+		hidden_effect = {
+			country_event = { id = origin.4030 }
+		}
+	}
+}
+
+# How can we free ourselves?
+country_event = {
+	id =  origin.4040
+	title = origin.4040.name
+	desc = origin.4040.desc
+	picture = GFX_evt_payback
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:MSI_country
+	}
+
+	option = { # weapons
+		name = "origin.4040.a"
+		custom_tooltip = "origin.4040.a.tooltip"
+		hidden_effect = {
+			country_event = { id = origin.4041 }
+		}
+	}
+
+	option = { # words
+		name = "origin.4040.b"
+		custom_tooltip = "origin.4040.b.tooltip"
+		hidden_effect = {
+			country_event = { id = origin.4042 }
+		}
+	}
+}
+
+# With violence!
+country_event = {
+	id =  origin.4041
+	title = origin.4041.name
+	desc = origin.4041.desc
+	picture = GFX_evt_small_space_battle
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:MSI_country
+	}
+
+	option = { # weapons
+		name = origin.4041.a
+		custom_tooltip = origin.4041.a.tooltip
+		begin_event_chain = {
+			event_chain = payback_make_them_pay_swords_chain
+			target = this
+		}
+	}
+}
+
+# With words!
+country_event = {
+	id =  origin.4042
+	title = origin.4042.name
+	desc = {
+		text = origin.4042.desc.nogalcom
+		trigger = {
+			is_galactic_community_formed = no
+		}
+	}
+	desc = {
+		text = origin.4042.desc.galcom
+		trigger = {
+			is_galactic_community_formed = yes
+			is_galactic_community_member = yes
+		}
+	}
+	desc = {
+		text = origin.4042.desc.nogalcommember
+		trigger = {
+			is_galactic_community_formed = yes
+			is_galactic_community_member = no
+		}
+	}
+	picture = GFX_evt_galactic_community
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:MSI_country
+	}
+
+	option = { # words
+		name = EXCELLENT
+		set_country_flag = payback_use_words
+		begin_event_chain = {
+			event_chain = payback_make_them_pay_words_chain
+			target = this
+		}
+		# If you're already in the galcom, trigger the cool war declaration
+		hidden_effect = {
+			if = {
+				limit = {
+					is_galactic_community_member = yes
+				}
+				country_event = { id = origin.4050 days = 10 }
+			}
+		}
+	}
+}
+
+# Joined Galcom
+country_event = {
+	id = origin.4050
+	title = origin.4050.name
+	desc = origin.4050.desc
+	picture = GFX_evt_slaver_empire
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		has_event_chain = payback_make_them_pay_words_chain
+		NOT = { has_country_flag = joined_galcom_first_time }
+	}
+
+	immediate = {
+		set_country_flag = joined_galcom_first_time
+	}
+
+	option = {
+		name = origin.4050.a
+		custom_tooltip = origin.4050.a.tooltip
+		hidden_effect = {
+			end_event_chain = payback_make_them_pay_words_chain
+			begin_event_chain = {
+				event_chain = payback_make_them_pay_words_1_chain
+				target = this
+			}
+		}
+	}
+
+	option = {
+		name = origin.4050.b
+		custom_tooltip = origin.4050.b.tooltip
+		hidden_effect = {
+			end_event_chain = payback_make_them_pay_words_chain
+			begin_event_chain = {
+				event_chain = payback_make_them_pay_words_2_chain
+				target = this
+			}
+		}
+	}
+
+	after = {
+		# Check if relevant resolutions while you weren't in the galcom and update the triggers accordingly
+		## Variant 1 - Equal STanding
+		if = {
+			limit = {
+				has_event_chain = payback_make_them_pay_words_1_chain
+			}
+			payback_words_chain_counters_check_joining_galcom = {
+				CHAIN = payback_make_them_pay_words_1_chain
+			}
+		}
+		## Variant 2 - Non-interference
+		if = {
+			limit = {
+				has_event_chain = payback_make_them_pay_words_2_chain
+			}
+			payback_words_chain_counters_check_joining_galcom = {
+				CHAIN = payback_make_them_pay_words_2_chain
+			}
+		}
+	}
+}
+
+# Passed a sanction
+country_event = {
+	id = origin.4051
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_galcom_member = {
+			has_origin = origin_payback
+			has_country_flag = payback_use_words
+		}
+		OR = {
+			last_resolution_changed = resolution_sanctions_tech_1
+			last_resolution_changed = resolution_sanctions_economic_1
+			last_resolution_changed = resolution_sanctions_military_1
+			last_resolution_changed = resolution_sanctions_administrative_1
+		}
+	}
+
+	immediate = {
+		every_galcom_member = {
+			limit = {
+				has_origin = origin_payback
+				has_country_flag = payback_use_words
+				OR = {
+					has_event_chain = payback_make_them_pay_words_1_chain
+					has_event_chain = payback_make_them_pay_words_2_chain
+				}
+			}
+			## Variant 1 - Equal Standing
+			if = {
+				limit = {
+					has_event_chain = payback_make_them_pay_words_1_chain
+				}
+				# Add a point to the relevant event chain
+				add_event_chain_counter = {
+					event_chain = payback_make_them_pay_words_1_chain
+					counter = "sanctions_passed"
+					amount = 1
+				}
+				payback_resolution_counters_check = {
+					CHAIN = payback_make_them_pay_words_1_chain
+					RESOLUTION = equal_standing_passed
+				}
+			}
+			## Variant 2 - Non-interference
+			if = {
+				limit = {
+					has_event_chain = payback_make_them_pay_words_2_chain
+				}
+				# Add a point to the relevant event chain
+				add_event_chain_counter = {
+					event_chain = payback_make_them_pay_words_2_chain
+					counter = "sanctions_passed"
+					amount = 1
+				}
+				payback_resolution_counters_check = {
+					CHAIN = payback_make_them_pay_words_2_chain
+					RESOLUTION = non_interference_passed
+				}
+			}
+		}
+	}
+}
+
+# Passed first resolution on the list
+country_event = {
+	id = origin.4052
+	title = origin.4052.name
+	desc = origin.4052.desc
+	picture = GFX_evt_galactic_community
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		has_country_flag = payback_use_words
+		NOT = { has_country_flag = payback_revenge_words_first_resolution_passed }
+	}
+
+	immediate = {
+		set_country_flag = payback_revenge_words_first_resolution_passed
+	}
+
+	option = {
+		name = EXCELLENT
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier3unityreward
+			min = @tier3unitymin
+			max = @tier3unitymax
+		}
+	}
+}
+
+# Passed equal standing or non-interference
+country_event = {
+	id = origin.4053
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_galcom_member = {
+			has_origin = origin_payback
+			has_country_flag = payback_use_words
+		}
+		OR = {
+			last_resolution_changed = resolution_pre_ftl_stances_equal_standing
+			last_resolution_changed = resolution_pre_ftl_stances_non_interference
+		}
+	}
+
+	immediate = {
+		every_galcom_member = {
+			limit = {
+				has_origin = origin_payback
+				has_country_flag = payback_use_words
+				OR = {
+					has_event_chain = payback_make_them_pay_words_1_chain
+					has_event_chain = payback_make_them_pay_words_2_chain
+				}
+			}
+			## Variant 1 - Equal STanding
+			if = {
+				limit = {
+					has_event_chain = payback_make_them_pay_words_1_chain
+				}
+				# Add a point to the relevant event chain
+				add_event_chain_counter = {
+					event_chain = "payback_make_them_pay_words_1_chain"
+					counter = "equal_standing_passed"
+					amount = 1
+				}
+				payback_resolution_counters_check = {
+					CHAIN = payback_make_them_pay_words_1_chain
+					RESOLUTION = equal_standing_passed
+				}
+			}
+			## Variant 2 - Non-interference
+			if = {
+				limit = {
+					has_event_chain = payback_make_them_pay_words_2_chain
+				}
+				# Add a point to the relevant event chain
+				add_event_chain_counter = {
+					event_chain = "payback_make_them_pay_words_2_chain"
+					counter = "non_interference_passed"
+					amount = 1
+				}
+				payback_resolution_counters_check = {
+					CHAIN = payback_make_them_pay_words_2_chain
+					RESOLUTION = non_interference_passed
+				}
+			}
+		}
+	}
+}
+
+# Passed all resolutions
+country_event = {
+	id = origin.4055
+	title = origin.4055.name
+	desc = {
+		text = origin.4055.desc.msi
+		trigger = {
+			exists = event_target:MSI_country
+		}
+	}
+	desc = {
+		text = origin.4055.desc.nomsi
+		trigger = {
+			NOR = {
+				exists = event_target:MSI_country
+				event_target:MSI_country = {
+					allows_slavery = yes
+				}
+			}
+		}
+	}
+	picture = GFX_evt_galactic_community
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		OR = {
+			has_event_chain = payback_make_them_pay_words_1_chain
+			has_event_chain = payback_make_them_pay_words_2_chain
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier4unityreward
+			min = @tier4unitymin
+			max = @tier4unitymax
+		}
+		add_modifier = {
+			modifier = payback_revenge_words
+		}
+		hidden_effect = {
+			# If MSI is still around and they're still slavers, they fall apart
+			if = {
+				limit = {
+					exists = event_target:MSI_country
+					event_target:MSI_country = {
+						allows_slavery = yes
+					}
+				}
+				country_event = { id = origin.4056 days = 15 }
+			}
+		}
+	}
+
+	after = {
+		remove_country_flag = payback_use_words
+		set_country_flag = payback_revenge_complete
+		end_event_chain = payback_debt_collectors_chain
+		if = {
+			limit = {
+				has_event_chain = payback_make_them_pay_words_1_chain
+			}
+			end_event_chain = payback_make_them_pay_words_1_chain
+		}
+		else = {
+			end_event_chain = payback_make_them_pay_words_2_chain
+		}
+	}
+}
+
+# Passed all resolutions or won Ideology war - follow-up
+country_event = {
+	id = origin.4056
+	title = "origin.4056.name"
+	desc = "origin.4056.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		room = slaver_room
+	}
+
+	trigger = {
+		exists = event_target:MSI_country
+	}
+
+	option = {
+		name = "origin.4056.a"
+		event_target:MSI_country = {
+			add_modifier = {
+				modifier = instability_join_revolt
+			}
+			add_modifier = {
+				modifier = angered_populace
+			}
+		}
+	}
+}
+
+# Repealed a sanction - update the counter
+country_event = {
+	id = origin.4057
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			last_resolution_changed = resolution_sanctions_tech_repeal_1
+			last_resolution_changed = resolution_sanctions_economic_repeal_1
+			last_resolution_changed = resolution_sanctions_military_repeal_1
+			last_resolution_changed = resolution_sanctions_administrative_repeal_1
+		}
+		any_galcom_member = {
+			OR = {
+				has_event_chain = payback_make_them_pay_words_1_chain
+				has_event_chain = payback_make_them_pay_words_2_chain
+			}
+		}
+	}
+
+	immediate = {
+		every_galcom_member = {
+			limit = {
+				has_origin = origin_payback
+				has_country_flag = payback_use_words
+				OR = {
+					has_event_chain = payback_make_them_pay_words_1_chain
+					has_event_chain = payback_make_them_pay_words_2_chain
+				}
+			}
+			## Variant 1
+			if = {
+				limit = {
+					has_event_chain = payback_make_them_pay_words_1_chain
+				}
+				# Add a point to the relevant event chain
+				add_event_chain_counter = {
+					event_chain = "payback_make_them_pay_words_1_chain"
+					counter = "sanctions_passed"
+					amount = -1
+				}
+			}
+			## Variant 2
+			if = {
+				limit = {
+					has_event_chain = payback_make_them_pay_words_2_chain
+				}
+				# Add a point to the relevant event chain
+				add_event_chain_counter = {
+					event_chain = "payback_make_them_pay_words_2_chain"
+					counter = "sanctions_passed"
+					amount = -1
+				}
+			}
+		}
+	}
+}
+
+# Repealed Equal Standing - update the counter
+country_event = {
+	id = origin.4058
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_galcom_member = {
+			has_event_chain = payback_make_them_pay_words_1_chain
+			last_resolution_changed = resolution_pre_ftl_stances_repeal_1
+		}
+	}
+
+	immediate = {
+		every_galcom_member = {
+			limit = {
+				has_event_chain = payback_make_them_pay_words_1_chain
+			}
+			add_event_chain_counter = {
+				event_chain = "payback_make_them_pay_words_1_chain"
+				counter = "equal_standing_passed"
+				amount = -1
+			}
+		}
+	}
+}
+
+# Repealed Non-Interference - update the counter
+country_event = {
+	id = origin.4059
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_galcom_member = {
+			has_event_chain = payback_make_them_pay_words_2_chain
+			last_resolution_changed = resolution_pre_ftl_stances_repeal_2
+		}
+	}
+
+	immediate = {
+		every_galcom_member = {
+			limit = {
+				has_event_chain = payback_make_them_pay_words_2_chain
+			}
+			add_event_chain_counter = {
+				event_chain = "payback_make_them_pay_words_2_chain"
+				counter = "non_interference_passed"
+				amount = -1
+			}
+		}
+	}
+}
+
+# MSI defeated by us - by fighting
+country_event = {
+	id =  origin.4060
+	title = origin.4060.name
+	desc = origin.4060.desc
+	picture = GFX_evt_victorious_army
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		fromfrom = {
+			OR = {
+				using_war_goal = {
+					type = wg_payback_wipe_them_out
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_force_ideology
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_tribute
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_megacorp_subjugate
+					owner = root
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = from
+			}
+			from = {
+				has_origin = origin_slavers
+			}
+		}
+		has_origin = origin_payback
+		has_event_chain = payback_make_them_pay_swords_chain
+	}
+
+	immediate = {
+		set_country_flag = payback_revenge_complete
+		if = {
+			limit = {
+				fromfrom = {
+					using_war_goal = {
+						type = wg_payback_force_ideology
+						owner = root
+					}
+				}
+			}
+			set_country_flag = pacified_MSI
+		}
+	}
+
+	option = {
+		name = origin.4060.a
+		add_modifier = {
+			modifier = payback_no_revenge
+		}
+	}
+
+	option = {
+		name = origin.4060.b
+		trigger = {
+			allows_slavery = no
+		}
+		custom_tooltip = origin.4060.b.tooltip
+		set_country_flag = payback_punish_slavers
+	}
+
+	after = {
+		end_event_chain = payback_make_them_pay_swords_chain
+		end_event_chain = payback_debt_collectors_chain
+		set_country_flag = with_interest_achievement
+		# If you won using force ideology, they collapse
+		if = {
+			limit = {
+				has_country_flag = pacified_MSI
+			}
+			country_event = { id = origin.4056 days = 15 }
+		}
+	}
+}
+
+# MSI defeated by us - by fighting - annihilation fallback
+# Why is this event necessary? Because if you destroy your opponent, on_war_won doesn't fire:
+# you aren't winning, the war ends because you don't have anyone to fight
+country_event = {
+	id =  origin.4061
+	title = origin.4060.name
+	desc = origin.4060.desc
+	picture = GFX_evt_victorious_army
+	show_sound = event_power_down
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		has_event_chain = payback_make_them_pay_swords_chain
+		has_country_flag = payback_killed_MSI
+	}
+
+	immediate = {
+		set_country_flag = payback_revenge_complete
+	}
+
+	option = {
+		name = origin.4060.a
+		add_modifier = {
+			modifier = payback_no_revenge
+		}
+	}
+
+	option = {
+		name = origin.4060.b
+		trigger = {
+			allows_slavery = no
+		}
+		custom_tooltip = origin.4060.b.tooltip
+		set_country_flag = payback_punish_slavers
+	}
+
+	after = {
+		end_event_chain = payback_make_them_pay_swords_chain
+		end_event_chain = payback_debt_collectors_chain
+		set_country_flag = with_interest_achievement
+	}
+}
+
+# MSI defeated by someone else
+ country_event = {
+	id =  origin.4070
+	title = origin.4070.name
+	desc = origin.4070.desc
+	picture = GFX_evt_slaver_empire
+	show_sound = event_space_battle
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		has_country_flag = payback_stolen_revenge
+		NOT = { has_country_flag = payback_revenge_complete }
+	}
+
+	option = {
+		name = origin.4070.a
+		add_modifier = {
+			modifier = payback_no_revenge_small
+		}
+		set_country_flag = payback_revenge_complete
+	}
+
+	option = {
+		name = origin.4070.b
+		trigger = {
+			OR = {
+				has_event_chain = payback_make_them_pay_words_chain
+				has_event_chain = payback_make_them_pay_words_1_chain
+				has_event_chain = payback_make_them_pay_words_2_chain
+			}
+		}
+		custom_tooltip = origin.4070.b.tooltip
+	}
+
+	option = {
+		name = origin.4070.c
+		trigger = {
+			exists = event_target:destroyer_country
+			NOR = {
+				has_event_chain = payback_make_them_pay_words_chain
+				has_event_chain = payback_make_them_pay_words_1_chain
+				has_event_chain = payback_make_them_pay_words_2_chain
+			}
+		}
+		# if MSI got destroyed by a crisis, get a modifier against them
+		if = {
+			limit = {
+				event_target:destroyer_country = {
+					is_crisis_faction = yes
+				}
+			}
+			add_modifier = {
+				modifier = payback_underdog
+			}
+			end_event_chain = payback_make_them_pay_swords_chain
+		}
+		# if MSI got destroyed by the khan, get a modifier against them
+		else_if = {
+			limit = {
+				event_target:destroyer_country = {
+					is_country_type = awakened_marauders
+				}
+			}
+			add_modifier = {
+				modifier = payback_underdog_khan
+			}
+			end_event_chain = payback_make_them_pay_swords_chain
+		}
+		# if not, the destroyer country becomes the new target of your revenge
+		else_if = {
+			limit = {
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire
+				}
+			}
+			event_target:destroyer_country = {
+				set_country_flag = payback_stole_revenge
+				save_global_event_target_as = payback_stole_revenge_country
+			}
+			# If the rare case the MSI gets destroyed before you can start your revenge, get the event chain now
+			if = {
+				limit = {
+						NOT = { has_event_chain = payback_make_them_pay_swords_chain }
+					}
+				begin_event_chain = {
+					event_chain = payback_make_them_pay_swords_chain
+					target = ROOT
+				}
+			}
+			custom_tooltip = origin.4070.d.tooltip
+		}
+	}
+
+	after = {
+		remove_country_flag = payback_stolen_revenge
+		end_event_chain = payback_debt_collectors_chain
+	}
+}
+
+# Defeated the people who defeated the MSI
+country_event = {
+	id =  origin.4071
+	title = origin.4071.name
+	desc = origin.4071.desc
+	picture = GFX_evt_victorious_army
+	show_sound = event_space_battle
+	is_triggered_only = yes
+
+	trigger = {
+		fromfrom = {
+			OR = {
+				using_war_goal = {
+					type = wg_payback_wipe_them_out
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_force_ideology
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_tribute
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_megacorp_subjugate
+					owner = root
+				}
+			}
+		}
+		from = {
+			has_country_flag = payback_stole_revenge
+		}
+		has_origin = origin_payback
+		has_event_chain = payback_make_them_pay_swords_chain
+	}
+
+	immediate = {
+		set_country_flag = payback_revenge_complete
+	}
+
+	option = {
+		name = origin.4070.a
+		add_modifier = {
+			modifier = payback_no_revenge
+		}
+	}
+
+	option = {
+		name = origin.4071.a
+		custom_tooltip = origin.4060.b.tooltip
+		set_country_flag = payback_punish_slavers
+	}
+
+	after = {
+		end_event_chain = payback_make_them_pay_swords_chain
+	}
+}
+
+### Broken Shackles Interactions
+
+# Recognizing each other (HIDDEN)
+# Fired by on_five_year_pulse_country
+country_event = {
+	id =  origin.4109
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			NOT = { has_country_flag = broken_shackles_recognized_payback@root }
+			has_communications = root
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				has_origin = origin_broken_shackles
+				NOT = { has_country_flag = broken_shackles_recognized_payback@root }
+				has_communications = root
+			}
+			save_event_target_as = bsempire
+		}
+		country_event = { id = origin.4110 days = 90 random = 360 }
+	}
+}
+
+# Recognizing each other
+country_event = {
+	id =  origin.4110
+	title = origin.4110.name
+	desc = origin.4110.desc
+	picture = GFX_evt_broken_shackles
+	show_sound = event_conversation
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+	}
+
+	immediate = {
+		set_country_flag = payback_recognized_broken_shackles@event_target:bsempire
+		event_target:bsempire = {
+			set_country_flag = broken_shackles_recognized_payback@root
+		}
+	}
+
+	option = {
+		name = {
+			text = origin.4110.a.phile
+			trigger = {
+				is_xenophobe = no
+			}
+		}
+		name = {
+			text = origin.4110.a.phobe
+			trigger = {
+				is_xenophobe = yes
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
+	}
+
+	after = {
+		add_opinion_modifier = {
+			modifier = opinion_fellow_slaves
+			who = event_target:bsempire
+		}
+		event_target:bsempire = {
+			add_opinion_modifier = {
+				modifier = opinion_fellow_slaves
+				who = root
+			}
+		}
+	}
+}
+
+# Sharing Espionage Intel
+country_event = {
+	id = origin.4120
+	title = "origin.4120.name"
+	desc = "origin.4120.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:broken_shackles_empire
+		planet_background = event_target:broken_shackles_empire
+		graphical_culture = event_target:broken_shackles_empire
+		city_level = event_target:broken_shackles_empire
+		room = event_target:broken_shackles_empire
+	}
+
+	trigger = {
+		exists = event_target:MSI_country
+		has_origin = origin_payback
+		NOT = { has_country_flag = origin_4120_fired }
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			has_country_flag = broken_shackles_recognized_payback@root
+			has_communications = root
+		}
+	}
+
+	immediate = {
+		set_country_flag = origin_4120_fired
+		random_playable_country = {
+			limit = {
+				has_origin = origin_broken_shackles
+				has_country_flag = broken_shackles_recognized_payback@root
+				has_communications = root
+			}
+			save_event_target_as = broken_shackles_empire
+		}
+	}
+
+	option = {
+		name = "origin.4120.a"
+		add_intel = {
+			who = event_target:MSI_country
+			amount = 50
+		}
+		event_target:broken_shackles_empire = {
+			add_intel = {
+				who = event_target:MSI_country
+				amount = 50
+			}
+		}
+	}
+
+	option = {
+		name = "origin.4120.b"
+	}
+}
+
+# Help on the senate floor
+country_event = {
+	id = origin.4130
+	title = "origin.4130.name"
+	desc = "origin.4130.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:broken_shackles_empire
+		planet_background = event_target:broken_shackles_empire
+		graphical_culture = event_target:broken_shackles_empire
+		city_level = event_target:broken_shackles_empire
+		room = event_target:broken_shackles_empire
+	}
+
+	trigger = {
+		has_origin = origin_payback
+		is_galactic_community_member = yes
+		NOT = { has_country_flag = origin_4130_fired }
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			has_country_flag = broken_shackles_recognized_payback@root
+			has_communications = prev
+			is_galactic_community_member = yes
+		}
+	}
+
+	immediate = {
+		set_country_flag = origin_4130_fired
+		random_playable_country = {
+			limit = {
+				has_origin = origin_broken_shackles
+				has_country_flag = broken_shackles_recognized_payback@root
+				has_communications = prev
+			}
+			save_event_target_as = broken_shackles_empire
+		}
+	}
+
+	option = {
+		name = "origin.4130.a"
+		event_target:broken_shackles_empire = {
+			add_favors = {
+				target = root
+				value = 5
+			}
+		}
+		add_favors = {
+			target = event_target:broken_shackles_empire
+			value = 5
+		}
+	}
+
+	option = {
+		name = "origin.4130.b"
+	}
+}
+
+# Help during the war
+country_event = {
+	id = origin.4140
+	title = "origin.4140.name"
+	desc = "origin.4140.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:broken_shackles_empire
+		planet_background = event_target:broken_shackles_empire
+		graphical_culture = event_target:broken_shackles_empire
+		city_level = event_target:broken_shackles_empire
+		room = event_target:broken_shackles_empire
+	}
+
+	trigger = {
+		exists = event_target:MSI_country
+		has_origin = origin_payback
+		has_event_chain = payback_make_them_pay_swords_chain
+		NOT = { has_country_flag = origin_4140_fired }
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			has_country_flag = broken_shackles_recognized_payback@root
+			has_communications = prev
+		}
+	}
+
+	immediate = {
+		set_country_flag = origin_4140_fired
+		random_playable_country = {
+			limit = {
+				has_origin = origin_broken_shackles
+				has_country_flag = broken_shackles_recognized_payback@root
+				has_communications = prev
+			}
+			save_event_target_as = broken_shackles_empire
+		}
+	}
+
+	option = {
+		name = "origin.4140.a"
+		event_target:broken_shackles_empire = {
+			set_country_flag = payback_bs_will_join_war
+		}
+	}
+}
+
+# Broken Shackles joins the war
+country_event = {
+	id = origin.4141
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			OR = {
+				using_war_goal = {
+					type = wg_payback_wipe_them_out
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_force_ideology
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_tribute
+					owner = root
+				}
+				using_war_goal = {
+					type = wg_payback_megacorp_subjugate
+					owner = root
+				}
+			}
+		}
+		has_origin = origin_payback
+		has_event_chain = payback_make_them_pay_swords_chain
+		any_playable_country = {
+			has_origin = origin_broken_shackles
+			has_country_flag = payback_bs_will_join_war
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				has_origin = origin_broken_shackles
+				has_country_flag = payback_bs_will_join_war
+			}
+			join_war_on_side = {
+				war = from
+				side = root
+			}
+		}
+	}
+}
+
+# MSI interactions
+# Leviathan slain
+country_event = {
+	id = origin.4149
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		has_origin = origin_payback
+		exists = event_target:MSI_country
+		has_communications = event_target:MSI_country
+		has_event_chain = payback_debt_collectors_chain
+		NOR = {
+			has_country_flag = origin_4149_fired
+			has_country_flag = fought_debt_collectors_last_time
+			has_country_flag = payback_revenge_complete
+		}
+		from = {
+			is_guardian_country = yes
+		}
+	}
+
+	immediate = {
+		set_country_flag = origin_4149_fired
+		country_event = { id = origin.4150 days = 15 }
+	}
+}
+
+# Leviathan slain
+country_event = {
+	id = origin.4150
+	title = "origin.4130.name"
+	desc = "origin.4150.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:MSI_country.species
+		room = slaver_room
+	}
+
+	trigger = {
+		has_origin = origin_payback
+		exists = event_target:MSI_country
+		has_communications = event_target:MSI_country
+		has_event_chain = payback_debt_collectors_chain
+		NOR = {
+			has_country_flag = fought_debt_collectors_last_time
+			has_country_flag = payback_revenge_complete
+		}
+	}
+
+	option = {
+		name = "origin.4150.a"
+		add_monthly_resource_mult = {
+			resource = energy
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+	}
+
+	option = {
+		name = "origin.4150.b"
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1materialreward
+			min = @tier1materialmin
+			max = @tier1materialmax
+		}
+	}
+}
+
+# Uplifted someone
+country_event = {
+	id = origin.4160
+	title = "origin.4130.name"
+	desc = "origin.4160.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:MSI_country.species
+		room = slaver_room
+	}
+
+	trigger = {
+		has_origin = origin_payback
+		exists = event_target:MSI_country
+		has_communications = event_target:MSI_country
+		has_event_chain = payback_debt_collectors_chain
+		NOR = {
+			has_country_flag = fought_debt_collectors_last_time
+			has_country_flag = origin_4160_fired
+			has_country_flag = payback_revenge_complete
+		}
+	}
+
+	immediate = {
+		set_country_flag = origin_4160_fired
+	}
+
+	option = {
+		name = "origin.4160.a"
+		add_modifier = {
+			modifier = payback_student
+		}
+	}
+
+	option = {
+		name = "origin.4160.b"
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1materialreward
+			min = @tier1materialmin
+			max = @tier1materialmax
+		}
+	}
+}
+
+# You're in a deficit
+situation_event = {
+	id = origin.4170
+	title = "origin.4130.name"
+	desc = "origin.4170.desc"
+	is_triggered_only = yes
+	diplomatic = yes
+	picture_event_data = {
+		portrait = event_target:MSI_country.species
+		room = slaver_room
+	}
+
+	trigger = {
+		owner = {
+			has_origin = origin_payback
+			exists = event_target:MSI_country
+			has_communications = event_target:MSI_country
+			has_event_chain = payback_debt_collectors_chain
+			NOR = {
+				has_country_flag = fought_debt_collectors_last_time
+				has_country_flag = origin_4170_recently_fired
+				has_country_flag = payback_revenge_complete
+			}
+			any_situation = {
+				OR = {
+					is_situation_type = situation_energy_deficit
+					is_situation_type = situation_mineral_deficit
+					is_situation_type = situation_food_deficit
+					is_situation_type = situation_consumer_goods_deficit
+					is_situation_type = situation_alloys_deficit
+				}
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_timed_country_flag = {
+				flag = origin_4170_recently_fired
+				days = 1800	# 5 years
+			}
+		}
+	}
+
+	option = {
+		name = "origin.4170.a"
+		owner = {
+			switch = {
+				trigger = has_deficit
+				energy = {
+					add_resource = {
+						energy = 1000
+					}
+				}
+				minerals = {
+					add_resource = {
+						minerals = 1000
+					}
+				}
+				food = {
+					add_resource = {
+						food = 1000
+					}
+				}
+				consumer_goods = {
+					add_resource = {
+						consumer_goods = 500
+					}
+				}
+				alloys = {
+					add_resource = {
+						alloys = 500
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = "origin.4170.b"
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1materialreward
+				min = @tier1materialmin
+				max = @tier1materialmax
+			}
+		}
+	}
+}
+
+
+## Out of Warranty
+# Fired by on_decade_pulse_country
+
+# Gene Clinic is breaking down
+country_event = {
+	id =  origin.4300
+	title = origin.4300.name
+	desc = {
+		trigger = {
+			AND = {
+				has_country_flag = has_encountered_other_empire
+				is_xenophile = yes
+			}
+		}
+		text = origin.4300.aliens.phile.desc
+	}
+	desc = {
+		trigger = {
+			AND = {
+				has_country_flag = has_encountered_other_empire
+				is_xenophobe = yes
+			}
+		}
+		text = origin.4300.aliens.phobe.desc
+	}
+	desc = {
+		trigger = {
+			NOR = {
+				has_country_flag = has_encountered_other_empire
+				is_xenophobe = yes
+			}
+		}
+		text = origin.4300.noaliens.desc
+	}
+	picture = GFX_evt_emergency_workers
+	show_sound = event_power_down
+	is_triggered_only = yes
+	location = home_planet
+
+	trigger = {
+		has_origin = origin_payback
+		NOT = {
+			has_country_flag = payback_had_out_of_warranty
+			has_technology = tech_frontier_health
+		}
+		home_planet = {
+			original_owner = yes
+			has_building = building_clinic
+		}
+	}
+
+	immediate = {
+		set_country_flag = payback_had_out_of_warranty
+		set_country_flag = payback_ruined_gene_clinics # prevents origin.4306 from firing upon gaining the tech
+		home_planet = {
+			ruin_building = building_clinic
+		}
+	}
+
+	option = { # Attempt to repair the clinics
+		name = origin.4300.a
+		begin_event_chain = {
+			event_chain = payback_out_of_warranty_chain
+			target = this
+		}
+		custom_tooltip = origin.4300.a.tooltip
+	}
+
+	option = { # Repurpose clinics (Autochthon Monument/Sanctuary of Repose)
+		name = origin.4300.b
+		allow = {
+			resource_stockpile_compare = {
+				resource = minerals
+				value >= 100
+			}
+		}
+		if = {
+			limit = { is_memorialist_empire = yes }
+			custom_tooltip = origin.4300.b.memorialist.tooltip
+		}
+		else = {
+			custom_tooltip = origin.4300.b.tooltip
+		}
+		add_resource = {
+			minerals = -100
+		}
+		home_planet = {
+			planet_event = { id = origin.4304 days = 15 }
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			# follow-up where healthcare is getting worse and the population is not happy about it
+			country_event = { id = origin.4305 days = 360 random = 180 }
+		}
+	}
+}
+
+# Building repaired!
+country_event = {
+	id =  origin.4301
+	title = origin.4301.name
+	desc = {
+		trigger = {
+			success_text = {
+				text = origin.4301.agreement.desc
+				owner = { num_research_agreements > 0 }
+			}
+			success_text = {
+				text = origin.4301.noagreement.desc
+				owner = { num_research_agreements = 0 }
+			}
+			text = newline
+			text = origin.4301.end.desc
+		}
+	}
+	picture = GFX_evt_scientific_experiments
+	show_sound = event_laboratory_sound
+	is_triggered_only = yes
+	location = home_planet
+
+	immediate = {
+		remove_country_flag = payback_ruined_gene_clinics
+	}
+
+	option = {
+		name = EXCELLENT
+		trigger = {
+			OR = {
+				is_xenophobe = no
+				num_research_agreements = 0
+			}
+		}
+	}
+
+	option = {
+		name = origin.4301.a
+		trigger = {
+			is_xenophobe = yes
+			num_research_agreements > 1
+		}
+		while = {
+			count = value:five_percent_species
+			random_owned_pop = {
+				limit = {
+					NOT = {
+						pop_has_ethic = ethic_xenophile
+						pop_has_trait = trait_mechanical
+					}
+				}
+				pop_change_ethic = "ethic_xenophile"
+			}
+		}
+	}
+
+	after = {
+		give_technology = {
+			tech = tech_frontier_health
+			message = yes
+		}
+		remove_modifier = payback_declining_healthcare
+		end_event_chain = payback_out_of_warranty_chain
+	}
+}
+
+# Building still broken
+country_event = {
+	id =  origin.4302
+	title = origin.4302.name
+	desc = origin.4302.desc
+	picture = GFX_evt_vivisection
+	is_triggered_only = yes
+	location = home_planet
+
+	trigger = {
+		home_planet = {
+			has_building = building_clinic
+		}
+	}
+
+	immediate = {
+		home_planet = {
+			ruin_building = building_clinic
+		}
+	}
+
+	option = { # Attempt to repair the clinics again
+		name = origin.4302.a
+		custom_tooltip = origin.4302.a.tooltip
+	}
+
+	option = { # Repurpose clinics (Autochthon Monument/Sanctuary of Repose)
+		name = origin.4300.b
+		allow = {
+			resource_stockpile_compare = {
+				resource = minerals
+				value >= 100
+			}
+		}
+		if = {
+			limit = { is_memorialist_empire = yes }
+			custom_tooltip = origin.4302.b.memorialist.tooltip
+		}
+		else = {
+			custom_tooltip = origin.4302.b.tooltip
+		}
+		add_resource = {
+			minerals = -100
+		}
+		home_planet = {
+			planet_event = { id = origin.4304 days = 15 }
+		}
+	}
+}
+
+# Building broken beyond repair
+planet_event = {
+	id =  origin.4303
+	title = origin.4303.name
+	desc = origin.4303.desc
+	picture = GFX_evt_archaeologists_escaping
+	show_sound = event_ship_explosion
+	is_triggered_only = yes
+	location = this
+
+	option = {
+		name = UNFORTUNATE
+		remove_building = building_clinic
+		random_owned_pop = {
+			limit = { is_robot_pop = no }
+			kill_pop = yes
+		}
+		owner = {
+			end_event_chain = payback_out_of_warranty_chain
+		}
+	}
+}
+
+# Building Repurposed
+planet_event = {
+	id =  origin.4304
+	title = origin.4304.name
+	desc = origin.4304.desc
+	picture = GFX_evt_arena
+	show_sound = event_celebration
+	is_triggered_only = yes
+	location = this
+
+	immediate = {
+		remove_building = building_clinic
+		if = {
+			limit = {
+				owner = { is_memorialist_empire = yes }
+			}
+			add_building = building_galactic_memorial_1
+		}
+		else = {
+			add_building = building_autochthon_monument
+		}
+	}
+
+	option = {
+		name = SPLENDID
+		owner = {
+			add_modifier = {
+				modifier = payback_healing_scars
+				years = 5
+			}
+		}
+	}
+}
+
+# No building - people getting sick
+country_event = {
+	id =  origin.4305
+	title = origin.4305.name
+	desc = origin.4305.desc
+	picture = GFX_evt_disease_outbreak
+	show_sound = event_life_support_fail
+	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = payback_ruined_gene_clinics
+		# Only happens if you haven't somehow built/gotten more clinics in the meantime
+		NOT = {
+			any_owned_planet = {
+				has_active_building = building_clinic
+			}
+		}
+	}
+
+	option = { # invest
+		name = origin.4305.a
+		allow = {
+			resource_stockpile_compare = {
+				resource = energy
+				value >= 500
+			}
+		}
+		add_resource = {
+			energy = -500
+		}
+		custom_tooltip = origin.4305.a.tooltip
+		set_country_flag = payback_researching_gene_clinics
+		add_modifier = {
+			modifier = payback_declining_healthcare
+			days = 18000
+		}
+	}
+
+	option = { # alternative medicine
+		name = origin.4305.b
+		custom_tooltip = origin.4305.b.tooltip
+		add_modifier = {
+			modifier = payback_declining_healthcare
+			days = 18000
+		}
+	}
+
+	option = { # not a problem
+		name = origin.4305.c
+		trigger = {
+			OR = {
+				is_reanimator = yes
+				is_death_cult_empire = yes
+			}
+		}
+	}
+}
+
+# Rediscovering genetic healthcare
+country_event = {
+	id =  origin.4306
+	title = origin.4306.name
+	desc = origin.4306.desc
+	picture = GFX_evt_genetic_modification
+	show_sound = event_celebration
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		has_country_flag = payback_ruined_gene_clinics
+		last_increased_tech = tech_frontier_health
+	}
+
+	option = {
+		name = EXCELLENT
+		end_event_chain = payback_out_of_warranty_chain
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
+		remove_modifier = payback_declining_healthcare
+	}
+}
+
+## Digsite Events
+# Each stage cleans up some debris from the home system
+# small_debris_object
+# medium_debris_01_object
+# medium_debris_02_object
+# large_debris_object
+# ancient_battlefield_02_object
+# abandoned_ship_2_object
+
+# Starting event
+country_event = {
+	id = origin.4900
+	title = "origin.4900.name"
+	desc = "origin.4900.desc"
+	picture = GFX_evt_payback
+	show_sound = event_dig_site
+	is_triggered_only = yes
+	location = capital_scope
+
+	trigger = {
+		has_origin = origin_payback
+		NOT = { has_country_flag = payback_starting_dig_site }
+	}
+
+	immediate = {
+		set_country_flag = payback_starting_dig_site
+	}
+
+	option = {
+		name = "origin.4900.a"
+		enable_special_project = {
+			name = "PAYBACK_KESSLER_EFFECT"
+			location = capital_scope
+			owner = root
+		}
+	}
+}
+
+# Project - 50%
+ship_event = {
+	id = origin.4930
+	title = "origin.4930.name"
+	desc = "origin.4930.desc"
+	picture = GFX_evt_space_debris
+	show_sound = event_dig_site
+	is_triggered_only = yes
+	location = from
+
+	immediate = {
+		from.solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					is_ambient_object_type = small_debris_object
+				}
+				destroy_ambient_object = this
+			}
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+# Project - 100%
+ship_event = {
+	id = origin.4931
+	title = "origin.4931.name"
+	desc = "origin.4931.desc"
+	picture = GFX_evt_payback
+	show_sound = event_dig_site
+	is_triggered_only = yes
+	location = from
+
+	immediate = {
+		from.solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					is_ambient_object_type = ancient_battlefield_02_object
+				}
+				destroy_ambient_object = this
+			}
+		}
+	}
+
+	option = {
+		name = "origin.4900.a"
+		fromfrom = {
+			set_country_flag = payback_unlocked_dig_site
+		}
+		fromfrom.capital_scope = {
+			remove_modifier = "payback_debris_field"
+		}
+	}
+}
+
+
+# Stage 1
+fleet_event = {
+	id = origin.4905
+	title = "origin.4905.name"
+	desc = "origin.4905.desc"
+	picture = GFX_evt_space_debris
+	show_sound = event_dig_site
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = UNDERSTOOD
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 2
+fleet_event = {
+	id = origin.4910
+	title = "origin.4910.name"
+	desc = "origin.4910.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = { # Dissect
+		name = "origin.4910.a"
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+
+	option = { # Parade
+		name = "origin.4910.c"
+		trigger = {
+			owner = {
+				OR = {
+					is_xenophile = no
+					is_pacifist = no
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier2influencereward
+				min = @tier2influencemin
+				max = @tier2influencemax
+			}
+		}
+	}
+
+	option = { # Burial
+		name = "origin.4910.d"
+		trigger = {
+			owner = {
+				# Why are we not using quick triggers like is_pacifist = yes?
+				# Because if we check ethics individually we get the nice "you get this choice because of your ethic" icon next to this choice
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+					has_civic = civic_memorialist
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2unityreward
+				min = @tier2unitymin
+				max = @tier2unitymax
+			}
+		}
+	}
+}
+
+# Stage 3
+fleet_event = {
+	id = origin.4920
+	title = "origin.4920.name"
+	desc = "origin.4920.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = "origin.4920.a"
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+}
+
+# Stage 6
+fleet_event = {
+	id = origin.4925
+	title = "origin.4925.name"
+	desc = "origin.4925.desc"
+	picture = GFX_evt_baol_datacrystals
+	show_sound = event_dig_site
+
+	archaeology = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+			save_event_target_as = ship_wreck
+		}
+		solar_system = {
+			random_system_planet = {
+				limit = { has_planet_flag = payback_site_planet }
+				save_event_target_as = habitat_spawn_planet
+			}
+		}
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		custom_tooltip = origin.4925.a.tt
+		name = EXCELLENT
+		begin_event_chain = {
+			event_chain = "payback_restore_warship_chain"
+			target = root.owner
+		}
+		enable_special_project = {
+			name = "RESTORE_WARSHIP_PROJECT"
+			location = event_target:ship_wreck
+			owner = root.owner
+		}
+		enable_special_project = {
+			name = "RESTORE_HABITAT_PROJECT"
+			location = event_target:ship_wreck
+			owner = root.owner
+		}
+	}
+}
+
+# Restored Flagship
+ship_event = {
+	id = origin.4934
+	title = "origin.4934.name"
+	desc = "origin.4934.desc"
+	picture = GFX_evt_payback
+	show_sound = event_dig_site
+	is_triggered_only = yes
+	location = owner.capital_scope
+
+	trigger = {
+		this.owner = { has_origin = origin_payback }
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					is_ambient_object_type = payback_site_ship_object
+				}
+				destroy_ambient_object = this
+			}
+			random_system_planet = {
+				limit = { has_planet_flag = payback_site_planet }
+				save_event_target_as = spawn_location
+				remove_planet_flag = has_orbital_debris
+			}
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		custom_tooltip = origin.4934.tt
+		owner = {
+			create_payback_warship_effect = yes
+		}
+	}
+}
+
+# Restored Habitat
+ship_event = {
+	id = origin.4935
+	title = "origin.4935.name"
+	desc = "origin.4935.desc"
+	picture = GFX_evt_payback
+	show_sound = event_dig_site
+	is_triggered_only = yes
+	location = owner.capital_scope
+
+	trigger = {
+		this.owner = { has_origin = origin_payback }
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					is_ambient_object_type = payback_site_ship_object
+				}
+				destroy_ambient_object = this
+			}
+			random_system_planet = {
+				limit = { has_planet_flag = payback_site_planet }
+				save_event_target_as = target_planet
+				remove_planet_flag = has_orbital_debris
+			}
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		custom_tooltip = origin.4935.tt
+		hidden_effect = {
+			solar_system = {
+				spawn_payback_site_habitat = yes
+			}
+		}
+		owner = {
+			add_research_option = tech_habitat_1
+			set_country_flag = payback_habitat
+		}
+	}
+}
+
+# Can Upgrade Flagship
+country_event = {
+	id = origin.4936
+	title = "origin.4936.name"
+	desc = "origin.4936.desc"
+	picture = GFX_evt_payback
+	show_sound = event_dig_site
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_payback
+		OR = {
+			last_increased_tech = tech_battleships
+			last_increased_tech = tech_cruisers
+			last_increased_tech = tech_destroyers
+		}
+		any_owned_ship = {
+			has_ship_flag = payback_flagship
+		}
+		NOT = {
+			has_special_project = UPGRADE_FLAGSHIP
+		}
+	}
+
+	immediate = {
+		random_owned_ship = {
+			limit = {
+				has_ship_flag = payback_flagship
+			}
+			save_event_target_as = payback_flagship
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		custom_tooltip = origin.4936.tt
+		enable_special_project = {
+			name = "UPGRADE_FLAGSHIP"
+			location = event_target:payback_flagship
+			owner = ROOT
+		}
+	}
+}
+
+# Flagship Upgraded
+ship_event = {
+	id = origin.4937
+	title = "origin.4937.name"
+	desc = "origin.4937.desc"
+	picture = GFX_evt_payback
+	show_sound = event_dig_site
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			has_origin = origin_payback
+			any_owned_ship = {
+				has_ship_flag = payback_flagship
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			random_owned_ship = {
+				limit = {
+					has_ship_flag = payback_flagship
+				}
+				save_event_target_as = spawn_location
+				# Unassign the leader so they won't get accidentally killed once we recreate the warship
+				fleet = {
+					if = {
+						limit = {
+							exists = leader
+						}
+						leader = {
+							save_event_target_as = flagship_leader
+							unassign_leader = this
+						}
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		custom_tooltip = origin.4937.tt
+		hidden_effect = {
+			owner = {
+				create_payback_warship_effect = yes
+			}
+		}
+	}
+
+	after = {
+		delete_ship = event_target:spawn_location
+	}
+}

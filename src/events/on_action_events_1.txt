@@ -3948,20 +3948,26 @@ country_event = {
 	immediate = {
 		if = {
 			limit = {
-				is_regular_empire = yes
+				OR = {
+					AND = {
+						from = { is_hive_empire = yes}
+						is_hive_empire = YES
+					}
+					AND = {
+						from = { is_hive_empire = no }
+						is_regular_empire = yes
+					}
+				}
 			}
 			FROMFROM = {
 				add_modifier = {
 					modifier = planet_culture_shock
 					years = 10
 				}
-				set_owner = ROOT
 			}
 		}
-		else = {
-			FROMFROM = {
-				set_owner = ROOT
-			}
+		FROMFROM = {
+			set_owner = ROOT
 		}
 
 		every_country = {
@@ -4198,7 +4204,6 @@ country_event = {
 			if = {
 				limit = {
 					num_pops >= 30
-					#num_pops <= 35
 				}
 				add_district = district_city
 				add_district = district_city
@@ -4585,7 +4590,7 @@ country_event = {
 		}
 		add_resource = {
 			minerals = 200 # Should be atleast the required amount for a spaceport
-			alloys = 200 # Spaceports cost alloys, now.
+			alloys = 200
 			energy = 200
 			influence = 250
 		}
@@ -6480,6 +6485,9 @@ planet_event = {
 		remove_modifier = "irradiated_planet"
 		remove_modifier = "second_home"
 		remove_deposit = d_radiotrophic_preserve
+		remove_modifier = "terraforming_candidate"
+		remove_modifier = "frozen_terraforming_candidate"
+		remove_modifier = "toxic_terraforming_candidate"
 
 		if = {
 			limit = {
@@ -7638,14 +7646,13 @@ planet_event = {
 		owner = {
 			exists = this
 			is_country_type = default
+			NOT = { is_same_value = from }
 		}
 	}
 
 	immediate = {
 		owner = {
-			if = { limit = { NOT = { is_same_empire = root.from } } # vfix
-				add_opinion_modifier = { who = root.from modifier = opinion_nuker }
-			}
+			add_opinion_modifier = { who = root.from modifier = opinion_nuker }
 		}
 		every_country = {
 			limit = {
@@ -7659,8 +7666,14 @@ planet_event = {
 				OR = {
 					is_xenophobe = no
 					NOR ={
-						has_overlord = root.from
-						is_overlord_to = root.from
+						AND = {
+							has_overlord = root.from
+							has_loyalty > 0
+						}
+						AND = {
+							is_overlord_to = root.from
+							root.from = { has_loyalty > 0 }
+						}						
 						is_in_federation_with = root.from
 						is_harming_relations_with = root.owner
 						is_at_war_with = root.owner

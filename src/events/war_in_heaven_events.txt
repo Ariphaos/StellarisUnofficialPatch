@@ -37,10 +37,8 @@ country_event = {
 		random_country = {
 			limit = {
 				is_country_type = fallen_empire
-				NOR = {
-					is_gestalt = yes
-					has_country_flag = sleepers_awake_first
-				}
+				NOT = { has_ethic = ethic_gestalt_consciousness }
+				NOT = { has_country_flag = sleepers_awake_first }
 			}
 			set_country_flag = sleepers_awake_ancient_rival
 			set_timed_country_flag = { flag = timed_ancient_rival days = 3600 }
@@ -81,7 +79,6 @@ country_event = {
 
 	immediate = {
 		every_playable_country = {
-			limit = { is_country_type = default }
 			set_timed_country_flag = { flag = ai_no_wars days = 5400 }
 		}
 		random_country = {
@@ -90,10 +87,10 @@ country_event = {
 				has_country_flag = sleepers_awake_first_sleeper
 			}
 			save_global_event_target_as = FirstSleeper
-			set_timed_country_flag = { flag = ai_no_wars days = 5400 }
+			set_timed_country_flag = { flag = ai_no_wars days = 3630 }
 		}
 		save_global_event_target_as = SecondSleeper
-		set_timed_country_flag = { flag = ai_no_wars days = 5400 }
+		set_timed_country_flag = { flag = ai_no_wars days = 3630 }
 		set_timed_country_flag = { flag = war_in_heaven_timer days = 720 }
 		set_timed_country_flag = { flag = war_in_heaven_timer_2 days = 3600 }
 		set_global_flag = sleepers_awake_rival_waking
@@ -218,23 +215,18 @@ country_event = {
 		if = {
 			limit = { has_galactic_emperor = no }
 			every_playable_country = {
-				limit = {
-					is_country_type = default
-				}
 				country_event = { id = war_in_heaven.4 }
 			}
 		}
 		else = {
 			every_playable_country = {
 				limit = {
-					is_country_type = default
 					is_galactic_community_member = yes
 				}
 				country_event = { id = war_in_heaven.7 }
 			}
 			every_playable_country = {
 				limit = {
-					is_country_type = default
 					is_galactic_community_member = no
 				}
 				country_event = { id = war_in_heaven.4 }
@@ -272,11 +264,10 @@ country_event = {
 			factor = 100
 			modifier = {
 				factor = 0
-				is_homicidal = yes
-			}
-			modifier = {
-				factor = 0
-				has_ascension_perk = ap_become_the_crisis
+				OR = {
+					is_homicidal = yes
+					has_ascension_perk = ap_become_the_crisis
+				}
 			}
 			modifier = {
 				factor = 0.5
@@ -463,11 +454,10 @@ country_event = {
 			factor = 100
 			modifier = {
 				factor = 0
-				is_homicidal = yes
-			}
-			modifier = {
-				factor = 0
-				has_ascension_perk = ap_become_the_crisis
+				OR = {
+					is_homicidal = yes
+					has_ascension_perk = ap_become_the_crisis
+				}
 			}
 			modifier = {
 				factor = 0.2
@@ -695,13 +685,23 @@ country_event = {
 	}
 	option = {
 		name = war_in_heaven.4.d
-		trigger = { is_subject = yes overlord = { is_country_type = awakened_fallen_empire } }
+		trigger = {
+			is_subject = yes
+		}
 		if = {
-			limit = { overlord = { is_same_empire = event_target:FirstSleeper } }
-			join_war = event_target:FirstSleeper
-		} else_if = {
-			limit = { overlord = { is_same_empire = from } }
-			join_war = from
+			limit = { overlord = { is_country_type = awakened_fallen_empire } }
+			if = {
+				limit = {
+					overlord = { is_same_value = event_target:FirstSleeper }
+				}
+				join_war = event_target:FirstSleeper
+			}
+			if = {
+				limit = {
+					overlord = { is_same_value = from }
+				}
+				join_war = from
+			}
 		}
 	}
 }
@@ -894,11 +894,11 @@ country_event = {
 					}
 				}
 			}
-			# end_war_effect = yes
 			every_war_participant = {
 				limit = { NOT = { is_same_value = prevprev } } # don't break the loop
 				prev = { remove_war_participant = prev }
 			}
+			#end_war_effect = yes
 		}
 		set_global_flag = war_in_heaven_first_awakened_down
 
@@ -951,13 +951,10 @@ country_event = {
 		is_country_type = awakened_fallen_empire
 		has_country_flag = sleepers_awake_first_sleeper
 		has_global_flag = war_in_heaven_ongoing
-		NOR = {
-			has_global_flag = war_in_heaven_nonaligned_league
-			has_global_flag = war_in_heaven_seeking_league_leader
-		}
+		NOT = { has_global_flag = war_in_heaven_nonaligned_league }
+		NOT = { has_global_flag = war_in_heaven_seeking_league_leader }
 		has_galactic_emperor = no # Galactic Empire serves this purpose
 		any_playable_country = {
-			# is_country_type = default
 			is_subject = no
 			NOT = {
 				any_country = {
@@ -966,7 +963,6 @@ country_event = {
 				}
 			}
 			any_playable_country = {
-				# is_country_type = default
 				NOR = {
 					is_subject = yes
 					any_country = {
@@ -1138,7 +1134,6 @@ country_event = {
 							is_at_war_with = prev
 						}
 						any_playable_country = {
-							# is_country_type = default
 							is_subject = no
 							relative_power = {
 								who = prev
@@ -1325,7 +1320,6 @@ country_event = {
 				NOT = { has_country_flag = formed_nonaligned_league }
 			}
 			is_subject = no
-			# is_country_type = default
 			NOT = { is_in_federation_with = root }
 		}
 	}
@@ -1340,36 +1334,9 @@ country_event = {
 			limit = {
 				has_country_flag = war_in_heaven_league_leader
 				is_subject = no
-				# is_country_type = default
 			}
-			random_list = {
-				50 = {
-					modifier = {
-						factor = 2
-						is_xenophile = yes
-					}
-					modifier = {
-						factor = 0.1
-						is_xenophobe = yes
-					}
-					modifier = {
-						factor = 5
-						is_militarist = yes
-					}
-					modifier = {
-						factor = 0.5
-						is_pacifist = yes
-					}
-					country_event = { id = war_in_heaven.15 }
-				}
-				50 = {
-					# Nothing
-					modifier = {
-						factor = 0
-						ROOT = { has_rival = PREV }
-					}
-				}
-			}
+			# Ariphaos TODO: This should check for dangerous federation types.
+			country_event = { id = war_in_heaven.15 }
 		}
 	}
 }
@@ -1546,18 +1513,28 @@ country_event = {
 	option = {
 		name = war_in_heaven.15.b
 		ai_chance = {
-			factor = 1
+			factor = 0
 			modifier = {
-				factor = 200
+				add = 900
 				has_rival = from
 			}
 			modifier = {
-				factor = 0.5
-				is_xenophile = yes
+				factor = 0.111111
+				OR = {
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_fanatic_militarist
+					AND = {
+						is_militarist = yes
+						is_xenophile = yes
+					}
+				}
 			}
 			modifier = {
 				factor = 0.5
-				is_militarist = yes
+				OR = {
+					is_militarist = yes
+					is_xenophile = yes
+				}
 			}
 		}
 		hidden_effect = {
@@ -1655,6 +1632,7 @@ country_event = {
 			}
 		}
 	}
+
 
 	immediate = {
 		if = {

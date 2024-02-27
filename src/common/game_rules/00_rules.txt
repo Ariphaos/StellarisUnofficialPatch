@@ -290,28 +290,7 @@ should_pay_for_leader_upkeep = {
 #Root = country
 #This = pop
 can_generate_leader_from_pop = {
-	has_citizenship_rights = yes
-	NOT = { has_trait = trait_syncretic_proles }
-	can_think = yes
-	OR = {
-		is_robot_pop = no
-		root = {
-			OR = {
-				has_technology = tech_synthetic_leaders
-				has_authority = auth_machine_intelligence
-				is_mechanical_empire = yes
-			}
-		}
-	}
-	OR = {
-		is_same_species = root
-		root = {
-			NAND = {
-				has_origin = origin_necrophage
-				has_trait = trait_necrophage
-			}
-		}
-	}
+	can_be_leader = yes
 }
 
 #Checks whether this species is eligible to become rulers through elections
@@ -341,26 +320,8 @@ can_create_espionage_asset_from_species = {
 #Root = country
 #This = pop
 can_generate_military_leader_from_pop = {
+	can_be_leader = yes
 	can_be_military_leader = yes
-	OR = {
-		is_robot_pop = no
-		root = {
-			OR = {
-				has_technology = tech_synthetic_leaders
-				has_authority = auth_machine_intelligence
-				is_mechanical_empire = yes
-			}
-		}
-	}
-	OR = {
-		is_same_species = root
-		root = {
-			NAND = {
-				has_origin = origin_necrophage
-				has_trait = trait_necrophage
-			}
-		}
-	}
 }
 
 #Root = species
@@ -1015,7 +976,7 @@ can_orbital_bombard = {
 				is_country_type = extradimensional_3
 				is_country_type = swarm
 				is_country_type = ai_empire
-				#is_country_type = cybrex_empire		# should be governed by hostile rule
+				is_country_type = cybrex_empire
 				is_country_type = dormant_marauders
 				is_country_type = marauder_raiders
 				is_country_type = ruined_marauders
@@ -1389,22 +1350,8 @@ can_subjugate_empires = {
 
 # this = leader
 can_leader_get_council_trait = {
-	OR = {
-		NAND = {
-			exists = owner
-			owner = { is_gestalt = yes }
-			is_councilor = no
-		}
-		has_leader_flag = restored_node
-	}
-	if = {
-		limit = {
-			exists = owner
-		}
-		owner = {
-			is_crisis_faction = no
-		}
-	}
+	# See 03_scripted_triggers_paragon.txt
+	can_leader_get_council_trait_trigger = yes
 }
 
 # this = leader
@@ -2591,16 +2538,14 @@ can_country_connect_to_relay_network = {
 			is_country_type = default
 			is_country_type = awakened_fallen_empire
 			is_country_type = fallen_empire
+			is_country_type = awakened_marauders
+		}
+		OR = {
 			from = { is_same_value = root }
 			is_in_federation_with = from
-			is_subject = yes
-			is_overlord = yes
+			has_overlord = from
+			from = { has_overlord = root }
 		}
-		NAND = {
-			has_closed_borders = from
-			can_control_access_for = from
-		}
-		NOT = { is_at_war_with = from }
 	}
 }
 
@@ -3200,3 +3145,112 @@ can_leader_explore_astral_rift = {
 		is_heir = no
 	}
 }
+
+# FROM = country of the ai (in case it's relevant)
+# THIS = planet
+# this determines if the planet is allowed to receive a governor at all, and isn't called for a specific candidate
+can_ai_assign_governor = {
+	OR = {
+		is_sector_capital = yes
+		is_capital = yes
+	}
+	num_pops >= 1	# replaces the MINIMUM_POPS_TO_CONSIDER_GOVERNOR define
+	NOT = {
+		exists = leader
+	}
+}
+
+# if the galactic community exists, is a galactic empire, and the country is part of it
+# the ai will call this to see if it should set its delegate to strengthn it
+# It is guaranteed that the galactic community exists, is an empire, and the country is part of it
+# when this rule is called
+# THIS = Country
+# FROM = Galactic Emperor (Country)
+should_ai_support_galactic_empire = {
+	OR = {
+		is_galactic_emperor = yes
+		AND = {
+			NOT = {
+				FROM = {
+					is_overlord_to = prev
+				}
+			}
+			imperial_authority <= 0.75
+			is_part_of_galactic_council = yes
+			opinion = {
+				who = FROM
+				value >= 300	# value defined as "GOOD" in for opinion 00_defines.txt
+			}
+		}
+		AND = {
+			NOT = {
+				FROM = {
+					is_overlord_to = prev
+				}
+			}
+			imperial_authority <= 0.75
+			opinion = {
+				who = FROM
+				value >= 750	# value define as "EXCELLENT" for opinion in 00_defines.txt
+			}
+		}
+		AND = {
+			# Subjects of the Galactic Emperor that are loyal or cannot vote
+			# should support the Imperium
+			FROM = {
+				is_overlord_to = prev
+			}
+			OR = {
+				has_loyalty >= 0
+				NOT = {
+					any_agreement = {
+						has_term_value = {
+							term = subject_diplomacy
+							value = subject_can_do_diplomacy
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# if the galactic community exists, is a galactic empire, and the country is part of it
+# and if it didn't decided to strengthen the empire,
+# the ai will call this to see if it should set its delegate to undermine it
+# if the ai neither wants to support nor undermine the galactic empire, it will just keep
+# its emissary as a standard delegate
+# It is guaranteed that the galactic community exists, is an empire, and the country is part of it
+# when this rule is called
+# THIS = Country
+# FROM = Galactic Emperor (Country)
+should_ai_undermine_galactic_empire = {
+	is_galactic_emperor = no
+	imperial_authority >= 0.25
+	OR = {
+		AND = {
+			NOT = {
+				FROM = {
+					is_overlord_to = prev
+				}
+			}
+			opinion = {
+				who = FROM
+				value <= -300	# value defined as "POOR" for opinion in 00_defines.txt
+			}
+		}
+		AND = {
+			FROM = {
+				is_overlord_to = prev
+			}
+			has_loyalty < 0
+			any_agreement = {
+				has_term_value = {
+					term = subject_diplomacy
+					value = subject_can_do_diplomacy
+				}
+			}
+		}
+	}
+}
+

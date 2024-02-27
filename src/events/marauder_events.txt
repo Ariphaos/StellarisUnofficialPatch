@@ -396,6 +396,12 @@ country_event = {
 
 	is_triggered_only = yes
 
+	immediate = {
+		fromfromfromfrom.solar_system = {
+			save_event_target_as = marauder_system
+		}
+	}
+
 	option = {
 		name = marauder.5.a
 	}
@@ -6370,7 +6376,7 @@ event = {
 								limit = {
 									any_system_planet = {
 										exists = owner
-										owner = { is_same_empire = event_target:marauder_target }
+										owner = { is_same_value = event_target:marauder_target }
 										num_pops > 0
 									}
 								}
@@ -6380,7 +6386,7 @@ event = {
 								random_system_planet = {
 									limit = {
 										exists = owner
-										owner = { is_same_empire = event_target:marauder_target }
+										owner = { is_same_value = event_target:marauder_target }
 										num_pops > 0
 									}
 									save_event_target_as = raid_planet
@@ -7153,7 +7159,6 @@ country_event = {
 			}
 			observer_event = { id = observer.13 }
 			every_playable_country = {
-				limit = { is_country_type = default }
 				establish_communications_no_message = root
 				country_event = { id = marauder.501 }
 			}
@@ -7161,15 +7166,13 @@ country_event = {
 		else = {
 			observer_event = { id = observer.18 }
 			every_playable_country = {
-				limit = { is_country_type = default }
 				establish_communications_no_message = root
 				country_event = { id = marauder.526 }
 			}
 		}
-		every_country = {
+		every_playable_country = {
 			limit = {
 				is_ai = yes
-				is_country_type = default
 			}
 			establish_communications_no_message = root
 		}
@@ -7302,13 +7305,13 @@ country_event = {
 	option = {
 		name = marauder.502.a
 		trigger = {
-			is_machine_empire = no
+			NOT = { has_authority = auth_machine_intelligence }
 		}
 	}
 	option = {
 		name = marauder.502.b
 		trigger = {
-			is_machine_empire = yes
+			has_authority = auth_machine_intelligence
 		}
 	}
 }
@@ -7853,7 +7856,7 @@ country_event = {
 		if = { # Planet belonged to liberator
 			limit = {
 				exists = event_target:planet_former_owner
-				event_target:planet_former_owner = { is_same_empire = root }
+				event_target:planet_former_owner = { is_same_value = root }
 			}
 			country_event = { id = marauder.516 }
 			break = yes
@@ -7998,9 +8001,9 @@ country_event = {
 		}
 		# If at fleet cap, check again later
 		if = {
-			# Ariphaos TODO: Move to balance, but should account for difficulty setting.
+			# Ariphaos TODO: Balance mod should adjust this further.
 			limit = {
-				fleet_power > 200000
+				ariphaos_patch_fleet_titanic = yes
 			}
 			country_event = { id = marauder.520 days = 340 }
 			break = yes
@@ -8081,6 +8084,7 @@ country_event = {
 	desc = "marauder.526.desc"
 	picture = GFX_evt_khan_throne_room
 	show_sound = event_radio_chatter
+	location = event_target:awakened_horde
 
 	is_triggered_only = yes
 
@@ -8216,42 +8220,42 @@ country_event = {
 	desc = {
 		trigger = {
 			any_agreement = { agreement_preset = preset_satrapy }
-			is_machine_empire = yes
+			has_authority = auth_machine_intelligence
 		}
 		text = "marauder.550.l.desc"
 	}
 	desc = {
 		trigger = {
 			any_agreement = { agreement_preset = preset_satrapy }
-			is_machine_empire = yes
+			has_authority = auth_machine_intelligence
 		}
 		text = "marauder.550.m.desc"
 	}
 	desc = {
 		trigger = {
 			any_agreement = { agreement_preset = preset_satrapy }
-			is_hive_empire = yes
+			has_authority = auth_hive_mind
 		}
 		text = "marauder.550.n.desc"
 	}
 	desc = {
 		trigger = {
 			any_agreement = { agreement_preset = preset_satrapy }
-			is_hive_empire = yes
+			has_authority = auth_hive_mind
 		}
 		text = "marauder.550.o.desc"
 	}
 	desc = {
 		trigger = {
 			any_agreement = { agreement_preset = preset_satrapy }
-			is_gestalt = no
+			NOT = { has_ethic = ethic_gestalt_consciousness }
 		}
 		text = "marauder.550.p.desc"
 	}
 	desc = {
 		trigger = {
 			any_agreement = { agreement_preset = preset_satrapy }
-			is_gestalt = no
+			NOT = { has_ethic = ethic_gestalt_consciousness }
 		}
 		text = "marauder.550.q.desc"
 	}
@@ -8729,7 +8733,7 @@ fleet_event = {
 	trigger = {
 		has_global_flag = marauder_crisis_started
 		NOT = { has_global_flag = great_khan_dead }
-		owner = { is_same_empire = event_target:raider_khanate }
+		owner = { is_same_value = event_target:raider_khanate }
 	}
 
 	immediate = {
@@ -9228,6 +9232,13 @@ country_event = {
 		}
 		every_country = {
 			limit = {
+				NOT = { any_agreement = { agreement_preset = preset_satrapy } }
+				is_ai = no
+			}
+			country_event = { id = marauder.661 }
+		}
+		every_country = {
+			limit = {
 				is_subject = yes
 				any_agreement = { agreement_preset = preset_satrapy }
 			}
@@ -9237,13 +9248,6 @@ country_event = {
 			}
 		}
 		observer_event = { id = observer.23 }
-		every_country = {
-			limit = {
-				NOT = { any_agreement = { agreement_preset = preset_satrapy } }
-				is_ai = no
-			}
-			country_event = { id = marauder.661 }
-		}
 		destroy_country = yes
 	}
 }
@@ -9446,16 +9450,6 @@ country_event = {
 	trigger = {
 		from = { is_country_type = awakened_marauders }
 		has_global_flag = great_khan_dead
-	}
-
-	immediate = {
-		set_country_flag = marauder_diplomacy_engaged
-	}
-
-	after = {
-		hidden_effect = {
-			remove_country_flag = marauder_diplomacy_engaged
-		}
 	}
 
 	option = {
@@ -9674,21 +9668,21 @@ country_event = {
 		text = marauder.702.a.desc
 		trigger = {
 			NOR = {
-				is_hive_empire = yes
-				is_machine_empire = yes
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
 			}
 		}
 	}
 	desc = {
 		text = marauder.702.b.desc
 		trigger = {
-			is_hive_empire = yes
+			has_authority = auth_hive_mind
 		}
 	}
 	desc = {
 		text = marauder.702.c.desc
 		trigger = {
-			is_machine_empire = yes
+			has_authority = auth_machine_intelligence
 		}
 	}
 	picture = GFX_evt_machine_space_battle

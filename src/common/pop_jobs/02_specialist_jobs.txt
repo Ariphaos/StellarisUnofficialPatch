@@ -29,9 +29,9 @@ researcher = {
 	resources = {
 		category = planet_researchers
 		produces = {
-			physics_research = 4
-			engineering_research = 4
-			society_research = 4
+			physics_research = 3
+			engineering_research = 3
+			society_research = 3
 		}
 		upkeep = {
 			consumer_goods = 2
@@ -54,9 +54,9 @@ researcher = {
 					has_planet_flag = has_science_ministry
 				}
 			}
-			physics_research = 2
-			engineering_research = 2
-			society_research = 2
+			physics_research = 1
+			engineering_research = 1
+			society_research = 1
 		}
 	}
 
@@ -387,7 +387,7 @@ enforcer = {
 	}
 
 	pop_modifier = {
-		pop_defense_armies_add = 2
+	 	pop_defense_armies_add = 2
 	}
 
 	triggered_planet_modifier = {
@@ -1775,6 +1775,111 @@ numistic_priest = {
 	}
 }
 
+preacher = {
+	category = specialist
+	condition_string = SPECIALIST_JOB_TRIGGER
+	building_icon = building_temple_of_prosperity
+	clothes_texture_index = 3
+	icon = numistic_priest
+
+	possible_pre_triggers = {
+		has_owner = yes
+		is_being_purged = no
+		is_being_assimilated = no
+		is_sapient = yes
+	}
+
+	possible_precalc = can_fill_specialist_job
+	possible = {
+		complex_specialist_job_check_trigger = yes
+	}
+
+	resources = {
+		category = planet_priests
+		produces = {
+			unity = 3
+		}
+		upkeep = {
+			consumer_goods = 2
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
+		# Actual trade value determined in the script value below
+		trade_value_add = 1
+		mult = value:preacher_trade_value
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
+		planet_amenities_add = 2
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			planet = {
+				has_active_building = building_league_offices
+			}
+		}
+		planet_amenities_add = 1
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_valid_civic = civic_efficient_bureaucracy }
+		}
+		country_edict_fund_add = 2
+		mult = value:job_total_output_modifier|JOB|preacher|RESOURCE|unity|
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_councilor = { COUNCILOR = "councilor_dimensional_worship_corporate" } }
+		}
+		trade_value_add = @councilor_dimensional_worship_priest_trade_value
+		mult = value:scripted_modifier_councilor_level_mult|MODIFIER|pop_job_trade_mult|TYPE|councilor_dimensional_worship_corporate|
+	}
+
+	weight = {
+		weight = @specialist_job_weight
+		mult = value:job_weights_modifier|JOB|preacher|RESOURCE|unity|
+		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_amenities_mult|
+		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_trade_mult|
+		modifier = {
+			factor = 0.2
+			has_citizenship_rights = no
+			NOT = { has_trait = trait_mechanical }
+		}
+		modifier = {
+			factor = 2
+			exists = owner
+			owner = { has_civic = civic_exalted_priesthood }
+		}
+		modifier = {
+			factor = 0.1
+			can_take_servant_job = yes
+		}
+		modifier = {
+			factor = 1.5
+			has_job = preacher
+		}
+		modifier = {
+			factor = 0.1
+			is_enslaved = yes
+			has_slavery_type = { type = slavery_indentured }
+		}
+	}
+}
+
 manager = {
 	category = specialist
 	condition_string = SPECIALIST_JOB_TRIGGER
@@ -3017,7 +3122,7 @@ knight = {
 	}
 
 	resources = {
-		category = knights_independent_category
+		category = planet_knights
 		produces = {
 			trigger = { exists = owner }
 			unity = 3
@@ -3032,15 +3137,19 @@ knight = {
 		}
 		upkeep = {
 			alloys = 1
+			trigger = {
+				exists = owner
+				owner = {
+					NOT = {
+						has_modifier = luminous_blades
+					}
+				}
+			}
 		}
 	}
 
-	triggered_pop_modifier = {
-		potential = {
-			always = yes
-		}
+	pop_modifier = {
 		pop_defense_armies_add = 2
-		mult = value:scripted_modifier_mult|MODIFIER|knights_independent_category_produces_mult|
 	}
 
 	triggered_planet_modifier = {
@@ -3048,31 +3157,19 @@ knight = {
 			owner = { has_country_flag = toxoids_7090_a }
 		}
 		planet_amenities_add = 5
-		mult = value:scripted_modifier_mult|MODIFIER|knights_independent_category_produces_mult|
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
 	}
 
-	triggered_country_modifier = {
+	country_modifier = {
 		country_naval_cap_add = 4
-		mult = value:scripted_modifier_mult|MODIFIER|knights_independent_category_produces_mult|
-	}
-
-	triggered_country_modifier = {
-		potential = {
-			owner = { has_modifier = alloy_producing_knights }
-		}
-		country_alloys_produces_mult = 0.015
 	}
 
 	weight = {
 		weight = @high_prio_specialist_job_weight
 		factor = 1.2
 		add = 5 #Somehow pops preferred to work as squires than as knights. No more.
-		modifier = {
-			mult = value:job_weights_modifier|JOB|bureaucrat|RESOURCE|unity|
-		}
-		modifier = {
-			mult = value:job_weights_research_modifier|JOB|researcher|
-		}
+		mult = value:job_weights_modifier|JOB|bureaucrat|RESOURCE|unity|
+		mult = value:job_weights_research_modifier|JOB|researcher|
 	}
 }
 
@@ -3163,6 +3260,115 @@ archaeoengineers = {
 			factor = 0.8
 			is_enslaved = yes
 			has_slavery_type = { type = slavery_indentured }
+		}
+	}
+}
+
+resort_worker = {
+	category = specialist
+	condition_string = SPECIALIST_JOB_TRIGGER
+	building_icon = building_amusement_megaplex
+	clothes_texture_index = 3
+	icon = servant
+
+	possible_pre_triggers = {
+		has_owner = yes
+		is_being_purged = no
+		is_being_assimilated = no
+		is_sapient = yes
+	}
+
+	possible_precalc = can_fill_specialist_job
+	possible = {
+		entertainer_job_check_trigger = yes
+	}
+
+	resources = {
+		category = planet_entertainers
+		produces = {
+			unity = 2
+		}
+		upkeep = {
+			consumer_goods = 2
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
+		trade_value_add = 4 
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_trade_mult|
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_tradition = tr_mercantile_commercial_enterprise }
+		}
+		planet_amenities_add = 2
+		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			has_councilor = { COUNCILOR = "councilor_corporate_hedonism" }
+		}
+
+		trade_value_add = @councilor_corporate_hedonism_entertainer_trade_value
+		mult = value:scripted_modifier_councilor_level_mult|MODIFIER|pop_job_trade_mult|TYPE|councilor_corporate_hedonism|
+	}
+
+	country_modifier = {
+		planet_amenities_mult = 0.01
+		pop_lifestyle_trade_mult = 0.01
+	}
+
+	weight = {
+		weight = @specialist_job_weight
+		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_amenities_mult|
+		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_trade_mult|
+		modifier = {
+			factor = 5
+			has_job = resort_worker 
+		}
+		# crisis purge
+		modifier = {
+			factor = 0.01
+			exists = planet
+			exists = planet.controller
+			planet.controller = {
+				OR = {
+					is_country_type = swarm
+					is_country_type = ai_empire
+				}
+			}
+			OR = { # contingency won't purge itself
+				NOT = { exists = event_target:custodian_bot }
+				AND = {
+					exists = event_target:custodian_bot
+					NOT = { species = { is_same_value = event_target:custodian_bot } }
+				}
+			}
+		}
+	}
+
+	weight = {
+		weight = @specialist_job_weight
+		mult = value:job_weights_modifier|JOB|culture_worker|RESOURCE|unity|
+		# We deliberately don't weight the ethics-based modifiers
+		modifier = {
+			factor = 0.2
+			has_citizenship_rights = no
+			NOT = { has_trait = trait_mechanical }
+		}
+		modifier = {
+			factor = 0.1
+			can_take_servant_job = yes
+		}
+		modifier = {
+			factor = 1.5
+			has_job = culture_worker
 		}
 	}
 }
