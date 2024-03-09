@@ -150,6 +150,7 @@ Currently, nearly everything here is for the AI.
 # Defines
 
 * STARBASE_CAPACITY_MAX = 9999 # For mod support.
+* MILITARY_POWER_HEALTH_WEIGHT = 0.4 # For the player, the AI already knows this is bupkiss.
 
 All remaining define entries help the AI.
 
@@ -213,7 +214,7 @@ All remaining define entries help the AI.
 * Allow pops to be sold if they are being purged.
 * Do not allow the AI to sell pops being assimilated. (The AI suddenly thinks they are useless.)
 * Restrict relay network connections to allies/subjects/overlords. (Performance)
-* Disallow trading rulers.
+* Disallow trading rulers or legendary leaders.
 
 # Global Ship Designs
 
@@ -235,11 +236,13 @@ All remaining define entries help the AI.
 * Somewhat restrict where the AI may build hyper relays. (Have more work to do on this.)
 * AI won't build more habitats if one is already uncolonized.
 * AI won't build habitat/orbital structures over planets that could potentially become colonies (and thus build orbital rings instead).
+* AI won't build quantum catapults as they do not know how to use them.
 
 # Opinion Modifiers
 
 * Certain empires will be slower to forgive necrophaging. (Paradox specifically did not include this, may move to balance.)
 * Start empires off a bit less friendly to each other. (This is to reduce how quickly pacts and alliances form.)
+* Selective Kinship shouldn't matter to fallen empires. 
 
 # Personalities
 
@@ -260,7 +263,6 @@ Some of these are weight tweaks. Things I consider to be bona-fide bugs are:
 * Logic for selective bombardment is suspect.
 * Pacifist xenophobes should be willing to leave primitives alone.
 * Inward perfection empires should prefer to do so.
-* Xenophobes should be less interested in enlightening primitives.
 * There are a couple places where `is_xenophile` should be `values_others`.
 
 # Pop Faction Types
@@ -341,6 +343,7 @@ Some of these are weight tweaks. Things I consider to be bona-fide bugs are:
 * Add some weights for Feral Overload event jobs.
 * Give mortal initiates some ethic weights.
 * Decadent pops are less interested in the soldier life.
+* Made priests want to keep their job a bit more, and ethics-weight them.
 
 # Random Names
 

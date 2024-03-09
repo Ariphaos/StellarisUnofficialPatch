@@ -1,0 +1,338 @@
+################################
+# Astral Planes Origins Events #
+################################
+
+namespace = astral_planes
+
+######################
+# Origin - Riftworld #
+######################
+
+# Home system initialization
+country_event = {
+	id = astral_planes.2100
+
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		has_origin = origin_riftworld
+	}
+
+	immediate = {
+		set_country_flag = astral_threads_found
+		give_technology = {
+			tech = tech_astral_harvesting
+			message = no
+		}
+		capital_scope = {
+			solar_system = {				
+				spawn_astral_rift = {
+					relative_to = prev
+					orbit_distance = 60
+					orbit_angle = 340
+					tolerance = 360
+					id = riftworld
+					spawn_sound = no
+				}
+				astral_rift = {
+					create_research_station = { owner = root }
+				}
+				prevprev = {
+					country_event = {
+						id = astral_planes.101
+						days = 10080
+						random = 1440
+						scopes = { from = prev.astral_rift }
+					}
+				}
+			}
+			planet_event = { id = astral_planes.2120 }
+		}
+
+		if = {
+			limit = {
+				OR = {
+					has_valid_civic = civic_dimensional_worship
+					has_valid_civic = civic_corporate_dimensional_worship
+				}
+			}
+			random_owned_starbase = {
+				set_starbase_building = {
+					slot = 1
+					building = dimensional_shrine
+				}
+			}
+		}
+	}
+}
+
+# Formless contact riftworld origin empires after completing a rift, entry point
+# THIS = Country: Explorer country
+# FROM = AstralRift: Explored astral rift
+# FROMFROM = Explorer ship
+country_event = {
+	id = astral_planes.2104
+
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		has_astral_planes_dlc = yes
+		# Not what?
+		has_origin = origin_riftworld
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				astral_rifts_completed = 3
+			}
+			country_event = { id = astral_planes.2105 days = 30 }
+		}
+	}
+}
+
+# Formless contacting riftworld origin empires after completing a rift
+country_event = {
+	id = astral_planes.2105
+	title = astral_planes.2105.name
+	desc = astral_planes.2105.desc
+	picture = GFX_evt_astral_rift
+
+	location = fromfrom
+	is_triggered_only = yes
+
+	option = {
+		name = ONSCREEN
+		country_event = { id = astral_planes.2110 }
+	}
+}
+
+# Formless contacting riftworld origin empires after completing a rift
+country_event = {
+	id = astral_planes.2110
+	title = astral_planes.2110.name
+	desc = astral_planes.2110.desc
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	location = fromfrom
+	is_triggered_only = yes
+
+	option = {
+		name = END_TRANSMISSION
+	}
+}
+
+# Riftworld ArcSite
+planet_event = {
+	id = astral_planes.2120
+	title = astral_planes.2120.name
+	desc = astral_planes.2120.desc
+	picture = GFX_evt_riftworld_archsite_crater
+	show_sound = event_finding_loot
+	location = this
+
+	is_triggered_only = yes
+
+	option = {
+		name = FASCINATING
+		create_archaeological_site = riftworld_digsite
+	}
+}
+
+fleet_event = {
+	id = astral_planes.2125
+	title = astral_planes.2125.name
+	desc = astral_planes.2125.desc
+	picture = GFX_evt_riftworld_archsite_crater
+	show_sound = ap_rift_event_0_astral_wonder
+	location = from
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = astral_planes.2125.a
+	}
+}
+
+fleet_event = {
+	id = astral_planes.2130
+	title = astral_planes.2130.name
+	desc = astral_planes.2130.desc
+	picture = GFX_evt_riftworld_archsite_crater
+	show_sound = event_dig_site
+	location = from
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = astral_planes.2130.a
+	}
+}
+
+fleet_event = {
+	id = astral_planes.2135
+	title = astral_planes.2135.name
+	desc = astral_planes.2135.desc
+	picture = GFX_evt_riftworld_archsite_ancientsphere
+	show_sound = ap_rift_event_0_ropes_pulleys
+	location = from
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = FASCINATING
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = astral_planes.2140
+	title = astral_planes.2140.name
+	desc = {
+		trigger = {
+			controller = {
+				has_technology = tech_rift_sphere
+				NOT = {
+					species = {
+						is_archetype = MACHINE
+					}
+				}
+			}
+		}
+		text = astral_planes.2140.desc.has_rift_sphere
+	}
+	desc = {
+		trigger = {
+			controller = {
+				NOR = { 
+					has_technology = tech_rift_sphere
+					species = {
+						is_archetype = MACHINE
+					}
+				}
+			}
+		}
+		text = astral_planes.2140.desc.default
+	}
+	desc = {
+		trigger = {
+			controller = {
+				has_technology = tech_rift_sphere
+				species = {
+					is_archetype = MACHINE
+				}
+			}
+		}
+		text = astral_planes.2140.desc.machine.has_rift_sphere
+	}
+	desc = {
+		trigger = {
+			controller = {
+				NOT = { has_technology = tech_rift_sphere }
+				species = {
+					is_archetype = MACHINE
+				}
+			}
+		}
+		text = astral_planes.2140.desc.machine
+	}
+	picture = GFX_evt_riftworld_archsite_ancestors
+	show_sound = ap_rift_event_0_astral_wonder
+	location = from
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = {
+		from = { set_site_progress_locked = no }
+	}
+
+	option = {
+		name = {
+			trigger = {
+				controller = {
+					is_machine_empire = no
+				}
+			}
+			text = astral_planes.2140.a
+		}
+		name = {
+			trigger = {
+				controller = {
+					is_synthetic_empire = yes
+				}
+			}
+			text = astral_planes.2140.a.synthetic
+		}
+		small_artifact_reward = yes
+		controller = {
+			if = {
+				limit = {
+					NOT = {
+						has_technology = tech_rift_sphere
+					}
+				}
+				add_tech_progress = {
+					tech = tech_rift_sphere
+					progress = 0.5
+				}
+				if = {
+					limit = {
+						any_situation = { is_situation_type = situation_a_rift_in_space }
+					}
+					every_situation = {
+						limit = { is_situation_type = situation_a_rift_in_space }
+						destroy_situation = this
+					}
+				}
+			}
+			else = {
+				add_monthly_resource_mult = {
+					resource = unity
+					value = @tier2unityreward
+					min = @tier2unitymin
+					max = @tier2unitymax
+				}
+			}
+			set_country_flag = riftworld_digsite_completed
+		}
+	}
+}

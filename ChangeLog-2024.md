@@ -1,5 +1,17 @@
 # Change Log - 2024
 
+## March 9th
+
+- AI won't research or build quantum catapults as it does not know how to use them.
+- Made priests want to keep their job a bit more, and weight them to ethics.
+- Fix for a Federations event missing a closing bracket. (17blue17)
+- Selective Kinship doesn't matter for Fallen Empires.
+- Adjusted names of tradition and building cap variables to match the defines. Mods that set the same variables will be taken into account for game logic.
+- Corrected some resolution/policy issues for PreFTL policy.
+- Reduced MILITARY_POWER_HEALTH_WEIGHT to better reflect actual combat results.
+- Fix Riftworld origin contact event.
+- Fix for Seddom. The irony. There is an event that fixes this if you have been affected by the bug.
+
 ## February 27th
 
 - 3.11 Update. Yes, this still fixes several hundred bugs; Paradox only got to a fraction of them. About twice as many as they listed, though their patch notes usually only document about half of the fixes they get to in a major patch, so this is no real surprise.

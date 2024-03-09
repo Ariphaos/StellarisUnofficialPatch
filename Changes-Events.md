@@ -113,6 +113,7 @@ General fixes (Astral Scar exclusions)
 * Prevent them from clobbering resources.
 * Flipped Cascading Catastrophe check for unfriendlies so homicidals won't take. (Not certain what was intended here so picked a middle ground.)
 * Allow a conquerer to get the Nanite Swarm project.
+* Handled a bit of irony.
 
 ## anomaly_events_AI.txt
 
@@ -465,7 +466,7 @@ General scope check fixes.
 ### Bugfixes
 
 * Think tank chain only triggers on newly built science megastructures. (Restored ones will 'work' but not actually be able to upgrade after killing your scientist.)
-* Prevent immortalt/legendary leaders from qualifying for the chain.
+* Prevent legendary leaders and rulers from qualifying for the chain.
 * Anti-aging cream project doesn't depend on capital.
 * Megastructure built notifications scope to system rather than the structure in case an empire doesn't have intel.
 
@@ -534,6 +535,12 @@ General scope check fix.
 ### Bugfixes
 
 * Declining healthcare should be a lot more persistent as it is supposed to be removed later on.
+
+## origin_events_astral_planes.txt
+
+### Bugfixes
+
+* Spoilers should only be talking to the people with the origin, not everyone without it.
 
 ## origin_events_paragon.txt
 
@@ -659,7 +666,7 @@ The changes in this file are now obsolete and only exist as regression safeguard
 * Better handling if the ruler is not psionic.
 * Zro crystal applies to all options.
 * Chosen becomes ruler option event doesn't trigger if chosen is already ruler.
-* Immortals, Chosen, and Legendary characters don't get eaten/devolved/become an hero.
+* Chosen and Legendary characters don't get eaten/devolved/become an hero.
 
 ### Hijinks
 
