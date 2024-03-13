@@ -192,10 +192,6 @@ All remaining define entries help the AI.
 
 * Fixed some inappropriately placed scope checks.
 
-### Rural
-
-* Properly trigger scrap miner descriptions.
-
 # Economic Modifiers
 
 * Essentially create as many likely-to-be-used modifiers as possible. I have verified this does not impact performance, and it allows mods to use many new modifiers without creating conflicting edits of this file.

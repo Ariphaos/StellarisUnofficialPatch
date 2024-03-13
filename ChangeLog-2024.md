@@ -1,5 +1,15 @@
 # Change Log - 2024
 
+## March 12th
+
+3.11.2 update. Apologies for the delay, busy day.
+
+- Added some missing descriptions for some new resolution tweaks.
+
+Patch issues fixed by Paradox:
+
+- Paradox fixed an issue with scrap miners on shattered ringworlds. 
+
 ## March 9th
 
 - AI won't research or build quantum catapults as it does not know how to use them.
