@@ -667,6 +667,7 @@ The changes in this file are now obsolete and only exist as regression safeguard
 * Zro crystal applies to all options.
 * Chosen becomes ruler option event doesn't trigger if chosen is already ruler.
 * Chosen and Legendary characters don't get eaten/devolved/become an hero.
+* Replace outdated "order by = level" with has_skill trigger.
 
 ### Hijinks
 

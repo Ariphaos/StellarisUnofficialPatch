@@ -1,5 +1,13 @@
 # Change Log - 2024
 
+## April 11th
+
+- 3.11.3 update. Also a busy day for me.
+
+- [I now have a Patreon](https://www.patreon.com/Ariphaos). I would just like to cover my Patreon expenses, really.
+
+- Replace outdated "order by = level" with has_skill trigger. (President Memes)
+
 ## March 12th
 
 3.11.2 update. Apologies for the delay, busy day.
