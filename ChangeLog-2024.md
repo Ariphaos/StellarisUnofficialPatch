@@ -1,5 +1,11 @@
 # Change Log - 2024
 
+## May 6th
+
+- Final 3.11 patch
+
+- Re-did fix for the Remnants origin somewhat, as Paradox has increased the maximum number of jumps to your guaranteed colonies to six. I need to make something for the balance patch to make this a bit more sane.
+
 ## April 11th
 
 - 3.11.3 update. Also a busy day for me.
