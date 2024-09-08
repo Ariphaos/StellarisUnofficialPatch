@@ -85,12 +85,12 @@ Currently, nearly everything here is for the AI.
 
 ### Event Buildings
 
-* Fix category for waste reprocessing center
+* (Paradox fixed as of 3.12) Fix category for waste reprocessing center
 
 ### Fallen Empire Buildings
 
-* Fix category for class 4 singularity and nourishment center.
-* Prevent buildable FE buildings from being autodestroyed. For example if you capture one from a non-FE.
+* (Paradox fixed as of 3.12) Fix category for class 4 singularity and nourishment center.
+* (Paradox fixed as of 3.12) Prevent buildable FE buildings from being autodestroyed. For example if you capture one from a non-FE.
 
 ### Branch Office Buildings
 
@@ -137,6 +137,7 @@ Currently, nearly everything here is for the AI.
 
 * Let angry nomads actually destroy things.
 * Ruined marauders cannot enforce borders.
+* Don't let merc enclaves pollute observation mode.
 
 # Decisions
 
@@ -211,6 +212,7 @@ All remaining define entries help the AI.
 * Do not allow the AI to sell pops being assimilated. (The AI suddenly thinks they are useless.)
 * Restrict relay network connections to allies/subjects/overlords. (Performance)
 * Disallow trading rulers or legendary leaders.
+* Infinity Root Leader should not count towards cap.
 
 # Global Ship Designs
 
@@ -252,7 +254,7 @@ All remaining define entries help the AI.
 
 # Policies
 
-Some of these are weight tweaks. Things I consider to be bona-fide bugs are:
+Some of these are AI weight tweaks or mod support. Things I consider to be bona-fide bugs are:
 
 * Conquerors and Subjugators shouldn't get a higher weight for liberation wars.
 * Liberation wars should have a higher weight if the appropriate galactic resolutions have been passed.
@@ -340,6 +342,7 @@ Some of these are weight tweaks. Things I consider to be bona-fide bugs are:
 * Give mortal initiates some ethic weights.
 * Decadent pops are less interested in the soldier life.
 * Made priests want to keep their job a bit more, and ethics-weight them.
+* Fixed a missing bracket in the specialist jobs file.
 
 # Random Names
 
@@ -348,7 +351,7 @@ Some of these are weight tweaks. Things I consider to be bona-fide bugs are:
 
 # Resolutions
 
-* My AI changes here are numerous. The AI is far more consistent, somewhat strategic, and generally won't do things like vote itself into censure.
+* My AI changes here are numerous, and it would be futile to list them all. The AI is far more consistent, somewhat strategic, and generally won't do things like vote itself into censure.
 
 # Script Values
 
@@ -375,3 +378,7 @@ Some of these are weight tweaks. Things I consider to be bona-fide bugs are:
 * Don't put tech blocks on primitive-inspired tech options.
 * Give Marauder generals the mercenary warrior trait.
 * Give the Diadochi starting starbase the fleet academy and crew quarters buildings. (Paradox specifically didn't include this.)
+
+# Scripted Variables
+
+* Add @auth_cyber_dictatorial_collectivist_tech (Arc)

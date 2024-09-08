@@ -1,0 +1,259 @@
+#####################
+# Galactic Paragons Origin Unique Buildings
+#####################
+
+#####################
+# Galactic Paragons Buildings
+#####################
+
+building_paragon_memory_vaults = {
+	base_buildtime = @b2_time
+	base_cap_amount = 1
+	empire_limit = 1
+	category = unity
+	can_demolish = yes
+	can_be_ruined = yes
+	can_be_disabled = yes
+	is_essential = yes
+	destroy_trigger = {
+		exists = owner
+		owner = {
+			is_memory_vault_empire = no
+		}
+	}
+	desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				OR = {
+					has_civic = civic_memory_vault
+					has_civic = civic_memory_vault_corporate
+				}
+			}
+		}
+		text = building_paragon_memory_vaults_desc
+	}
+	desc = {
+		trigger = {
+			exists = owner
+			owner = { has_civic = civic_memory_vault_machine }
+		}
+		text = building_paragon_memory_vaults_machine_desc
+	}
+	desc = {
+		trigger = {
+			exists = owner
+			owner = { has_civic = civic_memory_vault_hive }
+		}
+		text = building_paragon_memory_vaults_hive_desc
+	}
+
+	allow = {
+		has_upgraded_capital = yes
+		hidden_trigger = {
+			owner = {
+				OR = {
+					is_ai = no
+					resource_stockpile_compare = { resource = minerals value >= 800 }
+				}
+			}
+		}
+		is_occupied_flag = no
+	}
+
+	potential = {
+		custom_tooltip = {
+			text = EMPIRE_UNIQUE_BUILDING
+			owner = { is_memory_vault_empire = yes }
+		}
+		exists = planet
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+		}
+		produces = {
+			trigger = {
+				exists = owner
+			}
+			unity = 5
+		}
+		produces = {
+			trigger = {
+				exists = owner
+				planet = { is_variable_set = paragon_memory_vault }
+			}
+			unity = 5
+			multiplier = planet.paragon_memory_vault
+		}
+		upkeep = {
+			energy = @b2_upkeep
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_civic = civic_memory_vault_corporate }
+		}
+		trade_value_add = 10
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { has_civic = civic_memory_vault_corporate }
+			planet = { is_variable_set = paragon_memory_vault }
+		}
+		trade_value_add = 10
+		mult = planet.paragon_memory_vault
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				OR = {
+					has_civic = civic_memory_vault
+					has_civic = civic_memory_vault_machine
+					has_civic = civic_memory_vault_hive
+				}
+			}
+		}
+		species_leader_exp_gain = 0.01
+	}
+	triggered_country_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				OR = {
+					has_civic = civic_memory_vault
+					has_civic = civic_memory_vault_machine
+					has_civic = civic_memory_vault_hive
+				}
+			}
+			planet = { is_variable_set = paragon_memory_vault }
+		}
+		species_leader_exp_gain = 0.01
+		mult = planet.paragon_memory_vault
+	}
+
+	on_built = {
+		set_variable = {
+			which = paragon_memory_vault
+			value = 0
+		}
+	}
+
+	on_destroy = {
+		clear_variable = paragon_memory_vault
+	}
+}
+
+### THE BEHOLDER
+building_the_beholder = {
+	icon = building_temple_of_whispers
+	empire_limit = 1
+	can_build = no
+	can_demolish = no
+
+	category = manufacturing
+
+	destroy_trigger = {
+		OR = {
+			NOT = { exists = owner }
+			AND = { # if leader exists but has wrong owner
+				exists = event_target:beholder_leader
+				exists = event_target:beholder_leader.owner
+				owner = { NOT = { is_same_value = event_target:beholder_leader.owner } }
+			}
+			AND = { # if leader doesn't exist and owner isn't beholder chain owner
+				NOT = { exists = event_target:beholder_leader.owner }
+				owner = { NOT = { has_country_flag = beholder_chain_owner } }
+			}
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = { exists = event_target:beholder_leader }
+		planet_psionic_jobs_produces_mult = 0.10
+	}
+
+	resources = {
+		category = planet_buildings
+		upkeep = {
+			trigger = { exists = event_target:beholder_leader }
+			energy = 25
+		}
+		produces = {
+			trigger = {
+				exists = event_target:beholder_leader
+				NOT = {
+					has_planet_flag = psi_inoculating_pops
+				}
+			}
+			sr_zro = 8
+		}
+
+		upkeep = {
+			trigger = { NOT = { exists = event_target:beholder_leader } }
+			energy = 3
+		}
+		produces = {
+			trigger = { NOT = { exists = event_target:beholder_leader } }
+			sr_zro = 1
+		}
+	}
+
+	triggered_desc = {
+		trigger = {	NOT = { exists = event_target:beholder_leader }	}
+		text = building_the_beholder_unknown_desc
+	}
+
+	triggered_desc = {
+		trigger = {	exists = event_target:beholder_leader }
+		text = building_the_beholder_known_desc
+	}
+
+	triggered_desc = {
+		text = beholder_psi_pops_timer_tooltip
+		trigger = {
+			has_planet_flag = beholder_psi_pops_timer
+		}
+	}
+}
+
+### ASTROCREATOR AZARYN
+building_contained_ecosphere = {
+	icon = building_contained_ecosphere
+	empire_limit = 1
+	can_build = yes
+	can_demolish = yes
+	position_priority = 1
+
+	category = resource
+
+	potential = {
+		owner = { has_country_flag = azaryn_dead }
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = { minerals = 500 alloys = 500 }
+		upkeep = { energy = 5 }
+		produces = { food = 40 }
+	}
+
+	on_built = {
+		planet = { add_modifier = { modifier = contained_ecosphere_pheromones } }
+	}
+
+	on_destroy = {
+		planet = { remove_modifier = contained_ecosphere_pheromones }
+	}
+}

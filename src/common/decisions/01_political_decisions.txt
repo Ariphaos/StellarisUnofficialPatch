@@ -18,6 +18,7 @@ decision_enact_population_control = {
 		owner = {
 			NOT = { has_policy_flag = population_controls_not_allowed }
 			is_regular_empire = yes
+			is_individual_machine = no
 		}
 		NOT = { has_modifier = planet_population_control }
 	}
@@ -156,14 +157,13 @@ decision_enact_robot_assembly_control = {
 
 	potential = {
 		owner = {
-			is_regular_empire = yes
-			NOT = { has_policy_flag = robots_outlawed }
-			has_technology = tech_robotic_workers
+			is_gestalt = no
 			OR = {
 				has_policy_flag = population_controls_allowed
 				NOT = {
 					has_policy_flag = ai_full_rights
 				}
+				is_individual_machine = yes
 			}
 		}
 		NOT = { has_modifier = planet_robot_assembly_control }
@@ -248,12 +248,25 @@ decision_expel_population = {
 	allow = {
 		free_housing < 0
 		NOT = { has_modifier = planet_population_expelled }
+		custom_tooltip = {
+			fail_text = "decision_expel_population_fail_tooltip"
+			any_owned_pop = {
+				can_think = yes
+				NOR = {
+					has_trait = trait_hive_mind
+					is_non_sapient_robot = yes
+					is_pop_category = ruler
+				}
+			}
+		}
 	}
+
 
 	effect = {
 		custom_tooltip = decision_expel_population_effects
 		add_modifier = { modifier = "planet_population_expelled" days = 1800 }
 		hidden_effect = {
+			reroll_random = yes
 			switch = {
 				trigger = free_housing
 				-9 < { set_variable = { which = expel_pop_var value = 10 } } # 10
@@ -272,10 +285,10 @@ decision_expel_population = {
 
 				random_owned_pop = {
 					limit = {
-						is_robot_pop = no
+						can_think = yes
 						NOR = {
 							has_trait = trait_hive_mind
-							can_think = no
+							is_non_sapient_robot = yes
 							is_pop_category = ruler
 						}
 					}
@@ -338,6 +351,7 @@ decision_discourage_growth = {
 	potential = {
 		owner = {
 			has_policy_flag = population_controls_not_allowed
+			is_individual_machine = no
 		}
 		NOT = { has_modifier = planet_growth_discouraged }
 	}

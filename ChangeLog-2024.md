@@ -1,8 +1,65 @@
 # Change Log - 2024
 
+## September 7th
+
+Final 3.12 patch
+
+- (Patch Bug) Fixed an erroneous line in border_policy
+- (Patch Bug) Gestalts shouldn't see robot assembly decisions.
+- (Patch Bug) Don't block imperial chosen rulers from getting the extra civic.
+
+- Don't block rulers without the imperial heir trait from getting the extra civic in the chosen one event.
+- Add missing @auth_cyber_dictatorial_collectivist_tech entry (Arc)
+
+## July 16th
+
+So my dev machine developed a memory fault I ended up with other priorities. Apologies everyone.
+
+3.12.5 update
+
+- Paradox correctly added can_think for military leadership.
+
+- (Patch Bug) Modularity ascension now gets synthetics as they should.
+- (Patch Bug) Minor AI issue in starbase modules (17blue17)
+- (Patch Bug) Impossible Organism no longer needs scope fix. (ThePwnageKitty)
+
+- Deconstructing megastructures now properly returns the correct amount of resources (Night)
+- Crisis can purge again (Zomifi)
+- Let the Aberrant and Vehement use their construction ships (Zomifi)
+- Fix Scourge colonization (Zomifi)
+- Infinity Root leader should not count towards leader cap. (Govannon)
+
+## June 1st
+
+3.12.4 update
+
+- Fixed a missing bracket in specialist jobs.
+
+## May 30th
+
+3.12.3 update
+
+- Fixed some sky glitches my patch introduced (Sorry)
+- Stopped mercenaries from polluting observe mode (Zomifi)
+- Hopefully blocked the AI from asking non-leaders to leave hegemonies. (Let me know if it works.)
+
+## May 16th
+
+3.12.2 update
+
+## May 7th
+
+Now live for 3.12.
+
+Paradox has incorporated several more of my fixes into 3.12:
+
+- AI anomalies function again
+- Buildings have proper economic resources
+- Fallen Empire buildings no longer auto-destruct.
+
 ## May 6th
 
-- Final 3.11 patch
+Final 3.11 patch
 
 - Re-did fix for the Remnants origin somewhat, as Paradox has increased the maximum number of jumps to your guaranteed colonies to six. I need to make something for the balance patch to make this a bit more sane.
 

@@ -83,59 +83,6 @@ crew_quarters = {
 	}
 }
 
-mining_bay = {
-	icon = "GFX_spaceport_mining_bay"
-	construction_days = 180
-
-	potential = {
-		exists = owner
-		owner = { has_technology = tech_space_mining_1 }
-
-	}
-
-	possible = {
-		custom_tooltip = {
-			fail_text = "requires_starport_or_ring"
-			OR = {
-				has_starbase_size >= starbase_starport
-				is_orbital_ring = yes
-			}
-		}
-		custom_tooltip = {
-			fail_text = "requires_shattered_world"
-			solar_system = {
-				any_system_planet = {
-					OR = {
-						is_planet_class = pc_shattered
-						is_planet_class = pc_shattered_2
-					}
-				}
-			}
-		}
-	}
-
-	resources = {
-		category = starbase_buildings
-		cost = {
-			alloys = 50
-		}
-
-		produces = {
-			minerals = 5
-		}
-
-		upkeep = {
-			energy = 1
-		}
-	}
-
-	show_in_tech = "tech_space_mining_1"
-
-	ai_weight = {
-		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
-	}
-}
-
 hydroponics_bay = {
 	icon = "GFX_spaceport_module_hydroponic_farms"
 	construction_days = 180
@@ -180,6 +127,9 @@ hydroponics_bay = {
 resource_silo = {
 	icon = "GFX_spaceport_module_resource_silo"
 	construction_days = 180
+
+	potential = {
+	}
 
 	resources = {
 		category = starbase_buildings
@@ -288,7 +238,9 @@ listening_post = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_sensors_2 }
-		is_normal_starbase = yes
+		OR = {
+			is_normal_starbase = yes
+		}
 	}
 
 	possible = {
@@ -529,7 +481,12 @@ titan_yards = {
 
 	potential = {
 		exists = owner
-		owner = { has_technology = tech_titans }
+		owner = {
+			OR = {
+				has_technology = tech_titans
+				has_technology = tech_cosmogenesis_FE_titan
+			}
+		}
 		is_normal_starbase = yes
 	}
 
@@ -1569,6 +1526,109 @@ feeder = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
 }
+
+astromining_hub = {
+	icon = "GFX_orbitalring_mineral_hub"
+	construction_days = 360
+
+	potential = {
+		exists = owner
+		owner = {
+			has_civic = civic_machine_astromining_drones
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_astromining_bay"
+			OR = {
+				has_starbase_module = astromining_bay
+				starbase_buildable_is_in_queue_before = {
+					first = astromining_bay
+					second = astromining_hub
+				}
+			}
+		}
+	}
+
+	resources = {
+		category = starbase_buildings
+		cost = {
+			alloys = 50
+		}
+	}
+
+	custom_tooltip = sm_astromining_hub_office_desc_modifier
+
+	ai_weight = {
+		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
+	}
+}
+
+nanite_harvester = {
+	icon = "GFX_starbase_nanite_harvester"
+	construction_days = 360
+
+	potential = {
+		exists = owner
+		owner = {
+			has_tradition = tr_nanotech_adopt
+		}
+		is_normal_starbase = yes
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_starport"
+			has_starbase_size >= starbase_starport
+		}
+
+		custom_tooltip = {
+			fail_text = requires_planetoids_for_nanites
+			solar_system = {
+				any_system_planet = {
+					can_have_mineral_deposits = yes
+					NOT = { has_deposit = d_nanite_harvester_deposit }
+				}
+			}
+		}
+	}
+
+	resources = {
+		category = starbase_buildings
+		cost = {
+			alloys = 500
+		}
+		upkeep = {
+			energy = 4
+			mult = value:nanotech_harvester_deposit_num
+		}
+	}
+
+	on_finished = {
+		solar_system = {
+			system_event = {
+				id = cybernetics.5050
+			}
+		}
+	}
+
+	on_destroyed = {
+		solar_system = {
+			system_event = {
+				id = cybernetics.5051
+			}
+		}
+	}
+
+	custom_tooltip = nanite_harvester_tooltip
+
+	ai_weight = {
+		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
+		modifier = {}
+	}
+}
+
 
 #################
 # AURA BUILDINGS

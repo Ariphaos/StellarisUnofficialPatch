@@ -112,9 +112,10 @@ ap_lord_of_war = {
 	potential = {
 		host_has_dlc = "Overlord"
 		NOT = { has_ascension_perk = ap_lord_of_war }
-		NOR = {
-			has_ethic = ethic_gestalt_consciousness
-			has_valid_civic = civic_fanatic_purifiers
+		NOT = {	has_valid_civic = civic_fanatic_purifiers }
+		OR = {
+			is_regular_empire = yes
+			has_valid_civic = civic_machine_tactical_algorithms
 		}
 	}
 
@@ -166,14 +167,16 @@ ap_become_the_crisis = {
 		has_nemesis = yes
 		NOR = {
 			has_ascension_perk = ap_become_the_crisis
+			has_ascension_perk = ap_cosmogenesis
+			has_ascension_perk = ap_defender_of_the_galaxy
 			has_origin = origin_slavers
 		}
 	}
 
 	possible = {
 		custom_tooltip = {
-			fail_text = "requires_ascension_perks_2"
-			num_ascension_perks > 1
+			fail_text = "requires_ascension_perks_3"
+			num_ascension_perks > 2
 		}
 		custom_tooltip = {
 			fail_text = "requires_independence"
@@ -200,7 +203,7 @@ ap_become_the_crisis = {
 		hidden_effect = {
 			set_ai_personality = became_the_crisis
 		}
-		activate_crisis_progression = yes
+		activate_crisis_progression = nemesis_path
 	}
 
 	ai_weight = {
@@ -269,6 +272,95 @@ ap_become_the_crisis = {
 }
 
 #################
+# Cybernetics ASCENSION PERKS
+#################
+
+ap_cosmogenesis = {
+	potential = {
+		has_machine_age_dlc = yes
+		NOR = {
+			has_ascension_perk = ap_become_the_crisis
+			has_ascension_perk = ap_cosmogenesis
+			has_ascension_perk = ap_defender_of_the_galaxy
+			has_origin = origin_slavers # No crisis for MSI
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_ascension_perks_3"
+			num_ascension_perks > 2
+		}
+		custom_tooltip = {
+			fail_text = "requires_independence"
+			is_subject = no
+		}
+		custom_tooltip = {
+			fail_text = "must_not_be_custodian"
+			is_galactic_custodian = no
+		}
+		custom_tooltip = {
+			fail_text = "must_not_be_emperor"
+			is_galactic_emperor = no
+		}
+	}
+
+	on_enabled = {
+		hidden_effect = {
+			set_variable = {
+				which = cosmogenesis_world_advanced_logic_produced
+				value = 0
+			}
+		}
+		activate_crisis_progression = cosmogenesis_path
+	}
+
+	ai_weight = {
+		factor = 7.5
+		modifier = {
+			factor = 0
+			OR = {
+				is_egalitarian = yes
+				is_xenophile = yes
+			}
+		}
+		modifier = {
+			factor = 2
+			has_tradition = tr_discovery_finish
+		}
+		modifier = {
+			factor = 2
+			has_ascension_perk = ap_technological_ascendancy
+		}
+		modifier = {
+			factor = 2
+			has_ascension_perk = ap_enigmatic_engineering
+		}
+		modifier = {
+			factor = 2
+			vassals > 0
+			any_subject = {
+				any_agreement = {
+					has_active_specialization = specialist_scholarium
+				}
+			}
+		}
+		modifier = {
+			factor = 10
+			has_country_flag = whisperers_covenant_confirmed
+		}
+		modifier = {
+			factor = 0
+			galaxy_percentage < 0.1
+		}
+		modifier = {
+			factor = 2
+			galaxy_percentage > 0.2
+		}
+	}
+}
+
+#################
 # AQUATICS ASCENSION PERKS
 #################
 
@@ -276,10 +368,16 @@ ap_hydrocentric = {
 	potential = {
 		has_aquatics = yes
 		NOT = { has_ascension_perk = ap_hydrocentric }
-		has_trait = trait_pc_ocean_preference
+		OR = {
+			has_trait = trait_pc_ocean_preference
+			has_trait = trait_robot_aquatic
+		}
 	}
 	possible = {
-		has_trait = trait_aquatic
+		OR = {
+			has_trait = trait_aquatic
+			has_trait = trait_robot_aquatic
+		}
 		has_technology = tech_terrestrial_sculpting
 	}
 
@@ -316,6 +414,10 @@ ap_hydrocentric = {
 		modifier = {
 			factor = 5
 			has_origin = origin_ocean_paradise
+		}
+		modifier = {
+			factor = 5
+			has_origin = origin_ocean_machines
 		}
 	}
 }
@@ -539,7 +641,7 @@ ap_world_shaper = {
 		modifier = {
 			factor = 0
 			OR = {
-				has_origin = origin_void_dwellers
+				is_void_dweller_empire = yes
 				has_origin = origin_shattered_ring
 				has_trait = trait_aquatic
 				has_ethic = ethic_gestalt_consciousness
@@ -637,8 +739,13 @@ ap_defender_of_the_galaxy = {
 			num_ascension_perks > 2
 		}
 	}
+	custom_tooltip = ap_defender_of_the_galaxy_modifier_desc
+
 	modifier = {
-		description = ap_defender_of_the_galaxy_modifier_desc
+		damage_vs_country_type_synth_queen_mult = 0.5
+		damage_vs_country_type_awakened_synth_queen_mult = 0.5
+		damage_vs_country_type_synth_queen_convoys_mult = 0.5
+		damage_vs_country_type_synth_queen_outposts_mult = 0.5
 		damage_vs_country_type_swarm_mult = 0.5
 		damage_vs_country_type_extradimensional_mult = 0.5
 		damage_vs_country_type_extradimensional_2_mult = 0.5
@@ -654,8 +761,10 @@ ap_defender_of_the_galaxy = {
 	}
 
 	potential = {
-		NOT = {
+		NOR = {
 			has_ascension_perk = ap_defender_of_the_galaxy
+			has_ascension_perk = ap_become_the_crisis
+			has_ascension_perk = ap_cosmogenesis
 		}
 	}
 
@@ -670,7 +779,10 @@ ap_defender_of_the_galaxy = {
 						who = prev
 						value > equivalent
 					}
-					has_ascension_perk = ap_become_the_crisis
+					OR = {
+						has_ascension_perk = ap_become_the_crisis
+						has_ascension_perk = ap_cosmogenesis
+					}
 				}
 			}
 		}
@@ -681,8 +793,11 @@ ap_defender_of_the_galaxy = {
 				is_galactic_custodian = yes
 				is_galactic_emperor = yes
 				any_country = {
-					has_crisis_level = crisis_level_5
-					is_crisis_faction = yes
+					OR = {
+						has_crisis_level = crisis_level_5
+						has_crisis_level = crisis_cosmogenesis_level_5
+						is_crisis_faction = yes
+					}
 				}
 			}
 		}
@@ -699,6 +814,7 @@ ap_defender_of_the_galaxy = {
 				any_country = {
 					OR = {
 						has_crisis_level = crisis_level_5
+						has_crisis_level = crisis_cosmogenesis_level_5
 						is_crisis_faction = yes
 					}
 				}
@@ -998,7 +1114,7 @@ ap_mastery_of_nature = {
 		modifier = {
 			factor = 0
 			OR = {
-				has_origin = origin_void_dwellers
+				is_void_dweller_empire = yes
 				has_origin = origin_shattered_ring
 			}
 		}
@@ -1146,10 +1262,7 @@ ap_shared_destiny = {
 ap_voidborn = {
 	potential = {
 		host_has_dlc = "Utopia"
-		NOR = {
-			has_ascension_perk = ap_voidborn
-			has_origin = origin_void_dwellers
-		}
+		is_void_dweller_empire = no
 	}
 
 	possible = {

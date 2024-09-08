@@ -248,7 +248,6 @@ country_event = {
 	}
 }
 
-# The Flesh is Weak
 country_event = {
 	id = utopia.2500
 	title = "utopia.2500.name"
@@ -283,7 +282,6 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		set_country_flag = cyborg_empire
 		if = {
 			limit = {
 				any_owned_pop = {
@@ -573,7 +571,7 @@ country_event = {
 					is_councilor = yes
 					is_ruler = no
 				}
-				set_gestalt_node_protrait_effect = yes
+				set_gestalt_node_portrait_effect = yes
 			}
 		}
 	}
@@ -675,6 +673,7 @@ country_event = {
 }
 
 # New Leaders Get Cyborg Trait
+# If Leader Firewall has been applied, they also get that
 country_event = {
 	id = utopia.2510
 	is_triggered_only = yes
@@ -682,29 +681,50 @@ country_event = {
 
 	trigger = {
 		from = {
-			species = { has_trait = trait_cybernetic }
+			species = {
+				OR = {
+					has_trait = trait_cybernetic
+					has_trait = trait_limited_cybernetic
+				}
+			}
 		}
 	}
 
 	immediate = {
-		from = {
-			add_trait_no_notify = leader_trait_cyborg
+		if = {
+			limit = {
+				has_policy_flag = cyberization_standards_limited
+				from = {
+					species = { has_trait = trait_limited_cybernetic }
+					has_ethic = ethic_spiritualist
+				}
+			}
+			from = {
+				add_trait_no_notify = leader_trait_limited_cyborg
+			}
 		}
-	}
-}
-
-# Synthetic Evolution
-country_event = {
-	id = utopia.2545
-	title = "utopia.2545.name"
-	desc = "utopia.2545.desc"
-	picture = GFX_evt_robot_assembly_plant
-	show_sound = event_laboratory_sound
-
-	is_triggered_only = yes
-
-	option = {
-		name = "utopia.2545.a"
+		else = {
+			from = {
+				add_trait_no_notify = leader_trait_cyborg
+			}
+			if = {
+				limit = {
+					has_country_flag = firewall_built
+				}
+				from = {
+					add_trait_no_notify = leader_trait_firewalled
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_authority = auth_machine_intelligence
+				has_country_flag = driven_neural_chorus
+			}
+			from = {
+				add_skill_without_trait_selection = 1
+			}
+		}
 	}
 }
 
@@ -797,48 +817,8 @@ country_event = {
 		}
 		give_technology = { tech = tech_bio_reactor message = no }
 
-		create_species = {
-			is_mod = yes
-			name = this
-			namelist = this
-			plural = this
-			class = "ROBOT"
-			homeworld = root.species
-			portrait = "default_robot"
-			traits = {
-				trait = "trait_mechanical"
-			}
+		create_synth_species_effect = yes
 
-			effect = {
-				if = {
-					limit = { host_has_dlc = "Synthetic Dawn Story Pack" }
-					prev = {
-						switch = {
-							trigger = is_species_class
-							HUM = { prev = { change_species_characteristics = { portrait = "sd_hum_robot" } } }
-							MAM = { prev = { change_species_characteristics = { portrait = "sd_mam_robot" } } }
-							REP = { prev = { change_species_characteristics = { portrait = "sd_rep_robot" } } }
-							AVI = { prev = { change_species_characteristics = { portrait = "sd_avi_robot" } } }
-							ART = { prev = { change_species_characteristics = { portrait = "sd_art_robot" } } }
-							MOL = { prev = { change_species_characteristics = { portrait = "sd_mol_robot" } } }
-							FUN = { prev = { change_species_characteristics = { portrait = "sd_fun_robot" } } }
-							PLANT = { prev = { change_species_characteristics = { portrait = "sd_pla_robot" } } }
-							LITHOID = { prev = { change_species_characteristics = { portrait = "lith_machine" } } }
-							NECROID = { prev = { change_species_characteristics = { portrait = "nec_machine" } } }
-							AQUATIC = { prev = { change_species_characteristics = { portrait = "aqu_machine" } } }
-							TOX = { prev = { change_species_characteristics = { portrait = "tox_machine" } } }
-						}
-					}
-				}
-
-				rename_species = {
-					prompt_country = root #If targeted country is a player they will get a popup asking for a name/plural/adjective combo. Otherwise the species will get a random name from the specified name_list
-					name_list = ascension_list
-				}
-
-				save_event_target_as = new_robotic_species
-			}
-		}
 		every_owned_pop = {
 			limit = {
 				is_being_purged = no
@@ -847,7 +827,7 @@ country_event = {
 					is_livestock = no
 				}
 			}
-			change_species = event_target:new_robotic_species
+			change_species = event_target:synthspecies@root.owner
 		}
 
 		every_controlled_ship = {
@@ -858,7 +838,7 @@ country_event = {
 					is_livestock = no
 				}
 			}
-			change_species = event_target:new_robotic_species
+			change_species = event_target:synthspecies@root.owner
 		}
 
 		every_owned_army = {
@@ -874,7 +854,7 @@ country_event = {
 			modify_army = {
 				name = random
 				type = "robotic_army"
-				species = event_target:new_robotic_species
+				species = event_target:synthspecies@root.owner
 			}
 		}
 
@@ -891,7 +871,7 @@ country_event = {
 			modify_army = {
 				name = random
 				type = "robotic_defense_army"
-				species = event_target:new_robotic_species
+				species = event_target:synthspecies@root.owner
 			}
 		}
 
@@ -909,7 +889,7 @@ country_event = {
 					has_leader_flag = legendary_leader
 				}
 			}
-			change_species = event_target:new_robotic_species
+			change_species = event_target:synthspecies@root.owner
 			change_leader_portrait = species
 		}
 		every_pool_leader = {
@@ -922,10 +902,10 @@ country_event = {
 					has_trait = leader_trait_synthetic
 				}
 			}
-			change_species = event_target:new_robotic_species
+			change_species = event_target:synthspecies@root.owner
 			change_leader_portrait = species
 		}
-		change_dominant_species = { species = event_target:new_robotic_species }
+		change_dominant_species = { species = event_target:synthspecies@root.owner }
 
 		every_owned_leader = {
 			limit = {
@@ -966,7 +946,7 @@ country_event = {
 					is_livestock = no
 				}
 			}
-			change_species = event_target:new_robotic_species
+			change_species = event_target:synthspecies@root.owner
 			change_leader_portrait = species
 		}
 		every_pool_leader = {
@@ -1024,10 +1004,6 @@ country_event = {
 				country_event = { id = utopia.2557 days = 15 }
 			}
 		}
-
-		ROOT = {
-			set_country_flag = synth_assimilation
-		}
 		if = {
 			limit = {
 				any_planet_within_border = {
@@ -1046,7 +1022,6 @@ country_event = {
 			is_homicidal = no
 		}
 		name = "utopia.2551.a"
-		custom_tooltip = SYNTH_ASSIMILATION_CITIZENSHIP_ENABLED
 	}
 
 	option = {
@@ -1205,8 +1180,18 @@ country_event = {
 				species = { has_trait = trait_mechanical }
 			}
 			AND = {
-				is_machine_empire = yes
+				from = {
+					species = { has_trait = trait_machine_unit }
+					is_gestalt_node = no
+				}
 				has_tradition = tr_synthetics_finish
+			}
+			AND = {
+				from = {
+					species = { has_trait = trait_machine_unit }
+					is_gestalt_node = no
+				}
+				has_tradition = tr_modularity_finish
 			}
 		}
 	}
@@ -1301,7 +1286,7 @@ country_event = {
 	}
 }
 
-# New Leaders Get Psionic Trait (Latent Psionic)
+# New Leaders Get Psionic (Latent Psionic)
 country_event = {
 	id = utopia.2601
 	is_triggered_only = yes

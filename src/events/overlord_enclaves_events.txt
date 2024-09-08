@@ -1087,6 +1087,16 @@ country_event = {
 					is_country_type = ai_empire
 					has_communications = root
 				}
+				OR = {
+					any_country = {
+						is_country_type = awakened_synth_queen
+						has_communications = root
+					}
+					OR = {
+						has_special_project = THE_SYNTH_QUEENS_OUTPOST_AMBUSH
+						has_special_project = THE_SYNTH_QUEENS_CONVOY_AMBUSH
+					}
+				}
 			}
 			event_target:mercenary_enclave_country = {
 				trust = {
@@ -1905,6 +1915,55 @@ country_event = {
 			country_event = { id = enclave.265 }
 		}
 	}
+
+	# Cetana
+	option = {
+		name = enclave.240.f
+		trigger = {
+			NOT = { has_modifier = tactic_v_synth_queen }
+			OR = {
+				any_country = {
+					is_country_type = awakened_synth_queen
+					has_communications = root
+				}
+				OR = {
+					has_special_project = THE_SYNTH_QUEENS_OUTPOST_AMBUSH
+					has_special_project = THE_SYNTH_QUEENS_CONVOY_AMBUSH
+				}
+			}
+		}
+		allow = {
+			resource_stockpile_compare = { resource = energy value >= 5000 }
+		}
+		add_resource = { energy = -5000 }
+		add_modifier = {
+			modifier = tactic_v_synth_queen
+			days = -1
+		}
+		hidden_effect = {
+			country_event = { id = enclave.266 }
+		}
+	}
+
+	option = {
+		name = enclave.240.f
+		trigger = {
+			has_modifier = tactic_v_synth_queen
+			OR = {
+				any_country = {
+					is_country_type = awakened_synth_queen
+					has_communications = root
+				}
+				OR = {
+					has_special_project = THE_SYNTH_QUEENS_OUTPOST_AMBUSH
+					has_special_project = THE_SYNTH_QUEENS_CONVOY_AMBUSH
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = enclave.266 }
+		}
+	}
 }
 
 ## Tactical Appraisal Events
@@ -1942,6 +2001,13 @@ country_event = {
 	base = enclave.205
 	desc_clear = yes
 	desc = enclave.265.desc
+}
+#Synth Queen
+country_event = {
+	id = enclave.266
+	base = enclave.205
+	desc_clear = yes
+	desc = enclave.266.desc
 }
 
 # Mercenary Enclave: HIRE ARMIES
@@ -8319,6 +8385,7 @@ situation_event = {
 		owner = {
 			is_ai = no
 			is_gestalt = no
+			is_individual_machine = no
 			NOT = { has_country_flag = too_lucid_flag }
 			num_pops > 4
 			count_owned_planet = {
@@ -8775,6 +8842,9 @@ country_event = {
 					graphical_culture = "extra_dimensional_01"
 					prefix = no
 					upgradable = no
+					effect = {
+						set_ship_flag = special_science_ship
+					}
 				}
 				set_location = event_target:shrouded_system
 				set_leader = event_target:shrouded_leader
@@ -12685,7 +12755,10 @@ country_event = { # Salvagers
 
 	trigger = {
 		is_ai = no
-		NOT = { has_country_flag = salvager_enclave_diplomacy_engaged }
+		NOR = {
+			has_country_flag = salvager_enclave_diplomacy_engaged
+			has_country_flag = cosmogenesis_empire_has_won
+		}
 		exists = event_target:salvager_enclave_country
 		NOR = {
 			is_hostile = event_target:salvager_enclave_country
@@ -12698,7 +12771,7 @@ country_event = { # Salvagers
 			has_technology = tech_mega_engineering
 			AND = {
 				has_technology = tech_habitat_1
-				NOT = { has_origin = origin_void_dwellers }
+				has_void_dweller_origin = no
 			}
 		}
 	}

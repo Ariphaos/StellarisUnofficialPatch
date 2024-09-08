@@ -14,7 +14,18 @@ namespace = distar
 ship_event = {
 	id = distar.1
 	title = "distar.1.name"
-	desc = "distar.1.desc"
+	desc = {
+		trigger = {
+			exists = event_target:wreckage_owner
+		}
+		text = "distar.1.desc.contact"
+	}
+	desc = {
+		trigger = {
+			exists = event_target:wreckage_owner
+		}
+		text = "distar.1.desc.nocontact"
+	}
 	picture = GFX_evt_space_debris
 	show_sound = event_ship_bridge
 	location = event_target:supply_wreckage_tar
@@ -55,16 +66,27 @@ ship_event = {
 		name = "distar.1.a"
 		owner = {
 			add_resource = { minerals = 300 }
-			add_intel = {
-				who = event_target:wreckage_owner
-				amount = 10
+			if = {
+				limit = {
+					exists = event_target:wreckage_owner
+				}
+				add_intel = {
+					who = event_target:wreckage_owner
+					amount = 10
+				}
 			}
 		}
-		custom_tooltip = "distar.1.a.tooltip"
-		hidden_effect = { owner = { country_event = { id = distar.2 days = 180 } } }
+		if = {
+			limit = {
+				exists = event_target:wreckage_owner
+			}
+			custom_tooltip = "distar.1.a.tooltip"
+			hidden_effect = { owner = { country_event = { id = distar.2 days = 180 } } }
+		}
 	}
 	option = {
 		trigger = {
+			exists = event_target:wreckage_owner
 			owner = { NOT = { is_at_war_with = event_target:wreckage_owner } }
 		}
 		name = "distar.1.b"
@@ -482,6 +504,7 @@ ship_event = {
 			class = ROBOT
 			portrait = "default_robot"
 			namelist = "PRT1"
+			homeworld = this
 			traits = {
 				trait = "trait_mechanical"
 			}
@@ -4069,7 +4092,6 @@ country_event = { #Death of Scavenger Bot
 
 	immediate = {
 		set_country_flag = scrapper_killed # Achievement flag
-
 		every_playable_country = {
 			limit = {
 				has_event_chain = curator_poi_chain
@@ -4264,6 +4286,14 @@ country_event = { #Death of Scavenger Bot
 			}
 		}
 		give_nanite_techs = yes
+	}
+	option = {
+		name = distar.137.harv
+		trigger = {
+			can_harvest_parts = yes
+		}
+		set_country_flag = harvested_scavenger_parts
+		add_research_option = tech_leviathan_techgenesis
 	}
 	after = {
 		generate_parade_city = yes
@@ -4462,10 +4492,26 @@ ship_event = {
 	immediate = {
 		save_event_target_as = research_ship
 
+		create_species = {
+			name = "NAME_S8751"
+			class = MACHINE
+			portrait = cpl_03
+			namelist = "AI"
+			traits = {
+				ideal_planet_class = pc_habitat
+				trait = trait_machine_unit
+				trait = random_traits
+			}
+			effect = {
+				save_event_target_as = warform_species
+			}
+		}
+
 		create_country = {
 			name = "NAME_S8751"
 			type = nice_faction
 			auto_delete = yes
+			species = event_target:warform_species
 			flag = {
 				icon = {
 					category = "special"
@@ -7132,26 +7178,6 @@ country_event = { #Spawn Ratlings #Root = Global Event Country
 	}
 
 	immediate = {
-		create_species = {
-			name = "NAME_Ketling"
-			plural = "NAME_Ketlings"
-			class = MAM
-			portrait = "mam_rat"
-			homeworld = event_target:ratling_capital
-			namelist = "REP4"
-			traits = {
-				trait = "trait_pc_nuked_preference"
-				trait = "trait_psionic"
-				trait = "trait_repugnant"
-				trait = "trait_slow_breeders"
-				trait = "trait_thrifty"
-				trait = "trait_deviants"
-				trait = "trait_fleeting"
-			}
-			effect = {
-				save_global_event_target_as = ratling_species
-			}
-		}
 		create_country = {
 			name = "NAME_Ketlings"
 			adjective = "NAME_Ketling"
@@ -7911,7 +7937,7 @@ country_event = { #Create Full Ratling Empire #Root = Global Event Country
 			effect = {
 				set_graphical_culture = mammalian_01
 				save_global_event_target_as = ratling_country
-
+				set_country_flag = ratling_country
 				country_event = {
 					id = ariphaos_patch.9998
 					days = 1

@@ -5,7 +5,6 @@
 technologist = {
 	election_header = "GFX_faction_header_yellow"
 	guiding_ethic = ethic_materialist
-	use_guiding_ethic_as_pop_filter = no
 	visual_ethic = "technologist_visual_ethic"
 
 	unique = yes
@@ -14,7 +13,15 @@ technologist = {
 	resources = {
 		category = pop_factions
 		produces = {
-			unity = @faction_base_unity
+			unity = @faction_base_output
+		}
+	}
+
+	extortion_resource = {
+		category = pop_factions
+		produces = {
+			physics_research = @faction_base_output
+			mult = @faction_extortion_research_ratio
 		}
 	}
 
@@ -36,15 +43,8 @@ technologist = {
 	}
 
 	can_join_faction = {
-		OR = {
-			has_ethic = ethic_materialist
-			is_robot_pop = yes
-		}
 		is_shackled_robot = no
 		can_think = yes
-		NOT = {
-			has_ethic = ethic_spiritualist
-		}
 	}
 
 	attraction = {
@@ -68,8 +68,9 @@ technologist = {
 		}
 
 		modifier = {
-			factor = 2.0
+			factor = 2
 			is_robot_pop = yes
+			owner = { is_individual_machine = no }
 		}
 
 		modifier = {
@@ -246,6 +247,7 @@ technologist = {
 			exists = owner
 			owner = {
 				NOT = { has_ascension_perk = ap_synthetic_evolution }
+				is_individual_machine = no
 				any_relation = {
 					has_communications = root.owner
 					is_country_type = default
@@ -285,7 +287,7 @@ technologist = {
 		ETHIC = ethic_materialist
 		ETHIC_FANATIC = ethic_fanatic_materialist
 		ETHIC_OPPOSED = ethic_spiritualist
-	} 
+	}
 
 	demand = {
 		title = "TECHNOLOGIST_SECRET_KNOWLEDGE"
@@ -666,6 +668,51 @@ technologist = {
 						}
 					}
 				}
+			}
+		}
+		# Faction Extortion Buttons
+		extort_faction = {
+			title = "EXTORT_FACTION"
+			description = "EXTORT_FACTION_DESC"
+
+			potential = {
+				exists = owner
+				owner = {
+					has_authority = auth_oligarchic
+					has_country_flag = cyber_collectivist
+				}
+				is_faction_extorted = no
+			}
+
+			effect = {
+				set_faction_extorted = yes
+				custom_tooltip = physics_research_extortion_tt
+				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
+			}
+
+			ai_weight = {
+				base = 0
+			}
+		}
+		cancel_extort_faction = {
+			title = "CANCEL_EXTORT_FACTION"
+			description = "CANCEL_EXTORT_FACTION_DESC"
+
+			potential = {
+				exists = owner
+				owner = {
+					has_authority = auth_oligarchic
+					has_country_flag = cyber_collectivist
+				}
+				is_faction_extorted = yes
+			}
+
+			effect = {
+				set_faction_extorted = no
+			}
+
+			ai_weight = {
+				base = 0
 			}
 		}
 	}

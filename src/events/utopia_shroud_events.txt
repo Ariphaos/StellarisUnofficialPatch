@@ -373,6 +373,43 @@ country_event = {
 			}
 		}
 	}
+	option = { #Try to contact the Animator
+		name = "animator.shroud"
+		trigger = {
+			has_country_flag = synth_queen_can_contact_the_animator_of_clay
+			NOR = { 
+				has_country_flag = shroud_intro	
+				has_country_flag = synth_queen_contacted_the_animator_already
+			}
+		}
+		allow = {
+			resource_stockpile_compare = {
+				resource = energy
+				value >= 2000
+				mult = value:scripted_modifier_mult|MODIFIER|shroud_delve_cost|
+			}
+			resource_stockpile_compare = {
+				resource = sr_zro
+				value >= 500
+				mult = value:scripted_modifier_mult|MODIFIER|shroud_delve_cost|
+			}
+		}
+
+		add_resource = { 
+			energy = -2000
+			sr_zro = -500
+			mult = value:scripted_modifier_mult|MODIFIER|shroud_delve_cost|
+		}
+
+		hidden_effect = {
+			country_event = { id = crisis.24100 }
+			add_modifier = {
+				modifier = "shroud_cooldown"
+				days = 2160
+				time_multiplier = value:scripted_modifier_mult|MODIFIER|shroud_delve_cooldown|
+			}
+		}
+	}
 	option = {
 		name = "exit.shroud"
 		custom_tooltip = "exit.shroud.tooltip"
@@ -5207,6 +5244,10 @@ country_event = {
 			}
 			2 = {
 				modifier = {
+					factor = 0
+					has_global_flag = no_end_of_cycle
+				}
+				modifier = {
 					factor = 5
 					any_country = {
 						NOT = { is_same_value = ROOT }
@@ -5751,6 +5792,10 @@ country_event = {
 	location = root
 
 	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = no_end_of_cycle }
+	}
 
 	desc = {
 		text = "utopia.3320.desc.a"
@@ -7231,12 +7276,8 @@ country_event = {
 				has_authority = auth_imperial
 				any_owned_leader = {
 					has_chosen_one_leader_trait = yes
-					has_trait = trait_imperial_heir
-				}
-				# We've already got one!
-				NOT = {
-					any_owned_leader = {
-						has_chosen_one_leader_trait = yes
+					OR = {
+						has_trait = trait_imperial_heir
 						is_ruler = yes
 					}
 				}
@@ -7271,7 +7312,10 @@ country_event = {
 			random_owned_leader = {
 				limit = {
 					has_chosen_one_leader_trait = yes
-					has_trait = trait_imperial_heir
+					OR = {
+						has_trait = trait_imperial_heir
+						is_ruler = yes
+					}
 				}
 				save_event_target_as = chosen_one
 				species = { save_event_target_as = chosen_one_species }

@@ -4575,7 +4575,7 @@ planet_event = {
 		name = colony.9055.b
 		trigger = {
 			owner = {
-				NOT = { has_origin = origin_subterranean }
+				is_subterranean_empire = no
 			}
 		}
 		allow = {
@@ -4597,7 +4597,7 @@ planet_event = {
 		name = colony.9055.b
 		trigger = {
 			owner = {
-				has_origin = origin_subterranean
+				is_subterranean_empire = yes
 			}
 		}
 		allow = {
@@ -4802,7 +4802,7 @@ country_event = {
 			}
 			if = {
 				limit = {
-					has_origin = origin_subterranean
+					is_subterranean_empire = yes
 				}
 				set_country_flag = underlord_achievement
 			}
@@ -5443,7 +5443,7 @@ planet_event = { # first opportunity - might add unity to the pop job
 		custom_tooltip = colony.9220.c.desc
 		trigger = {
 			owner = {
-				has_origin = origin_subterranean
+				is_subterranean_empire = yes
 			}
 		}
 		set_planet_flag = manufactorium_subterranean
@@ -5463,11 +5463,11 @@ planet_event = { # first opportunity - might add unity to the pop job
 				OR = {
 					AND = {
 						has_civic = civic_crafters
-						has_origin = origin_subterranean
+						is_subterranean_empire = yes
 					}
 					AND = {
 						has_civic = civic_corporate_crafters
-						has_origin = origin_subterranean
+						is_subterranean_empire = yes
 					}
 				}
 			}
@@ -6733,15 +6733,7 @@ planet_event = {
 				max = @tier2materialmax
 			}
 		}
-		if = {
-			limit = {
-				owner = {
-					is_gestalt = yes
-				}
-			}
-			add_deposit = d_metallic_puddles_gestalt
-		}
-		else = { add_deposit = d_metallic_puddles }
+		add_deposit = d_metallic_puddles
 	}
 }
 
@@ -7544,6 +7536,7 @@ country_event = {
 	immediate = {
 		if = {
 			limit = {
+				is_gestalt = no
 				any_owned_leader = {
 					is_head_of_research = yes
 				}
@@ -7567,6 +7560,10 @@ country_event = {
 				limit = {
 					leader_class = scientist
 					is_ruler = no
+					NAND = {
+						is_councilor = yes
+						has_ethic = ethic_gestalt_consciousness
+					}
 				}
 				save_event_target_as = target_physicist
 			}
@@ -8096,7 +8093,10 @@ country_event = {
 		set_country_flag = b_world_spawned
 		if = {
 			limit = {
-				has_origin = origin_ocean_paradise
+				OR  = {
+					has_origin = origin_ocean_paradise
+					has_origin = origin_ocean_machines
+				}
 			}
 			home_planet = {
 				solar_system = {
@@ -8110,6 +8110,7 @@ country_event = {
 								key = NAME_B_Planet
 								variable_string = "[Root.GetHomeWorldName]"
 							}
+							clear_planet_modifiers = yes
 							save_event_target_as = b_planet
 							set_owner = root
 							set_controller = root
@@ -8122,19 +8123,6 @@ country_event = {
 							remove_all_buildings = yes
 							set_planet_flag = colony_event
 							generate_start_buildings_and_districts = yes
-							if = {
-								limit = {
-									root = { is_gestalt = yes }
-								}
-								add_modifier = {
-									modifier = ocean_paradise_hive
-								}
-							}
-							else = {
-								add_modifier = {
-									modifier = ocean_paradise
-								}
-							}
 						}
 					}
 					every_ambient_object = {
@@ -8161,6 +8149,7 @@ country_event = {
 								key = NAME_B_Planet
 								variable_string = "[Root.GetHomeWorldName]"
 							}
+							clear_planet_modifiers = yes
 							save_event_target_as = b_planet
 							set_owner = root
 							set_controller = root
@@ -8181,7 +8170,7 @@ country_event = {
 		}
 		else_if = {
 			limit = {
-				has_origin = origin_post_apocalyptic
+				is_apocalyptic_empire = yes
 			}
 			home_planet = {
 				solar_system = {
@@ -8196,6 +8185,7 @@ country_event = {
 								key = NAME_B_Planet
 								variable_string = "[Root.GetHomeWorldName]"
 							}
+							clear_planet_modifiers = yes
 							save_event_target_as = b_planet
 							set_owner = root
 							set_controller = root
@@ -8228,6 +8218,7 @@ country_event = {
 								key = NAME_B_Planet
 								variable_string = "[Root.GetHomeWorldName]"
 							}
+							clear_planet_modifiers = yes
 							save_event_target_as = b_planet
 							set_owner = root
 							set_controller = root
@@ -8236,17 +8227,7 @@ country_event = {
 							remove_all_buildings = yes
 							generate_start_buildings_and_districts = yes
 							set_planet_flag = colony_event
-							if = {
-								limit = {
-									root = {
-										is_machine_empire = no
-									}
-								}
-								change_pc = root.owner_species
-							}
-							else = {
-								change_pc = pc_nuked
-							}
+							change_pc = root.owner_species
 							if = {
 								limit = {
 									root.home_planet = {
@@ -8401,7 +8382,14 @@ situation_event = {
 		owner = { add_resource = { unity = -150 } }
 	}
 	option = {
-		name = colony.9860.b
+		name = {
+			trigger = { NOT = { target = { has_modifier = stolen_great_work } } }
+			text = colony.9860.b
+		}
+		name = {
+			trigger = { target = { has_modifier = stolen_great_work } }
+			text = colony.9860.c
+		}
 		add_situation_progress = 20
 		target = {
 			if = {
@@ -9433,74 +9421,7 @@ planet_event = {
 				target = this
 			}
 		}
-		#add_modifier = {  TODO CD: TO BE ADDED LATER IN PDT - AUG-40363
-		#	modifier = "stratovent_world_modifier_basic"
-		#	days = -1
-		#}
-			#while = {
-			#Spawn grazing tiyanki and have them patrol the system semi-randomly
-			#	create_tiyanki_country = yes
-			#	random_system_planet = {
-			#		limit = {
-			#			is_star = no
-			#			is_moon = no
-			#		}
-			#		save_event_target_as = stratovent_world_colony
-			#	}
-			#	random_system_planet = {
-			#		limit = {
-			#			is_star = no
-			#			is_moon = no
-			#			NOT = {
-			#				is_same_value = event_target:stratovent_world_colony
-			#			}
-			#		}
-			#		save_event_target_as = stratovent_world_colony
-			#	}
-			#	random_system_planet = {
-			#		limit = {
-			#			is_star = no
-			#			is_moon = no
-			#			NOR = {
-			#				is_same_value = event_target:fumongus_trigger_1
-			#				is_same_value = event_target:fumongus_trigger_2
-			#			}
-			#		}
-			#		save_event_target_as = fumongus_trigger_3
-			#	}
-			#	event_target:tiyanki_country = {
-			#		create_fleet = {
-			#			name = "NAME_Grazing_Tiyanki"
-			#			effect = {
-			#				set_owner = event_target:tiyanki_country
-			#				create_ship = {
-			#					name = ""
-			#					design = "NAME_Tiyanki_Cow"
-			#				}
-			#				while = {
-			#					count = 1
-			#					create_ship = {
-			#						name = ""
-			#						design = "NAME_Tiyanki_Bull"
-			#					}
-			#				}
-			#				while = {
-			#					count = 2
-			#					create_ship = {
-			#						name = ""
-			#						design = "NAME_Tiyanki_Calf"
-			#					}
-			#				}
-			#				set_location = event_target:stratovent_world_colony
-			#				set_fleet_stance = passive
-			#				set_aggro_range_measure_from = self
-			#				set_aggro_range = 5
-			#				set_fleet_flag = NAME_Grazing_Tiyanki
-			#			}
-			#		}
-			#	}
-			#}
-		}
+	}
 
 	option = {#Investigate the vents
 		name = "colony.9950.a"
@@ -10088,9 +10009,12 @@ planet_event = {
 		IF =  {
 			limit = {
 				owner_main_species = {
-					has_trait = trait_aquatic
+					OR = {
+						has_trait = trait_aquatic
+						has_trait = trait_robot_aquatic
 					}
 				}
+			}
 			owner = {
 				add_monthly_resource_mult = {
 					resource = unity

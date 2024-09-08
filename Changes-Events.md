@@ -117,7 +117,7 @@ General fixes (Astral Scar exclusions)
 
 ## anomaly_events_AI.txt
 
-* Revert the weird event ids so the AI actually gets something from surveying.
+* (Paradox fixed as of 3.12) Revert the weird event ids so the AI actually gets something from surveying.
 
 ## apocalypse_events.txt
 
@@ -665,7 +665,7 @@ The changes in this file are now obsolete and only exist as regression safeguard
 * Shroud age should apply to all and only psionic leaders, but not for immortals. Disable notifications for it as you already know it is happening. Also removed on becoming Chosen.
 * Better handling if the ruler is not psionic.
 * Zro crystal applies to all options.
-* Chosen becomes ruler option event doesn't trigger if chosen is already ruler.
+* Properly trigger chosen becoming ruler effect if the ruler doesn't have the imperial heir trait (for civic).
 * Chosen and Legendary characters don't get eaten/devolved/become an hero.
 * Replace outdated "order by = level" with has_skill trigger.
 

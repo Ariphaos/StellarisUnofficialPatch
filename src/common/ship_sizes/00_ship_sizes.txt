@@ -27,6 +27,7 @@
 #	max = 5							#Sets a maximum absolute number the country will aim to have. Note that it will still want only the minimum unless you define a system_mult or planet_mult
 #}
 # ship_roles = { name1 name2 } # Show up as selectable roles in the ship designer
+# never_lost = <yes/no> # Removes the chance for the ship size to instantly get killed by emergency ftl. It can still be killed by the random Emergency FTL damage effect.
 # triggered_ship_roles = { { name = test1 trigger = {} } { name = test1 trigger = {} } } # List of triggered ship roles, show up in the ship designer when the trigger is true, executes on country scope
 
 ####################
@@ -587,6 +588,7 @@ titan = {
 		OR = {
 			AND = {
 				is_scope_type = starbase
+				# No one wants to wait for this.
 				NOT = { has_starbase_size = juggernaut }
 			}
 			AND = {
@@ -614,7 +616,6 @@ titan = {
 					is_scope_type = starbase
 					has_starbase_size >= starbase_citadel
 				}
-#				is_ship_size = enclave_mercenary_station
 			}
 		}
 		custom_tooltip = {
@@ -631,7 +632,6 @@ titan = {
 					is_scope_type = starbase
 					has_starbase_building = titan_yards
 				}
-#				is_ship_size = enclave_mercenary_station
 			}
 		}
 	}
@@ -759,57 +759,152 @@ colonizer = {
 
 	resources = {
 		category = colonies
+		# Alloys
+		# 200 normally
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = no
+				}
+			}
+			alloys = @colony_cost_base
+		}
+		# 100 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = yes
+				}
+			}
+			alloys = @colony_cost_low
+		}
+
+		# Consumer goods for non-gestalt empires
+		# 200 normally
+		cost = {
+			trigger = {
+				from = {
+					is_gestalt = no
+					is_virtual_empire = no
+				}
+			}
+			consumer_goods = @colony_cost_base
+		}
+		# 100 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_gestalt = no
+					is_virtual_empire = yes
+				}
+			}
+			consumer_goods = @colony_cost_low
+		}
+		# Food for organics
+		# 200 normally
 		cost = {
 			trigger = {
 				from = {
 					is_lithoid_empire = no
 					is_robot_empire = no
 					is_hive_empire = no
+					NOT = {
+						has_origin = origin_synthetic_fertility
+					}
 				}
 			}
-			alloys = 200
-			food = 200
-			consumer_goods = 200
+			food = @colony_cost_base
 		}
+		# 500 if you're a hive mind
+		cost = {
+			trigger = {
+				from = {
+					is_lithoid_empire = no
+					is_robot_empire = no
+					is_hive_empire = yes
+				}
+			}
+			food = @colony_cost_high
+		}
+		# Minerals for lithoids
+		# 200 normally
 		cost = {
 			trigger = {
 				from = {
 					is_lithoid_empire = yes
 					is_robot_empire = no
 					is_hive_empire = no
+					NOT = {
+						has_origin = origin_synthetic_fertility
+					}
 				}
 			}
-			alloys = 200
-			minerals = 200
-			consumer_goods = 200
+			minerals = @colony_cost_base
 		}
+		# 500 if you're a hive mind
+		cost = {
+			trigger = {
+				from = {
+					is_lithoid_empire = yes
+					is_robot_empire = no
+					is_hive_empire = yes
+				}
+			}
+			minerals = @colony_cost_high
+		}
+		# Energy for machines
+		# 200 normally
 		cost = {
 			trigger = {
 				from = {
 					is_robot_empire = yes
+					is_gestalt = no
+					is_virtual_empire = no
 				}
 			}
-			alloys = 400
+			energy = @colony_cost_base
 		}
+		# 200 for synth fert
 		cost = {
 			trigger = {
 				from = {
-					is_hive_empire = yes
-					is_lithoid_empire = no
+					has_origin = origin_synthetic_fertility
 				}
 			}
-			alloys = 200
-			food = 500
+			energy = @colony_cost_base
 		}
+		# 400 if you're a virtual empire
 		cost = {
 			trigger = {
 				from = {
-					is_hive_empire = yes
-					is_lithoid_empire = yes
+					is_robot_empire = yes
+					is_gestalt = no
+					is_virtual_empire = yes
 				}
 			}
-			alloys = 200
-			minerals = 500
+			energy = @colony_cost_mid
+		}
+		# 500 if you're a machine intelligence
+		cost = {
+			trigger = {
+				from = {
+					is_robot_empire = yes
+					is_gestalt = yes
+					is_virtual_empire = no
+				}
+			}
+			energy = @colony_cost_high
+		}
+		# 700 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_robot_empire = yes
+					is_gestalt = yes
+					is_virtual_empire = yes
+				}
+			}
+			energy = @colony_cost_very_high
 		}
 
 		upkeep = {
@@ -819,6 +914,7 @@ colonizer = {
 	}
 
 	potential_country = {
+		is_guided_sapience_empire = no
 		OR = {
 			has_technology = tech_hyper_drive_1
 			has_technology = tech_hyper_drive_2
@@ -869,7 +965,7 @@ sponsored_colonizer = {
 	resources = {
 		category = colonies
 		cost = {
-			energy = 500
+			energy = @colony_cost_high
 		}
 
 		upkeep = {
@@ -879,6 +975,7 @@ sponsored_colonizer = {
 	}
 
 	potential_country = {
+		is_guided_sapience_empire = no
 		OR = {
 			has_civic = civic_corporate_dominion
 			has_civic = civic_private_prospectors
@@ -934,16 +1031,13 @@ lithoid_colonizer = {
 	resources = {
 		category = colonies
 		cost = {
-			minerals = 500
-		}
-
-		upkeep = {
-
+			minerals = @colony_cost_high
 		}
 	}
 
 	potential_country = {
 		has_origin = origin_lithoid
+		is_guided_sapience_empire = no
 		OR = {
 			has_technology = tech_hyper_drive_1
 			has_technology = tech_hyper_drive_2
@@ -954,6 +1048,212 @@ lithoid_colonizer = {
 	}
 	ai_ship_data = {
 		min = value:desired_colonizers_base
+	}
+}
+
+guided_sapience_colonizer = {
+	max_speed = @speed_very_slow
+	acceleration = 0.3
+	rotation_speed = 0.2
+	max_hitpoints = @colony_hp
+	modifier = {
+		ship_evasion_add = @colony_evasion
+	}
+	size_multiplier = 1
+	fleet_slot_size = 1
+	section_slots = { "mid" = { locator = "part1" } }
+	num_target_locators = 0
+	is_space_station = no
+	icon = ship_size_colonizer
+	base_buildtime = @colony_build_time
+
+	combat_disengage_chance = 0.5
+
+	enable_default_design = yes	#if yes, countries will have an auto-generated design at start
+	enable_3dview_in_ship_browser = no #if yes, ship design will have a 3d view in the ship browser
+	prerequisites = { "tech_colonization_1" }
+	is_civilian = yes
+	is_designable = no
+	components_add_to_cost = no
+	class = shipclass_colonizer
+	construction_type = starbase_shipyard
+	required_component_set = "power_core"
+	required_component_set = "ftl_components"
+	required_component_set = "thruster_components"
+	required_component_set = "sensor_components"
+	valid_target_aggressive_stance = no
+	auto_upgrade = yes
+	use_shipnames_from = colonizer
+
+	potential_country = {
+		is_guided_sapience_empire = yes
+		OR = {
+			has_technology = tech_hyper_drive_1
+			has_technology = tech_hyper_drive_2
+			has_technology = tech_hyper_drive_3
+			has_technology = tech_jump_drive_1
+			has_technology = tech_psi_jump_drive_1
+		}
+	}
+
+	ai_ship_data = {
+		min = value:desired_colonizers_base
+	}
+
+	resources = {
+		category = colonies
+		# Alloys
+		# 400 normally
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = no
+				}
+			}
+			alloys = @colony_cost_mid
+		}
+		# 200 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = yes
+				}
+			}
+			alloys = @colony_cost_base
+		}
+
+		# Consumer goods for non-gestalt empires
+		# 200 normally
+		cost = {
+			trigger = {
+				from = {
+					is_gestalt = no
+					is_virtual_empire = no
+				}
+			}
+			consumer_goods = @colony_cost_base
+		}
+		# 100 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_gestalt = no
+					is_virtual_empire = yes
+				}
+			}
+			consumer_goods = @colony_cost_low
+		}
+		# Food for organics
+		# 200 normally
+		cost = {
+			trigger = {
+				from = {
+					is_lithoid_empire = no
+					is_robot_empire = no
+					is_hive_empire = no
+					NOT = {
+						has_origin = origin_synthetic_fertility
+					}
+				}
+			}
+			food = @colony_cost_base
+		}
+		# 500 if you're a hive mind
+		cost = {
+			trigger = {
+				from = {
+					is_lithoid_empire = no
+					is_robot_empire = no
+					is_hive_empire = yes
+				}
+			}
+			food = @colony_cost_high
+		}
+		# Minerals for lithoids
+		# 200 normally
+		cost = {
+			trigger = {
+				from = {
+					is_lithoid_empire = yes
+					is_robot_empire = no
+					is_hive_empire = no
+					NOT = {
+						has_origin = origin_synthetic_fertility
+					}
+				}
+			}
+			minerals = @colony_cost_base
+		}
+		# 500 if you're a hive mind
+		cost = {
+			trigger = {
+				from = {
+					is_lithoid_empire = yes
+					is_robot_empire = no
+					is_hive_empire = yes
+				}
+			}
+			minerals = @colony_cost_high
+		}
+		# Energy for machines
+		# 200 normally
+		cost = {
+			trigger = {
+				from = {
+					is_robot_empire = yes
+					is_gestalt = no
+					is_virtual_empire = no
+				}
+			}
+			energy = @colony_cost_base
+		}
+		# 200 for synth fert
+		cost = {
+			trigger = {
+				from = {
+					has_origin = origin_synthetic_fertility
+				}
+			}
+			energy = @colony_cost_base
+		}
+		# 400 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_robot_empire = yes
+					is_gestalt = no
+					is_virtual_empire = yes
+				}
+			}
+			energy = @colony_cost_mid
+		}
+		# 500 if you're a machine intelligence
+		cost = {
+			trigger = {
+				from = {
+					is_robot_empire = yes
+					is_gestalt = yes
+					is_virtual_empire = no
+				}
+			}
+			energy = @colony_cost_high
+		}
+		# 700 if you're a virtual empire
+		cost = {
+			trigger = {
+				from = {
+					is_robot_empire = yes
+					is_gestalt = yes
+					is_virtual_empire = yes
+				}
+			}
+			energy = @colony_cost_very_high
+		}
+
+		upkeep = {
+			energy = @colony_upkeep_energy
+			alloys = @colony_upkeep_alloys
+		}
 	}
 }
 

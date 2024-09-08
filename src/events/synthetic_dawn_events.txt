@@ -8,90 +8,73 @@ namespace = syndaw
 
 @recent_event_pause = 75
 
-# mSet assimilation counter for Driven Assimilators
-country_event = {
-	id = syndaw.1
-	hide_window = yes
-	is_triggered_only = yes
-
-	trigger = {
-		has_civic = civic_machine_assimilator
-	}
-
-	immediate = {
-		set_variable = {
-			which = num_assimilated_pops
-			value = 0
-		}
-	}
-}
 
 # Machine & Synth Leaders malfunction | via on_decade_pulse
-event = {
-	id = syndaw.10
-	hide_window = yes
-	is_triggered_only = yes
-
-	trigger = {
-		any_playable_country = {
-			OR = {
-				has_authority = auth_machine_intelligence
-				has_country_flag = synthetic_empire
-				has_technology = "tech_synthetic_workers"
-			}
-		}
-	}
-
-	immediate = {
-		every_playable_country = {
-			limit = {
-				OR = {
-					has_authority = auth_machine_intelligence
-					has_country_flag = synthetic_empire
-					has_technology = "tech_synthetic_workers"
-				}
-				NOT = { has_relic = r_eternal_throne } # This relic prevents mechanicals from being randomly destroyed
-			}
-			country_event = { id = syndaw.11 random = 200 }
-		}
-	}
-}
+#event = {
+#	id = syndaw.10
+#	hide_window = yes
+#	is_triggered_only = yes
+#
+#	trigger = {
+#		any_playable_country = {
+#			OR = {
+#				has_authority = auth_machine_intelligence
+#				has_country_flag = synthetic_empire
+#				has_technology = "tech_synthetic_workers"
+#			}
+#		}
+#	}
+#
+#	immediate = {
+#		every_playable_country = {
+#			limit = {
+#				OR = {
+#					has_authority = auth_machine_intelligence
+#					has_country_flag = synthetic_empire
+#					has_technology = "tech_synthetic_workers"
+#				}
+#				NOT = { has_relic = r_eternal_throne } # This relic prevents mechanicals from being randomly destroyed
+#			}
+#			country_event = { id = syndaw.11 random = 200 }
+#		}
+#	}
+#}
 
 # Machine & Synth Leaders malfunction (per empire)
-country_event = {
-	id = syndaw.11
-	hide_window = yes
-	is_triggered_only = yes
-
-	immediate = {
-		random_list = {
-			90 = { } # nothing happens
-			10 = {
-				modifier = { # Tradition: Self-Preservation Protocols
-					factor = 0.5
-					has_active_tradition = tr_synchronicity_self_preservation
-				}
-				modifier = { # Edict: Zro Additives (via Psionic Archive Relic)
-					factor = 0.5
-					has_edict = zro_crystal_machine
-				}
-				if = { # Machine Intelligence
-					limit = {
-						has_authority = auth_machine_intelligence
-					}
-					fire_on_action = {
-						on_action = on_machine_leader_malfunction
-					}
-				}
-				else = { # Synthetic Ascension or Synth Workers Technology
-					fire_on_action = {
-						on_action = on_synth_leader_malfunction
-					}
-				}
-			}
-		}
-	}
-}
+#country_event = {
+#	id = syndaw.11
+#	hide_window = yes
+#	is_triggered_only = yes
+#
+#	immediate = {
+#		random_list = {
+#			90 = { } # nothing happens
+#			10 = {
+#				modifier = { # Tradition: Self-Preservation Protocols
+#					factor = 0.5
+#					has_active_tradition = tr_synchronicity_self_preservation
+#				}
+#				modifier = { # Edict: Zro Additives (via Psionic Archive Relic)
+#					factor = 0.5
+#					has_edict = zro_crystal_machine
+#				}
+#				if = { # Machine Intelligence
+#					limit = {
+#						has_authority = auth_machine_intelligence
+#					}
+#					fire_on_action = {
+#						on_action = on_machine_leader_malfunction
+#					}
+#				}
+#				else = { # Synthetic Ascension or Synth Workers Technology
+#					fire_on_action = {
+#						on_action = on_synth_leader_malfunction
+#					}
+#				}
+#			}
+#		}
+#	}
+#}
 
 # Science Vessel Leader dies (see also: 'action.71')
 country_event = {
@@ -363,7 +346,7 @@ event = { # unscoped gatekeeper
 				NOR = {
 					has_ethic = ethic_gestalt_consciousness
 					has_country_flag = synthetic_empire
-					has_ascension_perk = ap_the_flesh_is_weak
+					is_individual_machine = yes
 					has_policy_flag = ai_full_rights
 					has_country_flag = situation_machine_uprising_started
 					has_policy_flag = robots_outlawed
@@ -393,7 +376,7 @@ country_event = { # per-country gatekeeper
 		NOR = {
 			has_ethic = ethic_gestalt_consciousness
 			has_country_flag = synthetic_empire
-			has_ascension_perk = ap_the_flesh_is_weak
+			is_individual_machine = yes
 			has_policy_flag = ai_full_rights
 			has_country_flag = situation_machine_uprising_started
 			has_policy_flag = robots_outlawed		# If Robots were outlawed before NOW, Empire is safe.
@@ -1784,6 +1767,7 @@ planet_event = { #uprising
 			name = random
 			class = MACHINE
 			portrait = random
+			homeworld = this
 			traits = {
 				trait = trait_machine_unit
 				trait = random_traits
@@ -1819,6 +1803,21 @@ planet_event = { #uprising
 				}
 				owner = {
 					create_terminator_country = yes
+					event_target:current_uprising = {
+						country_event = { id = syndaw.1022 } # setup happens here now
+					}
+				}
+			}
+			10 = { # individual machine empire
+				modifier = {
+					add = event_target:organic_empire.var_uprising_cruelty_to_robots
+				}
+				modifier = {
+					factor = 0
+					owner = { has_machine_age_dlc = no }
+				}
+				owner = {
+					create_individual_machine_country = yes
 					event_target:current_uprising = {
 						country_event = { id = syndaw.1022 } # setup happens here now
 					}
@@ -2463,6 +2462,7 @@ country_event = {
 			OR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 		text = syndaw.1025.desc.machine
@@ -2472,6 +2472,7 @@ country_event = {
 			NOR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 		text = syndaw.1025.desc
@@ -2505,6 +2506,7 @@ country_event = {
 			OR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 		text = syndaw.1030.desc.machine
@@ -2514,6 +2516,7 @@ country_event = {
 			NOR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 		text = syndaw.1030.desc
@@ -2538,6 +2541,7 @@ country_event = {
 			OR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 		text = syndaw.1035.desc.machine
@@ -2547,6 +2551,7 @@ country_event = {
 			NOR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 		text = syndaw.1035.desc
@@ -2587,7 +2592,22 @@ country_event = {
 country_event = {
 	id = syndaw.1200
 	title = syndaw.1200.name
-	desc = syndaw.1200.desc
+	desc = {
+		trigger = {
+			event_target:current_uprising = {
+				is_individual_machine = no
+			}
+		}
+		text = syndaw.1200.desc
+	}
+	desc = {
+		trigger = {
+			event_target:current_uprising = {
+				is_individual_machine = yes
+			}
+		}
+		text = syndaw.1200.IM.desc
+	}
 	picture = GFX_evt_machine_sapience
 	#hide_window = yes
 	is_triggered_only = yes
@@ -2595,7 +2615,10 @@ country_event = {
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
 		is_country_type = default
-		has_authority = auth_machine_intelligence
+		OR = {
+			has_authority = auth_machine_intelligence
+			is_individual_machine = yes
+		}
 		has_country_flag = machine_uprising_country
 		has_relation_flag = {
 			who = from
@@ -2633,6 +2656,7 @@ country_event = {
 					NOR = {
 						has_country_flag = synthetic_empire
 						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
 					}
 				}
 				add_opinion_modifier = {
@@ -2646,6 +2670,7 @@ country_event = {
 					OR = {
 						has_country_flag = synthetic_empire
 						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
 					}
 					NOT = { is_same_value = root }
 				}
@@ -2780,6 +2805,7 @@ country_event = {
 					NOR = {
 						has_country_flag = synthetic_empire
 						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
 						is_same_value = root
 					}
 				}
@@ -2794,6 +2820,166 @@ country_event = {
 					OR = {
 						has_country_flag = synthetic_empire
 						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
+					}
+				}
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_machine_uprising_machine_comrades_defeated
+				}
+			}
+		}
+	}
+}
+
+# Machine Uprising wins
+country_event = {
+	id = syndaw.1201
+	title = syndaw.1200.name
+	desc = {
+		trigger = {
+			is_individual_machine = no
+		}
+		text = syndaw.1201.desc
+	}
+	desc = {
+		trigger = {
+			is_individual_machine = yes
+		}
+		text = syndaw.1201.IM.desc
+	}
+	picture = GFX_evt_machine_sapience
+	is_triggered_only = yes
+
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		is_country_type = default
+	}
+
+	immediate = {
+		observer_event = { id = observer.82 }
+	}
+
+	option = {
+		name = syndaw.1200.a
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 120
+			min = 2000
+			max = 6000
+		}
+		add_monthly_resource_mult = {
+			resource = influence
+			value = 120
+			min = 200
+			max = 600
+		}
+		custom_tooltip = "syndaw.1200.a.tooltip"
+		hidden_effect = {
+			every_playable_country = {
+				limit = {
+					has_communications = root
+					NOR = {
+						has_country_flag = synthetic_empire
+						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
+					}
+				}
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_machine_uprising_victorious
+				}
+			}
+			every_playable_country = {
+				limit = {
+					has_communications = root
+					OR = {
+						has_country_flag = synthetic_empire
+						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
+					}
+					NOT = { is_same_value = root }
+				}
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_machine_uprising_machine_comrades_victorious
+				}
+			}
+		}
+	}
+}
+
+# Uprising Host wins by destroying empire
+country_event = {
+	id = syndaw.1206
+	title = syndaw.1205.name
+	desc = {
+		trigger = {
+			is_spiritualist = no
+		}
+		text = syndaw.1206.desc
+	}
+	desc = {
+		trigger = {
+			is_spiritualist = yes
+		}
+		text = syndaw.1206.desc.spiri
+	}
+	picture = GFX_evt_unity_symbol
+	is_triggered_only = yes
+	show_sound = event_mystic_reveal
+
+	trigger = {
+		host_has_dlc = "Synthetic Dawn Story Pack"
+		is_country_type = default
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = { has_communications = root }
+			country_event = { id = syndaw.1035 days = 5 }
+		}
+		observer_event = { id = observer.83 }
+	}
+
+	option = {
+		name = OK
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 120
+			min = 2000
+			max = 6000
+		}
+		add_monthly_resource_mult = {
+			resource = influence
+			value = 120
+			min = 200
+			max = 600
+		}
+		custom_tooltip = syndaw.1205.a.tooltip
+		hidden_effect = {
+			every_playable_country = {
+				limit = {
+					has_communications = root
+					NOR = {
+						has_country_flag = synthetic_empire
+						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
+						is_same_value = root
+					}
+				}
+				add_opinion_modifier = {
+					who = root
+					modifier = opinion_machine_uprising_defeated
+				}
+			}
+			every_playable_country = {
+				limit = {
+					has_communications = root
+					OR = {
+						has_country_flag = synthetic_empire
+						has_authority = auth_machine_intelligence
+						is_individual_machine = yes
 					}
 				}
 				add_opinion_modifier = {
@@ -2819,6 +3005,7 @@ country_event = {
 			NOR = {
 				has_authority = auth_machine_intelligence
 				has_country_flag = synthetic_empire
+				is_individual_machine = yes
 			}
 		}
 	}
@@ -2835,6 +3022,7 @@ country_event = {
 						}
 						NOR = {
 							has_authority = auth_machine_intelligence
+							is_individual_machine = yes
 							has_country_flag = synthetic_empire
 							has_country_flag = fallen_empire_machine
 						}
@@ -2952,7 +3140,6 @@ planet_event = {
 		}
 	}
 }
-
 
 planet_event = {
 	id = syndaw.1320
