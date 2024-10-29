@@ -258,7 +258,7 @@ is_fallen_empire_machine = {
 		is_country_type = fallen_empire
 		is_country_type = awakened_fallen_empire
 	}
-	has_authority = auth_machine_intelligence
+	is_machine_empire = yes
 }
 
 is_fallen_empire_berserk_machine = {
@@ -306,7 +306,7 @@ is_valid_fallen_empire_for_task = {
 		has_ethic = ethic_fanatic_spiritualist
 		has_ethic = ethic_fanatic_xenophile
 		has_ethic = ethic_fanatic_materialist
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 	}
 }
 
@@ -432,6 +432,11 @@ has_first_contact_dlc = {
 has_astral_planes_dlc = {
 	optimize_memory
 	host_has_dlc = "Astral Planes"
+}
+
+has_cosmic_storms_dlc = {
+	optimize_memory
+	host_has_dlc = "Cosmic Storms"
 }
 
 has_machine_age_dlc = {
@@ -661,13 +666,17 @@ allows_alien_leaders = {
 
 can_be_leader = {
 	has_citizenship_rights = yes
-	can_think = yes
+	# Rule out Traits for servitude & lack of free will
+	NOR = {
+		has_trait = trait_syncretic_proles
+		can_think = no
+	}
 	OR = {
 		is_robot_pop = no
 		root = {
 			OR = {
 				has_technology = tech_synthetic_leaders
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				is_mechanical_empire = yes
 				is_individual_machine = yes
 			}
@@ -691,17 +700,17 @@ can_be_military_leader = {
 	OR = {
 		is_robot_pop = no
 		owner = { has_policy_flag = ai_full_rights }
-		owner = { has_authority = auth_machine_intelligence }
+		owner = { is_machine_empire = yes }
 		owner = { is_individual_machine = yes }
 	}
 	OR = {
 		AND = { # MIs only accept Fully Integrated leaders
-			owner = { has_authority = auth_machine_intelligence }
+			owner = { is_machine_empire = yes }
 			has_citizenship_type = { type = citizenship_full_machine country = owner }
 			has_military_service_type = { type = military_service_full }
 		}
 		AND = { # non-MIs accept whatever
-			NOT = { owner = { has_authority = auth_machine_intelligence } }
+			NOT = { owner = { is_machine_empire = yes } }
 			has_military_service_type = { type = military_service_full }
 		}
 	}
@@ -901,7 +910,7 @@ prefers_commander_governors = {
 #Works in species scope, with a country in from
 is_lonely_hive_mind_pop = {
 	has_trait = trait_hive_mind
-	NOT = { from = { has_authority = auth_hive_mind } }
+	NOT = { from = { is_hive_empire = yes } }
 	from = {
 		NOR = {
 			is_country_type = fallen_empire
@@ -915,7 +924,7 @@ is_disconnected_machine_pop = {
 	has_trait = trait_machine_unit
 	from = {
 		NOR = {
-			has_authority = auth_machine_intelligence
+			is_machine_empire = yes
 			is_country_type = fallen_empire
 			is_country_type = awakened_fallen_empire
 			is_individual_machine = yes
@@ -1128,7 +1137,7 @@ is_livestock = {
 is_synthetic_empire = {
 	OR = {
 		has_country_flag = synthetic_empire
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 		is_individual_machine = yes
 	}
 }
@@ -1147,8 +1156,8 @@ planet_can_be_liberated_from_owner = {
 		NOR = {
 			is_country_type = awakened_fallen_empire
 			is_country_type = fallen_empire
-			has_authority = auth_hive_mind
-			has_authority = auth_machine_intelligence
+			is_hive_empire = yes
+			is_machine_empire = yes
 		}
 	}
 }
@@ -1169,7 +1178,7 @@ is_robot_empire = {
 		owner_species = { has_trait = trait_mechanical }
 		owner_species = { has_trait = trait_machine_unit }
 		has_country_flag = synthetic_empire
-		has_authority = auth_machine_intelligence
+		is_machine_empire = yes
 	}
 }
 
@@ -1495,7 +1504,7 @@ is_default_or_fallen = {
 
 is_capitalist = {
 	OR = {
-		has_authority = auth_corporate
+		is_megacorp = yes
 		has_civic = civic_corporate_dominion
 		has_civic = civic_merchant_guilds
 	}
@@ -1507,7 +1516,7 @@ is_megacorp = {
 
 has_corporate_government = {
 	OR = {
-		has_authority = auth_corporate
+		is_megacorp = yes
 		has_civic = civic_galactic_sovereign_megacorp
 	}
 }
@@ -1527,8 +1536,8 @@ is_machine_empire = {
 is_autocracy = { #Power of one
 	OR = {
 		has_ethic = ethic_gestalt_consciousness
-		has_authority = auth_imperial
-		has_authority = auth_dictatorial
+		is_imperial_authority = yes
+		is_dictatorial_authority = yes
 	}
 }
 
@@ -1536,27 +1545,40 @@ is_oligarchy = { #Power of few
 	OR = {
 		has_authority = auth_oligarchic
 		AND = {
-			has_authority = auth_corporate
-			NOR = {
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
-			}
+			is_megacorp = yes
+			is_egalitarian = no
 		}
 	}
 }
 
 is_democracy = { #Power of many
 	OR = {
-		has_authority = auth_democratic
+		is_democratic_authority = yes
 		AND = {
-			has_authority = auth_corporate
+			is_megacorp = yes
 			is_egalitarian = yes
 		}
 	}
 }
 
-is_cyber_democracy = {
+is_democratic_authority = {
 	has_authority = auth_democratic
+}
+
+is_oligarchic_authority = {
+	has_authority = auth_oligarchic
+}
+
+is_imperial_authority = {
+	has_authority = auth_imperial
+}
+
+is_dictatorial_authority = {
+	has_authority = auth_dictatorial
+}
+
+is_cyber_democracy = {
+	is_democratic_authority = yes
 	OR = {
 		has_country_flag = cyber_individualist
 		has_country_flag = cyber_collectivist
@@ -1564,7 +1586,7 @@ is_cyber_democracy = {
 }
 
 is_cyber_oligarchy = {
-	has_authority = auth_oligarchic
+	is_oligarchic_authority = yes
 	OR = {
 		has_country_flag = cyber_individualist
 		has_country_flag = cyber_collectivist
@@ -1572,7 +1594,7 @@ is_cyber_oligarchy = {
 }
 
 is_cyber_dictatorial = {
-	has_authority = auth_dictatorial
+	is_dictatorial_authority = yes
 	OR = {
 		has_country_flag = cyber_individualist
 		has_country_flag = cyber_collectivist
@@ -1580,7 +1602,7 @@ is_cyber_dictatorial = {
 }
 
 is_cyber_imperial = {
-	has_authority = auth_imperial
+	is_imperial_authority = yes
 	OR = {
 		has_country_flag = cyber_individualist
 		has_country_flag = cyber_collectivist
@@ -1588,7 +1610,7 @@ is_cyber_imperial = {
 }
 
 is_cyber_corporate = {
-	has_authority = auth_corporate
+	is_megacorp = yes
 	OR = {
 		has_country_flag = cyber_individualist
 		has_country_flag = cyber_collectivist
@@ -1596,7 +1618,7 @@ is_cyber_corporate = {
 }
 
 is_synth_democracy = {
-	has_authority = auth_democratic
+	is_democratic_authority = yes
 	OR = {
 		has_country_flag = synth_physical
 		has_country_flag = synth_virtual
@@ -1604,7 +1626,7 @@ is_synth_democracy = {
 }
 
 is_synth_oligarchy = {
-	has_authority = auth_oligarchic
+	is_oligarchic_authority = yes
 	OR = {
 		has_country_flag = synth_physical
 		has_country_flag = synth_virtual
@@ -1612,7 +1634,7 @@ is_synth_oligarchy = {
 }
 
 is_synth_dictatorial = {
-	has_authority = auth_dictatorial
+	is_dictatorial_authority = yes
 	OR = {
 		has_country_flag = synth_physical
 		has_country_flag = synth_virtual
@@ -1620,7 +1642,7 @@ is_synth_dictatorial = {
 }
 
 is_synth_imperial = {
-	has_authority = auth_imperial
+	is_imperial_authority = yes
 	OR = {
 		has_country_flag = synth_physical
 		has_country_flag = synth_virtual
@@ -1628,7 +1650,7 @@ is_synth_imperial = {
 }
 
 is_synth_corporate = {
-	has_authority = auth_corporate
+	is_megacorp = yes
 	OR = {
 		has_country_flag = synth_physical
 		has_country_flag = synth_virtual
@@ -1645,7 +1667,7 @@ can_set_ai_policy = {
 			OR = {
 				has_technology = tech_synthetic_workers
 				has_technology = tech_sapient_ai
-				has_authority = auth_machine_intelligence
+				is_machine_empire = yes
 				is_individual_machine = yes
 			}
 			OR = {
@@ -1714,7 +1736,7 @@ has_total_war_cb = {
 					from = {
 						NOR = {
 							has_country_flag = synthetic_empire
-							has_authority = auth_machine_intelligence
+							is_machine_empire = yes
 							is_individual_machine = yes
 						}
 					}
@@ -2800,6 +2822,8 @@ has_precursor_intro = {
 		has_country_flag = cybrex_intro
 		has_country_flag = zroni_intro
 		has_country_flag = baol_intro
+		has_country_flag = inetian_intro
+		has_country_flag = adakkaria_intro
 		# Still in the early stages of 'On the Shoulders of Giants'
 		AND = {
 			has_origin = origin_shoulders_of_giants
@@ -3518,6 +3542,7 @@ has_research_building = {
 		has_building = building_research_lab_3
 		has_building = building_institute
 		has_building = building_supercomputer
+		has_building = building_astrometeorology_observation_center
 	}
 }
 
@@ -3950,7 +3975,6 @@ has_sacrificial_edict = {
 
 can_think = {
 	NOR = {
-		has_trait = trait_syncretic_proles
 		has_trait = trait_nerve_stapled
 		has_trait = trait_zombie
 		has_trait = trait_robot_suppressed
@@ -4207,6 +4231,109 @@ is_apocalyptic_empire = {
 	}
 }
 
+has_any_storm_building = {
+	# All the storm related buildings (except Astrometeorology Observation Center) go here
+	OR = {
+		has_building = building_storm_attraction_center
+		has_building = building_advanced_storm_attraction_center
+		has_building = building_storm_repellent_center
+		has_building = building_advanced_storm_repellent_center
+		has_building = building_storm_resistant_production
+		has_building = building_advanced_storm_resistant_production
+		has_building = building_adakkaria_patriotic_institute
+		has_building = building_storm_summoning_theater
+		has_building = building_storm_holo_theater
+		has_building = building_storm_grand_theater
+	}
+}
+
+has_any_storm_repellent_building = {
+	OR = {
+		any_owned_planet = {
+			OR = {
+				has_building = building_storm_repellent_center
+				has_building = building_advanced_storm_repellent_center
+			}
+		}
+		any_owned_starbase = {
+			has_starbase_building = storm_repelling_computer
+		}
+	}
+}
+
+has_any_storm_attracting_building = {
+	OR = {
+		any_owned_planet = {
+			OR = {
+				has_building = building_storm_attraction_center
+				has_building = building_advanced_storm_attraction_center
+			}
+		}
+		any_owned_starbase = {
+			has_starbase_building = storm_attraction_computer
+		}
+	}
+}
+
+has_storm_resistant_production_building = {
+	OR = {
+		has_building = building_storm_resistant_production
+		has_building = building_advanced_storm_resistant_production
+	}
+}
+
+system_has_negating_storm_building = {
+	solar_system = {
+		any_system_planet = {
+			has_building = building_planetary_shield_generator
+		}
+	}
+}
+
+system_has_storm_repelling_tech = {
+	OR = {
+		any_system_planet = {
+			OR = {
+				has_building = building_storm_repellent_center
+				has_building_construction = building_storm_repellent_center
+				has_building = building_advanced_storm_repellent_center
+				has_building_construction = building_advanced_storm_repellent_center
+			}
+		}
+		AND = {
+			exists = starbase
+			starbase = {
+				OR = {
+					has_starbase_building = storm_repelling_computer
+					is_starbase_building_building = storm_repelling_computer
+				}
+			}
+		}
+	}
+}
+
+system_has_storm_attraction_tech = {
+	OR = {
+		any_system_planet = {
+			OR ={
+				has_building = building_storm_attraction_center
+				has_building_construction = building_storm_attraction_center
+				has_building = building_advanced_storm_attraction_center
+				has_building_construction = building_advanced_storm_attraction_center
+			}
+		}
+		AND = {
+			exists = starbase
+			starbase = {
+				OR = {
+					has_starbase_building = storm_attraction_computer
+					is_starbase_building_building = storm_attraction_computer
+				}
+			}
+		}
+	}
+}
+
 blocks_minister_of_state = {
 	OR = {
 		is_gestalt = yes
@@ -4293,5 +4420,85 @@ can_dismantle_megastructure = {
 	from = {
 		has_technology = $TECH$
 		is_at_war = no
+	}
+}
+
+is_astrometeorologist_empire = {
+	OR = {
+		has_civic = civic_astrometeorology
+		has_civic = civic_astrometeorology_hive
+		has_civic = civic_astrometeorology_machine
+		has_civic = civic_astrometeorology_megacorp
+	}
+}
+
+is_storm_callers_empire = {
+	OR = {
+		has_civic = civic_storm_callers
+		has_civic = civic_storm_callers_megacorp
+	}
+}
+
+has_storm_attraction_civic = {
+	OR = {
+		is_astrometeorologist_empire = yes
+		is_storm_callers_empire = yes
+	}
+}
+
+is_environmental_architects_empire = {
+	OR = {
+		has_civic = civic_environmental_architects
+		has_civic = civic_environmental_architects_hive
+		has_civic = civic_environmental_architects_machine
+		has_civic = civic_environmental_architects_megacorp
+	}
+}
+
+influence_building_destruction_trigger = {
+	exists = owner
+	owner = { is_ai = yes }
+	solar_system = {
+		system_has_storm_repelling_tech = yes
+	}
+	owner = {
+		has_storm_attraction_civic = no
+		NOT = {
+			has_origin = origin_storm_chasers
+		}
+	}
+}
+
+has_sr_deposit = {
+	OR = {
+		has_deposit = d_dust_caverns
+		has_deposit = d_dust_desert
+		has_deposit = d_bubbling_swamp
+		has_deposit = d_fuming_bog
+		has_deposit = d_crystalline_caverns
+		has_deposit = d_crystal_forest
+		has_deposit = d_crystal_reef
+	}
+}
+
+can_obtain_volatile_motes = {
+	custom_tooltip = {
+		fail_text = must_have_access_to_volatile_motes_tt
+		OR = {
+			has_technology = tech_mine_volatile_motes
+			has_technology = tech_volatile_motes
+			has_country_flag = has_market_access
+		}
+	}
+}
+
+can_obtain_rare_crystals = {
+	custom_tooltip = {
+		fail_text = must_have_access_to_rare_crystals_tt
+		OR = {
+			has_technology = tech_mine_rare_crystals
+			has_technology = tech_rare_crystals
+			has_country_flag = has_market_access
+		}
 	}
 }

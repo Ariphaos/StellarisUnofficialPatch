@@ -12,7 +12,10 @@ building_military_academy = {
 	potential = {
 		exists = owner
 		owner = { NOT = { has_valid_civic = civic_reanimated_armies } }
-		NOT = { has_modifier = resort_colony }
+		NOR = { 
+			has_modifier = resort_colony 
+			has_modifier = penal_colony 
+		}
 	}
 
 	allow = {
@@ -180,11 +183,24 @@ building_stronghold = {
 		potential = {
 			exists = owner
 			owner = { is_gestalt = no }
+			NOT = { has_modifier = slave_colony }
 		}
 		modifier = {
 			job_soldier_add = @b1_jobs
 		}
 	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_gestalt = no }
+			has_modifier = slave_colony
+		}
+		modifier = {
+			job_battle_thrall_add = @b1_jobs
+		}
+	}
+
 	triggered_planet_modifier = {
 		potential = {
 			exists = owner
@@ -220,12 +236,23 @@ building_stronghold = {
 		}
 		text = job_warrior_drone_effect_desc
 	}
+
 	triggered_desc = {
 		trigger = {
 			exists = owner
 			owner = { is_gestalt = no }
+			NOT = { has_modifier = slave_colony }
 		}
 		text = job_soldier_effect_desc
+	}
+	
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = no }
+			has_modifier = slave_colony
+		}
+		text = job_battle_thrall_effect_desc
 	}
 }
 
@@ -246,11 +273,24 @@ building_fortress = {
 		potential = {
 			exists = owner
 			owner = { is_gestalt = no }
+			NOT = { has_modifier = slave_colony }
 		}
 		modifier = {
 			job_soldier_add = @b2_jobs
 		}
 	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_gestalt = no }
+			has_modifier = slave_colony
+		}
+		modifier = {
+			job_battle_thrall_add = @b2_jobs
+		}
+	}
+	
 	triggered_planet_modifier = {
 		potential = {
 			exists = owner
@@ -284,12 +324,23 @@ building_fortress = {
 		}
 		text = job_warrior_drone_effect_desc
 	}
+
 	triggered_desc = {
 		trigger = {
 			exists = owner
 			owner = { is_gestalt = no }
+			NOT = { has_modifier = slave_colony }
 		}
 		text = job_soldier_effect_desc
+	}
+	
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = no }
+			has_modifier = slave_colony
+		}
+		text = job_battle_thrall_effect_desc
 	}
 }
 
@@ -302,8 +353,6 @@ building_planetary_shield_generator = {
 
 	allow = {
 		has_upgraded_capital = yes
-		is_occupied_flag = no
-		hidden_trigger = { owner = { is_ai = no } }
 		if = {
 			limit = {
 				exists = orbital_defence
@@ -318,16 +367,42 @@ building_planetary_shield_generator = {
 				}
 			}
 		}
+		is_occupied_flag = no
 	}
 
 	destroy_trigger = {
-		exists = owner
-		owner = { is_ai = yes }
-		solar_system = { is_bottleneck_system = no }
 	}
 
 	planet_modifier = {
 		planet_orbital_bombardment_damage = -0.5
+	}
+	triggered_planet_modifier = {
+		potential = { has_cosmic_storms_dlc = yes }
+		planet_storm_devastation_mult = -0.5
+	}
+
+	inline_script = {
+		script = cosmic_storms/StormBuildingModifiers
+	}
+
+	on_built = {
+		if = {
+			limit = { has_cosmic_storms_dlc = yes }
+			solar_system = {
+				set_star_flag = storm_no_negative_effects
+				remove_modifier = storm_base_modifier
+			}
+		}
+	}
+
+	on_destroy = {
+		if = {
+			limit = { has_cosmic_storms_dlc = yes }
+			owner = { set_country_flag = shield_on_destroy } #an action when destroyed
+			solar_system = {
+				remove_star_flag = storm_no_negative_effects
+			}
+		}
 	}
 
 	resources = {
@@ -342,5 +417,18 @@ building_planetary_shield_generator = {
 
 	prerequisites = {
 		"tech_planetary_shield_generator"
+	}
+
+	custom_storm_ai_weight = {
+		weight = 5
+		modifier = {
+			factor = 5
+			AND = {
+				exists = owner
+				solar_system = {
+					owner = { num_cosmic_storms_encountered >=2 }
+				}
+			}
+		}
 	}
 }

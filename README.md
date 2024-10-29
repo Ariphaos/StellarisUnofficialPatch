@@ -47,7 +47,7 @@ This mod goes at the top of your load order. If you are also using [Vanilla fixe
 
 ## In Progress Games
 
-There are no expected issues with running or removing this from a running game.
+There are no expected issues with adding this to or removing this from a running game.
 
 ## Compatibility
 

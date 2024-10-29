@@ -625,6 +625,10 @@ The changes in this file are now obsolete and only exist as regression safeguard
 
 ## progress_events.txt
 
+### Bugfix
+
+* Missing = sign in event #2. (17blue17)
+
 ### Flavor
 
 * First Colony text for non-standard worlds (Gaia, Tomb, Relic, Ring)

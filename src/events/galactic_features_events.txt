@@ -3765,198 +3765,136 @@ ship_event = {
 	}
 }
 
-### Space Storms
+# Cosmic Storms
+
+### Debug spawn a random cosmic storm in a random system
 event = {
-	id = galactic_features.400
+	id = galactic_features.409
 	hide_window = yes
 
 	is_triggered_only = yes
 
 	trigger = {
-		mid_game_years_passed > 1
-		NOR = {
-			has_global_flag = ongoing_space_storm
-			has_global_flag = space_storm_cooldown
-		}
+		has_cosmic_storms_dlc = yes
 	}
 
 	immediate = {
-		random_list = {
-			999 = {}
-			10 = {
-				event_target:global_event_country = {
-					country_event = { id = galactic_features.401 }
-				}
-			}
+		spawn_random_storm = {
+			cosmic_storm_start_position = random
+			immediate = yes
 		}
 	}
 }
 
-# Create Storm
-country_event = {
-	id = galactic_features.401
+### Spawn Random Cosmic Storm Repeated Yearly (adakkaria_patriotic_institute)
+planet_event = {
+	id = galactic_features.411
 	hide_window = yes
 
 	is_triggered_only = yes
 
+	trigger = {
+		has_cosmic_storms_dlc = yes
+		exists = owner
+	}
+
 	immediate = {
-		set_global_flag = ongoing_space_storm
-		every_system = {
+		if = {
 			limit = {
-				is_inside_nebula = no
-				NOT = { has_star_flag = vluur_system }
+				NOT = {
+					has_building = building_adakkaria_patriotic_institute
+				}
 			}
-			random_list = {
-				50 = {
-					set_star_flag = storm_system
-					star = {
-						create_ambient_object = {
-							type = "space_storm_1"
-							location = this
-						}
-						last_created_ambient_object = {
-							set_ambient_object_flag = space_storm_object
-							set_location = {
-								target = prev
-								distance = 0
-								angle = random
+
+			# We use this flag to not accidentally start the repeating event twice, so if the building is gone,
+			# we can clean up the flag.
+			remove_planet_flag = patriotic_institute_spawning_storms
+		}
+		else = {
+			random = {
+				chance = 20
+				random_owned_pop = {
+					kill_pop = yes
+
+					# Next the storm spawning here so we only spawn a storm if a random pop exists.
+					prev = {
+						solar_system = {
+							random_list = {
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = electric_storm
+									}
+								}
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = particle_storm
+									}
+								}
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = gravity_storm
+									}
+								}
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = magnetic_storm
+									}
+								}
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = solar_storm
+										AVOID_STORMS = no
+									}
+								}
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = celestial_storm
+									}
+								}
+								1 = {
+									inline_script = {
+										script = cosmic_storms/SpawnAtPosition
+										TYPE = shroud_storm
+									}
+								}
 							}
 						}
 					}
-					create_space_storm = yes
-				}
-				50 = {}
-			}
-		}
-		country_event = { id = galactic_features.403 days = 1800 random = 1800 }
-		if = {
-			limit = {
-				is_galactic_community_formed = yes
-				any_playable_country = {
-					is_galactic_community_member = yes
-					NOT = { has_ethic = ethic_gestalt_consciousness }
-				}
-			}
-			random_playable_country = {
-				limit = {
-					is_galactic_community_member = yes
-					NOT = { has_ethic = ethic_gestalt_consciousness }
-				}
-				create_leader = {
-					class = commander
-					species = owner_main_species
-					effect = {
-						save_global_event_target_as = storm_name
-						exile_leader_as = storm_name
+					create_message = {
+						type = MESSAGE_INSTITUTE_SPAWNED_STORM
+						localization = MESSAGE_INSTITUTE_SPAWNED_STORM
+						days = 30
+						target = prev
+						recipient = prev.owner
+
+						variable = {
+							type = name
+							localization = PLANET
+							scope = prev
+						}
+
+						variable = {
+							type = name
+							localization = STORM
+							scope = last_created_cosmic_storm
+						}
+
+						variable = {
+							type = name
+							localization = SYSTEM
+							scope = prev.solar_system
+						}
 					}
 				}
 			}
-			every_playable_country = {
-				limit = { is_ai = no }
-				country_event = { id = galactic_features.405 }
-			}
+			planet_event = { id = galactic_features.411 days = 360 }
 		}
-		else = {
-			every_playable_country = {
-				limit = { is_ai = no }
-				country_event = { id = galactic_features.402 }
-			}
-		}
-	}
-}
-
-# Informed About Storm - No Galcom
-country_event = {
-	id = galactic_features.402
-	title = "galactic_features.402.name"
-	desc = "galactic_features.402.desc"
-	picture = GFX_evt_partition
-	show_sound = event_energy_field
-
-	is_triggered_only = yes
-
-	option = {
-		name = galactic_features.402.a
-	}
-}
-
-# Informed About Storm - GalCom Version
-country_event = {
-	id = galactic_features.405
-	title = "galactic_features.405.name"
-	desc = "galactic_features.405.desc"
-	picture = GFX_evt_partition
-	show_sound = event_energy_field
-
-	is_triggered_only = yes
-
-	option = {
-		name = galactic_features.402.a
-	}
-}
-
-# The Storm Ends
-country_event = {
-	id = galactic_features.403
-	hide_window = yes
-
-	is_triggered_only = yes
-
-	immediate = {
-		remove_global_flag = ongoing_space_storm
-		set_timed_global_flag = { flag = space_storm_cooldown days = 7200 }
-		every_system = {
-			limit = { has_star_flag = storm_system }
-			random_system_ambient_object = {
-				limit = { has_ambient_object_flag = space_storm_object }
-				destroy_ambient_object = this
-			}
-			remove_star_flag = storm_system
-			destroy_space_storm = yes
-		}
-		if = {
-			limit = { is_galactic_community_formed = yes }
-			every_playable_country = {
-				limit = { is_ai = no }
-				country_event = { id = galactic_features.406 }
-			}
-		}
-		else = {
-			every_playable_country = {
-				limit = { is_ai = no }
-				country_event = { id = galactic_features.404 }
-			}
-		}
-	}
-}
-
-# Informed About Storm Ending - No GalCom
-country_event = {
-	id = galactic_features.404
-	title = "galactic_features.404.name"
-	desc = "galactic_features.404.desc"
-	picture = GFX_evt_partition
-	show_sound = event_energy_field
-
-	is_triggered_only = yes
-
-	option = {
-		name = GOOD
-	}
-}
-
-# Informed About Storm Ending - GalCom Version
-country_event = {
-	id = galactic_features.406
-	title = "galactic_features.406.name"
-	desc = "galactic_features.406.desc"
-	picture = GFX_evt_partition
-	show_sound = event_energy_field
-
-	is_triggered_only = yes
-
-	option = {
-		name = GOOD
 	}
 }
 

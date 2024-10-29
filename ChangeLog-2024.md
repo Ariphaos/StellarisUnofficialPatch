@@ -1,5 +1,30 @@
 # Change Log - 2024
 
+# October 29th
+
+3.13.2 update (better late than never?)
+
+- Fixed missing = sign in progress_events (17blue17)
+- Made juggernaut shipyard policy apply to Cosmogenesis ships (Dobrynja )
+
+# September 24th
+
+3.13.1 update
+
+# September 10th
+
+3.13 update
+
+- Applied site-sniping fix code to new precursors.
+
+Paradox fixed the following in 3.13:
+
+- Scope error in action.740
+- A lot of basic mod support fixes
+- Nanites will no longer terraform astral scars (distar.311)
+- Scope check in paragon.5223
+- Removed broken wormhole traversal logic
+
 ## September 7th
 
 Final 3.12 patch
