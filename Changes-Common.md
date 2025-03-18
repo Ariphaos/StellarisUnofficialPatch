@@ -228,6 +228,9 @@ All remaining define entries help the AI.
 * Edit pleased faction entry so the faction is actually pleased with you.
 * Set a 'default' species sound for modded species. Should probably make something, for now set to Fungoid.
 
+# Leaders
+* Society focus trait levels 2 and 3 are no longer council traits.
+
 # Megastructures
 
 * You can't build a ringworld out of an astral rift.
