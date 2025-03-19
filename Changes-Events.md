@@ -158,6 +158,7 @@ General fixes (Astral Scar exclusions)
 * Corrupted Knight fix.
 * Some further restrictions to Feral Overload to prevent issues.
 * Don't let Negative Mass hit a ruler.
+* Removed permanent debris field created on the beta-planet if you complete Plight of the Beta-Universe as an empire with the Payback origin
 
 ### Mod Support
 
