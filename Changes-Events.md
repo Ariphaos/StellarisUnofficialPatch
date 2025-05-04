@@ -593,7 +593,7 @@ General fixes (astral scar exclusion).
 
 ### Mod Support
 
-* Birth of Piracy supports modded governments.
+* Don't log extra errors when encountering a modded government.
 
 ## planet_destruction_events.txt
 
@@ -672,6 +672,8 @@ The changes in this file are now obsolete and only exist as regression safeguard
 * Properly trigger chosen becoming ruler effect if the ruler doesn't have the imperial heir trait (for civic).
 * Chosen and Legendary characters don't get eaten/devolved/become an hero.
 * Replace outdated "order by = level" with has_skill trigger.
+* The End of the Cycle won't convert Shattered Ring segments to shrouded worlds.
+* The End of the Cycle will better handle bypasses.
 
 ### Hijinks
 

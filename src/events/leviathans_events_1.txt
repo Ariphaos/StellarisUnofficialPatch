@@ -4547,32 +4547,39 @@ country_event = {
 	is_triggered_only = yes
 
 	option = {
-		name = {
-			trigger = { has_valid_civic = civic_fanatic_purifiers }
-			text = SCUM
-		}
-		name = {
-			trigger = { has_valid_civic = civic_hive_devouring_swarm }
-			text = TASTY
-		}
-		name = {
-			trigger = { has_valid_civic = civic_machine_terminator }
-			text = EXTERMINATE
+		trigger = {
+			OR = {	# This is a hack to display the civic icon if needed
+				is_galactic_curators_empire = yes
+				is_galactic_curators_empire = no
+			}
 		}
 		name = {
 			trigger = {
-				NOR = {
-					has_valid_civic = civic_fanatic_purifiers
-					has_valid_civic = civic_hive_devouring_swarm
-					has_valid_civic = civic_machine_terminator
+				switch = {
+					trigger = has_valid_civic
+					civic_fanatic_purifiers = { text = SCUM }
+					civic_hive_devouring_swarm = { text = TASTY }
+					civic_machine_terminator = { text = EXTERMINATE }
+					default = { text = leviathans.502.a }
+
 				}
 			}
-			text = leviathans.502.a
 		}
 		hidden_effect = {
 			set_country_flag = curator_intro
 		}
 		default_hide_option = yes
+		if = {
+			limit = {
+				is_galactic_curators_empire = yes
+			}
+			from = {
+				add_trust = {
+					who = prev
+					amount = 20
+				}
+			}
+		}
 	}
 }
 
@@ -4781,6 +4788,90 @@ country_event = {
 			country_event = { id = leviathans.600 }
 		}
 	}
+	# Containment Vessel
+	option = {
+		name = leviathans.500.j
+		trigger = {
+			has_grand_archive_dlc = yes
+			has_technology = tech_gravity_wells
+			NOR = {
+				has_country_flag = tech_containment_vessel_acquired
+				has_technology = tech_containment_vessel
+			}
+
+		}
+		allow = {
+			custom_tooltip = {
+				fail_text = leviathans.500.j.opinion
+				event_target:curator_enclave_country = {
+					trust = {
+						who = root
+						value >= 80
+					}
+				}
+			}
+		}
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|5000|
+		}
+		add_research_option = tech_containment_vessel
+		hidden_effect = {
+			set_country_flag = tech_containment_vessel_acquired
+		}
+	}
+	# Grand Archive Collection Amendments
+	option = {
+		name = leviathans.500.k
+		trigger = {
+			has_grand_archive_dlc = yes
+			any_owned_megastructure = {
+				is_megastructure_type = grand_archive_0
+			}
+			OR = {
+				is_eligible_for_collection_stage_1_reward_any_reward = yes
+				is_eligible_for_collection_stage_2_reward_any_reward = yes
+				is_eligible_for_collection_stage_3_reward_any_reward = yes
+			}
+		}
+		hidden_effect = {
+			country_event = { id = leviathans.4100 }
+		}
+	}
+	option = {
+		name = leviathans.500.k
+		trigger = {
+			has_grand_archive_dlc = yes
+			any_owned_megastructure = {
+				is_megastructure_type = grand_archive_0
+			}
+			is_eligible_for_collection_stage_1_reward_any_reward = no
+			is_eligible_for_collection_stage_2_reward_any_reward = no
+			is_eligible_for_collection_stage_3_reward_any_reward = no
+			OR = {
+				has_received_every_stage_1_reward = no
+				has_received_every_stage_2_reward = no
+				has_received_every_stage_3_reward = no
+			}
+		}
+		is_dialog_only = yes
+		response_text = leviathans.500.k.reply.reward_unavailable
+	}
+	option = {
+		name = leviathans.500.k
+		trigger = {
+			has_grand_archive_dlc = yes
+			any_owned_megastructure = {
+				is_megastructure_type = grand_archive_0
+			}
+			has_received_every_stage_1_reward = yes
+			has_received_every_stage_2_reward = yes
+			has_received_every_stage_3_reward = yes
+		}
+		is_dialog_only = yes
+		response_text = leviathans.500.k.reply.over
+	}
 	# Goodbye
 	option = {
 		name = {
@@ -4840,7 +4931,7 @@ country_event = {
 			}
 			set_variable = {
 				which = curator_insight_cost
-				value = -1000
+				value = 1000
 			}
 		}
 		else_if = {
@@ -4850,7 +4941,7 @@ country_event = {
 			}
 			set_variable = {
 				which = curator_insight_cost
-				value = -2000
+				value = 2000
 			}
 		}
 		else_if = {
@@ -4860,7 +4951,7 @@ country_event = {
 			}
 			set_variable = {
 				which = curator_insight_cost
-				value = -3000
+				value = 3000
 			}
 		}
 		else_if = {
@@ -4870,13 +4961,13 @@ country_event = {
 			}
 			set_variable = {
 				which = curator_insight_cost
-				value = -4000
+				value = 4000
 			}
 		}
 		else = {
 			set_variable = {
 				which = curator_insight_cost
-				value = -5000
+				value = 5000
 			}
 		}
 	}
@@ -4884,16 +4975,12 @@ country_event = {
 	option = {
 		name = leviathans.507.a
 		allow = {
-			resource_stockpile_compare = {
-				resource = energy
-				value >= -1 #flip to a positive value to make this comparison
-				mult = curator_insight_cost
-			}
 			NOT = { has_modifier = curator_insight }
 		}
-		add_resource = {
-			energy = 1
-			mult = curator_insight_cost #negative value
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|curator_insight_cost|
 		}
 		add_modifier = {
 			modifier = curator_insight
@@ -4971,10 +5058,11 @@ country_event = {
 				}
 			}
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 300 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|300|
 		}
-		add_resource = { energy = -300 }
 		custom_tooltip = opinion10
 		hidden_effect = {
 			event_target:curator_enclave_country = {
@@ -5290,10 +5378,11 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = draconic_beats }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		add_modifier = {
 			modifier = draconic_beats
 			days = -1
@@ -5334,11 +5423,12 @@ country_event = {
 		trigger = {
 			NOT = { has_country_flag = bought_fortress_info_1 }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 200 }
-		}
 		response_text = leviathans.515.b.reply
-		add_resource = { energy = -200 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|200|
+		}
 		hidden_effect = {
 			set_country_flag = bought_fortress_info_1
 		}
@@ -5356,11 +5446,12 @@ country_event = {
 		trigger = {
 			NOT = { has_country_flag = bought_fortress_info_2 }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 200 }
-		}
 		response_text = leviathans.515.c.reply
-		add_resource = { energy = -200 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|200|
+		}
 		hidden_effect = {
 			set_country_flag = bought_fortress_info_2
 		}
@@ -5378,11 +5469,12 @@ country_event = {
 		trigger = {
 			NOT = { has_country_flag = bought_fortress_info_3 }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 200 }
-		}
 		response_text = leviathans.515.d.reply
-		add_resource = { energy = -200 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|200|
+		}
 		hidden_effect = {
 			set_country_flag = bought_fortress_info_3
 		}
@@ -5421,10 +5513,11 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = curator_buff_stellarite }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		add_modifier = {
 			modifier = curator_buff_stellarite
 			days = -1
@@ -5466,10 +5559,11 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = dimensional_horror_weak_points }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		add_modifier = {
 			modifier = dimensional_horror_weak_points
 			days = -1
@@ -5511,10 +5605,11 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = asteroid_hive_weak_points }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 2000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|2000|
 		}
-		add_resource = { energy = -2000 }
 		add_modifier = {
 			modifier = asteroid_hive_weak_points
 			days = -1
@@ -5556,10 +5651,11 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = curator_buff_sphere }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 600 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|600|
 		}
-		add_resource = { energy = -600 }
 		add_modifier = {
 			modifier = curator_buff_sphere
 			days = -1
@@ -5601,10 +5697,11 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = automated_dreadnought_weak_points }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		add_modifier = {
 			modifier = automated_dreadnought_weak_points
 			days = -1
@@ -5645,11 +5742,12 @@ country_event = {
 		trigger = {
 			NOT = { has_country_flag = bought_wraith_info_1 }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 200 }
-		}
 		response_text = leviathans.545.b.reply
-		add_resource = { energy = -200 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|200|
+		}
 		hidden_effect = { set_country_flag = bought_wraith_info_1 }
 	}
 	option = {
@@ -5665,11 +5763,12 @@ country_event = {
 		trigger = {
 			NOT = { has_country_flag = bought_wraith_info_2 }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 200 }
-		}
 		response_text = leviathans.545.c.reply
-		add_resource = { energy = -200 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|200|
+		}
 		hidden_effect = { set_country_flag = bought_wraith_info_2 }
 	}
 	option = {
@@ -5684,10 +5783,11 @@ country_event = {
 		trigger = {
 			NOT = { has_country_flag = bought_wraith_info_3 }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 200 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|200|
 		}
-		add_resource = { energy = -200 }
 		hidden_effect = { set_country_flag = bought_wraith_info_3 }
 	}
 	option = {
@@ -5721,11 +5821,12 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = curator_buff_hatchling }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
-		}
 		response_text = leviathans.550.b.reply
-		add_resource = { energy = -1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
+		}
 		add_modifier = {
 			modifier = curator_buff_hatchling
 			days = -1
@@ -5800,11 +5901,12 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = scavenger_weak_points }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
-		}
 		response_text = leviathans.555.c.reply
-		add_resource = { energy = -1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
+		}
 		add_modifier = {
 			modifier = scavenger_weak_points
 			days = -1
@@ -5873,11 +5975,12 @@ country_event = {
 		trigger = {
 			NOT = { has_modifier = elderly_tiyanki_weak_points }
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
-		}
 		response_text = leviathans.556.c.reply
-		add_resource = { energy = -1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
+		}
 		add_modifier = {
 			modifier = elderly_tiyanki_weak_points
 			days = -1
@@ -5955,7 +6058,7 @@ country_event = {
 				}
 				resource_stockpile_compare = {
 					resource = energy
-					value >= 1000
+					value >= value:curator_purchase_cost|COST|1000|
 				}
 			}
 		}
@@ -5971,7 +6074,8 @@ country_event = {
 					NOT = { has_global_flag = toxic_god_spawned }
 				}
 				add_resource = {
-					energy = -1000
+					energy = -1
+					mult = value:curator_purchase_cost|COST|1000|
 				}
 				random_situation = {
 					limit = { is_situation_type = situation_toxic_knights }
@@ -6005,7 +6109,7 @@ country_event = {
 				}
 				resource_stockpile_compare = {
 					resource = energy
-					value >= 1000
+					value >= value:curator_purchase_cost|COST|1000|
 				}
 			}
 		}
@@ -6021,7 +6125,8 @@ country_event = {
 					NOT = { has_global_flag = toxic_god_spawned }
 				}
 				add_resource = {
-					energy = -1000
+					energy = -1
+					mult = value:curator_purchase_cost|COST|1000|
 				}
 				random_situation = {
 					limit = { is_situation_type = situation_toxic_knights }
@@ -6138,14 +6243,6 @@ country_event = {
 	option = {
 		name = leviathans.590.a
 		allow = {
-			resource_stockpile_compare = {
-				resource = energy
-				value >= 1000
-			}
-			resource_stockpile_compare = {
-				resource = influence
-				value >= 50
-			}
 			hidden_trigger = {
 				NOR = {
 					has_country_flag = attacked_curators
@@ -6156,8 +6253,16 @@ country_event = {
 			}
 			custom_tooltip = leviathans.590.tt_scientist
 		}
-		add_resource = { energy = -1000 }
-		add_resource = { influence = -50 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
+		}
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = influence
+			AMOUNT = value:curator_purchase_cost|COST|50|
+		}
 		custom_tooltip = opinion20
 		hidden_effect = {
 			set_country_flag = curator_scientist_recruited # Achievement
@@ -6219,14 +6324,6 @@ country_event = {
 	option = {
 		name = leviathans.598.a
 		allow = {
-			resource_stockpile_compare = {
-				resource = energy
-				value >= 1000
-			}
-			resource_stockpile_compare = {
-				resource = influence
-				value >= 50
-			}
 			hidden_trigger = {
 				NOR = {
 					has_country_flag = attacked_curators
@@ -6237,8 +6334,16 @@ country_event = {
 			}
 			custom_tooltip = leviathans.598.tt_principles
 		}
-		add_resource = { energy = -1000 }
-		add_resource = { influence = -50 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
+		}
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = influence
+			AMOUNT = value:curator_purchase_cost|COST|50|
+		}
 		custom_tooltip = opinion20
 		hidden_effect = {
 			#set_country_flag = curator_scientist_recruited # Achievement
@@ -6320,10 +6425,11 @@ country_event = {
 		trigger = {
 			exists = event_target:curator_customer_1
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		custom_tooltip = opinion10
 		hidden_effect = {
 			event_target:curator_enclave_country = {
@@ -6350,10 +6456,11 @@ country_event = {
 		trigger = {
 			exists = event_target:curator_customer_2
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		custom_tooltip = opinion10
 		hidden_effect = {
 			event_target:curator_enclave_country = {
@@ -6380,10 +6487,11 @@ country_event = {
 		trigger = {
 			exists = event_target:curator_customer_3
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		custom_tooltip = opinion10
 		hidden_effect = {
 			event_target:curator_enclave_country = {
@@ -6410,10 +6518,11 @@ country_event = {
 		trigger = {
 			exists = event_target:curator_customer_4
 		}
-		allow = {
-			resource_stockpile_compare = { resource = energy value >= 1000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|1000|
 		}
-		add_resource = { energy = -1000 }
 		custom_tooltip = opinion10
 		hidden_effect = {
 			event_target:curator_enclave_country = {
@@ -6461,7 +6570,6 @@ country_event = {
 	option = {
 		name = leviathans.600.a
 		allow = {
-			resource_stockpile_compare = { resource = energy value >= 5000 }
 			hidden_trigger = {
 				NOR = {
 					has_completed_event_chain_counter = {
@@ -6472,7 +6580,11 @@ country_event = {
 				}
 			}
 		}
-		add_resource = { energy = -5000 }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|5000|
+		}
 		custom_tooltip = opinion20
 		generate_lcluster_clue = yes
 		hidden_effect = {
@@ -6678,6 +6790,146 @@ country_event = {
 			remove_country_flag = curator_enclave_diplomacy_engaged
 		}
 	}
+}
+
+country_event = {
+	id = leviathans.4100
+	base = leviathans.500
+	desc_clear = yes
+	option_clear = yes
+
+	desc = leviathans.4100.desc
+
+	inline_script = {
+		script = grand_archive/collection/curator_postponed_options_by_category
+		EVENT_ID = leviathans.4100
+		CATEGORY = aesthetic_wonder
+		FOLLOWUP_EVENT_ID = leviathans.4106
+	}
+
+	inline_script = {
+		script = grand_archive/collection/curator_postponed_options_by_category
+		EVENT_ID = leviathans.4100
+		CATEGORY = historical_item
+		FOLLOWUP_EVENT_ID = leviathans.4107
+	}
+
+	inline_script = {
+		script = grand_archive/collection/curator_postponed_options_by_category
+		EVENT_ID = leviathans.4100
+		CATEGORY = xeno_geology
+		FOLLOWUP_EVENT_ID = leviathans.4105
+	}
+
+	# Back
+	option = {
+		name = leviathans.506.d
+		hidden_effect = {
+			country_event = { id = leviathans.500 }
+		}
+	}
+
+	# Goodbye
+	option = {
+		name = GOODBYE
+		default_hide_option = yes
+	}
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_choice_event
+	EVENT_ID = leviathans.4105
+	LOCALIZATION_ID = leviathans.4105
+	CATEGORY = xeno_geology
+	STAGE_1_EVENT_ID = leviathans.4110
+	STAGE_3_EVENT_ID = leviathans.4115
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_choice_event
+	EVENT_ID = leviathans.4106
+	LOCALIZATION_ID = leviathans.4105
+	CATEGORY = aesthetic_wonder
+	STAGE_1_EVENT_ID = leviathans.4111
+	STAGE_3_EVENT_ID = leviathans.4116
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_choice_event
+	EVENT_ID = leviathans.4107
+	LOCALIZATION_ID = leviathans.4105
+	CATEGORY = historical_item
+	STAGE_1_EVENT_ID = leviathans.4112
+	STAGE_3_EVENT_ID = leviathans.4117
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_1_event
+	EVENT_ID = leviathans.4110
+	LOCALIZATION_ID = grand_archive.4105
+	CATEGORY = xeno_geology
+	MODIFIER_1 = mineral_insight
+	MODIFIER_2 = void_mining
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_1_event
+	EVENT_ID = leviathans.4111
+	LOCALIZATION_ID = grand_archive.4105
+	CATEGORY = aesthetic_wonder
+	MODIFIER_1 = cultural_enrichment
+	MODIFIER_2 = auctioneering_curation
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_1_event
+	EVENT_ID = leviathans.4112
+	LOCALIZATION_ID = grand_archive.4105
+	CATEGORY = historical_item
+	MODIFIER_1 = historical_insight
+	MODIFIER_2 = lessons_from_the_past
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_3_event
+	EVENT_ID = leviathans.4115
+	LOCALIZATION_ID = grand_archive.4105
+	CATEGORY = xeno_geology
+	RELIC_1 = r_the_modularium
+	RELIC_2 = r_everchanging_stone
+	RELIC_3 = r_flowmetal_alloy
+	RELIC_4 = r_pulsestone
+	RELIC_5 = r_crystallinus_diffuser
+	RESOURCE = minerals
+	RESOURCE_MULT = material
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_3_event
+	EVENT_ID = leviathans.4116
+	LOCALIZATION_ID = grand_archive.4105
+	CATEGORY = aesthetic_wonder
+	RELIC_1 = r_gavel_of_the_tribunal
+	RELIC_2 = r_tiyanki_matriarch_nerve_core
+	RELIC_3 = r_the_pattern_maker
+	RELIC_4 = r_vaporous_mega_orchid
+	RELIC_5 = r_celestial_resonator
+	RESOURCE = energy
+	RESOURCE_MULT = material
+}
+
+inline_script = {
+	script = grand_archive/collection/curator_postponed_reward_stage_3_event
+	EVENT_ID = leviathans.4117
+	LOCALIZATION_ID = grand_archive.4105
+	CATEGORY = historical_item
+	RELIC_1 = r_entangled_relay
+	RELIC_2 = r_propagandosphere
+	RELIC_3 = r_prototype_vir_core
+	RELIC_4 = r_executus_compendium
+	RELIC_5 = r_preservation_chamber
+	RESOURCE = unity
+	RESOURCE_MULT = unity
 }
 
 # CURATOR ENCLAVE ATTACKED

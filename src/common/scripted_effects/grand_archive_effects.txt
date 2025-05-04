@@ -1,0 +1,3009 @@
+####################################
+# Grand Archive - Scripted Effects #
+####################################
+
+##################
+# Gravity Snares #
+##################
+
+create_auto_updated_design_from_global_design = {
+	create_ship_design = {
+		design = $GLOBAL_DESIGN$
+	}
+	last_created_design = {
+		set_auto_upgrade_components = yes
+	}
+	add_ship_design = last_created_design
+}
+
+#############
+# Voidworms #
+#############
+
+# Checks if Voidworms country (global event target) exists
+# Creates the country and saves it if it does not
+create_voidworms_country = {
+	optimize_memory
+	if = {
+		limit = {
+			voidworms_enabled = yes
+			NOT = { exists = event_target:voidworms_country }
+		}
+		create_country = {
+			name = "NAME_Voidworms"
+			type = voidworms
+			inline_script = "grand_archive/voidworms_flag"
+			effect = {
+				inline_script = "grand_archive/voidworm_init_common_effects"
+				set_policy = {
+					policy = first_contact_protocol
+					option = first_contact_attack_allowed
+				}
+				save_global_event_target_as = voidworms_country
+				start_situation = {
+					type = voidworm_country_situation
+				}
+				if = {
+					limit = { is_difficulty = 0 }
+					add_modifier = { modifier = voidworm_scaling_difficulty_civilian }
+				}
+				else_if = {
+					limit = { is_difficulty = 1 }
+					add_modifier = { modifier = voidworm_scaling_difficulty_cadet }
+				}
+			}
+		}
+	}
+}
+
+create_voidworm_ship = {
+	create_ship = {
+		name = ""
+		design = $DESIGN$
+		upgradable = no
+		age = $AGE|-1$
+	}
+}
+
+create_multiple_voidworm_ship = {
+	while = {
+		count = $COUNT$
+		create_voidworm_ship = {
+			DESIGN = $DESIGN$
+			AGE = $AGE|0$
+		}
+	}
+}
+
+create_voidworm_fleet = {
+	create_fleet = {
+		name = "NAME_Voidworms"
+		parent = $PARENT|none$	# Copies last FTL fleet jump to allow getting out of the system
+		settings = {
+			can_upgrade = no
+			can_change_leader = no
+			uses_naval_capacity = no
+		}
+		effect = {
+			set_owner = $OWNER|event_target:voidworms_country$
+			create_multiple_voidworm_ship = {
+				COUNT = $COUNT$
+				DESIGN = $DESIGN$
+				AGE = $AGE|0$
+			}
+			set_location = $LOCATION$
+			set_fleet_stance = passive
+			set_fleet_flag = voidworms_fleet
+		}
+	}
+}
+
+create_voidworms_small_fleet = {
+	create_voidworm_fleet = {
+		DESIGN = NAME_Voidworms_Nymph
+		COUNT = $COUNT|9$
+		LOCATION = $LOCATION$
+		AGE = $AGE|0$
+	}
+}
+
+create_voidworms_medium_fleet = {
+	create_voidworm_fleet = {
+		DESIGN = NAME_Voidworms_Juvenile
+		COUNT = $COUNT|9$
+		LOCATION = $LOCATION$
+		AGE = $AGE|min$
+	}
+}
+
+create_voidworms_large_fleet = {
+	create_voidworm_fleet = {
+		DESIGN = NAME_Voidworms_Mature
+		COUNT = $COUNT|3$
+		LOCATION = $LOCATION$
+		AGE = $AGE|min$
+	}
+}
+
+create_voidworms_titan_fleet = {
+	create_voidworm_fleet = {
+		DESIGN = NAME_Voidworms_Troika
+		COUNT = $COUNT|1$
+		LOCATION = $LOCATION$
+		AGE = $AGE|min$
+	}
+}
+
+# scope = country
+create_voidworm_system_poi = {
+	if = {
+		limit = { exists = event_target:voidworm_system_$SIZE$ }
+		event_target:voidworm_system_$SIZE$ = {
+			if = {
+				limit = { has_star_flag = voidworms_system }
+				prev = {
+					create_point_of_interest = {
+						id = voidworm_system_$SIZE$_poi
+						name = voidworm_system_poi_title
+						desc = voidworm_system_poi_desc
+						event_chain = voidworm_crisis_eradicate_chain
+						location = prev
+						picture = GFX_evt_frenzied_voidworms_pacified
+					}
+				}
+			}
+		}
+	}
+}
+
+# scope = country
+create_voidworm_crisis_eradicate_chain = {
+	begin_event_chain = {
+		event_chain = voidworm_crisis_eradicate_chain
+		target = this
+	}
+	create_voidworm_system_poi = { SIZE = tiny }
+	create_voidworm_system_poi = { SIZE = small }
+	create_voidworm_system_poi = { SIZE = medium }
+	create_voidworm_system_poi = { SIZE = large }
+	create_voidworm_system_poi = { SIZE = huge }
+}
+
+# scope = system
+remove_voidworm_system_poi = {
+	if = {
+		limit = {
+			exists = event_target:voidworm_system_tiny
+			is_same_value = event_target:voidworm_system_tiny
+		}
+		every_playable_country = {
+			limit = {
+				has_point_of_interest = {
+					poi = voidworm_system_tiny_poi
+				}
+			}
+			remove_point_of_interest = voidworm_system_tiny_poi
+		}
+		clear_global_event_target = voidworm_system_tiny
+	}
+	else_if = {
+		limit = {
+			exists = event_target:voidworm_system_small
+			is_same_value = event_target:voidworm_system_small
+		}
+		every_playable_country = {
+			limit = {
+				has_point_of_interest = {
+					poi = voidworm_system_small_poi
+				}
+			}
+			remove_point_of_interest = voidworm_system_small_poi
+		}
+		clear_global_event_target = voidworm_system_small
+	}
+	else_if = {
+		limit = {
+			exists = event_target:voidworm_system_medium
+			is_same_value = event_target:voidworm_system_medium
+		}
+		every_playable_country = {
+			limit = {
+				has_point_of_interest = {
+					poi = voidworm_system_medium_poi
+				}
+			}
+			remove_point_of_interest = voidworm_system_medium_poi
+		}
+		clear_global_event_target = voidworm_system_medium
+	}
+	else_if = {
+		limit = {
+			exists = event_target:voidworm_system_large
+			is_same_value = event_target:voidworm_system_large
+		}
+		every_playable_country = {
+			limit = {
+				has_point_of_interest = {
+					poi = voidworm_system_large_poi
+				}
+			}
+			remove_point_of_interest = voidworm_system_large_poi
+		}
+		clear_global_event_target = voidworm_system_large
+	}
+	else_if = {
+		limit = {
+			exists = event_target:voidworm_system_huge
+			is_same_value = event_target:voidworm_system_huge
+		}
+		every_playable_country = {
+			limit = {
+				has_point_of_interest = {
+					poi = voidworm_system_huge_poi
+				}
+			}
+			remove_point_of_interest = voidworm_system_huge_poi
+		}
+		clear_global_event_target = voidworm_system_huge
+	}
+}
+
+end_voidworms_crisis = {
+	if = {
+		limit = { is_voidworms_crisis_active = yes }
+		set_global_flag = voidworms_plague_crisis_ended
+	}
+	if = {
+		limit = { exists = event_target:voidworms_country }
+		event_target:voidworms_country = {
+			if = {
+				limit = { has_country_flag = voidworm_crisis_active }
+				remove_country_flag = voidworm_crisis_active
+				set_country_type = voidworms
+				remove_modifier = voidworms_crisis_growth_modifier
+				random_situation = {
+					limit = { is_situation_type = voidworm_country_situation }
+					destroy_situation = this
+				}
+				add_modifier = { modifier = voidworms_post_crisis_modifier }
+				while = {
+					limit = {
+						check_variable_arithmetic = {
+							which = value:voidworm_ships_owned
+							value >= value:voidworm_maximum_population
+						}
+					}
+					random_owned_fleet = {
+						weights = {
+							base = 1
+							modifier = {
+								factor = 100
+								is_ship_size = voidworms_titan
+							}
+							modifier = {
+								factor = 2
+								OR = {
+									is_ship_size = voidworms_large
+									is_ship_size = voidworms_small
+								}
+							}
+						}
+						destroy_fleet = this
+					}
+				}
+				every_owned_fleet = {
+					if = {
+						limit = { has_modifier = voidworms_at_home_modifier }
+						remove_modifier = voidworms_at_home_modifier
+					}
+				}
+			}
+		}
+	}
+}
+
+##############
+# Cutholoids #
+##############
+
+# Checks if Cutholoids country (global event target) exists
+# Creates the country and saves it if it does not
+create_cutholoids_country = {
+	optimize_memory
+	if = {
+		limit = {
+			cutholoids_enabled = yes
+			NOT = { exists = event_target:cutholoids_country }
+		}
+		create_country = {
+			name = "NAME_Cutholoids"
+			type = cutholoids
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_1.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors={
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_global_event_target_as = cutholoids_country
+				set_variable = {
+					which = alive_cutholoids
+					value = 0
+				}
+			}
+		}
+	}
+}
+
+spawn_cutholoid_from_asteroid = {
+	create_fleet = {
+		name = "NAME_Cutholoids"
+		settings = {
+			can_upgrade = no
+			can_change_composition = no
+			can_change_leader = no
+			uses_naval_capacity = no
+			spawn_debris = no # Manually done later (on_ship_destroyed_victim)
+		}
+		effect = {
+			set_owner = event_target:cutholoids_country
+			create_ship = {
+				name = NAME_Cutholoids
+				design = NAME_Cutholoids
+				upgradable = no
+				effect = {
+					save_event_target_as = $EVENT_NAME|none$
+				}
+			}
+			set_location = $LOCATION$
+			$LOCATION$ = {
+				remove_planet = yes
+			}
+		}
+	}
+}
+
+# scope = planet (asteroid)
+hide_cutholoid_in_asteroid = {
+	change_pc = pc_cutholoid
+	set_planet_flag = suppress_archaeological_sites
+	reset_planet = yes
+	clear_deposits = yes
+	clear_planet_modifiers = yes
+	prevent_anomaly = yes
+
+	event_target:cutholoids_country = {
+		change_variable = {
+			which = alive_cutholoids
+			value = 1
+		}
+	}
+}
+
+@category_aesthetic_wonders = 1
+@category_historical_items = 2
+@category_xeno_geology = 3
+artifact_analysis_effect = {
+	random_list = {
+		1 = {
+			inline_script = {
+				script = grand_archive/artifact_analysis_can_give_category
+				CATEGORY = xeno_geology
+				VALUE = @category_xeno_geology
+			}
+			artifact_analysis_give_xeno_geology_specimen = { ORIGIN = artifact_analysis }
+		}
+		1 = {
+			inline_script = {
+				script = grand_archive/artifact_analysis_can_give_category
+				CATEGORY = aesthetic_wonder
+				VALUE = @category_aesthetic_wonders
+			}
+			artifact_analysis_give_aesthetic_wonders_specimen = { ORIGIN = artifact_analysis }
+		}
+		1 = {
+			inline_script = {
+				script = grand_archive/artifact_analysis_can_give_category
+				CATEGORY = historical_item
+				VALUE = @category_historical_items
+			}
+			artifact_analysis_give_historical_items_specimen = { ORIGIN = artifact_analysis }
+		}
+	}
+}
+
+artifact_analysis_give_xeno_geology_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = starmetal } }
+			}
+			give_specimen = { key = starmetal origin = $ORIGIN$ }
+		}
+		2 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = memorial_stone } }
+			}
+			give_specimen = { key = memorial_stone origin = $ORIGIN$ }
+		}
+		7 = {
+			modifier = {
+				factor = 0
+				NOR = {
+					can_artifact_analysis_give = { SPECIMEN = fossilized_voidworm_tooth }
+					can_artifact_analysis_give = { SPECIMEN = striated_sand }
+					can_artifact_analysis_give = { SPECIMEN = perfectly_faceted_carbon }
+				}
+			}
+			give_random_common_xeno_geology_specimen = { ORIGIN = $ORIGIN$ }
+		}
+	}
+}
+
+artifact_analysis_give_aesthetic_wonders_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = veil_of_selene } }
+			}
+			give_specimen = { key = veil_of_selene origin = $ORIGIN$ }
+		}
+		2 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = crystallized_cutholoid_eye } }
+			}
+			give_specimen = { key = crystallized_cutholoid_eye origin = $ORIGIN$ }
+		}
+		7 = {
+			modifier = {
+				factor = 0
+				NOR = {
+					can_artifact_analysis_give = { SPECIMEN = oiled_fabric }
+					can_artifact_analysis_give = { SPECIMEN = ancient_bust }
+					can_artifact_analysis_give = { SPECIMEN = uranium_glassware }
+				}
+			}
+			give_random_common_aesthetic_wonders_specimen = { ORIGIN = $ORIGIN$ }
+		}
+	}
+}
+
+artifact_analysis_give_historical_items_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = sullebaster_control_column } }
+			}
+			give_specimen = { key = sullebaster_control_column origin = $ORIGIN$ }
+		}
+		2 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = tiny_ancient_sarcophagus } }
+			}
+			give_specimen = { key = tiny_ancient_sarcophagus origin = $ORIGIN$ }
+		}
+		7 = {
+			modifier = {
+				factor = 0
+				NOR = {
+					can_artifact_analysis_give = { SPECIMEN = ancient_kinetic_launcher }
+					can_artifact_analysis_give = { SPECIMEN = chambered_clay_pot }
+					can_artifact_analysis_give = { SPECIMEN = ancient_political_memoir }
+				}
+			}
+			give_random_common_historical_items_specimen = { ORIGIN = $ORIGIN$ }
+		}
+	}
+}
+
+give_random_common_xeno_geology_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = fossilized_voidworm_tooth } }
+			}
+			give_specimen = { key = fossilized_voidworm_tooth origin = $ORIGIN$ }
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = striated_sand } }
+			}
+			give_specimen = { key = striated_sand origin = $ORIGIN$ }
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = perfectly_faceted_carbon } }
+			}
+			give_specimen = { key = perfectly_faceted_carbon origin = $ORIGIN$ }
+		}
+	}
+}
+
+give_random_common_aesthetic_wonders_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = oiled_fabric } }
+			}
+			give_specimen = { key = oiled_fabric origin = $ORIGIN$ }
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = ancient_bust } }
+			}
+			give_specimen = { key = ancient_bust origin = $ORIGIN$ }
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = uranium_glassware } }
+			}
+			give_specimen = { key = uranium_glassware origin = $ORIGIN$ }
+		}
+	}
+}
+
+give_random_common_historical_items_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = ancient_kinetic_launcher } }
+			}
+			give_specimen = { key = ancient_kinetic_launcher origin = $ORIGIN$ }
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = chambered_clay_pot } }
+			}
+			give_specimen = { key = chambered_clay_pot origin = $ORIGIN$ }
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				NOT = { can_artifact_analysis_give = { SPECIMEN = ancient_political_memoir } }
+			}
+			give_specimen = { key = ancient_political_memoir origin = $ORIGIN$ }
+		}
+	}
+}
+
+###############
+# Collection  #
+###############
+
+	###########
+	# Stage 1 #
+	###########
+
+give_collection_stage_1_reward = {
+	hidden_effect = {
+		set_country_flag = received_collection_stage_1_reward_$CATEGORY$
+	}
+	add_modifier = {
+		modifier = $MODIFIER$
+	}
+}
+
+give_collection_stage_1_reward_xeno_geology = {
+	give_collection_stage_1_reward = {
+		CATEGORY = xeno_geology
+		MODIFIER = $MODIFIER$
+	}
+}
+
+give_collection_stage_1_reward_aesthetic_wonder = {
+	give_collection_stage_1_reward = {
+		CATEGORY = aesthetic_wonder
+		MODIFIER = $MODIFIER$
+	}
+}
+
+give_collection_stage_1_reward_historical_item = {
+	give_collection_stage_1_reward = {
+		CATEGORY = historical_item
+		MODIFIER = $MODIFIER$
+	}
+}
+
+skip_collection_stage_1_reward = {
+	hidden_effect = {
+		if = {
+			limit = { is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = yes }
+			set_country_flag = skipped_collection_stage_1_reward_xeno_geology
+		}
+		else_if = {
+			limit = { is_eligible_collection_stage_1_reward_not_skipped_aesthetic_wonder = yes }
+			set_country_flag = skipped_collection_stage_1_reward_aesthetic_wonder
+		}
+		else_if = {
+			limit = { is_eligible_collection_stage_1_reward_not_skipped_historical_item = yes }
+			set_country_flag = skipped_collection_stage_1_reward_historical_item
+		}
+	}
+}
+
+give_homicidal_stage_1_reward = {
+	hidden_effect = {
+		set_country_flag = received_homicidal_stage_1_reward_$CATEGORY$
+	}
+	add_monthly_resource_mult = {
+		resource = unity
+		value = @tier2unityreward
+		min = @tier2unitymin
+		max = @tier2unitymax
+	}
+}
+
+	###########
+	# Stage 2 #
+	###########
+
+give_collection_stage_2_reward = {
+	hidden_effect = {
+		set_country_flag = received_collection_stage_2_reward_$CATEGORY$
+	}
+	custom_tooltip = collection_stage_2_reward_$CATEGORY$_tt
+}
+
+give_collection_stage_2_reward_xeno_geology = {
+	give_collection_stage_2_reward = {
+		CATEGORY = xeno_geology
+	}
+}
+
+give_collection_stage_2_reward_aesthetic_wonder = {
+	give_collection_stage_2_reward = {
+		CATEGORY = aesthetic_wonder
+	}
+}
+
+give_collection_stage_2_reward_historical_item = {
+	give_collection_stage_2_reward = {
+		CATEGORY = historical_item
+	}
+}
+
+skip_collection_stage_2_reward = {
+	hidden_effect = {
+		if = {
+			limit = { is_eligible_collection_stage_2_reward_not_skipped_xeno_geology = yes }
+			set_country_flag = skipped_collection_stage_2_reward_xeno_geology
+		}
+		else_if = {
+			limit = { is_eligible_collection_stage_2_reward_not_skipped_aesthetic_wonder = yes }
+			set_country_flag = skipped_collection_stage_2_reward_aesthetic_wonder
+		}
+		else_if = {
+			limit = { is_eligible_collection_stage_2_reward_not_skipped_historical_item = yes }
+			set_country_flag = skipped_collection_stage_2_reward_historical_item
+		}
+	}
+}
+
+give_homicidal_stage_2_reward = {
+	hidden_effect = {
+		set_country_flag = received_homicidal_stage_2_reward_$CATEGORY$
+	}
+	add_monthly_resource_mult = {
+		resource = unity
+		value = @tier3unityreward
+		min = @tier3unitymin
+		max = @tier3unitymax
+	}
+}
+
+	###########
+	# Stage 3 #
+	###########
+
+roll_selected_relic = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				OR = {
+					event_target:curator_enclave_country = {
+						has_country_flag = gave_relic_$RELIC_1$
+					}
+					has_country_flag = selected_relic_$RELIC_1$
+				}
+			}
+			modifier = {
+				factor = 0.1
+				any_playable_country = {
+					has_country_flag = selected_relic_$RELIC_1$
+				}
+			}
+			set_country_flag = selected_relic_$RELIC_1$
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				OR = {
+					event_target:curator_enclave_country = {
+						has_country_flag = gave_relic_$RELIC_2$
+					}
+					has_country_flag = selected_relic_$RELIC_2$
+				}
+			}
+			modifier = {
+				factor = 0.1
+				any_playable_country = {
+					has_country_flag = selected_relic_$RELIC_2$
+				}
+			}
+			set_country_flag = selected_relic_$RELIC_2$
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				OR = {
+					event_target:curator_enclave_country = {
+						has_country_flag = gave_relic_$RELIC_3$
+					}
+					has_country_flag = selected_relic_$RELIC_3$
+				}
+			}
+			modifier = {
+				factor = 0.1
+				any_playable_country = {
+					has_country_flag = selected_relic_$RELIC_3$
+				}
+			}
+			set_country_flag = selected_relic_$RELIC_3$
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				OR = {
+					event_target:curator_enclave_country = {
+						has_country_flag = gave_relic_$RELIC_4$
+					}
+					has_country_flag = selected_relic_$RELIC_4$
+				}
+			}
+			modifier = {
+				factor = 0.1
+				any_playable_country = {
+					has_country_flag = selected_relic_$RELIC_4$
+				}
+			}
+			set_country_flag = selected_relic_$RELIC_4$
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				OR = {
+					event_target:curator_enclave_country = {
+						has_country_flag = gave_relic_$RELIC_5$
+					}
+					has_country_flag = selected_relic_$RELIC_5$
+				}
+			}
+			modifier = {
+				factor = 0.1
+				any_playable_country = {
+					has_country_flag = selected_relic_$RELIC_5$
+				}
+			}
+			set_country_flag = selected_relic_$RELIC_5$
+		}
+	}
+}
+
+roll_selected_xeno_geology_relic = {
+	roll_selected_relic = {
+		RELIC_1 = r_the_modularium
+		RELIC_2 = r_everchanging_stone
+		RELIC_3 = r_flowmetal_alloy
+		RELIC_4 = r_pulsestone
+		RELIC_5 = r_crystallinus_diffuser
+	}
+}
+
+roll_selected_aesthetic_wonder_relic = {
+	roll_selected_relic = {
+		RELIC_1 = r_gavel_of_the_tribunal
+		RELIC_2 = r_tiyanki_matriarch_nerve_core
+		RELIC_3 = r_the_pattern_maker
+		RELIC_4 = r_vaporous_mega_orchid
+		RELIC_5 = r_celestial_resonator
+	}
+}
+
+roll_selected_historical_item_relic = {
+	roll_selected_relic = {
+		RELIC_1 = r_entangled_relay
+		RELIC_2 = r_propagandosphere
+		RELIC_3 = r_prototype_vir_core
+		RELIC_4 = r_executus_compendium
+		RELIC_5 = r_preservation_chamber
+	}
+}
+
+skip_collection_stage_3_reward = {
+	hidden_effect = {
+		if = {
+			limit = { is_eligible_collection_stage_3_reward_not_skipped_xeno_geology = yes }
+			set_country_flag = skipped_collection_stage_3_reward_xeno_geology
+		}
+		else_if = {
+			limit = { is_eligible_collection_stage_3_reward_not_skipped_aesthetic_wonder = yes }
+			set_country_flag = skipped_collection_stage_3_reward_aesthetic_wonder
+		}
+		else_if = {
+			limit = { is_eligible_collection_stage_3_reward_not_skipped_historical_item = yes }
+			set_country_flag = skipped_collection_stage_3_reward_historical_item
+		}
+	}
+}
+
+give_homicidal_stage_3_reward = {
+	hidden_effect = {
+		set_country_flag = received_homicidal_stage_3_reward_$CATEGORY$
+	}
+	add_monthly_resource_mult = {
+		resource = unity
+		value = @tier4unityreward
+		min = @tier4unitymin
+		max = @tier4unitymax
+	}
+}
+
+###################
+# Treasure Troves #
+###################
+
+setup_treasure_trove_reward = {
+	random_list = {
+		250 = {
+			modifier = {
+				add = 50
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_energy
+		}
+		100 = {
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_alloys
+		}
+		100 = {
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_minor_artifacts
+		}
+		100 = {
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_astral_threads
+		}
+		60 = {
+			modifier = {
+				add = 40
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_exotic_gases
+		}
+		60 = {
+			modifier = {
+				add = 40
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_volatile_motes
+		}
+		60 = {
+			modifier = {
+				add = 40
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_rare_crystals
+		}
+		250 = {
+			modifier = {
+				factor = 0
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_specimen
+		}
+		5 = {
+			modifier = {
+				add = 20
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_pirate_ship
+			create_fleet = {
+				name = "NAME_Ancestral_Glory"
+				effect = {
+					set_owner = prev.$COUNTRY_SCOPE$
+					create_ship = {
+						design = NAME_Ancestral_Glory
+						upgradable = no
+						effect = {
+							set_treasure_trove_pirate_ship_reward_name = yes
+							set_disabled = yes
+							save_event_target_as = treasure_trove_pirate_ship
+						}
+					}
+					set_location = prev
+				}
+			}
+		}
+		15 = {
+			modifier = {
+				add = 60
+				$COUNTRY_SCOPE$ = {
+					should_use_increased_treasure_trove_drops = yes
+				}
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_technology
+		}
+	}
+
+	# For Treasure Hunters origin, specimen is given in addition to another reward
+	if = {
+		limit = {
+			$COUNTRY_SCOPE$ = {
+				has_origin = origin_treasure_hunters
+				has_all_treasure_troves_specimens = no
+			}
+		}
+		set_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_specimen_extra
+	}
+
+	if = {
+		limit = {
+			OR = {
+				has_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_specimen
+				has_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_specimen_extra
+			}
+		}
+		draw_random_treasure_trove_specimen = {
+			TREASURE_TROVE_SCOPE_TYPE = $TREASURE_TROVE_SCOPE_TYPE$
+			COUNTRY_SCOPE = $COUNTRY_SCOPE$
+		}
+	}
+}
+
+give_treasure_trove_reward = {
+	switch = {
+		trigger = has_$TREASURE_TROVE_SCOPE_TYPE$_flag
+		treasure_trove_energy = {
+			$COUNTRY_SCOPE$ = {
+				add_monthly_resource_mult = {
+					resource = energy
+					value = @tier3materialreward
+					min = @tier3materialmin
+					max = @tier3materialmax
+					multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+				}
+			}
+		}
+		treasure_trove_alloys = {
+			$COUNTRY_SCOPE$ = {
+				add_monthly_resource_mult = {
+					resource = alloys
+					value = @tier3materialreward
+					min = @tier3materialmin
+					max = @tier3materialmax
+					multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+				}
+			}
+		}
+		treasure_trove_minor_artifacts = {
+			$COUNTRY_SCOPE$ = {
+				if = {
+					limit = { has_ancrel = yes }
+					add_monthly_resource_mult = {
+						resource = minor_artifacts
+						value = @tier3materialreward
+						min = @tier3materialmin
+						max = @tier3materialmax
+						multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+					}
+				}
+				else = {
+					add_monthly_resource_mult = {
+						resource = energy
+						value = @tier3materialreward
+						min = @tier3materialmin
+						max = @tier3materialmax
+						multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+					}
+				}
+			}
+		}
+		treasure_trove_astral_threads = {
+			$COUNTRY_SCOPE$ = {
+				if = {
+					limit = { has_astral_planes_dlc = yes }
+					add_monthly_resource_mult = {
+						resource = astral_threads
+						value = @tier3materialreward
+						min = @tier3materialmin
+						max = @tier3materialmax
+						multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+					}
+				}
+				else = {
+					add_monthly_resource_mult = {
+						resource = energy
+						value = @tier3materialreward
+						min = @tier3materialmin
+						max = @tier3materialmax
+						multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+					}
+				}
+			}
+		}
+		treasure_trove_exotic_gases = {
+			$COUNTRY_SCOPE$ = {
+				add_monthly_resource_mult = {
+					resource = exotic_gases
+					value = @tier3materialreward
+					min = @tier3materialmin
+					max = @tier3materialmax
+					multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+				}
+			}
+		}
+		treasure_trove_volatile_motes = {
+			$COUNTRY_SCOPE$ = {
+				add_monthly_resource_mult = {
+					resource = volatile_motes
+					value = @tier3materialreward
+					min = @tier3materialmin
+					max = @tier3materialmax
+					multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+				}
+			}
+		}
+		treasure_trove_rare_crystals = {
+			$COUNTRY_SCOPE$ = {
+				add_monthly_resource_mult = {
+					resource = rare_crystals
+					value = @tier3materialreward
+					min = @tier3materialmin
+					max = @tier3materialmax
+					multiplier = value:scripted_modifier_mult|MODIFIER|treasure_trove_reward_mult|
+				}
+			}
+		}
+		treasure_trove_pirate_ship = {
+			$COUNTRY_SCOPE$ = {
+				custom_tooltip = treasure_trove_pirate_ship_tt
+				hidden_effect = {
+					event_target:treasure_trove_pirate_ship = {
+						set_disabled = no
+					}
+				}
+			}
+		}
+		treasure_trove_technology = {
+			$COUNTRY_SCOPE$ = {
+				add_random_research_option = {
+					add_progress = value:calc_treasure_trove_progress|VALUE|0.25|
+					only_rare = yes
+					fail_effects = {
+						add_random_research_option = {
+							add_progress = value:calc_treasure_trove_progress|VALUE|0.25|
+						}
+					}
+				}
+			}
+		}
+	}
+
+	# For Treasure Hunters origin, specimen is given in addition to another reward
+	if = {
+		limit = {
+			OR = {
+				has_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_specimen
+				has_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_specimen_extra
+			}
+		}
+		custom_tooltip = treasure_trove_specimen_tt
+		hidden_effect = {
+			$COUNTRY_SCOPE$ = {
+				give_random_treasure_trove_specimen = {
+					TREASURE_TROVE_SCOPE_TYPE = $TREASURE_TROVE_SCOPE_TYPE$
+				}
+			}
+		}
+	}
+
+	if = {
+		limit = { has_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_pirates_defeated }
+		$COUNTRY_SCOPE$ = {
+			add_monthly_resource_mult = {
+				resource = energy
+				value = @tier2materialreward
+				min = @tier2materialmin
+				max = @tier2materialmax
+			}
+		}
+	}
+
+	remove_$TREASURE_TROVE_SCOPE_TYPE$_flag = treasure_trove_active
+	solar_system = {
+		if = {
+			limit = { has_star_flag = pirates_spawn_rolled }
+			remove_star_flag = pirates_spawn_rolled
+		}
+	}
+}
+
+set_treasure_trove_pirate_ship_reward_name = {
+	random_list = {
+		1 = { set_name = "PIRATE_SHIP_NAME_01" }
+		1 = { set_name = "PIRATE_SHIP_NAME_02" }
+		1 = { set_name = "PIRATE_SHIP_NAME_03" }
+		1 = { set_name = "PIRATE_SHIP_NAME_04" }
+		1 = { set_name = "PIRATE_SHIP_NAME_05" }
+		1 = { set_name = "PIRATE_SHIP_NAME_06" }
+		1 = { set_name = "PIRATE_SHIP_NAME_07" }
+		1 = { set_name = "PIRATE_SHIP_NAME_08" }
+		1 = { set_name = "PIRATE_SHIP_NAME_09" }
+		1 = { set_name = "PIRATE_SHIP_NAME_10" }
+		1 = { set_name = "PIRATE_SHIP_NAME_11" }
+		1 = { set_name = "PIRATE_SHIP_NAME_12" }
+		1 = { set_name = "PIRATE_SHIP_NAME_13" }
+		1 = { set_name = "PIRATE_SHIP_NAME_14" }
+		1 = { set_name = "PIRATE_SHIP_NAME_15" }
+		1 = { set_name = "PIRATE_SHIP_NAME_16" }
+		1 = { set_name = "PIRATE_SHIP_NAME_17" }
+		1 = { set_name = "PIRATE_SHIP_NAME_18" }
+		1 = { set_name = "PIRATE_SHIP_NAME_19" }
+	}
+}
+
+create_treasure_trove_pirate_fleet = {
+	event_target:pirate_band = {
+		create_leader = {
+			class = commander
+			species = owner_main_species
+			name = random
+			skill = 1
+		}
+		get_galaxy_setup_value = {
+			setting = end_game_year
+			which = local_end_game_years
+		}
+		set_variable = {
+			which = local_percent_game_years_passed
+			value = trigger:years_passed
+		}
+		divide_variable = {
+			which = local_percent_game_years_passed
+			value = local_end_game_years
+		}
+		create_fleet = {
+			name = "NAME_Pirate_Fleet"
+			effect = {
+				set_owner = event_target:pirate_band
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.0
+						}
+					}
+					create_pirate_ships_0 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.1
+						}
+					}
+					create_pirate_ships_1 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.2
+						}
+					}
+					create_pirate_ships_2 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.3
+						}
+					}
+					create_pirate_ships_3 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.4
+						}
+					}
+					create_pirate_ships_4 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.5
+						}
+					}
+					create_pirate_ships_5 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.6
+						}
+					}
+					create_pirate_ships_6 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.7
+						}
+					}
+					create_pirate_ships_7 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.8
+						}
+					}
+					create_pirate_ships_8 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 0.9
+						}
+					}
+					create_pirate_ships_9 = yes
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = local_percent_game_years_passed
+							value >= 1
+						}
+					}
+					create_pirate_ships_10 = yes
+				}
+				assign_leader = last_created_leader
+				set_location = event_target:pirate_home
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 800
+			}
+		}
+	}
+}
+
+draw_random_treasure_trove_specimen = {
+	random_list = {
+		1 = {
+			modifier = {
+				factor = 0
+				$COUNTRY_SCOPE$ = { has_specimen = flag_of_the_jaro_lyjo }
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = flag_of_the_jaro_lyjo
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				$COUNTRY_SCOPE$ = { has_specimen = hemterine_magnetic_figurehead }
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = hemterine_magnetic_figurehead
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				$COUNTRY_SCOPE$ = { has_specimen = sembelami_alms_basket }
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = sembelami_alms_basket
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				$COUNTRY_SCOPE$ = { has_specimen = tricorne_of_aussan }
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = tricorne_of_aussan
+		}
+		1 = {
+			modifier = {
+				factor = 0
+				$COUNTRY_SCOPE$ = { has_specimen = verdingo_tendril_hook }
+			}
+			set_$TREASURE_TROVE_SCOPE_TYPE$_flag = verdingo_tendril_hook
+		}
+	}
+}
+
+# scope = country
+# prev = treasure trove scope
+give_random_treasure_trove_specimen = {
+	prev = {
+		switch = {
+			trigger = has_$TREASURE_TROVE_SCOPE_TYPE$_flag
+			flag_of_the_jaro_lyjo = {
+				prev = {
+					give_specimen = { key = flag_of_the_jaro_lyjo origin = "TREASURE_TROVE" }
+				}
+			}
+			hemterine_magnetic_figurehead = {
+				prev = {
+					give_specimen = { key = hemterine_magnetic_figurehead origin = "TREASURE_TROVE" }
+				}
+			}
+			sembelami_alms_basket = {
+				prev = {
+					give_specimen = { key = sembelami_alms_basket origin = "TREASURE_TROVE" }
+				}
+			}
+			tricorne_of_aussan = {
+				prev = {
+					give_specimen = { key = tricorne_of_aussan origin = "TREASURE_TROVE" }
+				}
+			}
+			verdingo_tendril_hook = {
+				prev = {
+					give_specimen = { key = verdingo_tendril_hook origin = "TREASURE_TROVE" }
+				}
+			}
+		}
+	}
+}
+
+upgrade_celestial_chart_relic = {
+	custom_tooltip = celestial_chart_upgraded_tt
+	hidden_effect = {
+		switch = {
+			trigger = has_relic
+			r_celestial_chart_3 = {
+				remove_relic = r_celestial_chart_3
+				add_relic = r_celestial_chart_4
+			}
+			r_celestial_chart_2 = {
+				remove_relic = r_celestial_chart_2
+				add_relic = r_celestial_chart_3
+			}
+			r_celestial_chart_1 = {
+				remove_relic = r_celestial_chart_1
+				add_relic = r_celestial_chart_2
+			}
+			r_celestial_chart_0 = {
+				remove_relic = r_celestial_chart_0
+				add_relic = r_celestial_chart_1
+			}
+		}
+	}
+}
+
+##################
+# Primal Calling #
+##################
+
+### Primal Calling Exhibit ###
+refresh_primal_calling_exhibit_modifier = {
+	if = {
+		limit = { has_modifier = primal_calling_exhibit_modifier }
+		remove_modifier = primal_calling_exhibit_modifier
+	}
+	add_modifier = {
+		modifier = primal_calling_exhibit_modifier
+		multiplier = trigger:num_vivarium_slots
+		days = -1
+	}
+}
+
+### Primal Calling Exploit ###
+refresh_primal_calling_exploit_modifier = {
+	if = {
+		limit = { has_modifier = primal_calling_exploit_modifier }
+		remove_modifier = primal_calling_exploit_modifier
+	}
+	add_modifier = {
+		modifier = primal_calling_exploit_modifier
+		multiplier = trigger:num_vivarium_slots
+		days = -1
+	}
+}
+
+### Primal Calling Assimilate ###
+refresh_primal_calling_assimilate_modifier = {
+	if = {
+		limit = { has_modifier = primal_calling_assimilate_modifier }
+		remove_modifier = primal_calling_assimilate_modifier
+	}
+	add_modifier = {
+		modifier = primal_calling_assimilate_modifier
+		multiplier = trigger:num_vivarium_slots
+		days = -1
+	}
+}
+
+### Primal Calling Space Fauna Ships Update ###
+append_cloned_fauna_size = {
+	if = {
+		limit = { is_variable_set = cloned_space_fauna_size_value }
+		change_variable = {
+			which = cloned_space_fauna_size_value
+			value = $SHIP_SCOPE$.trigger:ship_size_multiplier
+		}
+	}
+	else = {
+		set_variable = {
+			which = cloned_space_fauna_size_value
+			value = $SHIP_SCOPE$.trigger:ship_size_multiplier
+		}
+	}
+}
+
+remove_cloned_fauna_size = {
+	if = {
+		limit = { is_variable_set = cloned_space_fauna_size_value }
+		subtract_variable = {
+			which = cloned_space_fauna_size_value
+			value = $SHIP_SCOPE$.trigger:ship_size_multiplier
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = cloned_space_fauna_size_value
+					value <= 0
+				}
+			}
+			clear_variable = cloned_space_fauna_size_value
+		}
+	}
+}
+
+create_voidlure_capture_message = {
+	create_message = {
+		type = VOIDLURE_ATTRACTED_FAUNA
+		localization = VOIDLURE_ATTRACTED_FAUNA_DESC
+		days = 30
+		target = last_created_fleet
+		variable = {
+			type = name
+			localization = SYSTEM
+			scope = last_created_fleet
+		}
+	}
+}
+
+spawn_from_location_tiyanki = {
+	event_target:tiyanki_country = {
+		create_fleet = {
+			name = "NAME_Tiyanki_Space_Whale"
+			effect = {
+				set_owner = event_target:tiyanki_country
+				create_ship = {
+					design = "NAME_Tiyanki_Cow"
+				}
+				while = {
+					count = 2
+					create_ship = {
+						design = "NAME_Tiyanki_Bull"
+					}
+				}
+				while = {
+					count = 4
+					create_ship = {
+						design = "NAME_Tiyanki_Calf"
+					}
+				}
+				set_location = $LOCATION$
+			}
+		}
+	}
+}
+
+spawn_from_location_space_amoeba = {
+	event_target:amoeba_country = {
+		create_fleet = {
+			name = "NAME_Space_Amoeba_plural"
+			effect = {
+				set_owner = event_target:amoeba_country
+				while = {
+					count = 2
+					create_ship = {
+						design = "NAME_Small_Space_Organism_Orange"
+					}
+				}
+				while = {
+					count = 4
+					create_ship = {
+						design = "NAME_Large_Space_Organism_Orange"
+					}
+				}
+				set_location = $LOCATION$
+			}
+		}
+	}
+}
+
+spawn_from_location_crystalline_entity = {
+	event_target:crystal_country = {
+		create_fleet = {
+			name = "NAME_Sapphire_Lurkers"
+			effect = {
+				set_owner = event_target:crystal_country
+				create_ship = {
+					design = "NAME_Small_Crystal_Entity_Blue"
+				}
+				while = {
+					count = 2
+					create_ship = {
+						design = "NAME_Medium_Crystal_Entity_Blue"
+					}
+				}
+				while = {
+					count = 4
+					create_ship = {
+						design = "NAME_Large_Crystal_Entity_Blue"
+					}
+				}
+				set_location = $LOCATION$
+			}
+		}
+	}
+}
+
+spawn_from_location_voidworm = {
+	event_target:voidworms_country = {
+		create_fleet = {
+			name = "NAME_Voidworms"
+			settings = {
+				can_upgrade = no
+				can_change_leader = no
+				uses_naval_capacity = no
+			}
+			effect = {
+				set_owner = event_target:voidworms_country
+				create_ship = {
+					design = "NAME_Voidworms_Mature"
+				}
+				while = {
+					count = 3
+					create_ship = {
+						design = "NAME_Voidworms_Juvenile"
+					}
+				}
+				set_location = $LOCATION$
+			}
+		}
+	}
+}
+
+spawn_from_location_cutholoid = {
+	event_target:cutholoids_country = {
+		create_fleet = {
+			name = "NAME_Cutholoids"
+			settings = {
+				can_upgrade = no
+				can_change_leader = no
+				uses_naval_capacity = no
+			}
+			effect = {
+				set_owner = event_target:cutholoids_country
+				create_ship = {
+					design = NAME_Cutholoids
+				}
+				set_location = $LOCATION$
+			}
+		}
+	}
+}
+
+increase_hunted_fauna_count = {
+	hidden_effect = {
+		if = {
+			limit = {
+				NOT = { is_variable_set = hunted_space_fauna }
+			}
+			set_variable = {
+				which = hunted_space_fauna
+				value = 1
+			}
+		}
+		else = {
+			change_variable = {
+				which = hunted_space_fauna
+				value = 1
+			}
+		}
+	}
+}
+
+give_specimen_galactic_curators = {
+	switch = {
+		trigger = has_civic
+		civic_galactic_curators = {
+			give_specimen = {
+				key = $KEY$
+				origin = civic_galactic_curators
+			}
+		}
+		civic_corporate_galactic_curators = {
+			give_specimen = {
+				key = $KEY$
+				origin = civic_corporate_galactic_curators
+			}
+		}
+		civic_hive_galactic_curators = {
+			give_specimen = {
+				key = $KEY$
+				origin = civic_hive_galactic_curators
+			}
+		}
+		civic_machine_galactic_curators = {
+			give_specimen = {
+				key = $KEY$
+				origin = civic_machine_galactic_curators
+			}
+		}
+	}
+}
+
+give_bio_repurposing_reward_on_organic_deposit_cleared = {
+	if = {
+		limit = {
+			exists = owner
+			owner = {
+				has_tradition = tr_domestication_bio_repurposing
+			}
+		}
+		owner = { add_resource = { food = @bio_repurposing_blocker_clear_food } }
+	}
+}
+
+release_all_vivarium_fauna = {
+	set_variable = {
+		which = local_released_fauna_count
+		value = @grand_archive_vivarium_capacity
+	}
+	set_variable = {
+		which = local_released_fauna_count_mult
+		value = modifier:country_vivarium_max_capacity_mult
+	}
+	change_variable = {
+		which = local_released_fauna_count_mult
+		value = 1
+	}
+	multiply_variable = {
+		which = local_released_fauna_count
+		value = local_released_fauna_count_mult
+	}
+
+	release_vivarium_fauna_count = {
+		count = local_released_fauna_count
+		location = $LOCATION$
+		owners = {
+			space_amoeba = event_target:amoeba_country
+			tiyanki = event_target:tiyanki_country
+			voidworm = event_target:voidworms_country
+			cutholoid = event_target:cutholoids_country
+			crystalline_entity = event_target:crystal_country
+		}
+	}
+}
+
+##############
+# Traditions #
+##############
+
+give_flawless_display_modifier_for_category = {
+	remove_modifier = archivism_flawless_display_modifier_$CATEGORY$
+	export_trigger_value_to_variable = {
+		trigger = count_exhibit
+		parameters = {
+			limit = {
+				is_exhibit_active = yes
+				is_specimen_category = $CATEGORY$
+				OR = {
+					is_specimen_rarity = rare
+					is_specimen_rarity = epic
+					is_specimen_rarity = exceptional
+				}
+			}
+		}
+		variable = $CATEGORY$_specimen_count
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = $CATEGORY$_specimen_count
+				value > 0
+			}
+		}
+		add_modifier = {
+			modifier = archivism_flawless_display_modifier_$CATEGORY$
+			mult = $CATEGORY$_specimen_count
+		}
+	}
+}
+
+add_trophy_hunter_resource_diff_to_variable = {
+	add_resource_diff_to_variable = {
+		EXPORT_SCOPE = fromfrom.fleet
+		RESOURCES_BEFORE = prev.$RESOURCE$_before
+		RESOURCES_AFTER = prev.$RESOURCE$_after
+		TARGET = trophy_hunter_gained_$RESOURCE$
+		RESOURCE = $RESOURCE$
+	}
+}
+
+add_resource_diff_to_variable = {
+	export_resource_stockpile_to_variable = {
+		resource = $RESOURCE$
+		variable = $RESOURCE$_after
+	}
+	$EXPORT_SCOPE$ = {
+		change_variable = {
+			which = $TARGET$
+			value = $RESOURCES_AFTER$
+		}
+		subtract_variable = {
+			which = $TARGET$
+			value = $RESOURCES_BEFORE$
+		}
+	}
+}
+
+display_trophy_hunters_fauna_kill_message = {
+	if = {
+		limit = {
+			OR = {
+				check_variable = { which = trophy_hunter_gained_minerals value > 0 }
+				check_variable = { which = trophy_hunter_gained_food value > 0 }
+				check_variable = { which = trophy_hunter_gained_energy value > 0 }
+				check_variable = { which = trophy_hunter_gained_unity value > 0 }
+				check_variable = { which = trophy_hunter_gained_exotic_gases value > 0 }
+				check_variable = { which = trophy_hunter_gained_rare_crystals value > 0 }
+			}
+		}
+		create_message = {
+			type = MESSAGE_TROPHY_HUNTERS_KILLED_FAUNA
+			localization = MESSAGE_TROPHY_HUNTERS_KILLED_FAUNA_DESC
+			days = 30
+			target = this
+			inline_script = {
+				script = grand_archive/trophy_hunter_message_resource_parameter
+				RESOURCE = minerals
+			}
+			inline_script = {
+				script = grand_archive/trophy_hunter_message_resource_parameter
+				RESOURCE = food
+			}
+			inline_script = {
+				script = grand_archive/trophy_hunter_message_resource_parameter
+				RESOURCE = energy
+			}
+			inline_script = {
+				script = grand_archive/trophy_hunter_message_resource_parameter
+				RESOURCE = unity
+			}
+			inline_script = {
+				script = grand_archive/trophy_hunter_message_resource_parameter
+				RESOURCE = exotic_gases
+			}
+			inline_script = {
+				script = grand_archive/trophy_hunter_message_resource_parameter
+				RESOURCE = rare_crystals
+			}
+		}
+		clear_variable = trophy_hunter_gained_minerals
+		clear_variable = trophy_hunter_gained_food
+		clear_variable = trophy_hunter_gained_energy
+		clear_variable = trophy_hunter_gained_unity
+		clear_variable = trophy_hunter_gained_exotic_gases
+		clear_variable = trophy_hunter_gained_rare_crystals
+	}
+}
+
+select_suitable_spawn_system = {
+	random_system_within_border = {
+		limit = {
+			is_capital_system = no
+			NOT = {
+				any_neighbor_system = {
+					OR = {
+						NOR = {
+							exists = owner
+							has_star_flag = hidden_treasure_system
+						}
+						AND = {
+							exists = owner
+							owner = { NOT = { is_same_value = root } }
+						}
+					}
+				}
+			}
+		}
+		weights = {
+			base = 1
+			modifier = {
+				factor = 0.01
+				OR = {
+					has_star_flag = treasure_hunters_spawn_pinpoint
+					has_star_flag = hidden_treasure_system
+				}
+			}
+		}
+		set_star_flag = treasure_hunters_spawn_pinpoint
+		save_event_target_as = suitable_spawn_system
+	}
+	if = {
+		limit = {
+			NOT = { exists = event_target:suitable_spawn_system }
+		}
+		capital_scope.solar_system = {
+			random_neighbor_system = {
+				limit = {
+					exists = owner
+					owner = { is_same_value = root }
+				}
+				save_event_target_as = suitable_spawn_system
+			}
+		}
+	}
+	# Select capital if there is no other solution
+	if = {
+		limit = {
+			NOT = { exists = event_target:suitable_spawn_system }
+		}
+		capital_scope.solar_system = {
+			save_event_target_as = suitable_spawn_system
+		}
+	}
+}
+
+spawn_treasure_hidden_system = {
+	if = {
+		limit = {
+			NOT = { has_event_chain = "treasure_hunters_origin_story_chain" }
+		}
+		begin_event_chain = {
+			event_chain = "treasure_hunters_origin_story_chain"
+			target = this
+		}
+	}
+	# First spawn has different rules than subsequent spawns
+	capital_scope.solar_system = {
+		random_neighbor_system = {
+			save_event_target_as = suitable_spawn_system
+		}
+	}
+	event_target:suitable_spawn_system = {
+		set_star_flag = treasure_hunters_spawn_pinpoint
+		spawn_system = {
+			min_distance = 20
+			max_distance = 25
+			initializer = "hidden_treasure_system_initializer"
+			hyperlane = no
+			effect = {
+				add_hyperlane = {
+					from = this
+					to = prev
+				}
+				save_global_event_target_as = first_hidden_system_for@root
+				root = {
+					set_visited = prev
+					create_point_of_interest = {
+						id = treasure_hunters_hidden_system_poi.1
+						name = "treasure_hunters_hidden_system_1_poi"
+						desc = "treasure_hunters_hidden_system_1_poi_desc"
+						event_chain = "treasure_hunters_origin_story_chain"
+						location = prev
+					}
+				}
+			}
+		}
+	}
+}
+
+create_black_needle_country = {
+	optimize_memory
+	if = {
+		limit = { NOT = { exists = event_target:black_needle_country } }
+		create_country = {
+			name = "NAME_BlackNeedle"
+			type = pirate
+			species = random
+			auto_delete = no
+			flag = {
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"red"
+					"red"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_global_event_target_as = black_needle_country
+			}
+		}
+		event_target:black_needle_country = {
+			randomize_flag_symbol = "pirate"
+		}
+	}
+}
+
+set_black_needle_neutral = {
+	event_target:black_needle_country = {
+		set_faction_hostility = {
+			target = root
+			set_hostile = no
+			set_neutral = yes
+			set_friendly = no
+		}
+	}
+}
+
+set_black_needle_hostile = {
+	event_target:black_needle_country = {
+		set_faction_hostility = {
+			target = root
+			set_hostile = yes
+			set_neutral = no
+			set_friendly = no
+		}
+	}
+}
+
+set_black_needle_actively_hostile = {
+	set_black_needle_hostile = yes
+	$FLEET_SCOPE$ = {
+		set_fleet_stance = aggressive
+		if = {
+			limit = {
+				solar_system = {
+					NOT = {
+						any_neighbor_system = {
+							exists = owner
+							owner = { is_same_value = root }
+							is_capital_system = yes
+						}
+					}
+				}
+			}
+			queue_actions = {
+				find_closest_system = {
+					trigger = {
+						id = $EVENT_ID$.trigger
+						NOT = { is_same_value = prev.solar_system }
+						OR = {
+							NOT = { exists = owner }
+							AND = {
+								owner = { is_same_value = root }
+								is_capital_system = no
+							}
+						}
+					}
+					found_system = {
+						move_to = this
+					}
+				}
+			}
+		}
+	}
+}
+
+create_captain_hoo_leader = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:captain_hoo }
+		}
+		create_black_needle_country = yes
+		event_target:black_needle_country = {
+			if = {
+				limit = {
+					prev = {
+						species_portrait = cyb5
+					}
+				}
+				create_species = {
+					name = "NAME_Unknown"
+					class = AVI
+					portrait = avi12
+					namelist = "PRT1"
+					effect = {
+						save_event_target_as = captain_hoo_species
+					}
+				}
+			}
+			else = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = AVI
+					portrait = cyb5
+					namelist = "PRT1"
+					effect = {
+						save_event_target_as = captain_hoo_species
+					}
+				}
+			}
+			create_leader = {
+				class = commander
+				species = event_target:captain_hoo_species
+				name = "NAME_CaptainHoo"
+				skill = 8
+				gender = male
+				event_leader = yes
+				skip_background_generation = yes
+				background_ethic = ethic_militarist
+				randomize_traits = no
+				effect = {
+					set_leader_flag = legendary_leader
+					add_trait = subclass_commander_admiral
+					add_trait = leader_trait_master_gunner
+					add_trait = leader_trait_aggressive_2
+					add_trait = leader_trait_wrecker_3
+					add_trait = leader_trait_commanding_presence_3
+					add_trait = leader_trait_resilient_2
+				}
+			}
+			last_created_leader = {
+				set_leader_flag = immune_to_negative_traits
+				save_global_event_target_as = captain_hoo
+				set_owner = event_target:black_needle_country
+			}
+		}
+	}
+}
+
+create_black_needle_fleet_01 = {
+	if = {
+		limit = {
+			exists = event_target:black_needle_country
+			exists = event_target:captain_hoo
+		}
+		set_black_needle_neutral = yes
+		create_fleet = {
+			name = "NAME_BlackNeedle"
+			effect = {
+				set_owner = event_target:black_needle_country
+				create_ship_design = {
+					design = "NAME_Reaver"
+				}
+				while = {
+					count = 8
+					create_ship = {
+						design = last_created_design
+						graphical_culture = "pirate_01"
+					}
+				}
+				create_ship_design = {
+					design = "NAME_Marauder"
+				}
+				create_ship = {
+					design = last_created_design
+					graphical_culture = "pirate_01"
+					effect = {
+						set_ship_flag = captain_hoo_ship
+						set_disable_at_health = 0.6
+					}
+				}
+				set_location = {
+					target = root.$LOCATION$
+					distance = 80
+					angle = random
+				}
+				set_fleet_stance = passive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 800
+				save_event_target_as = black_needle_fleet
+				event_target:black_needle_country = {
+					clone_leader = {
+						target = event_target:captain_hoo
+						effect = {
+							event_target:black_needle_fleet = {
+								assign_leader = prev
+							}
+						}
+					}
+				}
+			}
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				spawn_debris = no
+			}
+		}
+	}
+}
+
+spawn_black_needle_base_system = {
+	if = {
+		limit = {
+			NOT = { has_event_chain = "treasure_hunters_origin_story_chain" }
+		}
+		begin_event_chain = {
+			event_chain = "treasure_hunters_origin_story_chain"
+			target = this
+		}
+	}
+	select_suitable_spawn_system = yes
+	event_target:suitable_spawn_system = {
+		spawn_system = {
+			min_distance = 20
+			max_distance = 25
+			initializer = "black_needle_base_initializer"
+			hyperlane = no
+			effect = {
+				add_hyperlane = {
+					from = this
+					to = prev
+				}
+				save_global_event_target_as = black_needle_base_system_for@root
+				root = {
+					set_visited = prev
+					create_point_of_interest = {
+						id = black_needle_base_system_poi
+						name = "black_needle_base_system_poi"
+						desc = "black_needle_base_system_poi_desc"
+						event_chain = "treasure_hunters_origin_story_chain"
+						location = prev
+					}
+				}
+			}
+		}
+	}
+}
+
+spawn_smeegibb_shelter_system = {
+	if = {
+		limit = {
+			NOT = { has_event_chain = "treasure_hunters_origin_story_chain" }
+		}
+		begin_event_chain = {
+			event_chain = "treasure_hunters_origin_story_chain"
+			target = this
+		}
+	}
+	select_suitable_spawn_system = yes
+	event_target:suitable_spawn_system = {
+		spawn_system = {
+			min_distance = 20
+			max_distance = 25
+			initializer = "smeegibb_shelter_initializer"
+			hyperlane = no
+			effect = {
+				add_hyperlane = {
+					from = this
+					to = prev
+				}
+				save_global_event_target_as = smeegibb_system_for@root
+				root = {
+					set_visited = prev
+					create_point_of_interest = {
+						id = smeegibb_shelter_system_poi.1
+						name = "smeegibb_shelter_system_1_poi"
+						desc = "smeegibb_shelter_system_1_poi_desc"
+						event_chain = "treasure_hunters_origin_story_chain"
+						location = prev
+					}
+				}
+			}
+		}
+	}
+}
+
+create_smeegibb_country = {
+	optimize_memory
+	if = {
+		limit = { NOT = { exists = event_target:smeegibb_country } }
+		create_country = {
+			name = "NAME_Unknown"
+			type = paragon_event_country
+			species = random
+			auto_delete = yes
+			effect = {
+				save_global_event_target_as = smeegibb_country
+			}
+		}
+	}
+}
+
+create_smeegibb_leader = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:smeegibb }
+		}
+		create_smeegibb_country = yes
+		event_target:smeegibb_country = {
+			create_species = {
+				name = "NAME_Unknown"
+				class = AVI
+				portrait = mol12
+				namelist = "PRT1"
+				effect = {
+					save_event_target_as = smeegibb_species
+				}
+			}
+			create_leader = {
+				class = commander
+				species = event_target:smeegibb_species
+				name = "NAME_Smeegibb"
+				skill = 1
+				gender = indeterminable
+				event_leader = yes
+				skip_background_generation = yes
+				randomize_traits = no
+				effect = {
+					set_leader_flag = smeegibb
+				}
+			}
+			last_created_leader = {
+				save_global_event_target_as = smeegibb
+				set_owner = event_target:smeegibb_country
+			}
+		}
+	}
+}
+
+create_captain_inax_leader = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:captain_inax }
+		}
+		create_black_needle_country = yes
+		event_target:black_needle_country = {
+			if = {
+				limit = {
+					prev = {
+						species_portrait = art11
+					}
+				}
+				create_species = {
+					name = "NAME_Unknown"
+					class = ART
+					portrait = art15
+					namelist = "PRT1"
+					effect = {
+						save_event_target_as = captain_inax_species
+					}
+				}
+			}
+			else = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = ART
+					portrait = art11
+					namelist = "PRT1"
+					effect = {
+						save_event_target_as = captain_inax_species
+					}
+				}
+			}
+			create_leader = {
+				class = commander
+				species = event_target:captain_inax_species
+				name = "NAME_CaptainInax"
+				skill = 8
+				gender = female
+				event_leader = yes
+				skip_background_generation = yes
+				background_ethic = ethic_militarist
+				randomize_traits = no
+				effect = {
+					set_leader_flag = legendary_leader
+					add_trait = subclass_commander_admiral
+					add_trait = leader_trait_master_gunner
+					add_trait = leader_trait_aggressive_2
+					add_trait = leader_trait_wrecker_3
+					add_trait = leader_trait_commanding_presence_3
+					add_trait = leader_trait_resilient_2
+				}
+			}
+			last_created_leader = {
+				set_leader_flag = immune_to_negative_traits
+				save_global_event_target_as = captain_inax
+				set_owner = event_target:black_needle_country
+			}
+		}
+	}
+}
+
+create_black_needle_fleet_02 = {
+	if = {
+		limit = {
+			exists = event_target:black_needle_country
+			exists = event_target:captain_inax
+		}
+		set_black_needle_neutral = yes
+		create_fleet = {
+			name = "NAME_BlackNeedle"
+			effect = {
+				set_owner = event_target:black_needle_country
+				create_ship_design = {
+					design = "NAME_Skull"
+				}
+				while = {
+					count = 8
+					create_ship = {
+						design = last_created_design
+						graphical_culture = "pirate_01"
+					}
+				}
+				create_ship_design = {
+					design = "NAME_Bemat_destroyer_02"
+				}
+				while = {
+					count = 6
+					create_ship = {
+						design = last_created_design
+						graphical_culture = "pirate_01"
+					}
+				}
+				create_ship_design = {
+					design = "NAME_Bemat_cruiser_inax_01"
+				}
+				create_ship = {
+					design = last_created_design
+					graphical_culture = "pirate_01"
+					effect = {
+						set_ship_flag = captain_inax_ship
+						set_disable_at_health = 0.1
+					}
+				}
+				set_location = {
+					target = root.$LOCATION$
+					distance = 80
+					angle = random
+				}
+				set_fleet_stance = passive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 800
+				save_event_target_as = black_needle_fleet
+				event_target:black_needle_country = {
+					clone_leader = {
+						target = event_target:captain_inax
+						effect = {
+							event_target:black_needle_fleet = {
+								assign_leader = prev
+							}
+						}
+					}
+				}
+			}
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				spawn_debris = no
+			}
+		}
+	}
+}
+
+spawn_gateway_to_ness_treasure_system = {
+	if = {
+		limit = {
+			NOT = { has_event_chain = "treasure_hunters_origin_story_chain" }
+		}
+		begin_event_chain = {
+			event_chain = "treasure_hunters_origin_story_chain"
+			target = this
+		}
+	}
+	select_suitable_spawn_system = yes
+	event_target:suitable_spawn_system = {
+		spawn_system = {
+			min_distance = 20
+			max_distance = 25
+			initializer = "gateway_to_ness_treasure_initializer"
+			hyperlane = no
+			effect = {
+				add_hyperlane = {
+					from = this
+					to = prev
+				}
+				save_global_event_target_as = gateway_to_ness_treasure_system_for@root
+				root = {
+					if = {
+						limit = {
+							exists = event_target:voidworms_country
+							has_communications = event_target:voidworms_country
+						}
+						establish_communications_no_message = event_target:voidworms_treasure_hunters
+					}
+					set_visited = prev
+					create_point_of_interest = {
+						id = gateway_to_ness_treasure_system_poi
+						name = "gateway_to_ness_treasure_system_poi"
+						desc = "gateway_to_ness_treasure_system_poi_desc"
+						event_chain = "treasure_hunters_origin_story_chain"
+						location = prev
+					}
+				}
+			}
+		}
+	}
+}
+
+spawn_ness_treasure_system = {
+	if = {
+		limit = {
+			NOT = { has_event_chain = "treasure_hunters_origin_story_chain" }
+		}
+		begin_event_chain = {
+			event_chain = "treasure_hunters_origin_story_chain"
+			target = this
+		}
+	}
+	random_system = {
+		spawn_system = {
+			min_distance = 40
+			max_distance = 80
+			max_jumps = 0
+			initializer = "ness_treasure_initializer"
+			hyperlane = no
+			effect = {
+				save_global_event_target_as = ness_treasure_system_for@root
+			}
+		}
+	}
+}
+
+create_cobalt_quill_leader = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:cobalt_quill }
+		}
+		create_black_needle_country = yes
+		event_target:black_needle_country = {
+			create_species = {
+				name = "NAME_Unknown"
+				class = MAM
+				portrait = mam17
+				namelist = "PRT1"
+				effect = {
+					save_event_target_as = cobalt_quill_species
+				}
+			}
+			create_leader = {
+				class = commander
+				species = event_target:cobalt_quill_species
+				name = "NAME_CobaltQuill"
+				skill = 8
+				gender = male
+				event_leader = yes
+				skip_background_generation = yes
+				background_ethic = ethic_militarist
+				randomize_traits = no
+				effect = {
+					set_leader_flag = legendary_leader
+					add_trait = subclass_commander_admiral
+					add_trait = leader_trait_master_gunner
+					add_trait = leader_trait_aggressive_2
+					add_trait = leader_trait_wrecker_3
+					add_trait = leader_trait_commanding_presence_3
+					add_trait = leader_trait_resilient_2
+				}
+			}
+			last_created_leader = {
+				set_leader_flag = immune_to_negative_traits
+				save_global_event_target_as = cobalt_quill
+				set_owner = event_target:black_needle_country
+			}
+		}
+	}
+}
+
+create_final_black_needle_fleet = {
+	if = {
+		limit = {
+			exists = event_target:black_needle_country
+			exists = event_target:cobalt_quill
+		}
+		set_black_needle_neutral = yes
+		create_fleet = {
+			name = "NAME_BlackNeedle"
+			effect = {
+				set_owner = event_target:black_needle_country
+				create_ship_design = {
+					design = "NAME_Pirate_Galleon"
+				}
+				create_ship = {
+					design = last_created_design
+					graphical_culture = "pirate_01"
+				}
+				create_ship_design = {
+					design = "NAME_Bemat_cruiser_01"
+				}
+				while = {
+					count = 60
+					create_ship = {
+						design = last_created_design
+						graphical_culture = "pirate_01"
+					}
+				}
+				set_location = {
+					target = root.$LOCATION$
+					distance = 80
+					angle = random
+				}
+				set_fleet_stance = passive
+				save_event_target_as = black_needle_fleet
+				set_fleet_flag = black_needle_fleet
+				event_target:black_needle_country = {
+					clone_leader = {
+						target = event_target:cobalt_quill
+						effect = {
+							event_target:black_needle_fleet = {
+								assign_leader = prev
+							}
+						}
+					}
+				}
+			}
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				spawn_debris = no
+			}
+		}
+	}
+}
+
+create_sabotage_fleet = {
+	if = {
+		limit = {
+			exists = event_target:black_needle_country
+		}
+		create_fleet = {
+			name = "NAME_BlackNeedle"
+			effect = {
+				set_owner = event_target:black_needle_country
+				create_pirate_ships_10 = yes
+				set_location = prev
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 800
+				set_fleet_flag = sabotage_situation_fleet
+				set_fleet_flag = spawned_for@prev.owner
+			}
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				spawn_debris = no
+			}
+		}
+	}
+}
+
+create_captain_ness_leader = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:captain_ness_leader }
+		}
+		create_country = {
+			name = "NAME_Unknown"
+			type = global_event
+			auto_delete = yes
+			flag = {
+				icon = {
+					category = "special"
+					file = "unknown.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"null"
+					"null"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_event_target_as = captain_ness_country
+			}
+		}
+        event_target:captain_ness_country = {
+			create_species = {
+				name = "NAME_Unknown"
+				class = PARAGON
+				portrait = aqu_machine
+				namelist = "PRT1"
+				effect = {
+					save_event_target_as = ness_species
+				}
+			}
+			create_leader = {
+				class = admiral
+				species = event_target:ness_species
+				name = "NAME_CaptainNess"
+				skill = 10
+				gender = female
+				event_leader = no
+				skip_background_generation = yes
+				background_ethic = ethic_militarist
+				background_job = captain
+				custom_description = captain_ness_leader_desc
+				custom_catch_phrase = captain_ness_leader_catch_phrase
+				immortal = yes
+				hide_age = yes
+				randomize_traits = no
+				traits = {
+					trait = subclass_commander_admiral
+					trait = leader_trait_pirate_queen
+					trait = leader_trait_aggressive_2
+					trait = leader_trait_trickster_2
+					trait = leader_trait_corsair_2
+					trait = leader_trait_wrecker_2
+					trait = leader_trait_destructive_2
+					trait = leader_trait_victory_or_death_2
+				}
+				effect = {
+					set_owner = event_target:captain_ness_country
+					set_leader_flag = legendary_leader
+					set_leader_flag = immune_to_negative_traits
+					set_leader_flag = leader_death_events_blocked
+					save_global_event_target_as = captain_ness_leader
+					exile_leader_as = captain_ness_leader
+				}
+			}
+		}
+	}
+}
+
+create_primal_leader = {
+	create_country = {
+		name = "NAME_leader_country"
+		type = nice_faction
+		auto_delete = yes
+		flag = {
+			icon = {
+				category = "special"
+				file = "unknown.dds"
+			}
+			background = {
+				category = "backgrounds"
+				file = "00_solid.dds"
+			}
+			colors = {
+				"red"
+				"red"
+				"null"
+				"null"
+			}
+		}
+		effect = {
+			save_event_target_as = leader_country
+		}
+	}
+	event_target:leader_country = {
+		create_species = {
+			name = UNKNOWN
+			class = $SPECIES_CLASS$
+			portrait = $LEADER_PORTRAIT$
+			name_list = random_class
+			immortal = no
+			allow_negative_traits = no
+			effect = {
+				save_event_target_as = leader_species
+			}
+		}
+		create_leader = {
+			class = $CLASS$
+			species = event_target:leader_species
+			name = $NAME$
+			skill = $LEVEL$
+			gender = $GENDER$
+			event_leader = no # Leader is allowed to lead factions and win elections
+			background_ethic = ethic_$ETHIC$
+			skip_background_generation = yes
+			custom_description = $DESC$
+			custom_catch_phrase = $CATCH_PHRASE$
+			immortal = no
+			hide_age = no
+			randomize_traits = no
+			effect = {
+				save_event_target_as = primal_leader
+				set_leader_flag = renowned_leader
+				set_variable = { which = leader_pending_negative_traits_unmodified value = 1 }
+				set_owner = event_target:leader_country
+				exile_leader_as = primal_leader_exile
+			}
+		}
+	}
+}
+
+create_frenzied_voidworms_country = {
+	optimize_memory
+	if = {
+		limit = {
+			NOT = { exists = event_target:frenzied_voidworms_country }
+		}
+		create_country = {
+			name = "NAME_Frenzied_Voidworms"
+			type = frenzied_voidworms
+			inline_script = "grand_archive/voidworms_flag"
+			effect = {
+				inline_script = "grand_archive/voidworm_init_common_effects"
+				save_global_event_target_as = frenzied_voidworms_country
+			}
+		}
+	}
+}
+
+create_frenzied_voidworms_fleet = {
+	create_fleet = {
+		name = "NAME_Frenzied_Voidworms"
+		settings = {
+			can_upgrade = no
+			can_change_leader = no
+		}
+		effect = {
+			set_owner = event_target:frenzied_voidworms_country
+			set_variable = {
+				which = matures_to_spawn
+				value = 9
+			}
+			while = {
+				count = $FLEET_STRENGTH|0$
+				change_variable = {
+					which = matures_to_spawn
+					value = 2
+				}
+			}
+			while = {
+				count = matures_to_spawn
+				create_ship = {
+					design = NAME_Frenzied_Voidworms_Mature
+				}
+			}
+			while = {
+				count = 1
+				create_ship = {
+					design = NAME_Frenzied_Voidworms_Juvenile
+				}
+			}
+			while = {
+				count = 4
+				create_ship = {
+					design = NAME_Frenzied_Voidworms_Nymph
+				}
+			}
+			set_location = {
+				target = $LOCATION$
+				distance = 10
+				angle = random
+			}
+			set_fleet_stance = aggressive
+			set_fleet_flag = frenzied_voidworms_fleet
+			set_fleet_bombardment_stance = frenzied_voidworm_invasion
+			add_modifier = {
+				modifier = frenzied_voidworms_at_home_modifier
+				days = -1
+			}
+			save_event_target_as = frenzied_voidworms_fleet
+		}
+	}
+}
+
+get_frenzied_voidworms_target = {
+	if = {
+		limit = {
+			exists = home_planet
+			home_planet.owner = { is_same_value = prev }
+		}
+		home_planet = {
+			save_event_target_as = $TARGET$
+		}
+	}
+	else = {
+		capital_scope = {
+			save_event_target_as = $TARGET$
+		}
+	}
+}
+
+cleanup_sabotage_flags = {
+	remove_country_flag = periodic_spawn_block
+	remove_country_flag = destroyed_fleet_spawn_cooldown
+	every_system_within_border = {
+		limit = { has_star_flag = available_for_sabotage }
+		remove_star_flag = available_for_sabotage
+	}
+}
+
+# Scope = Planet
+plant_fruitful_seeds = {
+	set_planet_flag = seeds_planted_by@$SEEDS_OWNER$
+	set_surveyed = {
+		surveyed = yes
+		surveyor = $SEEDS_OWNER$
+	}
+	# If the planet has an owner:
+	# YOU
+	# - Get a positive opinion modifier
+	# THEM
+	# - Get a planet modifier (nice forests) or levels up an existing one
+	# - Get a decision to remove the modifier
+	if = {
+		limit = {
+			exists = owner
+		}
+		switch = {
+			trigger = has_modifier
+			seeded_planet_1_modifier = {
+				add_modifier = {
+					modifier = seeded_planet_2_modifier
+				}
+				remove_modifier = seeded_planet_1_modifier
+			}
+			seeded_planet_2_modifier = {
+				add_modifier = {
+					modifier = seeded_planet_3_modifier
+				}
+				remove_modifier = seeded_planet_2_modifier
+			}
+			default = {
+				add_modifier = {
+					modifier = seeded_planet_1_modifier
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					NOT = { is_same_value = $SEEDS_OWNER$ }
+				}
+			}
+			planet_event = { id = origin.7327 days = 1 }
+			owner = {
+				add_opinion_modifier = {
+					modifier = opinion_nice_forests
+					who = $SEEDS_OWNER$
+				}
+			}
+		}
+		# notify the seeds owner
+		$SEEDS_OWNER$ = {
+			remove_country_flag = put_seed_on@$SEEDED_FLEET$
+			set_country_flag = seed_on_planet@root
+			set_visited = root.solar_system
+			create_message = {
+				type = MESSAGE_FRUITFUL_SEED_PLANTED
+				localization = MESSAGE_FRUITFUL_SEED_PLANTED_OWNER
+				days = 30
+				target = root
+				variable = {
+					type = name
+					localization = PLANET
+					scope = root
+				}
+				variable = {
+					type = name
+					localization = SYSTEM
+					scope = root.solar_system
+				}
+			}
+		}
+	}
+	# If the planet has no owner:
+	# YOU
+	# - Get a planet modifier (dormant seed pod)
+	# - Get a special project to open it, colonizing the planet
+	else = {
+		add_modifier = {
+			modifier = seeded_planet_0_modifier
+		}
+		enable_special_project = {
+			name = OPEN_SEED_PODS_PROJECT
+			owner = $SEEDS_OWNER$
+			location = this
+		}
+		# notify the seeds owner
+		$SEEDS_OWNER$ = {
+			remove_country_flag = put_seed_on@$SEEDED_FLEET$
+			set_country_flag = seed_on_planet@root
+			set_visited = root.solar_system
+			create_message = {
+				type = MESSAGE_FRUITFUL_SEED_PLANTED
+				localization = MESSAGE_FRUITFUL_SEED_PLANTED_NO_OWNER
+				days = 30
+				target = root
+				variable = {
+					type = name
+					localization = PLANET
+					scope = root
+				}
+				variable = {
+					type = name
+					localization = SYSTEM
+					scope = root.solar_system
+				}
+			}
+		}
+	}
+	$SEEDED_FLEET$ = {
+		remove_fleet_flag = fruitful_seeded_critter
+	}
+}
+
+create_lured_fauna_country = {
+	optimize_memory
+	if = {
+		limit = {
+			NOT = { exists = event_target:lured_fauna_country }
+		}
+		create_country = {
+			name = "NAME_Lured_Fauna"
+			type = lured_fauna_faction
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_1.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors={
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_global_event_target_as = lured_fauna_country
+			}
+		}
+	}
+}

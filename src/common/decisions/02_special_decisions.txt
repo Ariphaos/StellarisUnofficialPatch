@@ -537,7 +537,7 @@ decision_consecrated_worlds = {
 			has_modifier = consecrated_quality_3
 			has_modifier = consecrated_quality_4
 		}
-		NOT = { has_designation = col_nanotech_world } 
+		NOT = { has_designation = col_nanotech_world }
 	}
 
 	allow = {
@@ -2216,6 +2216,120 @@ decision_shattered_ring_project = {
 			}
 			# Finally, bring it in line with ringworld sizes
 			set_planet_size = 10
+			# And set the country flag so you can take Galactic Wonders
+			owner = { set_country_flag = has_built_or_repaired_megastructure }
+		}
+	}
+
+	ai_weight = {
+		weight = 100
+	}
+}
+
+decision_shattered_ring_project_interloper = {
+	owned_planets_only = yes
+	icon = decision_arcology_project
+
+	enactment_time = 3600
+	resources = {
+		category = decisions
+		cost = {
+			alloys = 10000
+		}
+	}
+
+	potential = {
+		OR = {
+			is_planet_class = pc_shattered_ring_habitable
+			is_planet_class = pc_ringworld_habitable
+		}
+		solar_system = {
+			any_system_planet = {
+				has_planet_flag = interloper
+			}
+		}
+	}
+
+	allow = {
+		owner = { has_technology = tech_mega_engineering }
+	}
+
+	effect = {
+		# Make ringworld
+		custom_tooltip = decision_shattered_ring_project_interloper_effects
+		hidden_effect = {
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = reperable_damage
+					}
+					clear_deposits = yes
+					change_pc = pc_ringworld_habitable
+					if = {
+						limit = {
+							exists = mining_station
+						}
+						mining_station = {
+							delete_fleet = this
+						}
+					}
+					if = {
+						limit = {
+							exists = research_station
+						}
+						research_station = {
+							delete_fleet = this
+						}
+					}
+					set_planet_entity = {
+						entity = "ringworld_habitable_entity_01_entity"
+						graphical_culture = root.owner
+					}
+				}
+				random_system_planet = {
+					limit = {
+						has_planet_flag = interloper
+					}
+					if = {
+						limit = {
+							exists = mining_station
+						}
+						mining_station = {
+							delete_fleet = this
+						}
+					}
+					if = {
+						limit = {
+							exists = research_station
+						}
+						research_station = {
+							delete_fleet = this
+						}
+					}
+					remove_planet = yes
+				}
+				every_system_planet = {
+					limit = { is_planet_class = pc_ringworld_tech_damaged }
+					set_planet_entity = {
+						entity = "ringworld_tech_entity_01_entity"
+						graphical_culture = root.owner
+					}
+				}
+				every_system_planet = {
+					limit = { is_planet_class = pc_ringworld_seam_damaged }
+					change_pc = pc_ringworld_seam
+					set_planet_entity = {
+						entity = "ringworld_seam_entity_01_entity"
+						graphical_culture = root.owner
+					}
+				}
+				random_ambient_object = {
+					limit = {
+						has_ambient_object_flag = interloper_damage
+					}
+					destroy_ambient_object = this
+				}
+			}
 			# And set the country flag so you can take Galactic Wonders
 			owner = { set_country_flag = has_built_or_repaired_megastructure }
 		}

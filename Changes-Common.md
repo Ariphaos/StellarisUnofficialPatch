@@ -188,6 +188,7 @@ All remaining define entries help the AI.
 
 * Scope checking
 * Caps the amount of city districts the AI will build on a world. May need some mod awareness.
+* district_resort is a district, not a district set.
 
 ### Arcology
 

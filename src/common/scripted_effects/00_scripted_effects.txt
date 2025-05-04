@@ -3811,7 +3811,6 @@ give_tech_option_or_progress_effect = {
 #Use in war scope. War is deleted.
 end_war_effect = {
 	every_war_participant = {
-		# limit = { NOT = { is_same_value = prevprev } } # Something like this is only needed if the empire itself is destroyed. Fix in those situations.
 		prev = { remove_war_participant = prev }
 	}
 }
@@ -5253,6 +5252,9 @@ create_baol_species_effect = {
 				species = this
 				add_trait = trait_plantoid_phototrophic
 				add_traits_at_start_of_list = yes
+				effect = {
+					save_global_event_target_as = $GLOBAL_TARGET$
+				}
 			}
 		}
 	}
@@ -5268,6 +5270,9 @@ create_hive_baol_species_effect = {
 			species = this
 			add_trait = trait_hive_mind
 			add_traits_at_start_of_list = yes
+			effect = {
+				save_global_event_target_as = $GLOBAL_TARGET$
+			}
 		}
 	}
 }
@@ -6798,7 +6803,36 @@ set_ruined_megastructure = {
 		}
 		remove_megastructure = this
 	}
+	else_if = {
+		limit = { is_megastructure_type = grand_archive_0 }
+		solar_system = {
+			system_event = { id = grand_archive.4501 }
+		}
+	}
 	else = {
+		remove_megastructure = this
+	}
+}
+
+# This = Grand Archive (megastructure)
+destroy_grand_archive = {
+	if = {
+		limit = { is_megastructure_type = grand_archive_0 }
+		create_ambient_object = {
+			type = "large_debris_object"
+			location = this
+		}
+		last_created_ambient_object = {
+			set_location = {
+				target = prev
+				distance = 35
+				angle = 30
+			}
+		}
+		if = {
+			limit = { exists = planet }
+			planet = { remove_planet_flag = has_megastructure }
+		}
 		remove_megastructure = this
 	}
 }
@@ -7176,7 +7210,7 @@ remove_fauna_yuht = {
 	if = {
 		limit = { has_modifier = dangerous_wildlife }
 		remove_modifier = dangerous_wildlife
-		}
+	}
 
 	if = {
 		limit = { has_modifier = titanic_life }
@@ -7821,96 +7855,6 @@ tomb_world_modifier_cleanup = {
 	remove_modifier = "planet_myrmeku_upgrade_robots"
 	remove_modifier = "planet_myrmeku_pest_control"
 	remove_modifier = "planet_myrmeku_lured"
-}
-
-fruitful_add_seed_to_critter = {
-	# There is no trigger to check a fleet's name, so we're using flags instead
-	switch = {
-		trigger = has_fleet_flag
-		NAME_Tiyanki_Space_Whale = {
-			set_name = NAME_Tiyanki_Space_Whale_seed
-			set_fleet_flag = NAME_Tiyanki_Space_Whale_seed
-			remove_fleet_flag = NAME_Tiyanki_Space_Whale
-		}
-		NAME_Grazing_Tiyanki = {
-			set_name = NAME_Grazing_Tiyanki_seed
-			set_fleet_flag = NAME_Grazing_Tiyanki_seed
-			remove_fleet_flag = NAME_Grazing_Tiyanki
-		}
-		NAME_Amoeba_Swarm = {
-			set_name = NAME_Amoeba_Swarm_seed
-			set_fleet_flag = NAME_Amoeba_Swarm_seed
-			remove_fleet_flag = NAME_Amoeba_Swarm
-		}
-		NAME_Space_Amoeba_Hunters = {
-			set_name = NAME_Space_Amoeba_Hunters_seed
-			set_fleet_flag = NAME_Space_Amoeba_Hunters_seed
-			remove_fleet_flag = NAME_Space_Amoeba_Hunters
-		}
-		NAME_Space_Amoeba_plural = {
-			set_name = NAME_Space_Amoeba_plural_seed
-			set_fleet_flag = NAME_Space_Amoeba_plural_seed
-			remove_fleet_flag = NAME_Space_Amoeba_plural
-		}
-		# Bubbles
-		NAME_Bubbles = {
-			set_name = NAME_Bubbles_seed
-			set_fleet_flag = NAME_Bubbles_seed
-			remove_fleet_flag = NAME_Bubbles
-		}
-		NAME_Nyx = {
-			set_name = NAME_Nyx_seed
-			set_fleet_flag = NAME_Nyx_seed
-			remove_fleet_flag = NAME_Nyx
-		}
-		NAME_Renegade = {
-			set_name = NAME_Renegade_seed
-			set_fleet_flag = NAME_Renegade_seed
-			remove_fleet_flag = NAME_Renegade
-		}
-		NAME_Cyto = {
-			set_name = NAME_Cyto_seed
-			set_fleet_flag = NAME_Cyto_seed
-			remove_fleet_flag = NAME_Cyto
-		}
-		NAME_Boomer = {
-			set_name = NAME_Boomer_seed
-			set_fleet_flag = NAME_Boomer_seed
-			remove_fleet_flag = NAME_Boomer
-		}
-	}
-}
-
-fruitful_remove_seed_to_critter = {
-	# There is no trigger to check a fleet's name, so we're using flags instead
-	switch = {
-		trigger = has_fleet_flag
-		NAME_Tiyanki_Space_Whale_seed = {
-			set_name = NAME_Tiyanki_Space_Whale
-			set_fleet_flag = NAME_Tiyanki_Space_Whale
-			remove_fleet_flag = NAME_Tiyanki_Space_Whale_seed
-		}
-		NAME_Grazing_Tiyanki_seed = {
-			set_name = NAME_Grazing_Tiyanki
-			set_fleet_flag = NAME_Grazing_Tiyanki
-			remove_fleet_flag = NAME_Grazing_Tiyanki_seed
-		}
-		NAME_Amoeba_Swarm_seed = {
-			set_name = NAME_Amoeba_Swarm
-			set_fleet_flag = NAME_Amoeba_Swarm
-			remove_fleet_flag = NAME_Amoeba_Swarm_seed
-		}
-		NAME_Space_Amoeba_Hunters_seed = {
-			set_name = NAME_Space_Amoeba_Hunters
-			set_fleet_flag = NAME_Space_Amoeba_Hunters
-			remove_fleet_flag = NAME_Space_Amoeba_Hunters_seed
-		}
-		NAME_Space_Amoeba_plural_seed = {
-			set_name = NAME_Space_Amoeba_plural
-			set_fleet_flag = NAME_Space_Amoeba_plural
-			remove_fleet_flag = NAME_Space_Amoeba_plural_seed
-		}
-	}
 }
 
 initialize_kaleidoscope = {

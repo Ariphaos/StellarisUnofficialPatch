@@ -1,8 +1,8 @@
-version="3.13.2.0"
+version="3.14.1596535"
 tags={
 	"Fixes"
 }
 picture="thumbnail.png"
-name="~~Ariphaos Unofficial Patch (3.13)"
-supported_version="v3.13.2"
+name="~~Ariphaos Unofficial Patch (3.14)"
+supported_version="v3.14.1592653"
 remote_file_id="1995601384"

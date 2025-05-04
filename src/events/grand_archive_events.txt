@@ -1,0 +1,7895 @@
+########################
+# Grand Archive Events #
+########################
+
+namespace = grand_archive
+
+#########################
+# Gravity Snares Events #
+#########################
+
+ship_event = {
+	id = grand_archive.1
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_space_fauna = no
+		OR = {
+			is_ship_class = shipclass_military
+			is_ship_class = shipclass_military_special
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = built_artificial_ship
+		}
+	}
+}
+
+# Gravity Snare was sent
+fleet_event = {
+	id = grand_archive.100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = from
+	}
+
+	immediate = {
+		from = {
+			set_timed_fleet_flag = {
+				flag = gravity_snare_is_in_cooldown
+				days = value:calc_gravity_snare_cooldown
+			}
+			controller = {
+				if = {
+					limit = {
+						is_ai = yes
+					}
+					set_timed_country_flag = {
+						flag = gravity_snare_is_in_cooldown_ai
+						days = 360
+					}
+				}
+			}
+			leader = {
+				save_global_event_target_as = gravity_snare_sender@root
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.105
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		last_increased_tech = tech_gravity_wells
+	}
+
+	immediate = {
+		create_auto_updated_design_from_global_design = {
+			GLOBAL_DESIGN = "NAME_GravitySnare"
+		}
+		# Gravity Snares info
+		if = {
+			limit = { is_beastmasters_empire = yes }
+			country_event = {
+				id = grand_archive.7210
+				days = 30
+			}
+		}
+		else = {
+			country_event = { id = grand_archive.7210 }
+		}
+		# Prethoryn Scourge info
+		if = {
+			limit = {
+				exists = event_target:prethoryn
+				has_communications = event_target:prethoryn
+			}
+			country_event = {
+				id = grand_archive.7220
+				days = 30
+			}
+		}
+	}
+}
+
+# capture_leader_scientist_exp_gain modifier handle
+ship_event = {
+	id = grand_archive.110
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = from
+		from = {
+			check_modifier_value = {
+				modifier = on_fauna_capture_scientist_exp_gain
+				value > 0
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			controller = {
+				every_owned_leader = {
+					limit = { leader_class = scientist }
+					add_experience = prevprev.modifier:on_fauna_capture_scientist_exp_gain
+				}
+			}
+		}
+	}
+}
+
+# Gravity Snare general experience reward
+ship_event = {
+	id = grand_archive.115
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:gravity_snare_sender@from
+	}
+
+	immediate = {
+		event_target:gravity_snare_sender@from = {
+			add_experience = @gravity_snare_experience_reward
+		}
+	}
+}
+
+# Gravity snare sender global target clear
+fleet_event = {
+	id = grand_archive.120
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:gravity_snare_sender@this
+	}
+
+	immediate = {
+		clear_global_event_target = gravity_snare_sender@this
+	}
+}
+
+# From = space fauna
+# FROMFROM = contact system
+country_event = {
+	id = grand_archive.200
+
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = { is_capturable_space_critter_country_type = yes }
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { is_variable_set = space_fauna_contacted }
+			}
+			set_variable = {
+				which = space_fauna_contacted
+				value = 1
+			}
+		}
+		else = {
+			change_variable = {
+				which = space_fauna_contacted
+				value = 1
+			}
+		}
+
+		if = {
+			limit = { has_origin = origin_primal_calling }
+			country_event = {
+				id = grand_archive.1001
+				scopes = {
+					from = from
+					fromfrom = fromfrom
+				}
+			}
+		}
+	}
+}
+
+# Curator destroyed
+country_event = {
+    id = grand_archive.500
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		exists = event_target:curator_enclave_country
+		is_same_value = event_target:curator_enclave_country
+	}
+
+    immediate = {
+		# Mockup country
+		create_country = {
+			name = "NAME_Curator_Order"
+			adjective = "NAME_Curator_adj"
+			type = nice_faction
+			species = event_target:curator_enclave_country
+			flag = {
+				icon = {
+					category = "enclaves"
+					file = "enclaves_flag_curator.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "vertical.dds"
+				}
+				colors={
+					"blue"
+					"dark_blue"
+					"null"
+					"null"
+				}
+			}
+			auto_delete = no
+			ignore_initial_colony_error = yes
+			effect = {
+				save_global_event_target_as = backup_curator_country
+			}
+		}
+		if = {
+			limit = {
+				exists = from
+				from = {
+					has_technology = tech_gravity_wells
+					NOR = {
+						has_country_flag = tech_containment_vessel_acquired
+						has_technology = tech_containment_vessel
+					}
+				}
+			}
+			from = {
+				add_research_option = tech_containment_vessel
+			}
+		}
+		every_playable_country = {
+			limit = {
+				NOR = {
+					has_country_flag = attacked_curators
+					is_same_value = root.from
+				}
+			}
+			establish_communications_no_message = event_target:backup_curator_country
+			if = {
+				limit = { has_country_flag = curator_collection_reward_chain_started }
+				country_event = { id = grand_archive.4100 }
+			}
+			else = {
+				country_event = { id = grand_archive.4120 }
+			}
+		}
+	}
+}
+
+####################
+# Voidworms Events #
+####################
+
+# Voidworms First Contact
+first_contact_event = {
+	id = grand_archive.2000
+	title = grand_archive.2000.name
+	desc = grand_archive.2000.desc
+	picture = GFX_evt_unidentified_voidworms
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+	first_contact = yes
+
+	immediate = {
+		set_site_progress_locked = yes
+	}
+
+	after = {
+		set_site_progress_locked = no
+	}
+
+	option = {
+		name = grand_archive.2000.a
+		set_first_contact_stage = voidworms_stage_2
+	}
+}
+
+first_contact_event = {
+	id = grand_archive.2005
+	title = grand_archive.2005.name
+	desc = {
+		trigger = {
+			text = grand_archive.2005.desc
+			text = newline
+			success_text = {
+				text = grand_archive.2005.desc.primal_calling
+				owner = { has_origin = origin_primal_calling }
+			}
+		}
+	}
+	picture = GFX_evt_unidentified_voidworms
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+	first_contact = yes
+
+	immediate = {
+		set_site_progress_locked = yes
+	}
+
+	option = {
+		name = {
+			trigger = {
+				owner = { is_homicidal = no }
+			}
+			text = story.101.aa
+		}
+		name = {
+			trigger = {
+				owner = { is_homicidal = yes }
+			}
+			text = grand_archive.2005.a.homicidal
+		}
+		owner = {
+			add_modifier = {
+				modifier = voidworms_hunting_buff
+				days = -1
+			}
+			increase_hunted_fauna_count = yes
+		}
+	}
+
+	option = {
+		name = story.101.bb
+		trigger = {
+			owner = { is_homicidal = no }
+		}
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = "VOIDWORMS_PROJECT"
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+
+	after = {
+		finish_first_contact_effect = yes
+		set_site_progress_locked = no
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = grand_archive.200
+					days = 30
+					scopes = {
+						from = event_target:voidworms_country
+						fromfrom = root.solar_system
+					}
+				}
+				if = {
+					limit = {
+						exists = event_target:voidworms_treasure_hunters
+						NOT = { has_communications = event_target:voidworms_treasure_hunters }
+					}
+					establish_communications_no_message = event_target:voidworms_treasure_hunters
+				}
+			}
+		}
+	}
+}
+
+# Voidworms FC final stage standalone
+# From = contact system
+country_event = {
+	id = grand_archive.2006
+	title = grand_archive.2005.name
+	desc = grand_archive.2005.desc
+	picture = GFX_evt_unidentified_voidworms
+	show_sound = ga_event_voidworms_plague
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:voidworms_country
+		NOT = { has_communications = event_target:voidworms_country }
+	}
+
+	immediate = {
+		establish_communications_no_message = event_target:voidworms_country
+	}
+
+	option = {
+		name = story.101.aa
+		add_modifier = {
+			modifier = voidworms_hunting_buff
+			days = -1
+		}
+		increase_hunted_fauna_count = yes
+	}
+
+	option = {
+		name = story.101.bb
+		capital_scope = {
+			enable_special_project = {
+				name = "VOIDWORMS_PROJECT"
+				location = this
+				owner = root.owner
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			country_event = {
+				id = grand_archive.200
+				days = 30
+				scopes = {
+					from = event_target:voidworms_country
+					fromfrom = root.from
+				}
+			}
+		}
+	}
+}
+
+# Voidworms kill-check for hunting buff
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = grand_archive.2010
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = from
+		from = {
+			is_voidworms_country_type = yes
+		}
+		has_modifier = voidworms_hunting_buff
+	}
+
+	immediate = {
+		add_resource = { food = @voidworms_hunting_buff_food_reward }
+	}
+}
+
+# Voidworms special project outcome
+country_event = {
+	id = grand_archive.2015
+	title = grand_archive.2015.name
+	desc = grand_archive.2015.desc
+	picture = GFX_evt_voidworms
+	show_sound = ga_event_voidworms_plague
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2015.a
+		add_modifier = {
+			modifier = voidworm_enzymes
+			days = -1
+		}
+	}
+
+	option = {
+		trigger = {
+			NOT = { has_technology = tech_voidworm_immunity }
+		}
+		name = grand_archive.2015.b
+		add_research_option = tech_voidworm_immunity
+		add_tech_progress = {
+			tech = tech_voidworm_immunity
+			progress = 0.5
+		}
+	}
+}
+
+# Voidworm Troika killed during special project
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = grand_archive.2040
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_special_project = VOIDWORM_GLANDS_PROJECT
+		from = {
+			is_voidworms_hostile_country_type = yes
+		}
+		fromfromfrom = {
+			has_fleet_flag = is_actively_bombarding
+		}
+	}
+
+	immediate = {
+		abort_special_project = { type = VOIDWORM_GLANDS_PROJECT }
+		fromfromfrom = {
+			create_ambient_object = {
+				type = voidworm_carcass_01_object
+				location = this
+			}
+		}
+		last_created_ambient_object = {
+			enable_special_project = {
+				name = VOIDWORM_TITAN_DEBRIS_PROJECT
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+# Voidworm fleet destroyed
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = grand_archive.2050
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_voidworms_hostile_country_type = yes
+			NOT = {
+				any_owned_fleet = {
+					NOT = { is_same_value = root.fromfromfrom }
+				}
+			}
+		}
+		fromfromfrom = {
+			NOT = { is_ship_size = voidworm_nest }
+		}
+	}
+
+	immediate = {
+		country_event = {
+			id = grand_archive.2052
+			scopes = { from = fromfromfrom.solar_system }
+		}
+	}
+}
+
+# Voidworm starbase destroyed in home system
+# This = owner of ship 1 (combatant)
+# From = owner of ship 2 (destroyed)
+# FromFrom = ship 1
+# FromFromFrom = ship 2
+country_event = {
+	id = grand_archive.2051
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_voidworms_hostile_country_type = yes
+		}
+		fromfromfrom = {
+			is_ship_size = voidworm_nest
+			solar_system = {
+				has_star_flag = voidworms_system
+				NOT = {
+					any_ship_in_system = {
+						NOT = { is_same_value = prev }
+						is_ship_size = voidworm_nest
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		fromfromfrom.solar_system = {
+			remove_star_flag = voidworms_system
+			remove_voidworm_system_poi = yes
+		}
+		if = {
+			limit = {
+				count_system = {
+					limit = { has_star_flag = voidworms_system }
+					count <= 0
+				}
+			}
+			every_playable_country = {
+				if = {
+					limit = { has_event_chain = voidworm_crisis_eradicate_chain }
+					end_event_chain = voidworm_crisis_eradicate_chain
+				}
+				random_situation = {
+					limit = { is_situation_type = situation_voidworm_plague }
+					add_situation_progress = 1000 # Finish situation
+				}
+			}
+			end_voidworms_crisis = yes
+			if = {
+				limit = {
+					from = {
+						check_variable_arithmetic = {
+							which = value:voidworm_ships_owned
+							value <= 0
+						}
+					}
+				}
+				country_event = {
+					id = grand_archive.2052
+					scopes = { from = root.fromfromfrom.solar_system }
+				}
+			}
+			else = {
+				# Destroying every nest should give you Voidworm heart even if they're not extinct yet
+				country_event = {
+					id = grand_archive.2053
+					scopes = { from = root.fromfromfrom.solar_system }
+				}
+			}
+		}
+		else = {
+			country_event = {
+				id = grand_archive.2054
+				scopes = { from = root.fromfromfrom.solar_system }
+			}
+		}
+	}
+}
+
+# Voidworms are now extinct
+country_event = {
+	id = grand_archive.2052
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = voidworms_extinct }
+	}
+
+	immediate = {
+		end_voidworms_crisis = yes
+		set_global_flag = voidworms_extinct
+		# Since now voidworm country isn't automatically destroyed, remove respawn mechanic when extinct
+		event_target:voidworms_country = {
+			random_situation = {
+				limit = { is_situation_type = voidworm_country_situation }
+				destroy_situation = this
+			}
+		}
+		country_event = {
+			id = grand_archive.2053
+			scopes = { from = from }
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2053
+	title = grand_archive.2053.name
+	desc = grand_archive.2053.desc
+	picture = GFX_evt_frenzied_voidworms_destroyed
+	show_sound = ga_event_voidworms_system_destroyed
+	location = from
+	is_triggered_only = yes
+
+	specimen = voidworm_heart
+
+	trigger = {
+		has_global_flag = voidworms_plague_crisis_ended
+		NOT = { has_specimen = voidworm_heart }
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+country_event = {
+	id = grand_archive.2054
+	title = grand_archive.2054.name
+	desc = grand_archive.2054.desc
+	picture = GFX_evt_frenzied_voidworms_destroyed
+	show_sound = ga_event_voidworms_system_destroyed
+	location = from
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		if = {
+			limit = {
+				NOT = { has_modifier = voidworm_slayers_modifier }
+			}
+			add_modifier = { modifier = voidworm_slayers_modifier }
+		}
+	}
+}
+
+situation_event = {
+	id = grand_archive.2055
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		change_variable = {
+			which = elapsed_months
+			value = 1
+		}
+		owner = {
+			# Monthly pulse events
+			country_event = { id = grand_archive.2065 }				# Voidworms Respawning
+
+			if = {
+				limit = {
+					check_variable_arithmetic = {
+						which = prev.elapsed_months
+						modulo = 12
+						value = 0
+					}
+				}
+
+				set_variable_to_random_value = {
+					which = voidworm_crisis_start_roll
+					min = 0
+					max = 100
+				}
+
+				# Yearly pulse events
+				country_event = { id = grand_archive.2300 }			# Voidworm Crisis start
+			}
+
+			if = {
+				limit = {
+					check_variable_arithmetic = {
+						which = value:voidworm_nest_owned
+						value > 0
+					}
+					check_variable_arithmetic = {
+						which = prev.elapsed_months
+						modulo = value:voidworm_system_month_respawn_time
+						value = 0
+					}
+				}
+				# respawn pulse event
+				country_event = { id = grand_archive.2460 }
+			}
+		}
+	}
+}
+
+# Voidworms Respawn
+country_event = {
+	id = grand_archive.2065
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		is_voidworms_hostile_country_type = yes
+		check_variable_arithmetic = {
+			which = value:voidworm_nest_owned
+			value > 0
+		}
+		OR = {
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_0
+				num_ships < 2
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_2
+				num_ships < 3
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_4
+				num_ships < 6
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_6
+				num_ships < 9
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_8
+				num_ships < 12
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_10
+				num_ships < 15
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_12
+				num_ships < 18
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_14
+				num_ships < 21
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_16
+				num_ships < 24
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_18
+				num_ships < 27
+			}
+			AND = {
+				NOR = {
+					has_global_flag = ariphaos_patch_galaxy_size_0
+					has_global_flag = ariphaos_patch_galaxy_size_2
+					has_global_flag = ariphaos_patch_galaxy_size_4
+					has_global_flag = ariphaos_patch_galaxy_size_6
+					has_global_flag = ariphaos_patch_galaxy_size_8
+					has_global_flag = ariphaos_patch_galaxy_size_10
+					has_global_flag = ariphaos_patch_galaxy_size_12
+					has_global_flag = ariphaos_patch_galaxy_size_14
+					has_global_flag = ariphaos_patch_galaxy_size_16
+					has_global_flag = ariphaos_patch_galaxy_size_18
+				}
+				num_ships < 30
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+			5 = {
+				random_system = {
+					limit = { has_star_flag = voidworms_system }
+					random_system_planet = {
+						save_event_target_as = voidworms_planet
+					}
+					create_voidworms_small_fleet = {
+						COUNT = 3
+						LOCATION = event_target:voidworms_planet
+					}
+					create_voidworms_medium_fleet = {
+						COUNT = 3
+						LOCATION = event_target:voidworms_planet
+					}
+					create_voidworms_large_fleet = {
+						COUNT = 3
+						LOCATION = event_target:voidworms_planet
+					}
+				}
+			}
+			150 = {}
+		}
+	}
+}
+
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = grand_archive.2080
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = voidworms_plague_crisis_ended }
+		exists = owner
+		owner = {
+			is_voidworms_hostile_country_type = yes
+		}
+		NOT = { is_ship_size = voidworm_nest }
+	}
+
+	immediate = {
+		if = {
+			limit = { has_modifier = voidworms_at_home_modifier }
+			remove_modifier = voidworms_at_home_modifier
+		}
+		if = {
+			limit = {
+				from = { has_star_flag = voidworms_system }
+			}
+			add_modifier = {
+				modifier = voidworms_at_home_modifier
+				mult = value:voidworms_growth_mult
+			}
+		}
+	}
+}
+
+situation_event = {
+	id = grand_archive.2090
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				has_situation_flag = approach_set
+				NOT = { has_situation_flag = path_locked }
+			}
+			set_timed_situation_flag = {
+				flag = path_locked
+				years = @voidworm_plague_approach_cooldown_years
+			}
+		}
+		else_if = {
+			limit = { NOT = { has_situation_flag = approach_set } }
+			set_situation_flag = approach_set
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2095
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		fromfrom = {
+			is_ship_size = voidworm_nest
+		}
+	}
+
+	immediate = {
+		create_ambient_object = {
+			type = voidworm_broken_nest
+			location = fromfrom
+			appear_state = "appearing"
+		}
+		from = {
+			set_country_flag = destroyed_voidworm_nest
+		}
+	}
+}
+
+########################################
+# Voidworms Galactic Resolution Events #
+########################################
+
+# Killed Voidworms - Eradication
+country_event = {
+	id = grand_archive.2100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		from = {
+			is_voidworms_country_type = yes
+		}
+		is_active_resolution = "resolution_voidworm_eradication"
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				has_country_flag = resolution_breached_voidworms_inside_borders
+				NOT = {
+					any_system_within_border = {
+						any_fleet_in_system = {
+							owner = {
+								is_voidworms_country_type = yes
+							}
+						}
+					}
+				}
+			}
+			remove_country_flag = resolution_breached_voidworms_inside_borders
+		}
+	}
+}
+
+# Voidworms Inside Borders
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = grand_archive.2101
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		owner = {
+			is_voidworms_country_type = yes
+		}
+		is_active_resolution = "resolution_voidworm_eradication"
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				exists = from.owner
+				from = {
+					owner = {
+						is_galactic_community_member = yes
+						NOT = { has_country_flag = resolution_breached_voidworms_inside_borders }
+					}
+				}
+			}
+			from = {
+				owner = {
+					set_country_flag = resolution_breached_voidworms_inside_borders
+					country_event = {
+						id = grand_archive.2105
+						scopes = { from = root.from }
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_playable_country = {
+					is_galactic_community_member = yes
+					has_country_flag = resolution_breached_voidworms_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_voidworms_country_type = yes
+								}
+							}
+						}
+					}
+				}
+			}
+			every_playable_country = {
+				limit = {
+					is_galactic_community_member = yes
+					has_country_flag = resolution_breached_voidworms_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_voidworms_country_type = yes
+								}
+							}
+						}
+					}
+				}
+				remove_country_flag = resolution_breached_voidworms_inside_borders
+			}
+		}
+	}
+}
+
+# Voidworms Inside Borders - Resolution Enacted
+country_event = {
+	id = grand_archive.2102
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_playable_country = {
+					is_galactic_community_member = yes
+					any_system_within_border = {
+						any_fleet_in_system = {
+							owner = {
+								is_voidworms_country_type = yes
+							}
+						}
+					}
+				}
+			}
+			every_playable_country = {
+				limit = {
+					is_galactic_community_member = yes
+					any_system_within_border = {
+						any_fleet_in_system = {
+							owner = {
+								is_voidworms_country_type = yes
+							}
+						}
+					}
+				}
+				set_country_flag = resolution_breached_voidworms_inside_borders
+				country_event = { id = grand_archive.2103 }
+			}
+		}
+	}
+}
+
+# Voidworms Inside Borders - Resolution Enacted - Informed
+country_event = {
+	id = grand_archive.2103
+	title = "grand_archive.2103.name"
+	desc = "grand_archive.2103.desc"
+	picture = GFX_evt_civil_action
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+	}
+}
+
+# Voidworms Inside Borders - Monthly Clean Up Event
+event = {
+	id = grand_archive.2104
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		is_active_resolution = "resolution_voidworm_eradication"
+		any_playable_country = {
+			has_country_flag = resolution_breached_voidworms_inside_borders
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_playable_country = {
+					has_country_flag = resolution_breached_voidworms_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_voidworms_country_type = yes
+								}
+							}
+						}
+					}
+				}
+			}
+			every_playable_country = {
+				limit = {
+					has_country_flag = resolution_breached_voidworms_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_voidworms_country_type = yes
+								}
+							}
+						}
+					}
+				}
+				remove_country_flag = resolution_breached_voidworms_inside_borders
+			}
+		}
+	}
+}
+
+# Voidworms Inside Borders - Informed
+country_event = {
+	id = grand_archive.2105
+	title = "grand_archive.2105.name"
+	desc = "grand_archive.2105.desc"
+	picture = GFX_evt_voidworm_flock
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+	}
+}
+
+# Voidworms Inside Borders - Monthly Check
+event = {
+	id = grand_archive.2106
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		is_active_resolution = "resolution_voidworm_eradication"
+		any_playable_country = {
+			NOT = { has_country_flag = resolution_breached_voidworms_inside_borders }
+			any_system_within_border = {
+				any_fleet_in_system = {
+					exists = owner
+					owner = {
+						is_voidworms_country_type = yes
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				NOT = { has_country_flag = resolution_breached_voidworms_inside_borders }
+				any_system_within_border = {
+					any_fleet_in_system = {
+						exists = owner
+						owner = {
+							is_voidworms_country_type = yes
+						}
+					}
+				}
+			}
+			set_country_flag = resolution_breached_voidworms_inside_borders
+			country_event = { id = grand_archive.2107 }
+		}
+	}
+}
+
+# Voidworms Inside Borders - Resolution Enacted - Informed
+country_event = {
+	id = grand_archive.2107
+	title = "grand_archive.2105.name"
+	desc = "grand_archive.2107.desc"
+	picture = GFX_evt_voidworm_flock
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_fleet_in_system = {
+					exists = owner
+					owner = {
+						is_voidworms_country_type = yes
+					}
+				}
+			}
+			save_event_target_as = invaded_system
+		}
+	}
+
+	option = {
+		name = OK
+	}
+}
+
+# Planet bombarded by Voidworms
+# This = Planet
+# From = Bombarder (country)
+planet_event = {
+	id = grand_archive.2190
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_voidworms_hostile_country_type = yes
+		}
+		OR = {
+			has_orbital_bombardment_stance = voidworm_invasion
+			has_orbital_bombardment_stance = voidworm_invasion_crisis
+		}
+	}
+
+	immediate = {
+		every_fleet_in_orbit = {
+			limit = {
+				is_ship_size = voidworms_titan
+				NOT = { has_fleet_flag = is_actively_bombarding }
+			}
+			set_fleet_flag = is_actively_bombarding
+		}
+		owner = {
+			country_event = {
+				id = grand_archive.2195
+				scopes = { from = root }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2195
+	title = "grand_archive.2195.name"
+	desc = {
+		trigger = {
+			species = {
+				NOR = {
+					has_trait = trait_mechanical
+					has_trait = trait_machine_unit
+					is_lithoid = yes
+				}
+			}
+		}
+		text = grand_archive.2195.desc.default
+	}
+	desc = {
+		trigger = {
+			species = {
+				OR = {
+					has_trait = trait_mechanical
+					has_trait = trait_machine_unit
+					is_lithoid = yes
+				}
+			}
+		}
+		text = grand_archive.2195.desc.rocks
+	}
+	picture = GFX_evt_voidworms
+	show_sound = ga_event_voidworms_plague
+	is_triggered_only = yes
+	location = from
+
+	trigger = {
+		NOT = { has_country_flag = bombarded_by_voidworms_event }
+	}
+
+	immediate = {
+		set_country_flag = bombarded_by_voidworms_event
+	}
+
+	option = {
+		name = {
+			trigger = { is_homicidal = no }
+			text = grand_archive.2195.a
+		}
+		name = {
+			trigger = { is_homicidal = yes }
+			text = grand_archive.2195.a.homicidal
+		}
+	}
+}
+
+# Voidworms bombarding planet
+# This = Planet where the pop was bombed to death
+# From = Country bombarding the planet
+# FromFrom = Biggest fleet bombarding the planet (the one we used the bombardment stance from)
+planet_event = {
+	id = grand_archive.2200
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			has_orbital_bombardment_stance = voidworm_invasion
+			has_orbital_bombardment_stance = voidworm_invasion_crisis
+		}
+	}
+
+	immediate = {
+		set_planet_flag = infected_by_voidworms
+		if = {
+			limit = {
+				exists = owner
+				owner = {
+					NOR = {
+						has_country_flag = voidworms_spawn_disabled
+						has_technology = tech_voidworm_immunity
+					}
+				}
+				event_target:voidworms_country = {
+					check_variable_arithmetic = {
+						which = value:voidworm_ships_owned
+						value < value:voidworm_crisis_maximum_population
+					}
+				}
+			}
+			set_variable = {
+				which = local_voidworm_to_spawn
+				value = 3
+			}
+			fromfrom = {
+				every_owned_ship = {
+					export_modifier_to_variable = {
+						modifier = voidworm_nymph_chance_on_bombardment
+						variable = local_voidworm_nymph_chance_value
+					}
+					if = {
+						limit = {
+							check_variable = {
+								which = local_voidworm_nymph_chance_value
+								value > 0
+							}
+						}
+						set_variable_to_random_value = {
+							which = local_roll
+							min = 0
+							max = 1
+							rounded = no
+						}
+						if = {
+							limit = {
+								check_variable = {
+									which = local_voidworm_nymph_chance_value
+									value >= local_roll
+								}
+							}
+							root = {
+								change_variable = {
+									which = local_voidworm_to_spawn
+									value = 1
+								}
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					any_fleet_in_orbit = {
+						is_ship_size = voidworms_small
+						owner = {
+							is_same_value = root.from
+						}
+						count_used_naval_cap = {
+							limit = { always = yes }
+							count <= @voidworms_max_naval_cap
+						}
+					}
+				}
+				random_fleet_in_orbit = {
+					limit = {
+						is_ship_size = voidworms_small
+						owner = {
+							is_same_value = root.from
+						}
+					}
+					create_multiple_voidworm_ship = {
+						DESIGN = NAME_Voidworms_Nymph
+						COUNT = root.local_voidworm_to_spawn
+						AGE = 0
+					}
+					save_event_target_as = nymph_fleet
+				}
+			}
+			else = {
+				create_voidworm_fleet = {
+					DESIGN = NAME_Voidworms_Nymph
+					COUNT = root.local_voidworm_to_spawn
+					LOCATION = root
+					PARENT = fromfrom
+					OWNER = from
+					AGE = 0
+				}
+				last_created_fleet = {
+					save_event_target_as = nymph_fleet
+				}
+			}
+			if = {
+				limit = {
+					exists = event_target:nymph_fleet
+				}
+				event_target:nymph_fleet = {
+					every_owned_ship = {
+						limit = {
+							NOR = {
+								has_modifier = space_critter_rarity_common
+								has_modifier = space_critter_rarity_rare
+								has_modifier = space_critter_rarity_epic
+								has_modifier = space_critter_rarity_exceptional
+							}
+						}
+						root.fromfrom = {
+							random_owned_ship = {
+								limit = {
+									is_ship_size = voidworms_titan
+								}
+								switch = {
+									trigger = has_modifier
+									space_critter_rarity_common = {
+										prevprev = {
+											add_modifier = { modifier = space_critter_rarity_common }
+										}
+									}
+									space_critter_rarity_rare = {
+										prevprev = {
+											add_modifier = { modifier = space_critter_rarity_rare }
+										}
+									}
+									space_critter_rarity_epic = {
+										prevprev = {
+											add_modifier = { modifier = space_critter_rarity_epic }
+										}
+									}
+									space_critter_rarity_exceptional = {
+										prevprev = {
+											add_modifier = { modifier = space_critter_rarity_exceptional }
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		fromfrom = {
+			change_variable = {
+				which = voidworm_killed_population_count
+				value = 1
+			}
+		}
+		if = {
+			limit = {
+				from = {
+					has_country_flag = voidworm_crisis_active
+				}
+			}
+			owner = {
+				change_variable = {
+					which = voidworm_plague_pop_victims_count
+					value = 1
+				}
+				random_situation = {
+					limit = { is_situation_type = situation_voidworm_plague }
+					add_situation_progress = @voidworm_plague_progress_per_pop_killed
+				}
+			}
+		}
+	}
+}
+
+# Voidworm immunity for all countries at game start
+country_event = {
+	id = grand_archive.2210
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		is_voidworms_country_type = no
+		NOT = { has_country_flag = was_recently_targeted_by_voidworms }
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = was_recently_targeted_by_voidworms
+			years = 35
+		}
+	}
+}
+
+####################################
+# Voidworm Galactic Plague Crisis #
+####################################
+
+# Voidworm Plague crisis start
+country_event = {
+	id = grand_archive.2300
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = voidworms_plague_crisis_started }
+		mid_game_years_passed >= @voidworm_crisis_min_year
+		end_game_years_passed < 0
+		is_country_type = voidworms
+		check_variable_arithmetic = {
+			which = value:voidworm_nest_owned
+			value > 0
+		}
+		check_variable = {
+			which = voidworm_crisis_start_roll
+			value < value:voidworm_crisis_start_chance
+		}
+	}
+
+	immediate = {
+		set_global_flag = voidworms_plague_crisis_started
+		set_country_type = voidworms_crisis
+		set_country_flag = voidworm_crisis_active
+
+		add_modifier = {
+			modifier = voidworms_crisis_growth_modifier
+		}
+
+		every_system = {
+			limit = { has_star_flag = voidworms_system }
+			every_fleet_in_system = {
+				limit = {
+					is_owned_by = root
+					NOT = { is_ship_size = voidworm_nest }
+				}
+				if = {
+					limit = { has_modifier = voidworms_at_home_modifier }
+					remove_modifier = voidworms_at_home_modifier
+				}
+				add_modifier = {
+					modifier = voidworms_at_home_modifier
+					mult = @voidworms_crisis_growth_mult
+				}
+			}
+			random_system_planet = {
+				limit = { is_star = no }
+				create_voidworms_titan_fleet = {
+					COUNT = 3
+					LOCATION = prev
+					AGE = random
+				}
+			}
+		}
+
+		every_playable_country = {
+			country_event = { id = grand_archive.2310 }
+		}
+
+		country_event = { id = grand_archive.2305 days = 360 }
+	}
+}
+
+# Voidworm Plague crisis respawn
+country_event = {
+	id = grand_archive.2305
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = voidworms_plague_crisis_ended }
+		check_variable_arithmetic = {
+			which = value:voidworm_nest_owned
+			value > 0
+		}
+		is_voidworm_crisis_eligible_for_respawn = yes
+	}
+
+	immediate = {
+		every_system = {
+			limit = {
+				is_system_eligible_for_voidworm_respawn = yes
+			}
+			random_fleet_in_system = {
+				limit = {
+					is_ship_size = voidworm_nest
+				}
+				create_voidworms_small_fleet = {
+					COUNT = 9
+					LOCATION = prev
+				}
+				create_voidworms_medium_fleet = {
+					COUNT = 6
+					LOCATION = prev
+				}
+				create_voidworms_large_fleet = {
+					COUNT = 3
+					LOCATION = prev
+				}
+				create_voidworms_titan_fleet = {
+					COUNT = 3
+					LOCATION = prev
+					AGE = random
+				}
+			}
+		}
+
+		country_event = { id = grand_archive.2305 days = 360 }
+	}
+}
+
+# Voidworm Plague Crisis starting event for players
+country_event = {
+	id = grand_archive.2310
+	title = grand_archive.2310.name
+	desc = {
+		trigger = {
+			has_communications = event_target:voidworms_country
+			NOT = { has_technology = tech_voidworm_immunity }
+		}
+		text = grand_archive.2310.desc.default
+	}
+	desc = {
+		trigger = {
+			has_communications = event_target:voidworms_country
+			has_technology = tech_voidworm_immunity
+		}
+		text = grand_archive.2310.desc.tech
+	}
+	desc = {
+		trigger = {
+			NOT = { has_communications = event_target:voidworms_country }
+		}
+		text = grand_archive.2310.desc.nocontact
+	}
+	picture = GFX_evt_situation_voidworm_plague
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+
+	immediate = {
+		create_voidworm_crisis_eradicate_chain = yes
+		start_situation = {
+			type = situation_voidworm_plague
+		}
+	}
+
+	option = {
+		name = grand_archive.2310.a
+	}
+
+	after = {
+		if = {
+			limit = {
+				NOT = { has_communications = event_target:voidworms_country }
+			}
+			establish_communications_no_message = event_target:voidworms_country
+		}
+	}
+}
+
+# Voidworm Immunity acquired during Voidworm Plague situation
+country_event = {
+	id = grand_archive.2315
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		last_increased_tech = tech_voidworm_immunity
+		any_situation = {
+			is_situation_type = situation_voidworm_plague
+		}
+	}
+
+	immediate = {
+		random_situation = {
+			limit = {
+				is_situation_type = situation_voidworm_plague
+			}
+			add_situation_progress = @vaccine_situation_advancement
+		}
+		event_target:voidworms_country = {
+			every_owned_fleet = {
+				limit = {
+					has_fleet_flag = is_actively_bombarding
+					exists = orbit
+					orbit = {
+						exists = planet.owner
+						planet.owner = {
+							has_technology = tech_voidworm_immunity
+						}
+					}
+				}
+				set_fleet_stance = passive
+			}
+		}
+	}
+}
+
+# Voidworms killed during crisis situation
+# This = owner of ship 1 (combatant)
+# From = owner of ship 2 (destroyed)
+# FromFrom = ship 1
+# FromFromFrom = ship 2
+country_event = {
+	id = grand_archive.2320
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = { is_voidworms_country_type = yes }
+		is_voidworms_crisis_active = yes
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				any_situation = {
+					is_situation_type = situation_voidworm_plague
+				}
+				OR = {
+					is_same_value = root
+					is_friendly_to = root
+				}
+			}
+			random_situation = {
+				limit = { is_situation_type = situation_voidworm_plague }
+				add_situation_progress = value:voidworm_plague_progress_per_voidworm_killed|SCOPE|root.fromfromfrom|
+			}
+		}
+	}
+}
+
+# If a country becomes playable or is created during voidworms crisis, becomes immune
+# this = country
+country_event = {
+	id = grand_archive.2350
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		is_country_type = default
+		is_voidworms_crisis_active = yes
+	}
+
+	immediate = {
+		set_country_flag = voidworms_bombardment_disabled
+	}
+}
+
+##################################
+# Voidworms Crisis Random Events #
+##################################
+
+# Support Fleets events
+
+country_event = {
+	id = grand_archive.2400
+	title = grand_archive.2400.name
+	desc = grand_archive.2400.desc
+	picture = GFX_evt_hangar_bay
+	show_sound = event_construction
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2400.a
+		allow = { has_resource = { type = energy amount >= 1000 } }
+		add_resource = { energy = -1000 }
+		add_modifier = {
+			modifier = production_surge_modifier
+			days = 3600
+		}
+	}
+
+	option = {
+		name = grand_archive.2400.b
+		if = {
+			limit = { has_valid_civic = civic_beastmasters }
+			add_monthly_resource_mult = {
+				resource = food
+				value = @tier3materialreward
+				min = @tier3materialmin
+				max = @tier3materialmax
+			}
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = @tier3materialreward
+				min = @tier3materialmin
+				max = @tier3materialmax
+			}
+		}
+		else = {
+			add_monthly_resource_mult = {
+				resource = alloys
+				value = @tier5materialreward
+				min = @tier5materialmin
+				max = @tier5materialmax
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2405
+	title = grand_archive.2405.name
+	desc = {
+		trigger = { is_gestalt = no }
+		text = grand_archive.2405.desc.default
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = grand_archive.2405.desc.gestalt
+	}
+	picture = GFX_evt_salute
+	show_sound = event_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2405.a
+		trigger = { is_gestalt = no }
+	}
+
+	option = {
+		name = GOOD
+		trigger = { is_gestalt = yes }
+	}
+
+	after = {
+		custom_tooltip = grand_archive.2405.tt
+		hidden_effect = {
+			refresh_leader_pool = yes
+			while = {
+				count = 3
+				create_saved_leader = {
+					creator = this
+					key = new_commander
+					class = commander
+					species = owner_main_species
+					name = random
+					skill = 2
+				}
+				activate_saved_leader = {
+					add_to_owned = no
+					key = new_commander
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2410
+	title = grand_archive.2410.name
+	desc = {
+		trigger = { is_gestalt = no }
+		text = grand_archive.2410.desc.default
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = grand_archive.2410.desc.gestalt
+	}
+	picture = GFX_evt_hangar_bay
+	show_sound = event_machinery
+
+	is_triggered_only = yes
+
+	option = {
+		name = GOOD
+		if = {
+			limit = {
+				NOT = { has_technology = tech_ship_armor_2 }
+				can_research_technology = tech_ship_armor_2
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_ship_armor_2 } }
+				add_research_option = tech_ship_armor_2
+			}
+			add_tech_progress = {
+				tech = tech_ship_armor_2
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_armor_hardeners_1 }
+				can_research_technology = tech_armor_hardeners_1
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_armor_hardeners_1 } }
+				add_research_option = tech_armor_hardeners_1
+			}
+			add_tech_progress = {
+				tech = tech_armor_hardeners_1
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shields_2 }
+				can_research_technology = tech_shields_2
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shields_2 } }
+				add_research_option = tech_shields_2
+			}
+			add_tech_progress = {
+				tech = tech_shields_2
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_ship_armor_3 }
+				can_research_technology = tech_ship_armor_3
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_ship_armor_3 } }
+				add_research_option = tech_ship_armor_3
+			}
+			add_tech_progress = {
+				tech = tech_ship_armor_3
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_armor_hardeners_2 }
+				can_research_technology = tech_armor_hardeners_2
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_armor_hardeners_2 } }
+				add_research_option = tech_armor_hardeners_2
+			}
+			add_tech_progress = {
+				tech = tech_armor_hardeners_2
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shields_3 }
+				can_research_technology = tech_shields_3
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shields_3 } }
+				add_research_option = tech_shields_3
+			}
+			add_tech_progress = {
+				tech = tech_shields_3
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_ship_armor_4 }
+				can_research_technology = tech_ship_armor_4
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_ship_armor_4 } }
+				add_research_option = tech_ship_armor_4
+			}
+			add_tech_progress = {
+				tech = tech_ship_armor_4
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shields_4 }
+				can_research_technology = tech_shields_4
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shields_4 } }
+				add_research_option = tech_shields_4
+			}
+			add_tech_progress = {
+				tech = tech_shields_4
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shield_rechargers_1 }
+				can_research_technology = tech_shield_rechargers_1
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shield_rechargers_1 } }
+				add_research_option = tech_shield_rechargers_1
+			}
+			add_tech_progress = {
+				tech = tech_shield_rechargers_1
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_ship_armor_5 }
+				can_research_technology = tech_ship_armor_5
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_ship_armor_5 } }
+				add_research_option = tech_ship_armor_5
+			}
+			add_tech_progress = {
+				tech = tech_ship_armor_5
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shield_hardeners_1 }
+				can_research_technology = tech_shield_hardeners_1
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shield_hardeners_1 } }
+				add_research_option = tech_shield_hardeners_1
+			}
+			add_tech_progress = {
+				tech = tech_shield_hardeners_1
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shields_5 }
+				can_research_technology = tech_shields_5
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shields_5 } }
+				add_research_option = tech_shields_5
+			}
+			add_tech_progress = {
+				tech = tech_shields_5
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_shield_hardeners_2 }
+				can_research_technology = tech_shield_hardeners_2
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_shield_hardeners_2 } }
+				add_research_option = tech_shield_hardeners_2
+			}
+			add_tech_progress = {
+				tech = tech_shield_hardeners_2
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_crystal_armor_1 }
+				can_research_technology = tech_crystal_armor_1
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_crystal_armor_1 } }
+				add_research_option = tech_crystal_armor_1
+			}
+			add_tech_progress = {
+				tech = tech_crystal_armor_1
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_dark_matter_deflector }
+				can_research_technology = tech_dark_matter_deflector
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_dark_matter_deflector } }
+				add_research_option = tech_dark_matter_deflector
+			}
+			add_tech_progress = {
+				tech = tech_dark_matter_deflector
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_dragon_armor }
+				can_research_technology = tech_dragon_armor
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_dragon_armor } }
+				add_research_option = tech_dragon_armor
+			}
+			add_tech_progress = {
+				tech = tech_dragon_armor
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_technology = tech_crystal_armor_2 }
+				can_research_technology = tech_crystal_armor_2
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_crystal_armor_2 } }
+				add_research_option = tech_crystal_armor_2
+			}
+			add_tech_progress = {
+				tech = tech_crystal_armor_2
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				can_research_technology = tech_repeatable_improved_armor_output
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_repeatable_improved_armor_output } }
+				add_research_option = tech_repeatable_improved_armor_output
+			}
+			add_tech_progress = {
+				tech = tech_repeatable_improved_armor_output
+				progress = @front_line_progress
+			}
+		}
+		else_if = {
+			limit = {
+				can_research_technology = tech_repeatable_improved_shield_output
+			}
+			if = {
+				limit = { NOT = { has_tech_option = tech_repeatable_improved_shield_output } }
+				add_research_option = tech_repeatable_improved_shield_output
+			}
+			add_tech_progress = {
+				tech = tech_repeatable_improved_shield_output
+				progress = @front_line_progress
+			}
+		}
+		else = {
+			add_random_research_option = {
+				add_progress = @front_line_progress
+				category = materials
+				fail_effects = {
+					add_monthly_resource_mult = {
+						resource = physics_research
+						value = @tier2researchreward
+						min = @tier2researchmin
+						max = @tier2researchmax
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2420
+	title = grand_archive.2420.name
+	desc = grand_archive.2420.desc
+	picture = GFX_evt_emergency_workers
+	show_sound = event_laboratory_sound
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_owned_leader = {
+			limit = {
+				NOT = { has_leader_flag = leader_death_events_blocked }
+				is_ruler = no
+				is_heir = no
+				is_organic_species = yes
+				leader_class = scientist
+			}
+			save_event_target_as = infected_leader
+			exile_leader_as = infected_leader
+		}
+	}
+
+	option = {
+		name = grand_archive.2420.a
+		hidden_effect = {
+			return_leader_from_exile = infected_leader
+			event_target:infected_leader = {
+				kill_leader = {
+					show_notification = yes
+					executed = yes
+				}
+			}
+			random_situation = {
+				limit = { is_situation_type = situation_voidworm_plague }
+				add_situation_progress = 100
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.2420.b
+		hidden_effect = {
+			return_leader_from_exile = infected_leader
+			random_list = {
+				1 = {
+					event_target:infected_leader = {
+						kill_leader = { show_notification = yes }
+					}
+				}
+				1 = {
+					event_target:infected_leader = {
+						add_trait = leader_trait_maimed
+					}
+					add_monthly_resource_mult = {
+						resource = unity
+						value = @tier3unityreward
+						min = @tier3unitymin
+						max = @tier3unitymax
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2425
+	title = grand_archive.2425.name
+	desc = grand_archive.2425.desc.default
+	desc = {
+		trigger = {
+			if = {
+				limit = {
+					has_valid_civic = civic_machine_servitor
+				}
+				text = grand_archive.2425.desc.rogue
+			}
+			else_if = {
+				limit = {
+					is_robot_empire = yes
+				}
+				text = grand_archive.2425.desc.robot
+			}
+			else_if = {
+				limit = {
+					is_gestalt = yes
+				}
+				text = grand_archive.2425.desc.gestalt
+			}
+			else = {
+				text = grand_archive.2425.desc.default
+			}
+		}
+	}
+	picture = {
+		trigger = {
+			OR = {
+				is_robot_empire = no
+				has_valid_civic = civic_machine_servitor
+			}
+		}
+		picture = GFX_evt_cover_blown
+	}
+	picture = {
+		trigger = {
+			is_robot_empire = yes
+			NOT = { has_valid_civic = civic_machine_servitor }
+		}
+		picture = GFX_evt_circuitry_modification
+	}
+	show_sound = event_bad_omen
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				is_colony = yes
+				has_planet_flag = infected_by_voidworms
+			}
+			save_event_target_as = infected_planet
+			random_owned_pop = {
+				limit = { is_organic_species = yes }
+				save_event_target_as = infected_planet_pop
+			}
+		}
+		export_resource_stockpile_to_variable = {
+			resource = food
+			variable = current_food_stockpile
+		}
+	}
+
+	option = {
+		name = grand_archive.2425.a.default
+		trigger = {
+			OR = {
+				is_robot_empire = no
+				has_valid_civic = civic_machine_servitor
+			}
+		}
+		custom_tooltip = grand_archive.2425.a.default.tt
+		hidden_effect = {
+			every_owned_planet = {
+				limit = {
+					is_colony = yes
+					is_under_colonization = no
+					count_owned_pop = {
+						limit = { is_organic_species = yes }
+						count > 0
+					}
+				}
+				random_owned_pop = {
+					limit = { is_organic_species = yes }
+					kill_pop = yes
+				}
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1unityreward
+			min = @tier1unitymin
+			max = @tier1unitymax
+		}
+	}
+
+	option = {
+		name = grand_archive.2425.a.robot
+		trigger = {
+			is_robot_empire = yes
+			NOT = { has_valid_civic = civic_machine_servitor }
+		}
+		custom_tooltip = grand_archive.2425.a.robot.tt
+		hidden_effect = {
+			every_owned_planet = {
+				limit = { NOT = { has_planet_flag = infected_by_voidworms } }
+				add_planet_devastation = @infected_devastation
+			}
+		}
+		add_resource = {
+			food = -0.25
+			mult = current_food_stockpile
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1unityreward
+			min = @tier1unitymin
+			max = @tier1unitymax
+		}
+	}
+
+	option = {
+		name = grand_archive.2425.b
+		custom_tooltip = grand_archive.2425.b.tt
+		hidden_effect = {
+			every_owned_planet = {
+				limit = { is_colony = yes }
+				create_voidworms_small_fleet = {
+					COUNT = @voidworm_nymph_spawn_count
+					LOCATION = prev
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2430
+	title = grand_archive.2430.name
+	desc = grand_archive.2430.desc
+	picture = GFX_evt_surrender
+	show_sound = event_criminal_activity
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2430.a
+		allow = {
+			has_resource = { type = energy amount >= 500 }
+			has_resource = { type = minerals amount >= 1000 }
+		}
+		add_resource = {
+			energy = -500
+			minerals = -1000
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
+	}
+
+	option = {
+		name = grand_archive.2430.b
+		trigger = { NOT = { has_valid_civic = civic_media_conglomerate } }
+		add_modifier = {
+			modifier = public_distrust_modifier
+			days = -1
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2440
+	title = grand_archive.2440.name
+	desc = grand_archive.2440.desc
+	picture = GFX_evt_society_research
+	show_sound = event_laboratory_sound
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_random_research_option = {
+			add_progress = 0.5
+			category = biology
+			ignore_prereqs = no
+			fail_effects = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = @tier1researchreward
+					min = @tier1researchmin
+					max = @tier1researchmax
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2445
+	title = grand_archive.2445.name
+	desc = {
+		trigger = { is_gestalt = no }
+		text = grand_archive.2445.desc.default
+	}
+	desc = {
+		trigger = { is_gestalt = yes }
+		text = grand_archive.2445.desc.gestalt
+	}
+	picture = GFX_evt_scientific_experiments
+	show_sound = event_laboratory_sound
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2445.a.default
+		trigger = { is_gestalt = no }
+		random_situation = {
+			limit = { is_situation_type = situation_voidworm_plague }
+			add_situation_progress = 100
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+		add_modifier = {
+			modifier = test_subject_unwilling_modifier
+			days = -1
+		}
+	}
+
+	option = {
+		name = grand_archive.2445.b.default
+		trigger = { is_gestalt = no }
+		random_situation = {
+			limit = { is_situation_type = situation_voidworm_plague }
+			add_situation_progress = 50
+		}
+		add_modifier = {
+			modifier = test_subject_volunteer_modifier
+			days = -1
+		}
+	}
+
+	option = {
+		name = grand_archive.2445.c
+		trigger = { is_gestalt = no }
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
+	}
+
+	option = {
+		name = grand_archive.2445.a.gestalt
+		trigger = { is_gestalt = yes }
+		random_situation = {
+			limit = { is_situation_type = situation_voidworm_plague }
+			add_situation_progress = 100
+		}
+		add_modifier = {
+			modifier = test_subject_gestalt_modifier
+			days = -1
+		}
+	}
+
+	option = {
+		name = grand_archive.2445.b.gestalt
+		trigger = { is_gestalt = yes }
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1unityreward
+			min = @tier1unitymin
+			max = @tier1unitymax
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2450
+	title = grand_archive.2450.name
+	desc = grand_archive.2450.desc
+	picture = GFX_evt_voidworms
+	show_sound = event_laboratory_sound
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2450.a
+	}
+
+	option = {
+		name = grand_archive.2450.b
+		capital_scope = {
+			enable_special_project = {
+				name = "VOIDWORM_GLANDS_PROJECT"
+				owner = root
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2455
+	title = grand_archive.2455.name
+	desc = grand_archive.2455.desc
+	picture = GFX_evt_voidworm_flock
+	show_sound = event_laboratory_sound
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		random_situation = {
+			limit = { is_situation_type = situation_voidworm_plague }
+			add_situation_progress = 100
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier5unityreward
+			min = @tier5unitymin
+			max = @tier5unitymax
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2460
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_global_flag = voidworms_plague_crisis_started }
+		check_variable_arithmetic = {
+			which = value:voidworm_nest_owned
+			value > 0
+		}
+		is_voidworm_eligible_for_respawn = yes
+	}
+
+	immediate = {
+		every_system = {
+			limit = { has_star_flag = voidworms_system }
+			random_fleet_in_system = {
+				limit = { is_ship_size = voidworm_nest }
+				create_voidworms_small_fleet = {
+					COUNT = 3
+					LOCATION = prev
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.2500
+	title = grand_archive.2500.name
+	desc = {
+		trigger = {
+			NOT = { has_technology = tech_voidworm_immunity }
+		}
+		text = grand_archive.2500.desc.default
+	}
+	desc = {
+		trigger = {
+			has_technology = tech_voidworm_immunity
+		}
+		text = grand_archive.2500.desc.tech
+	}
+	picture = GFX_evt_frenzied_voidworms_pacified
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:voidworms_country
+		event_target:voidworms_country = {
+			any_owned_ship = { always = yes }
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#####################
+# Cutholoids Events #
+#####################
+
+# Cutholoids standard First Contact first event
+first_contact_event = {
+	id = grand_archive.2800
+	title = grand_archive.2800.name
+	desc = grand_archive.2800.desc
+	picture = GFX_evt_cutholoids_first_contact
+	show_sound = ga_cutholoids_idle
+	is_triggered_only = yes
+	location = solar_system
+	first_contact = yes
+
+	abort_trigger = {
+		OR = {
+			NOT = { exists = owner }
+			NOT = { exists = contact_country }
+			owner = { has_communications = root.contact_country }
+		}
+	}
+
+	immediate = {
+		set_name = grand_archive.2800.name
+	}
+
+	after = {
+		hidden_effect = {
+			fire_on_action = {
+				on_action = on_first_contact_started
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.2800.a
+		set_first_contact_starting_stage = yes
+	}
+}
+
+# Cutholoids First Contact
+# FROM = contact location
+country_event = {
+	id = grand_archive.2900
+	title = grand_archive.2900.name
+	desc = {
+		trigger = {
+			text = grand_archive.2900.desc
+			text = newline
+			success_text = {
+				text = grand_archive.2900.desc.primal_calling
+				owner = { has_origin = origin_primal_calling }
+			}
+		}
+	}
+	picture = GFX_evt_cutholoids_first_contact
+	show_sound = ga_cutholoids_idle
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:cutholoids_country
+		has_encountered_cutholoid = no
+	}
+
+	immediate = {
+		# Simulate First Contact
+		set_country_flag = cutholoids_encountered
+		country_event = { id = tutorial.61 }
+		event_target:cutholoids_country = {
+			root = {
+				establish_communications_no_message = prev
+				establish_communication_with_subjects_and_federation = { FLAG = cutholoids_encountered }
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			country_event = {
+				id = grand_archive.200
+				days = 30
+				scopes = {
+					from = event_target:cutholoids_country
+					fromfrom = from.solar_system
+				}
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.2900.a
+		trigger = { is_homicidal = no }
+		capital_scope = {
+			enable_special_project = {
+				name = "RESEARCH_CUTHOLOIDS_PROJECT"
+				location = this
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = {
+			trigger = { is_homicidal = no }
+			text = grand_archive.2900.b
+		}
+		name = {
+			trigger = { is_homicidal = yes }
+			text = grand_archive.2900.b.homicidal
+		}
+		add_modifier = {
+			modifier = cutholoids_hunting_buff
+		}
+		increase_hunted_fauna_count = yes
+	}
+}
+
+# Cutholoids standard First Contact last event
+first_contact_event = {
+	id = grand_archive.2901
+	title = grand_archive.2900.name
+	desc = {
+		trigger = {
+			text = grand_archive.2900.desc
+			text = newline
+			success_text = {
+				text = grand_archive.2900.desc.primal_calling
+				owner = { has_origin = origin_primal_calling }
+			}
+		}
+	}
+	picture = GFX_evt_cutholoids_first_contact
+	show_sound = ga_cutholoids_idle
+
+	is_triggered_only = yes
+	first_contact = yes
+
+	immediate = {
+		set_site_progress_locked = yes
+	}
+
+	option = {
+		name = grand_archive.2900.a
+		trigger = {
+			owner = { is_homicidal = no }
+		}
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = "RESEARCH_CUTHOLOIDS_PROJECT"
+					location = this
+					owner = root
+				}
+			}
+		}
+	}
+
+	option = {
+		name = {
+			trigger = {
+				owner = { is_homicidal = no }
+			}
+			text = grand_archive.2900.b
+		}
+		name = {
+			trigger = {
+				owner = { is_homicidal = yes }
+			}
+			text = grand_archive.2900.b.homicidal
+		}
+		owner = {
+			add_modifier = {
+				modifier = cutholoids_hunting_buff
+			}
+			increase_hunted_fauna_count = yes
+		}
+	}
+
+	after = {
+		finish_first_contact_effect = yes
+		set_site_progress_locked = no
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = grand_archive.200
+					days = 30
+					scopes = {
+						from = event_target:cutholoids_country
+						fromfrom = root.solar_system
+					}
+				}
+			}
+		}
+	}
+}
+
+# Cutholoid Research Special Project end
+country_event = {
+	id = grand_archive.2905
+	title = grand_archive.2905.name
+	desc = grand_archive.2905.desc
+	picture = GFX_evt_cutholoids_hidden
+	show_sound = ga_cutholoids_idle
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.2905.a
+		owner = {
+			add_modifier = { modifier = space_fauna_armor }
+		}
+	}
+
+	option = {
+		name = grand_archive.2905.b
+		owner = {
+			give_technology = { tech = tech_asteroidal_carapace }
+		}
+	}
+}
+
+# Cutholoid kill-check for hunting buff
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = grand_archive.2910
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = from
+		from = {
+			is_cutholoids_country_type = yes
+		}
+		has_modifier = cutholoids_hunting_buff
+	}
+
+	immediate = {
+		add_resource = { minerals = @cutholoids_hunting_buff_mineral_reward }
+	}
+}
+
+# Cutholoids game start spawn
+event = {
+	id = grand_archive.3000
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		cutholoids_enabled = yes
+	}
+
+	immediate = {
+		create_cutholoids_country = yes
+		event_target:global_event_country = {
+			get_galaxy_setup_value = {
+				setting = num_stars
+				which = local_cutholoids_num
+				scale_by = 0.025  # Cutholoids in map = stars / 100 * 1.5 (200 -> 5, 400 -> 10, 600 -> 15, ...)
+			}
+			multiply_variable = {
+				which = local_cutholoids_num
+				value = trigger:cutholoids_scaling
+			}
+		}
+
+		while = {
+			count = event_target:global_event_country.local_cutholoids_num
+
+			reroll_random = yes
+
+			random_system = {
+				limit = {
+					has_owner = no
+					NOT = { has_star_flag = empire_cluster }
+					has_asteroid_belt = yes
+					any_system_planet = {
+						is_planet_class = pc_asteroid
+						has_any_flag = no
+					}
+				}
+
+				weights = {
+					base = 1
+					modifier = {
+						add = 1
+						count_system_planet = {
+							limit = { is_planet_class = pc_asteroid }
+							count > 3
+						}
+					}
+					modifier = {
+						factor = 0.01
+						count_system_planet = {
+							limit = { is_planet_class = pc_cutholoid }
+							count > 0
+						}
+					}
+					modifier = {
+						factor = 0.1
+						any_neighbor_system = {
+							count_system_planet = {
+								limit = { is_planet_class = pc_cutholoid }
+								count > 0
+							}
+						}
+					}
+				}
+
+				random_system_planet = {
+					limit = {
+						is_planet_class = pc_asteroid
+						has_any_flag = no
+					}
+					hide_cutholoid_in_asteroid = yes
+				}
+			}
+		}
+
+		event_target:global_event_country = {
+			clear_variable = local_cutholoids_num
+		}
+	}
+}
+
+# Cutholoid Respawn
+event = {
+	id = grand_archive.3001
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		exists = event_target:cutholoids_country
+		any_country = {
+			has_established_contact = event_target:cutholoids_country
+		}
+		OR = {
+			AND = {
+				OR = {
+					has_global_flag = ariphaos_patch_galaxy_size_0
+					has_global_flag = ariphaos_patch_galaxy_size_2
+				}
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 1
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_4
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 2
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_6
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 3
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_8
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 4
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_10
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 5
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_12
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 6
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_14
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 7
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_16
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 8
+					}
+				}
+			}
+			AND = {
+				has_global_flag = ariphaos_patch_galaxy_size_18
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 9
+					}
+				}
+			}
+			AND = {
+				NOR = {
+					has_global_flag = ariphaos_patch_galaxy_size_0
+					has_global_flag = ariphaos_patch_galaxy_size_2
+					has_global_flag = ariphaos_patch_galaxy_size_4
+					has_global_flag = ariphaos_patch_galaxy_size_6
+					has_global_flag = ariphaos_patch_galaxy_size_8
+					has_global_flag = ariphaos_patch_galaxy_size_10
+					has_global_flag = ariphaos_patch_galaxy_size_12
+					has_global_flag = ariphaos_patch_galaxy_size_14
+					has_global_flag = ariphaos_patch_galaxy_size_16
+					has_global_flag = ariphaos_patch_galaxy_size_18
+				}
+				event_target:cutholoids_country = {
+					check_variable = {
+						which = alive_cutholoids
+						value < 10
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_owner = no
+				NOT = { has_star_flag = empire_cluster }
+				has_asteroid_belt = yes
+				any_system_planet = {
+					is_planet_class = pc_asteroid
+					has_any_flag = no
+					count_playable_country = {
+						limit = {
+							prev = {
+								is_surveyed = { status = yes who = prev }
+							}
+						}
+						count = 0
+					}
+				}
+			}
+
+			weights = {
+				base = 1
+				modifier = {
+					factor = 0.1
+					count_system_planet = {
+						limit = { is_planet_class = pc_cutholoid }
+						count > 0
+					}
+				}
+				modifier = {
+					factor = 0.5
+					any_neighbor_system = {
+						count_system_planet = {
+							limit = { is_planet_class = pc_cutholoid }
+							count > 0
+						}
+					}
+				}
+			}
+
+			random_system_planet = {
+				limit = {
+					is_planet_class = pc_asteroid
+					has_any_flag = no
+					count_playable_country = {
+						limit = {
+							prev = {
+								is_surveyed = { status = yes who = prev }
+							}
+						}
+						count = 0
+					}
+				}
+				hide_cutholoid_in_asteroid = yes
+			}
+		}
+	}
+}
+
+# Ship is being eaten by a hidden Cutholoid (from)
+ship_event = {
+	id = grand_archive.3008
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			save_event_target_as = cutholoid_under_radar
+		}
+		set_disabled = yes
+		leader = {
+			exile_leader_as = leader_eaten_by_cutholoid@owner
+		}
+		fleet = {
+			set_mia = mia_fleet_eaten
+			begin_event_chain = {
+				event_chain = "cutholoid_discovered_chain"
+				target = controller
+			}
+			enable_special_project = {
+				name = "HIDDEN_CUTHOLOID_ATTACK_PROJECT"
+				location = event_target:cutholoid_under_radar
+				owner = controller
+			}
+			enable_special_project = {
+				name = "HIDDEN_CUTHOLOID_CAPTURE_PROJECT"
+				location = event_target:cutholoid_under_radar
+				owner = controller
+			}
+		}
+		controller = {
+			country_event = { id = grand_archive.3011 }
+		}
+	}
+}
+
+# Ship manages to escape Cutholoid (from)
+ship_event = {
+	id = grand_archive.3009
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			save_event_target_as = cutholoid_under_radar
+		}
+		fleet = {
+			if = {
+				limit = {
+					is_cloaked = no
+					can_go_mia = yes
+				}
+				clear_orders = yes
+				set_mia = mia_return_home
+				set_mia_return_delay = 30
+			}
+		}
+		spawn_cutholoid_from_asteroid = {
+			LOCATION = event_target:cutholoid_under_radar
+			EVENT_NAME = revealed_cutholoid
+		}
+		if = {
+			limit = { fleet = { is_cloaked = no } }
+			event_target:revealed_cutholoid.fleet = {
+				set_fleet_stance = aggressive
+			}
+		}
+		controller = {
+			country_event = {
+				id = grand_archive.3012
+				scopes = { from = event_target:revealed_cutholoid }
+			}
+		}
+	}
+}
+
+# Cutholoid surveyed
+# Scope = Ship
+# From = Planet
+ship_event = {
+	id = grand_archive.3010
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		exists = event_target:cutholoids_country
+		from = {
+			is_planet_class = pc_cutholoid
+			NOT = { has_planet_flag = cutholoid_is_eating }
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				controller = {
+					NOR = {
+						has_event_chain = "cutholoid_discovered_chain"
+						has_communications = event_target:cutholoids_country
+						has_country_flag = confronted_by_cutholoid
+					}
+				}
+				fleet = { is_cloaked = no }
+			}
+			from = {
+				set_planet_flag = cutholoid_is_eating
+				solar_system = {
+					save_global_event_target_as = cutholoid_system_for@root.controller
+				}
+			}
+			ship_event = {
+				id = grand_archive.3008
+				days = 1
+				scopes = { from = from }
+			}
+		}
+		else = { # Country is dealing/dealt with a Cutholoid, so we reveal it
+			ship_event = {
+				id = grand_archive.3009
+				days = 1
+				scopes = { from = from }
+			}
+		}
+		controller = { set_country_flag = confronted_by_cutholoid }
+	}
+}
+
+country_event = {
+	id = grand_archive.3011
+	title = "grand_archive.3011.name"
+	desc = grand_archive.3011.desc
+	picture = GFX_evt_cutholoids_hidden
+	show_sound = event_comms_cutoff
+
+	location = event_target:cutholoid_under_radar
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.3011.a
+	}
+}
+
+# from = cutholoid
+country_event = {
+	id = grand_archive.3012
+	title = "grand_archive.3012.name"
+	desc = grand_archive.3012.desc
+	picture = GFX_evt_cutholoids_first_contact
+	show_sound = event_default
+
+	location = from
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = met_another_cutholoid }
+		OR = {
+			has_communications = event_target:cutholoids_country
+			has_active_first_contact_with = event_target:cutholoids_country
+		}
+	}
+
+	immediate = {
+		set_country_flag = met_another_cutholoid
+	}
+
+	option = {
+		name = grand_archive.3012.a
+	}
+}
+
+# This = owner of destroyed ship (cutholoid)
+# From = owner of attacking ship (special project owner)
+# FromFrom = destroyed ship
+# FromFromFrom = attacking ship
+country_event = {
+	id = grand_archive.3014
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		is_cutholoids_country_type = yes
+		exists = fromfrom
+		fromfrom = {
+			has_ship_flag = ambushing_cutholoid
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				fromfrom = { has_ship_flag = spawned_for@prev }
+			}
+			random_owned_fleet = {
+				limit = { has_fleet_flag = revealed_hiding_cutholoid }
+				fleet_event = {
+					id = grand_archive.3015
+					days = 1
+					scopes = {
+						from = root.fromfrom.solar_system
+					}
+				}
+			}
+		}
+	}
+}
+
+# This = missing fleet
+# from = system
+fleet_event = {
+	id = grand_archive.3015
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+	}
+
+	immediate = {
+		set_leader = leader_eaten_by_cutholoid@controller
+		controller = {
+			random_list = {
+				1 = {
+					modifier = {
+						factor = 0
+						has_country_flag = captured_hiding_cutholoid
+					}
+					set_country_flag = leader_digested_by_cutholoid
+				}
+				1 = {}
+			}
+		}
+		fleet_event = { id = grand_archive.3016 }
+	}
+}
+
+# fromfrom = system
+fleet_event = {
+	id = grand_archive.3016
+	title = "grand_archive.3016.name"
+	desc = {
+		text = grand_archive.3016.desc.leader_killed
+		trigger = {
+			leader = { has_trait = leader_trait_cutholoid_victim }
+		}
+	}
+	desc = {
+		text = grand_archive.3016.desc.default
+		trigger = {
+			leader = { NOT = { has_trait = leader_trait_cutholoid_victim } }
+		}
+	}
+	picture = GFX_evt_cutholoids_attack
+	show_sound = ga_cutholoids_idle
+
+	location = fromfrom
+	is_triggered_only = yes
+
+	immediate = {
+		remove_fleet_flag = revealed_hiding_cutholoid
+		set_mia_return_delay = 0
+		every_owned_ship = {
+			set_disabled = no
+		}
+		if = {
+			limit = {
+				controller = { has_country_flag = leader_digested_by_cutholoid }
+			}
+			leader = { add_trait = leader_trait_cutholoid_victim }
+			controller = { remove_country_flag = leader_digested_by_cutholoid }
+		}
+	}
+
+	option = {
+		name = OK
+		leader = {
+			if = {
+				limit = { has_trait = leader_trait_cutholoid_victim }
+				tooltip = {
+					add_trait = leader_trait_cutholoid_victim
+				}
+			}
+		}
+		hidden_effect = {
+			controller = {
+				if = {
+					limit = {
+						has_country_flag = captured_hiding_cutholoid
+						NOT = { has_communications = event_target:cutholoids_country }
+					}
+					country_event = {
+						id = grand_archive.2900
+						days = 5
+						scopes = { from = fromfrom }
+					}
+					remove_country_flag = captured_hiding_cutholoid
+				}
+			}
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				exists = event_target:cutholoid_system_for@controller
+			}
+			clear_global_event_target = cutholoid_system_for@controller
+		}
+	}
+}
+
+fleet_event = {
+	id = grand_archive.3017
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = { can_go_mia = yes }
+			set_mia = mia_return_home
+			set_mia_return_delay = 30
+			every_owned_ship = {
+				set_disabled = no
+			}
+			fleet_event = { id = grand_archive.3018 }
+		}
+		else = {
+			fleet_event = {
+				id = grand_archive.3017
+				days = 1
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = grand_archive.3018
+	title = "grand_archive.3018.name"
+	desc = grand_archive.3018.desc
+	picture = GFX_evt_cutholoids_attack
+	show_sound = ga_cutholoids_emerge
+
+	location = event_target:current_system
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:cutholoid_system_for@controller
+	}
+
+	immediate = {
+		event_target:cutholoid_system_for@controller = {
+			save_event_target_as = current_system
+		}
+	}
+
+	option = {
+		name = grand_archive.3018.a
+	}
+
+	after = {
+		if = {
+			limit = {
+				exists = event_target:cutholoid_system_for@controller
+			}
+			clear_global_event_target = cutholoid_system_for@controller
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.3020
+	title = "grand_archive.3020.name"
+	desc = "grand_archive.3020.desc"
+	picture = GFX_evt_cutholoids_hidden
+	show_sound = ga_cutholoids_emerge
+
+	location = event_target:current_system
+	is_triggered_only = yes
+
+	trigger = {
+		exists = from
+	}
+
+	immediate = {
+		from = {
+			set_leader = leader_eaten_by_cutholoid@root
+			destroy_fleet = this
+		}
+		fromfrom = {
+			solar_system = { save_event_target_as = current_system }
+			save_event_target_as = revealed_cutholoid
+		}
+		spawn_cutholoid_from_asteroid = {
+			LOCATION = event_target:revealed_cutholoid
+		}
+	}
+
+	option = {
+		name = UNFORTUNATE
+	}
+
+	after = {
+		if = {
+			limit = {
+				exists = event_target:cutholoid_system_for@this
+			}
+			clear_global_event_target = cutholoid_system_for@this
+		}
+	}
+}
+
+# When cutholoid is created from code
+ship_event = {
+	id = grand_archive.3024
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		exists = owner
+		owner = { is_cutholoids_country_type = yes }
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = alive_cutholoids
+				value = 1
+			}
+		}
+	}
+}
+
+# Spawn special debris for Cutholoids
+# This = owner of destroyed ship (cutholoid)
+# From = owner of attacking ship
+# FromFrom = destroyed ship
+# FromFromFrom = attacking ship
+country_event = {
+	id = grand_archive.3025
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		is_cutholoids_country_type = yes
+	}
+
+	immediate = {
+		change_variable = {
+			which = alive_cutholoids
+			value = -1
+		}
+		if = {
+			limit = {
+				from = { is_default_or_fallen = yes }
+			}
+			create_ambient_object = {
+				type = cutholoid_debris_01_object
+				location = fromfrom
+			}
+			last_created_ambient_object = {
+				enable_special_project = {
+					name = CUTHOLOID_DEBRIS_PROJECT
+					location = this
+					owner = root.from
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.3026
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			destroy_ambient_object = this
+		}
+		random_list = {
+			1 = {
+				add_resource_from_debris = {
+					minerals = 1000
+					system = root.fromfrom
+				}
+			}
+			1 = {
+				add_resource_from_debris = {
+					rare_crystals = 200
+					system = root.fromfrom
+				}
+			}
+		}
+	}
+}
+
+# Cutholoid revealed on_entering_system_fleet
+# Scope = fleet
+# From = System
+fleet_event = {
+	id = grand_archive.3030
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		exists = event_target:cutholoids_country
+		controller = {
+			is_country_type = default
+			has_communications = event_target:cutholoids_country
+		}
+	}
+
+	immediate = {
+		from = {
+			every_system_planet = {
+				limit = { is_planet_class = pc_cutholoid }
+				save_event_target_as = revealed_cutholoid
+				spawn_cutholoid_from_asteroid = {
+					LOCATION = event_target:revealed_cutholoid
+				}
+			}
+		}
+	}
+}
+
+# Capture cutholoid achievement
+ship_event = {
+	id = grand_archive.3035
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_ship_category = cutholoid
+	}
+
+	immediate = {
+		event_target:cutholoids_country = {
+			change_variable = {
+				which = alive_cutholoids
+				value = -1
+			}
+		}
+		from.controller = {
+			set_country_flag = has_ever_captured_a_cutholoid
+		}
+
+		# Cutholoid Hunt project capture handling
+		if = {
+			limit = { has_ship_flag = ambushing_cutholoid }
+			random_playable_country = {
+				limit = {
+					root = { has_ship_flag = spawned_for@prev }
+				}
+				random_owned_fleet = {
+					limit = { has_fleet_flag = revealed_hiding_cutholoid }
+					fleet_event = {
+						id = grand_archive.3015
+						days = 1
+						scopes = {
+							from = root.solar_system
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#########################################
+# Cutholoids Galactic Resolution Events #
+#########################################
+
+# Killed Cutholoids - Eradication
+country_event = {
+	id = grand_archive.3100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		from = {
+			is_cutholoids_country_type = yes
+		}
+		is_active_resolution = "resolution_cutholoid_eradication"
+	}
+
+	immediate = {
+		every_playable_country = {
+			limit = {
+				has_country_flag = resolution_breached_cutholoids_inside_borders
+				NOT = {
+					any_system_within_border = {
+						any_fleet_in_system = {
+							owner = {
+								is_cutholoids_country_type = yes
+							}
+						}
+					}
+				}
+			}
+			remove_country_flag = resolution_breached_cutholoids_inside_borders
+		}
+	}
+}
+
+# Cutholoids Inside Borders
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = grand_archive.3101
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		owner = {
+			is_cutholoids_country_type = yes
+		}
+		is_active_resolution = "resolution_cutholoid_eradication"
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				exists = from.owner
+				from = {
+					owner = {
+						is_galactic_community_member = yes
+						NOT = { has_country_flag = resolution_breached_cutholoids_inside_borders }
+					}
+				}
+			}
+			from = {
+				owner = {
+					set_country_flag = resolution_breached_cutholoids_inside_borders
+					country_event = {
+						id = grand_archive.3105
+						scopes = { from = root.from }
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_playable_country = {
+					is_galactic_community_member = yes
+					has_country_flag = resolution_breached_cutholoids_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_cutholoids_country_type = yes
+								}
+							}
+						}
+					}
+				}
+			}
+			every_playable_country = {
+				limit = {
+					is_galactic_community_member = yes
+					has_country_flag = resolution_breached_cutholoids_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_cutholoids_country_type = yes
+								}
+							}
+						}
+					}
+				}
+				remove_country_flag = resolution_breached_cutholoids_inside_borders
+			}
+		}
+	}
+}
+
+# Cutholoids Inside Borders - Resolution Enacted
+country_event = {
+	id = grand_archive.3102
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_playable_country = {
+					is_galactic_community_member = yes
+					any_system_within_border = {
+						any_fleet_in_system = {
+							owner = {
+								is_cutholoids_country_type = yes
+							}
+						}
+					}
+				}
+			}
+			every_playable_country = {
+				limit = {
+					is_galactic_community_member = yes
+					any_system_within_border = {
+						any_fleet_in_system = {
+							owner = {
+								is_cutholoids_country_type = yes
+							}
+						}
+					}
+				}
+				set_country_flag = resolution_breached_cutholoids_inside_borders
+				country_event = { id = grand_archive.3103 }
+			}
+		}
+	}
+}
+
+# Cutholoids Inside Borders - Resolution Enacted - Informed
+country_event = {
+	id = grand_archive.3103
+	title = "grand_archive.3103.name"
+	desc = "grand_archive.3103.desc"
+	picture = GFX_evt_civil_action
+	show_sound = event_assembly_fight
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+	}
+}
+
+# Cutholoids Inside Borders - Monthly Clean Up Event
+event = {
+	id = grand_archive.3104
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		is_active_resolution = "resolution_cutholoid_eradication"
+		any_playable_country = {
+			has_country_flag = resolution_breached_cutholoids_inside_borders
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_playable_country = {
+					has_country_flag = resolution_breached_cutholoids_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_cutholoids_country_type = yes
+								}
+							}
+						}
+					}
+				}
+			}
+			every_playable_country = {
+				limit = {
+					has_country_flag = resolution_breached_cutholoids_inside_borders
+					NOT = {
+						any_system_within_border = {
+							any_fleet_in_system = {
+								owner = {
+									is_cutholoids_country_type = yes
+								}
+							}
+						}
+					}
+				}
+				remove_country_flag = resolution_breached_cutholoids_inside_borders
+			}
+		}
+	}
+}
+
+# Cutholoids Inside Borders - Informed
+country_event = {
+	id = grand_archive.3105
+	title = "grand_archive.3105.name"
+	desc = "grand_archive.3105.desc"
+	picture = GFX_evt_cutholoids_attack
+	show_sound = ga_cutholoids_idle
+
+	is_triggered_only = yes
+
+	option = {
+		name = OK
+	}
+}
+
+# Cutholoids Inside Borders - Monthly Check
+event = {
+	id = grand_archive.3106
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_community_formed = yes
+		is_active_resolution = "resolution_cutholoid_eradication"
+		any_playable_country = {
+			NOT = { has_country_flag = resolution_breached_cutholoids_inside_borders }
+			any_system_within_border = {
+				any_fleet_in_system = {
+					exists = owner
+					owner = {
+						is_cutholoids_country_type = yes
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_playable_country = {
+			limit = {
+				NOT = { has_country_flag = resolution_breached_cutholoids_inside_borders }
+				any_system_within_border = {
+					any_fleet_in_system = {
+						exists = owner
+						owner = {
+							is_cutholoids_country_type = yes
+						}
+					}
+				}
+			}
+			set_country_flag = resolution_breached_cutholoids_inside_borders
+			country_event = { id = grand_archive.3107 }
+		}
+	}
+}
+
+# Cutholoids Inside Borders - Resolution Enacted - Informed
+country_event = {
+	id = grand_archive.3107
+	title = "grand_archive.3105.name"
+	desc = "grand_archive.3107.desc"
+	picture = GFX_evt_cutholoids_attack
+	show_sound = ga_cutholoids_idle
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_fleet_in_system = {
+					exists = owner
+					owner = {
+						is_cutholoids_country_type = yes
+					}
+				}
+			}
+			save_event_target_as = invaded_system
+		}
+	}
+
+	option = {
+		name = OK
+	}
+}
+
+#########################################
+# Cutholoids Engulf Events #
+#########################################
+
+@engulf_return_delay_in_days = 30
+
+# Transfer ship to mia
+# This = Engulfed Ship (Defender)
+# From = Engulfing Ship (Attacker)
+ship_event = {
+	id = grand_archive.3200
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			exists = controller
+			controller = { is_country_type = default }
+		}
+	}
+
+	immediate = {
+		switch = {
+			trigger = is_ship_size
+			space_whale_1 = { from.controller = { add_resource = { food = 1000 } } }
+			space_whale_2 = { from.controller = { add_resource = { food = 1000 } } }
+			space_whale_3 = { from.controller = { add_resource = { food = 1000 } } }
+			space_whale_4 = { from.controller = { add_resource = { food = 1000 } } }
+			space_whale_5 = { from.controller = { add_resource = { food = 1000 } } }
+			space_amoeba = { from.controller = { add_resource = { physics_research = 500 } } }
+			space_amoeba_mother = { from.controller = { add_resource = { physics_research = 1000 } } }
+			voidworms_small = { from.controller = { add_resource = { food = 100 } } }
+			voidworms_medium = { from.controller = { add_resource = { food = 200 } } }
+			crystal_ship_small_blue = { from.controller = { add_resource = { rare_crystals = 50 } } }
+			crystal_ship_medium_blue = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_large_blue = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_small_green = { from.controller = { add_resource = { rare_crystals = 50 } } }
+			crystal_ship_medium_green = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_large_green = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_small_yellow = { from.controller = { add_resource = { rare_crystals = 50 } } }
+			crystal_ship_medium_yellow = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_large_yellow = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_small_red = { from.controller = { add_resource = { rare_crystals = 50 } } }
+			crystal_ship_medium_red = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_large_red = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_small_blue_elite = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_medium_blue_elite = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_large_blue_elite = { from.controller = { add_resource = { rare_crystals = 200 } } }
+			crystal_ship_small_green_elite = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_medium_green_elite = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_large_green_elite = { from.controller = { add_resource = { rare_crystals = 200 } } }
+			crystal_ship_small_yellow_elite = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_medium_yellow_elite = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_large_yellow_elite = { from.controller = { add_resource = { rare_crystals = 200 } } }
+			crystal_ship_small_red_elite = { from.controller = { add_resource = { rare_crystals = 100 } } }
+			crystal_ship_medium_red_elite = { from.controller = { add_resource = { rare_crystals = 150 } } }
+			crystal_ship_large_red_elite = { from.controller = { add_resource = { rare_crystals = 200 } } }
+			default = {
+				create_fleet = {
+					name = fleet
+					effect = {
+						set_owner = prev.from.controller
+						set_location = prev.fleet
+						create_ship = {
+							name = random
+							design = prev
+							graphical_culture = prev
+							graphical_culture_fallback = prev.controller
+							upgradable = no
+						}
+						set_mia = mia_return_home
+						set_mia_return_delay = @engulf_return_delay_in_days
+					}
+				}
+			}
+		}
+	}
+}
+
+####################
+# Specimens Events #
+####################
+
+# This = Country which established the communications
+# From = Country which communications were established with
+country_event = {
+	id = grand_archive.3995
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:curator_enclave_country
+		OR = {
+			AND = {
+				has_valid_civic = civic_galactic_curators
+				NOT = { has_communications = event_target:curator_enclave_country }
+				from = {
+					NOR = {
+						is_same_value = event_target:curator_enclave_country
+						is_capturable_space_critter_country_type = yes
+					}
+				}
+			}
+			AND = {
+				from = {
+					has_valid_civic = civic_galactic_curators
+					NOT = { has_communications = event_target:curator_enclave_country }
+				}
+				NOR = {
+					is_same_value = event_target:curator_enclave_country
+					is_capturable_space_critter_country_type = yes
+				}
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = { has_valid_civic = civic_galactic_curators }
+			country_event = {
+				id = grand_archive.4115
+				days = 30
+				random = 30
+			}
+		}
+		if = {
+			limit = { from = { has_valid_civic = civic_galactic_curators } }
+			from = {
+				country_event = {
+					id = grand_archive.4115
+					days = 30
+					random = 30
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		# This should always be true but in case it's not, no notification will displayed when a specimen is acquired when it should not have had
+		has_grand_archive_dlc = yes
+	}
+
+	immediate = {
+		switch = {
+			trigger = is_last_acquired_specimen_rarity
+			rare = {
+				create_message = {
+					type = MESSAGE_SPECIMEN_ACQUIRED
+					days = @toast_message_days
+					variable = {
+						key = "border"
+						value = "GFX_border_rare"
+					}
+				}
+			}
+			epic = {
+				create_message = {
+					type = MESSAGE_SPECIMEN_ACQUIRED
+					days = @toast_message_days
+					variable = {
+						key = "border"
+						value = "GFX_border_veteran"
+					}
+				}
+			}
+			exceptional = {
+				create_message = {
+					type = MESSAGE_SPECIMEN_ACQUIRED
+					days = @toast_message_days
+					variable = {
+						key = "border"
+						value = "GFX_border_legendary"
+					}
+				}
+			}
+			default = {
+				create_message = {
+					type = MESSAGE_SPECIMEN_ACQUIRED
+					days = @toast_message_days
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4005
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		acquired_specimen_count > 0
+		NOT = { has_country_flag = first_specimen_acquired_event_occured }
+	}
+
+	immediate = {
+		set_country_flag = first_specimen_acquired_event_occured
+		country_event = { # Recursive check
+			id = grand_archive.4010
+			days = 30
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4006
+	title = "grand_archive.4006.name"
+	desc = {
+		trigger = {
+			acquired_specimen_count > 0
+		}
+		text = grand_archive.4006.desc.default
+	}
+	desc = {
+		trigger = {
+			acquired_specimen_count <= 0
+		}
+		text = grand_archive.4006.desc.no_specimen
+	}
+	picture = GFX_evt_specimen_archive
+	show_sound = ga_event_grand_archive
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			NOR = {
+				has_technology = tech_galactic_archivism
+				has_country_flag = grand_archive_kickstart_proposed
+			}
+			AND = {
+				is_beastmasters_empire = yes
+				NOT = {
+					any_owned_megastructure = {
+						is_megastructure_type = grand_archive_0
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = grand_archive_kickstart_proposed
+	}
+
+	option = {
+		allow = {
+			has_resource = { type = energy amount >= 1000 }
+		}
+		name = grand_archive.4006.a
+		add_resource = {
+			energy = -1000
+		}
+		add_tech_option_or_research_effect = {
+			TECH = tech_galactic_archivism
+			PROGRESS = 0.5
+			CATEGORY = society_research
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = "TREASURE_HUNTERS_BUILD_GRAND_ARCHIVE"
+				location = this
+				owner = root
+			}
+		}
+		ai_chance = {
+			modifier = {
+				add = 10
+				has_resource = { type = energy amount >= 5000 }
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.4006.b
+	}
+}
+
+country_event = {
+	id = grand_archive.4010
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					has_resource = { type = energy amount > 1000 }
+					has_technology = tech_galactic_archivism
+				}
+			}
+			country_event = { id = grand_archive.4006 }
+		}
+		else = {
+			country_event = {
+				id = grand_archive.4010
+				days = 120
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4100
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		can_get_collection_rewards_from_curators = yes
+		OR = {
+			is_eligible_collection_stage_1_reward_not_skipped_any = yes
+			is_eligible_collection_stage_2_reward_not_skipped_any = yes
+			is_eligible_collection_stage_3_reward_not_skipped_any = yes
+		}
+		NOT = { has_country_flag = pending_curator_collection_reward }
+	}
+
+	immediate = {
+		set_country_flag = pending_curator_collection_reward
+		country_event = {
+			id = grand_archive.4101
+			days = 360
+			random = 180
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4101
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		can_get_collection_rewards_from_curators = yes
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				is_eligible_collection_stage_1_reward_not_skipped_any = no
+				is_eligible_collection_stage_2_reward_not_skipped_any = no
+				is_eligible_collection_stage_3_reward_not_skipped_any = no
+			}
+			remove_country_flag = pending_curator_collection_reward
+		}
+		else_if = {
+			limit = { has_curator_event = no }
+			if = {
+				limit = { exists = event_target:backup_curator_country }
+				event_target:backup_curator_country = {
+					save_event_target_as = communicating_curator
+				}
+			}
+			else = {
+				event_target:curator_enclave_country = {
+					save_event_target_as = communicating_curator
+				}
+			}
+			if = {
+				limit = { is_eligible_collection_stage_1_reward_not_skipped_any = yes }
+				country_event = {
+					id = grand_archive.4105
+					scopes = { from = event_target:communicating_curator }
+				}
+			}
+			else_if = {
+				limit = { is_eligible_collection_stage_2_reward_not_skipped_any = yes }
+				country_event = {
+					id = grand_archive.4106
+					scopes = { from = event_target:communicating_curator }
+				}
+			}
+			else_if = {
+				limit = { is_eligible_collection_stage_3_reward_not_skipped_any = yes }
+				country_event = {
+					id = grand_archive.4107
+					scopes = { from = event_target:communicating_curator }
+				}
+			}
+		}
+		else = {
+			remove_country_flag = pending_curator_collection_reward
+			country_event = {
+				id = grand_archive.4100
+			}
+		}
+	}
+}
+
+# Stage 1 rewards
+# FROM = selected curator
+country_event = {
+	id = grand_archive.4105
+	title = "grand_archive.4105.name"
+	desc = {
+		trigger = {
+			if = {
+				limit = {
+					is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = yes
+				}
+				text = grand_archive.4105.desc.1.xeno_geology
+			}
+			else_if = {
+				limit = {
+					is_eligible_collection_stage_1_reward_not_skipped_aesthetic_wonder = yes
+				}
+				text = grand_archive.4105.desc.1.aesthetic_wonder
+			}
+			else_if = {
+				limit = {
+					is_eligible_collection_stage_1_reward_not_skipped_historical_item = yes
+				}
+				text = grand_archive.4105.desc.1.historical_item
+			}
+			else = {
+				text = ERROR
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		portrait = from
+		room = enclave_curator_room
+	}
+	location = event_target:curator_enclave_system
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		can_get_collection_rewards_from_curators = yes
+		is_eligible_collection_stage_1_reward_not_skipped_any = yes
+	}
+
+	option = {
+		name = grand_archive.4105.1.mineral_insight
+		trigger = { is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = yes }
+		allow = { has_resource = { type = energy amount >= @curator_stage_1_price } }
+		add_resource = { energy = @curator_stage_1_price mult = -1 }
+		give_collection_stage_1_reward_xeno_geology = {
+			MODIFIER = mineral_insight
+		}
+	}
+
+	option = {
+		name = grand_archive.4105.1.void_mining
+		trigger = { is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = yes }
+		allow = { has_resource = { type = energy amount >= @curator_stage_1_price } }
+		add_resource = { energy = @curator_stage_1_price mult = -1 }
+		give_collection_stage_1_reward_xeno_geology = {
+			MODIFIER = void_mining
+		}
+	}
+
+	option = {
+		name = grand_archive.4105.1.cultural_enrichment
+		trigger = {
+			is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = no
+			is_eligible_collection_stage_1_reward_not_skipped_aesthetic_wonder = yes
+		}
+		allow = { has_resource = { type = energy amount >= @curator_stage_1_price } }
+		add_resource = { energy = @curator_stage_1_price mult = -1 }
+		give_collection_stage_1_reward_aesthetic_wonder = {
+			MODIFIER = cultural_enrichment
+		}
+	}
+
+	option = {
+		name = grand_archive.4105.1.auctioneering_curation
+		trigger = {
+			is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = no
+			is_eligible_collection_stage_1_reward_not_skipped_aesthetic_wonder = yes
+		}
+		allow = { has_resource = { type = energy amount >= @curator_stage_1_price } }
+		add_resource = { energy = @curator_stage_1_price mult = -1 }
+		give_collection_stage_1_reward_aesthetic_wonder = {
+			MODIFIER = auctioneering_curation
+		}
+	}
+
+	option = {
+		name = grand_archive.4105.1.historical_insight
+		trigger = {
+			is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = no
+			is_eligible_collection_stage_1_reward_not_skipped_aesthetic_wonder = no
+			is_eligible_collection_stage_1_reward_not_skipped_historical_item = yes
+		}
+		allow = { has_resource = { type = energy amount >= @curator_stage_1_price } }
+		add_resource = { energy = @curator_stage_1_price mult = -1 }
+		give_collection_stage_1_reward_historical_item = {
+			MODIFIER = historical_insight
+		}
+	}
+
+	option = {
+		name = grand_archive.4105.1.lessons_from_the_past
+		trigger = {
+			is_eligible_collection_stage_1_reward_not_skipped_xeno_geology = no
+			is_eligible_collection_stage_1_reward_not_skipped_aesthetic_wonder = no
+			is_eligible_collection_stage_1_reward_not_skipped_historical_item = yes
+		}
+		allow = { has_resource = { type = energy amount >= @curator_stage_1_price } }
+		add_resource = { energy = @curator_stage_1_price mult = -1 }
+		give_collection_stage_1_reward_historical_item = {
+			MODIFIER = lessons_from_the_past
+		}
+	}
+
+	option = {
+		name = grand_archive.4105.1.no
+		skip_collection_stage_1_reward = yes
+		default_hide_option = yes
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = pending_curator_collection_reward
+			country_event = {
+				id = grand_archive.4100
+			}
+		}
+	}
+}
+
+# Stage 2 rewards
+# FROM = selected curator
+country_event = {
+	id = grand_archive.4106
+	title = "grand_archive.4105.name"
+	desc = {
+		trigger = {
+			if = {
+				limit = {
+					is_eligible_collection_stage_2_reward_not_skipped_xeno_geology = yes
+				}
+				text = grand_archive.4105.desc.2.xeno_geology
+			}
+			else_if = {
+				limit = {
+					is_eligible_collection_stage_2_reward_not_skipped_aesthetic_wonder = yes
+				}
+				text = grand_archive.4105.desc.2.aesthetic_wonder
+			}
+			else_if = {
+				limit = {
+					is_eligible_collection_stage_2_reward_not_skipped_historical_item = yes
+				}
+				text = grand_archive.4105.desc.2.historical_item
+			}
+			else = {
+				text = ERROR
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		portrait = from
+		room = enclave_curator_room
+	}
+	location = event_target:curator_enclave_system
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		can_get_collection_rewards_from_curators = yes
+		is_eligible_collection_stage_2_reward_not_skipped_any = yes
+	}
+
+	option = {
+		name = EXCELLENT
+		trigger = { is_eligible_collection_stage_2_reward_not_skipped_xeno_geology = yes }
+		allow = { has_resource = { type = energy amount >= @curator_stage_2_price } }
+		add_resource = { energy = @curator_stage_2_price mult = -1 }
+		give_collection_stage_2_reward_xeno_geology = yes
+	}
+
+	option = {
+		name = EXCELLENT
+		trigger = {
+			is_eligible_collection_stage_2_reward_not_skipped_xeno_geology = no
+			is_eligible_collection_stage_2_reward_not_skipped_aesthetic_wonder = yes
+		}
+		allow = { has_resource = { type = energy amount >= @curator_stage_2_price } }
+		add_resource = { energy = @curator_stage_2_price mult = -1 }
+		give_collection_stage_2_reward_aesthetic_wonder = yes
+	}
+
+	option = {
+		name = EXCELLENT
+		trigger = {
+			is_eligible_collection_stage_2_reward_not_skipped_xeno_geology = no
+			is_eligible_collection_stage_2_reward_not_skipped_aesthetic_wonder = no
+			is_eligible_collection_stage_2_reward_not_skipped_historical_item = yes
+		}
+		allow = { has_resource = { type = energy amount >= @curator_stage_2_price } }
+		add_resource = { energy = @curator_stage_2_price mult = -1 }
+		give_collection_stage_2_reward_historical_item = yes
+	}
+
+	option = {
+		name = grand_archive.4105.2.no
+		skip_collection_stage_2_reward = yes
+		default_hide_option = yes
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = pending_curator_collection_reward
+			country_event = {
+				id = grand_archive.4100
+			}
+		}
+	}
+}
+
+# Stage 3 rewards
+# FROM = selected curator
+country_event = {
+	id = grand_archive.4107
+	title = "grand_archive.4105.name"
+	desc = {
+		trigger = {
+			if = {
+				limit = {
+					is_eligible_collection_stage_3_reward_not_skipped_xeno_geology = yes
+				}
+				if = {
+					limit = {
+						event_target:curator_enclave_country = {
+							has_country_flag = gave_relic_r_the_modularium
+							has_country_flag = gave_relic_r_everchanging_stone
+							has_country_flag = gave_relic_r_flowmetal_alloy
+							has_country_flag = gave_relic_r_pulsestone
+							has_country_flag = gave_relic_r_crystallinus_diffuser
+						}
+					}
+					text = grand_archive.4105.desc.3.no_relic.xeno_geology
+				}
+				else = {
+					text = grand_archive.4105.desc.3.xeno_geology
+				}
+			}
+			else_if = {
+				limit = {
+					is_eligible_collection_stage_3_reward_not_skipped_aesthetic_wonder = yes
+				}
+				if = {
+					limit = {
+						event_target:curator_enclave_country = {
+							has_country_flag = gave_relic_r_gavel_of_the_tribunal
+							has_country_flag = gave_relic_r_tiyanki_matriarch_nerve_core
+							has_country_flag = gave_relic_r_the_pattern_maker
+							has_country_flag = gave_relic_r_vaporous_mega_orchid
+							has_country_flag = gave_relic_r_celestial_resonator
+						}
+					}
+					text = grand_archive.4105.desc.3.no_relic.aesthetic_wonder
+				}
+				else = {
+					text = grand_archive.4105.desc.3.aesthetic_wonder
+				}
+			}
+			else_if = {
+				limit = {
+					is_eligible_collection_stage_3_reward_not_skipped_historical_item = yes
+				}
+				if = {
+					limit = {
+						event_target:curator_enclave_country = {
+							has_country_flag = gave_relic_r_entangled_relay
+							has_country_flag = gave_relic_r_propagandosphere
+							has_country_flag = gave_relic_r_prototype_vir_core
+							has_country_flag = gave_relic_r_executus_compendium
+							has_country_flag = gave_relic_r_preservation_chamber
+						}
+					}
+					text = grand_archive.4105.desc.3.no_relic.historical_item
+				}
+				else = {
+					text = grand_archive.4105.desc.3.historical_item
+				}
+			}
+			else = {
+				text = ERROR
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		portrait = from
+		room = enclave_curator_room
+	}
+	location = event_target:curator_enclave_system
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		can_get_collection_rewards_from_curators = yes
+		is_eligible_collection_stage_3_reward_not_skipped_any = yes
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				is_eligible_collection_stage_3_reward_not_skipped_xeno_geology = yes
+				NOT = { has_country_flag = rolled_relics_for_xeno_geology }
+			}
+			set_country_flag = rolled_relics_for_xeno_geology
+			roll_selected_xeno_geology_relic = yes
+			roll_selected_xeno_geology_relic = yes
+		}
+		else_if = {
+			limit = {
+				is_eligible_collection_stage_3_reward_not_skipped_aesthetic_wonder = yes
+				NOT = { has_country_flag = rolled_relics_for_aesthetic_wonder }
+			}
+			set_country_flag = rolled_relics_for_aesthetic_wonder
+			roll_selected_aesthetic_wonder_relic = yes
+			roll_selected_aesthetic_wonder_relic = yes
+		}
+		else_if = {
+			limit = {
+				is_eligible_collection_stage_3_reward_not_skipped_historical_item = yes
+				NOT = { has_country_flag = rolled_relics_for_historical_item }
+			}
+			set_country_flag = rolled_relics_for_historical_item
+			roll_selected_historical_item_relic = yes
+			roll_selected_historical_item_relic = yes
+		}
+	}
+
+	inline_script = {
+		script = grand_archive/collection/stage_3_reward_options_by_category
+		EVENT_ID = grand_archive.4105
+		CATEGORY = xeno_geology
+		TRIGGER = is_only_eligible_collection_stage_3_reward_not_skipped
+		RELIC_1 = r_the_modularium
+		RELIC_2 = r_everchanging_stone
+		RELIC_3 = r_flowmetal_alloy
+		RELIC_4 = r_pulsestone
+		RELIC_5 = r_crystallinus_diffuser
+		RESOURCE = minerals
+		RESOURCE_MULT = material
+	}
+
+	inline_script = {
+		script = grand_archive/collection/stage_3_reward_options_by_category
+		EVENT_ID = grand_archive.4105
+		CATEGORY = aesthetic_wonder
+		TRIGGER = is_only_eligible_collection_stage_3_reward_not_skipped
+		RELIC_1 = r_gavel_of_the_tribunal
+		RELIC_2 = r_tiyanki_matriarch_nerve_core
+		RELIC_3 = r_the_pattern_maker
+		RELIC_4 = r_vaporous_mega_orchid
+		RELIC_5 = r_celestial_resonator
+		RESOURCE = energy
+		RESOURCE_MULT = material
+	}
+
+	inline_script = {
+		script = grand_archive/collection/stage_3_reward_options_by_category
+		EVENT_ID = grand_archive.4105
+		CATEGORY = historical_item
+		TRIGGER = is_only_eligible_collection_stage_3_reward_not_skipped
+		RELIC_1 = r_entangled_relay
+		RELIC_2 = r_propagandosphere
+		RELIC_3 = r_prototype_vir_core
+		RELIC_4 = r_executus_compendium
+		RELIC_5 = r_preservation_chamber
+		RESOURCE = unity
+		RESOURCE_MULT = unity
+	}
+
+	option = {
+		name = grand_archive.4105.3.no
+		skip_collection_stage_3_reward = yes
+		default_hide_option = yes
+	}
+
+	after = {
+		hidden_effect = {
+			remove_country_flag = pending_curator_collection_reward
+			country_event = {
+				id = grand_archive.4100
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4110
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:curator_enclave_country
+		NOT = { has_communications = event_target:curator_enclave_country }
+	}
+
+	immediate = {
+		# Getting active specimens per category
+		export_trigger_value_to_variable = {
+			trigger = count_exhibit
+			parameters = {
+				limit = {
+					is_exhibit_active = yes
+					is_specimen_category = xeno_geology
+				}
+			}
+			variable = xeno_specimen_count
+		}
+		export_trigger_value_to_variable = {
+			trigger = count_exhibit
+			parameters = {
+				limit = {
+					is_exhibit_active = yes
+					is_specimen_category = aesthetic_wonder
+				}
+			}
+			variable = wonder_specimen_count
+		}
+		export_trigger_value_to_variable = {
+			trigger = count_exhibit
+			parameters = {
+				limit = {
+					is_exhibit_active = yes
+					is_specimen_category = historical_item
+				}
+			}
+			variable = historical_specimen_count
+		}
+
+		set_variable_to_random_value = {
+			which = local_random_curator_contact
+			min = 0
+			max = 100
+		}
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = value:curators_contact_relative_to_specimen
+					multiply = trigger:years_passed
+					multiply = 0.2
+					value > local_random_curator_contact
+				}
+			}
+			country_event = {
+				id = grand_archive.4115
+				days = 1
+				random = 1799
+			}
+		}
+
+		# Variables clean-up
+		clear_variable = xeno_specimen_count
+		clear_variable = wonder_specimen_count
+		clear_variable = historical_specimen_count
+	}
+}
+
+country_event = {
+	id = grand_archive.4115
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = event_target:curator_enclave_country
+		NOT = { has_communications = event_target:curator_enclave_country }
+	}
+
+	immediate = {
+		establish_communications_no_message = event_target:curator_enclave_country
+		country_event = {
+			id = leviathans.502
+			scopes = { from = event_target:curator_enclave_country }
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4120
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			AND = {
+				exists = event_target:curator_enclave_country
+				has_communications = event_target:curator_enclave_country
+			}
+			exists = event_target:backup_curator_country
+		}
+		NOR = {
+			has_country_flag = attacked_curators
+			has_country_flag = curator_collection_reward_chain_started
+		}
+		any_owned_megastructure = {
+			is_megastructure_type = grand_archive_0
+		}
+	}
+
+	immediate = {
+		set_country_flag = curator_collection_reward_chain_started
+		hidden_effect = {
+			country_event = {
+				id = grand_archive.4121
+				days = 30
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4121
+	title = "grand_archive.4121.name"
+	desc = {
+		trigger = {
+			exists = event_target:backup_curator_country
+		}
+		text = grand_archive.4121.desc.dead
+	}
+	desc = {
+		trigger = {
+			NOT = { exists = event_target:backup_curator_country }
+		}
+		text = grand_archive.4121.desc.default
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		portrait = event_target:communicating_curator
+		room = enclave_curator_room
+	}
+	location = event_target:curator_enclave_system
+
+	trigger = {
+		can_get_collection_rewards_from_curators = yes
+	}
+
+	immediate = {
+		if = {
+			limit = { exists = event_target:backup_curator_country }
+			event_target:backup_curator_country = {
+				save_event_target_as = communicating_curator
+			}
+		}
+		else = {
+			event_target:curator_enclave_country = {
+				save_event_target_as = communicating_curator
+			}
+		}
+	}
+
+	option = {
+		name = VERYWELL
+		if = {
+			limit = { exists = event_target:curator_enclave_country }
+			event_target:curator_enclave_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			country_event = {
+				id = grand_archive.4100
+				days = 30
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4130
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		is_homicidal = yes
+		OR = {
+			is_eligible_for_homicidal_stage_1_reward_any_reward = yes
+			is_eligible_for_homicidal_stage_2_reward_any_reward = yes
+			is_eligible_for_homicidal_stage_3_reward_any_reward = yes
+		}
+		NOT = { has_country_flag = pending_homicidal_collection_reward }
+	}
+
+	immediate = {
+		set_country_flag = pending_homicidal_collection_reward
+		if = {
+			limit = { is_eligible_for_homicidal_stage_1_reward_any_reward = yes }
+			country_event = { id = grand_archive.4135 } # Fanatic Purifiers
+			country_event = { id = grand_archive.4136 } # Devouring Swarm
+			country_event = { id = grand_archive.4137 } # Determined Exterminators
+		}
+		else_if = {
+			limit = { is_eligible_for_homicidal_stage_2_reward_any_reward = yes }
+			country_event = { id = grand_archive.4140 } # Fanatic Purifiers
+			country_event = { id = grand_archive.4141 } # Devouring Swarm
+			country_event = { id = grand_archive.4142 } # Determined Exterminators
+		}
+		else_if = {
+			limit = { is_eligible_for_homicidal_stage_3_reward_any_reward = yes }
+			country_event = { id = grand_archive.4145 } # Fanatic Purifiers
+			country_event = { id = grand_archive.4146 } # Devouring Swarm
+			country_event = { id = grand_archive.4147 } # Determined Exterminators
+		}
+	}
+}
+
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4135
+	CIVIC = civic_fanatic_purifiers
+	STAGE = 1
+}
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4136
+	CIVIC = civic_hive_devouring_swarm
+	STAGE = 1
+}
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4137
+	CIVIC = civic_machine_terminator
+	STAGE = 1
+}
+
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4140
+	CIVIC = civic_fanatic_purifiers
+	STAGE = 2
+}
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4141
+	CIVIC = civic_hive_devouring_swarm
+	STAGE = 2
+}
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4142
+	CIVIC = civic_machine_terminator
+	STAGE = 2
+}
+
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4145
+	CIVIC = civic_fanatic_purifiers
+	STAGE = 3
+}
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4146
+	CIVIC = civic_hive_devouring_swarm
+	STAGE = 3
+}
+inline_script = {
+	script = grand_archive/collection/homicidal_collection_reward_event
+	EVENT_ID = grand_archive.4147
+	CIVIC = civic_machine_terminator
+	STAGE = 3
+}
+
+# Galactic Curators rewards when finishing arc site
+fleet_event = {
+	id = grand_archive.4150
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		owner = { is_galactic_curators_empire = yes }
+	}
+
+	immediate = {
+		owner = { country_event = { id = grand_archive.4151 } }
+	}
+}
+
+# Galactic Curators rewards
+country_event = {
+	id = grand_archive.4151
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_curators_empire = yes
+		days_passed > 0
+		is_last_acquired_specimen_from_trade = no
+	}
+
+	immediate = {
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1unityreward
+			min = @tier1unitymin
+			max = @tier1unitymax
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.4155
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_eligible_for_collection_stage_3_reward_any_reward = yes
+	}
+
+	immediate = {
+		set_country_flag = has_unlocked_all_exhibits_for_any_category
+	}
+}
+
+# Archivism handle edge case
+country_event = {
+	id = grand_archive.4199
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			AND = {
+				exists = from
+				from = { is_megastructure_type = grand_archive_0 }
+				has_technology = tech_galactic_archivism
+			}
+			AND = {
+				last_increased_tech = tech_galactic_archivism
+				any_owned_megastructure = {
+					is_megastructure_type = grand_archive_0
+				}
+			}
+		}
+	}
+
+	immediate = {
+		# Trigger finisher effect
+		country_event = { id = grand_archive.4200 }
+		# Trigger Expert Negociation effect
+		country_event = { id = grand_archive.4210 }
+		# Trigger Flawless Display effect
+		country_event = { id = grand_archive.4220 }
+	}
+}
+
+# Archivism finisher effect
+country_event = {
+	id = grand_archive.4200
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_tradition = tr_archivism_finish
+	}
+
+	immediate = {
+		remove_modifier = archivism_finisher_collection_modifier
+		set_variable = {
+			which = num_completed_collections
+			value = 0
+		}
+		if = {
+			limit = {
+				count_exhibit = {
+					limit = {
+						is_exhibit_active = yes
+						is_specimen_category = xeno_geology
+					}
+					count >= @collection_max_exhibit_count
+				}
+			}
+			change_variable = {
+				which = num_completed_collections
+				value = 1
+			}
+		}
+		if = {
+			limit = {
+				count_exhibit = {
+					limit = {
+						is_exhibit_active = yes
+						is_specimen_category = aesthetic_wonder
+					}
+					count >= @collection_max_exhibit_count
+				}
+			}
+			change_variable = {
+				which = num_completed_collections
+				value = 1
+			}
+		}
+		if = {
+			limit = {
+				count_exhibit = {
+					limit = {
+						is_exhibit_active = yes
+						is_specimen_category = historical_item
+					}
+					count >= @collection_max_exhibit_count
+				}
+			}
+			change_variable = {
+				which = num_completed_collections
+				value = 1
+			}
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = num_completed_collections
+					value > 0
+				}
+			}
+			add_modifier = {
+				modifier = archivism_finisher_collection_modifier
+				mult = num_completed_collections
+			}
+		}
+	}
+}
+
+# Archivism Expert Negociation effect
+country_event = {
+	id = grand_archive.4210
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_tradition = tr_archivism_expert_negociation
+	}
+
+	immediate = {
+		export_trigger_value_to_variable = {
+			trigger = count_exhibit
+			parameters = {
+				limit = {
+					is_exhibit_active = yes
+				}
+			}
+			variable = specimen_in_exhibition_count
+		}
+		if = {
+			limit = { is_homicidal = yes }
+			remove_modifier = archivism_expert_negociation_homicidal_modifier
+			if = {
+				limit = {
+					check_variable = {
+						which = specimen_in_exhibition_count
+						value > 0
+					}
+				}
+				add_modifier = {
+					modifier = archivism_expert_negociation_homicidal_modifier
+					mult = specimen_in_exhibition_count
+				}
+			}
+		}
+		else = {
+			remove_modifier = archivism_expert_negociation_modifier
+			if = {
+				limit = {
+					check_variable = {
+						which = specimen_in_exhibition_count
+						value > 0
+					}
+				}
+				add_modifier = {
+					modifier = archivism_expert_negociation_modifier
+					mult = specimen_in_exhibition_count
+				}
+			}
+		}
+	}
+}
+
+# Archivism Flawless Display effect
+country_event = {
+	id = grand_archive.4220
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_tradition = tr_archivism_flawless_display
+	}
+
+	immediate = {
+		give_flawless_display_modifier_for_category = { CATEGORY = xeno_geology }
+		give_flawless_display_modifier_for_category = { CATEGORY = aesthetic_wonder }
+		give_flawless_display_modifier_for_category = { CATEGORY = historical_item }
+	}
+}
+
+####################################
+# Grand Archive Destruction Events #
+####################################
+
+# Grand Archive Destroyed effect after system is destroyed
+# This = starbase being destroyed (not ship!)
+# From = fleet that destroyed the starbase
+starbase_event = {
+	id = grand_archive.4500
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		solar_system = {
+			any_system_megastructure = { is_megastructure_type = grand_archive_0 }
+		}
+	}
+
+	immediate = {
+		solar_system = {
+			every_system_megastructure = {
+				limit = { is_megastructure_type = grand_archive_0 }
+				if = {
+					limit = { exists = planet }
+					planet = { save_event_target_as = grand_archive_location }
+				}
+				else = {
+					prev = { save_event_target_as = grand_archive_location }
+				}
+				destroy_grand_archive = yes
+			}
+		}
+
+		owner = {
+			# Cleanup
+			remove_country_flag = ga_destroyed_contains_specimen
+			remove_country_flag = ga_destroyed_contains_space_fauna
+
+			if = {
+				limit = { num_vivarium_slots > 0 }
+				set_country_flag = ga_destroyed_contains_space_fauna
+				release_all_vivarium_fauna = { LOCATION = event_target:grand_archive_location }
+			}
+			set_country_flag = grand_archive_destroyed
+		}
+
+		if = {
+			limit = {
+				exists = from.controller
+				from.controller = { is_country_type = default }
+			}
+			from.controller = {
+				country_event = {
+					id = grand_archive.4505
+					scopes = {
+						from = root.owner
+						fromfrom = root.solar_system
+					}
+				}
+			}
+		}
+		else = {
+			owner = {
+				country_event = { id = grand_archive.4520 }
+			}
+		}
+	}
+}
+
+# Grand Archive Destroyed effect from system destroyed
+# This = system
+system_event = {
+	id = grand_archive.4501
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_system_megastructure = {
+			is_megastructure_type = grand_archive_0
+		}
+	}
+
+	immediate = {
+		every_system_megastructure = {
+			limit = { is_megastructure_type = grand_archive_0 }
+			if = {
+				limit = { exists = planet }
+				planet = { save_event_target_as = grand_archive_location }
+			}
+			else = {
+				prev = { save_event_target_as = grand_archive_location }
+			}
+			destroy_grand_archive = yes
+		}
+
+		if = {
+			limit = { exists = owner }
+			owner = {
+				remove_country_flag = ga_destroyed_contains_space_fauna
+				if = {
+					limit = { num_vivarium_slots > 0 }
+					set_country_flag = ga_destroyed_contains_space_fauna
+					release_all_vivarium_fauna = { LOCATION = event_target:grand_archive_location }
+				}
+				set_country_flag = grand_archive_destroyed
+				country_event = { id = grand_archive.4520 }
+			}
+		}
+	}
+}
+
+# This = destroyer (country)
+# From = victim (country)
+# fromfrom = system where it happened
+country_event = {
+	id = grand_archive.4505
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			if = {
+				limit = {
+					any_exhibit = {
+						contains_specimen = yes
+						root = { NOT = { has_specimen = prev } }
+					}
+				}
+				set_country_flag = ga_destroyed_contains_specimen
+				root = {
+					if = {
+						limit = { has_valid_civic = civic_barbaric_despoilers }
+						steal_specimens = {
+							who = root.from
+							category = all
+							count = 2
+							show_notification = yes
+						}
+					}
+					else = {
+						steal_specimens = {
+							who = root.from
+							category = all
+							count = 1
+							show_notification = yes
+						}
+					}
+				}
+			}
+			country_event = {
+				id = grand_archive.4515
+				scopes = {
+					from = root
+					fromfrom = root.fromfrom
+				}
+			}
+		}
+		country_event = {
+			id = grand_archive.4510
+			scopes = {
+				from = from
+				fromfrom = fromfrom
+			}
+		}
+	}
+}
+
+# This = destroyer (country)
+# From = victim (country)
+# fromfrom = system where it happened
+country_event = {
+	id = grand_archive.4510
+	title = grand_archive.4510.name
+	desc = {
+		trigger = {
+			from = {
+				has_country_flag = ga_destroyed_contains_specimen
+				has_country_flag = ga_destroyed_contains_space_fauna
+			}
+		}
+		text = grand_archive.4510.desc.stolen_freed
+	}
+	desc = {
+		trigger = {
+			from = {
+				has_country_flag = ga_destroyed_contains_specimen
+				NOT = { has_country_flag = ga_destroyed_contains_space_fauna }
+			}
+		}
+		text = grand_archive.4510.desc.stolen
+	}
+	desc = {
+		trigger = {
+			from = {
+				NOT = { has_country_flag = ga_destroyed_contains_specimen }
+				has_country_flag = ga_destroyed_contains_space_fauna
+			}
+			has_ancrel = yes
+		}
+		text = grand_archive.4510.desc.ancrel_freed
+	}
+	desc = {
+		trigger = {
+			from = {
+				NOR = {
+					has_country_flag = ga_destroyed_contains_specimen
+					has_country_flag = ga_destroyed_contains_space_fauna
+				}
+			}
+			has_ancrel = yes
+		}
+		text = grand_archive.4510.desc.ancrel
+	}
+	desc = {
+		trigger = {
+			from = {
+				NOT = { has_country_flag = ga_destroyed_contains_specimen }
+				has_country_flag = ga_destroyed_contains_space_fauna
+			}
+			has_ancrel = no
+		}
+		text = grand_archive.4510.desc.none_freed
+	}
+	desc = {
+		trigger = {
+			from = {
+				NOR = {
+					has_country_flag = ga_destroyed_contains_specimen
+					has_country_flag = ga_destroyed_contains_space_fauna
+				}
+			}
+			has_ancrel = no
+		}
+		text = grand_archive.4510.desc.none
+	}
+	picture = GFX_evt_large_explosion
+	show_sound = ga_grand_archive_destruction
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		trigger = {
+			NOT = { has_valid_civic = civic_barbaric_despoilers }
+		}
+	}
+	option = { # Used only to add civic icon next to the option
+		name = EXCELLENT
+		trigger = {
+			has_valid_civic = civic_barbaric_despoilers
+		}
+	}
+
+	after = {
+		if = {
+			limit = { has_ancrel = yes }
+			add_resource = { minor_artifacts = 100 }
+		}
+	}
+}
+
+# This = victim (country)
+# from = destroyer (country)
+# fromfrom = system where it happened
+country_event = {
+	id = grand_archive.4515
+	title = grand_archive.4515.name
+	desc = {
+		trigger = {
+			has_country_flag = ga_destroyed_contains_specimen
+			has_country_flag = ga_destroyed_contains_space_fauna
+		}
+		text = grand_archive.4515.desc.stolen_freed
+	}
+	desc = {
+		trigger = {
+			has_country_flag = ga_destroyed_contains_specimen
+			NOT = { has_country_flag = ga_destroyed_contains_space_fauna }
+		}
+		text = grand_archive.4515.desc.stolen
+	}
+	desc = {
+		trigger = {
+			NOT = { has_country_flag = ga_destroyed_contains_specimen }
+			has_country_flag = ga_destroyed_contains_space_fauna
+		}
+		text = grand_archive.4515.desc.none_freed
+	}
+	desc = {
+		trigger = {
+			NOR = {
+				has_country_flag = ga_destroyed_contains_specimen
+				has_country_flag = ga_destroyed_contains_space_fauna
+			}
+		}
+		text = grand_archive.4515.desc.none
+	}
+	picture = GFX_evt_archaeologists_escaping
+	show_sound = ga_grand_archive_destruction
+
+	is_triggered_only = yes
+
+	option = {
+		name = UNFORTUNATE
+	}
+}
+
+# This = victim (country)
+# from = system where it happened
+country_event = {
+	id = grand_archive.4520
+	title = grand_archive.4520.name
+	desc = {
+		trigger = {
+			has_country_flag = ga_destroyed_contains_space_fauna
+		}
+		text = grand_archive.4520.desc.freed
+	}
+	desc = {
+		trigger = {
+			NOT = { has_country_flag = ga_destroyed_contains_space_fauna }
+		}
+		text = grand_archive.4520.desc.default
+	}
+	picture = GFX_evt_grand_archive
+	show_sound = ga_event_grand_archive
+
+	is_triggered_only = yes
+
+	option = {
+		name = UNFORTUNATE
+	}
+}
+
+# Starbase, where Grand Archive is built, is disabled
+# This = starbase being disabled (not ship!)
+# From = fleet that disabled the starbase
+starbase_event = {
+	id = grand_archive.4530
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		solar_system = {
+			any_system_megastructure = { is_megastructure_type = grand_archive_0 }
+		}
+	}
+
+	immediate = {
+		# Setup for different lore event, when GA is effectively destroyed
+		owner = {
+			set_timed_country_flag = {
+				flag = grand_archive_system_disabled
+				days = 5
+			}
+		}
+	}
+}
+
+# Grand Archive Dismantled effect from giving system
+# This = System containing the Grand Archive
+# FROM = Country: New controller of the system
+# FROMFROM = Country: Old controller of the system
+system_event = {
+	id = grand_archive.4550
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_system_megastructure = {
+			is_megastructure_type = grand_archive_0
+		}
+		exists = from
+		exists = fromfrom
+		from = { # Subject integration is handled in grand_archive.4570
+			NOT = { is_same_value = root.fromfrom }
+		}
+	}
+
+	immediate = {
+		every_system_megastructure = {
+			limit = { is_megastructure_type = grand_archive_0 }
+			if = {
+				limit = { exists = planet }
+				planet = {
+					remove_planet_flag = has_megastructure
+					save_event_target_as = grand_archive_location
+				}
+			}
+			else = {
+				prev = { save_event_target_as = grand_archive_location }
+			}
+			remove_megastructure = this
+		}
+		fromfrom = {
+			# Cleanup
+			remove_country_flag = ga_destroyed_contains_specimen
+			remove_country_flag = ga_destroyed_contains_space_fauna
+
+			if = {
+				limit = { any_exhibit = { contains_specimen = yes } }
+				set_country_flag = ga_destroyed_contains_specimen
+			}
+			if = {
+				limit = { num_vivarium_slots > 0 }
+				set_country_flag = ga_destroyed_contains_space_fauna
+			}
+			set_country_flag = grand_archive_destroyed
+		}
+		if = {
+			limit = {
+				fromfrom = { has_country_flag = grand_archive_system_disabled }
+			}
+			fromfrom = {
+				if = {
+					limit = { has_country_flag = ga_destroyed_contains_space_fauna }
+					release_all_vivarium_fauna = { LOCATION = event_target:grand_archive_location }
+				}
+			}
+			from = {
+				country_event = {
+					id = grand_archive.4505
+					scopes = {
+						from = root.fromfrom
+						fromfrom = root
+					}
+				}
+			}
+		}
+		else = {
+			from = {
+				country_event = {
+					id = grand_archive.4555
+					scopes = {
+						from = root.fromfrom
+						fromfrom = root
+					}
+				}
+			}
+			fromfrom = {
+				country_event = {
+					id = grand_archive.4560
+					scopes = {
+						from = root
+					}
+				}
+			}
+		}
+	}
+}
+
+# from = owner (country)
+# FROMFROM = system where it happened
+country_event = {
+	id = grand_archive.4555
+	title = grand_archive.4555.name
+	desc = grand_archive.4555.desc
+	picture = GFX_evt_grand_archive
+	show_sound = ga_event_grand_archive
+
+	is_triggered_only = yes
+
+	option = {
+		name = VERYWELL
+	}
+}
+
+# this = owner (country)
+# from = system where it happened
+country_event = {
+	id = grand_archive.4560
+	title = grand_archive.4560.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				ga_destroyed_contains_specimen = {
+					switch = {
+						trigger = has_country_flag
+						ga_destroyed_contains_space_fauna = { text = grand_archive.4560.desc.specimen_fauna }
+						default = { text = grand_archive.4560.desc.specimen_nofauna }
+					}
+				}
+				default = {
+					switch = {
+						trigger = has_country_flag
+						ga_destroyed_contains_space_fauna = { text = grand_archive.4560.desc.nospecimen_fauna }
+						default = { text = grand_archive.4560.desc.none }
+					}
+				}
+			}
+		}
+	}
+	picture = GFX_evt_grand_archive
+	show_sound = ga_event_grand_archive
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = { has_country_flag = ga_destroyed_contains_space_fauna }
+			release_vivarium_fauna = {
+				category = all
+				cull_vivarium_critter = yes
+			}
+		}
+	}
+
+	option = {
+		name = VERYWELL
+		add_resource = { alloys = 500 }
+		tooltip = {
+			if = {
+				limit = { has_country_flag = ga_destroyed_contains_space_fauna }
+				release_vivarium_fauna = {
+					category = all
+					cull_vivarium_critter = yes
+				}
+			}
+		}
+	}
+}
+
+# Grand Archive Dismantled from subject integration
+# This = overlord
+# From = subject
+country_event = {
+	id = grand_archive.4570
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_system_within_border = {
+			has_megastructure = grand_archive_0
+		}
+		from = {
+			any_system_within_border = {
+				has_megastructure = grand_archive_0
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			every_system_within_border = {
+				limit = { has_megastructure = grand_archive_0 }
+				every_system_megastructure = {
+					limit = { is_megastructure_type = grand_archive_0 }
+					if = {
+						limit = { exists = planet }
+						planet = { remove_planet_flag = has_megastructure }
+					}
+					remove_megastructure = this
+				}
+				save_event_target_as = megastructure_system
+			}
+		}
+		country_event = {
+			id = grand_archive.4555
+			scopes = {
+				from = root.from
+				fromfrom = event_target:megastructure_system
+			}
+		}
+	}
+}
+
+# Grand Archive rebuilt
+# this = owner (country)
+# from = solar system
+country_event = {
+	id = grand_archive.4580
+	title = grand_archive.4580.name
+	desc = grand_archive.4580.desc
+	picture = GFX_evt_exhibition_grand_archive
+	show_sound = ga_event_grand_archive
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_any_dna = yes
+	}
+
+	immediate = {
+		set_variable = {
+			which = repopulate_cost
+			value = value:vivarium_repopulation_cost
+		}
+	}
+
+	option = {
+		name = grand_archive.4580.a
+	}
+
+	option = {
+		name = grand_archive.4580.b
+		allow = { has_technology = tech_gravity_wells }
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = repopulate_cost
+		}
+		hidden_effect = {
+			if = {
+				limit = { has_dna = { ship_category = space_amoeba } }
+				add_to_vivarium = {
+					design = NAME_Small_Space_Organism_Blue
+					rarity = highest
+					amount = 2
+				}
+			}
+			if = {
+				limit = { has_dna = { ship_category = tiyanki } }
+				add_to_vivarium = {
+					design = NAME_Tiyanki_Hatchling
+					rarity = highest
+					amount = 2
+				}
+			}
+			if = {
+				limit = { has_dna = { ship_category = crystalline_entity } }
+				add_to_vivarium = {
+					design = NAME_Small_Crystal_Entity_Blue
+					rarity = highest
+					amount = 2
+				}
+			}
+			if = {
+				limit = { has_dna = { ship_category = voidworm } }
+				add_to_vivarium = {
+					design = NAME_Voidworms_Nymph
+					rarity = highest
+					amount = 2
+				}
+			}
+			if = {
+				limit = { has_dna = { ship_category = cutholoid } }
+				add_to_vivarium = {
+					design = NAME_Cutholoids_Hatchling
+					rarity = highest
+					amount = 2
+				}
+			}
+		}
+	}
+}
+
+################
+# Relic Events #
+################
+
+country_event = {
+	id = grand_archive.5000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		while = {
+			count = value:twenty_percent_organics_pop
+			random_owned_pop = {
+				limit = { is_robot_pop = no }
+				kill_pop = yes
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.5005
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		has_modifier = gavel_of_the_tribunal_galcom
+	}
+
+	immediate = {
+		remove_modifier = gavel_of_the_tribunal_galcom
+	}
+}
+
+country_event = {
+	id = grand_archive.5010
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_opinion_modifier = {
+			modifier = opinion_vaporous_mega_orchid
+			who = root
+		}
+	}
+
+	immediate = {
+		remove_opinion_modifier = {
+			modifier = opinion_vaporous_mega_orchid
+			who = root
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.5015
+	title = grand_archive.5015.name
+	desc = grand_archive.5015.desc
+	picture = GFX_evt_treasure_trove
+
+	is_triggered_only = yes
+
+	immediate = {
+		ordered_owned_planet = {
+			limit = {
+				is_planet_eligible_for_treasure_planet = yes
+				NOT = { has_deposit = d_treasure_planet }
+			}
+			position = 0
+			order_by = trigger:distance_to_capital
+			inverse = yes
+			save_event_target_as = treasure_planet_candidate_1
+		}
+		ordered_owned_planet = {
+			limit = {
+				is_planet_eligible_for_treasure_planet = yes
+				NOT = { has_deposit = d_treasure_planet }
+				NOT = { is_same_value = event_target:treasure_planet_candidate_1 }
+			}
+			position = 0
+			order_by = trigger:distance_to_capital
+			inverse = yes
+			save_event_target_as = treasure_planet_candidate_2
+		}
+		ordered_owned_planet = {
+			limit = {
+				is_planet_eligible_for_treasure_planet = yes
+				NOT = { has_deposit = d_treasure_planet }
+				NOR = {
+					is_same_value = event_target:treasure_planet_candidate_1
+					is_same_value = event_target:treasure_planet_candidate_2
+				}
+			}
+			position = 0
+			order_by = trigger:distance_to_capital
+			inverse = yes
+			save_event_target_as = treasure_planet_candidate_3
+		}
+	}
+
+	option = {
+		trigger = { exists = event_target:treasure_planet_candidate_1 }
+		name = grand_archive.5015.a
+		event_target:treasure_planet_candidate_1 = {
+			add_deposit = d_treasure_planet
+			save_event_target_as = selected_treasure_planet
+		}
+	}
+
+	option = {
+		trigger = { exists = event_target:treasure_planet_candidate_2 }
+		name = grand_archive.5015.b
+		event_target:treasure_planet_candidate_2 = {
+			add_deposit = d_treasure_planet
+			save_event_target_as = selected_treasure_planet
+		}
+	}
+
+	option = {
+		trigger = { exists = event_target:treasure_planet_candidate_3 }
+		name = grand_archive.5015.c
+		event_target:treasure_planet_candidate_3 = {
+			add_deposit = d_treasure_planet
+			save_event_target_as = selected_treasure_planet
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			if = {
+				limit = {
+					has_origin = origin_treasure_hunters
+					NOT = { has_country_flag = treasure_hunters_council_position_acquired }
+				}
+				set_country_flag = called_8290_from_celestial_chart
+				country_event = {
+					id = grand_archive.8290
+					days = 5
+					scopes = { from = event_target:selected_treasure_planet }
+				}
+			}
+		}
+	}
+}
+
+##########################
+# Treasure Troves Events #
+##########################
+
+country_event = {
+	id = grand_archive.6000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_treasure_hunters
+		has_relic = r_celestial_chart_4
+	}
+
+	immediate = {
+		country_event = { id = grand_archive.6010 days = 0 random = 360 }
+	}
+}
+
+country_event = {
+	id = grand_archive.6005
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		mid_game_years_passed > 0
+		NOT = { has_origin = origin_treasure_hunters }
+	}
+
+	immediate = {
+		set_variable_to_random_value = {
+			which = local_roll
+			min = 0
+			max = 100
+		}
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = trigger:acquired_specimen_count
+					add = 3
+					value > local_roll
+				}
+			}
+			country_event = { id = grand_archive.6010 days = 0 random = 360 }
+		}
+	}
+}
+
+# Treasure Trove discovered
+country_event = {
+	id = grand_archive.6010
+	title = "grand_archive.6010.name"
+	desc = grand_archive.6010.desc
+	picture = GFX_evt_treasure_trove
+	show_sound = ga_event_treasure_muted
+	is_triggered_only = yes
+
+	location = event_target:treasure_trove_planet
+
+	trigger = {
+		NOT = { has_special_project = "TREASURE_TROVE" }
+		has_treasure_trove_candidate = yes
+	}
+
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				is_star = no
+				is_colonizable = no
+				is_colony = no
+				is_artificial = no
+				NOR = {
+					is_planet_class = pc_gas_giant
+					has_planet_flag = treasure_trove
+					solar_system = {
+						any_system_planet = {
+							has_planet_flag = treasure_trove_active
+						}
+					}
+				}
+			}
+			set_planet_flag = treasure_trove
+			set_planet_flag = treasure_trove_active
+			save_event_target_as = treasure_trove_planet
+		}
+	}
+
+	option = {
+		name = grand_archive.6010.a
+		hidden_effect = {
+			begin_event_chain = {
+				event_chain = "treasure_troves_chain"
+				target = this
+			}
+		}
+		event_target:treasure_trove_planet = {
+			enable_special_project = {
+				name = "TREASURE_TROVE"
+				location = this
+				owner = prev
+			}
+		}
+	}
+}
+
+# Treasure Trove acquired
+ship_event = {
+	id = grand_archive.6015
+	title = "grand_archive.6015.name"
+	desc = {
+		trigger = {
+			hidden:fromfrom = {
+				switch = {
+					trigger = has_planet_flag
+					treasure_trove_specimen = { text = grand_archive.6015.desc.specimen }
+					treasure_trove_pirate_ship = { text = grand_archive.6015.desc.pirate_ship }
+					treasure_trove_technology = { text = grand_archive.6015.desc.tech }
+					default = { text = grand_archive.6015.desc }
+				}
+				text = newline
+				success_text = {
+					text = grand_archive.6015.desc.specimen_extra
+					has_planet_flag = treasure_trove_specimen_extra
+				}
+			}
+		}
+	}
+	picture = GFX_evt_treasure_trove
+	show_sound = ga_event_treasure
+	is_triggered_only = yes
+
+	location = fromfrom
+
+	immediate = {
+		fromfrom = {
+			setup_treasure_trove_reward = {
+				TREASURE_TROVE_SCOPE_TYPE = planet
+				COUNTRY_SCOPE = root.controller
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.6015.a
+	}
+
+	after = {
+		fromfrom = {
+			give_treasure_trove_reward = {
+				TREASURE_TROVE_SCOPE_TYPE = planet
+				COUNTRY_SCOPE = root.controller
+			}
+		}
+		controller = {
+			end_event_chain = "treasure_troves_chain"
+		}
+		hidden_effect = {
+			controller = {
+				if = {
+					limit = {
+						has_origin = origin_treasure_hunters
+						NOT = { has_country_flag = treasure_hunters_council_position_acquired }
+					}
+					set_country_flag = called_8290_from_treasure_trove
+					country_event = {
+						id = grand_archive.8290
+						days = 5
+						scopes = { from = root.fromfrom }
+					}
+				}
+			}
+		}
+	}
+}
+
+# Pirates defending Treasure Trove
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = grand_archive.6020
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_fleet_order = collect_data_fleet_order
+		from = {
+			NOT = { has_star_flag = pirates_spawn_rolled }
+			any_system_planet = {
+				has_planet_flag = treasure_trove_active
+			}
+		}
+	}
+
+	immediate = {
+		from = { set_star_flag = pirates_spawn_rolled }
+		set_variable_to_random_value = {
+			which = local_random_pirate_chance
+			min = 0
+			max = 100
+			rounded = yes
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = local_random_pirate_chance
+					value <= 15
+				}
+			}
+			from = {
+				random_system_planet = {
+					limit = { has_planet_flag = treasure_trove_active }
+					save_event_target_as = treasure_trove_planet
+					set_planet_flag = treasure_trove_contested_by_pirates
+					root.controller = {
+						country_event = {
+							id = grand_archive.6025
+							scopes = {
+								from = prev
+								fromfrom = prev.solar_system
+								fromfromfrom = root
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Spawning Pirates fleet
+# from = treasure trove planet
+# fromfrom = system
+# fromfromfrom = fleet entering system
+country_event = {
+	id = grand_archive.6025
+	title = grand_archive.6025.name
+	desc = grand_archive.6025.desc
+	picture = GFX_evt_treasure_trove_pirate_fleet
+	show_sound = ga_event_black_needle
+	is_triggered_only = yes
+
+	location = event_target:treasure_trove_pirate_fleet
+
+	immediate = {
+		fromfrom = {
+			save_event_target_as = pirate_system
+			create_normal_pirate_country = {
+				HOME_PLANET_TRIGGER = is_active_treasure_trove_planet
+			}
+			last_created_country = {
+				set_country_flag = disable_pirate_starbase_spawning
+			}
+			create_treasure_trove_pirate_fleet = yes
+			last_created_fleet = {
+				set_fleet_flag = treasure_trove_pirate_fleet
+				save_event_target_as = treasure_trove_pirate_fleet
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.6025.a
+		from = {
+			enable_special_project = {
+				name = "TREASURE_TROVE_PIRATES"
+				location = this
+				owner = prev
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.6030
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	location = event_target:treasure_trove_planet
+
+	trigger = {
+		fromfromfrom = {
+			has_fleet_flag = treasure_trove_pirate_fleet
+		}
+	}
+
+	immediate = {
+		fromfromfrom = {
+			solar_system = {
+				save_event_target_as = pirate_system
+				random_system_planet = {
+					limit = { has_planet_flag = treasure_trove_contested_by_pirates }
+					save_event_target_as = treasure_trove_planet
+					remove_planet_flag = treasure_trove_contested_by_pirates
+					set_planet_flag = treasure_trove_pirates_defeated
+				}
+				owner = {
+					country_event = {
+						id = grand_archive.6031
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.6031
+	title = grand_archive.6031.name
+	desc = grand_archive.6031.desc
+	picture = GFX_evt_exploding_ship
+	is_triggered_only = yes
+
+	location = event_target:treasure_trove_planet
+
+	option = {
+		name = grand_archive.6031.a
+		complete_special_project = {
+			type = "TREASURE_TROVE_PIRATES"
+			location = event_target:treasure_trove_planet
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.6035
+	title = grand_archive.6035.name
+	desc = grand_archive.6035.desc
+	picture = GFX_evt_pirate_armada
+	is_triggered_only = yes
+
+	location = from
+
+	immediate = {
+		fromfrom = {
+			remove_star_flag = pirates_spawn_rolled
+			random_system_planet = {
+				limit = { has_planet_flag = treasure_trove_contested_by_pirates }
+				save_event_target_as = treasure_trove_planet
+				remove_planet_flag = treasure_trove_contested_by_pirates
+				remove_planet_flag = treasure_trove_active
+			}
+			random_fleet_in_system = {
+				limit = { has_fleet_flag = treasure_trove_pirate_fleet }
+				set_mia = mia_emergency_ftl
+				fleet_event = {
+					id = grand_archive.6040
+					days = 1
+				}
+			}
+		}
+		abort_special_project = {
+			type = "TREASURE_TROVE_PIRATES"
+			location = event_target:treasure_trove_planet
+		}
+		abort_special_project = {
+			type = "TREASURE_TROVE"
+			location = event_target:treasure_trove_planet
+		}
+		end_event_chain = "treasure_troves_chain"
+	}
+
+	option = {
+		name = grand_archive.6035.a
+	}
+}
+
+fleet_event = {
+	id = grand_archive.6040
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		remove_fleet_flag = treasure_trove_pirate_fleet # So success event isn't triggered
+		delete_fleet = this
+	}
+}
+
+##################################
+# Origin Events - Primal Calling #
+##################################
+
+country_event = {
+	id = grand_archive.6050
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		gains_genetic_materials_from_fauna_kill = yes
+	}
+
+	immediate = {
+		fromfrom = {
+			display_trophy_hunters_fauna_kill_message = yes
+		}
+	}
+}
+
+fleet_event = {
+	id = grand_archive.6055
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		controller = {
+			gains_genetic_materials_from_fauna_kill = yes
+		}
+	}
+
+	immediate = {
+		display_trophy_hunters_fauna_kill_message = yes
+	}
+}
+
+# Voidlures spawning
+inline_script = {
+	script = grand_archive/voidlure_event
+	CATEGORY = tiyanki
+	SPAWN_EVENT_ID = grand_archive.7000
+	COUNTRY = tiyanki_country
+}
+
+inline_script = {
+	script = grand_archive/voidlure_event
+	CATEGORY = space_amoeba
+	SPAWN_EVENT_ID = grand_archive.7001
+	COUNTRY = amoeba_country
+}
+
+inline_script = {
+	script = grand_archive/voidlure_event
+	CATEGORY = crystalline_entity
+	SPAWN_EVENT_ID = grand_archive.7002
+	COUNTRY = crystal_country
+}
+
+inline_script = {
+	script = grand_archive/voidlure_event
+	CATEGORY = voidworm
+	SPAWN_EVENT_ID = grand_archive.7003
+	COUNTRY = voidworms_country
+}
+
+inline_script = {
+	script = grand_archive/voidlure_event
+	CATEGORY = cutholoid
+	SPAWN_EVENT_ID = grand_archive.7004
+	COUNTRY = cutholoids_country
+}
+
+country_event = {
+	id = grand_archive.7010
+	title = grand_archive.7010.name
+	desc = {
+		trigger = {
+			has_origin = origin_primal_calling
+		}
+		text = grand_archive.7010.desc.primal_calling
+	}
+	desc = {
+		trigger = {
+			NOT = { has_origin = origin_primal_calling }
+		}
+		text = grand_archive.7010.desc
+	}
+	picture = GFX_evt_voidlures
+	show_sound = ga_event_hunter_fanfare_announcement
+
+	is_triggered_only = yes
+
+	option = {
+		name = FASCINATING
+	}
+}
+
+first_contact_event = {
+	id = grand_archive.7015
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_same_value = event_target:tiyanki_country
+		}
+		owner = {
+			has_country_flag = voidlure_attracted_tiyanki
+		}
+	}
+
+	immediate = {
+		owner = {
+			country_event = {
+				id = grand_archive.7020
+				days = 5
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.7020
+	title = grand_archive.7020.name
+	desc = grand_archive.7020.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_voidlures
+	show_sound = ga_event_hunter_fanfare_announcement
+
+	option = {
+		name = VERYWELL
+	}
+}
+
+#################
+# Civics Events #
+#################
+
+############################
+# Civic: Galactic Curators #
+############################
+
+country_event = {
+	id = grand_archive.7100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_galactic_curators_empire = yes
+	}
+
+	immediate = {
+		add_research_option = tech_galactic_archivism
+		give_random_common_xeno_geology_specimen = { ORIGIN = ORIGIN }
+		give_random_common_aesthetic_wonders_specimen = { ORIGIN = ORIGIN }
+		give_random_common_historical_items_specimen = { ORIGIN = ORIGIN }
+		unlock_exhibit = xeno_geology
+		unlock_exhibit = aesthetic_wonder
+		unlock_exhibit = historical_item
+	}
+}
+
+#######################
+# Civic: Beastmasters #
+#######################
+
+country_event = {
+	id = grand_archive.7200
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_beastmasters_empire = yes
+	}
+
+	immediate = {
+		# Space Amoebas Pacification
+		add_modifier = { modifier = pacified_amoebas }
+		event_target:amoeba_country = {
+			set_faction_hostility = {
+				set_hostile = no
+				set_neutral = yes
+				target = prev
+			}
+		}
+		if = {
+			limit = { exists = event_target:amoeba_garrison_country }
+			event_target:amoeba_garrison_country = {
+				set_faction_hostility = {
+					set_hostile = no
+					set_neutral = yes
+					target = prev
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOR = {
+					has_tech_option = tech_amoeba_strike_craft_1
+					has_technology = tech_amoeba_strike_craft_1
+				}
+			}
+			add_research_option = tech_amoeba_strike_craft_1
+		}
+		if = {
+			limit = {
+				NOR = {
+					has_tech_option = tech_regenerative_hull_tissue
+					has_technology = tech_regenerative_hull_tissue
+				}
+			}
+			add_research_option = tech_regenerative_hull_tissue
+		}
+
+		give_technology = { tech = tech_gravity_wells message = no }
+		give_technology = { tech = tech_alien_cloning message = no }
+		give_technology = { tech = tech_thrusters_bio_integration message = no }
+		give_technology = { tech = tech_hyper_drive_bio_integration message = no }
+		give_technology = { tech = tech_sensors_bio_integration message = no }
+		give_technology = { tech = tech_combat_computers_bio_integration message = no }
+
+		solar_system = {
+			if = {
+				limit = { exists = starbase }
+				starbase = {
+					remove_starbase_module = { module = shipyard }
+					set_starbase_module = {
+						slot = 1
+						module = beastport
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.7210
+	title = grand_archive.7210.name
+	desc = {
+		trigger = {
+			text = grand_archive.7210.desc.common
+			text = newline
+			success_text = {
+				text = grand_archive.7210.desc.vivarium
+				check_variable = { which = vivarium_capacity value > 0 }
+			}
+			success_text = {
+				text = grand_archive.7210.desc.no_vivarium
+				check_variable = { which = vivarium_capacity value <= 0 }
+			}
+		}
+	}
+	picture = GFX_evt_gravity_snare
+	show_sound = ga_gravity_snare_deploy
+	is_triggered_only = yes
+
+	trigger = {
+		has_grand_archive_dlc = yes
+		has_technology = tech_gravity_wells
+	}
+
+	immediate = {
+		set_variable = {
+			which = vivarium_capacity
+			value = value:get_vivarium_capacity
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			clear_variable = vivarium_capacity
+		}
+	}
+
+	option = {
+		name = VERYWELL
+	}
+}
+
+country_event = {
+	id = grand_archive.7220
+	title = grand_archive.7220.name
+	desc = grand_archive.7220.desc
+	show_sound = event_default
+	picture = GFX_evt_gravity_snare
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.7220.a
+	}
+}
+
+###################
+# Bio-repurposing #
+###################
+
+fleet_event = {
+	id = grand_archive.7300
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		controller = {
+			has_tradition = tr_domestication_bio_repurposing
+			is_reanimator = no
+		}
+	}
+
+	immediate = {
+		spawn_custom_debris = {
+			for = root
+			must_scavenge = yes
+			reset_killed_ship_designs = yes
+			should_add_ship_to_debris = {
+				is_space_fauna = yes
+				can_be_reanimated = yes
+			}
+		}
+	}
+}
+
+###############
+# Reanimators #
+###############
+
+fleet_event = {
+	id = grand_archive.7305
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		controller = {
+			is_reanimator = yes
+		}
+	}
+
+	immediate = {
+		spawn_custom_debris = {
+			for = root
+			must_reanimate = yes
+			reset_killed_ship_designs = yes
+			should_add_ship_to_debris = {
+				is_space_fauna = yes
+				has_catalytic_bladder_mutation = no
+				can_be_reanimated = yes
+			}
+		}
+	}
+}
+
+# Reanimate destroyed fauna
+# this = country
+# from = debris
+# fromfrom = controller of destroyed ship
+# fromfromfrom = science ship
+country_event = {
+	id = grand_archive.7310
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_reanimator = yes
+	}
+
+	immediate = {
+		from = {
+			create_fleet = {
+				effect = {
+					set_owner = prev
+					set_location = root.from
+					save_event_target_as = reanimating_fleet
+				}
+			}
+			reanimate_space_fauna = {
+				fleet = event_target:reanimating_fleet
+			}
+		}
+	}
+}
+
+###################
+# Boarding events #
+###################
+# This = Leader captured
+# from = perpetrator country
+# fromfrom = victim country
+# fromfromfrom = system where it happened
+leader_event = {
+	id = grand_archive.9000
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		set_leader_flag = leader_death_events_blocked
+		exile_leader_as = captured_leader_by@from
+
+		from = {
+			create_message = {
+				type = MESSAGE_LEADER_CAPTURED
+				localization = MESSAGE_LEADER_CAPTURED_DESC
+				days = 20
+
+				variable = {
+					type = name
+					localization = COUNTRY
+					scope = root.fromfrom
+				}
+			}
+		}
+
+		fromfrom = {
+			country_event = {
+				id = grand_archive.9005
+				days = 1
+				scopes = {
+					from = root.from
+					fromfrom = root
+					fromfromfrom = root.fromfromfrom
+				}
+			}
+		}
+	}
+}
+
+# Captured Leader notification event
+# this = country victim
+# from = country perpetrator
+# fromfrom = captured leader
+# fromfromfrom = system where it happened
+country_event = {
+	id = grand_archive.9005
+	title = grand_archive.9005.name
+	diplomatic_title = grand_archive.9005.name
+	desc = {
+		trigger = {
+			NOT = { has_country_flag = captured_leader_decision_postponed@fromfrom }
+		}
+		text = grand_archive.9005.desc
+	}
+	desc = {
+		trigger = {
+			has_country_flag = captured_leader_decision_postponed@fromfrom
+		}
+		text = grand_archive.9005.desc.second
+	}
+	show_sound = par_notification_ethics_generic
+
+	event_window_type = leader_recruit
+	picture_event_data = {
+		portrait = fromfrom
+	}
+	picture = GFX_leader_recruitment_bg_renowned
+
+	is_triggered_only = yes
+
+	option = {
+		tag = hire_leader
+		name = grand_archive.9005.a
+		allow = {
+			resource_stockpile_compare = {
+				resource = energy
+				value >=  100
+				mult = fromfrom.trigger:trading_value
+			}
+		}
+		custom_tooltip = grand_archive.9005.a.tt
+		add_resource = {
+			energy = -100
+			mult = fromfrom.trigger:trading_value
+		}
+		hidden_effect = {
+			clone_leader = {
+				target = fromfrom
+				skip_background_generation = yes
+			}
+			fromfrom = {
+				kill_leader = { show_notification = no }
+			}
+
+			from = {
+				add_resource = {
+					energy = 100
+					mult = root.fromfrom.trigger:trading_value
+				}
+				create_message = {
+					type = MESSAGE_LEADER_RANSOM_PAID
+					localization = MESSAGE_LEADER_RANSOM_PAID_DESC
+					days = 20
+
+					variable = {
+						type = name
+						localization = COUNTRY
+						scope = root
+					}
+					variable = {
+						type = name
+						localization = LEADER
+						scope = root.fromfrom
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.9005.b
+		trigger = {
+			NOT = { has_country_flag = captured_leader_decision_postponed@fromfrom }
+		}
+		set_country_flag = captured_leader_decision_postponed@fromfrom
+		hidden_effect = {
+			country_event = {
+				id = grand_archive.9005
+				days = 180
+				scopes = {
+					from = from
+					fromfrom = fromfrom
+					fromfromfrom = fromfromfrom
+				}
+			}
+		}
+	}
+
+	option = {
+		tag = dismiss_leader
+		name = grand_archive.9005.c
+		hidden_effect = {
+			from = {
+				country_event = {
+					id = grand_archive.9010
+					days = 2
+					scopes = {
+						from = root
+						fromfrom = root.fromfrom
+					}
+				}
+			}
+		}
+	}
+}
+
+# Captured Leader perpetrator - Negative answer
+# this = country
+# from = country victim
+# fromfrom = captured leader
+country_event = {
+	id = grand_archive.9010
+	title = grand_archive.9010.name
+	desc = grand_archive.9010.desc
+	show_sound = par_notification_ethics_generic
+	picture = GFX_evt_acquire_asset
+
+	is_triggered_only = yes
+
+	immediate = {
+		from = {
+			clone_leader = {
+				target = fromfrom
+				effect = {
+					save_event_target_as = executed_commander_by@root
+				}
+			}
+		}
+		event_target:executed_commander_by@root = {
+			kill_leader = {
+				show_notification = yes
+				executed = yes
+			}
+		}
+	}
+
+	option = {
+		name = grand_archive.9010.a
+		allow = {
+			NOR = {
+				is_xenophile = yes
+				is_pacifist = yes
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier3unityreward
+			min = @tier3unitymin
+			max = @tier3unitymax
+		}
+	}
+
+	option = {
+		name = grand_archive.9010.b
+		allow = {
+			NOR = {
+				is_xenophobe = yes
+				is_militarist = yes
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = influence
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
+	}
+
+	option = {
+		name = grand_archive.9010.c
+		add_intel = {
+			amount = 100
+			who = from
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			fromfrom = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+}
+
+###########################
+# Unique Mutations Events #
+###########################
+
+ship_event = {
+	id = grand_archive.10000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_space_fauna = yes
+		owner = {
+			is_country_type = default
+			has_technology = tech_controlled_mutations_2
+		}
+	}
+
+	immediate = {
+		switch = {
+			trigger = is_ship_size
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_amoeba SHIP_CATEGORY = space_amoeba EVENT_ID = grand_archive.10005 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_amoeba_mother SHIP_CATEGORY = space_amoeba EVENT_ID = grand_archive.10005 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_1 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_2 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_3 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_4 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_5 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_small SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_medium SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_large SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_titan SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = cutholoids_hatchling SHIP_CATEGORY = cutholoid EVENT_ID = grand_archive.10008 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = cutholoids_juvenile SHIP_CATEGORY = cutholoid EVENT_ID = grand_archive.10008 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = cutholoids SHIP_CATEGORY = cutholoid EVENT_ID = grand_archive.10008 }
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10005
+	title = grand_archive.10005.name
+	desc = grand_archive.10005.desc
+	show_sound = event_space_amoeba
+	picture = GFX_evt_friendly_amoeba
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = "space_amoeba_UNIQUE_MUTATION_PROJECT"
+			owner = root
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10006
+	title = grand_archive.10006.name
+	desc = grand_archive.10006.desc
+	show_sound = evn_ove_tiyanki_family
+	picture = GFX_evt_tiyanki_family
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = "tiyanki_UNIQUE_MUTATION_PROJECT"
+			owner = root
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10007
+	title = grand_archive.10007.name
+	desc = grand_archive.10007.desc
+	show_sound = ga_voidworms_troika_attack
+	picture = GFX_evt_voidworm_flock
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = "voidworm_UNIQUE_MUTATION_PROJECT"
+			owner = root
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10008
+	title = grand_archive.10008.name
+	desc = grand_archive.10008.desc
+	show_sound = ga_cutholoids_emerge
+	picture = GFX_evt_cutholoids_attack
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = "cutholoid_UNIQUE_MUTATION_PROJECT"
+			owner = root
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10010
+	title = grand_archive.10010.name
+	desc = grand_archive.10010.desc
+	show_sound = event_space_amoeba
+	picture = GFX_evt_friendly_amoeba
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = { tech = tech_unique_mutation_space_amoeba }
+	}
+}
+
+country_event = {
+	id = grand_archive.10015
+	title = grand_archive.10015.name
+	desc = grand_archive.10015.desc
+	show_sound = evn_ove_tiyanki_family
+	picture = GFX_evt_tiyanki_family
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = { tech = tech_unique_mutation_tiyanki }
+	}
+}
+
+country_event = {
+	id = grand_archive.10020
+	title = grand_archive.10020.name
+	desc = grand_archive.10020.desc
+	picture = GFX_evt_voidworm_flock
+	show_sound = ga_event_voidworms_plague
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = { tech = tech_unique_mutation_voidworm }
+	}
+}
+
+country_event = {
+	id = grand_archive.10025
+	title = grand_archive.10025.name
+	desc = grand_archive.10025.desc
+	picture = GFX_evt_cutholoids_attack
+	show_sound = ga_cutholoids_idle
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = { tech = tech_unique_mutation_cutholoid }
+	}
+}
+
+country_event = {
+	id = grand_archive.10030
+	title = grand_archive.10030.name
+	desc = grand_archive.10030.desc
+	show_sound = event_space_crystals
+	picture = GFX_evt_space_crystals
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = { tech = tech_unique_mutation_crystalline_entity }
+	}
+}
+
+country_event = {
+	id = grand_archive.10055
+	title = grand_archive.10055.name
+	desc = grand_archive.10055.desc
+	show_sound = event_space_whale
+	picture = GFX_evt_ancient_tiyanki
+
+	is_triggered_only = yes
+
+	trigger = {
+		fromfromfrom = { is_ship_size = leviathan_01_elder_tiyanki }
+		has_grand_archive_dlc = yes
+		has_technology = tech_controlled_mutations_2
+		NOT = { has_technology = tech_unique_mutation_restorative_enzymes }
+	}
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = tiyanki_matriarch_UNIQUE_MUTATION_PROJECT
+			owner = this
+		}
+	}
+}
+
+
+country_event = {
+	id = grand_archive.10060
+	title = grand_archive.10060.name
+	desc = grand_archive.10060.desc
+	show_sound = event_space_whale
+	picture = GFX_evt_ancient_tiyanki
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = {
+			tech = tech_unique_mutation_restorative_enzymes
+			message = no
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10065
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_variable = {
+			which = local_heal_value
+			value = fromfrom.value:scripted_modifier_add|MODIFIER|heal_random_fleet_creature_on_death|
+		}
+		if = {
+			limit = { check_variable = { which = local_heal_value value > 0 } }
+
+			fromfrom.fleet = {
+				random_controlled_ship = {
+					limit = {
+						is_space_fauna = yes
+						NOT = { is_same_value = fromfrom }
+						has_hp_percentage < 1.0
+					}
+					repair_percentage = root.local_heal_value
+					repair_armor_percentage = root.local_heal_value
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10075
+	title = grand_archive.10075.name
+	desc = grand_archive.10075.desc
+	show_sound = event_space_whale
+	picture = GFX_evt_voidspawn
+
+	is_triggered_only = yes
+
+	trigger = {
+		fromfromfrom = { is_ship_size = leviathan_01_voidspawn }
+		has_grand_archive_dlc = yes
+		has_technology = tech_controlled_mutations_2
+		NOT = { has_technology = tech_unique_mutation_starborne_biology }
+	}
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = voidspawn_UNIQUE_MUTATION_PROJECT
+			owner = this
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10080
+	title = grand_archive.10080.name
+	desc = grand_archive.10080.desc
+	show_sound = event_space_whale
+	picture = GFX_evt_voidspawn
+
+	is_triggered_only = yes
+
+	option = {
+		name = INTERESTING
+		give_technology = {
+			tech = tech_unique_mutation_starborne_biology
+			message = no
+		}
+	}
+}
+
+# Catalytic Bladder unique mutation damage upon death
+country_event = {
+	id = grand_archive.10090
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_variable = {
+			which = local_damage_percentage
+			value = fromfrom.value:scripted_modifier_add|MODIFIER|damage_random_nearby_enemy_on_death|
+		}
+		if = {
+			limit = {
+				check_variable = { which = local_damage_percentage value > 0 }
+			}
+			fromfrom.solar_system = {
+				random_ship_in_system = {
+					limit = {
+						owner = {
+							is_same_value = root.from
+						}
+						distance = {
+							source = root.fromfrom
+							max_distance <= 30
+							same_solar_system = yes
+						}
+					}
+
+					root.fromfrom = {
+						export_trigger_value_to_variable = {
+							trigger = has_max_hp
+							variable = local_max_hp
+						}
+						export_trigger_value_to_variable = {
+							trigger = has_max_armor_hp
+							variable = local_max_armor_hp
+						}
+					}
+					change_variable = {
+						which = local_damage_value
+						value = local_max_hp
+					}
+					change_variable = {
+						which = local_damage_value
+						value = local_max_armor_hp
+					}
+					multiply_variable = {
+						which = local_damage_value
+						value = local_damage_percentage
+					}
+					damage_ship = local_damage_value
+				}
+			}
+
+			play_sound = { # Sound played on ship explosion
+				sound = ga_weapon_catalytic_bladder
+				location = fromfrom
+			}
+		}
+	}
+}
+
+# Berserker Glands unique mutation
+ship_event = {
+	id = grand_archive.10095
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		design = {
+			has_berserker_glands_mutation = yes
+		}
+	}
+
+	immediate = {
+		add_modifier = {
+			modifier = berserker_glands_modifier
+			days = @unique_mutation_berserker_glands_days
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		fromfrom = {
+			check_modifier_value = {
+				modifier = split_into_smaller_size_on_death
+				value > 0
+			}
+			NOT = { has_ship_flag = spawned_from_split_modifier }
+		}
+	}
+
+	immediate = {
+		fromfrom = {
+			create_smaller_size_creature_in_fleet = {
+				count = value:scripted_modifier_add|MODIFIER|split_into_smaller_size_on_death|
+				effect = {
+					set_ship_flag = destroy_after_battle
+					set_ship_flag = spawned_from_split_modifier
+					fleet = {
+						set_fleet_flag = check_destroy_after_battle
+					}
+				}
+			}
+		}
+
+		play_sound = { # Sound played on ship death
+			sound = ga_weapon_fissile_cores
+			location = fromfrom
+		}
+	}
+}
+
+fleet_event = {
+	id = grand_archive.10105
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_fleet_flag = check_destroy_after_battle
+	}
+
+	immediate = {
+		remove_fleet_flag = check_destroy_after_battle
+		every_owned_ship = {
+			limit = {
+				has_ship_flag = destroy_after_battle
+			}
+			destroy_ship = this
+		}
+	}
+}
+
+#################################
+# Fauna Core Component Insights #
+#################################
+
+country_event = {
+	id = grand_archive.7400
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				last_increased_tech = tech_controlled_mutations
+			}
+			if = {
+				limit = {
+					has_technology = tech_thrusters_2
+					NOT = { has_technology = tech_thrusters_bio_integration }
+				}
+				add_research_option = tech_thrusters_bio_integration
+			}
+			if = {
+				limit = {
+					has_technology = tech_hyper_drive_2
+					NOT = { has_technology = tech_hyper_drive_bio_integration }
+				}
+				add_research_option = tech_hyper_drive_bio_integration
+			}
+			if = {
+				limit = {
+					has_technology = tech_sensors_2
+					NOT = { has_technology = tech_sensors_bio_integration }
+				}
+				add_research_option = tech_sensors_bio_integration
+			}
+			if = {
+				limit = {
+					has_technology = tech_combat_computers_2
+					NOT = { has_technology = tech_combat_computers_bio_integration }
+				}
+				add_research_option = tech_combat_computers_bio_integration
+			}
+		}
+		else_if = {
+			limit = {
+				last_increased_tech = tech_thrusters_2
+				has_technology = tech_controlled_mutations
+				NOT = { has_technology = tech_thrusters_bio_integration }
+			}
+			add_research_option = tech_thrusters_bio_integration
+		}
+		else_if = {
+			limit = {
+				last_increased_tech = tech_hyper_drive_2
+				has_technology = tech_controlled_mutations
+				NOT = { has_technology = tech_hyper_drive_bio_integration }
+			}
+			add_research_option = tech_hyper_drive_bio_integration
+		}
+		else_if = {
+			limit = {
+				last_increased_tech = tech_sensors_2
+				has_technology = tech_controlled_mutations
+				NOT = { has_technology = tech_sensors_bio_integration }
+			}
+			add_research_option = tech_sensors_bio_integration
+		}
+		else_if = {
+			limit = {
+				last_increased_tech = tech_combat_computers_2
+				has_technology = tech_controlled_mutations
+				NOT = { has_technology = tech_combat_computers_bio_integration }
+			}
+			add_research_option = tech_combat_computers_bio_integration
+		}
+	}
+}
+
+# Mutated Voidworm Nest active
+country_event = {
+	id = grand_archive.9900
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { is_variable_set = mutated_voidworms_nest_usage }
+			}
+			set_variable = {
+				which = mutated_voidworms_nest_usage
+				value = 1
+			}
+		}
+		else = {
+			change_variable = {
+				which = mutated_voidworms_nest_usage
+				value = 1
+			}
+		}
+
+		create_fleet = {
+			name = "NAME_Frenzied_Voidworms"
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				uses_naval_capacity = no
+				spawn_debris = no
+			}
+			effect = {
+				set_owner = root
+				while = {
+					count = 32
+					create_ship = {
+						name = random
+						design = "NAME_Frenzied_Voidworms_Mature"
+						upgradable = no
+					}
+				}
+				while = {
+					count = 18
+					create_ship = {
+						name = random
+						design = "NAME_Frenzied_Voidworms_Juvenile"
+						upgradable = no
+					}
+				}
+				while = {
+					count = 34
+					create_ship = {
+						name = random
+						design = "NAME_Frenzied_Voidworms_Nymph"
+						upgradable = no
+					}
+				}
+				set_location = root.capital_scope
+				add_modifier = {
+					modifier = mutated_voidworms_scaling
+					mult = prev.mutated_voidworms_nest_usage
+				}
+			}
+		}
+	}
+}
+
+################################
+# Primal Calling Tech Insights #
+################################
+
+# First Contact with Fauna
+country_event = {
+	id = grand_archive.9950
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		add_tech_option_or_research_effect = {
+			TECH = tech_gravity_wells
+			PROGRESS = 0.25
+			CATEGORY = physics_research
+		}
+	}
+}
+
+# First Fauna capture
+ship_event = {
+	id = grand_archive.9955
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from.owner = {
+			has_origin = origin_primal_calling
+			NOT = { has_country_flag = primal_calling_first_capture_insight }
+		}
+	}
+
+	immediate = {
+		from.owner = {
+			country_event = { id = grand_archive.9960 }
+			set_country_flag = primal_calling_first_capture_insight
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.9960
+	title = grand_archive.9960.name
+	desc = grand_archive.9960.desc
+	show_sound = ga_gravity_snare_success
+	picture = GFX_evt_gravity_snare
+
+	is_triggered_only = yes
+
+	option = {
+		name = grand_archive.9960.a
+		add_tech_option_or_research_effect = {
+			TECH = tech_alien_cloning
+			PROGRESS = 0.25
+			CATEGORY = society_research
+		}
+	}
+}
+
+# First creature cloning
+ship_event = {
+	id = grand_archive.9970
+	title = grand_archive.9970.name
+	desc = grand_archive.9970.desc
+	show_sound = event_laboratory_sound
+	picture = GFX_evt_genetic_modification
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_space_fauna = yes
+		owner = {
+			has_origin = origin_primal_calling
+			NOT = { has_country_flag = primal_calling_first_cloning_insight }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = primal_calling_first_cloning_insight
+		}
+	}
+
+	option = {
+		name = grand_archive.9970.a
+		owner = {
+			add_tech_option_or_research_effect = {
+				TECH = tech_controlled_mutations
+				PROGRESS = 0.25
+				CATEGORY = society_research
+			}
+		}
+	}
+}

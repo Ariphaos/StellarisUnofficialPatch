@@ -742,11 +742,14 @@ can_declare_war = {
 #Root = country
 #This = planet
 can_colonize_planet = {
+	hidden_trigger = {
+		exists = root
+	}
+
 	custom_tooltip = {
 		fail_text = "COLONIZATION_IMPOSSIBLE_UNDER_INVESTIGATION"
 		NOT = { has_planet_flag = planet_under_investigation }
 	}
-
 	custom_tooltip = {
 		fail_text = "COLONIZATION_IMPOSSIBLE_DYSON_SPHERE"
 		if = {
@@ -790,6 +793,16 @@ can_colonize_planet = {
 				cares_for_crimson_crawlers = yes
 			}
 		}
+	}
+
+	custom_tooltip = {
+		fail_text = "COLONIZATION_IMPOSSIBLE_DEFENDED_PLANET"
+		NOT = { has_planet_flag = planet_defended_forbid_colonization }
+	}
+
+	custom_tooltip = {
+		fail_text = "COLONIZATION_IMPOSSIBLE_SMEEGIBB_PLANET"
+		NOT = { has_planet_flag = cannot_colonize_smeegibb_shelter }
 	}
 
 	custom_tooltip = {
@@ -845,6 +858,16 @@ can_terraform_planet = {
 		NOT = {
 			has_modifier = metal_planet
 		}
+	}
+
+	custom_tooltip = {
+		fail_text = COLONIZATION_IMPOSSIBLE_DEFENDED_PLANET
+		NOT = { has_planet_flag = planet_defended_forbid_colonization }
+	}
+
+	custom_tooltip = {
+		fail_text = "COLONIZATION_IMPOSSIBLE_SMEEGIBB_PLANET"
+		NOT = { has_planet_flag = cannot_colonize_smeegibb_shelter }
 	}
 }
 
@@ -1226,11 +1249,22 @@ can_orbital_bombard = {
 				is_country_type = gray_goo
 				is_country_type = vol
 				AND = {
+					is_country_type = frenzied_voidworms
+					has_country_flag = can_bombard
+					FROM.CONTROLLER = { has_country_flag = tormented_by_frenzied_voidworms }
+				}
+				AND = {
 					OR = {
 						is_country_type = awakened_marauders
 						is_country_type = formless
 					}
 					FROM.CONTROLLER = { is_hostile = prev }
+				}
+				AND = {
+					is_voidworms_hostile_country_type = yes
+					ROOT = {
+						is_ship_size = voidworms_titan
+					}
 				}
 			}
 		}
@@ -1475,6 +1509,16 @@ ai_should_restrict_system = {
 			}
 		}
 		AND = {
+			root = { is_country_type = voidworms }
+			exists = owner
+			owner = {
+				OR = {
+					is_country_type = dormant_marauders
+					is_country_type = awakened_marauders
+				}
+			}
+		}
+		AND = {
 			root = { 
 				OR = {
 					is_country_type = caravaneer_fleet
@@ -1491,6 +1535,7 @@ ai_should_restrict_system = {
 					is_country_type = fallen_empire
 					is_country_type = awakened_marauders
 					is_country_type = marauder_raiders
+					is_country_type = voidworms
 					is_country_type = caravaneer_fleet
 					ariphaos_patch_fleet_huge = no
 				}
@@ -1614,6 +1659,7 @@ can_leader_get_normal_trait = {
 			owner = {
 				is_autocracy = yes
 			}
+			NOT = { has_leader_flag = ignore_autocracy_ruler_trait_restriction }
 		}
 		is_heir = yes
 	}
@@ -2476,7 +2522,19 @@ can_pop_auto_migrate = {
 	}
 	custom_tooltip = {
 		fail_text = AUTO_MIGRATE_VIRTUALITY
-		has_virtual_species_trait = no
+		OR = {
+			has_virtual_species_trait = no
+			AND = {
+				has_virtual_species_trait = yes
+				exists = owner
+				owner = {
+					OR = {
+						is_individual_machine = no
+						is_machine_empire = no
+					}
+				}
+			}
+		}
 	}
 	if = {
 		limit = {
@@ -2615,6 +2673,22 @@ can_have_first_contact = {
 		NOT = {
 			any_active_first_contact = {
 				contact_country = { is_tiyanki_country_type = yes }
+			}
+		}
+	}
+	else_if = {
+		limit = { from = { is_cutholoids_country_type = yes } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = { is_cutholoids_country_type = yes }
+			}
+		}
+	}
+	else_if = {
+		limit = { from = { is_voidworms_country_type = yes } }
+		NOT = {
+			any_active_first_contact = {
+				contact_country = { is_voidworms_country_type = yes }
 			}
 		}
 	}
@@ -3187,27 +3261,8 @@ chance_for_external_leader_pool = {
 
 # this = country scope
 council_agenda_early_activation_cost = {
-	# At 10% progress, returns 1, 2000 * Empire Size
-	# At 50% progress, returns 0.12, Or 250 * Empire Size
-	# At 70% progress, returns 0.03. Cost tweaked to be 64 * Empire Size
-	# At 90% progress, returns 0.015. Or 30 * Empire Size
-	# Cost = MIN(EmpireSize - 100, 10) * 2000 * (0.008 + 1 / (POW(progress * 3, 5) + 1.008))
-	base = -100
-	add = trigger:empire_size
-	min = 0
-	add = 10
-	mult = 0.1	# Ceil up to even 10.
-	ceiling = yes
-	mult = 10
-	mult = 2000	# Tweaked multiplier.
-
-	# Apply curve multiplier, depending on current Agenda's progress.
-	mult = value:council_agenda_early_activation_cost_curve
-
-	# Rounded to closest 100
-	divide = 100
-	round = yes
-	mult = 100
+	base = 0
+	add = value:council_agenda_early_activation_cost
 }
 
 # this = leader scope
@@ -3740,4 +3795,272 @@ has_breached_shroud_storm = {
 	exists = from
 	has_country_flag = breached_shroud
 	from = { is_storm_type = shroud_storm }
+}
+
+# THIS = Fleet
+is_science_fleet_gravity_snare_on_cooldown = {
+	custom_tooltip = {
+		success_text = FLEETORDER_SEND_SNARE_ON_COOLDOWN
+		OR = {
+			has_fleet_flag = gravity_snare_is_in_cooldown
+			controller = {
+				has_country_flag = gravity_snare_is_in_cooldown_ai
+			}
+		}
+	}
+}
+
+# THIS = Fleet
+# FROM = Country / Snare sender
+can_fleet_be_captured_by_snares = {
+	custom_tooltip = {
+		fail_text = "FLEETORDER_GRAVITY_SNARE_NO_COMMUNICATIONS"
+		exists = from
+		exists = owner
+		from = {
+			has_communications = root.owner
+		}
+	}
+	custom_tooltip = {
+		fail_text = "FLEETORDER_MUST_BE_SPACE_CRITTER"
+		exists = owner
+		owner = {
+			OR = {
+				is_capturable_space_critter_country_type = yes
+				is_country_type = grave_guardian
+				is_country_type = lured_fauna_faction
+			}
+			is_guardian_country = no
+		}
+		any_owned_ship = {
+			is_space_fauna = yes
+		}
+	}
+}
+
+# THIS = country
+can_fauna_grow = {
+	NOT = { has_policy_flag = nutrient_rationing }
+}
+
+# THIS = country
+can_use_exhibits = {
+	hidden_trigger = { exists = this }
+	custom_tooltip = {
+		fail_text = "GALACTIC_ARCHIVISM_NOT_RESEARCHED"
+		has_technology = tech_galactic_archivism
+	}
+	custom_tooltip = {
+		fail_text = "GRAND_ARCHIVE_NOT_BUILT"
+		any_owned_megastructure = {
+			is_megastructure_type = grand_archive_0
+		}
+	}
+}
+
+# THIS = country
+can_access_vivarium = {
+	custom_tooltip = {
+		fail_text = "GRAVITY_WELLS_NOT_RESEARCHED"
+		has_technology = tech_gravity_wells
+	}
+	custom_tooltip = {
+		fail_text = "VIVARIUM_NO_ROOM"
+		check_variable_arithmetic = {
+			which = value:get_vivarium_capacity
+			value > 0
+		}
+	}
+}
+
+# this = debris
+# root = country who can explore debris
+can_scavenge_and_research_debris = {
+	OR = {
+		AND = {
+			exists = root
+			root = {
+				has_policy_flag = scavenge_and_research_debris
+			}
+		}
+		AND = {
+			must_scavenge = yes
+			must_research = yes
+		}
+	}
+}
+
+# this = debris
+# root = country who can explore debris
+can_scavenge_debris = {
+	OR = {
+		AND = {
+			exists = root
+			root = {
+				has_policy_flag = scavenge_debris
+			}
+		}
+		AND = {
+			must_scavenge = yes
+			must_research = no
+		}
+	}
+}
+
+# this = country
+# from = location (galactic_object)
+can_excavate_outside_borders = {
+	exists = this
+	exists = from
+	has_tradition = tr_archivism_frontier_archaeology
+	from = {
+		solar_system = { NOT = { exists = owner } }
+	}
+}
+
+# this = country
+can_voidworms_bombard_country = {
+	hidden_trigger = {
+		exists = event_target:voidworms_country
+		exists = this
+	}
+	NOR = {
+		is_tiyanki_country_type = yes
+		is_amoeba_country_type = yes
+		is_crystal_country_type = yes
+		is_country_type = cloud
+		is_drone_country_type = yes
+		is_voidworms_country_type = yes
+		is_fallen_empire = yes
+		is_country_type = awakened_marauders
+	}
+	# During crisis, they should bombard no matter what, otherwise check tech and max voidworms
+	if = {
+		limit = {
+			event_target:voidworms_country = {
+				is_country_type = voidworms_crisis
+			}
+		}
+		always = yes
+	}
+	else = {
+		NOT = { has_technology = tech_voidworm_immunity }
+		event_target:voidworms_country = {
+			check_variable_arithmetic = {
+				which = value:voidworm_ships_owned
+				value < value:voidworm_maximum_population
+			}
+		}
+	}
+}
+
+# this = country
+can_use_mutations = {
+	hidden_trigger = { exists = this }
+	has_technology = tech_controlled_mutations
+}
+
+can_use_artificial_breeding = {
+	hidden_trigger = { exists = this }
+	has_technology = tech_alien_cloning
+}
+
+# this = actor (country)
+# from = recipient (country)
+can_trade_specimens = {
+	exists = this
+	exists = from
+	count_exhibit = {
+		limit = { contains_specimen = yes }
+		count > 0
+	}
+	NOT = { has_country_flag = has_already_traded_specimens }
+	from = {
+		count_exhibit = {
+			limit = { contains_specimen = yes }
+			count < @archive_max_exhibit_count
+		}
+	}
+}
+
+# this = ship design
+# from = owner (country)
+force_create_default_ship_design = {
+	exists = this
+	exists = from
+	is_designable = yes
+	OR = {
+		AND = {
+			is_space_fauna = yes
+			from = {
+				uses_fauna_ship_sizes = yes
+			}
+		}
+		# Add other cases here if any
+	}
+}
+
+# from = owner (country)
+#This = fleet
+is_seeded = {
+	has_fleet_flag = fruitful_seeded_critter
+}
+
+# this = destroyed ship
+# from = attacker (ship)
+can_capture_ship = {
+	exists = this
+	exists = from
+	exists = controller
+	controller = {
+		is_country_type = default
+	}
+	OR = {
+		# Civilian Ships
+		is_ship_size = constructor
+		is_ship_size = science
+		# Regular Ships
+		is_ship_size = corvette
+		is_ship_size = frigate
+		is_ship_size = destroyer
+		is_ship_size = cruiser
+		is_ship_size = battleship
+		# Galactic Nemesis Ships
+		is_ship_size = crisis_corvette
+		is_ship_size = crisis_destroyer
+		is_ship_size = crisis_cruiser
+		# Offspring Ships
+		AND = {
+			controller = {
+				has_origin = origin_progenitor_hive
+			}
+			OR = {
+				is_ship_size = offspring_corvette
+				is_ship_size = offspring_destroyer
+				is_ship_size = offspring_cruiser
+				is_ship_size = offspring_battleship
+			}
+		}
+		# Cosmogenesis Ships
+		is_ship_size = cosmo_crisis_destroyer
+		is_ship_size = cosmo_crisis_battlecruiser
+		# Nanotech Ships
+		AND = {
+			controller = {
+				has_tradition = tr_nanotech_finish
+			}
+			OR = {
+				is_ship_size = nanite_swarmer
+				is_ship_size = nanite_interdictor
+			}
+		}
+		# Fallen Empire Ships
+		is_ship_size = large_ship_fallen_empire
+		is_ship_size = small_ship_fallen_empire
+		# Marauder Ships
+		is_ship_size = marauder_corvette
+		is_ship_size = marauder_destroyer
+		is_ship_size = marauder_cruiser
+		is_ship_size = marauder_galleon
+	}
 }

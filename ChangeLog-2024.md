@@ -1,5 +1,34 @@
 # Change Log - 2024
 
+# December 15th
+
+* Undid 'fix' to arc furnace counting as it is no longer needed. 
+
+# December 14th
+
+3.14.15926 update
+
+Some fixes
+
+* Fixed weird species rights logic involving Synthetic Fertility.
+* Blocked drones from working non-drone gas/mote jobs. (alrmkh)
+* (Patch Fix) Removed erroneous AI shipyard logic that remained in the patch for some reason. (bericsson) 
+* (Patch Fix) Fixed erroneous guardian check in Baldarak chain. (Fireprince)
+
+# December 2nd
+
+3.14.1592 update.
+
+# November 21st
+
+3.14.159 update.
+
+# November 7th
+
+3.14 update 
+
+- Fixed bio-ship sensors not autoupgrading to level 4.
+
 # October 29th
 
 3.13.2 update (better late than never?)
