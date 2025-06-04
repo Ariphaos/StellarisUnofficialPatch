@@ -399,6 +399,7 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Don't let drones take normal gas extractor or mote harvester jobs.
 * Applied some weights for ethics and robots to initiates.
 * Economic category fix for some fallen empire jobs.
+* Immediately allow civilians and maintenance drones to demote in a lathe.
 
 # Random Names
 
@@ -418,6 +419,8 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Base Cosmic Storm size off of star count rather than hardcoded size strings. (Mod Support)
 * Voidworm spawning based on star count instead of size strings. (Mod Support)
 * Starlit Citadel, same reason.
+* Properly count the number of neural chips in the lathe.
+* Divide lathe purge rate by number of pop groups.
 
 # Scripted Effects
 

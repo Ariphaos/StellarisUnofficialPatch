@@ -1,5 +1,13 @@
 # Change Log - 2025
 
+## June 4th, part 2
+
+/u/Little_Elia on Reddit made a [comprehensive fix](https://www.reddit.com/r/Stellaris/comments/1l2hckv/guide_how_to_fix_the_synaptic_lathe_in_40/) for the Lathe being bugged, and this has been applied:
+
+* Immediately allow civilians and maintenance drones to demote in a lathe.
+* Properly count the number of neural chips in the lathe.
+* Divide lathe purge rate by number of pop groups.
+
 ## June 4th
 
 4.0 Update, apologies for the delay, all.
