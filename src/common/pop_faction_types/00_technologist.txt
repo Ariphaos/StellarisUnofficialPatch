@@ -13,15 +13,57 @@ technologist = {
 	resources = {
 		category = pop_factions
 		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
 			unity = @faction_base_output
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			physics_research = @faction_major_output
+			engineering_research = @faction_minor_output
+			mult = @crowdsourcing_multiplier
 		}
 	}
 
 	extortion_resource = {
 		category = pop_factions
 		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
 			physics_research = @faction_base_output
 			mult = @faction_extortion_research_ratio
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			physics_research = @faction_major_output
+			engineering_research = @faction_minor_output
+			mult = @faction_extortion_crowdsourcing_ratio
 		}
 	}
 
@@ -69,7 +111,7 @@ technologist = {
 
 		modifier = {
 			factor = 2
-			is_robot_pop = yes
+			is_robot_pop_group = yes
 			owner = { is_individual_machine = no }
 		}
 
@@ -120,6 +162,46 @@ technologist = {
 				NOR = {
 					has_policy_flag = robots_outlawed
 					has_policy_flag = ai_outlawed
+				}
+			}
+		}
+	}
+
+	demand = { # Unplugged: Cyberize
+		title = TECHNOLOGIST_UNPLUGGED_CYBERIZE
+		unfulfilled_title = TECHNOLOGIST_UNPLUGGED_NOT_CYBERIZE
+		desc = TECHNOLOGIST_UNPLUGGED_CYBERIZE_DESC
+
+		unfulfilled_effect = -20
+		fulfilled_effect = 10
+
+		potential = {
+			exists = owner
+			owner = {
+				has_origin = origin_unplugged
+				any_situation = {
+					is_situation_type = situation_unplugged_identity
+				}
+			}
+		}
+
+		trigger = {
+			owner = {
+				any_situation = {
+					is_situation_type = situation_unplugged_identity
+					OR = {
+						AND = { # safely in the Cyberize stage
+							current_stage = unplugged_identity_stage_3
+							situation_monthly_progress > 0
+						}
+						AND = { # trending towards Cyberization and our Approach is aligned
+							situation_monthly_progress > 0.05
+							OR = {
+								current_situation_approach = situation_unplugged_identity_discourage_change
+								current_situation_approach = situation_unplugged_identity_embrace_opinion
+							}
+						}
+					}
 				}
 			}
 		}
@@ -384,19 +466,21 @@ technologist = {
 		unfulfilled_effect = 0
 
 		potential = {
-	     host_has_dlc = "Ancient Relics Story Pack"
-	     exists = owner
-	     owner = {
-		  OR = {
-		      has_country_flag = irassian_world_found
-		      has_country_flag = yuht_world_found
-		      has_country_flag = vultaum_world_found
-		      has_country_flag = cybrex_world_found
-		      has_country_flag = league_world_found
-		      has_country_flag = last_baol_system
-		      has_country_flag = last_zroni_system
-		  }
-	     }
+			host_has_dlc = "Ancient Relics Story Pack"
+			exists = owner
+			owner = {
+				OR = {
+					has_country_flag = irassian_world_found
+					has_country_flag = yuht_world_found
+					has_country_flag = vultaum_world_found
+					has_country_flag = cybrex_world_found
+					has_country_flag = league_world_found
+					has_country_flag = last_baol_system
+					has_country_flag = last_zroni_system
+					has_country_flag = tempest_invocator_found
+					has_country_flag = weather_manipulator_found
+				}
+			}
 		}
 
 		trigger = {
@@ -431,7 +515,7 @@ technologist = {
 	}
 
 	on_create = {
-		pop_faction_event = { id = factions.1 }
+		pop_faction_event = { id = factions.0 }
 	}
 
 	on_destroy = {
@@ -483,6 +567,7 @@ technologist = {
 
 			effect = {
 				add_modifier = { modifier = embraced_faction days = 3600 }
+				owner = { set_country_flag = has_embraced_faction }
 				parameter:empire = {
 					shift_ethic = ethic_materialist
 					hidden_effect = {
@@ -551,6 +636,7 @@ technologist = {
 			}
 
 			effect = {
+				owner = { set_country_flag = has_promoted_faction }
 				parameter:empire = {
 					add_modifier = { modifier = promoted_materialist days = -1 }
 				}
@@ -680,6 +766,10 @@ technologist = {
 				owner = {
 					is_oligarchic_authority = yes
 					has_country_flag = cyber_collectivist
+					NOR = {
+						has_valid_civic = civic_crowdsourcing
+						has_valid_civic = civic_corporate_crowdsourcing
+					}
 				}
 				is_faction_extorted = no
 			}
@@ -687,6 +777,33 @@ technologist = {
 			effect = {
 				set_faction_extorted = yes
 				custom_tooltip = physics_research_extortion_tt
+				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
+			}
+
+			ai_weight = {
+				base = 0
+			}
+		}
+		extort_faction_crowdsourcing = { #Crowdsourcing version
+			title = "EXTORT_FACTION"
+			description = "EXTORT_FACTION_DESC"
+
+			potential = {
+				exists = owner
+				owner = {
+					is_oligarchic_authority = yes
+					has_country_flag = cyber_collectivist
+					OR = {
+						has_valid_civic = civic_crowdsourcing
+						has_valid_civic = civic_corporate_crowdsourcing
+					}
+				}
+				is_faction_extorted = no
+			}
+
+			effect = {
+				set_faction_extorted = yes
+				custom_tooltip = crowdsourced_extortion_tt
 				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
 			}
 

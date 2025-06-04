@@ -1,0 +1,225 @@
+##########################################################################
+# Planet Modifier Decisions
+##########################################################################
+
+decision_bleak_planet = {
+	owned_planets_only = yes
+	sound = event_administrative_work
+	icon = decision_arid_planet
+	enactment_time = 900
+
+	resources = {
+		category = decisions
+		cost = {
+			energy = 750
+			food = 250
+		}
+	}
+
+	potential = {
+		exists = owner
+		has_modifier = bleak_planet
+		owner = {
+			has_technology = tech_terrestrial_sculpting
+		}
+	}
+
+	effect = {
+		remove_modifier = bleak_planet
+	}
+
+	ai_weight = {
+		weight = 50
+	}
+}
+
+decision_build_dayside_farm = {
+	owned_planets_only = yes
+	sound = event_administrative_work
+	icon = decision_divine_algorithm
+	enactment_time = 900
+
+	resources = {
+		category = decisions
+		cost = {
+			energy = 1000
+		}
+	}
+
+	potential = {
+		exists = owner
+		has_modifier = tidal_locked
+		is_moon = no
+		owner = {
+			has_technology = tech_power_hub_1
+		}
+		NOT = {
+			has_deposit = d_dayside_farm
+		}
+	}
+
+	effect = {
+		add_deposit = d_dayside_farm
+	}
+
+	ai_weight = {
+		weight = 1
+
+		modifier = { # don't end if less than 1 housing
+			factor = 0
+			NOR = {
+				has_building = building_energy_grid
+				has_building = building_energy_nexus
+			}
+		}
+	}
+}
+
+decision_hazardous_weather = {
+	owned_planets_only = yes
+	sound = event_administrative_work
+	icon = decision_colony_settlement
+	enactment_time = 900
+
+	resources = {
+		category = decisions
+		cost = {
+			energy = 1000
+		}
+	}
+
+	potential = {
+		exists = owner
+		OR = {
+			has_modifier = hazardous_weather
+			has_modifier = wild_storms
+		}
+		owner = {
+			has_technology = tech_terrestrial_sculpting
+		}
+	}
+
+	effect = {
+		IF = {
+			limit = {
+				has_modifier = hazardous_weather
+			}
+			remove_modifier = hazardous_weather
+		}
+		IF = {
+			limit = {
+				has_modifier = wild_storms
+			}
+			remove_modifier = wild_storms
+		}
+	}
+
+	ai_weight = {
+		weight = 0
+	}
+}
+
+decision_dangerous_wildlife = {
+	owned_planets_only = yes
+	sound = event_administrative_work
+	icon = decision_animal_wildlife
+	enactment_time = 900
+
+	resources = {
+		category = decisions
+		cost = {
+			energy = 1000
+		}
+	}
+
+	potential = {
+		exists = owner
+		NOT = {
+			owner = { has_valid_civic = civic_environmentalist }
+		}
+		has_modifier = dangerous_wildlife
+		owner = {
+			has_technology = tech_terrestrial_sculpting
+		}
+	}
+
+	effect = {
+		remove_modifier = dangerous_wildlife
+	}
+
+	ai_weight = {
+		weight = 0
+	}
+}
+
+##########################################################################
+# SR Stripmining Decision
+##########################################################################
+
+decision_stripmine_planet = {
+	owned_planets_only = yes
+	sound = event_dig_site
+	icon = decision_strip_mining
+	enactment_time = 900
+
+	resources = {
+		category = decisions
+		cost = {
+			energy = 5000
+		}
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			NOR = {
+				has_valid_civic = civic_environmentalist
+				is_wilderness_empire = yes
+			}
+			has_technology = tech_mineral_purification_2
+		}
+		NOT = { has_deposit = d_planet_stripmine }
+		is_artificial = no
+	}
+
+	allow = {
+		num_districts = { type = district_mining value > 5 }
+	}
+
+	effect = {
+		custom_tooltip = decision_stripmine_planet_tooltip
+		add_deposit = d_planet_stripmine
+		hidden_effect = {
+			every_deposit = {
+				limit = {
+					has_deposit_category = deposit_cat_energy
+				}
+				remove_deposit = yes
+			}
+			every_deposit = {
+				limit = {
+					has_deposit_category = deposit_cat_food
+				}
+				remove_deposit = yes
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 0
+		modifier = { # We don't want the AI striping every planet
+			add = 10
+			has_designation = col_mining
+			has_sr_deposit = yes
+			# Need to also block if there are good energy deposits.
+			# For now, make sure they can cover the habitability drop.
+			exists = owner
+			owner = {
+				OR = {
+					is_synthetic_empire = yes
+					is_lithoid_empire = yes
+				}
+			}
+		}
+	}
+}

@@ -5,6 +5,11 @@
 building_hydroponics_farm = {
 	base_buildtime = @b1_time
 	category = resource
+
+	building_sets = {
+		hydroponics
+	}
+
 	potential = {
 		exists = owner
 		owner = {
@@ -12,11 +17,13 @@ building_hydroponics_farm = {
 				country_uses_food = yes
 				is_ai = no
 			}
+			is_wilderness_empire = no
 		}
-        NOT = { is_planet_class = pc_machine }
-        NOT = { has_modifier = resort_colony }
-    }
+		NOT = { is_planet_class = pc_machine }
+		NOT = { has_modifier = resort_colony }
+	}
 	allow = {
+		exists = owner
 		OR = {
 			owner = { is_ai = no }
 			AND = {
@@ -27,7 +34,10 @@ building_hydroponics_farm = {
 						value < 30
 					}
 				}
-				free_district_slots = 0
+				num_free_districts = {
+					type = district_farming
+					value < 1
+				}
 			}
 		}
 		is_occupied_flag = no
@@ -36,8 +46,13 @@ building_hydroponics_farm = {
 		exists = owner
 		OR = {
 			owner = {
-				is_ai = yes
-				country_uses_food = no
+				OR = {
+					AND = {
+						is_ai = yes
+						country_uses_food = no
+					}
+					is_wilderness_empire = yes
+				}
 			}
 			planet = {
 				NOT = { is_planet_class = pc_habitat }
@@ -50,23 +65,14 @@ building_hydroponics_farm = {
 					}
 				}
 			}
-			planet = {
-				free_building_slots = 0
-				owner = {
-					is_ai = yes
-					has_monthly_income = {
-						resource = food
-						value > 250
-					}
-				}
-			}
 		}
 	}
+
 	inline_script = {
 		script = jobs/farmers_add
-		FARMER_AMOUNT = 3
-		ANGLER_AMOUNT = 2
+		AMOUNT = @building_static_jobs
 	}
+
 	resources = {
 		category = planet_buildings
 		cost = {
@@ -83,54 +89,48 @@ building_hydroponics_farm = {
 
 building_food_processing_facility = {
 	base_buildtime = @b1_time
-	base_cap_amount = 1
+	planet_limit = 1
 	category = resource
 
-	potential = {
-		exists = owner
-		NOR = {
-			is_planet_class = pc_machine
-			has_modifier = resort_colony
-		}
-
-		OR = {
-			owner = {
-				is_ai = no
-			}
-			has_any_farming_district_or_buildings = yes
-		}
+	building_sets = {
+		farming
 	}
 
 	allow = {
 		is_occupied_flag = no
 	}
 
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no } # see 'building_massive_growth_3'
+		NOR = {
+			is_planet_class = pc_machine
+			has_modifier = resort_colony
+		}
+		OR = {
+			owner = { is_ai = no }
+			has_any_farming_district_or_buildings = yes
+		}
+	}
 	destroy_trigger = {
 		exists = owner
 		OR = {
 			owner = {
-				is_ai = yes
-				country_uses_food = no
+				OR = {
+					AND = {
+						is_ai = yes
+						country_uses_food = no
+					}
+					is_wilderness_empire = yes
+				}
 			}
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
 			AND = {
-				owner = {
-					is_ai = yes
-				}
+				owner = { is_ai = yes }
 				has_any_farming_district_or_buildings = no
 			}
 		}
-	}
-
-	inline_script = {
-		script = jobs/farmers_add
-		FARMER_AMOUNT = 1
-		ANGLER_AMOUNT = 1
-	}
-
-	planet_modifier = {
-		planet_farmers_food_produces_add = 1
 	}
 
 	resources = {
@@ -141,6 +141,10 @@ building_food_processing_facility = {
 		upkeep = {
 			energy = 2
 		}
+	}
+
+	planet_modifier = {
+		planet_farmers_produces_mult = 0.20
 	}
 
 	upgrades = {
@@ -150,6 +154,19 @@ building_food_processing_facility = {
 	prerequisites = {
 		"tech_food_processing_1"
 	}
+
+	ai_resource_production = {
+   		food = 10
+
+		trigger = {
+			has_any_agriculture_zone = yes
+		}
+	}
+
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
 }
 
 building_food_processing_center = {
@@ -157,6 +174,13 @@ building_food_processing_center = {
 	can_build = no
 	category = resource
 
+	building_sets = {
+		farming
+	}
+
+	potential = {
+		owner = { is_wilderness_empire = no } # see 'building_massive_growth_4'
+	}
 	allow = {
 		exists = owner
 		has_upgraded_capital = yes
@@ -164,585 +188,23 @@ building_food_processing_center = {
 	}
 
 	destroy_trigger = {
+		exists = owner
 		OR = {
-			AND = {
-				exists = owner
+			owner = {
 				OR = {
-					owner = {
+					AND = {
 						is_ai = yes
 						country_uses_food = no
 					}
-					AND = {
-						owner = {
-							is_ai = yes
-						}
-						has_any_farming_district_or_buildings = no
-					}
+					is_wilderness_empire = yes
 				}
+			}
+			AND = {
+				owner = { is_ai = yes }
+				has_any_farming_district_or_buildings = no
 			}
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
-		}
-	}
-
-	planet_modifier = {
-		planet_farmers_food_produces_add = 2
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			has_ringworld_output_boost = yes
-		}
-		modifier = {
-			planet_farmers_food_produces_add = 2
-		}
-	}
-
-	inline_script = {
-		script = jobs/farmers_add
-		FARMER_AMOUNT = 2
-		ANGLER_AMOUNT = 2
-	}
-
-	resources = {
-		category = planet_buildings
-		cost = {
-			trigger = {
-				has_ringworld_output_boost = no
-			}
-			minerals = @b2_minerals
-			volatile_motes = @b2_rare_cost
-		}
-		cost = {
-			trigger = {
-				has_ringworld_output_boost = yes
-			}
-			minerals = 900
-			volatile_motes = 200
-		}
-		upkeep = {
-			trigger = {
-				has_ringworld_output_boost = no
-			}
-			energy = 2
-			volatile_motes = @b2_rare_upkeep
-		}
-		upkeep = {
-			trigger = {
-				has_ringworld_output_boost = yes
-			}
-			energy = 5
-			volatile_motes = 3
-		}
-	}
-
-	prerequisites = {
-		"tech_food_processing_2"
-	}
-}
-
-building_baol_organic_plant = {
-	base_buildtime = @b2_time
-	base_cap_amount = 1
-	category = resource
-
-	potential = {
-		exists = owner
-		NOR = {
-			is_planet_class = pc_machine
-			has_modifier = resort_colony
-		}
-	}
-
-	allow = {
-		is_occupied_flag = no
-	}
-
-	destroy_trigger = {
-		exists = owner
-		OR = {
-			owner = {
-				is_ai = yes
-				country_uses_food = no
-			}
-			is_planet_class = pc_machine
-			has_modifier = resort_colony
-		}
-	}
-
-	planet_modifier = {
-		planet_farmers_food_produces_add = 1
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			owner = {
-				country_uses_consumer_goods = yes
-			}
-		}
-		planet_farmers_consumer_goods_produces_add = 0.5
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			owner = {
-				country_uses_consumer_goods = no
-			}
-		}
-		planet_farmers_energy_produces_add = 1
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			owner = {
-				country_uses_consumer_goods = yes
-				has_ascension_perk = ap_archaeoengineers
-			}
-		}
-		planet_farmers_consumer_goods_produces_add = 0.5
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			owner = {
-				country_uses_consumer_goods = no
-				has_ascension_perk = ap_archaeoengineers
-			}
-		}
-		planet_farmers_energy_produces_add = 1
-	}
-
-	inline_script = {
-		script = jobs/farmers_add
-		FARMER_AMOUNT = 2
-		ANGLER_AMOUNT = 2
-	}
-
-	resources = {
-		category = planet_buildings
-		cost = {
-			minerals = @b2_minerals
-			minor_artifacts = 25
-		}
-		upkeep = {
-			energy = 2
-		}
-	}
-
-	prerequisites = {
-		"tech_secrets_baol"
-	}
-}
-
-building_mineral_purification_plant = {
-
-	desc = {
-		trigger = { NOT = { is_planet_class = pc_shattered_ring_habitable } }
-		text = building_mineral_purification_plant_desc
-	}
-
-	desc = {
-		trigger = { is_planet_class = pc_shattered_ring_habitable }
-		text = building_scrap_processing_plant_desc
-	}
-
-	base_buildtime = @b1_time
-	base_cap_amount = 1
-	category = resource
-
-	allow = {
-		is_occupied_flag = no
-	}
-
-	destroy_trigger = {
-		OR = {
-			has_modifier = resort_colony
-			AND = {
-				exists = owner
-				owner = {
-					is_ai = yes
-				}
-				has_any_mining_district = no
-			}
-		}
-	}
-
-	potential = {
-		NOR = {
-			has_modifier = resort_colony
-		}
-
-		NOR = { # Ringworlds don't have mines
-			is_planet_class = pc_ringworld_habitable
-			is_planet_class = pc_cybrex
-		}
-		OR = {
-			NOT = { is_planet_class = pc_habitat }
-			AND = {
-				is_planet_class = pc_habitat
-				check_modifier_value = {
-					modifier = district_hab_mining_max
-					value > 0
-				}
-			}
-		}
-		OR = {
-			owner = {
-				is_ai = no
-			}
-			has_any_mining_district = yes
-		}
-	}
-
-	planet_modifier = {
-		planet_miners_minerals_produces_add = 1
-	}
-
-	inline_script = {
-		script = jobs/miners_add
-		AMOUNT = 1
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_robot_empire = yes
-			}
-			NOR = {
-				is_planet_class = pc_habitat
-				is_planet_class = pc_machine
-				is_planet_class = pc_hive
-				is_planet_class = pc_city
-				is_planet_class = pc_shattered_ring_habitable
-			}
-		}
-		modifier = {
-			district_mining_max = 2
-		}
-	}
-
-	resources = {
-		category = planet_buildings
-		cost = {
-			minerals = 200
-		}
-		cost = {
-			trigger = {
-				owner = {
-					is_robot_empire = yes
-				}
-			}
-			minerals = 100
-			alloys = 100
-		}
-		upkeep = {
-			energy = 2
-		}
-	}
-
-	prerequisites = {
-		tech_mineral_purification_1
-	}
-
-	upgrades = {
-		building_mineral_purification_hub
-	}
-}
-
-building_mineral_purification_hub = {
-
-	desc = {
-		trigger = { NOT = { is_planet_class = pc_shattered_ring_habitable } }
-		text = building_mineral_purification_hub_desc
-	}
-
-	desc = {
-		trigger = { is_planet_class = pc_shattered_ring_habitable }
-		text = building_scrap_processing_hub_desc
-	}
-
-	base_buildtime = @b2_time
-	can_build = no
-	category = resource
-
-	allow = {
-		has_upgraded_capital = yes
-		NOR = {
-			has_modifier = resort_colony
-		}
-		is_occupied_flag = no
-	}
-
-	destroy_trigger = {
-		OR = {
-			has_modifier = resort_colony
-			AND = {
-				exists = owner
-				owner = {
-					is_ai = yes
-				}
-				has_any_mining_district = no
-			}
-		}
-	}
-
-
-	triggered_planet_modifier = {
-		potential = {
-			NOT = { is_planet_class = pc_shattered_ring_habitable }
-		}
-		modifier = {
-			planet_miners_minerals_produces_add = 2
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			is_planet_class = pc_shattered_ring_habitable
-		}
-		modifier = {
-			planet_miners_minerals_produces_add = 1
-			planet_miners_alloys_produces_add = 0.5
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			has_ringworld_output_boost = yes
-		}
-		modifier = {
-			planet_miners_minerals_produces_add = 2
-		}
-	}
-
-	inline_script = {
-		script = jobs/miners_add
-		AMOUNT = 2
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_robot_empire = yes
-			}
-			NOR = {
-				is_planet_class = pc_habitat
-				is_planet_class = pc_machine
-				is_planet_class = pc_hive
-				is_planet_class = pc_city
-				is_planet_class = pc_shattered_ring_habitable
-			}
-		}
-		modifier = {
-			district_mining_max = 4
-		}
-	}
-
-	resources = {
-		category = planet_buildings
-		cost = {
-			trigger = {
-				has_ringworld_output_boost = no
-			}
-			minerals = @b2_minerals
-			volatile_motes = @b2_rare_cost
-		}
-		cost = {
-			trigger = {
-				owner = {
-					is_robot_empire = yes
-				}
-			}
-			minerals = 300
-			alloys = 150
-		}
-		cost = {
-			trigger = {
-				has_ringworld_output_boost = yes
-			}
-			minerals = 900
-			volatile_motes = 200
-		}
-		upkeep = {
-			trigger = {
-				has_ringworld_output_boost = no
-			}
-			energy = 2
-			volatile_motes = @b2_rare_upkeep
-		}
-		upkeep = {
-			trigger = {
-				has_ringworld_output_boost = yes
-			}
-			energy = 5
-			volatile_motes = 3
-		}
-	}
-
-	prerequisites = {
-		tech_mineral_purification_2
-	}
-}
-
-building_energy_grid = {
-	base_buildtime = @b1_time
-	base_cap_amount = 1
-	category = resource
-
-	destroy_trigger = {
-		OR = {
-			OR = {
-				has_modifier = resort_colony
-			}
-			AND = {
-				exists = owner
-				owner = {
-					is_ai = yes
-				}
-				has_any_generator_district_or_building = no
-			}
-		}
-	}
-
-	allow = {
-		is_occupied_flag = no
-	}
-
-	potential = {
-		NOR = {
-			has_modifier = resort_colony
-		}
-		OR = {
-			NOT = { is_planet_class = pc_habitat }
-			AND = {
-				is_planet_class = pc_habitat
-				check_modifier_value = {
-					modifier = district_hab_energy_max
-					value > 0
-				}
-			}
-		}
-		OR = {
-			owner = {
-				is_ai = no
-			}
-			has_any_generator_district_or_building = yes
-		}
-	}
-
-	planet_modifier = {
-		planet_technician_energy_produces_add = 1
-	}
-
-	inline_script = {
-		script = jobs/technicians_add
-		AMOUNT = 1
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_robot_empire = yes
-			}
-			NOR = {
-				is_planet_class = pc_habitat
-				is_planet_class = pc_machine
-				is_planet_class = pc_hive
-				is_planet_class = pc_city
-			}
-		}
-		modifier = {
-			district_generator_max = 2
-		}
-	}
-
-	resources = {
-		category = planet_buildings
-		cost = {
-			minerals = @b1_minerals
-		}
-		cost = {
-			trigger = {
-				owner = {
-					is_robot_empire = yes
-				}
-			}
-			minerals = 100
-			alloys = 100
-		}
-		upkeep = {
-			energy = 2
-		}
-	}
-
-	prerequisites = {
-		tech_power_hub_1
-	}
-
-	upgrades = {
-		building_energy_nexus
-	}
-}
-
-building_energy_nexus = {
-	base_buildtime = @b2_time
-	can_build = no
-	category = resource
-
-	allow = {
-		has_upgraded_capital = yes
-		is_occupied_flag = no
-	}
-
-	destroy_trigger = {
-		OR = {
-			has_modifier = resort_colony
-			AND = {
-				exists = owner
-				owner = {
-					is_ai = yes
-				}
-				has_any_generator_district_or_building = no
-			}
-		}
-	}
-
-	planet_modifier = {
-		planet_technician_energy_produces_add = 2
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			has_ringworld_output_boost = yes
-		}
-		modifier = {
-			planet_technician_energy_produces_add = 2
-		}
-	}
-
-	inline_script = {
-		script = jobs/technicians_add
-		AMOUNT = 2
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_robot_empire = yes
-			}
-			NOR = {
-				is_planet_class = pc_habitat
-				is_planet_class = pc_machine
-				is_planet_class = pc_hive
-				is_planet_class = pc_city
-			}
-		}
-		modifier = {
-			district_generator_max = 4
 		}
 	}
 
@@ -778,21 +240,1347 @@ building_energy_nexus = {
 		}
 	}
 
+	planet_modifier = {
+		planet_farmers_produces_mult = 0.20
+		planet_farmers_food_produces_add = 2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			has_ringworld_output_boost = yes
+		}
+		modifier = {
+			planet_farmers_food_produces_add = 2
+		}
+	}
+
+	prerequisites = {
+		"tech_food_processing_2"
+	}
+
+	ai_resource_production = {
+   		food = 15
+
+		trigger = {
+			has_any_agriculture_zone = yes
+		}
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_farming_districts_1 = {
+	base_buildtime = @b1_time
+	planet_limit = 1
+	category = resource
+
+	building_sets = {
+		farming
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_farming_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_farming_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_farming_max = @b1_max_districts_add
+	}
+
+	upgrades = {
+		building_farming_districts_2
+	}
+
+	prerequisites = {
+		tech_industrial_farming
+	}
+}
+
+building_farming_districts_2 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		farming
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_farming_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_farming_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			exotic_gases = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			exotic_gases = @b2_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_farming_max = @b2_max_districts_add
+	}
+
+	upgrades = {
+		building_farming_districts_3
+	}
+
+	prerequisites = {
+		tech_eco_simulation
+	}
+}
+
+building_farming_districts_3 = {
+	base_buildtime = @b3_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		farming
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_farming_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_farming_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			exotic_gases = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			exotic_gases = @b3_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_farming_max = @b3_max_districts_add
+	}
+
+	upgrades = {
+		building_farming_districts_4
+	}
+
+	prerequisites = {
+		tech_gene_crops
+	}
+}
+
+building_farming_districts_4 = {
+	base_buildtime = @b4_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		farming
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_farming_district = yes
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_farming_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b4_minerals
+			exotic_gases = @b4_rare_cost
+		}
+		upkeep = {
+			energy = @b4_upkeep
+			exotic_gases = @b4_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_farming_max = @b4_max_districts_add
+	}
+
+	prerequisites = {
+		tech_nano_vitality_crops
+	}
+}
+
+building_baol_organic_plant = {
+	base_buildtime = @b2_time
+	planet_limit = 1
+	category = resource
+
+	building_sets = {
+		farming
+		factory
+	}
+
+	potential = {
+		NOR = {
+			is_planet_class = pc_machine
+			has_modifier = resort_colony
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_ai = yes
+				country_uses_food = no
+			}
+			is_planet_class = pc_machine
+			has_modifier = resort_colony
+		}
+	}
+
+	inline_script = {
+		script = jobs/farmers_add
+		AMOUNT = @building_static_jobs
+	}
+	# for exceptions to the above (i.e. Wilderness):
+	inline_script = {
+		script = buildings/planet_job_resource_produces_add
+		JOB = farmers
+		RESOURCE = food
+		AMOUNT = 1
+	}
+
+	# Additional farmer output (non-Archaeoengineering)
+	triggered_planet_modifier = {
+		potential = {
+			owner = {
+				country_uses_consumer_goods = yes
+			}
+		}
+		planet_farmers_consumer_goods_produces_add = 0.5
+	}
+	triggered_planet_modifier = {
+		potential = {
+			owner = {
+				country_uses_consumer_goods = no
+			}
+		}
+		planet_farmers_energy_produces_add = 1
+	}
+
+	# Additional farmer output (with Archaeoengineering)
+	triggered_planet_modifier = {
+		potential = {
+			owner = {
+				country_uses_consumer_goods = yes
+				has_ascension_perk = ap_archaeoengineers
+			}
+		}
+		planet_farmers_consumer_goods_produces_add = 0.5
+	}
+	triggered_planet_modifier = {
+		potential = {
+			owner = {
+				country_uses_consumer_goods = no
+				has_ascension_perk = ap_archaeoengineers
+			}
+		}
+		planet_farmers_energy_produces_add = 1
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			minor_artifacts = 25
+		}
+		cost = {
+			trigger = {
+				owner = { is_wilderness_empire = yes }
+			}
+			biomass = @b3_biomass
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	ai_resource_production = {
+		food = 10
+
+		trigger = {
+			has_any_agriculture_zone = yes
+		}
+	}
+
+	inline_script = {
+		script = buildings/on_all_wilderness_buildings_districts
+	}
+
+	prerequisites = {
+		"tech_secrets_baol"
+	}
+}
+
+building_mine_generic = {
+	base_buildtime = @b1_time
+	category = resource
+
+	building_sets = {
+		mining
+		urban
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+		NOT = { has_modifier = resort_colony }
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			planet = {
+				NOT = { is_planet_class = pc_habitat }
+				free_building_slots = 0
+				owner = {
+					is_ai = yes
+					has_monthly_income = {
+						resource = minerals
+						value > 100
+					}
+				}
+			}
+		}
+	}
+
+	inline_script = {
+		script = jobs/miners_add
+		AMOUNT = @building_static_jobs
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+	prerequisites = {
+		"tech_mechanized_mining"
+	}
+}
+
+building_mineral_purification_plant = {
+	desc = {
+		trigger = {
+			NOT = { is_planet_class = pc_shattered_ring_habitable }
+		}
+		text = building_mineral_purification_plant_desc
+	}
+	desc = {
+		trigger = { is_planet_class = pc_shattered_ring_habitable }
+		text = building_scrap_processing_plant_desc
+	}
+
+	base_buildtime = @b1_time
+	planet_limit = 1
+	category = resource
+
+	building_sets = {
+		mining
+	}
+
+	potential = {
+		owner = { is_wilderness_empire = no } # see 'building_churning_tunnels_3'
+		NOR = {
+			has_modifier = resort_colony
+			is_planet_class = pc_ringworld_habitable
+			is_planet_class = pc_cybrex
+		}
+		OR = {
+			NOT = { is_planet_class = pc_habitat }
+			AND = {
+				is_planet_class = pc_habitat
+				check_modifier_value = {
+					modifier = district_hab_mining_max
+					value > 0
+				}
+			}
+		}
+		OR = {
+			has_planet_flag = ignore_ai_building_limitations
+			owner = { is_ai = no }
+			has_any_mining_district_or_building = yes
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		OR = {
+			has_modifier = resort_colony
+			AND = {
+				exists = owner
+				owner = { is_ai = yes }
+				has_any_mining_district_or_building = no
+			}
+			AND = {
+				exists = owner
+				owner = { is_wilderness_empire = yes }
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = 200
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	planet_modifier = {
+		planet_miners_produces_mult = 0.20
+	}
+
+	upgrades = {
+		building_mineral_purification_hub
+	}
+
+	prerequisites = {
+		tech_mineral_purification_1
+	}
+
+	ai_resource_production = {
+   		minerals = 10
+
+		trigger = {
+			has_any_mining_zone = yes
+		}
+	}
+
+	ai_resource_production = {
+   		minerals = 5
+		energy = 10
+
+		trigger = {
+			has_zone = {
+				zone = zone_betharian
+			}
+		}
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_mineral_purification_hub = {
+	desc = {
+		trigger = { NOT = { is_planet_class = pc_shattered_ring_habitable } }
+		text = building_mineral_purification_hub_desc
+	}
+
+	desc = {
+		trigger = { is_planet_class = pc_shattered_ring_habitable }
+		text = building_scrap_processing_hub_desc
+	}
+
+	base_buildtime = @b2_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		mining
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no } # see 'building_churning_tunnels_4'
+		OR = {
+			owner = { is_ai = no }
+			has_any_mining_district_or_building = yes
+		}
+	}
+	allow = {
+		has_upgraded_capital = yes
+		NOT = { has_modifier = resort_colony }
+		is_occupied_flag = no
+	}
+	destroy_trigger = {
+		OR = {
+			has_modifier = resort_colony
+			AND = {
+				exists = owner
+				owner = { is_ai = yes }
+				has_any_mining_district_or_building = no
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			trigger = {
+				has_ringworld_output_boost = no
+			}
+			minerals = @b2_minerals
+			volatile_motes = @b2_rare_cost
+		}
+		cost = {
+			trigger = {
+				has_ringworld_output_boost = yes
+			}
+			minerals = 900
+			volatile_motes = 200
+		}
+		upkeep = {
+			trigger = {
+				has_ringworld_output_boost = no
+			}
+			energy = 2
+			volatile_motes = @b2_rare_upkeep
+		}
+		upkeep = {
+			trigger = {
+				has_ringworld_output_boost = yes
+			}
+			energy = 5
+			volatile_motes = 3
+		}
+	}
+
+	planet_modifier = {
+		planet_miners_produces_mult = 0.20
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			NOT = { is_planet_class = pc_shattered_ring_habitable }
+		}
+		modifier = {
+			planet_miners_minerals_produces_add = 2
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			is_planet_class = pc_shattered_ring_habitable
+		}
+		modifier = {
+			planet_miners_minerals_produces_add = 1
+			planet_miners_alloys_produces_add = 0.5
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			has_ringworld_output_boost = yes
+		}
+		modifier = {
+			planet_miners_minerals_produces_add = 2
+		}
+	}
+	prerequisites = {
+		tech_mineral_purification_2
+	}
+
+	ai_resource_production = {
+   		minerals = 15
+
+		trigger = {
+			has_any_mining_zone = yes
+		}
+	}
+
+	ai_resource_production = {
+   		minerals = 7.5
+		energy = 15
+
+		trigger = {
+			has_zone = {
+				zone = zone_betharian
+			}
+		}
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_mining_districts_1 = {
+	base_buildtime = @b1_time
+	planet_limit = 1
+	category = resource
+
+	building_sets = {
+		mining
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_mining_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_mining_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_mining_max = @b1_max_districts_add
+	}
+
+	upgrades = {
+		building_mining_districts_2
+	}
+
+	prerequisites = {
+		tech_mechanized_mining
+	}
+}
+
+building_mining_districts_2 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		mining
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_mining_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_mining_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			volatile_motes = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			volatile_motes = @b2_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_mining_max = @b2_max_districts_add
+	}
+
+	upgrades = {
+		building_mining_districts_3
+	}
+
+	prerequisites = {
+		tech_mining_1
+	}
+}
+
+building_mining_districts_3 = {
+	base_buildtime = @b3_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		mining
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_mining_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_mining_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			volatile_motes = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			volatile_motes = @b3_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_mining_max = @b3_max_districts_add
+	}
+
+	upgrades = {
+		building_mining_districts_4
+	}
+
+	prerequisites = {
+		tech_mining_2
+	}
+}
+
+building_mining_districts_4 = {
+	base_buildtime = @b4_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		mining
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_mining_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_mining_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b4_minerals
+			volatile_motes = @b4_rare_cost
+		}
+		upkeep = {
+			energy = @b4_upkeep
+			volatile_motes = @b4_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_mining_max = @b4_max_districts_add
+	}
+
+	prerequisites = {
+		tech_mining_3
+	}
+}
+
+building_generator_generic = {
+	base_buildtime = @b1_time
+	category = resource
+
+	building_sets = {
+		generator
+		urban
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+		NOT = { has_modifier = resort_colony }
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			planet = {
+				NOT = { is_planet_class = pc_habitat }
+				free_building_slots = 0
+				owner = {
+					is_ai = yes
+					has_monthly_income = {
+						resource = energy
+						value > 100
+					}
+				}
+			}
+		}
+	}
+
+	inline_script = {
+		script = jobs/technicians_add
+		AMOUNT = @building_static_jobs
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+	prerequisites = {
+		"tech_power_plant_1"
+	}
+}
+
+building_energy_grid = {
+	base_buildtime = @b1_time
+	planet_limit = 1
+	category = resource
+
+	building_sets = {
+		generator
+	}
+
+	potential = {
+		NOT = { has_modifier = resort_colony }
+		exists = owner
+		owner = {
+			is_wilderness_empire = no # see 'building_bioelectric_stimulator_3'
+		}
+		OR = {
+			NOT = { is_planet_class = pc_habitat }
+			AND = {
+				is_planet_class = pc_habitat
+				check_modifier_value = {
+					modifier = district_hab_energy_max
+					value > 0
+				}
+			}
+			OR = {
+				owner = { is_ai = no }
+				has_any_generator_district_or_building = yes
+			}
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+	destroy_trigger = {
+		OR = {
+			has_modifier = resort_colony
+			AND = {
+				exists = owner
+				owner = { is_ai = yes }
+				has_any_generator_district_or_building = no
+			}
+			AND = {
+				exists = owner
+				owner = { is_wilderness_empire = yes }
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = 2
+		}
+	}
+
+	planet_modifier = {
+		planet_technician_produces_mult = 0.20
+	}
+
+	prerequisites = {
+		tech_power_hub_1
+	}
+
+	upgrades = {
+		building_energy_nexus
+	}
+
+	ai_resource_production = {
+   		energy = 10
+
+		trigger = {
+			has_any_generator_zone = yes
+		}
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_energy_nexus = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		generator
+	}
+
+	potential = {
+		NOT = { has_modifier = resort_colony }
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		OR = {
+			owner = { is_ai = no }
+			has_any_generator_district_or_building = yes
+		}
+	}
+	destroy_trigger = {
+		OR = {
+			has_modifier = resort_colony
+			AND = {
+				exists = owner
+				owner = { is_ai = yes }
+				has_any_generator_district_or_building = no
+			}
+			AND = {
+				exists = owner
+				owner = { is_wilderness_empire = yes } # see 'building_bioelectric_stimulator_4'
+			}
+		}
+	}
+	allow = {
+		has_upgraded_capital = yes
+		is_occupied_flag = no
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			trigger = {
+				has_ringworld_output_boost = no
+			}
+			minerals = @b2_minerals
+			rare_crystals = @b2_rare_cost
+		}
+		cost = {
+			trigger = {
+				has_ringworld_output_boost = yes
+			}
+			minerals = 900
+			rare_crystals = 200
+		}
+		upkeep = {
+			trigger = {
+				has_ringworld_output_boost = no
+			}
+			energy = 2
+			rare_crystals = @b2_rare_upkeep
+		}
+		upkeep = {
+			trigger = {
+				has_ringworld_output_boost = yes
+			}
+			energy = 5
+			rare_crystals = 3
+		}
+	}
+
+	planet_modifier = {
+		planet_technician_produces_mult = 0.20
+		planet_technician_energy_produces_add = 2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			has_ringworld_output_boost = yes
+		}
+		modifier = {
+			planet_technician_energy_produces_add = 2
+		}
+	}
+
 	prerequisites = {
 		tech_power_hub_2
+	}
+
+	ai_resource_production = {
+   		energy = 15
+
+		trigger = {
+			has_any_generator_zone = yes
+		}
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_generator_districts_1 = {
+	base_buildtime = @b1_time
+	planet_limit = 1
+	category = resource
+
+	building_sets = {
+		generator
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_generator_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_generator_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_generator_max = @b1_max_districts_add
+	}
+
+	upgrades = {
+		building_generator_districts_2
+	}
+
+	prerequisites = {
+		tech_power_plant_1
+	}
+}
+
+building_generator_districts_2 = {
+	base_buildtime = @b2_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		generator
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_generator_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_generator_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			rare_crystals = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			rare_crystals = @b2_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_generator_max = @b2_max_districts_add
+	}
+
+	upgrades = {
+		building_generator_districts_3
+	}
+
+	prerequisites = {
+		tech_power_plant_2
+	}
+}
+
+building_generator_districts_3 = {
+	base_buildtime = @b3_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		generator
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_generator_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_generator_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			rare_crystals = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			rare_crystals = @b3_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_generator_max = @b3_max_districts_add
+	}
+
+	upgrades = {
+		building_generator_districts_4
+	}
+
+	prerequisites = {
+		tech_power_plant_3
+	}
+}
+
+building_generator_districts_4 = {
+	base_buildtime = @b4_time
+	can_build = no
+	category = resource
+
+	building_sets = {
+		generator
+	}
+
+	potential = {
+		exists = owner
+		owner = { is_wilderness_empire = no }
+		has_any_capped_planet_generator_district = yes
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = {
+				is_wilderness_empire = yes
+			}
+			has_any_capped_planet_generator_district = no
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b4_minerals
+			rare_crystals = @b4_rare_cost
+		}
+		upkeep = {
+			energy = @b4_upkeep
+			rare_crystals = @b4_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		district_generator_max = @b4_max_districts_add
+	}
+
+	prerequisites = {
+		tech_power_plant_4
 	}
 }
 
 building_resource_silo = {
 	base_buildtime = 180
-
 	category = resource
+
+	building_sets = {
+		generator
+		mining
+		farming
+		urban
+	}
 
 	potential = {
 		NOR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
 		}
+		exists = owner
+		owner = { is_wilderness_empire = no } # see 'building_subterranean_cache'
 	}
 
 	allow = {
@@ -818,25 +1606,6 @@ building_resource_silo = {
 			}
 		}
 		is_occupied_flag = no
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = { is_regular_empire = yes }
-		}
-		modifier = {
-			job_clerk_add = 1
-		}
-	}
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = { is_gestalt = yes }
-		}
-		modifier = {
-			job_maintenance_drone_add = 1
-		}
 	}
 
 	resources = {
@@ -866,42 +1635,38 @@ building_resource_silo = {
 	prerequisites = {
 		"tech_basic_industry"
 	}
-
-	triggered_desc = {
-		trigger = {
-			exists = owner
-			owner = { is_gestalt = yes }
-		}
-		text = job_maintenance_drone_effect_desc
-	}
-	triggered_desc = {
-		trigger = {
-			exists = owner
-			owner = { is_gestalt = no }
-		}
-		text = job_clerk_effect_desc
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
 	}
 }
 
 building_bio_reactor = {
 	base_buildtime = @b1_time
-	base_cap_amount = 1
+	planet_limit = 1
 
 	category = resource
 
+	building_sets = {
+		farming
+	}
+
 	potential = {
 		exists = owner
+		owner = { is_wilderness_empire = no }
 		NOR = {
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
 		}
-
 		OR = {
 			owner = {
 				is_ai = no
 			}
 			has_any_farming_district_or_buildings = yes
 		}
+	}
+
+	allow = {
+		is_occupied_flag = no
 	}
 
 	destroy_trigger = {
@@ -921,10 +1686,6 @@ building_bio_reactor = {
 			}
 		}
 	}
-	
-	allow = {
-		is_occupied_flag = no
-	}
 
 	resources = {
 		category = planet_buildings
@@ -934,12 +1695,6 @@ building_bio_reactor = {
 		upkeep = {
 			food = @b1_upkeep
 		}
-	}
-
-	inline_script = {
-		script = jobs/farmers_add
-		FARMER_AMOUNT = 1
-		ANGLER_AMOUNT = 1
 	}
 
 	planet_modifier = {
@@ -961,6 +1716,10 @@ building_bio_reactor_2 = {
 	can_build = no
 	category = resource
 
+	building_sets = {
+		farming
+	}
+
 	allow = {
 		has_upgraded_capital = yes
 		is_occupied_flag = no
@@ -968,11 +1727,11 @@ building_bio_reactor_2 = {
 
 	potential = {
 		exists = owner
+		owner = { is_wilderness_empire = no }
 		NOR = {
 			is_planet_class = pc_machine
 			has_modifier = resort_colony
 		}
-
 		OR = {
 			owner = {
 				is_ai = no
@@ -1009,12 +1768,6 @@ building_bio_reactor_2 = {
 		}
 	}
 
-	inline_script = {
-		script = jobs/farmers_add
-		FARMER_AMOUNT = 2
-		ANGLER_AMOUNT = 2
-	}
-
 	planet_modifier = {
 		planet_farmers_food_produces_add = -3
 		planet_farmers_energy_produces_add = 2
@@ -1022,6 +1775,6 @@ building_bio_reactor_2 = {
 	}
 
 	prerequisites = {
-		tech_bio_reactor_2
+		"tech_bio_reactor_2"
 	}
 }

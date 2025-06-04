@@ -13,13 +13,14 @@ event = {
 		every_country = {
 			limit = { is_ai = no }
 			country_event = { id = country.900 days = 460 random = 60 }
+			country_event = { id = game_start.74 }
 		}
 
 		### HUMAN SPAWNS
 		if = { #FTP spawner
 			limit = {
 				has_lithoids = yes
-				num_ai_empires_setting >= 1
+				num_ai_empires_setting >= 2
 				any_country = { #First check that UNE has spawned
 					has_country_flag = human_1
 					is_human_species = yes
@@ -40,7 +41,7 @@ event = {
 							has_country_flag = human_1
 							is_ai = no
 						}
-						factor = 5
+						factor = 4
 					}
 					random_system = {
 						limit = {
@@ -92,18 +93,47 @@ event = {
 				}
 			}
 			random_list = {
-				50 = { }
-				40 = {
+				490 = { }	# No Sol
+				400 = {		# Pre-FTLs
+					complex_trigger_modifier = {
+						trigger = check_galaxy_setup_value
+						parameters = {
+							setting = primitive_worlds_scale
+						}
+						mode = factor
+					}
 					random_system = {
 						limit = { has_owner = no }
 						spawn_system = { initializer = "pre_ftl_init_sol" }
 					}
 					add_extra_hyperlane_to_spawned_system_effect = yes
 				}
-				10 = {
+				100 = {		# Tomb World
+					complex_trigger_modifier = {
+						trigger = check_galaxy_setup_value
+						parameters = {
+							setting = primitive_worlds_scale
+						}
+						mode = factor
+					}
 					random_system = {
 						limit = { has_owner = no }
 						spawn_system = { initializer = "special_init_04" }
+					}
+					add_extra_hyperlane_to_spawned_system_effect = yes
+				}
+				10 = {		# Geocentric Experiment
+					complex_trigger_modifier = {
+						trigger = check_galaxy_setup_value
+						parameters = {
+							setting = habitable_worlds_scale
+						}
+						mode = factor
+						mult = 0.4 # e.g. 0.5x habitable = factor of 0.2; 5x habitable worlds = factor of 2
+					}
+					random_system = {
+						limit = { has_owner = no }
+						spawn_system = { initializer = "init_sol_geocentric" }
 					}
 					add_extra_hyperlane_to_spawned_system_effect = yes
 				}
@@ -118,6 +148,9 @@ event = {
 				save_global_event_target_as = global_event_country
 			}
 		}
+		
+		ariphaos_patch_evaluate_start = yes
+		ariphaos_patch_evaluate_galaxy = yes
 
 		### SPAWN SPECIAL COUNTRIES
 		create_country = {
@@ -181,6 +214,29 @@ event = {
 					set_neutral = yes
 					set_friendly = no
 				}
+			}
+		}
+
+		every_country = {
+			limit = {
+				is_amoeba_country_type = yes
+			}
+			every_country = {
+				limit = {
+					OR = {
+						is_tiyanki_country_type = yes
+					}
+				}
+				set_faction_hostility = {
+					target = prev
+					set_hostile = yes
+					set_neutral = no
+					set_friendly = no
+				}
+			}
+			add_modifier = {
+				modifier = tiyanki_butcher
+				days = -1
 			}
 		}
 
@@ -370,6 +426,12 @@ event = {
 			fruitful_start_effect = yes
 		}
 
+		# Wilderness
+		every_playable_country = {
+			limit = { has_origin = origin_wilderness }
+			country_event = { id = wilderness.150 } # stellar flare
+		}
+
 		## Payback/Escaped Slaves Slaver empire
 		# if advanced starts are enabled or a player has picked it, continue
 		if = {
@@ -432,10 +494,6 @@ event = {
 			limit = {
 				is_eager_explorer_empire = yes
 			}
-			give_technology = {
-				message = no
-				tech = tech_subspace_drive
-			}
 			low_tech_start_add_research_options_effect = yes
 			add_research_option = tech_hyper_drive_1
 		}
@@ -451,7 +509,9 @@ event = {
 					is_ruler = yes
 					NOT = { has_trait = leader_trait_cyborg	}
 				}
-				add_trait = leader_trait_ritualistic_implants_cyborg
+				add_trait = {
+					trait = leader_trait_ritualistic_implants_cyborg
+				}
 			}
 		}
 
@@ -469,6 +529,14 @@ event = {
 				has_origin = origin_arc_welders
 			}
 			arc_welders_start_effect = yes
+		}
+
+		# Starlit Citadel
+		every_playable_country = {
+			limit = {
+				has_origin = origin_starlit_citadel
+			}
+			starlit_citadel_start_effect = yes
 		}
 
 		# Astro-Mining Drones
@@ -501,30 +569,12 @@ event = {
 			}
 		}
 
-		# Natural Design
+		# Synthetic Fertility
 		every_playable_country = {
 			limit = {
-				is_natural_design_empire = yes
-				capital_scope = {
-					free_building_slots > 0
-				}
+				has_origin = origin_evolutionary_predators
 			}
-			if = {
-				limit = {
-					is_hive_empire = yes
-				}
-				capital_scope = {
-					add_building = building_hive_transcendental_retreat
-				}
-			}
-			if = {
-				limit = {
-					is_hive_empire = no
-				}
-				capital_scope = {
-					add_building = building_transcendental_retreat
-				}
-			}
+			country_event = { id = bio.1000 }
 		}
 
 		# Spyware Directives
@@ -552,6 +602,22 @@ event = {
 			obsessional_directive_start_effect = yes
 		}
 
+		every_playable_country = { # Shared Genetics
+			limit = {
+				has_valid_civic = civic_hive_shared_genetics
+			}
+			add_modifier = {
+				modifier = shared_genetics_fire_rate
+				days = -1
+				mult = value:count_negative_traits_from_country
+			}
+			add_modifier = {
+				modifier = shared_genetics_hull
+				days = -1
+				mult = value:count_positive_traits_from_country
+			}
+		}
+
 		if = { #If someone has Beastmasters civic, spawn amoeba already to give them communication
 			limit = {
 				any_country = {
@@ -559,6 +625,16 @@ event = {
 				}
 			}
 			create_amoeba_country = yes
+		}
+
+		# Unplugged
+		if = {
+			limit = {
+				any_playable_country = {
+					has_origin = origin_unplugged
+				}
+			}
+			unplugged_origin_start_effect = yes
 		}
 	}
 }
@@ -886,6 +962,12 @@ country_event = {
 		add_resource = { minerals = 1000 }
 		add_resource = { alloys = 500	}
 		add_resource = { influence = 200 }
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier2unityreward
+			min = @tier2unitymin
+			max = @tier2unitymax
+		}
 		if = {
 			limit = {
 				OR = {
@@ -915,6 +997,7 @@ country_event = {
 			limit = {
 				has_deposit_for = shipclass_mining_station
 				has_mining_station = no
+				has_any_rare_strategic_resource = no
 			}
 			create_mining_station = {
 				owner = ROOT
@@ -924,6 +1007,7 @@ country_event = {
 			limit = {
 				has_deposit_for = shipclass_research_station
 				has_research_station = no
+				has_any_rare_strategic_resource = no
 			}
 			create_research_station = {
 				owner = ROOT
@@ -939,22 +1023,6 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		add_resource = { energy = 100	}
-		add_resource = { minerals = 100	}
-		add_resource = { alloys = 100	}
-		add_resource = { influence = 100 }
-
-		if = {
-			limit = {
-				OR = {
-					is_gestalt = no
-					has_valid_civic = civic_machine_servitor
-				}
-
-			}
-			add_resource = { consumer_goods = 100 }
-		}
-
 		if = {
 			limit = {
 				has_origin = origin_mechanists
@@ -1037,10 +1105,13 @@ country_event = {
 					last_created_leader = {
 						if = {
 							limit = {
-								has_skill > 1
+								has_base_skill > 1
 								num_traits = 0
 							}
-							add_trait_no_notify = random_common
+							add_trait = {
+								trait = random_common
+								show_message = no
+							}
 						}
 					}
 					set_leader = last_created_leader
@@ -1059,15 +1130,18 @@ country_event = {
 			last_created_leader = {
 				if = {
 					limit = {
-						has_skill > 1
+						has_base_skill > 1
 						num_traits = 0
 					}
-					add_trait_no_notify = random_common
+					add_trait = {
+						trait = random_common
+						show_message = no
+					}
 				}
 			}
 		}
 		
-		last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
+		last_created_leader = { ariphaos_patch_leader_change_traits = yes } # If a mod adds starting cybernetics or something.
 
 		if = {
 			limit = {
@@ -1097,10 +1171,13 @@ country_event = {
 							last_created_leader = {
 								if = {
 									limit = {
-										has_skill > 1
+										has_base_skill > 1
 										num_traits = 0
 									}
-									add_trait_no_notify = random_common
+									add_trait = {
+										trait = random_common
+										show_message = no
+									}
 								}
 							}
 						}
@@ -1112,15 +1189,21 @@ country_event = {
 								set_country_flag = created_first_eager_ship
 							}
 							last_created_leader = {
-								add_trait_no_notify = leader_trait_meticulous
+								add_trait = {
+									trait = leader_trait_meticulous
+									show_message = no
+								}
 							}
 						}
 						else = {
 							last_created_leader = {
-								add_trait_no_notify = leader_trait_roamer
+								add_trait = {
+									trait = leader_trait_roamer
+									show_message = no
+								}
 							}
 						}
-						last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
+						last_created_leader = { ariphaos_patch_leader_change_traits = yes } # If a mod adds starting cybernetics or something.
 						set_leader = last_created_leader
 					}
 				}
@@ -1220,17 +1303,20 @@ country_event = {
 					last_created_leader = {
 						if = {
 							limit = {
-								has_skill > 1
+								has_base_skill > 1
 								num_traits = 0
 							}
-							add_trait_no_notify = random_common
+							add_trait = {
+								trait = random_common
+								show_message = no
+							}
 						}
 					}
 					set_leader = last_created_leader
 					save_event_target_as = beastmasters_starting_fleet
 				}
 			}
-		
+
 			if = {
 				limit = { has_origin = origin_fruitful }
 				event_target:beastmasters_starting_fleet = {
@@ -1254,6 +1340,38 @@ country_event = {
 				effect = {
 					set_owner = prev
 					if = {
+						limit = {
+							root = {
+								country_uses_bio_ships = yes
+								NOT = {
+									has_valid_civic = civic_hive_cordyceptic_drones
+								}
+							}
+						}
+						while = {
+							count = 2
+							create_ship = {
+								name = random
+								random_existing_design = mauler_stage_1
+							}
+						}
+						if = {
+							limit = {
+								root = { has_origin = origin_progenitor_hive }
+							}
+							create_ship = {
+								name = random
+								random_existing_design = offspring_weaver_stage_1
+							}
+						}
+						else = {
+							create_ship = {
+								name = random
+								random_existing_design = weaver_stage_1
+							}
+						}
+					}
+					else_if = {
 						limit = {
 							root = {
 								NOT = {
@@ -1296,11 +1414,26 @@ country_event = {
 						}
 						if = {
 							limit = {
-								root = { has_origin = origin_progenitor_hive }
+								root = {
+									country_uses_bio_ships = no
+									has_origin = origin_progenitor_hive
+								}
 							}
 							create_ship = {
 								name = random
 								random_existing_design = offspring_corvette
+							}
+						}
+						else_if = {
+							limit = {
+								root = {
+									country_uses_bio_ships = yes
+									has_origin = origin_progenitor_hive
+								}
+							}
+							create_ship = {
+								name = random
+								random_existing_design = offspring_weaver_stage_1
 							}
 						}
 						else = {
@@ -1322,10 +1455,13 @@ country_event = {
 					last_created_leader = {
 						if = {
 							limit = {
-								has_skill > 1
+								has_base_skill > 1
 								num_traits = 0
 							}
-							add_trait_no_notify = random_common
+							add_trait = {
+								trait = random_common
+								show_message = no
+							}
 						}
 					}
 					set_leader = last_created_leader
@@ -1361,10 +1497,13 @@ country_event = {
 					last_created_leader = {
 						if = {
 							limit = {
-								has_skill > 1
+								has_base_skill > 1
 								num_traits = 0
 							}
-							add_trait_no_notify = random_common
+							add_trait = {
+								trait = random_common
+								show_message = no
+							}
 						}
 					}
 					set_leader = last_created_leader
@@ -1387,15 +1526,18 @@ country_event = {
 			last_created_leader = {
 				if = {
 					limit = {
-						has_skill > 1
+						has_base_skill > 1
 						num_traits = 0
 					}
-					add_trait_no_notify = random_common
+					add_trait = {
+						trait = random_common
+						show_message = no
+					}
 				}
 			}
 		}
 		
-		last_created_leader = { add_leader_traits_after_modification = yes } # If a mod adds starting cybernetics or something.
+		last_created_leader = { ariphaos_patch_leader_change_traits = yes } # If a mod adds starting cybernetics or something.
 	}
 }
 
@@ -1428,8 +1570,8 @@ country_event = {
 			limit = {
 				is_machine_empire = no
 			}
-			every_owned_pop = {
-				set_pop_flag = organic_fallen_empire_pop
+			every_owned_pop_group = {
+				set_pop_group_flag = organic_fallen_empire_pop
 			}
 		}
 		# contact other fallen empires & marauders
@@ -1516,24 +1658,6 @@ planet_event = {
 			limit = { has_planet_flag = void_dweller_habitat_1 }
 			void_dweller_home_planet_setup = yes
 		}
-
-		if = {
-			limit = { has_planet_flag = toxic_knights_homeworld }
-			toxic_knights_order_habitat_setup = yes
-		}
-
-		if = {
-			limit = {
-				owner = {
-					is_astrometeorologist_empire = yes
-				}
-				has_building = building_research_lab_1
-			}
-
-			remove_building = building_research_lab_1
-			add_building = building_astrometeorology_observation_center
-		}
-
 	}
 }
 
@@ -1640,11 +1764,6 @@ planet_event = {
 			}
 
 			if = {
-				limit = { owner = { is_gestalt = no } }
-				add_building = building_factory_1
-				add_building = building_commercial_zone
-			}
-			if = {
 				limit = {
 					owner = { is_subterranean_empire = yes }
 				}
@@ -1673,12 +1792,6 @@ planet_event = {
 			while = {
 				count = 2
 				add_district_if_possible_effect = {
-					district = district_industrial
-				}
-			}
-			while = {
-				count = 2
-				add_district_if_possible_effect = {
 					district = district_mining_uncapped
 				}
 			}
@@ -1699,7 +1812,7 @@ planet_event = {
 						}
 					}
 					add_district_if_possible_effect = {
-						district = district_srw_commercial
+						district = district_city
 					}
 				}
 				else = {
@@ -1739,52 +1852,6 @@ planet_event = {
 						district = district_nexus
 					}
 				}
-			}
-
-			add_building = building_foundry_1
-			add_building = building_factory_1
-			if = {
-				limit = {
-					owner = {
-						is_megacorp = no
-						is_spiritualist = no
-						is_gestalt = no
-					}
-				}
-				add_building = building_bureaucratic_1
-			}
-			else_if = {
-				limit = {
-					owner = { is_spiritualist = yes }
-				}
-				add_building = building_temple
-			}
-			else_if = {
-				limit = {
-					owner = { is_megacorp = yes }
-				}
-				add_building = building_corporate_monument
-			}
-			else_if = {
-				limit = {
-					owner = { is_hive_empire = yes }
-				}
-				add_building = building_hive_node
-			}
-			else_if = {
-				limit = {
-					owner = {
-						is_machine_empire = yes
-						NOT = { has_valid_civic = civic_machine_servitor }
-					}
-				}
-				add_building = building_simulation_1
-			}
-			if = {
-				limit = {
-					owner = { is_gestalt = no }
-				}
-				add_building = building_holo_theatres
 			}
 		}
 		else = {
@@ -1848,14 +1915,14 @@ planet_event = {
 				limit = { owner = { is_machine_empire = yes } }
 				while = {
 					count = 13
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else_if = {
 				limit = { owner = { is_hive_empire = yes } }
 				while = {
 					count = 16
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else_if = {
@@ -1868,13 +1935,13 @@ planet_event = {
 				}
 				while = {
 					count = 6
-					create_pop = {
+					create_pop_group = {
 						species = event_target:mechanical_species
 					}
 				}
 				while = {
 					count = 12
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else_if = {
@@ -1894,17 +1961,17 @@ planet_event = {
 				}
 				while = {
 					count = 8
-					create_pop = { species = event_target:syncretic_species }
+					create_pop_group = { species = event_target:syncretic_species }
 				}
 				while = {
 					count = 10
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else = {
 				while = {
 					count = 18
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 		}
@@ -1913,14 +1980,14 @@ planet_event = {
 				limit = { owner = { is_machine_empire = yes } }
 				while = {
 					count = 15
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else_if = {
 				limit = { owner = { is_hive_empire = yes } }
 				while = {
 					count = 18
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else_if = {
@@ -1933,13 +2000,13 @@ planet_event = {
 				}
 				while = {
 					count = 4
-					create_pop = {
+					create_pop_group = {
 						species = event_target:mechanical_species
 					}
 				}
 				while = {
 					count = 7
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else_if = {
@@ -1959,17 +2026,17 @@ planet_event = {
 				}
 				while = {
 					count = 4
-					create_pop = { species = event_target:syncretic_species }
+					create_pop_group = { species = event_target:syncretic_species }
 				}
 				while = {
 					count = 6
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 			else = {
 				while = {
 					count = 10
-					create_pop = { species = owner_main_species }
+					create_pop_group = { species = owner_main_species }
 				}
 			}
 		}
@@ -2327,23 +2394,23 @@ country_event = {
 						}
 					}
 				}
-				random_owned_pop = {
+				weighted_random_owned_pop_group = {
 					limit = {
 						NOT = { is_same_species = prev }
 					}
 					species = { save_event_target_as = correct_prepatent_species }
 				}
 			}
-			every_owned_pop = {
+			every_owned_pop_group = {
 				limit = {
 					NOT = { is_same_species = owner_species }
 				}
 				planet = {
-					create_pop = {
+					create_pop_group = {
 						species = event_target:correct_prepatent_species
 					}
 				}
-				kill_pop = yes
+				kill_single_pop = yes
 			}
 			remove_country_flag = necrophage_une
 			remove_country_flag = necrophage_commonwealth
@@ -2662,41 +2729,6 @@ country_event = {
 	}
 }
 
-#Place Memory Vault building if you have the civic at game start
-country_event = {
-	id = game_start.62
-	hide_window = yes
-	trigger = {
-		is_memory_vault_empire = yes
-		is_country_type = default
-		NOR = {
-			has_origin = origin_broken_shackles
-			has_origin = origin_payback
-		}
-	}
-
-	is_triggered_only = yes
-
-	immediate = {
-		capital_scope = {
-			if = {
-				limit = {
-					free_building_slots <= 0
-					has_district = district_generator
-					has_district = district_city
-				}
-				remove_district = district_generator
-				add_district = district_city
-			}
-			set_variable = {
-				which = paragon_memory_vault
-				value = 0
-			}
-			add_building = building_paragon_memory_vaults
-		}
-	}
-}
-
 # Change Ethic of first Ruler to empire's fanatic ethic.
 # More likely they would've been elected, and easier to re-elect them.
 country_event = {
@@ -2740,7 +2772,7 @@ country_event = {
 	}
 }
 
-#Place Clinic building if you have the Pharma civic at game start
+# Give techs if you have the Pharma civic at game start
 country_event = {
 	id = game_start.64
 	hide_window = yes
@@ -2753,67 +2785,8 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		capital_scope = {
-			if = {
-				limit = {
-					has_building = building_commercial_zone
-				}
-				remove_building = building_commercial_zone
-			}
-			if = {
-				limit = {
-					free_building_slots <= 0
-					has_district = district_generator
-					has_district = district_city
-				}
-				remove_district = district_generator
-				add_district = district_city
-			}
-			add_building = building_clinic
-		}
 		give_technology = { message = no tech = tech_frontier_health }
 		add_research_option = tech_subdermal_stimulation
-	}
-}
-
-#Place additional cop building, if you have Dystopian Society
-country_event = {
-	id = game_start.65
-	hide_window = yes
-	trigger = {
-		has_civic = civic_dystopian_society
-		is_country_type = default
-		NOR = {
-			has_origin = origin_broken_shackles
-			has_origin = origin_payback
-			has_void_dweller_origin = yes
-		}
-	}
-
-	is_triggered_only = yes
-
-	immediate = {
-		capital_scope = {
-			switch = {
-				trigger = has_building
-				building_commercial_zone = {
-					remove_building = building_commercial_zone
-				}
-				building_temple = {
-					remove_building = building_temple
-				}
-			}
-			if = {
-				limit = {
-					free_building_slots <= 0
-					has_district = district_generator
-					has_district = district_city
-				}
-				remove_district = district_generator
-				add_district = district_city
-			}
-			add_building = building_precinct_house
-		}
 	}
 }
 
@@ -3023,10 +2996,13 @@ country_event = {
 				last_created_leader = {
 					if = {
 						limit = {
-							has_skill > 1
+							has_base_skill > 1
 							num_traits = 0
 						}
-						add_trait_no_notify = random_common
+						add_trait = {
+							trait = random_common
+							show_message = no
+						}
 					}
 				}
 				last_created_leader = {
@@ -3075,10 +3051,13 @@ country_event = {
 				last_created_leader = {
 					if = {
 						limit = {
-							has_skill > 1
+							has_base_skill > 1
 							num_traits = 0
 						}
-						add_trait_no_notify = random_common
+						add_trait = {
+							trait = random_common
+							show_message = no
+						}
 					}
 				}
 				last_created_leader = {
@@ -3131,10 +3110,13 @@ country_event = {
 					last_created_leader = {
 						if = {
 							limit = {
-								has_skill > 1
+								has_base_skill > 1
 								num_traits = 0
 							}
-							add_trait_no_notify = random_common
+							add_trait = {
+								trait = random_common
+								show_message = no
+							}
 						}
 					}
 					last_created_leader = {
@@ -3181,10 +3163,13 @@ country_event = {
 				last_created_leader = {
 					if = {
 						limit = {
-							has_skill > 1
+							has_base_skill > 1
 							num_traits = 0
 						}
-						add_trait_no_notify = random_common
+						add_trait = {
+							trait = random_common
+							show_message = no
+						}
 					}
 				}
 				last_created_leader = {
@@ -3230,10 +3215,13 @@ country_event = {
 				last_created_leader = {
 					if = {
 						limit = {
-							has_skill > 1
+							has_base_skill > 1
 							num_traits = 0
 						}
-						add_trait_no_notify = random_common
+						add_trait = {
+							trait = random_common
+							show_message = no
+						}
 					}
 				}
 				last_created_leader = {
@@ -3290,6 +3278,22 @@ country_event = {
 				}
 				set_country_flag = augmentation_bazaars_superconductive
 			}
+		}
+	}
+}
+
+### Empire Focus
+country_event = {
+	id = game_start.74
+	hide_window = yes
+	is_triggered_only = yes
+	event_message_type = EMPIRE_FOCUS
+
+	immediate = {
+		create_message = {
+			type = EMPIRE_FOCUS
+			localization = game_start.74.title
+			days = 30
 		}
 	}
 }

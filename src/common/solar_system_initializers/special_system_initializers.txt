@@ -41,7 +41,7 @@ special_init_06 = {
 	}
 	usage = misc_system_init
 	usage_odds = {
-		base = 2000000
+		base = @spawn_system_slightlycommon
 		modifier = {
 			factor = 0
 			is_bottleneck_system = yes
@@ -247,7 +247,7 @@ special_init_07 = {
 	usage = misc_system_init
 
 	usage_odds = {
-		base = 5
+		base = @spawn_system_common
 		modifier = {
 			factor = 0
 			NOT = { is_in_cluster = resource_cluster_1 }
@@ -697,6 +697,7 @@ crystal_manufactory_system = {
 	init_effect = {
 		random_system_planet = {
 			limit = {
+				is_star = no
 				habitable_planet = no
 				has_deposit_for = shipclass_mining_station
 				#reduces spawn rate of manufactory, but not system
@@ -720,7 +721,13 @@ trappist_initializer = {
 	name = "NAME_Trappist"
 	class = "sc_m"
 	usage = misc_system_init
-	usage_odds = 2000000
+	usage_odds = {
+		base = @spawn_system_common
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
+		}
+	}
 	max_instances = 1
 	scaled_spawn_chance = 10
 
@@ -819,14 +826,14 @@ parvus_system = {
 	}
 	usage = misc_system_init
 	usage_odds = {
-		base = 100
+		base = @spawn_system_common
 		modifier = {
 			factor = 0
-			is_fe_cluster = yes
+			is_bottleneck_system = yes
 		}
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
 		}
 	}
 	max_instances = 1
@@ -922,10 +929,14 @@ polaris_civilization = {
 	}
 	usage = misc_system_init
 	usage_odds = {
-		base = 2000000
+		base = @spawn_system_extreme
 		modifier = {
 			factor = 0
 			is_bottleneck_system = yes
+		}
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
 		}
 	}
 	max_instances = 1
@@ -1094,7 +1105,7 @@ polaris_civilization = {
 
 	change_orbit = 40
 
-    planet = {
+	planet = {
 		count = { min = 1 max = 3 }
 		orbit_distance = 20
 		orbit_angle = { min = 90 max = 270 }
@@ -1102,10 +1113,10 @@ polaris_civilization = {
 
 		moon = {
 	  		count = { min = 0 max = 2 }
-	    	orbit_distance = 5
-	    	orbit_angle = { min = 90 max = 270 }
+			orbit_distance = 5
+			orbit_angle = { min = 90 max = 270 }
 		}
-    }
+	}
 
 	init_effect = {
 		while = {
@@ -1132,11 +1143,8 @@ fumongus_init_01 = {
 	class = "rl_standard_stars"
 	usage = misc_system_init
 	usage_odds = {
-		base = 200
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
-		}
+		base = @spawn_system_common
+		inline_script = "solar_system_initializers/initializer_modifiers_habitable_world_systems"
 	}
 	max_instances = 1
 	asteroid_belt = {
@@ -1348,7 +1356,15 @@ ghost_ship_system_initializer_01 = {
 	}
 	usage = misc_system_init
 	usage_odds = {
-		base = 10
+		base = @spawn_system_verycommon
+		complex_trigger_modifier = {
+			trigger = check_galaxy_setup_value
+			parameters = {
+			  setting = habitable_worlds_scale
+			}
+			mode = factor
+			mult = 0.4 # e.g. 0.5x habitable = factor of 0.2; 5x habitable worlds = factor of 2
+		}
 		modifier = {
 			factor = 0
 			has_star_flag = empire_cluster
@@ -1807,10 +1823,10 @@ locust_system_initializer_01 = {
 
 	usage = misc_system_init
 	usage_odds = {
-		base = 4
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
+		base = @spawn_system_common
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
 		}
 	}
 	max_instances = 1
@@ -2051,15 +2067,15 @@ locust_system_initializer_01 = {
 }
 
 # Holibrae System
-Holibrae_initializer = {
+holibrae_initializer = {
 	name = "NAME_Holibrae"
 	class = "sc_m"
 	usage = misc_system_init
 	usage_odds = {
-		base = 4
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
+		base = @spawn_system_base
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
 		}
 	}
 	max_instances = 1
@@ -2382,6 +2398,18 @@ the_chosen_home_initializer = {
 					save_global_event_target_as = chosen_empire
 					set_country_flag = chosen_empire
 					give_starting_resources_effect = yes
+
+					# A bit extra
+					add_resource = {
+						energy = 2000
+						minerals = 2000
+						alloys = 2000
+						consumer_goods = 2000
+						trade = 2000
+						influence = 1000
+						unity = 500
+					}
+
 					create_leader = {
 						class = official
 						species = event_target:chosen_species
@@ -2403,6 +2431,13 @@ the_chosen_home_initializer = {
 			clear_blockers = yes
 			generate_start_buildings_and_districts = yes
 			generate_start_pops = yes
+
+			while = { # To make up for the disadvantage of being stuck behind the wormhole
+				count = 5
+				weighted_random_owned_pop_group = {
+					add_pop_amount = 1200
+				}
+			}
 		}
 	}
 
@@ -2774,6 +2809,7 @@ the_chosen_gate_initializer = {
 							add_modifier = {
 								modifier = paradisiacal_habitat_science
 							}
+							set_name = paradisiacal_habitat_science
 						}
 						else_if = {
 							limit = {
@@ -2787,6 +2823,7 @@ the_chosen_gate_initializer = {
 							add_modifier = {
 								modifier = paradisiacal_habitat_mining
 							}
+							set_name = paradisiacal_habitat_mining
 						}
 						else_if = {
 							limit = {
@@ -2800,6 +2837,7 @@ the_chosen_gate_initializer = {
 							add_modifier = {
 								modifier = paradisiacal_habitat_energy
 							}
+							set_name = paradisiacal_habitat_energy
 						}
 					}
 				}
@@ -2940,7 +2978,11 @@ the_star_mall_initializer = {
 				host_has_dlc = "Utopia"
 				host_has_dlc = "Federations"
 			}
-			add = 2000000
+			add = @spawn_system_verycommon
+		}
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
 		}
 		modifier = {
 			factor = 0
@@ -3181,10 +3223,10 @@ breachsealer_system = {
 
 	usage = misc_system_init
 	usage_odds = {
-		base = 90000
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
+		base = @spawn_system_extreme
+		inline_script = {
+			script = solar_system_initializers/initializer_modifiers_habitable_world_systems_mult
+			VALUE = 0.4
 		}
 	}
 	max_instances = 1
@@ -3364,19 +3406,12 @@ metal_planet_system_initializer = {
 	usage = misc_system_init
 
 	usage_odds = {
-		base = 5
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
-		}
-		modifier = {
-			factor = 0
-			is_bottleneck_system = yes
-		}
+		base = @spawn_system_slightlycommon
 		modifier = {
 			factor = 0
 			has_cosmic_storms_dlc = no
 		}
+		inline_script = "solar_system_initializers/initializer_modifiers_habitable_world_systems"
 	}
 
 	max_instances = 1
@@ -3438,19 +3473,12 @@ previously_terraformed_planet_system_initializer = {
 
 	usage = misc_system_init
 	usage_odds = {
-		base = 5
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
-		}
-		modifier = {
-			factor = 0
-			is_bottleneck_system = yes
-		}
+		base = @spawn_system_common
 		modifier = {
 			factor = 0
 			has_cosmic_storms_dlc = no
 		}
+		inline_script = "solar_system_initializers/initializer_modifiers_habitable_world_systems"
 	}
 	max_instances = 1
 	scaled_spawn_chance = 3
@@ -3518,19 +3546,12 @@ collided_planet_system_initializer = {
 	usage = misc_system_init
 
 	usage_odds = {
-		base = 5
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
-		}
-		modifier = {
-			factor = 0
-			is_bottleneck_system = yes
-		}
+		base = @spawn_system_base
 		modifier = {
 			factor = 0
 			has_cosmic_storms_dlc = no
 		}
+		inline_script = "solar_system_initializers/initializer_modifiers_habitable_world_systems"
 	}
 
 	max_instances = 1
@@ -3637,19 +3658,12 @@ wooden_planet_system_initializer = {
 	usage = misc_system_init
 
 	usage_odds = {
-		base = 5
-		modifier = {
-			factor = 0
-			has_star_flag = empire_cluster
-		}
-		modifier = {
-			factor = 0
-			is_bottleneck_system = yes
-		}
+		base = @spawn_system_common
 		modifier = {
 			factor = 0
 			has_cosmic_storms_dlc = no
 		}
+		inline_script = "solar_system_initializers/initializer_modifiers_habitable_world_systems"
 	}
 
 	max_instances = 1

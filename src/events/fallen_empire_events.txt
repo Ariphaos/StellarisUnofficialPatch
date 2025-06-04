@@ -40,7 +40,23 @@ country_event = {
 	id = fallen_empires.2
 	title = fallen_empires.2.name
 	desc = fallen_empires.2.desc
-	picture = GFX_evt_fallen_empire
+	picture = {
+		trigger = {
+			from = {
+				is_hive_empire = no
+			}
+		}
+		picture = GFX_evt_fallen_empire
+	}
+
+	picture = {
+		trigger = {
+			from = {
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_planetary_riot
 	location = root
 
@@ -366,6 +382,24 @@ country_event = {
 	id = fallen_empires.8
 	title = fallen_empires.8.name
 	desc = fallen_empires.8.desc
+	desc = {
+		exclusive_trigger = {
+			from = { has_country_flag = fallen_empire_hive_control }
+		}
+		text = fallen_empires.8.desc.control
+	}
+	desc = {
+		exclusive_trigger = {
+			from = { has_country_flag = fallen_empire_hive_growth }
+		}
+		text = fallen_empires.8.desc.growth
+	}
+	desc = {
+		exclusive_trigger = {
+			from = { has_country_flag = fallen_empire_hive_war }
+		}
+		text = fallen_empires.8.desc.war
+	}
 
 	is_triggered_only = yes
 	diplomatic = yes
@@ -378,10 +412,6 @@ country_event = {
 		room = from.ruler
 	}
 
-	immediate = {
-		from = { save_event_target_as = fallen_empire_humiliator }
-	}
-
 	option = {
 		name = fallen_empires.8.a
 		ai_chance = {
@@ -391,8 +421,8 @@ country_event = {
 				fleet_power > 300000
 			}
 		}
-		fallen_empire_humiliate_effect = yes
 		from = { save_event_target_as = fallen_empire_humiliator }
+		fallen_empire_humiliate_effect = yes
 		if = {
 			limit = {
 				has_ascension_perk = ap_cosmogenesis
@@ -406,7 +436,6 @@ country_event = {
 				add_modifier = { modifier = humiliated days = 3600 }
 			}
 		}
-
 		custom_tooltip = "fallen_empires.8.a.tooltip"
 		hidden_effect = { remove_country_flag = fe_demand_made@from }
 	}
@@ -435,6 +464,13 @@ situation_event = {
 			OR = {
 				is_country_type = fallen_empire
 				is_country_type = awakened_fallen_empire
+			}
+			OR = {
+				has_origin = origin_fallen_empire
+				AND = {
+					has_country_flag = first_hive_fe_fragment
+					has_origin = origin_fallen_empire_hive
+				}
 			}
 			is_at_war = no
 			any_playable_country = {
@@ -500,7 +536,7 @@ situation_event = {
 						}
 						any_system_within_border = {
 							distance = {
-								source = root.capital_scope
+								source = root.owner.capital_scope
 								max_distance <= 200
 							}
 						}
@@ -725,7 +761,12 @@ ship_event = {
 		}
 		text = fallen_empires.100.B.desc.gestalt
 	}
-	picture = GFX_evt_ship_in_orbit
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_mystic_reveal_light
 	location = from
 	is_triggered_only = yes

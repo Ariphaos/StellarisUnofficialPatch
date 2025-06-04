@@ -1,5 +1,9 @@
 This is far from finished.
 
+# AI Espionage
+
+* Rogue Servitors are more willing to exfiltrate pops from slavers and purgers.
+
 # Anomalies
 
 ## General
@@ -19,10 +23,19 @@ This is far from finished.
 * AIANOM_RESEARCHDEPO_CAT - Not for colonizable worlds.
 * AIANOM_LUMP_CAT - Make energy/minerals more likely than science.
 
+# AI Budget
+
+* Scramble for some extra exotic gasses if a hospital/entertainment upgrade is possible and a planet is low on amenities.
+
 # Archaeological Sites
 
 * Zroni chain: Require the intro flag.
 * Baol chain: Require the intro flag.
+* Cosmic Storms chains likewise require their respective intro flags.
+
+# Armies
+
+* Allow additional titanic life armies if the country has multiple planets with the completed project.
 
 # Artifact Actions
 
@@ -30,17 +43,17 @@ This is far from finished.
 
 # Ascension Perks
 
-* Tradition check block checks against a `@cap_tradition_categories` variable, which can be easily overridden by tradition cap mods.
 * A number of AI tweaks to tradition and path choices. 
-* One common theme is the AI is unlikely to pick an ascension path before their 3rd pick, but starting with their 5th they are heavily incentivized to do so.
+* Most commonly, it makes them less likely to make it their 3rd pick unless they have a quick-access origin, but much more common beginning with their 5th pick.
+* Others are to better reflect AI ethics, personality, or position.
 
 # Attitudes
 
-* Make the AI somewhat more aggressive.
+* Make the AI somewhat more aggressive if they hate or fear you.
 
 # Bombardment Stances
 
-* Back during the days when the AI could only choose selective we got creative with forcing them to intermediate or armageddon.
+* Back during the days when the AI could only choose selective, we got creative with forcing them to intermediate or armageddon.
 * Forcing the AI to intermediate remains, unless locked to selective.
 * Machine terminators will always use armageddon bombardment.
 * Fixed a bug handling raiding stance in systems where the bombarder has a claim.
@@ -55,12 +68,12 @@ Currently, nearly everything here is for the AI.
 
 ### Capital Buildings
 
-* Give 1 less enforcer to the AI unless they need it.
+* Give 100 less enforcers to the AI unless they need it.
 * Give resort worlds some default enforcers.
 
 ### Pop Assembly
 
-* AI will dismantle pop assembly buildings of their population exceeds a defined variable.
+* Pop number no longer matters, so this can finally die.
 
 ### Resource Buildings
 
@@ -69,44 +82,41 @@ Currently, nearly everything here is for the AI.
 ### Manufacturing Buildings
 
 * AI will not build a ministry of production / production center without a significant manufacturing presence.
+* Don't let the AI lock itself if it doesn't have sufficient minor artifacts.
+
+* Temporary Balance Fix: Reduce Ancient Refinery output by a factor of 5, and have an empire limit of 1.
 
 ### Research Buildings
 
 * Similarly for institute / supercomputer.
+* Don't let the AI lock itself if it doesn't have sufficient minor artifacts.
 
 ### Amenity Buildings
 
 * A bug in the hyper entertainment forum specification won't allow the building to be destroyed unless the owner has the dystopian society civic, rather than being one of a number of possible destruction triggers.
+* Loosened the restrictions on AI medical buildings.
 * Advanced logic for handling AI housing.
 
 ### Army Buildings
 
 * The AI will keep shield generators around in chokepoint systems.
 
-### Event Buildings
-
-* (Paradox fixed as of 3.12) Fix category for waste reprocessing center
-
 ### Fallen Empire Buildings
 
-* (Paradox fixed as of 3.12) Fix category for class 4 singularity and nourishment center.
-* (Paradox fixed as of 3.12) Prevent buildable FE buildings from being autodestroyed. For example if you capture one from a non-FE.
-
-### Branch Office Buildings
-
-* Some AI weight editing.
+* Prevent autodestruction of some special buildings.
 
 # Bypasses
 
-* Prevent a bunch of NPC country types from using Gateways, LGates, or Hyper Relays (Performance)
-* Wormholes can use normal empire access rules just fine. (Performance, solves an issue with custodian / galactic emperor access.)
+* Prevent a bunch of NPC country types from using Gateways, LGates, or Hyper Relays. Space critters, caravaneers, etc. (Performance and aesthetics.)
+* The emperor is also free to yeet fleets where he/she/it/whatever wills.
 
-# Colony Automation Exceptions
+# Colony Automation Crisis Exceptions
 
-* Some support for thrall worlds, though I need to dig into this more.
+* Added support for thrall worlds facing high crime
 
 # Colony Types
 
+* Machine empires with a habitat as their capital won't lose the capital designation to a bureau.
 * Correct duplicated entry for industrial ecumenopolis designation.
 
 # Component Templates
@@ -121,17 +131,13 @@ Currently, nearly everything here is for the AI.
 
 ### Role Computers
 
-* Treat precognitive as an upgrade to sapient computers. (This used to work.)
+* Treat precognitive as an upgrade to sapient computers. (This used to work, check for 4.0 and perhaps give 'ai' a bypass if they have the tech.)
 * AI without the path will not use it if they somehow get it.
 
 ### Shields
 
 * Treat psionic shields as an upgrade to dark matter shields.
-* AI without the path will not use it.
-
-### Cloud Critter Weapon
-
-* AI will prioritize these if they have them in the event of an Unbidden invasion.
+* AI with the tradition tree will use psionic shields
 
 # Country Types
 
@@ -146,21 +152,47 @@ Currently, nearly everything here is for the AI.
 * Allow thrall worlds to be made with established rural districts.
 * Don't delete the dimensional portal when making an ecumenopolis.
 * Better logic for dealing with crime.
-* Some more logic for strip mining decision. (Paradox took most of this for 3.11)
+* AI shouldn't be so eager to remove potentially beneficial planet modifiers.
+* Some more logic for strip mining decision. 
 
 # Defines
 
-* STARBASE_CAPACITY_MAX = 9999 # For mod support.
-* MILITARY_POWER_HEALTH_WEIGHT = 0.4 # For the player, the AI already knows this is bupkiss.
+## Game Affecting
 
-All remaining define entries help the AI.
+* MILITARY_POWER_HEALTH_WEIGHT = 0.4 # For the player. The AI already knows health is overvalued in power calculations.
 
-* SYSTEM_BOTTLENECK_RADIUS = 3 # Help the AI make better decisions
+* SYSTEM_BOTTLENECK_RADIUS = 3 # Largely to help the AI make better decisions. It does impact galaxy generation slightly.
 
 * HABITABILITY_OPPOSITE_PLANET = 0.50 # Events trigger below 50% habitability. This is largely graphical and UX and probably should be in unchecked defines.
+
 * HABITABILITY_AUTO_MIGRATION = 0.50 # Ditto.
-* AI_MIN_HABITABILITY_TO_COLONIZE = 0.5 # ""
-* SLAVE_BUY_HABITABILITY_THRESHOLD = 0.5 ""
+
+## Mod support
+
+* STARBASE_CAPACITY_MAX = 9999
+
+## Vassalization Adjustments
+
+I modify this partially in diplomatic actions, but some values are better tweaked here. 
+
+The idea is to make vassalization to be about the same difficulty if the target empire is under serious threat, but more difficult otherwise.
+
+* VASSALIZATION_ACCEPTANCE_OTHER_ATTITUDE = -100
+* VASSALIZATION_ACCEPTANCE_ATTITUDE_ATTACK = -9999
+* VASSALIZATION_ACCEPTANCE_ATTITUDE_COEXIST = -50
+* VASSALIZATION_ACCEPTANCE_ATTITUDE_ALLIANCE = 0
+
+* VASSALIZATION_ACCEPTANCE_OTHER_THREAT_MULT = 0.5
+* VASSALIZATION_ACCEPTANCE_OTHER_THREAT_MAX = 100
+* VASSALIZATION_ACCEPTANCE_DISTANCE_MULT = -1	
+
+## AI Adjustments
+
+* AI_LEAVE_POPS_WHEN_RESETTLING = 1000 # Avoid growth penalties, and don't lock out of upgrades.
+* AI_DESIGNATION_COOLDOWN = 360 # Let AI change designations yearly.
+* AI_MIN_HABITABILITY_TO_COLONIZE = 0.5 # Events happen below 50% hability, and it is now no longer a great idea to colonize everything you find.
+
+* TERRAFORMING_RESOURCE_THRESHOLD_FACTOR = 1.5	# Slightly larger energy guarantee.
 
 * STARBASE_COLONY_SCORE = 9 # Failing evaluating the map, we have only these numbers to play with.
 * STARBASE_HABITABLE_PLANET_SCORE = 9
@@ -168,14 +200,23 @@ All remaining define entries help the AI.
 * STARBASE_MEGASTRUCTURE_SCORE = 2
 * STARBASE_BYPASS_SCORE = 4
 
-* SLAVE_BUY_UNEMPLOYMENT_THRESHOLD = 1
-* MIN_WANTED_SCIENTISTS = 3
+* AI_SLAVE_MARKET_SELL_LIMIT = 1200 # AI seems much less likely to sell, so increasing the limit for those that do.
+* SLAVE_BUY_UNEMPLOYMENT_THRESHOLD = 100
+* SLAVE_BUY_HABITABILITY_THRESHOLD = 0.5
+
+* MIN_WANTED_SCIENTISTS = 3 # To prioritize exploration, especially early
 * MIN_FLEET_FOR_OPERATIONS = 900
 * MIN_FLEET_THREAT_TO_CRISIS = 40000
 
+* TRANSPORT_RETREAT_HEALTH_THRESHOLD = 0.8	# Should be a bit more cowardly.
+
+* SHIP_FLEET_POWER_UPGRADE_THRESHOLD = 1.2 # Even this might be too high.
+
+* DEEPSPACE_CITADEL_INNER_RADIUS_PERCENTAGE = 0.5 # You want these close enough to your starbase to support it.
+
 # Deposits
 
-* Some AI weight adjustments, particularly for starting deposits. Prioritize releasing pops and other things can wait until later.
+* Some AI weight adjustments, particularly for starting deposits. Prioritize releasing pops, other things can wait until later.
 
 # Diplomatic Actions
 
@@ -186,18 +227,24 @@ All remaining define entries help the AI.
 
 ### City
 
-* Scope checking
-* Caps the amount of city districts the AI will build on a world. May need some mod awareness.
+* TODO: Need some logic for district caps.
 * district_resort is a district, not a district set.
 
 ### Arcology
 
-* Fixed some inappropriately placed scope checks.
+* Some scope fixes, most made irrelevant in 4.0.
 
-# Economic Modifiers
+# Economic Categories
 
-* Essentially create as many likely-to-be-used modifiers as possible. I have verified this does not impact performance, and it allows mods to use many new modifiers without creating conflicting edits of this file.
-* My edits here are strictly vanilla. If a mod says it requires Jasonpepe's mod instead, it probably does.
+This doesn't do everything it did in previous versions just yet. I am moving to a build system. For now, if you need all of the modifiers, use jasonpepe's mod.
+
+## AI
+
+* Allow budgeting for most edicts.
+
+## Bugs
+
+* Orbital rings shouldn't count as outposts. 
 
 # Edicts
 
@@ -228,10 +275,17 @@ All remaining define entries help the AI.
 * Edit outraged faction entry so you are green if you haven't angered them.
 * Edit pleased faction entry so the faction is actually pleased with you.
 * Set a 'default' species sound for modded species. Should probably make something, for now set to Fungoid.
+* General missing context switch checks.
 
 # Megastructures
 
-* You can't build a ringworld out of an astral rift.
+## Bugs
+
+* Give proper refund for dismantling megastructures.
+* You can't build a ringworld out of an astral rift. Don't remove them, either.
+
+## AI
+
 * Somewhat restrict where the AI may build hyper relays. (Have more work to do on this.)
 * AI won't build more habitats if one is already uncolonized.
 * AI won't build habitat/orbital structures over planets that could potentially become colonies (and thus build orbital rings instead).
@@ -251,7 +305,7 @@ All remaining define entries help the AI.
 
 # Planet Classes
 
-* Ecumenopoli get `@cap_planet_buildings` for building slots. (For mods that change the cap.)
+* Ecumenopoli get `@cap_planet_buildings` for building slots. (For mods that change the cap.) (No longer relevant as of 4.0)
 
 # Policies
 
@@ -264,9 +318,13 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Inward perfection empires should prefer to do so.
 * There are a couple places where `is_xenophile` should be `values_others`.
 
+# Pop Categories
+
+* Scope checks.
+
 # Pop Faction Types
 
-* For the sake of UI cleanliness, it should always be possible to get green in everything, so .001 favor is given for not causing offense on some line. It should be yellow if they are simply 'not pleased', giving flat 0 favor rather than a penalty.
+* For the sake of UI cleanliness, it should always be possible to get green in everything, so .001 favor is given for not causing offense on some lines. It should be yellow if they are simply 'not pleased', giving flat 0 favor rather than a fractional penalty.
 * Add AI weights to promoting/suppressing factions, particularly for empires whose civics are dependent.
 
 ### Imperialists
@@ -336,14 +394,11 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 
 # Pop Jobs
 
-* In general `not = { has_job =` ... checks with factors > 1 are removed to discourage bouncing.
-* Some scope checks were added for some weird errors.
-* Add/correct resource categories for FE jobs.
-* Add some weights for Feral Overload event jobs.
-* Give mortal initiates some ethic weights.
-* Decadent pops are less interested in the soldier life.
-* Made priests want to keep their job a bit more, and ethics-weight them.
-* Fixed a missing bracket in the specialist jobs file.
+* Fixed a bug where crisis purge may fail.
+* Made slaves more likely to be entertainers.
+* Don't let drones take normal gas extractor or mote harvester jobs.
+* Applied some weights for ethics and robots to initiates.
+* Economic category fix for some fallen empire jobs.
 
 # Random Names
 
@@ -356,9 +411,13 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 
 # Script Values
 
-* Set minimum rebellion power to 100 for calculations.
-* Get the AI up to 8 constructors.
-* Country type check on science ships for safety.
+* Set minimum rebellion power to 100 for calculations. Originally to stop a divide by zero, but now it remains to ensure the resulting weight for the event isn't in the septillions.
+* Get the AI up to 8 constructors. This is as many as the AI can handle.
+* Decades since game start should actually count decades rather than centuries.
+* Some better bounds around science ships.
+* Base Cosmic Storm size off of star count rather than hardcoded size strings. (Mod Support)
+* Voidworm spawning based on star count instead of size strings. (Mod Support)
+* Starlit Citadel, same reason.
 
 # Scripted Effects
 
@@ -373,13 +432,151 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Star cracker shouldn't break astral scars.
 * Subject check for joining war on declared crisis.
 * Compute star count directly and use that rather than getting a setup string.
-* Only the top two tiers of market nominees are considered.
+* Only the top two tiers of market nominees are considered. The equation is otherwise the same as vanilla.
 * Give Xenophobic FE slaves a root species they can be reverted to.
 * Check to make sure opinion modifications during the War in Heaven only involve the Sleepers (as opposed to e.g. an angry Spiritualist FE after someone blew up a holy world.)
 * Don't put tech blocks on primitive-inspired tech options.
 * Give Marauder generals the mercenary warrior trait.
 * Give the Diadochi starting starbase the fleet academy and crew quarters buildings. (Paradox specifically didn't include this.)
+* Use star count for the imperial fiefdom origin.
+* Refugee fix. I'm not sure if 100% is actually what is desired, but that seemed to be what the intent was?
+
+# Scripted Loc
+
+* Standard owner scope checks
+
+# Scripted Triggers
+
+* Make sure military leaders can think.
+* Displacement purging still counts as allowing purging. (May not be the best fix for what this addresses.)
+* Fix is_oligarchy trigger.
+* Third Baol project will first try to find a habitable world inside borders, and won't target a holy world.
+* Add additional modifiers to the districts_good_* triggers.
+* Astral Scars are not valid for the scholarium sensors or research candidates.
+* Add Fallen Hive to FE Cluster trigger
 
 # Scripted Variables
 
-* Add @auth_cyber_dictatorial_collectivist_tech (Arc)
+* Add missing inline script variable, @auth_cyber_dictatorial_collectivist_tech
+
+# Section Templates
+
+* Fix fire from star for a number of critters and crisises.
+* Fix two guns sharing same locator on ancient stations.
+* Convince the AI to use a better spread of sections depending on its preferred weapon.
+
+# Ship Behaviors
+
+* Set Return to Formation range to 600, so mixed fleets and carriers are not hamstrung.
+
+# Ship Sizes
+
+* Policy to turn off Juggernaut shipyards (they'll still repair/upgrade).
+* Restrict juggernauts from building titans (way too slow) or colonizers.
+
+* Fix Marauder Range bonus
+* Give the Marauder battleship some base armor.
+
+# Solar System Initializers
+
+* Removed scope from some Distant Stars checks that don't need it and sometimes get confused.
+* Don't let the Caravaneers set up in a bottleneck system. (Alternate idea: Require it?)
+* Check star count rather than galaxy_size string for Overlord initializers.
+* Don't let the Chosen spawn off of any crisis_spawn_exclude system.
+* Block anomalies on Fevor's moon; they can block the reward you get from the chain.
+
+# Special Projects
+
+## Projects moved to Country Scope
+
+Starting projects in country scope was one of Risa's original fixes. I have received notice of these being buggy, however I am unable to replicate the problems people have. Saves would be appreciated.
+
+* Handle Synth Inflitration project in country scope, otherwise the player loses it if they lose their capital.
+* Handle first contact space critter projects in country scope.
+* Handle The Prince in country scope.
+* Handle the Masters' Writings projects in country scope.
+* Handle the Cryopod in country scope.
+* Handle Mystery Cream in country scope
+* Handle Limb in country scope.
+* Handle Colossus project in country scope.
+* Handle messenger pod projects in country scope.
+* Handle ldragon taming in country scope.
+* Handle Enigmatic Cache project in country scope.
+* Handle impossible organism in country scope.
+
+## Other Fixes
+
+* Fix the Crystal Manufactory project.
+* Don't let the Limbo fellows drop themselves on a holy world.
+* Uncomment Snek project if someone wants to unleash this again.
+* Don't count erudites and similar intelligent traits as being 'unintelligent' for the Enigmatic Cache.
+
+# Species Rights
+
+## Citizenship Types
+
+* Only assimilate one species at a time.
+* Permit purging robots so long as AI does not have full rights.
+* Some AI logic about which species an empire might be less inclined to keep.
+* Fix for machine purging.
+* Psionic assimilation requires thinking pops.
+
+## Colonization Control
+
+* Necrophage AI will not restrict colonization.
+
+## Living Standards
+
+* Lathe/Displacement/Neutering is more permissive about allowed living standards, but they are blocked from 'none.'
+* Rather than a weight reduction, AI will only flout the galactic community about subsistence living standards if they are rather unfriendly.
+* Psionic assimilation requires thinking pops.
+
+## Population Controls
+
+* Necrophages will do no such thing.
+* Slaver AI will be more inclined to enact them on less desireable slaves.
+
+## Slavery Types
+
+* A lot of logic for how the AI determines who to put into indentured servitude.
+
+# Starbase Buildings
+
+* Really powerful AI may build a second titan yard.
+* Split titan yard and colossus yard across multiple starbases.
+* Shroud Beacon is less attractive if an enclave is already in the AI's territory.
+* Don't allow a disruption field inside a pulsar system where shields are stripped anyway.
+* Aborting transit hub construction aborts transit hub construction, and not the communications jammer.
+* Ditto with the command center.
+
+# Starbase Types
+
+* A lot of AI logic. A lot more is needed.
+
+# Strategic Resources
+
+* Allow mods to increase the Influence cap.
+
+# Technology
+
+* AI won't research quantum catapults.
+* AI won't research hyper relays before Hyperdrive III
+
+* Don't block terraforming techs from empires with less than one planet. Can screw over primitives, or empires that have lost their capital.
+* Similarly for the bureaucracy techs, base if off of pop count rather than planet count.
+
+# Terraform
+
+* Remove terraforming candidate from newly minted hive worlds.
+
+# Traits
+
+* Shroud Age requires psionic, and won't be added to already-immortal chosen ones.
+* Don't make erudite an opposite of enigmatic intelligence. (Hey hope you don't mind we screw you out of your ascension...)
+* Allow envoys to get their species traits.
+* Matched a few missing opposite trait entries.
+
+
+
+
+

@@ -45,6 +45,10 @@ Some of these are from Vanilla Fixes.
 
 * Total radius of galaxies is limited to 1.0 to make sure they don't box out when using higher galactic radius values.
 
+## General Improvement
+
+* Enabled .25 hyperlane density for all default starts.
+
 # Unchecked Defines
 
 (No current changes.)

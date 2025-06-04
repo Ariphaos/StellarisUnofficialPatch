@@ -1,0 +1,365 @@
+##################################
+# BioGenesis Unique Buildings #
+##################################
+
+@buildings_t1 = 1
+@buildings_t2 = 2
+@buildings_t3 = 3
+@buildings_t4 = 4
+
+@tier_1_capital_defense_armies = 2
+@tier_2_capital_defense_armies = 4
+@tier_3_capital_defense_armies = 8
+@tier_4_capital_defense_armies = 16
+
+#Citadel Uplink
+
+building_citadel_uplink = {
+	base_buildtime = @b3_time
+	planetary_ftl_inhibitor = yes
+	position_priority = 100
+	can_be_ruined = no
+	category = army
+	planet_limit = 1
+
+	category = planet_buildings
+
+	building_sets = {
+		government
+		fortress
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			has_origin = origin_starlit_citadel
+		}
+	}
+
+	allow = {
+		exists = solar_system
+		solar_system = {
+			custom_tooltip = {
+				text = "requires_deep_space_citadel"
+				count_ship_in_system = {
+					limit = {
+						is_space_citadel_ship_size = yes
+					}
+					count > 0
+				}
+			}
+		}
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		exists = solar_system
+		OR = {
+			owner = {
+				NOT = {
+					has_origin = origin_starlit_citadel
+				}
+			}
+			solar_system = {
+				count_ship_in_system = {
+					limit = {
+						is_space_citadel_ship_size = yes
+					}
+					count = 0
+				}
+			}
+		}
+	}
+
+	convert_to = {
+		building_fortress
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+		}
+		upkeep = {
+			energy = @b3_upkeep
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = solar_system
+			OR = {
+				is_scope_valid = no
+				AND = {
+					exists = owner
+					owner = { is_regular_empire = yes }
+				}
+			}
+		}
+		job_skywatcher_add = @building_static_jobs
+		mult = solar_system.value:skywatcher_dsc_mult
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = solar_system
+			exists = owner
+			owner = { is_gestalt = yes }
+		}
+		job_skywatcher_drone_add = @building_static_jobs
+		mult = solar_system.value:skywatcher_dsc_mult
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+			}
+		}
+		text = job_skywatcher_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		text = job_skywatcher_drone_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			exists = solar_system
+			owner = {
+				is_gestalt = no
+			}
+			NOT = {
+				solar_system = {
+					any_ship_in_system = {
+						is_ship_size = starbase_deep_space_citadel_3
+					}
+				}
+			}
+		}
+		text = job_skywatcher_add_dsc_tt
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			exists = solar_system
+			owner = {
+				is_gestalt = yes
+			}
+			NOT = {
+				solar_system = {
+					any_ship_in_system = {
+						is_ship_size = starbase_deep_space_citadel_3
+					}
+				}
+			}
+		}
+		text = job_skywatcher_drone_add_dsc_tt
+	}
+}
+
+##############################
+# GENETIC ASCENSION SITUATION
+##############################
+
+building_genomic_facility = {
+	base_buildtime = @b3_time
+	category = amenity
+	planet_limit = 1
+
+	building_sets = {
+		government
+		research
+		society
+	}
+
+	potential = {
+		owner = {
+			has_country_flag = genomic_research_facility_unlocked
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		owner = {
+			NOT = {
+				has_country_flag = genomic_research_facility_unlocked
+			}
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+		}
+		upkeep = {
+			energy = @b3_upkeep
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_regular_empire = yes }
+		}
+		job_healthcare_add = @building_static_jobs
+	}
+
+	inline_script = {
+		script = jobs/spawning_drone_add
+		AMOUNT = @building_static_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_technology = tech_gene_tailoring
+			}
+			any_owned_pop_group = {
+				has_auto_modding_trait = yes
+			}
+		}
+		auto_mod_monthly_add = 200
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				game_start_auto_mod_empire = yes
+			}
+			any_owned_pop_group = {
+				has_auto_modding_trait = yes
+			}
+		}
+		auto_mod_monthly_add = 200
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_country_flag = mutation_unlock_level_1
+			}
+		}
+		pop_environment_tolerance = @genomic_mutation_habitability
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_country_flag = mutation_unlock_level_2
+			}
+		}
+		auto_mod_monthly_add = @genomic_mutation_auto_mod
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_country_flag = clone_army_full_potential
+				has_genetic_stage_1_tradition = yes
+			}
+		}
+		clone_soldiers_sustained = @clones_sustained_basic
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				OR = {
+					has_purity_heightened_attributes_tradition = yes
+					has_cloning_artificial_population_tradition = yes
+					has_mutation_somatic_subversiveness_tradition = yes
+				}
+			}
+		}
+		organic_pop_bonus_workforce_mult = @genomic_workforce_mult
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+			}
+		}
+		text = healthcare_is_genomic_researcher_tt
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		text = spawning_is_genomic_researcher_tt
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+				has_completed_genetic_situation = yes
+			}
+		}
+		text = job_genomic_researcher_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+				has_completed_genetic_situation = no
+			}
+		}
+		text = job_genomic_researcher_situation_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = yes
+				has_completed_genetic_situation = yes
+			}
+		}
+		text = job_genomic_drone_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_gestalt = yes
+				has_completed_genetic_situation = no
+			}
+		}
+		text = job_genomic_drone_situation_effect_desc
+	}
+
+	is_essential = yes
+}

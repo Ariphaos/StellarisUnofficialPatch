@@ -9,16 +9,29 @@
 # Genetic Ascension  (regular empires & Hive Minds)
 ap_engineered_evolution = {
 	on_enabled = {
-		custom_tooltip = "engineered_evolution_tooltip"
 		if = {
 			limit = {
-				has_origin = origin_clone_army
-				OR = {
-					has_trait = trait_clone_soldier_infertile
-					has_trait = trait_clone_soldier_infertile_full_potential
-				}
+				has_biogenesis_dlc = yes
+				is_wilderness_empire = no
 			}
-			custom_tooltip = clone_soldier_locked_genes
+			hidden_effect = {
+				country_event = { id = bio.1 }
+			}
+			custom_tooltip = "engineered_evolution_biogenesis_tt"
+			set_country_flag = genomic_research_facility_unlocked
+		}
+		else_if = {
+			limit = {
+				has_biogenesis_dlc = yes
+				is_wilderness_empire = yes
+			}
+			hidden_effect = {
+				country_event = { id = bio.1 }
+			}
+			custom_tooltip = "engineered_evolution_wilderness_tt"
+		}
+		else = {
+			custom_tooltip = "engineered_evolution_tooltip"
 		}
 	}
 	possible = {
@@ -26,9 +39,27 @@ ap_engineered_evolution = {
 			fail_text = "synthetic_empire_biological_ascension"
 			NOT = { has_trait = trait_mechanical }
 		}
-		custom_tooltip = {
-			fail_text = "requires_ascension_perks_2"
-			num_ascension_perks > 1
+		if = {
+			limit = {
+				NOR = {
+					has_origin = origin_clone_army
+					has_origin = origin_overtuned
+				}
+			}
+			custom_tooltip = {
+				fail_text = "requires_ascension_perks_2"
+				num_ascension_perks > 1
+			}
+		}
+
+		if = {
+			limit = {
+				has_origin = origin_overtuned
+			}
+			custom_tooltip = {
+				fail_text = "requires_ascension_perks_1"
+				num_ascension_perks > 0
+			}
 		}
 		custom_tooltip = {
 			fail_text = "requires_not_ap_the_flesh_is_weak"
@@ -50,13 +81,28 @@ ap_engineered_evolution = {
 			fail_text = "requires_free_tradition_tree"
 			num_tradition_categories < @max_tradition_trees
 		}
+		if = {
+			limit = {
+				has_origin = origin_clone_army
+			}
+			custom_tooltip = {
+				fail_text = "clone_soldier_locked_genes"
+				OR = {
+					has_country_flag = clone_army_fertility_unlocked
+					has_country_flag = clone_army_full_potential
+				}
+			}
+		}
 	}
 
 	potential = {
-		has_utopia = yes
+		OR = {
+			has_utopia = yes
+			has_biogenesis_dlc = yes
+		}
 		NOR = {
 			has_ascension_perk = ap_engineered_evolution
-			has_authority = "auth_machine_intelligence"
+			is_machine_empire = yes
 			has_origin = origin_shroudwalker_apprentice
 			has_origin = origin_cybernetic_creed
 			has_origin = origin_synthetic_fertility
@@ -68,6 +114,15 @@ ap_engineered_evolution = {
 		NOT = { has_valid_civic = civic_augmentation_bazaars }
 	}
 
+	tradition_swap = {
+		inherit_effects = yes
+		inherit_icon = yes
+		name = ap_engineered_evolution_wilderness
+		trigger = {
+			is_wilderness_empire = yes
+		}
+	}
+
 	ai_weight = {
 		factor = @ascension_path_base_weight
 		modifier = {
@@ -77,6 +132,10 @@ ap_engineered_evolution = {
 		modifier = {
 			factor = 0.1
 			num_ascension_perks < 3
+			NOR = {
+				has_origin = origin_clone_army
+				has_origin = origin_overtuned
+			}
 		}
 		modifier = {
 			factor = 10
@@ -100,6 +159,7 @@ ap_the_flesh_is_weak = {
 			OR = {
 				num_ascension_perks > 1
 				has_origin = origin_cybernetic_creed
+				has_origin = origin_unplugged
 			}
 		}
 		custom_tooltip = {
@@ -130,10 +190,21 @@ ap_the_flesh_is_weak = {
 			has_origin = origin_shroudwalker_apprentice
 			has_origin = origin_cybernetic_creed
 			has_origin = origin_synthetic_fertility
+			has_origin = origin_evolutionary_predators
+			AND = {
+				has_origin = origin_unplugged
+				OR = {
+					has_country_flag = is_decyberized
+					has_country_flag = is_cyberized
+				}
+			}
 		}
 		is_gestalt = no
 		is_individual_machine = no
 		is_natural_design_empire = no
+		owner_species = {
+			NOT = { has_trait = trait_unplugged_decyberized }
+		}
 	}
 
 	ai_weight = {
@@ -153,6 +224,10 @@ ap_the_flesh_is_weak = {
 		modifier = {
 			factor = 0.1
 			num_ascension_perks < 3
+			NOR = {
+				has_origin = origin_cybernetic_creed
+				has_origin = origin_unplugged
+			}
 		}
 		modifier = {
 			factor = 10
@@ -186,8 +261,10 @@ ap_organo_machine_interfacing = {
 			has_utopia = yes
 			has_machine_age_dlc = yes
 		}
-		NOT = {
+		NOR = {
 			has_ascension_perk = ap_organo_machine_interfacing
+			has_origin = origin_evolutionary_predators
+			has_origin = origin_wilderness
 		}
 		is_hive_empire = yes
 		is_natural_design_empire = no
@@ -326,16 +403,20 @@ ap_synthetic_evolution = {
 		}
 		NOR = {
 			has_ascension_perk = ap_synthetic_evolution
-			has_authority = "auth_machine_intelligence"
+			is_machine_empire = yes
 			has_origin = origin_shroudwalker_apprentice
 			has_origin = origin_cybernetic_creed
 			has_origin = origin_synthetic_fertility
+			has_origin = origin_evolutionary_predators
 		}
 		is_gestalt = no
 		is_mechanical_empire = no
 		is_natural_design_empire = no
 		NOT = { has_valid_civic = civic_augmentation_bazaars }
 		is_individual_machine = no
+		owner_species = {
+			NOT = { has_trait = trait_unplugged_decyberized }
+		}
 	}
 
 	ai_weight = {
@@ -397,6 +478,15 @@ ap_mind_over_matter = {
 			fail_text = "requires_free_tradition_tree"
 			num_tradition_categories < @max_tradition_trees
 		}
+		if = {
+			limit = {
+				has_origin = origin_unplugged
+			}
+			custom_tooltip = {
+				fail_text = "requires_unplugged_decyberized"
+				has_country_flag = is_decyberized
+			}
+		}
 	}
 
 	potential = {
@@ -407,13 +497,20 @@ ap_mind_over_matter = {
 			has_origin = origin_shroudwalker_apprentice
 			has_origin = origin_cybernetic_creed
 			has_origin = origin_synthetic_fertility
+			has_origin = origin_evolutionary_predators
+			has_valid_civic = civic_augmentation_bazaars
 		}
 		is_gestalt = no
 		is_mechanical_empire = no
-		is_cyborg_empire = no
+		OR = {
+			is_cyborg_empire = no
+			AND = {
+				has_origin = origin_unplugged
+				NOT = { has_country_flag = is_cyberized }
+			}
+		}
 		is_natural_design_empire = no
 		is_individual_machine = no
-		NOT = { has_valid_civic = civic_augmentation_bazaars }
 	}
 
 	ai_weight = {
@@ -429,6 +526,10 @@ ap_mind_over_matter = {
 		modifier = {
 			factor = 10
 			has_ethic = ethic_fanatic_spiritualist
+		}
+		modifier = {
+			factor = 0
+			has_ethic = ethic_fanatic_materialist
 		}
 		modifier = {
 			factor = 0.1

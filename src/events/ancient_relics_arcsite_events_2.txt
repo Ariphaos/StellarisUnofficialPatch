@@ -148,7 +148,7 @@ country_event = {
 			event_target:planet_option_1 = {
 				while = {
 					count = 3
-					create_pop = {
+					create_pop_group = {
 						species = event_target:omnicodex_species
 					}
 				}
@@ -184,7 +184,7 @@ country_event = {
 			event_target:planet_option_2 = {
 				while = {
 					count = 3
-					create_pop = {
+					create_pop_group = {
 						species = event_target:omnicodex_species
 					}
 				}
@@ -220,7 +220,7 @@ country_event = {
 			event_target:planet_option_3 = {
 				while = {
 					count = 3
-					create_pop = {
+					create_pop_group = {
 						species = event_target:omnicodex_species
 					}
 				}
@@ -256,7 +256,7 @@ country_event = {
 			event_target:planet_option_4 = {
 				while = {
 					count = 3
-					create_pop = {
+					create_pop_group = {
 						species = event_target:omnicodex_species
 					}
 				}
@@ -292,7 +292,7 @@ country_event = {
 			event_target:planet_option_5 = {
 				while = {
 					count = 3
-					create_pop = {
+					create_pop_group = {
 						species = event_target:omnicodex_species
 					}
 				}
@@ -464,7 +464,7 @@ planet_event = {
 	trigger = {
 		owner = { is_ai = no }
 		has_ancrel = yes
-		num_pops > 0
+		pop_amount > 0
 		OR = {
 			is_planet_class = pc_desert
 			is_planet_class = pc_tropical
@@ -624,8 +624,18 @@ fleet_event = {
 	}
 
 	option = {
-		name = CURIOUS
+		name = EXCELLENT
 		owner = { add_relic = r_ancient_sword }
+		large_artifact_reward = yes
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.6070.b.evopred
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = large TYPE = arthropoid }
+			add_relic = r_ancient_sword
+		}
 		large_artifact_reward = yes
 	}
 }
@@ -912,6 +922,21 @@ fleet_event = {
 			}
 		}
 	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.6125.desc.b.evopred
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = large TYPE = humanoid }
+			add_relic = r_severed_head
+		}
+		large_artifact_reward = yes
+		hidden_effect = {
+			owner = {
+				country_event = { id = ancrel.6130 }
+			}
+		}
+	}
 }
 
 # Fallen Empire Transmission
@@ -1152,7 +1177,12 @@ ship_event = {
 	id = ancrel.6150
 	title = "ancrel.6150.name"
 	desc = "ancrel.6150.desc"
-	picture = GFX_evt_ship_in_orbit_2
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit_2
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_energy_field
 	location = from
 
@@ -1195,7 +1225,12 @@ ship_event = {
 	id = ancrel.6151
 	title = "ancrel.6150.name"
 	desc = "ancrel.6151.desc"
-	picture = GFX_evt_ship_in_orbit_2
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit_2
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_energy_field
 	location = from
 
@@ -2150,9 +2185,13 @@ fleet_event = {
 	id = ancrel.9025
 	title = "ancrel.9025.name"
 	desc = "ancrel.9025.desc"
-	picture = GFX_evt_ship_in_orbit
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_bad_omen
-
 	archaeology = yes
 	is_triggered_only = yes
 
@@ -2259,7 +2298,12 @@ fleet_event = {
 	id = ancrel.9045
 	title = "ancrel.9045.name"
 	desc = "ancrel.9045.desc"
-	picture = GFX_evt_landing_ship
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_landing_ship
+		BIOSHIP_PICTURE = GFX_evt_bioship_landing
+	}
 	show_sound = event_dig_site
 
 	archaeology = yes
@@ -2521,7 +2565,12 @@ fleet_event = {
 	id = ancrel.9070
 	title = "ancrel.9070.name"
 	desc = "ancrel.9070.desc"
-	picture = GFX_evt_big_landing_ship
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_big_landing_ship
+		BIOSHIP_PICTURE = GFX_evt_bioship_landing
+	}
 	show_sound = event_drilling
 
 	archaeology = yes
@@ -2718,6 +2767,41 @@ fleet_event = {
 	option = {
 		name = INTRIGUING
 		owner = {
+			if = {
+				limit = {
+					has_tech_option = tech_alien_life_studies
+				}
+				add_tech_progress = {
+					tech = tech_alien_life_studies
+					progress = 0.5
+				}
+			}
+			else_if = {
+				limit = {
+					NOT = { has_technology = tech_alien_life_studies }
+					can_research_technology = tech_alien_life_studies
+				}
+				add_research_option = tech_alien_life_studies
+				add_tech_progress = {
+					tech = tech_alien_life_studies
+					progress = 0.1
+				}
+			}
+			else = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = @tier4researchreward
+					min = @tier4researchmin
+					max = @tier4researchmax
+				}
+			}
+		}
+	}
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9090.b.evopred
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = medium }
 			if = {
 				limit = {
 					has_tech_option = tech_alien_life_studies
@@ -3125,7 +3209,9 @@ fleet_event = {
 	option = {
 		name = INTENSIFIES
 		leader = {
-			add_trait = leader_trait_traumatized
+			add_trait = {
+				trait = leader_trait_traumatized
+			}
 		}
 		owner = {
 			add_monthly_resource_mult = {
@@ -4070,10 +4156,6 @@ fleet_event = {
 
 	after = {
 		fromfrom = { set_site_progress_locked = no }
-	}
-
-	option = {
-		name = GOODBYE
 		owner = {
 			if = {
 				limit = {
@@ -4169,6 +4251,15 @@ fleet_event = {
 				}
 			}
 		}
+	}
+
+	option = {
+		name = GOODBYE
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9235.b.evopred
 	}
 }
 
@@ -4332,6 +4423,7 @@ fleet_event = {
 						has_technology = tech_archaeo_refinery
 						has_tech_option = tech_archaeo_refinery
 					}
+					can_research_technology = tech_archaeo_refinery
 				}
 				add_research_option = tech_archaeo_refinery
 				add_tech_progress = {
@@ -4388,6 +4480,7 @@ fleet_event = {
 						has_technology = tech_archaeo_refinery
 						has_tech_option = tech_archaeo_refinery
 					}
+					can_research_technology = tech_archaeo_refinery
 				}
 				add_research_option = tech_archaeo_refinery
 				add_tech_progress = {
@@ -4441,6 +4534,7 @@ fleet_event = {
 						has_technology = tech_archaeo_refinery
 						has_tech_option = tech_archaeo_refinery
 					}
+					can_research_technology = tech_archaeo_refinery
 				}
 				add_research_option = tech_archaeo_refinery
 				add_tech_progress = {
@@ -4790,10 +4884,6 @@ fleet_event = {
 
 	after = {
 		fromfrom = { set_site_progress_locked = no }
-	}
-
-	option = {
-		name = INTERESTING
 		owner = {
 			if = {
 				limit = {
@@ -4836,6 +4926,15 @@ fleet_event = {
 			}
 		}
 	}
+
+	option = {
+		name = INTERESTING
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9320.b.evopred
+	}
 }
 
 # Stage 3 - Alt. 2 - Bio-Savior
@@ -4855,10 +4954,6 @@ fleet_event = {
 
 	after = {
 		fromfrom = { set_site_progress_locked = no }
-	}
-
-	option = {
-		name = FASCINATING
 		owner = {
 			if = {
 				limit = {
@@ -4899,6 +4994,18 @@ fleet_event = {
 					max = @tier4researchmax
 				}
 			}
+		}
+	}
+
+	option = {
+		name = FASCINATING
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9320.b.evopred
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = small TYPE = molluscoid }
 		}
 	}
 }
@@ -4920,10 +5027,6 @@ fleet_event = {
 
 	after = {
 		fromfrom = { set_site_progress_locked = no }
-	}
-
-	option = {
-		name = UNFORTUNATE
 		owner = {
 			if = {
 				limit = {
@@ -4953,6 +5056,16 @@ fleet_event = {
 				}
 			}
 		}
+	}
+
+	option = {
+		name = UNFORTUNATE
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9320.b.evopred
+		owner = { give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = small } }
 	}
 }
 
@@ -5213,7 +5326,12 @@ fleet_event = {
 	id = ancrel.9360
 	title = "ancrel.9360.name"
 	desc = "ancrel.9360.desc"
-	picture = GFX_evt_landing_ship
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_landing_ship
+		BIOSHIP_PICTURE = GFX_evt_bioship_landing
+	}
 	show_sound = event_bad_omen
 
 	archaeology = yes
@@ -5312,6 +5430,15 @@ fleet_event = {
 			add_resource = { exotic_gases = 250 }
 		}
 	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9370.b.evopred
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = small TYPE = aquatic }
+			add_resource = { exotic_gases = 250 }
+		}
+	}
 }
 
 # Stage 3 - Alt. 2 - Preposterous Snooze
@@ -5333,10 +5460,6 @@ fleet_event = {
 
 	after = {
 		fromfrom = { set_site_progress_locked = no }
-	}
-
-	option = {
-		name = PECULIAR
 		owner = {
 			if = {
 				limit = {
@@ -5367,6 +5490,15 @@ fleet_event = {
 			}
 		}
 	}
+
+	option = {
+		name = PECULIAR
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9370.b.evopred
+	}
 }
 
 # Stage 3 - Alt. 3 - Big Ones Couldn't Cope
@@ -5392,6 +5524,19 @@ fleet_event = {
 
 	option = {
 		name = INTERESTING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.9370.b.evopred
 		owner = {
 			add_monthly_resource_mult = {
 				resource = society_research
@@ -5870,58 +6015,15 @@ country_event = {
 
 	immediate = {
 		random_list = {
-			60 = { country_event = { id = ancrel.10001 } }
-			30 = { country_event = { id = ancrel.10002 } }
-			6 = { country_event = { id = ancrel.10003 } }
-			1 = {
+			30 = { country_event = { id = ancrel.10001 } }
+			25 = { country_event = { id = ancrel.10002 } }
+			25 = { country_event = { id = ancrel.10003 } }
+			20 = {
 				modifier = {
 					factor = 2
 					has_ascension_perk = ap_archaeoengineers
 				}
-				country_event = { id = ancrel.10004 }
-			}
-			1 = {
-				modifier = {
-					factor = 2
-					has_ascension_perk = ap_archaeoengineers
-				}
-				country_event = { id = ancrel.10005 }
-			}
-			1 = {
-				modifier = {
-					factor = 2
-					has_ascension_perk = ap_archaeoengineers
-				}
-				country_event = { id = ancrel.10006 }
-			}
-			1 = {
-				modifier = {
-					factor = 0
-					country_uses_consumer_goods = no
-				}
-				modifier = {
-					factor = 2
-					has_ascension_perk = ap_archaeoengineers
-				}
-				country_event = { id = ancrel.10007 }
-			}
-			1 = {
-				modifier = {
-					factor = 0
-					country_uses_food = no
-				}
-				modifier = {
-					factor = 2
-					has_ascension_perk = ap_archaeoengineers
-				}
-				country_event = { id = ancrel.10008 }
-			}
-			1 = {
-				modifier = {
-					factor = 2
-					has_ascension_perk = ap_archaeoengineers
-				}
-				country_event = { id = ancrel.10009 }
+				grant_random_fe_building = yes
 			}
 		}
 	}
@@ -6043,131 +6145,131 @@ country_event = {
 	}
 }
 
-country_event = {
-	id = ancrel.10004
-	title = "ancrel.10004.name"
-	desc = "ancrel.10004.nanoforge"
-	picture = GFX_evt_ancient_records
-
-	is_triggered_only = yes
-
-	option = {
-		name = "EXCELLENT"
-
-		hidden_effect = {
-			owner = {
-				change_variable = { which = nano_forge_build_count value = 1 }
-				change_variable = { which = nano_forge_upgrade_count value = 1 }
-				set_country_flag = nano_forge_can_build
-			}
-		}
-	}
-}
-
-country_event = {
-	id = ancrel.10005
-	title = "ancrel.10004.name"
-	desc = "ancrel.10004.skydome"
-	picture = GFX_evt_ancient_records
-
-	is_triggered_only = yes
-
-	option = {
-		name = "EXCELLENT"
-
-		hidden_effect = {
-			owner = {
-				change_variable = { which = skydome_build_count value = 1 }
-				change_variable = { which = skydome_upgrade_count value = 1 }
-				set_country_flag = skydome_can_build
-			}
-		}
-	}
-}
-
-country_event = {
-	id = ancrel.10006
-	title = "ancrel.10004.name"
-	desc = "ancrel.10004.dimensional_fabricator"
-	picture = GFX_evt_ancient_records
-
-	is_triggered_only = yes
-
-	option = {
-		name = "EXCELLENT"
-
-		hidden_effect = {
-			owner = {
-				change_variable = { which = dimensional_fabricator_build_count value = 1 }
-				change_variable = { which = dimensional_fabricator_upgrade_count value = 1 }
-				set_country_flag = dimensional_fabricator_can_build
-			}
-		}
-	}
-}
-
-country_event = {
-	id = ancrel.10007
-	title = "ancrel.10004.name"
-	desc = "ancrel.10004.affluence_center"
-	picture = GFX_evt_ancient_records
-
-	is_triggered_only = yes
-
-	option = {
-		name = "EXCELLENT"
-
-		hidden_effect = {
-			owner = {
-				change_variable = { which = affluence_center_build_count value = 1 }
-				change_variable = { which = affluence_center_upgrade_count value = 1 }
-				set_country_flag = affluence_center_can_build
-			}
-		}
-	}
-}
-
-country_event = {
-	id = ancrel.10008
-	title = "ancrel.10004.name"
-	desc = "ancrel.10004.nourishment_center"
-	picture = GFX_evt_ancient_records
-
-	is_triggered_only = yes
-
-	option = {
-		name = "EXCELLENT"
-
-		hidden_effect = {
-			owner = {
-				change_variable = { which = nourishment_center_build_count value = 1 }
-				change_variable = { which = nourishment_center_upgrade_count value = 1 }
-				set_country_flag = nourishment_center_can_build
-			}
-		}
-	}
-}
-
-country_event = {
-	id = ancrel.10009
-	title = "ancrel.10004.name"
-	desc = "ancrel.10004.class_4_singularity"
-	picture = GFX_evt_ancient_records
-
-	is_triggered_only = yes
-
-	option = {
-		name = "EXCELLENT"
-
-		hidden_effect = {
-			owner = {
-				change_variable = { which = class_4_singularity_build_count value = 1 }
-				change_variable = { which = class_4_singularity_upgrade_count value = 1 }
-				set_country_flag = class_4_singularity_can_build
-			}
-		}
-	}
-}
+#country_event = {
+#	id = ancrel.10004
+#	title = "ancrel.10004.name"
+#	desc = "ancrel.10004.nanoforge"
+#	picture = GFX_evt_ancient_records
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "EXCELLENT"
+#
+#		hidden_effect = {
+#			owner = {
+#				change_variable = { which = nano_forge_build_count value = 1 }
+#				change_variable = { which = nano_forge_upgrade_count value = 1 }
+#				set_country_flag = nano_forge_can_build
+#			}
+#		}
+#	}
+#}
+#
+#country_event = {
+#	id = ancrel.10005
+#	title = "ancrel.10004.name"
+#	desc = "ancrel.10004.skydome"
+#	picture = GFX_evt_ancient_records
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "EXCELLENT"
+#
+#		hidden_effect = {
+#			owner = {
+#				change_variable = { which = skydome_build_count value = 1 }
+#				change_variable = { which = skydome_upgrade_count value = 1 }
+#				set_country_flag = skydome_can_build
+#			}
+#		}
+#	}
+#}
+#
+#country_event = {
+#	id = ancrel.10006
+#	title = "ancrel.10004.name"
+#	desc = "ancrel.10004.dimensional_fabricator"
+#	picture = GFX_evt_ancient_records
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "EXCELLENT"
+#
+#		hidden_effect = {
+#			owner = {
+#				change_variable = { which = dimensional_fabricator_build_count value = 1 }
+#				change_variable = { which = dimensional_fabricator_upgrade_count value = 1 }
+#				set_country_flag = dimensional_fabricator_can_build
+#			}
+#		}
+#	}
+#}
+#
+#country_event = {
+#	id = ancrel.10007
+#	title = "ancrel.10004.name"
+#	desc = "ancrel.10004.affluence_center"
+#	picture = GFX_evt_ancient_records
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "EXCELLENT"
+#
+#		hidden_effect = {
+#			owner = {
+#				change_variable = { which = affluence_center_build_count value = 1 }
+#				change_variable = { which = affluence_center_upgrade_count value = 1 }
+#				set_country_flag = affluence_center_can_build
+#			}
+#		}
+#	}
+#}
+#
+#country_event = {
+#	id = ancrel.10008
+#	title = "ancrel.10004.name"
+#	desc = "ancrel.10004.nourishment_center"
+#	picture = GFX_evt_ancient_records
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "EXCELLENT"
+#
+#		hidden_effect = {
+#			owner = {
+#				change_variable = { which = nourishment_center_build_count value = 1 }
+#				change_variable = { which = nourishment_center_upgrade_count value = 1 }
+#				set_country_flag = nourishment_center_can_build
+#			}
+#		}
+#	}
+#}
+#
+#country_event = {
+#	id = ancrel.10009
+#	title = "ancrel.10004.name"
+#	desc = "ancrel.10004.class_4_singularity"
+#	picture = GFX_evt_ancient_records
+#
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "EXCELLENT"
+#
+#		hidden_effect = {
+#			owner = {
+#				change_variable = { which = class_4_singularity_build_count value = 1 }
+#				change_variable = { which = class_4_singularity_upgrade_count value = 1 }
+#				set_country_flag = class_4_singularity_can_build
+#			}
+#		}
+#	}
+#}
 
 # Find military applications
 country_event = {
@@ -6295,7 +6397,10 @@ country_event = {
 	option = {
 		name = "artifact_find_peaceful_application_amenities_hivemind"
 		custom_tooltip = "artifact_find_peaceful_application_amenities_hivemind_desc"
-		trigger = {	is_hive_empire = yes }
+		trigger = {
+			is_hive_empire = yes
+			is_wilderness_empire = no
+		}
 		add_modifier = {
 			modifier = "artifact_find_peaceful_application_amenities_hivemind"
 			days = 1800
@@ -6749,13 +6854,17 @@ country_event = {
 			}
 		}
 
-		give_technology = { tech = tech_housing_1 }
-		add_research_option = tech_housing_2
+		if = {
+			limit = {
+				is_wilderness_empire = no
+			}
+			give_technology = { tech = tech_housing_1 }
+			add_research_option = tech_housing_2
+		}
 		add_tech_progress = {
 			tech = tech_secrets_league
 			progress = 0.1
 		}
-
 		add_modifier = {
 			modifier = artifact_league_research_completed # industry research and building build speed
 			days = -1
@@ -7307,7 +7416,9 @@ country_event = {
 			add_or_level_up_veteran_trait_effect = {
 				TRAIT = leader_trait_maniacal
 			}
-			add_trait = leader_trait_substance_abuser
+			add_trait = {
+				trait = leader_trait_substance_abuser
+			}
 			add_experience = 200
 		}
 	}
@@ -7517,6 +7628,7 @@ country_event = {
 	}
 }
 
+# Broken World
 fleet_event = {
 	id = ancrel.11000
 	title = ancrel.11000.name
@@ -8012,7 +8124,9 @@ fleet_event = {
 						has_trait = leader_trait_meticulous_2
 					}
 				}
-				add_trait = leader_trait_meticulous
+				add_trait = {
+					trait = leader_trait_meticulous
+				}
 			}
 		}
 		allow = {
@@ -8031,7 +8145,9 @@ fleet_event = {
 		leader = {
 			if = {
 				limit = { NOT = { has_trait = leader_trait_percussive_maintainer } }
-				add_trait = leader_trait_percussive_maintainer
+				add_trait = {
+					trait = leader_trait_percussive_maintainer
+				}
 			}
 		}
 		custom_tooltip = percussive_maintainer_tooltip
@@ -8324,6 +8440,20 @@ fleet_event = {
 		}
 		large_artifact_reward = yes
 	}
+
+	option = {
+		trigger = {
+			owner = { has_origin = origin_evolutionary_predators }
+		}
+		name = ancrel.12040.c.evopred
+		owner = {
+			add_modifier = {
+				modifier = killer_librarian_organism
+			}
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = large }
+		}
+		large_artifact_reward = yes
+	}
 	option = {
 		name = ancrel.12040.B
 
@@ -8439,7 +8569,12 @@ country_event = {
 	id = ancrel.12065
 	title = ancrel.12065.name
 	desc = ancrel.12065.desc
-	picture = GFX_evt_ship_in_orbit_3
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit_3
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_space_battle
 	location = fromfrom
 	is_triggered_only = yes
@@ -8646,13 +8781,12 @@ fleet_event = {
 				}
 				while = {
 					count = 5
-					add_district = district_industrial
 					add_district = district_generator_uncapped
 					add_district = district_mining_uncapped
 				}
 				while = {
 					count = 80
-					create_pop = {
+					create_pop_group = {
 						species = event_target:new_machines
 					}
 				}
@@ -8694,7 +8828,7 @@ fleet_event = {
 				while = {
 					count = 80
 					random_owned_planet = {
-						create_pop = {
+						create_pop_group = {
 							species = event_target:new_machines
 						}
 						weights = {
@@ -8739,7 +8873,7 @@ fleet_event = {
 				while = {
 					count = 80
 					random_owned_planet = {
-						create_pop = {
+						create_pop_group = {
 							species = event_target:new_robots
 						}
 						weights = {
@@ -8822,7 +8956,7 @@ fleet_event = {
 				change_pc = pc_machine
 				while = {
 					count = 80
-					create_pop = {
+					create_pop_group = {
 						species = event_target:new_machines
 					}
 				}
@@ -8832,7 +8966,6 @@ fleet_event = {
 				}
 				while = {
 					count = 2
-					add_district = district_industrial
 					add_district = district_generator_uncapped
 					add_district = district_mining_uncapped
 				}
@@ -9064,6 +9197,18 @@ fleet_event = {
 		}
 	}
 
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.13020.b.evopred
+		medium_artifact_reward = yes
+		owner = {
+			add_modifier = {
+				modifier = polaris_biology_modifier
+			}
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = medium TYPE = plantoid }
+		}
+	}
+
 	after = {
 		fromfrom = { set_site_progress_locked = no }
 	}
@@ -9106,6 +9251,12 @@ fleet_event = {
 	option = {
 		name = ancrel.13020.a
 	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.13020.b.evopred
+	}
+
 	after = {
 		fromfrom = { set_site_progress_locked = no }
 		medium_artifact_reward = yes
@@ -9388,7 +9539,36 @@ country_event = {
 
 	option = {
 		name = ancrel.13135.a
+		trigger = {
+			NOT = { has_origin = origin_evolutionary_predators }
+		}
 		owner = {
+			add_modifier = {
+				modifier = mycelial_network_modifier
+				days = -1
+			}
+			add_modifier = {
+				modifier = fumongus_authoritarian
+				years = 20
+			}
+		}
+		#flag for anomaly hookup
+		hidden_effect = {
+			owner = {
+				set_global_flag = fumongus_active
+				set_global_flag = fumongus_resolved
+				set_country_flag = fumongus_ours
+			}
+		}
+	}
+
+	option = {
+		name = ancrel.13135.a.evopred
+		trigger = {
+			has_origin = origin_evolutionary_predators
+		}
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = large TYPE = fungoid }
 			add_modifier = {
 				modifier = mycelial_network_modifier
 				days = -1
@@ -9435,7 +9615,34 @@ country_event = {
 
 	option = {
 		name = ancrel.13130.a
+		trigger = {
+			NOT = { has_origin = origin_evolutionary_predators }
+		}
 		owner = {
+			add_modifier = {
+				modifier = mycelial_network_modifier
+				days = -1
+			}
+			add_modifier = {
+				modifier = fumongus_authoritarian
+				years = 20
+			}
+		}
+		#flag for anomaly hookup
+		owner = {
+			set_global_flag = fumongus_active
+			set_global_flag = fumongus_resolved
+			set_country_flag = fumongus_ours
+		}
+	}
+
+	option = {
+		name = ancrel.13135.a.evopred
+		trigger = {
+			has_origin = origin_evolutionary_predators
+		}
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = large TYPE = fungoid }
 			add_modifier = {
 				modifier = mycelial_network_modifier
 				days = -1
@@ -9879,6 +10086,7 @@ fleet_event = {
 		trigger = {
 			owner = {
 				is_xenophile = no
+				NOT = { has_origin = origin_evolutionary_predators }
 			}
 		}
 		owner = {
@@ -9927,6 +10135,22 @@ fleet_event = {
 		}
 		owner = {
 			add_resource = { energy = 5000 }
+		}
+	}
+
+	option = { # Evolutionary Predator Interaction
+		name = ancrel.14510.e
+		trigger = {
+			owner = {
+				has_origin = origin_evolutionary_predators
+			}
+		}
+		owner = {
+			add_modifier = {
+				modifier = tiyanki_butcher
+				days = -1
+			}
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = large }
 		}
 	}
 }
@@ -9987,7 +10211,23 @@ fleet_event = {
 		name = site_setback
 		fromfrom = { add_stage_clues = -1 }
 		leader = {
-			add_trait = leader_trait_paranoid
+			add_trait = {
+				trait = leader_trait_paranoid
+			}
+		}
+	}
+
+	option = {
+		exclusive_trigger = { owner = { has_origin = origin_evolutionary_predators } }
+		name = ancrel.14910.b.evopred
+		fromfrom = { add_stage_clues = -1 }
+		owner = {
+			give_evolutionary_predator_situation_progress_and_dna = { AMOUNT = small }
+		}
+		leader = {
+			add_trait = {
+				trait = leader_trait_paranoid
+			}
 		}
 	}
 }
@@ -10013,7 +10253,7 @@ planet_event = {
 	}
 
 	trigger = {
-		num_pops > 0
+		pop_amount > 0
 		OR = {
 			is_planet_class = pc_tropical
 			is_planet_class = pc_gaia

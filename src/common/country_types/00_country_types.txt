@@ -43,7 +43,7 @@
 #		neutral = no						#if yes, fleets will never attack anything and will never be attacked
 #		hostile = no						#if yes, fleets will attack everything on sight ( except neutral fleets )
 #		follow = no							#if yes, fleets will follow the fleets of allies
-#		auto_delete = yes					#if yes, country will be automatically be deleted when considered dead ( usually when out of colonies and colony ships ). Should be yes in most cases but can be useful to turn off for some countries that are created by events.
+#		auto_delete = yes					#if yes, country will be automatically deleted when considered dead ( usually when out of colonies and colony ships ). Should be yes in most cases but can be useful to turn off for some countries that are created by events.
 #		needs_border_access = yes			#decides if a country needs to have explicit border access from another country to enter its borders.
 #		generate_borders = yes				#decides if a country generates borders or not
 #		needs_colony = yes					#decides if a country needs a colony ( or a colony ship ) to be considered alive.
@@ -152,7 +152,6 @@ default = {
 		standard_leader_module = {}
 		standard_diplomacy_module = { contact_rule = does_first_contact_sites }
 		standard_technology_module = {}
-		standard_trade_routes_module = {}
 		standard_pop_factions_module = {}
 		standard_expansion_module = {}
 		standard_species_rights_module = {}
@@ -178,7 +177,7 @@ default = {
 					has_valid_civic = civic_machine_servitor
 				}
 			}
-			consumer_goods = 10
+			consumer_goods = 15
 		}
 		produces = {
 			trigger = {
@@ -207,9 +206,11 @@ default = {
 						is_individual_machine = yes
 						has_country_flag = non_lithoid_subspecies
 					}
+					# Or have bioships
+					country_uses_bio_ships = yes
 				}
 			}
-			food = 10
+			food = 20
 		}
 		produces = {
 			trigger = {
@@ -238,21 +239,21 @@ default = {
 					}
 				}
 			}
-			minerals = 10
+			minerals = 20
 		}
 		produces = {
 			trigger = {
 				is_machine_empire = yes
 			}
-			energy = 10
+			energy = 20
 		}
 		produces = {
 			trigger = {
 				is_lithoid_empire = yes
 				has_valid_civic = civic_hive_cordyceptic_drones
 			}
-			food = 5
-			minerals = -5
+			food = 10
+			minerals = -10
 		}
 	}
 
@@ -261,7 +262,7 @@ default = {
 		category = planet_branch_offices
 		cost = {
 			energy = 1000
-			influence = 50
+			influence = 75
 		}
 	}
 }
@@ -747,6 +748,8 @@ awakened_fallen_empire = {
 				action_invite_to_federation
 				action_leave_federation
 				action_kick_from_federation
+				action_build_spy_network
+				action_manage_spy_network
 			}
 			can_send = {
 				action_declare_war
@@ -785,6 +788,31 @@ awakened_fallen_empire = {
 			sr_zro = 2
 			influence = 3
 		}
+	}
+}
+
+
+primal_mind = {
+	government = no
+	observable = no
+	is_space_critter = yes
+	blocks_piracy = yes
+	ai = {
+		enabled = no
+	}
+	faction = {
+		neutral = yes
+		hostile = no
+		needs_border_access = no
+		generate_borders = no
+		needs_colony = no
+		space_creatures = yes
+	}
+	modules = {
+		exclusive_diplomacy_module = { # Nothing is allowed, but we need this for relationships.
+			contact_rule = on_action_only
+		}
+		basic_technology_module = {}
 	}
 }
 
@@ -873,7 +901,6 @@ rebel = {
 			contact_rule = on_action_only
 		}
 		standard_technology_module = {}
-		standard_trade_routes_module = {}
 		#standard_species_rights_module = {}
 	}
 }
@@ -1040,8 +1067,8 @@ enclave_mercenary = {
 		category = country_base
 		produces = {
 			energy = 500
-			minerals = 250
-			food = 100
+			minerals = 500
+			food = 500
 			alloys = 250
 			consumer_goods = 100
 			rare_crystals = 1
@@ -1062,7 +1089,9 @@ enclave_mercenary = {
 			trigger = {
 				mid_game_years_passed > 0
 			}
-			energy = 250
+			energy = 500
+			minerals = 500
+			food = 500
 			alloys = 250
 			rare_crystals = 10
 			exotic_gases = 10
@@ -1077,11 +1106,13 @@ enclave_mercenary = {
 			trigger = {
 				end_game_years_passed > 0
 			}
-			energy = 250
+			energy = 500
+			minerals = 500
+			food = 500
 			alloys = 250
-			sr_dark_matter = 2
-			sr_living_metal = 2
-			sr_zro = 2
+			sr_dark_matter = 5
+			sr_living_metal = 5
+			sr_zro = 5
 
 			physics_research = 400
 			engineering_research = 400
@@ -1092,42 +1123,42 @@ enclave_mercenary = {
 			trigger = {
 				has_technology = tech_rare_crystals
 			}
-			rare_crystals = 2
+			rare_crystals = 10
 		}
 
 		produces = {
 			trigger = {
 				has_technology = tech_exotic_gases
 			}
-			exotic_gases = 2
+			exotic_gases = 10
 		}
 
 		produces = {
 			trigger = {
 				has_technology = tech_volatile_motes
 			}
-			volatile_motes = 2
+			volatile_motes = 10
 		}
 
 		produces = {
 			trigger = {
 				has_technology = tech_mine_dark_matter
 			}
-			sr_dark_matter = 1
+			sr_dark_matter = 5
 		}
 
 		produces = {
 			trigger = {
 				has_technology = tech_mine_living_metal
 			}
-			sr_living_metal = 1
+			sr_living_metal = 5
 		}
 
 		produces = {
 			trigger = {
 				has_technology = tech_mine_zro
 			}
-			sr_zro = 1
+			sr_zro = 5
 		}
 	}
 }
@@ -2410,5 +2441,84 @@ no_contact_neutral_faction = {
 		exclusive_diplomacy_module = { contact_rule = on_action_only } # Nothing is allowed, but we need this for relationships.
 		basic_technology_module = {}
 		standard_event_module = {}
+	}
+}
+
+abandoned_hatchery = {
+	scaled_difficulty_bonuses = 1
+	blocks_piracy = yes
+	can_own_empty_planets = yes
+	has_capital = yes
+	government = no
+	enforces_borders = no
+	observable = no
+	uses_origins = no
+	home_system = starlit_sealed_1
+	ai = {
+		enabled = no
+	}
+	faction = {
+		hostile = yes
+		needs_border_access = no
+		generate_borders = no
+		needs_colony = no
+	}
+	modules = {
+		exclusive_diplomacy_module = {
+			contact_rule = on_action_only
+		}
+		basic_technology_module = {}
+		standard_event_module = {}
+	}
+}
+
+behemoth_hatchling = {
+	scaled_difficulty_bonuses = 0.5	# scales to setting
+	government = no
+	attack_unarmed_orbital_stations = yes
+	destroys_starbases = yes
+	observable = yes
+	orbital_bombardment = yes
+	ai = {
+		enabled = no
+	}
+	faction = {
+		hostile = yes
+		needs_border_access = no
+		generate_borders = no
+		needs_colony = no
+		auto_delete = yes
+	}
+	modules = {
+		exclusive_diplomacy_module = { contact_rule = always } # Nothing is allowed, but we need this for relationships.
+		basic_technology_module = {}
+		standard_event_module = {} # For bouncing events
+	}
+}
+
+voidspawn_boss = {
+	scaled_difficulty_bonuses = 2.5	# scales to setting
+	is_space_critter = yes
+	government = no
+	destroys_starbases = yes
+	observable = yes
+	ai = {
+		enabled = no
+		modules = {
+			swarm_military_minister_module
+		}
+	}
+	faction = {
+		needs_colony = no
+		hostile = yes
+		needs_border_access = no
+	}
+
+	modules = {
+		standard_event_module = {}
+		basic_technology_module = {}
+		exclusive_diplomacy_module = {
+			contact_rule = always
+		}
 	}
 }

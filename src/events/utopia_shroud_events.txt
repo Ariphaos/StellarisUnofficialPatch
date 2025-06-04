@@ -1289,7 +1289,10 @@ country_event = {
 					is_immortal = no
 					has_chosen_one_leader_trait = no
 				}
-				add_trait_no_notify = leader_trait_shroud_age
+				add_trait = {
+					trait = leader_trait_shroud_age
+					show_message = no
+				}
 			}
 		}
 		default_hide_option = yes
@@ -4347,11 +4350,22 @@ country_event = {
 		event_target:chosen_leader = {
 			remove_all_negative_traits = yes
 			remove_trait = leader_trait_psionic
-			add_trait = leader_trait_chosen
+			add_trait = {
+				trait = leader_trait_chosen
+			}
 			# Age is now just a number
 			if = {
 				limit = { has_trait = leader_trait_shroud_age }
 				remove_trait = leader_trait_shroud_age
+			}
+			# Material augments are not going to stand up to this.
+			if = {
+				limit = { has_trait = leader_trait_cyborg }
+				remove_trait = leader_trait_cyborg
+			}
+			if = {
+				limit = { has_trait = leader_trait_limited_cyborg }
+				remove_trait = leader_trait_limited_cyborg
 			}
 		}
 	}
@@ -5081,13 +5095,19 @@ country_event = {
 				}
 				modifier = {
 					factor = 1.6
-					num_buildings = {
-						type = building_clinic
-						value = 0
-					}
-					num_buildings = {
-						type = building_hospital
-						value = 0
+					OR = {
+						num_buildings = {
+							type = building_medical_1
+							value = 0
+						}
+						num_buildings = {
+							type = building_medical_2
+							value = 0
+						}
+						num_buildings = {
+							type = building_medical_3
+							value = 0
+						}
 					}
 				}
 				modifier = {
@@ -5503,17 +5523,17 @@ country_event = {
 			random_owned_planet = {
 				limit = {
 					is_capital = no
-					any_owned_pop = {
+					any_owned_pop_group = {
 						is_sapient = yes
-						is_robot_pop = no
+						is_robot_pop_group = no
 					}
 				}
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_sapient = yes
-						is_robot_pop = no
+						is_robot_pop_group = no
 					}
-					kill_pop = yes
+					kill_single_pop = yes
 				}
 			}
 			set_variable = {
@@ -5536,17 +5556,17 @@ country_event = {
 			random_owned_planet = {
 				limit = {
 					is_capital = no
-					any_owned_pop = {
+					any_owned_pop_group = {
 						is_sapient = yes
-						is_robot_pop = no
+						is_robot_pop_group = no
 					}
 				}
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_sapient = yes
-						is_robot_pop = no
+						is_robot_pop_group = no
 					}
-					kill_pop = yes
+					kill_single_pop = yes
 				}
 			}
 			if = {
@@ -5701,6 +5721,9 @@ country_event = {
 		hidden_effect = {
 			remove_country_flag = form_covenant_flag
 		}
+	}
+	after = {
+		country_event = { id = timeline.24 } # Milestone First Custodian Appointment
 	}
 }
 
@@ -5918,10 +5941,10 @@ country_event = {
 					add_building = building_hydroponics_farm
 					while = {
 						limit = {
-							num_pops < 8
+							pop_amount < 800
 							free_housing > 0
 						}
-						create_pop = {
+						create_pop_group = {
 							species = owner
 						}
 					}
@@ -5944,10 +5967,10 @@ country_event = {
 					add_building = building_factory_1
 					while = {
 						limit = {
-							num_pops < 8
+							pop_amount < 800
 							free_housing > 0
 						}
-						create_pop = {
+						create_pop_group = {
 							species = owner
 						}
 					}
@@ -5982,7 +6005,7 @@ country_event = {
 			limit = { has_modifier = covenant_shroud_marked }
 			remove_modifier = covenant_shroud_marked
 			remove_all_armies = yes
-			every_owned_pop = {
+			every_owned_pop_group = {
 				root = {
 					change_variable = {
 						which = "end_power"
@@ -6030,10 +6053,6 @@ country_event = {
 			if = {
 				limit = {
 					is_planet_class = pc_habitat
-				}
-				every_owned_pop = {
-					unemploy_pop = yes
-					kill_pop = yes
 				}
 				destroy_colony = yes
 				spawn_habitat_cracker_effect = yes
@@ -6411,10 +6430,6 @@ planet_event = {
 			limit = {
 				is_planet_class = pc_habitat
 			}
-			every_owned_pop = {
-				unemploy_pop = yes
-				kill_pop = yes
-			}
 			destroy_colony = yes
 		}
 		else_if = {
@@ -6562,7 +6577,9 @@ country_event = {
 	option = {
 		name = "utopia.3331.opt.a"
 		event_target:leader_target = {
-			add_trait = "leader_trait_substance_abuser"
+			add_trait = {
+				trait = leader_trait_substance_abuser
+			}
 		}
 	}
 }
@@ -6628,12 +6645,12 @@ country_event = {
 
 	trigger = {
 		any_owned_planet = {
-			num_pops > 1
+			pop_amount > 100
 			NOR = {
 				has_modifier = whisperers_madness
 				has_modifier = whisperers_psychosis
 			}
-			any_owned_pop = {
+			any_owned_pop_group = {
 				has_trait = "trait_psionic"
 			}
 		}
@@ -6642,17 +6659,17 @@ country_event = {
 	immediate = {
 		random_owned_planet = {
 			limit = {
-				num_pops > 1
+				pop_amount > 100
 				NOR = {
 					has_modifier = whisperers_madness
 					has_modifier = whisperers_psychosis
 				}
-				any_owned_pop = {
+				any_owned_pop_group = {
 					has_trait = "trait_psionic"
 				}
 			}
-			random_owned_pop = {
-				kill_pop = yes
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
 		}
 	}
@@ -6679,12 +6696,12 @@ country_event = {
 
 	trigger = {
 		any_owned_planet = {
-			num_pops > 5
+			pop_amount > 500
 			NOR = {
 				has_modifier = whisperers_madness
 				has_modifier = whisperers_psychosis
 			}
-			any_owned_pop = {
+			any_owned_pop_group = {
 				has_trait = "trait_psionic"
 			}
 		}
@@ -6693,17 +6710,17 @@ country_event = {
 	immediate = {
 		random_owned_planet = {
 			limit = {
-				num_pops > 1
+				pop_amount > 100
 				NOR = {
 					has_modifier = whisperers_madness
 					has_modifier = whisperers_psychosis
 				}
-				any_owned_pop = {
+				any_owned_pop_group = {
 					has_trait = "trait_psionic"
 				}
 			}
-			random_owned_pop = {
-				kill_pop = yes
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
 		}
 	}
@@ -6755,7 +6772,7 @@ country_event = {
 				}
 			}
 			position = 0
-			order_by = trigger:has_skill
+			order_by = level
 			inverse = yes
 			kill_leader = {}
 		}
@@ -6780,7 +6797,7 @@ country_event = {
 
 	trigger = {
 		any_owned_planet = {
-			num_pops > 4
+			pop_amount > 400
 			NOR = {
 				has_modifier = eater_unhappiness_planet_1
 				has_modifier = eater_unhappiness_planet_2
@@ -6791,21 +6808,21 @@ country_event = {
 	immediate = {
 		random_owned_planet = {
 			limit = {
-				num_pops > 4
+				pop_amount > 400
 				NOR = {
 					has_modifier = eater_unhappiness_planet_1
 					has_modifier = eater_unhappiness_planet_2
 				}
 			}
 			save_event_target_as = planet_target
-			random_owned_pop = {
-				kill_pop = yes
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
-			random_owned_pop = {
-				kill_pop = yes
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
-			random_owned_pop = {
-				kill_pop = yes
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
 		}
 	}
@@ -7064,11 +7081,11 @@ country_event = {
 	immediate = {
 		random_owned_planet = {
 			limit = {
-				any_owned_pop = {
+				any_owned_pop_group = {
 					has_trait = trait_psionic
 				}
 			}
-			random_owned_pop = {
+			weighted_random_owned_pop_group = {
 				limit = {
 					has_trait = trait_psionic
 				}
@@ -7134,7 +7151,7 @@ country_event = {
 
 	trigger = {
 		any_owned_planet = {
-			num_pops > 1
+			pop_amount > 100
 			NOR = {
 				has_modifier = eater_unhappiness_planet_1
 				has_modifier = eater_unhappiness_planet_2
@@ -7145,15 +7162,15 @@ country_event = {
 	immediate = {
 		random_owned_planet = {
 			limit = {
-				num_pops > 1
+				pop_amount > 100
 				NOR = {
 					has_modifier = eater_unhappiness_planet_1
 					has_modifier = eater_unhappiness_planet_2
 				}
 			}
 			save_event_target_as = planet_target
-			random_owned_pop = {
-				kill_pop = yes
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
 		}
 	}
@@ -7249,8 +7266,8 @@ country_event = {
 
 	trigger = {
 		any_owned_planet = {
-			count_owned_pop = {
-				count >= 8
+			count_owned_pop_amount = {
+				count >= 800
 				limit = {
 					is_sapient = yes
 					has_trait = trait_psionic
@@ -7263,8 +7280,8 @@ country_event = {
 	immediate = {
 		random_owned_planet = {
 			limit = {
-				count_owned_pop = {
-					count >= 8
+				count_owned_pop_amount = {
+					count >= 800
 					limit = {
 						is_sapient = yes
 						has_trait = trait_psionic
@@ -7273,7 +7290,7 @@ country_event = {
 				}
 			}
 			save_event_target_as = devolved_species_planet
-			random_owned_pop = {
+			weighted_random_owned_pop_group = {
 				limit = {
 					is_sapient = yes
 					has_trait = trait_psionic
@@ -7281,16 +7298,20 @@ country_event = {
 				}
 				species = { save_event_target_as = species_target }
 				create_random_devolved_species = yes
-			}
-			while = {
-				count = 4
-				random_owned_pop = {
-					limit = {
-						is_sapient = yes
-						has_trait = trait_psionic
-						has_presapient_trait = no
+				save_event_target_as = source_pop_group
+				prev = {
+					create_pop_group = {
+						pop_group = event_target:source_pop_group
+						size = 0
+						effect = {
+							change_species = event_target:devolved_species_target
+							transfer_pop_amount = {
+								source = event_target:source_pop_group
+								target = this
+								amount = 400
+							}
+						}
 					}
-					change_species = event_target:devolved_species_target
 				}
 			}
 			check_planet_employment = yes

@@ -110,7 +110,12 @@ country_event = {
 		set_country_flag = has_encountered_other_empire
 
 		# First contact protocols fires between 3 and 6 months.
-		country_event = { id = first_contact.1060 days = 135 random = 45 }
+		if = {
+			limit = {
+				very_first_contact_paragon = yes
+			}
+			set_country_flag = first_contact_protocol_event_happened
+		}
 
 		species = { save_event_target_as = victim_species }
 
@@ -935,13 +940,14 @@ planet_event = {
 			# resettle 5 pops to the MSI capital
 			while = {
 				count = 5
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_same_species = owner_main_species
 					}
-					resettle_pop = {
-						pop = this
-						planet = event_target:MSI_country.capital_scope
+					resettle_pop_group = {
+						POP_GROUP = this
+						PLANET = event_target:MSI_country.capital_scope
+						AMOUNT = 100
 					}
 				}
 			}
@@ -1168,11 +1174,11 @@ country_event = {
 			has_country_flag = debt_collectors_pay_slaves
 		}
 		allow = {
-			count_owned_pop = {
+			count_owned_pop_amount = {
 				limit = {
 					is_same_species = owner_main_species
 				}
-				count > 5
+				count >= 600
 			}
 		}
 		custom_tooltip = origin.4030.c.tooltip
@@ -1180,13 +1186,14 @@ country_event = {
 			# resettle 2 pops to the MSI capital
 			while = {
 				count = 2
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_same_species = owner_main_species
 					}
-					resettle_pop = {
-						pop = this
-						planet = event_target:MSI_country.capital_scope
+					resettle_pop_group = {
+						POP_GROUP = this
+						PLANET = event_target:MSI_country.capital_scope
+						AMOUNT = 100
 					}
 				}
 			}
@@ -1200,11 +1207,11 @@ country_event = {
 			has_country_flag = debt_collectors_pay_slaves
 		}
 		allow = {
-			count_owned_pop = {
+			count_owned_pop_amount = {
 				limit = {
 					is_enslaved = yes
 				}
-				count >= 2
+				count >= 200
 			}
 		}
 		custom_tooltip = origin.4030.d.tooltip
@@ -1212,13 +1219,14 @@ country_event = {
 			# resettle 2 pops to the MSI capital
 			while = {
 				count = 2
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_enslaved = yes
 					}
-					resettle_pop = {
-						pop = this
-						planet = event_target:MSI_country.capital_scope
+					resettle_pop_group = {
+						POP_GROUP = this
+						PLANET = event_target:MSI_country.capital_scope
+						AMOUNT = 100
 					}
 				}
 			}
@@ -1350,24 +1358,25 @@ country_event = {
 	option = { # Pay with your own people
 		name = "origin.4030.c"
 		allow = {
-			count_owned_pop = {
+			count_owned_pop_amount = {
 				limit = {
 					is_same_species = owner_main_species
 				}
-				count > 2
+				count >= 300
 			}
 		}
 		hidden_effect = {
 			# resettle 2 pops to the MSI capital
 			while = {
 				count = 2
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_same_species = owner_main_species
 					}
-					resettle_pop = {
-						pop = this
-						planet = event_target:MSI_country.capital_scope
+					resettle_pop_group = {
+						POP_GROUP = this
+						PLANET = event_target:MSI_country.capital_scope
+						AMOUNT = 100
 					}
 				}
 			}
@@ -1378,24 +1387,25 @@ country_event = {
 	option = { # Pay with slaves
 		name = "origin.4030.d"
 		allow = {
-			count_owned_pop = {
+			count_owned_pop_amount = {
 				limit = {
 					is_enslaved = yes
 				}
-				count > 2
+				count >= 3
 			}
 		}
 		hidden_effect = {
 			# resettle 2 pops to the MSI capital
 			while = {
 				count = 2
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						is_enslaved = yes
 					}
-					resettle_pop = {
-						pop = this
-						planet = event_target:MSI_country.capital_scope
+					resettle_pop_group = {
+						POP_GROUP = this
+						PLANET = event_target:MSI_country.capital_scope
+						AMOUNT = 100
 					}
 				}
 			}
@@ -2858,7 +2868,7 @@ country_event = {
 		}
 		home_planet = {
 			original_owner = yes
-			has_building = building_clinic
+			has_building = building_medical_2
 		}
 	}
 
@@ -2866,7 +2876,7 @@ country_event = {
 		set_country_flag = payback_had_out_of_warranty
 		set_country_flag = payback_ruined_gene_clinics # prevents origin.4306 from firing upon gaining the tech
 		home_planet = {
-			ruin_building = building_clinic
+			ruin_building = building_medical_2
 		}
 	}
 
@@ -2953,16 +2963,15 @@ country_event = {
 			is_xenophobe = yes
 			num_research_agreements > 1
 		}
-		while = {
-			count = value:five_percent_species
-			random_owned_pop = {
-				limit = {
-					NOT = {
-						pop_has_ethic = ethic_xenophile
-						pop_has_trait = trait_mechanical
-					}
-				}
-				pop_change_ethic = "ethic_xenophile"
+		every_owned_pop_group = {
+			limit = {
+				has_any_ethic = yes
+				NOT = { has_ethic = ethic_xenophile }
+			}
+			pop_group_transfer_ethic = {
+				POP_GROUP = this
+				ETHOS = ethic_xenophile
+				PERCENTAGE = 0.05
 			}
 		}
 	}
@@ -2988,13 +2997,13 @@ country_event = {
 
 	trigger = {
 		home_planet = {
-			has_building = building_clinic
+			has_building = building_medical_2
 		}
 	}
 
 	immediate = {
 		home_planet = {
-			ruin_building = building_clinic
+			ruin_building = building_medical_2
 		}
 	}
 
@@ -3039,10 +3048,10 @@ planet_event = {
 
 	option = {
 		name = UNFORTUNATE
-		remove_building = building_clinic
-		random_owned_pop = {
-			limit = { is_robot_pop = no }
-			kill_pop = yes
+		remove_building = building_medical_2
+		random_owned_pop_group = {
+			limit = { is_robot_pop_group = no }
+			kill_single_pop = yes
 		}
 		owner = {
 			end_event_chain = payback_out_of_warranty_chain
@@ -3061,7 +3070,7 @@ planet_event = {
 	location = this
 
 	immediate = {
-		remove_building = building_clinic
+		remove_building = building_medical_2
 		if = {
 			limit = {
 				owner = { is_memorialist_empire = yes }
@@ -3096,9 +3105,12 @@ country_event = {
 	trigger = {
 		has_country_flag = payback_ruined_gene_clinics
 		# Only happens if you haven't somehow built/gotten more clinics in the meantime
-		NOT = {
+		NOR = {
 			any_owned_planet = {
-				has_active_building = building_clinic
+				has_active_building = building_medical_2
+			}
+			any_owned_planet = {
+				has_active_building = building_medical_3
 			}
 		}
 	}
@@ -3542,6 +3554,9 @@ ship_event = {
 		name = EXCELLENT
 		custom_tooltip = origin.4935.tt
 		hidden_effect = {
+			owner = {
+				save_event_target_as = habitat_owner
+			}
 			solar_system = {
 				spawn_payback_site_habitat = yes
 			}
@@ -3565,9 +3580,9 @@ country_event = {
 	trigger = {
 		has_origin = origin_payback
 		OR = {
-			last_increased_tech = tech_battleships
-			last_increased_tech = tech_cruisers
-			last_increased_tech = tech_destroyers
+			last_increased_tech = tech_starbase_5
+			last_increased_tech = tech_starbase_4
+			last_increased_tech = tech_starbase_3
 		}
 		any_owned_ship = {
 			has_ship_flag = payback_flagship

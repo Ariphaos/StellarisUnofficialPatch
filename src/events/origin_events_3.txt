@@ -314,6 +314,34 @@ country_event = {
 	}
 }
 
+planet_event = {
+	id = origin.3155
+
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_planet_class = pc_shattered_ring_habitable
+		is_colony = no
+		exists = space_owner
+		space_owner = {
+			is_ai = yes
+		}
+	}
+
+	immediate = {
+		create_colony = {
+			owner = space_owner
+			species = space_owner.species
+		}
+		create_pop_group = {
+			size = 100
+			species = owner_main_species
+		}
+	}
+}
+
 ##################
 # PROGENITOR HIVE
 ##################
@@ -332,7 +360,7 @@ country_event = {
 			limit = { is_idle = no }
 			#This approximates a function to level up every 1.5(n+1) years so that you can expect to get a level 10 leader after 80 years.
 			export_trigger_value_to_variable = {
-				trigger = has_skill
+				trigger = has_base_skill
 				variable = experience_bonus
 			}
 			multiply_variable = {
@@ -542,10 +570,11 @@ planet_event = {
 		NOR = {
 			is_planet_class = pc_cosmogenesis_world
 			num_assigned_jobs = {
-				job = offspring_drone
-				value >= 1
+				job = spawning_drone
+				value >= 100
 			}
 		}
+		days_passed > 5
 	}
 
 	immediate = {
@@ -579,8 +608,8 @@ country_event = {
 					has_modifier = missing_offspring_modifier
 					is_planet_class = pc_cosmogenesis_world
 					num_assigned_jobs = {
-						job = offspring_drone
-						value >= 1
+						job = spawning_drone
+						value >= 100
 					}
 				}
 			}
@@ -594,12 +623,11 @@ country_event = {
 				has_modifier = missing_offspring_modifier
 				OR = {
 					num_assigned_jobs = {
-						job = offspring_drone
-						value >= 1
+						job = spawning_drone
+						value >= 100
 					}
 					has_deposit = d_progenitor
 				}
-
 			}
 			remove_modifier = "missing_offspring_modifier"
 		}
@@ -618,7 +646,7 @@ country_event = {
 		any_owned_planet = {
 			has_modifier = missing_offspring_modifier
 			NOT = { has_planet_flag = offspring_missing_warned }
-			num_pops >= 3
+			pop_amount >= 300
 			is_capital = no
 		}
 	}
@@ -627,7 +655,7 @@ country_event = {
 		every_owned_planet = {
 			limit = {
 				has_modifier = missing_offspring_modifier
-				num_pops >= 3
+				pop_amount >= 300
 				NOT = { has_planet_flag = offspring_missing_warned }
 			}
 			set_timed_planet_flag = {
@@ -667,52 +695,52 @@ planet_event = {
 
 planet_event = { #Glassing the Progenitor
 	id = origin.3245
- 	title = origin.3245.name
- 	desc = origin.3245.desc
- 	picture = GFX_evt_progenitor_throne
- 	show_sound = evn_ove_progenitor_throne
- 	is_triggered_only = yes
+	title = origin.3245.name
+	desc = origin.3245.desc
+	picture = GFX_evt_progenitor_throne
+	show_sound = evn_ove_progenitor_throne
+	is_triggered_only = yes
 
- 	pre_triggers = {
- 		is_capital = yes
- 		has_owner = yes
- 	}
+	pre_triggers = {
+		is_capital = yes
+		has_owner = yes
+	}
 
- 	trigger = {
- 		exists = owner
- 		owner = { has_origin = origin_progenitor_hive }
- 		has_deposit = d_progenitor
- 	}
+	trigger = {
+		exists = owner
+		owner = { has_origin = origin_progenitor_hive }
+		has_deposit = d_progenitor
+	}
 
- 	immediate = {
- 		remove_deposit = d_progenitor
- 		add_deposit = d_progenitor_empty
- 	}
- 	option = {
- 		name = origin.3245.a
- 	}
- 	option = {
- 		name = origin.3245.b
- 	}
- 	option = {
- 		name = origin.3245.c
- 	}
- 	option = {
- 		name = origin.3245.d
- 	}
- 	after = {
- 	 	owner = {
- 			if = {
- 				limit = {
- 					NOT = { has_modifier = missing_progenitor_modifier }
- 				}
+	immediate = {
+		remove_deposit = d_progenitor
+		add_deposit = d_progenitor_empty
+	}
+	option = {
+		name = origin.3245.a
+	}
+	option = {
+		name = origin.3245.b
+	}
+	option = {
+		name = origin.3245.c
+	}
+	option = {
+		name = origin.3245.d
+	}
+	after = {
+		owner = {
+			if = {
+				limit = {
+					NOT = { has_modifier = missing_progenitor_modifier }
+				}
 				add_modifier = {
 					modifier = missing_progenitor_modifier
 					days = -1
 				}
 			}
 		}
- 	}
+	}
 }
 
 country_event = {
@@ -880,6 +908,7 @@ country_event = {
 		event_target:quantum_catapult_system = {
 			set_star_class = sc_pulsar
 			set_star_flag = quantum_catapult_system_flag@root
+			star = { prevent_anomaly = yes }
 
 			spawn_megastructure = {
 				type = "quantum_catapult_ruined_slingshot"
@@ -1321,7 +1350,7 @@ country_event = {
 
 	immediate = {
 		country_event = {
-			id = tutorial.2100 # Tutorial: Enclave Diplomacy
+			id = tutorial.2100 days = 1 # Tutorial: Enclave Diplomacy
 			scopes = { from = event_target:shroudwalker_enclave_country }
 		}
 	}
@@ -1945,19 +1974,41 @@ country_event = {
 					set_location = root.capital_star
 				}
 			}
-			create_fleet = {
-				effect = {
-					set_owner = root
-					while = {
-						count = 3
-						create_ship = {
-							name = random
-							design = NAME_Dagger
+			if = {
+				limit = {
+					country_uses_bio_ships = yes
+				}
+				create_fleet = {
+					effect = {
+						set_owner = root
+						while = {
+							count = 3
+							create_ship = {
+								name = random
+								design = NAME_CHARGER_1
+								growth_stage = 1
+							}
 						}
+						set_location = root.capital_star
 					}
-					set_location = root.capital_star
 				}
 			}
+			else = {
+				create_fleet = {
+					effect = {
+						set_owner = root
+						while = {
+							count = 3
+							create_ship = {
+								name = random
+								design = NAME_Dagger
+							}
+						}
+						set_location = root.capital_star
+					}
+				}
+			}
+
 			add_resource = {
 				energy = 2000
 				food = 1000
@@ -2136,19 +2187,43 @@ country_event = { # Overlord Version
 								target = event_target:previous_overlord
 							}
 							# Give them a fleet of their own
-							create_fleet = {
-								effect = {
-									set_owner = event_target:current_splinter
-									while = {
-										count = 10
-										create_ship = {
-											name = random
-											design = NAME_Ravager
-										}
+							if = {
+								limit = {
+									event_target:current_splinter = {
+										country_uses_bio_ships = yes
 									}
-									set_location = event_target:current_splinter.capital_star
+								}
+								create_fleet = {
+									effect = {
+										set_owner = event_target:current_splinter
+										while = {
+											count = 20
+											create_ship = {
+												name = random
+												design = NAME_CHARGER_1
+												growth_stage = 1
+											}
+										}
+										set_location = event_target:current_splinter.capital_star
+									}
 								}
 							}
+							else = {
+								create_fleet = {
+									effect = {
+										set_owner = event_target:current_splinter
+										while = {
+											count = 10
+											create_ship = {
+												name = random
+												design = NAME_Ravager
+											}
+										}
+										set_location = event_target:current_splinter.capital_star
+									}
+								}
+							}
+
 							# Give them some starting resources
 							add_basic_resources_effect = { VALUE = 3000 }
 							add_manufactured_resources_effect = { VALUE = 1500 }
@@ -2612,7 +2687,10 @@ country_event = { # Get Scientist
 			}
 		}
 		last_created_leader = {
-			add_trait_no_notify = leader_trait_fotd_scientist
+			add_trait = {
+				trait = leader_trait_fotd_scientist
+				show_message = no
+			}
 			save_event_target_as = fotd_Leader
 			exile_leader_as = fotd_Leader_exile
 		}
@@ -2703,7 +2781,10 @@ country_event = { # Get Admiral
 			}
 		}
 		last_created_leader = {
-			add_trait_no_notify = leader_trait_fotd_commander
+			add_trait = {
+				trait = leader_trait_fotd_commander
+				show_message = no
+			}
 			save_event_target_as = fotd_Leader
 			exile_leader_as = fotd_Leader_exile
 		}
@@ -2788,7 +2869,9 @@ country_event = { # Return the Leader
 			}
 		}
 		event_target:fotd_Leader_accepted = {
-			add_trait = leader_trait_stubborn
+			add_trait = {
+				trait = leader_trait_stubborn
+			}
 		}
 		owner = {
 			add_resource = { unity = -500 }
@@ -2838,7 +2921,9 @@ country_event = { # Return the Leader Escalated
 				limit = {
 					NOT = { has_trait_tier1or2 = { TRAIT = leader_trait_substance_abuser } }
 				}
-				add_trait = leader_trait_substance_abuser
+				add_trait = {
+					trait = leader_trait_substance_abuser
+				}
 				owner = {
 					add_resource = { unity = -1000 }
 					hidden_effect = {
@@ -2855,7 +2940,9 @@ country_event = { # Return the Leader Escalated
 				limit = {
 					NOT = { has_trait = leader_trait_arrested_development }
 				}
-				add_trait = leader_trait_arrested_development
+				add_trait = {
+					trait = leader_trait_arrested_development
+				}
 				owner = {
 					add_resource = { unity = -1000 }
 					hidden_effect = {
@@ -3149,11 +3236,8 @@ country_event = { # Requests aid
 	option = { #Ignore
 		name = origin.6020.c
 		event_target:fotd_seperatist_planet = {
-			while = {
-				count = 1
-				random_owned_pop = {
-					kill_pop = yes
-				}
+			random_owned_pop_group = {
+				kill_single_pop = yes
 			}
 		}
 		add_modifier = {
@@ -3824,27 +3908,27 @@ country_event = { # Encounter Leviathan
 		}
 		hidden_effect = {
 			home_planet = {
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						species = {
 							is_same_value = root.species
 						}
 					}
-					kill_pop = yes
+					kill_single_pop = yes
 				}
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = {
 						species = {
 							is_same_value = root.species
 						}
 					}
-					kill_pop = yes
+					kill_single_pop = yes
 				}
 			}
 			event_target:fotd_seperatist_planet@root = {
 				while = {
 					count = 2
-					create_pop = {
+					create_pop_group = {
 						species = root.species
 					}
 				}
@@ -4134,15 +4218,15 @@ country_event = {
 		name = BATTLESTATIONS
 		custom_tooltip = five_percent_xenophobe_tt
 		hidden_effect = {
-			while = {
-				count = value:five_percent_species
-				random_owned_pop = {
-					limit = {
-						NOT = {
-							has_ethic = ethic_xenophobe
-						}
-					}
-					pop_change_ethic = ethic_xenophobe
+			every_owned_pop_group = {
+				limit = {
+					has_any_ethic = yes
+					NOT = { has_ethic = ethic_xenophobe }
+				}
+				pop_group_transfer_ethic = {
+					POP_GROUP = this
+					ETHOS = ethic_xenophobe
+					PERCENTAGE = 0.05
 				}
 			}
 		}
@@ -4644,16 +4728,16 @@ country_event = { # We have found them
 						set_capital = yes
 
 						remove_building = building_colony_shelter
-						add_building = building_primitive_farm
+						add_primitive_farm_or_mine = yes
 						add_building = building_primitive_factory
-						add_building = building_primitive_farm
+						add_primitive_farm_or_mine = yes
 						add_building = building_primitive_power_plant
 						add_building = building_primitive_capital
 						add_building = building_urban_dwellings
 						remove_building = building_colony_shelter
 						while = {
 							count = 16
-							create_pop = {
+							create_pop_group = {
 								species = last_created_species
 							}
 						}
@@ -4753,9 +4837,6 @@ ship_event = { # Scanning hunter planet
 		}
 		hidden_effect = {
 			from = {
-				every_owned_pop = {
-					kill_pop = yes
-				}
 				change_pc = pc_nuked
 				destroy_colony = yes
 			}
@@ -5067,7 +5148,6 @@ situation_event = {
 
 	immediate = {
 		target = {
-			every_owned_pop = { kill_pop = yes }
 			destroy_colony = yes
 			change_pc = pc_shattered
 			clear_deposits = yes
@@ -5970,7 +6050,10 @@ country_event = {
 				skill = 5
 			}
 			last_created_leader = {
-				add_trait_no_notify = leader_trait_fotd_commander
+				add_trait = {
+					trait = leader_trait_fotd_commander
+					show_message = no
+				}
 				save_event_target_as = fotd_patrol_admiral_target
 				set_leader_flag = fotd_patrol_admiral
 			}
@@ -6073,17 +6156,17 @@ country_event = {
 	immediate = {
 		capital_scope = {
 			export_trigger_value_to_variable = {
-				trigger = num_pops
+				trigger = pop_amount
 				variable = seperatist_pops
 			}
-			change_variable = { #Makes it so that they are at least always 5 pops behind the player
+			change_variable = { #Makes it so that they are at least always 500 pops behind the player
 				which = seperatist_pops
-				value = 5
+				value = 500
 			}
 		}
 		home_planet = {
 			export_trigger_value_to_variable = {
-				trigger = num_pops
+				trigger = pop_amount
 				variable = fotd_pops
 			}
 		}
@@ -6095,7 +6178,7 @@ country_event = {
 				}
 			}
 			capital_scope = {
-				create_pop = {
+				create_pop_group = {
 					species = root.species
 				}
 				if = {
@@ -6142,7 +6225,7 @@ country_event = {
 							1 = {
 								modifier = {
 									factor = 0
-									has_building = building_clinic
+									has_building = building_medical_2
 								}
 								add_building = building_foundry_1
 							}
@@ -6165,9 +6248,6 @@ country_event = {
 						random_list = {
 							2 = {
 								add_district = district_city
-							}
-							1 = {
-								add_district = district_industrial
 							}
 							1 = {
 								modifier = {
@@ -6349,6 +6429,7 @@ country_event = {
 	trigger = {
 		has_modifier = fotd_settled_differences
 		from = {
+			NOT = { leader_class = envoy }
 			species = { is_same_species = root.species }
 		}
 	}
@@ -6360,8 +6441,16 @@ country_event = {
 				from = {
 					switch = {
 						trigger = leader_class
-						commander = { add_trait = leader_trait_fotd_commander }
-						scientist = { add_trait = leader_trait_fotd_scientist }
+						commander = {
+							add_trait = {
+								trait = leader_trait_fotd_commander
+							}
+						}
+						scientist = {
+							add_trait = {
+								trait = leader_trait_fotd_scientist
+							}
+						}
 					}
 				}
 			}
@@ -6615,9 +6704,6 @@ country_event = { #Seperatists would rather die than give you their planet
 			random_system_planet = {
 				limit = {
 					has_planet_flag = fotd_seperatist_planet@root
-				}
-				every_owned_pop = {
-					kill_pop = yes
 				}
 				change_pc = pc_nuked
 				destroy_colony = yes

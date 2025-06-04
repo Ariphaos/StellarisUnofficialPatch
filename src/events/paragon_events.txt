@@ -745,11 +745,26 @@ planet_event = {
 				remove_trait = leader_trait_psionic
 				remove_trait = subclass_commander_admiral
 				change_leader_class = official
-				add_trait_no_notify = subclass_official_governor
-				add_trait_no_notify = leader_trait_governor_psionic_communion
-				add_trait_no_notify = leader_trait_mediator
-				add_trait_no_notify = leader_trait_generator_focus_2
-				add_trait_no_notify = leader_trait_intellectual
+				add_trait = {
+					trait = subclass_official_governor
+					show_message = no
+				}
+				add_trait = {
+					trait = leader_trait_governor_psionic_communion
+					show_message = no
+				}
+				add_trait = {
+					trait = leader_trait_mediator
+					show_message = no
+				}
+				add_trait = {
+					trait = leader_trait_generator_focus_2
+					show_message = no
+				}
+				add_trait = {
+					trait = leader_trait_intellectual
+					show_message = no
+				}
 			}
 			# Delete ship
 			every_fleet_in_orbit = {
@@ -832,7 +847,7 @@ planet_event = {
 			days_from_present = 180
 			expires = 180
 		}
-		random_owned_pop = {
+		weighted_random_owned_pop_group = {
 			limit = {
 				is_organic_species = yes
 				is_being_assimilated = no
@@ -841,6 +856,7 @@ planet_event = {
 					has_trait = trait_cybernetic
 					has_trait = trait_psionic
 					has_trait = trait_hive_mind
+					has_trait = trait_malleable_genes
 				}
 			}
 			modify_species = {
@@ -861,7 +877,7 @@ planet_event = {
 		}
 		if = {
 			limit = {
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					count = 0
 					limit = {
 						is_organic_species = yes
@@ -1610,7 +1626,7 @@ country_event = {
 		sound = par_azaryn_hire
 
 		hidden_effect = {
-			random_owned_planet = {
+			if = {
 				limit = {
 					is_variable_set = paragon_memory_vault
 				}
@@ -2091,13 +2107,17 @@ planet_event = {
 				}
 				leader_trait_legendary_terraformation_nucleus_2_buds = {
 					remove_trait = leader_trait_legendary_terraformation_nucleus_2_buds
-					add_trait = leader_trait_legendary_terraformation_nucleus_1_bud
+					add_trait = {
+						trait = leader_trait_legendary_terraformation_nucleus_1_bud
+					}
 					change_leader_portrait = paragon_azaryn_1_bud
 					leader_event = { id = paragon.235 days = 90 random = 30 }
 				}
 				leader_trait_legendary_terraformation_nucleus_3_buds = {
 					remove_trait = leader_trait_legendary_terraformation_nucleus_3_buds
-					add_trait = leader_trait_legendary_terraformation_nucleus_2_buds
+					add_trait = {
+						trait = leader_trait_legendary_terraformation_nucleus_2_buds
+					}
 					change_leader_portrait = paragon_azaryn_2_buds
 					leader_event = { id = paragon.232 days = 60 random = 30 }
 				}
@@ -2427,17 +2447,13 @@ country_event = {
 	after = {
 		while = {
 			count = 5
-			random_owned_pop = {
+			random_owned_pop_group = {
 				limit = { planet = { is_same_value = event_target:nucleus_building_planet } }
-				kill_pop = yes
+				kill_single_pop = yes
 			}
 		}
 		event_target:nucleus_building_planet = {
 			if = {
-				limit = { has_district = district_industrial }
-				remove_district = district_industrial
-			}
-			else_if = {
 				limit = { has_district = district_farming }
 				remove_district = district_farming
 			}
@@ -2585,7 +2601,10 @@ planet_event = {
 	immediate = {
 		if = {
 			limit = {
-				owner = { has_modifier = agenda_superior_colonies_finish }
+				OR = {
+					has_modifier = agenda_superior_colonies_finish
+					has_modifier = agenda_superior_colonies_finish_wilderness
+				}
 			}
 			add_modifier = {
 				modifier = agenda_superior_colonies_planet_boost
@@ -2613,7 +2632,12 @@ country_event = {
 		if = {
 			# Not necessarily the last finished Agenda, but checking if it's active does the job.
 			limit = {
-				owner = { has_modifier = agenda_superior_colonies_finish }
+				owner = {
+					OR = {
+						has_modifier = agenda_superior_colonies_finish
+						has_modifier = agenda_superior_colonies_finish_wilderness
+					}
+				}
 			}
 			# Check all our Colonies if they were founded last 10 years (has can_be_boosted flag).
 			every_system_within_border = {
@@ -2659,7 +2683,6 @@ country_event = {
 		}
 	}
 }
-
 
 ########################
 ## TOASTS
@@ -2732,6 +2755,16 @@ country_event = {
 		if = {
 			limit = {
 				is_democratic_authority = yes
+				NOR = {
+					has_country_flag = cyber_creed_advanced_government
+					has_country_flag = cyber_individualist
+					has_country_flag = cyber_collectivist
+					has_country_flag = synth_physical
+					has_country_flag = synth_virtual
+					has_country_flag = bio_purity
+					has_country_flag = bio_cloning
+					has_country_flag = bio_mutation
+				}
 				exists = ruler
 				ruler = {
 					NOT = {
@@ -2762,7 +2795,14 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		has_paragon_dlc = yes
+		OR = {
+			has_paragon_dlc = yes
+			AND = {
+				has_origin = origin_evolutionary_predators
+				is_imperial_authority = yes
+				is_mutation_authority = yes
+			}
+		}
 		is_country_type = default
 		exists = from
 		from = {
@@ -2772,8 +2812,8 @@ country_event = {
 			NOT = {
 				has_leader_flag = leader_death_events_blocked
 			}
-			or = {
-				has_skill >= 4
+			OR = {
+				has_base_skill >= 4
 				is_ruler = yes
 				has_leader_flag = renowned_leader
 				has_leader_flag = legendary_leader
@@ -2822,19 +2862,19 @@ country_event = {
 				# Increase chance for leaders of higher level
 				modifier = {
 					add = 10
-					from = { has_skill >= 4 }
+					from = { has_base_skill >= 4 }
 				}
 				modifier = {
 					add = 20
-					from = { has_skill >= 6 }
+					from = { has_base_skill >= 6 }
 				}
 				modifier = {
 					add = 30
-					from = { has_skill >= 8 }
+					from = { has_base_skill >= 8 }
 				}
 				modifier = {
 					add = 40
-					from = { has_skill >= 10 }
+					from = { has_base_skill >= 10 }
 				}
 
 				# Increase chance for leaders that have served the country for a long time
@@ -3152,6 +3192,54 @@ country_event = {
 				}
 			}
 		}
+		if = { #Randomise the EvoPred option
+			limit = {
+				is_imperial_authority = yes
+				has_origin = origin_evolutionary_predators
+				is_mutation_authority = yes
+				exists = ruler
+			}
+			random_list = {
+				10 = {
+					modifier = {
+						factor = 0
+						ruler = {
+							num_leader_traits = {
+								value = 0
+								negative = yes
+								count_tiers = yes
+							}
+						}
+					}
+					from = { set_leader_flag = evopred_ruler_eats_negative }
+				}
+				10 = {
+					modifier = {
+						factor = 0
+						ruler = {
+							leader_age < 45
+						}
+					}
+					from = { set_leader_flag = evopred_ruler_eats_age }
+				}
+				10 = {
+					modifier = {
+						factor = 0
+						ruler = {
+							num_leader_traits = {
+								value = 20 #Lets prevent this from getting too silly
+								negative = no
+								count_tiers = yes
+							}
+						}
+					}
+					from = { set_leader_flag = evopred_ruler_eats_positive }
+				}
+				10 = {
+					from = { set_leader_flag = evopred_ruler_eats_agenda }
+				}
+			}
+		}
 	}
 
 	# A private funeral
@@ -3375,6 +3463,116 @@ country_event = {
 		}
 		hidden_effect = {
 			country_event = { id = paragon.563 scopes = { from = from } }
+		}
+	}
+
+	# Imperial EvoPred
+	option = {
+		name = paragon.550.evopred
+		trigger = {
+			is_imperial_authority = yes
+			is_mutation_authority = yes
+			from = { has_leader_flag = evopred_ruler_eats_negative }
+			exists = ruler
+			from.species = {
+				OR = {
+					is_archetype = BIOLOGICAL
+					is_archetype = LITHOID
+				}
+			}
+		}
+		custom_tooltip = paragon.550.evopred.a.tt
+
+		hidden_effect = {
+			ruler = {
+				remove_all_negative_traits = yes
+			}
+		}
+	}
+
+	option = {
+		name = paragon.550.evopred
+		trigger = {
+			is_imperial_authority = yes
+			is_mutation_authority = yes
+			from = { has_leader_flag = evopred_ruler_eats_age }
+			exists = ruler
+			from.species = {
+				OR = {
+					is_archetype = BIOLOGICAL
+					is_archetype = LITHOID
+				}
+			}
+		}
+		custom_tooltip = paragon.550.evopred.b.tt
+
+		hidden_effect = {
+			ruler = {
+				set_age = value:evopred_imperial_age
+			}
+		}
+	}
+
+	option = {
+		name = paragon.550.evopred
+		trigger = {
+			is_imperial_authority = yes
+			is_mutation_authority = yes
+			from = { has_leader_flag = evopred_ruler_eats_positive }
+			exists = ruler
+			from.species = {
+				OR = {
+					is_archetype = BIOLOGICAL
+					is_archetype = LITHOID
+				}
+			}
+		}
+		custom_tooltip = paragon.550.evopred.c.tt
+
+		hidden_effect = {
+			if = {
+				limit = {
+					ruler = {
+						has_base_skill = 10
+					}
+				}
+				ruler = {
+					set_skill = 9
+					add_skill = 1
+				}
+			}
+			else = {
+				ruler = {
+					add_trait = {
+						trait = random_common
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		allow = {
+			has_agenda_selected = yes
+			council_agenda_progress_percent < 1
+		}
+		name = paragon.550.evopred
+		trigger = {
+			is_imperial_authority = yes
+			is_mutation_authority = yes
+			from = { has_leader_flag = evopred_ruler_eats_agenda }
+			exists = ruler
+			from.species = {
+				OR = {
+					is_archetype = BIOLOGICAL
+					is_archetype = LITHOID
+				}
+			}
+		}
+		custom_tooltip = paragon.550.evopred.d.tt
+
+		hidden_effect = {
+			add_council_agenda_progress_percent = 0.5
 		}
 	}
 }
@@ -3722,7 +3920,12 @@ country_event = {
 	id = paragon.570
 	title = "paragon.570.name"
 	desc = "paragon.570.desc"
-	picture = GFX_evt_ship_in_orbit_2
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit_2
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_power_down
 	is_triggered_only = yes
 
@@ -3757,14 +3960,25 @@ country_event = {
 
 	after = {
 		# Clean up the clone since we aren't using it anymore
-		from = { kill_leader = { show_notification = no } }
+		from = {
+			kill_leader = { show_notification = no }
+		}
 	}
 
 	option = {
 		name = paragon.571.a
-		add_modifier = {
-			modifier = paragon_death_the_hive_endures
-			years = 5
+		if = {
+			limit = { is_wilderness_empire = yes }
+			add_modifier = {
+				modifier = paragon_death_the_wilderness_endures
+				years = 5
+			}
+		}
+		else = {
+			add_modifier = {
+				modifier = paragon_death_the_hive_endures
+				years = 5
+			}
 		}
 	}
 }
@@ -3972,7 +4186,7 @@ country_event = {
 	trigger = {
 		any_owned_leader = {
 			NOT = { has_leader_flag = beholder }
-			has_skill >= 3
+			has_base_skill >= 3
 			leader_years_of_service >= 10
 		}
 	}
@@ -3981,7 +4195,7 @@ country_event = {
 		random_owned_leader = {
 			limit = {
 				NOT = { has_leader_flag = beholder }
-				has_skill >= 3
+				has_base_skill >= 3
 				leader_years_of_service >= 10
 			}
 			if = {
@@ -4024,7 +4238,7 @@ leader_event = {
 		is_councilor = yes
 		OR = {
 			has_trait_tier1or2 = { TRAIT = trait_ruler_warlike }
-			has_trait_tier1or2 = { TRAIT = leader_trait_aggressive }
+			has_trait = leader_trait_aggressive
 			has_trait = leader_trait_bellicose
 			num_leader_traits = {
 				value >= 1
@@ -4229,8 +4443,8 @@ leader_event = {
 	fire_only_once = yes
 
 	trigger = {
-		has_skill >= 3
-		has_skill <= 6
+		has_base_skill >= 3
+		has_base_skill <= 6
 	}
 
 	immediate = {
@@ -4426,8 +4640,8 @@ leader_event = {
 		}
 		OR = {
 			has_narratively_great_speaker_trait = yes
-			has_trait_tier1or2 = { TRAIT = leader_trait_army_veteran }
-			has_trait_tier1or2 = { TRAIT = leader_trait_retired_fleet_officer }
+			has_trait = leader_trait_army_veteran
+			has_trait = leader_trait_retired_fleet_officer
 		}
 		species = {
 			NOR = {

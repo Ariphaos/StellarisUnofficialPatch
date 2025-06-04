@@ -2,35 +2,47 @@
 # Science buildings
 #############
 building_research_lab_1 = {
+	can_build = yes
 	base_buildtime = @b1_time
-
 	exempt_from_ai_planet_specialization = no
 
 	category = research
+
+	building_sets = {
+		research
+	}
 
 	potential = {
 		NOR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
-			has_modifier = penal_colony	
+			has_modifier = penal_colony
 		}
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+		is_special_colony_type = no
 	}
 
 	allow = {
 		is_occupied_flag = no
 	}
 
+	ai_weight_coefficient = 0
+
 	destroy_trigger = {
 		OR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
-			has_modifier = penal_colony	
+			has_modifier = penal_colony
 		}
 	}
 
 	inline_script = {
 		script = jobs/researchers_add
-		AMOUNT = @b1_jobs
+		AMOUNT = @building_static_jobs_3
+		LARGE_AMOUNT = @building_static_jobs
 	}
 
 	resources = {
@@ -43,23 +55,33 @@ building_research_lab_1 = {
 		}
 	}
 
-	upgrades = {
-		"building_research_lab_2"
-	}
-
 	prerequisites = {
 		"tech_basic_science_lab_1"
+	}
+
+	upgrades = {
+		"building_research_lab_2"
 	}
 }
 
 building_research_lab_2 = {
 	base_buildtime = @b2_time
 	can_build = no
-
 	category = research
 
+	building_sets = {
+		research
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no # see 'building_brain_node_3'
+		}
+		is_special_colony_type = no
+	}
+
 	allow = {
-		has_upgraded_capital = yes
 		is_occupied_flag = no
 	}
 
@@ -67,13 +89,8 @@ building_research_lab_2 = {
 		OR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
-			has_modifier = penal_colony	
+			has_modifier = penal_colony
 		}
-	}
-
-	inline_script = {
-		script = jobs/researchers_add
-		AMOUNT = @b2_jobs
 	}
 
 	resources = {
@@ -88,23 +105,41 @@ building_research_lab_2 = {
 		}
 	}
 
-	upgrades = {
-		"building_research_lab_3"
+	inline_script = {
+		script = jobs/researchers_add
+		AMOUNT = @building_static_jobs_high_3
+		LARGE_AMOUNT = @building_static_jobs
 	}
 
 	prerequisites = {
 		"tech_basic_science_lab_2"
 	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+	upgrades = {
+		"building_research_lab_3"
+	}
 }
 
 building_research_lab_3 = {
 	base_buildtime = @b3_time
-	can_build = no
-
 	category = research
+	can_build = no
+	building_sets = {
+		research
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no # see 'building_brain_node_4'
+		}
+		is_special_colony_type = no
+	}
 
 	allow = {
-		has_major_upgraded_capital = yes
 		is_occupied_flag = no
 	}
 
@@ -112,42 +147,7 @@ building_research_lab_3 = {
 		OR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
-			has_modifier = penal_colony	
-		}
-	}
-
-	inline_script = {
-		script = jobs/researchers_add
-		AMOUNT = @b3_jobs
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_regular_empire = yes
-				is_galactic_community_member = yes
-			}
-			is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
-			has_modifier = pm_extradimensional_experimentation
-		}
-		modifier = {
-			job_dimensional_portal_researcher_add = 1
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_gestalt = yes
-				is_galactic_community_member = yes
-			}
-			is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
-			has_modifier = pm_extradimensional_experimentation
-		}
-		modifier = {
-			job_dimensional_portal_researcher_gestalt_add = 1
+			has_modifier = penal_colony
 		}
 	}
 
@@ -175,24 +175,35 @@ building_research_lab_3 = {
 		}
 	}
 
+	inline_script = {
+		script = jobs/researchers_add
+		AMOUNT = @building_static_jobs_very_high_3
+		LARGE_AMOUNT = @building_static_jobs
+	}
+
 	prerequisites = {
 		"tech_basic_science_lab_3"
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
 	}
 }
 
 building_institute = {
 	base_buildtime = @b2_time
-	empire_limit = {
-		base = 1
-	}
-
+	planet_limit = 1
 	category = research
+
+	building_sets = {
+		research
+	}
 
 	potential = {
 		NOR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
-			has_modifier = penal_colony	
+			has_modifier = penal_colony
 		}
 		exists = owner
 		owner = { is_regular_empire = yes }
@@ -213,16 +224,24 @@ building_institute = {
 	}
 
 	allow = {
-		has_major_upgraded_capital = yes
 		is_occupied_flag = no
 		exists = owner
 		or = {
 			owner = { is_ai = no }
-			planet_resource_compare = {
-				resource = physics_research
-				value > 20
+			and = {
+				num_assigned_jobs = {
+					job = physicist
+					value >= 200
+				}
+				num_assigned_jobs = {
+					job = biologist
+					value >= 200
+				}
+				num_assigned_jobs = {
+					job = engineer
+					value >= 200
+				}
 			}
-			has_designation = col_research
 		}
 	}
 
@@ -238,52 +257,77 @@ building_institute = {
 		}
 	}
 
-	country_modifier = {
-		country_scientist_cap_add = 1
-		all_technology_research_speed = 0.05
+	planet_modifier = {
+		planet_physicists_physics_research_produces_add = 2
+		planet_biologists_society_research_produces_add = 2
+		planet_engineers_engineering_research_produces_add = 2
 	}
 
-	planet_modifier = {
-		job_head_researcher_add = 1
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+			}
+		}
+		planet_physicists_consumer_goods_upkeep_add = 1.5
+		planet_biologists_consumer_goods_upkeep_add = 1.5
+		planet_engineers_consumer_goods_upkeep_add = 1.5
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_machine_empire = yes
+			}
+		}
+		planet_physicists_energy_upkeep_add = 3
+		planet_biologists_energy_upkeep_add = 3
+		planet_engineers_energy_upkeep_add = 3
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_hive_empire = yes
+			}
+		}
+		planet_physicists_minerals_upkeep_add = 4
+		planet_biologists_minerals_upkeep_add = 4
+		planet_engineers_minerals_upkeep_add = 4
 	}
 
 	prerequisites = {
 		"tech_global_research_initiative"
 	}
 
-	triggered_desc = {
-		text = job_head_researcher_effect_desc
-	}
-
 	show_tech_unlock_if = {
 		is_regular_empire = yes
 	}
 
-	ai_resource_production = {
-		trigger = {
-			planet_resource_compare = {
-				resource = physics_research
-				value >= 30
-			}
-		}
-		physics_research = 5
-		society_research = 5
-		engineering_research = 5
+	inline_script = {
+		script = districts/ai_research_extra_weighting
+		AMOUNT = 10
 	}
 }
 
 building_supercomputer = {
 	base_buildtime = @b2_time
-	empire_limit = {
-		base = 1
-	}
+	planet_limit = 1
 	icon = building_institute
 
 	category = research
 
+	building_sets = {
+		research
+	}
+
 	potential = {
 		exists = owner
-		owner = { is_gestalt = yes }
+		owner = {
+			is_gestalt = yes
+			is_wilderness_empire = no
+		}
 		NOR = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
@@ -311,6 +355,7 @@ building_supercomputer = {
 			has_modifier = slave_colony
 			has_modifier = penal_colony
 			owner = { is_regular_empire = yes }
+			owner = { is_wilderness_empire = yes }
 		}
 	}
 
@@ -330,14 +375,44 @@ building_supercomputer = {
 		}
 	}
 
-	country_modifier = {
-		country_scientist_cap_add = 1
-		all_technology_research_speed = 0.05
+	planet_modifier = {
+		planet_physicists_physics_research_produces_add = 2
+		planet_biologists_society_research_produces_add = 2
+		planet_engineers_engineering_research_produces_add = 2
 	}
 
-	inline_script = {
-		script = jobs/researchers_add
-		AMOUNT = 2
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+			}
+		}
+		planet_physicists_consumer_goods_upkeep_add = 1.5
+		planet_biologists_consumer_goods_upkeep_add = 1.5
+		planet_engineers_consumer_goods_upkeep_add = 1.5
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_machine_empire = yes
+			}
+		}
+		planet_physicists_energy_upkeep_add = 3
+		planet_biologists_energy_upkeep_add = 3
+		planet_engineers_energy_upkeep_add = 3
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_hive_empire = yes
+			}
+		}
+		planet_physicists_minerals_upkeep_add = 4
+		planet_biologists_minerals_upkeep_add = 4
+		planet_engineers_minerals_upkeep_add = 4
 	}
 
 	prerequisites = {
@@ -346,36 +421,23 @@ building_supercomputer = {
 
 	show_tech_unlock_if = {
 		is_gestalt = yes
+		is_wilderness_empire = no
 	}
 
-	ai_resource_production = {
-		trigger = {
-			planet_resource_compare = {
-				resource = physics_research
-				value >= 20
-			}
-		}
-		physics_research = 3
-		society_research = 3
-		engineering_research = 3
-	}
-	ai_resource_production = {
-		trigger = {
-			planet_resource_compare = {
-				resource = physics_research
-				value >= 40
-			}
-		}
-		physics_research = 3
-		society_research = 3
-		engineering_research = 3
+	inline_script = {
+		script = districts/ai_research_extra_weighting
+		AMOUNT = 10
 	}
 }
 
 building_archaeostudies_faculty = {
 	base_buildtime = @b2_time
-
+	planet_limit = 1
 	category = research
+
+	building_sets = {
+		research
+	}
 
 	empire_limit = {
 		base = 1
@@ -388,6 +450,9 @@ building_archaeostudies_faculty = {
 			has_modifier = penal_colony
 		}
 		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
 	}
 
 	destroy_trigger = {
@@ -396,12 +461,29 @@ building_archaeostudies_faculty = {
 			has_modifier = resort_colony
 			has_modifier = slave_colony
 			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+			AND = {
+				owner = { is_ai = yes }
+				NOT = { is_planet_class = pc_relic }
+			}
 		}
 	}
 
 	allow = {
-		has_upgraded_capital = yes
 		is_occupied_flag = no
+		exists = owner
+		or = {
+			owner = { is_ai = no }
+			and = {
+				owner = {
+					resource_stockpile_compare = {
+						resource = minor_artifacts
+						value >= @b2_rare_cost
+					}
+				}
+				is_planet_class = pc_relic
+			}
+		}
 	}
 
 	resources = {
@@ -416,14 +498,62 @@ building_archaeostudies_faculty = {
 	}
 
 	inline_script = {
-		script = jobs/archaeoengineers_add
-		BASE_AMOUNT = 3
-		AP_AMOUNT = 2
+		script = jobs/biologists_add
+		AMOUNT = @building_static_jobs
 	}
 
 	country_modifier = {
 		category_archaeostudies_research_speed_mult = 0.5
 		country_resource_max_minor_artifacts_add = 1000
+	}
+
+	planet_modifier = {
+		planet_biologists_society_research_produces_add = 1
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_gestalt = no
+			}
+		}
+		planet_biologists_consumer_goods_upkeep_add = 1
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_machine_empire = yes
+			}
+		}
+		planet_biologists_energy_upkeep_add = 2
+	}
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_hive_empire = yes
+			}
+		}
+		planet_biologists_minerals_upkeep_add = 2.5
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			is_planet_class = pc_relic
+		}
+		planet_biologists_minor_artifacts_produces_add = 0.5
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_ascension_perk = ap_archaeoengineers
+			}
+		}
+		planet_biologists_minor_artifacts_produces_add = 0.5
 	}
 
 	triggered_country_modifier = {
@@ -437,7 +567,9 @@ building_archaeostudies_faculty = {
 	}
 
 	triggered_country_modifier = {
-		potential = { planet = { is_planet_class = pc_relic } }
+		potential = {
+			is_planet_class = pc_relic
+		}
 		category_archaeostudies_research_speed_mult = 0.5
 	}
 
@@ -445,16 +577,28 @@ building_archaeostudies_faculty = {
 		"tech_archaeostudies"
 	}
 
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+
 	triggered_desc = {
 		text = building_archaeostudies_faculty_relic_effect
+	}
+	
+	inline_script = {
+		script = districts/ai_research_society_extra_weighting
+		AMOUNT = 5
 	}
 }
 
 building_vultaum_reality_computer = {
 	base_buildtime = @b2_time
-	base_cap_amount = 1
-
+	planet_limit = 1
 	category = research
+
+	building_sets = {
+		research
+	}
 
 	potential = {
 		exists = owner
@@ -466,7 +610,6 @@ building_vultaum_reality_computer = {
 	}
 
 	allow = {
-		has_major_upgraded_capital = yes
 		is_occupied_flag = no
 	}
 
@@ -485,13 +628,23 @@ building_vultaum_reality_computer = {
 			minerals = @b2_minerals
 			minor_artifacts = 30
 		}
+		cost = {
+			trigger = {
+				owner = { is_wilderness_empire = yes }
+			}
+			biomass = @b2_biomass
+		}
 		upkeep = {
 			energy = @b2_upkeep
 		}
 	}
 
+	inline_script = {
+		script = buildings/on_all_wilderness_buildings_districts
+	}
+
 	planet_modifier = {
-		planet_researchers_physics_research_produces_add = 1
+		planet_physicists_physics_research_produces_add = 1
 	}
 
 	triggered_planet_modifier = {
@@ -499,64 +652,1015 @@ building_vultaum_reality_computer = {
 			exists = owner
 			owner = { has_ascension_perk = ap_archaeoengineers }
 		}
-		planet_researchers_physics_research_produces_add = 1
+		planet_physicists_physics_research_produces_add = 1
 	}
 
 	triggered_planet_modifier = {
 		potential = {
 			exists = owner
-			owner = { is_gestalt = no }
+			owner = {
+				has_ascension_perk = ap_cosmogenesis
+			}
 		}
-		modifier = {
-			job_head_researcher_add = 1
-		}
+		planet_physicists_advanced_logic_produces_add = 0.5
 	}
 
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = { is_hive_empire = yes }
-		}
-		modifier = {
-			job_brain_drone_add = 1
-		}
+	inline_script = {
+		script = jobs/physicists_add
+		AMOUNT = @building_static_jobs
 	}
 
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = { is_machine_empire = yes }
-		}
-		modifier = {
-			job_calculator_add = 1
-		}
+	inline_script = {
+		script = districts/ai_research_physics_extra_weighting
+		AMOUNT = 7.5
 	}
 
 	prerequisites = {
 		"tech_secrets_vultaum"
 	}
+}
+
+building_physics_lab_1 = {
+	can_build = yes
+	base_buildtime = @b1_time
+	planet_limit = 1
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		physics
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/physicists_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_physicists_physics_research_produces_add = 1
+	}
+
+	upgrades = {
+		building_physics_lab_2
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+
+	inline_script = {
+		script = districts/ai_research_physics_extra_weighting
+		AMOUNT = 5
+	}
+
+	prerequisites = {
+		"tech_physics_1"
+	}
+}
+
+building_physics_lab_2 = {
+	can_build = no
+	base_buildtime = @b2_time
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		physics
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			volatile_motes = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			volatile_motes = @b2_rare_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/physicists_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_physicists_physics_research_produces_add = 2
+		planet_physicists_volatile_motes_upkeep_add = 0.5
+	}
+
+	upgrades = {
+		building_physics_lab_3
+	}
+
+	prerequisites = {
+		"tech_physics_2"
+	}
+
+	inline_script = {
+		script = districts/ai_research_physics_extra_weighting
+		AMOUNT = 7.5
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+
+}
+
+building_physics_lab_3 = {
+	can_build = no
+	base_buildtime = @b3_time
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		physics
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			volatile_motes = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			volatile_motes = @b3_rare_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/physicists_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_physicists_physics_research_produces_add = 2
+		physicist_jobs_bonus_workforce_mult = 0.15
+		planet_physicists_volatile_motes_upkeep_add = 0.5
+	}
+
+	prerequisites = {
+		"tech_physics_3"
+	}
+
+	inline_script = {
+		script = districts/ai_research_physics_extra_weighting
+		AMOUNT = 10
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_biolab_1 = {
+	can_build = yes
+	base_buildtime = @b1_time
+	planet_limit = 1
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		society
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/biologists_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_biologists_society_research_produces_add = 1
+	}
+
+	upgrades = {
+		building_biolab_2
+	}
+
+	prerequisites = {
+		"tech_society_1"
+	}
+
+	inline_script = {
+		script = districts/ai_research_society_extra_weighting
+		AMOUNT = 5
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+
+}
+
+building_biolab_2 = {
+	can_build = no
+	base_buildtime = @b2_time
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		society
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			exotic_gases = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			exotic_gases = @b2_rare_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/biologists_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_biologists_society_research_produces_add = 2
+		planet_biologists_exotic_gases_upkeep_add = 0.5
+	}
+
+	upgrades = {
+		building_biolab_3
+	}
+
+	prerequisites = {
+		"tech_society_2"
+	}
+
+	inline_script = {
+		script = districts/ai_research_society_extra_weighting
+		AMOUNT = 7.5
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+
+}
+
+building_biolab_3 = {
+	can_build = no
+	base_buildtime = @b2_time
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		society
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			exotic_gases = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			exotic_gases = @b3_rare_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/biologists_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_biologists_society_research_produces_add = 2
+		biologist_jobs_bonus_workforce_mult = 0.15
+		planet_biologists_exotic_gases_upkeep_add = 0.5
+	}
+
+	prerequisites = {
+		"tech_society_3"
+	}
+
+	inline_script = {
+		script = districts/ai_research_society_extra_weighting
+		AMOUNT = 10
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_engineering_facility_1 = {
+	can_build = yes
+	base_buildtime = @b1_time
+	planet_limit = 1
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		engineering
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/engineers_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_engineers_engineering_research_produces_add = 1
+	}
+
+	upgrades = {
+		building_engineering_facility_2
+	}
+
+	prerequisites = {
+		"tech_engineering_1"
+	}
+
+	inline_script = {
+		script = districts/ai_research_engineering_extra_weighting
+		AMOUNT = 5
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_engineering_facility_2 = {
+	can_build = no
+	base_buildtime = @b2_time
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		engineering
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			rare_crystals = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			rare_crystals = @b2_rare_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/engineers_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_engineers_engineering_research_produces_add = 2
+		planet_engineers_rare_crystals_upkeep_add = 0.5
+	}
+
+	upgrades = {
+		building_engineering_facility_3
+	}
+
+	prerequisites = {
+		"tech_engineering_2"
+	}
+
+	inline_script = {
+		script = districts/ai_research_engineering_extra_weighting
+		AMOUNT = 7.5
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_engineering_facility_3 = {
+	can_build = no
+	base_buildtime = @b3_time
+	exempt_from_ai_planet_specialization = no
+
+	category = research
+
+	building_sets = {
+		research
+		engineering
+	}
+
+	potential = {
+		NOR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			rare_crystals = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			rare_crystals = @b3_rare_upkeep
+		}
+	}
+
+	inline_script = {
+		script = jobs/engineers_add
+		AMOUNT = @building_static_jobs
+	}
+
+	planet_modifier = {
+		planet_engineers_engineering_research_produces_add = 2
+		engineer_jobs_bonus_workforce_mult = 0.15
+		planet_engineers_rare_crystals_upkeep_add = 0.5
+	}
+
+	prerequisites = {
+		"tech_engineering_3"
+	}
+
+	inline_script = {
+		script = districts/ai_research_engineering_extra_weighting
+		AMOUNT = 10
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_ranger_lodge = {
+	base_buildtime = @b1_time
+	planet_limit = 1
+	icon = holding_park_ranger_lodge
+
+	category = research
+
+	building_sets = {
+		research
+		society
+	}
+
+	potential = {
+		NOT = {	has_modifier = slave_colony	}
+		owner = {
+			is_regular_empire = yes
+			has_valid_civic = civic_environmentalist
+		}
+		NOR = {
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			is_planet_class = pc_relic
+		}
+		is_artificial = no
+	}
+
+	allow = {
+		is_occupied_flag = no
+		custom_tooltip = {
+			fail_text = no_free_district_for_ranger_lodge
+			planet = {
+				num_free_districts = {
+					type = any
+					value > 0
+				}
+			}
+		}
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			owner = { is_regular_empire = no }
+			has_modifier = slave_colony
+			owner = { NOT = { has_valid_civic = civic_environmentalist } }
+			is_planet_class = pc_city
+			is_planet_class = pc_hive
+			is_planet_class = pc_machine
+			is_planet_class = pc_relic
+		}
+	}
+
+	ai_resource_production = {
+		unity = 2
+		mult = value:natural_blocker_count
+	}
+
+	ai_resource_production = {
+		unity = 1
+		trigger = { owner_has_resolution = { RES = resolution_ecology_integrated_gardens } }
+		mult = value:natural_blocker_count
+	}
+
+	ai_resource_production = {
+		unity = 1
+		trigger = { owner_has_resolution = { RES = resolution_ecology_environmental_control_board } }
+		mult = value:natural_blocker_count
+	}
+
+	ai_resource_production = {
+		unity = 1
+		trigger = { owner_has_resolution = { RES = resolution_ecology_paradise_initiative } }
+		mult = value:natural_blocker_count
+	}
+
+	planet_modifier = {
+		job_biologist_add = 100 # 100 Rangers no matter what
+		deposit_blockers_natural_unity_produces_add = 2
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
+		job_biologist_add = 100 # +100 Rangers per natural blocker
+		mult = value:natural_blocker_count
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner_has_resolution = { RES = resolution_ecology_paradise_initiative }
+		}
+		job_biologist_add = 100 # +100 Rangers per natural blocker if GalCom approves
+		mult = value:natural_blocker_count
+	}
+
+
+	triggered_planet_modifier = {
+		potential = { owner_has_resolution = { RES = resolution_ecology_integrated_gardens } }
+		deposit_blockers_natural_unity_produces_add = 1
+	}
+
+	triggered_planet_modifier = {
+		potential = { owner_has_resolution = { RES = resolution_ecology_environmental_control_board } }
+		deposit_blockers_natural_unity_produces_add = 2
+	}
+
+	triggered_planet_modifier = {
+		potential = { owner_has_resolution = { RES = resolution_ecology_paradise_initiative } }
+		deposit_blockers_natural_unity_produces_add = 3
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b1_minerals
+		}
+		upkeep = {
+			energy = @b1_upkeep
+		}
+	}
 
 	triggered_desc = {
+		text = biologist_is_ranger_tt
+	}
+
+	triggered_desc = {
+		text = job_ranger_effect_desc
+	}
+
+	on_built = {
+		planet = {
+			add_blocker = { type = d_big_nature_preserve_blocker }
+		}
+	}
+
+	on_destroy = {
+		planet = {
+			if = {
+				limit = { has_deposit = d_big_nature_preserve_blocker }
+				every_deposit = {
+					limit = {
+						is_deposit_type = d_big_nature_preserve_blocker
+					}
+					remove_deposit = d_big_nature_preserve_blocker
+				}
+			}
+		}
+	}
+}
+
+building_research_upkeep_1 = {
+	base_buildtime = @b2_time
+	planet_limit = 1
+	category = research
+
+	building_sets = {
+		research
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			exotic_gases = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			exotic_gases = @b2_rare_upkeep
+		}
+	}
+
+	planet_modifier = {
+		planet_researchers_upkeep_mult = -0.20
+	}
+
+	prerequisites = {
+		"tech_basic_science_lab_2"
+	}
+
+	ai_resource_production = {
+		consumer_goods = 5
+
 		trigger = {
 			exists = owner
 			owner = { is_gestalt = no }
+			has_any_research_zone = yes
 		}
-		text = job_head_researcher_effect_desc
 	}
 
-	triggered_desc = {
+	ai_resource_production = {
+		energy = 10
+
 		trigger = {
 			exists = owner
-			owner = { is_hive_empire = yes }
+			owner = {
+				is_gestalt = yes
+				is_hive_empire = no
+			}
+			has_any_research_zone = yes
 		}
-		text = job_brain_drone_effect_desc
 	}
 
-	triggered_desc = {
+	ai_resource_production = {
+		minerals = 10
+
 		trigger = {
 			exists = owner
-			owner = { is_machine_empire = yes }
+			owner = {
+				is_gestalt = yes
+				is_hive_empire = yes
+			}
+			has_any_research_zone = yes
 		}
-		text = job_calculator_effect_desc
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+}
+
+building_research_efficiency_1 = {
+	base_buildtime = @b3_time
+	planet_limit = 1
+	category = research
+
+	building_sets = {
+		research
+	}
+
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+		}
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		exists = owner
+		OR = {
+			has_modifier = resort_colony
+			has_modifier = slave_colony
+			has_modifier = penal_colony
+			owner = { is_wilderness_empire = yes }
+		}
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b3_minerals
+			exotic_gases = @b3_rare_cost
+		}
+		upkeep = {
+			energy = @b3_upkeep
+			exotic_gases = @b3_rare_upkeep
+		}
+		upkeep = {
+			trigger = {
+				owner = {
+					is_galactic_community_member = yes
+				}
+				is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
+				planet = {
+					has_modifier = pm_extradimensional_experimentation
+				}
+			}
+			sr_zro = 1
+		}
+	}
+
+	planet_modifier = {
+		researcher_jobs_bonus_workforce_mult = 0.15
+	}
+
+	prerequisites = {
+		"tech_basic_science_lab_2"
+	}
+
+	inline_script = {
+		script = districts/ai_research_extra_weighting
+		AMOUNT = 5
+	}
+
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
 	}
 }

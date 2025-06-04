@@ -42,10 +42,10 @@
 # 		trigger = count_owned_planet
 # 		trigger_scope = owner 		#Lets you get the result of the trigger on a different scope. Default is "this"
 # 		parameters = { 				#Stick any further information necessary in here, like you'd do within the {} of the trigger normally
-# 			limit = { num_pops > 10 }
+# 			limit = { pop_amount > 1000 }
 # 		}
 # 		mode = add 					#Allows all numerical operations
-# 		mult = 5 					#Multiplies the outcome by this. In this example, this means adding 5 for each planet with more than 10 pops
+# 		mult = 5 					#Multiplies the outcome by this. In this example, this means adding 5 for each planet with more than 1000 pops
 # 	}
 # }
 
@@ -123,7 +123,7 @@ revolt_situation_rebellion_joiners = {
 revolt_fleet_power = {
 	base = 0
 	add = event_target:rebel_empire.trigger:fleet_power
-	min = 100 # The division gets cubed, then multiplied by 5.
+	min = 100
 }
 
 revolt_fleet_comparison_factor = {
@@ -155,13 +155,13 @@ potential_revolt_situation_monthly_progress_estimation = {
 	modifier = {
 		add = 1
 		desc = STRING_UNEMPLOYMENT
-		num_unemployed >= 2
+		num_unemployed >= 200
 	}
 	modifier = {
 		add = 2
 		desc = STRING_PURGING
 		has_current_purge = yes
-		any_owned_pop = {
+		any_owned_pop_group = {
 			is_being_purged = yes
 			NOT = {
 				has_purge_type = { type = purge_neutering }
@@ -225,7 +225,7 @@ potential_revolt_situation_monthly_progress_estimation = {
 			limit = {
 				NOT = { is_same_value = prevprev }
 				planet_stability >= @stabilitylevel3
-				num_pops > 5
+				pop_amount > 500
 			}
 		}
 		potential = {
@@ -233,7 +233,7 @@ potential_revolt_situation_monthly_progress_estimation = {
 				any_system_colony = {
 					NOT = { is_same_value = prevprev }
 					planet_stability >= @stabilitylevel3
-					num_pops > 5
+					pop_amount > 500
 				}
 			}
 		}
@@ -248,7 +248,7 @@ potential_revolt_situation_monthly_progress_estimation = {
 			limit = {
 				NOT = { is_same_value = prevprev }
 				planet_stability < @stabilitylevel2
-				num_pops > 5
+				pop_amount > 500
 			}
 		}
 		potential = {
@@ -256,7 +256,7 @@ potential_revolt_situation_monthly_progress_estimation = {
 				any_system_colony = {
 					NOT = { is_same_value = prevprev }
 					planet_stability < @stabilitylevel2
-					num_pops > 5
+					pop_amount > 500
 				}
 			}
 		}
@@ -272,12 +272,12 @@ potential_revolt_situation_monthly_progress_estimation = {
 	modifier = {
 		subtract = 1
 		desc = STRING_WEAK_PLANET
-		num_pops < 30
+		pop_amount < 3000
 	}
 	modifier = {
 		add = 1
 		desc = STRING_STRONG_PLANET
-		num_pops > 60
+		pop_amount > 6000
 	}
 }
 
@@ -355,7 +355,7 @@ desired_science_ships = {
 	modifier = {
 		add = 2
 		years_passed < 30
-		years_passed > 10
+		years_passed > 5
 		is_country_type = default
 	}
 	modifier = { #they shouldn't ever need it, but just in case
@@ -404,69 +404,78 @@ job_weights_manual_corrections = {
 	#planet_jobs_worker_produces_mult as if it were in its current pop category, which means "strong" pops would register as being
 	#good at research so long as they are currently workers.
 
+#	modifier = {
+#		subtract = value:species_job_modifiers_worker
+#		NOR = {
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = worker
+#			}
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = simple_drone
+#			}
+#		}
+#		OR = {
+#			is_pop_category = worker
+#			is_pop_category = robot_servant
+#			is_pop_category = simple_drone
+#		}
+#	}
+#	modifier = {
+#		subtract = species.modifier:planet_jobs_slave_produces_mult
+#		NOT = {
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = worker
+#			}
+#		}
+#		is_pop_category = slave
+#		has_job_category = worker
+#	}
+#	modifier = {
+#		subtract = value:species_job_modifiers_specialist
+#		NOR = {
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = specialist
+#			}
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = complex_drone
+#			}
+#		}
+#		OR = {
+#			is_specialist_category = yes
+#			is_pop_category = complex_drone
+#		}
+#	}
+#	modifier = {
+#		add = value:species_job_modifiers_specialist
+#		OR = {
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = specialist
+#			}
+#			is_job_of_pop_category = {
+#				job = $JOB$
+#				category = complex_drone
+#			}
+#		}
+#		NOR = {
+#			is_specialist_category = yes
+#			is_pop_category = complex_drone
+#		}
+#	}
+# Need to use JOB somewhere
 	modifier = {
-		subtract = value:species_job_modifiers_worker
-		NOR = {
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = worker
-			}
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = simple_drone
-			}
-		}
-		OR = {
-			is_pop_category = worker
-			is_pop_category = robot_servant
-			is_pop_category = simple_drone
+		factor = 1
+		is_job_of_pop_category = {
+			job = $JOB$
+			category = worker
 		}
 	}
-	modifier = {
-		subtract = species.modifier:planet_jobs_slave_produces_mult
-		NOT = {
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = worker
-			}
-		}
-		is_pop_category = slave
-		has_job_category = worker
-	}
-	modifier = {
-		subtract = value:species_job_modifiers_specialist
-		NOR = {
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = specialist
-			}
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = complex_drone
-			}
-		}
-		OR = {
-			is_pop_category = specialist
-			is_pop_category = complex_drone
-		}
-	}
-	modifier = {
-		add = value:species_job_modifiers_specialist
-		OR = {
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = specialist
-			}
-			is_job_of_pop_category = {
-				job = $JOB$
-				category = complex_drone
-			}
-		}
-		NOR = {
-			is_pop_category = specialist
-			is_pop_category = complex_drone
-		}
-	}
+	base = 1
 }
 
 species_job_modifiers_worker = {
@@ -492,6 +501,7 @@ job_weights_research_modifier = {
 				engineering_research = 0.34
 			}
 		}
+		trigger_scope = planet
 		mode = add
 	}
 	add = value:job_weights_manual_corrections|JOB|$JOB$|
@@ -507,6 +517,7 @@ job_weights_modifier = {
 			job = $JOB$
 			resource = $RESOURCE$
 		}
+		trigger_scope = planet
 		mode = add
 		[[FACTOR]
 			mult = $FACTOR$
@@ -535,6 +546,7 @@ job_weights_multiple_resources_modifier = {
 				$RESOURCE2$ = $WEIGHT2$
 			}
 		}
+		trigger_scope = planet
 		mode = add
 	}
 	add = value:job_weights_manual_corrections|JOB|$JOB$|
@@ -644,6 +656,7 @@ knight_commander_unity_output_modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7220_a }
 	}
+	mult = 100
 }
 
 knight_commander_research_output_modifier = {
@@ -660,6 +673,7 @@ knight_commander_research_output_modifier = {
 		add = 1
 		owner = { has_country_flag = toxoids_7130_b }
 	}
+	mult = 100
 }
 
 tech_weight_likelihood = {
@@ -676,7 +690,7 @@ leader_cost = {
 
 leader_cost_x_squared_term = {
 	base = 0
-	add = trigger:has_skill
+	add = trigger:has_base_skill
 	subtract = 1
 	pow = 2
 	mult = 50
@@ -684,7 +698,7 @@ leader_cost_x_squared_term = {
 
 leader_cost_x_term = {
 	base = 0
-	add = trigger:has_skill
+	add = trigger:has_base_skill
 	subtract = 1
 	mult = 25
 }
@@ -744,11 +758,18 @@ farming_districts_value = {
 		multiplier = 4
 		mode = add
 	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_orchard_forests
+		}
+		mode = add
+	}
 }
 
 edict_size_effect = {
 	base = 0.01
-	mult = trigger:empire_size
+	mult = trigger:empire_sprawl_over_cap
 	add = 1
 }
 
@@ -997,7 +1018,7 @@ overlord_gaiaseeder_upkeep = {
 
 num_non_sapient_robots_on_planet = {
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
 				is_non_sapient_robot = yes
@@ -1014,14 +1035,15 @@ robot_pop_strength = {
 
 	# Specialist Robots.
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
-				is_robot_pop = yes
-				has_job_category = specialist
+				is_robot_pop_group = yes
+				is_specialist_category = yes
 			}
 		}
 		mode = add
+		multiplier = 0.01
 	}
 
 	# Multiply by 2 or 0.5 if outlawed.
@@ -1033,15 +1055,15 @@ robot_pop_strength = {
 
 	# Non-specialist Robots, 0.5 each.
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
-				is_robot_pop = yes
-				NOT = { has_job_category = specialist }
+				is_robot_pop_group = yes
+				NOT = { is_specialist_category = yes }
 			}
 		}
 		mode = add
-		multiplier = 0.5
+		multiplier = 0.005
 	}
 }
 
@@ -1067,7 +1089,7 @@ robot_pop_strength_proportion = {
 	# Proportion Progress comes from Number of Robot Pops divided by Total pops:
 	### Max 5 at: 100% of Pops are Robot workers, OR 25% of Pops are Specialist Robots with "AI allowed".
 	add = value:robot_pop_strength
-	divide = trigger:num_pops
+	divide = trigger:pop_amount
 	multiply = 10
 	max = 5
 }
@@ -1083,8 +1105,8 @@ situation_machine_uprising_pops_monthly_progress = {
 }
 
 capital_empire_ratio = {
-	add = trigger:num_pops
-	divide = capital_scope.trigger:num_pops
+	add = trigger:pop_amount
+	divide = capital_scope.trigger:pop_amount
 }
 
 created_merc_number = {
@@ -1139,10 +1161,10 @@ percentage_protected_drones = {
 	# first we check how many pops are in that category
 	# and multiply it by 100
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
-				is_robot_pop = yes
+				is_robot_pop_group = yes
 				is_pop_category = $CATEGORY$
 			}
 		}
@@ -1150,10 +1172,10 @@ percentage_protected_drones = {
 	}
 	# then divide by the total number of pops to get the percentage
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
-				is_robot_pop = yes
+				is_robot_pop_group = yes
 			}
 		}
 		mode = divide
@@ -1230,58 +1252,181 @@ toxic_attendant_growth = {
 	complex_trigger_modifier = {
 		trigger = num_districts
 		parameters = {
-			type = district_industrial
+			type = district_city
 		}
 		mode = add
 	}
 	complex_trigger_modifier = {
 		trigger = num_districts
 		parameters = {
-			type = district_arcology_arms_industry
+			type = district_crashed_slaver_ship
 		}
 		mode = add
 	}
 	complex_trigger_modifier = {
 		trigger = num_districts
 		parameters = {
-			type = district_arcology_civilian_industry
+			type = district_resort
 		}
 		mode = add
 	}
 	complex_trigger_modifier = {
 		trigger = num_districts
 		parameters = {
-			type = district_hab_industrial
+			type = district_prison
 		}
 		mode = add
 	}
 	complex_trigger_modifier = {
 		trigger = num_districts
 		parameters = {
-			type = district_rw_industrial
+			type = district_slave
 		}
-		mult = 4
 		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hab_housing
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hive
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hive_1
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hive_2
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hive_3
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_nexus
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_nexus_1
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_nexus_2
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_nexus_3
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_arcology_housing
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_arcology_urban_1
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_arcology_urban_2
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_arcology_urban_3
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_city
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_urban_1
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_urban_2
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_urban_3
+		}
+		mode = add
+	}
+	modifier = {
+		has_any_industry_zone = yes
+		mult = 2
 	}
 }
 
 incubator_growth = {
-	base = 37
-	subtract = trigger:num_pops
+	base = 3700
+	subtract = trigger:pop_amount
+	divide = 100
 	min = -10
 	max = 30
 }
 
 pioneer_growth = {
-	base = 26
-	subtract = trigger:num_pops
+	base = 2600
+	subtract = trigger:pop_amount
 	min = 0
 	max = 25
 }
 
 counter_noxious = {
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
 				NOT = { has_trait = trait_noxious }
@@ -1290,6 +1435,7 @@ counter_noxious = {
 		}
 		mode = add
 	}
+	divide = 100
 	max = 20
 }
 
@@ -1306,66 +1452,20 @@ ships_of_size_in_fromscoped_debris = {
 
 toxic_knight_job_number = {
 	base = 0
-	complex_trigger_modifier = {
-		trigger = count_owned_pop
-		parameters = {
-			limit = {
-				has_job = knight
-			}
-		}
-		mult = 0.05
-		mode = add
-	}
-	complex_trigger_modifier = {
-		potential = {
-			owner = {
-				is_overlord = yes
-			}
-		}
-		trigger = count_galaxy_planet
-		parameters = {
-			limit = {
-				has_owner = yes
-				has_holding = {
-					holding = holding_knight_commandery
-					owner = root
-				}
-			}
-		}
-		mult = 0.05
-		mode = add
-	}
-	complex_trigger_modifier = {
-		potential = {
-			owner = {
-				has_corporate_government = yes
-			}
-		}
-		trigger = count_galaxy_planet
-		parameters = {
-			limit = {
-				has_owner = yes
-				has_holding = {
-					holding = building_knightly_theme_park
-					owner = root
-				}
-			}
-		}
-		mult = 0.01
-		mode = add
-	}
+	add = modifier:knight_quest_progress_add
 }
 
 consquences_damn_you = {
 	base = 0.01
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
 				is_overtuned = yes
 			}
 		}
-	mode = add
+		divide = 100
+		mode = add
 	}
 }
 
@@ -1398,19 +1498,6 @@ brood_usage_mult = {
 	}
 }
 
-federation_xp_from_diplo_tradition = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_member
-		parameters = {
-			limit = {
-				has_tradition = tr_diplomacy_finish
-			}
-		}
-		mode = add
-	}
-}
-
 conclave_election_ascension_value = {
 	add = trigger:num_planetary_ascension_tiers
 	mult = 0.1
@@ -1420,9 +1507,9 @@ conclave_election_ascension_value = {
 conclave_election_robots_value = {
 	base = 1
 	complex_trigger_modifier = {
-		trigger = pop_percentage
+		trigger = pop_amount_percentage
 		parameters = {
-			limit = { is_robot_pop = yes }
+			limit = { is_robot_pop_group = yes }
 		}
 		mode = subtract
 	}
@@ -1435,19 +1522,10 @@ conclave_election_bribes_value = {
 
 conclave_election_value = {
 	complex_trigger_modifier = {
-		trigger = pop_percentage
+		trigger = pop_amount_percentage
 		parameters = {
 			limit = {
-				OR = {
-					has_job = priest
-					has_job = high_priest
-					has_job = death_priest
-					has_job = mortal_initiate
-					has_job = preacher
-					has_job = technophant
-					has_job = haruspex
-					has_job = numistic_priest
-				}
+				bureaucrat_is_priest = yes
 			}
 		}
 		mode = add
@@ -1538,7 +1616,7 @@ consequences_cost = {
 ten_percent_main_species = {
 	# count main species pop
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
 				is_same_species = owner_main_species
@@ -1546,45 +1624,17 @@ ten_percent_main_species = {
 		}
 		mode = add
 	}
-	mult = 0.10
+	mult = 0.1
 	floor = yes
 }
 
 five_percent_species = {
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		mode = add
 	}
 	mult = 0.05
-	floor = yes
-}
-
-ten_percent_species = {
-	complex_trigger_modifier = {
-		trigger = count_owned_pop
-		mode = add
-	}
-	mult = 0.10
-	floor = yes
-}
-
-twenty_percent_species = {
-	# count main species pop
-	complex_trigger_modifier = {
-		trigger = count_owned_pop
-		mode = add
-	}
-	mult = 0.20
-	floor = yes
-}
-
-fifty_percent_species = {
-	# count main species pop
-	complex_trigger_modifier = {
-		trigger = count_owned_pop
-		mode = add
-	}
-	mult = 0.50
+	divide = 100
 	floor = yes
 }
 
@@ -1636,15 +1686,6 @@ pre_ftl_gain_tech_progress = {
 	[[BONUS]
 		add = $BONUS$
 	]
-}
-
-thirty_percent_species = {
-	complex_trigger_modifier = {
-		trigger = count_owned_pop
-		mode = add
-	}
-	mult = 0.30
-	floor = yes
 }
 
 primitive_slider_value = {
@@ -1714,17 +1755,13 @@ positive_opinion_decay_rate = {
 zoo_keeper_amenity_output = {
 	base = 4
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = num_assigned_jobs
 		trigger_scope = planet
 		parameters = {
-			limit = {
-				OR = {
-					has_job = xeno_zoo_animal
-					has_job = xeno_zoo_beast
-					has_job = livestock_zoo_animal
-					has_job = livestock_zoo_beast
-				}
-			}
+			job = xeno_zoo_animal
+			job = xeno_zoo_beast
+			job = livestock_zoo_animal
+			job = livestock_zoo_beast
 		}
 		mode = add
 		mult = 2
@@ -1890,7 +1927,7 @@ insight_reduction = {
 
 percent_species_ethic = {
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
 				is_$ETHIC$ = yes
@@ -1900,7 +1937,7 @@ percent_species_ethic = {
 	}
 	mult = 100
 	complex_trigger_modifier = {
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		mode = divide
 	}
 }
@@ -2232,15 +2269,22 @@ slaves_on_planet = {
 	base = 0
 	complex_trigger_modifier = {
 		trigger_scope = planet
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
-				is_robot_pop = no
-				is_enslaved	= yes
+				is_robot_pop_group = no
+				is_enslaved = yes
 			}
 		}
 		mode = add
 	}
+}
+
+slaves_on_planet_100 = {
+	base = 1
+	mult = value:slaves_on_planet
+	divide = 100
+	floor = yes
 }
 
 decades_since_game_start = {
@@ -2311,21 +2355,6 @@ num_cyborg_traits_species = {
 	}
 }
 
-num_cyborg_traits_pop = {
-	base = 1
-	complex_trigger_modifier = {
-		trigger = count_species_traits
-		trigger_scope = pop
-		parameters = {
-			limit = {
-				has_cyborg_trait = yes
-			}
-			category = cyborg
-		}
-		mode = add
-	}
-}
-
 transcendental_growth = {
 	base = 0
 	add = trigger:num_ascension_perks
@@ -2352,10 +2381,7 @@ budding_multiplier = {
 	}
 	modifier = {
 		add = 0.5
-		OR = {
-			has_trait = trait_plantoid_budding
-			has_trait = trait_advanced_budding
-		}
+		has_trait = trait_plantoid_budding
 		planet = {
 			OR = {
 				has_active_building = building_gaiaseeders_4
@@ -2375,45 +2401,6 @@ agenda_mind_over_matter_cost = {
 		mult = 2
 		is_materialist = yes
 	}
-}
-
-living_standard_trade_value = {
-	base = 0
-	modifier = {
-		is_pop_category = ruler
-		add = modifier:living_standard_trade_value_rulers_add
-	}
-	modifier = {
-		is_pop_category = specialist
-		add = modifier:living_standard_trade_value_specialists_add
-	}
-	modifier = {
-		is_pop_category = worker
-		add = modifier:living_standard_trade_value_workers_add
-	}
-	modifier = {
-		is_pop_category = slave
-		add = modifier:living_standard_trade_value_slaves_add
-	}
-	modifier = {
-		is_pop_category = criminal
-		add = modifier:living_standard_trade_value_criminals_add
-	}
-	add = modifier:pop_lifestyle_trade_value_add
-	mult = value:scripted_modifier_mult|MODIFIER|pop_lifestyle_trade_value_mult|
-}
-
-preacher_trade_value = {
-	base = 2
-	add = owner.modifier:job_preacher_trade_value_add
-	# We want to inherit the bonuses from the branch office owner if they exist as well.
-	modifier = {
-		planet = {
-			has_branch_office = yes
-		}
-		add = planet.branch_office_owner.modifier:job_preacher_trade_value_add
-	}
-	mult = value:scripted_modifier_mult|MODIFIER|pop_job_trade_mult|
 }
 
 rise_to_the_occasion_value = {
@@ -2441,121 +2428,30 @@ habitat_build_cost_mult = {
 	add = modifier:megastructures_cost_mult
 }
 
-num_major_orbitals_type = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_fleet_in_system
-		parameters = {
-			limit = {
-				is_ship_size = major_orbital_resource
-				has_fleet_flag = $TYPE$_orbital
-			}
-		}
-		mode = add
-	}
-}
-
-num_major_orbitals_class = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_fleet_in_system
-		parameters = {
-			limit = {
-				is_ship_size = major_orbital_$CLASS$
-			}
-		}
-		mode = add
-	}
-}
-
-num_minor_orbitals_type = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_fleet_in_system
-		parameters = {
-			limit = {
-				is_ship_size = minor_orbital_resource
-				has_fleet_flag = $TYPE$_orbital
-			}
-		}
-		mode = add
-	}
-}
-
-num_minor_orbitals_class = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_fleet_in_system
-		parameters = {
-			limit = {
-				is_ship_size = minor_orbital_$CLASS$
-			}
-		}
-		mode = add
-	}
-}
-
-num_major_and_minor_orbitals_type = {
-	base = 0
-	add = value:num_major_orbitals_type|TYPE|$TYPE$|
-	add = value:num_minor_orbitals_type|TYPE|$TYPE$|
-}
-
-num_major_and_minor_orbitals_class = {
-	base = 0
-	add = value:num_major_orbitals_class|CLASS|$CLASS$|
-	add = value:num_minor_orbitals_class|CLASS|$CLASS$|
-}
-
-habitat_district_value = {
-	base = 0
-	add = solar_system.value:num_major_and_minor_orbitals_type|TYPE|$TYPE$|
-	mult = 3
-}
-
-num_major_orbitals = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_fleet_in_system
-		parameters = {
-			limit = {
-				is_ship_class = shipclass_habitat_station
-				NOR = {
-					is_ship_size = minor_orbital_resource
-					is_ship_size = minor_orbital_generic
-				}
-			}
-		}
-		mode = add
-	}
-}
-
-num_minor_orbitals = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_fleet_in_system
-		parameters = {
-			limit = {
-				is_ship_class = shipclass_habitat_station
-				OR = {
-					is_ship_size = minor_orbital_resource
-					is_ship_size = minor_orbital_generic
-				}
-			}
-		}
-		mode = add
-	}
-}
-
 hab_void_dweller_jobs = {
-	base = 2
+	base = 1
 	modifier = {
-		add = 1
+		add = 0.5
 		is_void_dweller_empire = yes
 	}
 }
 
-max_major_orbitals = {
+hab_void_dweller_jobs_mult = {
+	base = 0
+	add = value:hab_void_dweller_jobs
+	mult = $MULT$
+}
+
+hab_void_dweller_virtual_jobs = {
+	base = 1
+	modifier = {
+		add = 0.5
+		is_void_dweller_empire = yes
+	}
+	mult = 0.5
+}
+
+num_major_celestial_objects = {
 	base = 0
 	complex_trigger_modifier = {
 		trigger = count_system_planet
@@ -2565,14 +2461,13 @@ max_major_orbitals = {
 				is_astral_scar = no
 				is_asteroid = no
 				is_moon = no
-				has_any_megastructure = no
 			}
 		}
 		mode = add
 	}
 }
 
-max_minor_orbitals = {
+num_minor_celestial_objects = {
 	base = 0
 	complex_trigger_modifier = {
 		trigger = count_system_planet
@@ -2584,55 +2479,6 @@ max_minor_orbitals = {
 					is_asteroid = yes
 					is_moon = yes
 				}
-				has_any_megastructure = no
-			}
-		}
-		mode = add
-	}
-}
-
-max_research_orbitals = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_system_planet
-		parameters = {
-			limit = {
-				is_artificial = no
-				is_astral_scar = no
-				has_deposit_for = shipclass_research_station
-				has_any_megastructure = no
-			}
-		}
-		mode = add
-	}
-}
-
-max_energy_orbitals = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_system_planet
-		parameters = {
-			limit = {
-				is_artificial = no
-				is_astral_scar = no
-				has_orbital_energy_deposit = yes
-				has_any_megastructure = no
-			}
-		}
-		mode = add
-	}
-}
-
-max_mining_orbitals = {
-	base = 0
-	complex_trigger_modifier = {
-		trigger = count_system_planet
-		parameters = {
-			limit = {
-				is_artificial = no
-				is_astral_scar = no
-				has_orbital_mining_deposit = yes
-				has_any_megastructure = no
 			}
 		}
 		mode = add
@@ -2842,10 +2688,10 @@ count_any_districts = {
 count_specialists = {
 	complex_trigger_modifier = {
 		trigger_scope = planet
-		trigger = count_owned_pop
+		trigger = count_owned_pop_amount
 		parameters = {
 			limit = {
-				is_pop_category = specialist
+				is_specialist_category = yes
 			}
 		}
 		mode = add
@@ -2893,4 +2739,254 @@ count_free_districts = {
 		}
 		mode = add
 	}
+}
+
+num_jobs_with_tag = {
+	complex_trigger_modifier = {
+		trigger = num_pops_with_job_tag
+		trigger_scope = planet
+		parameters = {
+			tags = { $TAG$ }
+		}
+		mode = add
+	}
+	divide = 100
+}
+
+num_pops_in_strata = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		trigger_scope = planet
+		parameters = {
+			limit = {
+				is_pop_category = $STRATA$
+			}
+		}
+		mode = add
+	}
+	divide = 100
+}
+
+branch_office_value_for_buildings = {
+	complex_trigger_modifier = {
+		trigger = branch_office_value
+		trigger_scope = planet
+		parameters = {
+			who = owner
+		}
+		mode = add
+	}
+	add = 100
+	divide = 100
+}
+
+num_active_research_labs = {
+	base = 0
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_research_lab_1|
+	}
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_research_lab_2|
+	}
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_research_lab_3|
+	}
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_brain_node_1|
+	}
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_brain_node_2|
+	}
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_brain_node_3|
+	}
+	modifier = {
+		add = value:num_active_buildings|BUILDING|building_brain_node_4|
+	}
+}
+
+trade_bonus = {
+	base = 0
+	complex_trigger_modifier = {
+   		trigger = resource_income_compare
+   		parameters = {
+   		   	resource = trade
+   		}
+   		mode = add
+	}
+}
+
+negative_empire_size_percent = {
+	base = 0.001
+	mult = trigger:empire_size
+	mult = -1
+	add = 1.1
+	min = 0.1
+	max = 1
+}
+
+habitat_districts_from_major = {
+	base = 0
+	add = solar_system.value:num_major_celestial_objects
+	mult = 0.25
+}
+
+habitat_districts_from_minor = {
+	base = 0
+	add = solar_system.value:num_minor_celestial_objects
+	mult = 0.25
+}
+
+habitat_districts_from_other = {
+	base = 0
+	add = from.modifier:habitat_max_districts_add
+}
+
+max_habitat_districts_value = {
+	base = 6
+	add = value:habitat_districts_from_major
+	modifier = {
+		from = {
+			has_technology = tech_habitat_2
+		}
+		add = value:habitat_districts_from_major
+	}
+	modifier = {
+		from = {
+			has_technology = tech_habitat_3
+		}
+		add = value:habitat_districts_from_major
+	}
+	modifier = {
+		from = {
+			is_void_dweller_empire = yes
+		}
+		add = value:habitat_districts_from_minor
+	}
+	add = value:habitat_districts_from_other
+	floor = yes
+}
+
+count_any_building = {
+	complex_trigger_modifier = {
+		trigger = num_buildings
+		parameters = {
+			type = any
+		}
+		mode = add
+	}
+}
+
+per_100_pop_amount = {
+	complex_trigger_modifier = {
+		trigger = pop_amount
+		mode = add
+	}
+	divide = 100
+	floor = yes
+}
+
+per_100_local_pop_amount = {
+	add = local_pop_amount
+	divide = 100
+	floor = yes
+}
+
+city_districts_value = {
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_city
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hive
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_nexus
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_city
+		}
+		multiplier = 5
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_hive
+		}
+		multiplier = 5
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_rw_nexus
+		}
+		multiplier = 5
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_arcology_housing
+		}
+		multiplier = 2
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_craglands
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_districts
+		parameters = {
+			type = district_hab_housing
+		}
+		mode = add
+	}
+}
+
+
+fe_building_cap = {
+	base = 0
+	add = $BUILDING$_build_count
+	max = 3
+}
+
+psionic_workforce_from_telepaths = {
+	base = 5			# 5% Base
+	modifier = {
+		exists = owner
+		owner = { has_tradition = tr_psionics_breach_shroud }
+		add = 5			# +5% from tradition
+	}
+	modifier = {		# +1% per Councilor level from Psionic Sovereign
+		has_councilor = { COUNCILOR = "councilor_psionic_sovereign" }
+		add = value:councilor_level|TYPE|councilor_psionic_sovereign|
+	}
+	divide = 100		# Normalise to percentages
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = telepath
+		}
+		mode = mult		# Scale with Telepath jobs
+	}
+	divide = 100		# Renormalise to "per 100 jobs"
 }

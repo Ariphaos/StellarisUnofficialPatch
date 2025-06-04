@@ -247,6 +247,16 @@ diplomatic_stance = {
 				factor = 3.0
 				has_ai_personality = federation_builders
 			}
+
+			modifier = {
+				factor = 3.0
+				has_ai_personality = hive_mind_friend
+			}
+
+			modifier = {
+				factor = 3.0
+				has_country_flag = fallen_empire_hive_control
+			}
 		}
 	}
 
@@ -327,6 +337,7 @@ diplomatic_stance = {
 		icon = "GFX_diplomatic_stance_expansionist"
 
 		potential = {
+			is_wilderness_empire = no
 			OR = {
 				is_country_type = default
 				is_country_type = awakened_fallen_empire
@@ -344,6 +355,47 @@ diplomatic_stance = {
 		modifier = {
 			starbase_outpost_cost_mult = -0.10
 			planet_colony_development_speed_mult = 0.15
+			country_border_friction_mult = 1.0
+		}
+
+		ai_weight = {
+			weight = 10
+
+			modifier = {
+				factor = 2
+				NOT = { has_country_flag = has_encountered_other_empire }
+			}
+
+			modifier = {
+				factor = 0.01
+				has_ascension_perk = ap_become_the_crisis
+			}
+		}
+	}
+
+	option = {
+		name = "diplo_stance_expansionist_wilderness"
+		icon = "GFX_diplomatic_stance_expansionist"
+
+		potential = {
+			is_wilderness_empire = yes
+			OR = {
+				is_country_type = default
+				is_country_type = awakened_fallen_empire
+			}
+		}
+
+		valid = {
+			is_homicidal = no
+		}
+
+		policy_flags = {
+			diplo_stance_expansionist
+		}
+
+		modifier = {
+			starbase_outpost_cost_mult = -0.10
+			terraform_speed_mult = 0.15
 			country_border_friction_mult = 1.0
 		}
 
@@ -400,8 +452,7 @@ diplomatic_stance = {
 
 		modifier = {
 			diplo_weight_economy_mult = 0.25
-			trade_value_mult = 0.1
-			local_trade_protection_add = 5
+			country_trade_produces_mult = 0.1
 			external_leader_pool_add = 1
 		}
 
@@ -531,6 +582,7 @@ diplomatic_stance = {
 					has_valid_civic = civic_machine_warbots
 					has_valid_civic = civic_private_military_companies
 					has_valid_civic = civic_warrior_culture
+					has_country_flag = fallen_empire_hive_war
 				}
 			}
 
@@ -674,11 +726,17 @@ diplomatic_stance = {
 		icon = "GFX_diplomatic_stance_rest"
 
 		potential = {
-			is_hive_empire = yes
+			OR = {
+				is_hive_empire = yes
+				has_menace_perk = menp_behemoth_ever_hungry
+			}
 		}
 
 		valid = {
-			has_valid_civic = civic_hive_devouring_swarm
+			OR = {
+				has_valid_civic = civic_hive_devouring_swarm
+				has_menace_perk = menp_behemoth_ever_hungry
+			}
 		}
 
 		policy_flags = {
@@ -2313,6 +2371,10 @@ first_contact_protocol = {
 				factor = 2
 				has_origin = origin_payback
 			}
+			modifier = {
+				factor = 3
+				has_origin = origin_wilderness
+			}
 		}
 	}
 
@@ -2444,7 +2506,7 @@ food_policy = {
 		modifier = {
 			planet_pops_organics_food_upkeep_mult = -0.25
 			planet_pops_organics_minerals_upkeep_mult = -0.25
-			pop_growth_speed = -0.1
+			logistic_growth_mult = -0.1
 			biological_pop_happiness = -0.1
 			lithoid_pop_happiness = -0.1
 		}
@@ -2476,7 +2538,7 @@ food_policy = {
 			planet_pops_organics_minerals_upkeep_mult = 0.25
 			biological_pop_happiness = 0.05
 			lithoid_pop_happiness = 0.05
-			pop_growth_speed = 0.10
+			logistic_growth_mult = 0.1
 		}
 
 		AI_weight = {
@@ -2499,7 +2561,7 @@ food_policy_gestalt = {
 
 		modifier = {
 			planet_pops_organics_food_upkeep_mult = -0.25
-			pop_growth_speed = -0.15
+			logistic_growth_mult = -0.15
 		}
 
 		AI_weight = {
@@ -2526,7 +2588,7 @@ food_policy_gestalt = {
 
 		modifier = {
 			planet_pops_organics_food_upkeep_mult = 0.5
-			pop_growth_speed = 0.33
+			logistic_growth_mult = 0.33
 		}
 
 		AI_weight = {
@@ -2776,6 +2838,21 @@ trade_policy = {
 			is_worker_coop_empire = no
 		}
 
+		on_enabled = {
+			hidden_effect = {
+				set_trade_conversions = {
+					trade = 0.5
+					energy = 0.5
+				}
+			}
+		}
+
+		on_disabled = {
+			hidden_effect = {
+				set_trade_conversions = { }
+			}
+		}
+
 		AI_weight = {
 			factor = 0
 		}
@@ -2793,6 +2870,13 @@ trade_policy = {
 			}
 			has_tradition = tr_mercantile_adaptive_economic_policies
 			is_worker_coop_empire = no
+		}
+
+		on_enabled = {
+			set_trade_conversions = {
+				trade = 0.75
+				consumer_goods = 0.25
+			}
 		}
 
 		policy_flags = {
@@ -2825,6 +2909,13 @@ trade_policy = {
 			is_worker_coop_empire = no
 		}
 
+		on_enabled = {
+			set_trade_conversions = {
+				trade = 0.75
+				unity = 0.25
+			}
+		}
+
 		policy_flags = {
 			trade_conversion_unity
 		}
@@ -2842,6 +2933,14 @@ trade_policy = {
 		potential = {
 			has_federation = yes
 			federation = { has_federation_perk = trade_federation_passive }
+		}
+		on_enabled = {
+			set_trade_conversions = {
+				trade = 0.50
+				energy = 0.10
+				consumer_goods = 0.20
+				unity = 0.20
+			}
 		}
 
 		policy_flags = {
@@ -2863,6 +2962,13 @@ trade_policy = {
 			federation = { has_federation_perk = unity_trade_1 }
 		}
 
+		on_enabled = {
+			set_trade_conversions = {
+				trade = 0.60
+				unity = 0.40
+			}
+		}
+
 		policy_flags = {
 			trade_conversion_holy_covenant
 		}
@@ -2881,6 +2987,16 @@ trade_policy = {
 			is_worker_coop_empire = yes
 		}
 
+		on_enabled = {
+			set_trade_conversions = {
+				trade = 0.30
+				energy = 0.20
+				minerals = 0.20
+				food = 0.20
+				unity = 0.10
+			}
+		}
+
 		policy_flags = {
 			trade_conversion_mutual_aid
 		}
@@ -2892,11 +3008,64 @@ trade_policy = {
 			factor = 1000
 		}
 	}
+
+#	option = {
+#		name = "trade_policy_research"
+#
+#		potential = {
+#			is_worker_coop_empire = no
+#		}
+#
+#		on_enabled = {
+#			set_trade_conversions = {
+#				physics_research = 0.1
+#				society_research = 0.1
+#				engineering_research = 0.1
+#			}
+#		}
+#
+#		AI_weight = {
+#			factor = 0
+#		}
+#	}
+}
+
+logistics_policy = {
+	potential = {
+		is_gestalt = yes
+	}
+
+	option = {
+		name = "logistics_policy_gestalt"
+
+		potential = {
+			is_gestalt = yes
+		}
+
+		on_enabled = {
+			hidden_effect = {
+				set_trade_conversions = {
+					trade = 1
+				}
+			}
+		}
+
+		on_disabled = {
+			hidden_effect = {
+				set_trade_conversions = { }
+			}
+		}
+
+		AI_weight = {
+			factor = 0
+		}
+	}
 }
 
 drone_policy = {
 	potential = {
 		has_ethic = ethic_gestalt_consciousness
+		is_wilderness_empire = no # see 'symbiont_policy'
 	}
 
 	option = {
@@ -2924,6 +3093,48 @@ drone_policy = {
 
 	option = {
 		name = "drone_policy_thinker"
+
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = -0.2
+			planet_jobs_complex_drone_produces_mult = 0.2
+		}
+
+		AI_weight = {
+			factor = 0
+		}
+	}
+}
+
+symbiont_policy = {
+	potential = {
+		is_wilderness_empire = yes
+	}
+
+	option = {
+		name = "symbiont_policy_balanced"
+
+		modifier = {}
+
+		AI_weight = {
+			factor = 1
+		}
+	}
+
+	option = {
+		name = "symbiont_policy_worker"
+
+		modifier = {
+			planet_jobs_simple_drone_produces_mult = 0.2
+			planet_jobs_complex_drone_produces_mult = -0.2
+		}
+
+		AI_weight = {
+			factor = 0
+		}
+	}
+
+	option = {
+		name = "symbiont_policy_thinker"
 
 		modifier = {
 			planet_jobs_simple_drone_produces_mult = -0.2
@@ -3184,14 +3395,13 @@ pre_sapients = {
 		OR = {
 			has_country_flag = found_presapients
 			any_planet_within_border = {
-				any_owned_pop = {
+				any_owned_pop_group = {
 					is_sapient = no
 				}
 			}
 			is_guided_sapience_empire = yes
 		}
 	}
-
 	option = {
 		name = "pre_sapients_protect"
 
@@ -3296,7 +3506,7 @@ pre_sapients = {
 			NOR = {
 				has_ethic = "ethic_xenophile"
 				has_ethic = "ethic_fanatic_xenophile"
-				is_guided_sapience_empire = yes
+				has_valid_civic = civic_guided_sapience
 			}
 		}
 
@@ -3321,6 +3531,116 @@ pre_sapients = {
 					has_valid_civic = civic_machine_terminator
 					has_valid_civic = civic_fanatic_purifiers
 				}
+			}
+		}
+	}
+}
+
+disconnected_drones = {
+	potential = {
+		has_biogenesis_dlc = yes
+		is_regular_empire = yes
+		OR = {
+			any_planet_within_border = {
+				any_owned_pop_group = {
+					is_hive_species = yes
+				}
+			}
+			any_playable_country = {
+				is_hive_empire = yes
+				has_communications = root
+			}
+		}
+	}
+
+	option = {
+		name = "disconnected_drones_sustain"
+
+		potential = {
+			NOT = {
+				has_valid_civic = civic_fanatic_purifiers
+			}
+		}
+
+		on_enabled = {
+			hidden_effect = {
+				every_owned_species = {
+					limit = {
+						OR = {
+							has_citizenship_type = {
+								type = citizenship_exploited_drone
+								country = root
+							}
+							has_citizenship_type = {
+								type = citizenship_symbiotic_drone
+								country = root
+							}
+						}
+					}
+					set_citizenship_type = {
+						type = citizenship_protected_drone
+						country = root
+					}
+				}
+			}
+		}
+
+		policy_flags = {
+			disconnected_drones_sustain
+		}
+
+		AI_weight = {
+			factor = 10
+			modifier = {
+				factor = 0
+				values_others = no
+			}
+		}
+	}
+
+	option = {
+		name = "disconnected_drones_purge"
+
+		valid = {
+			is_xenophile = no
+		}
+
+		on_enabled = {
+			hidden_effect = {
+				every_owned_species = {
+					limit = {
+						OR = {
+							has_citizenship_type = {
+								type = citizenship_protected_drone
+								country = root
+							}
+							has_citizenship_type = {
+								type = citizenship_symbiotic_drone
+								country = root
+							}
+							has_citizenship_type = {
+								type = citizenship_exploited_drone
+								country = root
+							}
+						}
+					}
+					set_citizenship_type = {
+						type = citizenship_purge
+						country = root
+					}
+				}
+			}
+		}
+
+		policy_flags = {
+			disconnected_drones_purge
+		}
+
+		AI_weight = {
+			factor = 10
+			modifier = {
+				factor = 0
+				is_homicidal = no
 			}
 		}
 	}
@@ -3676,6 +3996,16 @@ purge = {
 				has_ethic = ethic_xenophobe
 				has_ethic = ethic_fanatic_xenophobe
 				has_crisis_perk = menp_undertaker	# Unlocked with Crisis Level 1
+				AND = {
+					custom_tooltip = {
+						text = civic_tooltip_not_xenophile
+						NOR = {
+							has_ethic = ethic_xenophile
+							has_ethic = ethic_fanatic_xenophile
+						}
+					}
+					has_purity_imperfection_remediation_tradition = yes
+				}
 			}
 		}
 
@@ -3863,6 +4193,75 @@ relentless_industrialists_policy = {
 			modifier = {
 				factor = 5
 				has_country_flag = relentless_industrialists_cleanup
+			}
+		}
+	}
+}
+
+eternal_vigilance_policy = {
+	potential = {
+		is_country_type = default
+		has_ascension_perk = ap_eternal_vigilance
+	}
+
+	option = {
+		name = eternal_vigilance_full_spending
+
+		policy_flags = {
+			eternal_vigilance_full_spending
+		}
+
+		AI_weight = {
+			weight = 20
+			modifier = { #Seems like a good idea if you have the energy to spend
+				factor = 5
+				has_monthly_income = {
+					resource = energy
+					value > 100
+				}
+			}
+			modifier = { #Uhoh we are close to a defecit we probably shouldn't
+				factor = 0
+				has_monthly_income = {
+					resource = energy
+					value < 1
+				}
+			}
+		}
+	}
+	option = {
+		name = eternal_vigilance_half_spending
+
+		policy_flags = {
+			eternal_vigilance_half_spending
+		}
+
+		AI_weight = { #This is the option if you are doing just fine on the economy front
+			weight = 75
+		}
+	}
+	option = {
+		name = eternal_vigilance_no_spending
+
+		policy_flags = {
+			eternal_vigilance_no_spending
+		}
+
+		AI_weight = {
+			weight = 1
+			modifier = { #Seems like a bad idea if you have the energy to spend
+				factor = 0
+				has_monthly_income = {
+					resource = energy
+					value > 100
+				}
+			}
+			modifier = { #Uhoh we are close to a defecit we probably shouldn't spend more
+				factor = 5
+				has_monthly_income = {
+					resource = energy
+					value < 1
+				}
 			}
 		}
 	}

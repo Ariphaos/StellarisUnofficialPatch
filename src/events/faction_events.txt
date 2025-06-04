@@ -8,54 +8,189 @@
 
 namespace = factions
 
-# A faction is formed
+# A faction is formed - filter toast or event
+pop_faction_event = {
+	hide_window = yes
+	id = factions.0
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			owner = {
+				has_origin = origin_broken_shackles
+			}
+		}
+	}
+
+	immediate = {
+
+		owner = {
+			every_owned_planet = {
+				every_owned_pop_group = {
+					force_faction_evaluation = yes
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = first_faction
+					}
+				}
+				set_country_flag = first_faction
+				from = { pop_faction_event = { id = factions.1 } }
+			}
+			else = {
+				from = {
+					switch = {
+						trigger = is_pop_faction_type
+						traditionalist = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_TRADITIONALIST
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						imperialist = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_IMPERIALIST
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						supremacist = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_SUPREMACIST
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						isolationist = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_ISOLATIONIST
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						totalitarian = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_TOTALITARIAN
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						progressive = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_PROGRESSIVE
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						prosperity = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_PROSPERITY
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						technologist = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_TECHNOLOGIST
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						xenoist = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_XENOIST
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+						manifesti = {
+							root.owner = {
+								create_faction_formed_message = {
+									FACTION_TYPE = MESSAGE_FACTION_MANIFESTI
+									FACTION_INTRO = factions.1.desc.start_short
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
+}
+
+# A faction is formed - toast
+# A faction is formed - toast (standard version)
 pop_faction_event = {
 	id = factions.1
 	title = factions.1.title
 	desc = {
 		trigger = {
-			text = factions.1.desc.start
+			# Intro
+			success_text = {
+				text = factions.1.desc.start
+				hidden:owner = { NOT = { has_origin = origin_unplugged } }
+			}
+			success_text = {
+				text = factions.1.desc.unplugged_start
+				hidden:owner = { has_origin = origin_unplugged }
+			}
 			text = newline
-			success_text = {
-				text = factions.1.desc.imperialist
-				is_pop_faction_type = imperialist
+			# Body text (standard Factions with variants based on e.g. Origin)
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = imperialist
 			}
-			success_text = {
-				text = factions.1.desc.isolationist
-				is_pop_faction_type = isolationist
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = isolationist
 			}
-			success_text = {
-				text = factions.1.desc.progressive
-				is_pop_faction_type = progressive
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = progressive
 			}
-			success_text = {
-				text = factions.1.desc.prosperity
-				is_pop_faction_type = prosperity
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = prosperity
 			}
-			success_text = {
-				text = factions.1.desc.supremacist
-				is_pop_faction_type = supremacist
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = supremacist
 			}
-			success_text = {
-				text = factions.1.desc.technologist
-				is_pop_faction_type = technologist
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = technologist
 			}
-			success_text = {
-				text = factions.1.desc.totalitarian
-				is_pop_faction_type = totalitarian
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = totalitarian
 			}
-			success_text = {
-				text = factions.1.desc.traditionalist
-				is_pop_faction_type = traditionalist
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = traditionalist
 			}
-			success_text = {
-				text = factions.1.desc.xenoist
-				is_pop_faction_type = xenoist
+			inline_script = {
+				script = pop_faction_types/faction1_desc
+				FACTION = xenoist
 			}
+			# Body text (other, exempt Factions)
 			success_text = {
 				text = factions.1.desc.manifesti
 				is_pop_faction_type = manifesti
 			}
+			# Outro
 			success_text = {
 				hidden:owner = { NOT = { has_country_flag = first_faction } }
 				text = factions.1.desc.firstfinisher
@@ -66,25 +201,15 @@ pop_faction_event = {
 	show_sound = event_factions
 	is_triggered_only = yes
 
-	trigger = {
-		NOT = {
-			owner = {
-				has_origin = origin_broken_shackles
-				#has_country_flag = first_faction
-			}
-		}
-	}
-
 	option = {
 		name = OK
 		hidden_effect = {
 			owner = {
 				every_owned_planet = {
-					every_owned_pop = {
+					every_owned_pop_group = {
 						force_faction_evaluation = yes
 					}
 				}
-				set_country_flag = first_faction
 			}
 		}
 	}
@@ -244,60 +369,83 @@ country_event = {
 	id = factions.2000
 	title = factions.2000.title
 	location = event_target:TargetFaction.Owner.capital_scope
-	desc = {
-		trigger = {
-			text = factions.2000.desc.start
-			text = newline
-			success_text = {
-				text = factions.2000.desc.imperialist
-				event_target:TargetFaction = { is_pop_faction_type = imperialist }
-			}
-			success_text = {
-				text = factions.2000.desc.isolationist
-				event_target:TargetFaction = { is_pop_faction_type = isolationist }
-			}
-			success_text = {
-				text = factions.2000.desc.progressive
-				event_target:TargetFaction = { is_pop_faction_type = progressive }
-			}
-			success_text = {
-				text = factions.2000.desc.prosperity
-				event_target:TargetFaction = { is_pop_faction_type = prosperity }
-			}
-			success_text = {
-				text = factions.2000.desc.supremacist
-				event_target:TargetFaction = { is_pop_faction_type = supremacist }
-			}
-			success_text = {
-				text = factions.2000.desc.technologist
-				event_target:TargetFaction = { is_pop_faction_type = technologist }
-			}
-			success_text = {
-				text = factions.2000.desc.totalitarian
-				event_target:TargetFaction = { is_pop_faction_type = totalitarian }
-			}
-			success_text = {
-				text = factions.2000.desc.traditionalist
-				event_target:TargetFaction = { is_pop_faction_type = traditionalist }
-			}
-			success_text = {
-				text = factions.2000.desc.xenoist
-				event_target:TargetFaction = { is_pop_faction_type = xenoist }
-			}
-			success_text = {
-				text = factions.2000.desc.manifesti
-				event_target:TargetFaction = { is_pop_faction_type = manifesti }
-			}
-		}
-	}
 
 	picture = GFX_evt_alien_propaganda
 	show_sound = event_factions
-
+	hide_window = yes
 	is_triggered_only = yes
 
-	option = {
-		name = OK
+	immediate = {
+
+		event_target:TargetFaction = {
+			switch = {
+				trigger = is_pop_faction_type
+				imperialist = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_IMPERIALIST
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				supremacist = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_SUPREMACIST
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				isolationist = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_ISOLATIONIST
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				totalitarian = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_TOTALITARIAN
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				progressive = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_PROGRESSIVE
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				prosperity = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_PROSPERITY
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				technologist = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_TECHNOLOGIST
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+				xenoist = {
+					root = {
+						create_faction_shifted_message = {
+							FACTION_TYPE = MESSAGE_FACTION_EMBRACED_XENOIST
+							FACTION_INTRO = factions.2000.desc_short
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -502,7 +650,7 @@ planet_event = {
 	immediate = {
 		if = { # Egalitarianism has taken root
 			limit = {
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					limit = {
 						is_egalitarian = yes
 					}
@@ -513,14 +661,14 @@ planet_event = {
 		}
 		else_if = { # Other, unsupported ethics are present
 			limit = {
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					limit = {
 						has_alternative_ethics = {
 							THIS_SCOPE = this
 							REF_SCOPE = root.owner
 						}
 					}
-					count > 1
+					count > 100
 				}
 			}
 			set_planet_flag = frontier_alternatives
@@ -688,7 +836,7 @@ planet_event = {
 	immediate = {
 		if = { # Authoritarianism has taken root
 			limit = {
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					limit = {
 						is_authoritarian = yes
 					}
@@ -699,14 +847,14 @@ planet_event = {
 		}
 		else_if = { # Diverse ethics are present (mutually exclusive with above)
 			limit = {
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					limit = {
 						has_alternative_ethics = {
 							THIS_SCOPE = this
 							REF_SCOPE = root.owner
 						}
 					}
-					count > 2
+					count >= 300
 				}
 			}
 			set_planet_flag = frontier_discourse
@@ -844,6 +992,7 @@ planet_event = {
 				has_origin = origin_legendary_leader
 				has_origin = origin_legendary_leader_imperial
 				has_origin = origin_legendary_leader_dictatorial
+				has_origin = origin_common_ground
 				has_country_flag = manifesti_spawned
 			}
 		}
@@ -859,19 +1008,41 @@ planet_event = {
 
 	immediate = {
 		save_event_target_as = manifesti_world
-		owner = { set_country_flag = manifesti_spawned }
+		owner = { 
+			set_country_flag = manifesti_spawned 
+			random_list = {
+				33 = { set_country_flag = manifesti_physics }
+				33 = { set_country_flag = manifesti_society }
+				33 = { set_country_flag = manifesti_engineering }
+			} 
+		}
+	}
+	option = { # Take no action
+		name = manifesti.1.a
 		begin_event_chain = {
 			event_chain = manifesti_chain
 			target = owner
 		}
+		add_modifier = {
+			modifier = planet_manifesti_polarization
+			days = 1095
+		}
+		hidden_effect = {
+			planet_event = { id = manifesti.5 days = 59 }
+		}
 	}
-
-	option = {
-		name = manifesti.1.a
-		tooltip = {
-			begin_event_chain = {
-				event_chain = manifesti_chain
-				target = owner
+	option = { # Encourage participation
+		name = manifesti.1.b
+		begin_event_chain = {
+			event_chain = manifesti_chain
+			target = owner
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1unityreward
+				min = @tier1unitymin
+				max = @tier1unitymax
 			}
 		}
 		add_modifier = {
@@ -882,20 +1053,152 @@ planet_event = {
 			planet_event = { id = manifesti.5 days = 59 }
 		}
 	}
+	option = { # Pacify the dissenters
+		name = manifesti.1.c
+		trigger = {
+			owner = {
+				has_ethic = ethic_authoritarian
+			}
+		}
+		allow = {
+			owner = {
+				has_resource = { type = minerals amount >= 1000 }
+			}
+		}
+		owner = {
+			add_resource = { minerals = -1000 }
+		}
+		custom_tooltip = manifesti.1.tt
+	}
+	option = { # Authorize brute force
+		name = manifesti.1.d
+		trigger = {
+			owner = {
+				has_ethic = ethic_militarist
+			}
+		}
+		allow = {
+			owner = {
+				has_resource = { type = energy amount >= 1000 }
+			}
+		}
+		owner = {
+			add_resource = { energy = -1000 }
+		}
+		custom_tooltip = manifesti.1.tt
+	}
+	option = { # Organize a counter protest
+		name = manifesti.1.e
+		trigger = {
+			owner = {
+				has_ethic = ethic_xenophile
+			}
+		}
+		allow = {
+			owner = {
+				has_unity_times_empire_size = { VALUE = 1 }
+				has_resource = { type = consumer_goods amount > 100 }
+			}
+		}
+		owner = {
+			add_unity_times_empire_size = { VALUE = -1 }
+			add_resource = { consumer_goods = -100 }
+		}
+		custom_tooltip = manifesti.1.tt
+	}
+	option = { # Flood the streets with unity rallies
+		name = manifesti.1.f
+		trigger = {
+			owner = {
+				has_ethic = ethic_egalitarian
+			}
+		}
+		allow = {
+			owner = {
+				has_unity_times_empire_size = { VALUE = 1 }
+				has_resource = { type = influence amount > 50 }
+			}
+		}
+		owner = {
+			add_unity_times_empire_size = { VALUE = -1 }
+			add_resource = { influence = -50 }
+		}
+		custom_tooltip = manifesti.1.tt
+	}
+option = { # Organize a counter protest
+	name = manifesti.1.g
+	trigger = {
+		owner = {
+			has_ethic = ethic_pacifist
+		}
+	}
+	allow = {
+		owner = {
+			has_unity_times_empire_size = { VALUE = 2 }
+		}
+	}
+	owner = {
+		add_unity_times_empire_size = { VALUE = -2 }
+	}
+	custom_tooltip = manifesti.1.tt
+	}
+	option = { # Frame it as a distraction
+	name = manifesti.1.h
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_spiritualist
+				}
+			}
+		}
+		allow = {
+			if = {
+				limit = {
+					owner = {
+						has_ethic = ethic_materialist
+					}
+				}
+				owner = {
+					resource_stockpile_compare = { resource = alloys value > 100 }
+					resource_stockpile_compare = { resource = energy value > 500 }
+				}
+			}
+			if = {
+				limit = {
+					owner = {
+						has_ethic = ethic_spiritualist
+					}
+				}
+				owner = {
+					resource_stockpile_compare = { resource = influence value > 100 }
+				}
+			}
+		}
+		owner = {
+			if = {
+				limit = {
+					has_ethic = ethic_materialist
+				}
+				add_resource = { alloys = -100 }
+				add_resource = { energy = -500 }
+			}
+			if = {
+				limit = {
+					has_ethic = ethic_spiritualist
+				}
+				add_resource = { influence = -100 }
+			}
+		}
+		custom_tooltip = manifesti.1.tt
+	}
 }
 
 # Protests cease; the group is named
 planet_event = {
 	id = manifesti.5
 	title = manifesti.5.name
-	desc = {
-		text = manifesti.5.desc
-		trigger = { NOT = { has_planet_flag = manifesti_investigate } }
-	}
-	desc = {
-		text = manifesti.5.investigated.desc
-		trigger = { has_planet_flag = manifesti_investigate }
-	}
+	desc = manifesti.5.desc
 	picture = GFX_evt_city_planet
 	show_sound = event_cityscape
 	location = root
@@ -919,43 +1222,198 @@ planet_event = {
 				amount = 1
 			}
 			random_owned_planet = {
-				limit = { num_pops > 7 }
+				limit = { pop_amount > 700 }
 				save_event_target_as = manifesti_world #Can be the same world as ROOT if needs be
 			}
+			#Reroll manifesti tech for Crowdsourcing
+			remove_country_flag = manifesti_physics
+			remove_country_flag = manifesti_society
+			remove_country_flag = manifesti_engineering
+			random_list = {
+				33 = { set_country_flag = manifesti_physics }
+				33 = { set_country_flag = manifesti_society }
+				33 = { set_country_flag = manifesti_engineering }
+			} 
 		}
 	}
 
-	option = { #Let them continue
+	option = { # Let them have their fun
 		name = manifesti.5.a
+		if = {
+			limit = {
+				owner = {
+					is_egalitarian = yes
+				}
+			}
+			event_target:manifesti_world = {
+				add_modifier = {
+					modifier = planet_manifesti_egalitarian_attraction
+					days = 1095
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					is_pacifist = yes
+				}
+			}
+			event_target:manifesti_world = {
+				add_modifier = {
+					modifier = planet_manifesti_pacifist_attraction
+					days = 1095
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					is_xenophile = yes
+				}
+			}
+			event_target:manifesti_world = {
+				add_modifier = {
+					modifier = planet_manifesti_xenophile_attraction
+					days = 1095
+				}
+			}
+		}
 		hidden_effect = {
 			event_target:manifesti_world = {
 				planet_event = { id = manifesti.15 days = 245 }
 			}
 		}
 	}
-	option = { #Make arrests
+	option = { # Declare Martial Law
 		name = manifesti.5.b
+		trigger = {
+			owner = {
+				is_militarist = yes
+			}
+		}
 		allow = {
-			hidden_trigger = {
-				owner = {
-					# Check if can afford. Authoritarian Empires pay half price.
-					has_unity_times_empire_size = { VALUE = 1 }
-					OR = {
+			NOT = {
+				has_modifier = martial_law
+			}
+			owner = {
+				has_resource = { type = influence amount > 50 }
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -50
+			}
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				set_planet_flag = manifesti_militarist_successful
+				planet_event = { id = manifesti.10 days = 93 }
+			}
+		}
+	}
+	option = { # Melt down the projects for resources
+		name = manifesti.5.c
+		trigger = {
+			owner = {
+				is_materialist = yes
+			}
+		}
+		allow = {
+			owner = {
+				has_resource = { type = influence amount > 50 }
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -50
+			}
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				set_planet_flag = manifesti_materialist_successful
+				planet_event = { id = manifesti.10 days = 93 }
+			}
+		}
+	}
+	option = { # Declare them messengers of the void
+		name = manifesti.5.d
+		trigger = {
+			owner = {
+				is_spiritualist = yes
+			}
+		}
+		allow = {
+			owner = {
+				has_resource = { type = influence amount > 50 }
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -50
+			}
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				set_planet_flag = manifesti_spiritualist_successful
+				planet_event = { id = manifesti.10 days = 93 }
+			}
+		}
+	}
+	option = { # Disrupt planet wide communications
+		name = manifesti.5.e
+		trigger = {
+			owner = {
+				is_xenophobe = yes
+			}
+		}
+		allow = {
+			owner = {
+				has_resource = { type = influence amount > 50 }
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -50
+			}
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				set_planet_flag = manifesti_xenophobe_successful
+				planet_event = { id = manifesti.10 days = 93 }
+			}
+		}
+	}
+	option = { # Locate and detain their families
+		name = manifesti.5.f
+		allow = {
+			owner = {
+				has_resource = { type = influence amount > 50 }
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -50
+			}
+		}
+		random_list = {
+			25 = {
+				modifier = {
+					factor = 100
+					owner = {
 						is_authoritarian = yes
-						has_unity_times_empire_size = { VALUE = 2 }
 					}
 				}
+				event_target:manifesti_world = {
+					set_planet_flag = manifesti_authoritarian_successful
+				}
+				custom_tooltip = manifesti.5.f.tt1
 			}
-		}
-		# Pay up, half price for Authoritarians.
-		if = {
-			limit = {
-				owner = { is_authoritarian = yes }
+			75 = {
+				event_target:manifesti_world = {
+					set_planet_flag = manifesti_violent_protests
+				}
+				custom_tooltip = manifesti.5.f.tt2
 			}
-			owner = { add_unity_times_empire_size = { VALUE = -1 } }
-		}
-		else = {
-			owner = { add_unity_times_empire_size = { VALUE = -2 } }
 		}
 		hidden_effect = {
 			event_target:manifesti_world = {
@@ -965,11 +1423,52 @@ planet_event = {
 	}
 }
 
-# Manifesti apprehended
+# Nipped in the Bud
 planet_event = {
 	id = manifesti.10
 	title = manifesti.10.name
-	desc = manifesti.10.desc
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_militarist_successful
+		}
+		text = manifesti.10.desc_militarist
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_materialist_successful
+		}
+		text = manifesti.10.desc_materialist
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_spiritualist_successful
+		}
+		text = manifesti.10.desc_spiritualist
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_xenophobe_successful
+		}
+		text = manifesti.10.desc_xenophobe
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_authoritarian_successful
+		}
+		text = manifesti.10.desc_authoritarian
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_dismantled_exhibition
+		}
+		text = manifesti.10.desc_dismantled_exhibition
+	}
+	desc = {
+		trigger = {
+			has_planet_flag = manifesti_violent_protests
+		}
+		text = manifesti.10.desc_violent_protests
+	}
 	picture = GFX_evt_surreal_visions
 	show_sound = event_mystic_reveal
 	location = root
@@ -998,7 +1497,94 @@ planet_event = {
 
 	option = {
 		name = manifesti.10.a
+		trigger = {
+			NOT = {
+				has_planet_flag = manifesti_violent_protests
+			}
+		}
+		switch = {
+			trigger = has_planet_flag
+			manifesti_militarist_successful = {
+				add_modifier = {
+					modifier = martial_law
+					days = 3650
+				}
+				owner = {
+					add_monthly_resource_mult = {
+						resource = unity
+						value = @tier3influencereward
+						min = @tier3influencemin
+						max = @tier3influencemax
+					}
+				}
+			}
+			manifesti_materialist_successful = {
+				owner = {
+					add_monthly_resource_mult = {
+						resource = consumer_goods
+						value = @tier2materialreward
+						min = @tier2materialmin
+						max = @tier2materialmax
+					}
+					add_resource = {
+						alloys = -100
+					}
+				}
+			}
+			manifesti_spiritualist_successful = {
+				owner = {
+					create_leader = {
+						name = random
+						species = root
+						class = scientist
+						event_leader = yes
+						set_age = 31
+						randomize_traits = no
+						background_ethic = ethic_xenophobe
+						custom_description = manifesti_leader_desc
+						effect = {
+							set_skill = 6
+						}
+						traits = {
+							trait = leader_trait_lavish_lifestyle
+						}
+					}
+					last_created_leader = {
+						save_global_event_target_as = manifesti_leader
+						set_leader_flag = manifesti_divine_leader
+						set_owner = root
+					}
+				}
+			}
+			manifesti_xenophobe_successful = {
+				add_modifier = {
+					modifier = planet_manifesti_network_disrupted
+					days = 3650
+				}
+			}
+			manifesti_authoritarian_successful = {
+				add_modifier = {
+					modifier = planet_manifesti_widespread_arrests
+					days = 3650
+				}
+			}
+			manifesti_dismantled_exhibition = {
+				add_modifier = {
+				modifier = planet_manifesti_exhibition_shutdown
+				days = 3650
+				}
+			}
+		}
 		remove_modifier = planet_manifesti_joy
+		owner = { end_event_chain = manifesti_chain }
+	}
+	option = {
+		name = manifesti.10.b
+		trigger = {
+			has_planet_flag = manifesti_violent_protests
+		}
+		remove_modifier = planet_manifesti_joy
+		add_planet_devastation = 75
 		owner = { end_event_chain = manifesti_chain }
 	}
 }
@@ -1028,18 +1614,47 @@ planet_event = {
 			}
 			random_owned_planet = { #Manifesti spreads
 				limit = {
-					num_pops > 7
+					pop_amount > 700
 				}
 				save_event_target_as = manifesti_world #Can be the same world as ROOT if needs be
-				add_modifier = { modifier = planet_manifesti_uslurp_mod days = 360 }
+				add_modifier = { modifier = planet_manifesti_uslurp_mod days = 1095 }
 			}
+			#Reroll manifesti tech for Crowdsourcing
+			remove_country_flag = manifesti_physics
+			remove_country_flag = manifesti_society
+			remove_country_flag = manifesti_engineering
+			random_list = {
+				33 = { set_country_flag = manifesti_physics }
+				33 = { set_country_flag = manifesti_society }
+				33 = { set_country_flag = manifesti_engineering }
+			} 
 		}
 	}
 
-	option = { #Let them continue
+	option = { # Buy their silence
 		name = manifesti.15.a
+		allow = {
+			owner = {
+				has_resource = { type = energy amount >= 1000 }
+			}
+		}
 		owner = {
-			add_modifier = { modifier = manifesti_uslurp_mod days = 360 }
+			add_resource = { energy = -1000 }
+		}
+
+		hidden_effect = {
+			event_target:manifesti_world = {
+				remove_modifier = planet_manifesti_uslurp_mod
+				planet_event = { id = manifesti.20 days = 145 }
+			}
+		}
+	}
+	option = { # Withhold pay from nonconformists
+		name = manifesti.15.b
+		tooltip = {
+			event_target:manifesti_world = {
+				add_modifier = { modifier = planet_manifesti_uslurp_mod days = 1095 }
+			}
 		}
 		hidden_effect = {
 			event_target:manifesti_world = {
@@ -1047,36 +1662,42 @@ planet_event = {
 			}
 		}
 	}
-	option = { #Make arrests
-		name = manifesti.15.b
+	option = { # Partake in the trend
+		name = manifesti.15.c
 		trigger = {
-			owner = { is_egalitarian = no }
-		}
-		allow = {
-			hidden_trigger = {
-				owner = {
-					# Check if can afford. Authoritarian Empires pay half price.
-					has_unity_times_empire_size = { VALUE = 1 }
-					OR = {
-						is_authoritarian = yes
-						has_unity_times_empire_size = { VALUE = 2 }
-					}
-				}
+			owner = {
+				is_egalitarian = yes
 			}
-		}
-		# Pay up, half price for Authoritarians.
-		if = {
-			limit = {
-				owner = { is_authoritarian = yes }
-			}
-			owner = { add_unity_times_empire_size = { VALUE = -1 } }
-		}
-		else = {
-			owner = { add_unity_times_empire_size = { VALUE = -2 } }
 		}
 		hidden_effect = {
 			event_target:manifesti_world = {
-				planet_event = { id = manifesti.10 days = 93 }
+				planet_event = { id = manifesti.20 days = 145 }
+			}
+		}
+	}
+	option = { # Celebrate linguistic diversity
+		name = manifesti.15.d
+		trigger = {
+			owner = {
+				is_xenophile = yes
+			}
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				planet_event = { id = manifesti.20 days = 145 }
+			}
+		}
+	}
+	option = { # Foster dialogue, not division
+		name = manifesti.15.e
+		trigger = {
+			owner = {
+				is_pacifist = yes
+			}
+		}
+		hidden_effect = {
+			event_target:manifesti_world = {
+				planet_event = { id = manifesti.20 days = 145 }
 			}
 		}
 	}
@@ -1105,6 +1726,15 @@ planet_event = {
 				counter = "manifesti_rise"
 				amount = 1
 			}
+			#Reroll manifesti tech for Crowdsourcing
+			remove_country_flag = manifesti_physics
+			remove_country_flag = manifesti_society
+			remove_country_flag = manifesti_engineering
+			random_list = {
+				33 = { set_country_flag = manifesti_physics }
+				33 = { set_country_flag = manifesti_society }
+				33 = { set_country_flag = manifesti_engineering }
+			} 
 		}
 	}
 
@@ -1121,8 +1751,9 @@ planet_event = {
 			planet_event = { id = manifesti.25 days = 156 }
 		}
 	}
-	option = { #Make arrests
+	option = { # exhibition dismantled
 		name = manifesti.20.b
+		set_planet_flag = manifesti_dismantled_exhibition
 		hidden_effect = {
 			planet_event = { id = manifesti.10 days = 93 }
 		}
@@ -1146,16 +1777,41 @@ planet_event = {
 
 	immediate = { }
 
-	option = {
-		name = INTERESTING
+	option = { # It was inevitable
+		name = manifesti.25.a
 		hidden_effect = {
 			owner = {
 				country_event = { id = manifesti.26 days = 20 } #Forces evaluation of the Manifesti faction
 			}
 		}
+		custom_tooltip = manifesti.25.tt
 	}
-	option = {
+	option = { # Embrace it
 		name = manifesti.25.b
+		owner = {
+			every_owned_planet = {
+				add_modifier = {
+				modifier = planet_manifesti_endorsed
+				days = 3650
+				}
+			}
+			hidden_effect = {
+				country_event = { id = manifesti.26 days = 20 } #Forces evaluation of the Manifesti faction
+			}
+		}
+		custom_tooltip = manifesti.25.tt
+	}
+
+	option = { # Declare them outlaws
+		name = manifesti.25.c
+		owner = {
+			every_owned_planet = {
+				add_modifier = {
+				modifier = planet_manifesti_supressed
+				days = 9125
+				}
+			}
+		}
 	}
 
 	after = {
@@ -1203,7 +1859,7 @@ country_event = {
 
 	immediate = {
 		set_country_flag = manifesti_decline #Can force removal of the faction even if the timed "manifesti_faction" flag remains active
-		every_owned_pop = {
+		every_owned_pop_group = {
 			limit = {
 				OR = { #Those eligible to join the faction (in lieu of a has_faction trigger for pops)
 					has_ethic = ethic_egalitarian
@@ -1214,7 +1870,7 @@ country_event = {
 					has_ethic = ethic_fanatic_pacifist
 				}
 			}
-			set_pop_flag = manifesti_bored
+			set_pop_group_flag = manifesti_bored
 		}
 	}
 

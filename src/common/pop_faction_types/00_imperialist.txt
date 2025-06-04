@@ -13,15 +13,57 @@ imperialist = {
 	resources = {
 		category = pop_factions
 		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
 			unity = @faction_base_output
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			engineering_research = @faction_major_output
+			society_research = @faction_minor_output
+			mult = @crowdsourcing_multiplier
 		}
 	}
 
 	extortion_resource = {
 		category = pop_factions
 		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
 			alloys = @faction_base_output
 			mult = @faction_extortion_alloys_ratio
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			engineering_research = @faction_major_output
+			society_research = @faction_minor_output
+			mult = @faction_extortion_crowdsourcing_ratio
 		}
 	}
 
@@ -612,6 +654,46 @@ imperialist = {
 		}
 	}
 
+	demand = { # Unplugged: Cyberize
+		title = IMPERIALIST_UNPLUGGED_CYBERIZE
+		unfulfilled_title = IMPERIALIST_UNPLUGGED_NOT_CYBERIZE
+		desc = IMPERIALIST_UNPLUGGED_CYBERIZE_DESC
+
+		unfulfilled_effect = -10
+		fulfilled_effect = 5
+
+		potential = {
+			exists = owner
+			owner = {
+				has_origin = origin_unplugged
+				any_situation = {
+					is_situation_type = situation_unplugged_identity
+				}
+			}
+		}
+
+		trigger = {
+			owner = {
+				any_situation = {
+					is_situation_type = situation_unplugged_identity
+					OR = {
+						AND = { # safely in the Cyberize stage
+							current_stage = unplugged_identity_stage_3
+							situation_monthly_progress > 0
+						}
+						AND = { # trending towards Cyberization and our Approach is aligned
+							situation_monthly_progress > 0.05
+							OR = {
+								current_situation_approach = situation_unplugged_identity_discourage_change
+								current_situation_approach = situation_unplugged_identity_embrace_opinion
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	# Faction Demands for Ruler and Council positions.
 	inline_script = {
 		script = "paragon/global_faction_demands"
@@ -621,7 +703,7 @@ imperialist = {
 	}
 
 	on_create = {
-		pop_faction_event = { id = factions.1 }
+		pop_faction_event = { id = factions.0 }
 	}
 
 	on_destroy = {
@@ -673,6 +755,7 @@ imperialist = {
 
 			effect = {
 				add_modifier = { modifier = embraced_faction days = 3600 }
+				owner = { set_country_flag = has_embraced_faction }
 				parameter:empire = {
 					shift_ethic = ethic_militarist
 					hidden_effect = {
@@ -754,6 +837,7 @@ imperialist = {
 			}
 
 			effect = {
+				owner = { set_country_flag = has_promoted_faction }
 				parameter:empire = {
 					add_modifier = { modifier = promoted_militarist days = -1 }
 				}
@@ -893,6 +977,10 @@ imperialist = {
 				owner = {
 					is_oligarchic_authority = yes
 					has_country_flag = cyber_collectivist
+					NOR = {
+						has_valid_civic = civic_crowdsourcing
+						has_valid_civic = civic_corporate_crowdsourcing
+					}
 				}
 				is_faction_extorted = no
 			}
@@ -900,6 +988,33 @@ imperialist = {
 			effect = {
 				set_faction_extorted = yes
 				custom_tooltip = alloys_extortion_tt
+				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
+			}
+
+			ai_weight = {
+				base = 0
+			}
+		}
+		extort_faction_crowdsourcing = { #Crowdsourcing version
+			title = "EXTORT_FACTION"
+			description = "EXTORT_FACTION_DESC"
+
+			potential = {
+				exists = owner
+				owner = {
+					is_oligarchic_authority = yes
+					has_country_flag = cyber_collectivist
+					OR = {
+						has_valid_civic = civic_crowdsourcing
+						has_valid_civic = civic_corporate_crowdsourcing
+					}
+				}
+				is_faction_extorted = no
+			}
+
+			effect = {
+				set_faction_extorted = yes
+				custom_tooltip = crowdsourced_extortion_tt
 				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
 			}
 

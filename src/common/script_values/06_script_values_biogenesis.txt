@@ -1,0 +1,817 @@
+################################
+# Scripted Values - BioGenesis #
+################################
+
+num_evolutionary_predators_planets = {
+	complex_trigger_modifier = { #First we count all the fresh modifiers and multiply them by 10
+	trigger = count_owned_planet
+	parameters = {
+		limit = {
+			OR = {
+				has_modifier = fresh_biosphere
+				has_modifier = genetic_soup
+			}
+		}
+	}
+	mode = add
+	mult = 10
+	}
+	complex_trigger_modifier = { #Then we count the exhausted ones
+		trigger = count_owned_planet
+		parameters = {
+			limit = {
+				has_modifier = exhausted_biosphere
+			}
+		}
+		mode = add
+	}
+	modifier = { #If you have the incorporate approach increase the final value by 50%
+		has_country_flag = evolutionary_predators_incorporate
+		mult = 1.5
+	}
+}
+
+num_evolutionary_predators_purge = {
+
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = livestock
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = livestock_zoo_animal
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = livestock_zoo_beast
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = livestock_lithoid
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = livestock_zoo_animal_lithoid
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = livestock_zoo_beast_lithoid
+		}
+		mode = add
+	}
+	mult = 0.002
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				is_pop_category = purge
+				is_organic_species = yes
+			}
+		}
+		mode = add
+		mult = 0.01
+	}
+	modifier = { #If you have the consume approach increase the final value by 50%
+		has_country_flag = evolutionary_predators_consume
+		mult = 1.5
+	}
+
+	modifier = { #If you have the hive authority increase the final value by 100%
+		is_mutation_authority = yes
+		is_hive_empire = yes
+		mult = 2
+	}
+}
+
+num_evolutionary_predators_species = { #Count all species in your empire, minus the robots, and remove your own species
+	complex_trigger_modifier = {
+		trigger = count_owned_species
+		parameters = {
+			limit = {
+				NOR = {
+					is_archetype = MACHINE
+					is_archetype = ROBOT
+					is_archetype = OTHER
+					is_same_species = prev.species
+					has_citizenship_type = { country = prev type = citizenship_purge }
+				}
+				root.owner = {
+					any_owned_pop_group = {
+						is_exact_same_species = prevprev
+					}
+				}
+			}
+		}
+		mode = add
+		mult = 5
+	}
+	modifier = { #If you have the synthesize approach increase the final value by 50%
+		has_country_flag = evolutionary_predators_synthesize
+		mult = 1.5
+	}
+	modifier = { #If you have the democratic authority increase the final value by 100%
+		is_democratic_authority = yes
+		is_mutation_authority = yes
+		mult = 2
+	}
+}
+
+num_evolutionary_predators_council = { #Count all species on your council, minus the robots, and remove your own species
+	complex_trigger_modifier = {
+		trigger = count_owned_leader
+		parameters = {
+			limit = {
+				prev = {
+					any_owned_leader = {
+						is_same_species = prevprev
+						is_councilor = yes
+					}
+				}
+				species = {
+					NOR = {
+						is_archetype = MACHINE
+						is_archetype = ROBOT
+						is_archetype = OTHER
+						is_same_species = prevprev.species #You can't get DNA from your own species
+					}
+				}
+			}
+		}
+		mode = add
+		mult = 5
+	}
+	modifier = { #If you have the synthesize approach increase the final value by 50%
+		has_country_flag = evolutionary_predators_synthesize
+		mult = 1.5
+	}
+}
+
+num_evolutionary_predators_subjects = { #Count all species among your subjects
+	complex_trigger_modifier = {
+		trigger = count_subject
+		parameters = {
+			limit = {
+				any_agreement = {
+					has_term_value = {
+						term = subject_dna
+						value = subject_gives_evopred_dna
+					}
+				}
+				species = {
+					NOR = {
+						is_archetype = MACHINE
+						is_archetype = ROBOT
+						is_archetype = OTHER
+						is_same_species = prevprev.species #You can't get DNA from your own species
+					}
+				}
+			}
+		}
+		mode = add
+		mult = 3
+	}
+	modifier = { #If you have the synthesize approach increase the final value by 50%
+		has_country_flag = evolutionary_predators_synthesize
+		mult = 1.5
+	}
+}
+
+num_evolutionary_predators_megacorp = { #Count all empires that you have commercial pacts with
+	complex_trigger_modifier = {
+		trigger = count_relation
+		parameters = {
+			limit = {
+				has_commercial_pact = prev
+				species =  {
+					NOR = {
+						is_archetype = MACHINE
+						is_archetype = ROBOT
+						is_archetype = OTHER
+						is_same_species = prevprev.species #You can't get DNA from your own species
+					}
+				}
+			}
+		}
+		mode = add
+		mult = 10
+	}
+	modifier = { #If you have the synthesize approach increase the final value by 50%
+		has_country_flag = evolutionary_predators_synthesize
+		mult = 1.5
+	}
+
+	modifier = { #If you have the proper authority multiply it by a further 100%
+		is_mutation_authority = yes
+		mult = 2
+	}
+}
+
+evopred_50 = {
+	base = 1000
+	mult = owner.num_evopred_situations_ran
+	mult = 0.5
+}
+
+evopred_imperial_age = {
+	add = trigger:leader_age
+	subtract = from.value:evopred_dead_leader_age
+	min = 30
+}
+
+evopred_dead_leader_age = {
+	add = trigger:leader_age
+}
+
+counter_familial = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				has_trait = trait_familial
+			}
+		}
+		mode = add
+	}
+	max = 20000
+}
+
+count_positive_traits_from_country = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_positive_traits
+		trigger_scope = species
+		mode = add
+	}
+}
+
+count_negative_traits_from_country = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_negative_traits
+		trigger_scope = species
+		mode = add
+	}
+}
+
+biomorphosis_progress_mult_value = {
+	base = 1
+	add = modifier:biomorphosis_progress_mult
+}
+
+species_traits_purity_count_value = {
+	base = 0
+	add = value:num_species_traits_of_cost_mult|COST|1|
+	add = value:num_species_traits_of_cost_mult|COST|2|
+	add = value:num_species_traits_of_cost_mult|COST|3|
+	add = value:num_species_traits_of_cost_mult|COST|4|
+	add = value:num_species_traits_of_cost_mult|COST|5|
+	add = value:num_species_traits_of_cost_mult|COST|6|
+	add = value:num_species_traits_of_cost_mult|COST|7|
+	add = value:num_species_traits_of_cost_mult|COST|8|
+	add = value:num_species_traits_of_cost_mult|COST|9|
+	add = value:num_species_traits_of_cost_mult|COST|10|
+	add = value:num_negative_species_traits_of_cost_mult|COST|1|
+	add = value:num_negative_species_traits_of_cost_mult|COST|2|
+	add = value:num_negative_species_traits_of_cost_mult|COST|3|
+	add = value:num_negative_species_traits_of_cost_mult|COST|4|
+	add = value:num_negative_species_traits_of_cost_mult|COST|5|
+	add = value:num_negative_species_traits_of_cost_mult|COST|6|
+	add = value:num_negative_species_traits_of_cost_mult|COST|7|
+	add = value:num_negative_species_traits_of_cost_mult|COST|8|
+	add = value:num_negative_species_traits_of_cost_mult|COST|9|
+	add = value:num_negative_species_traits_of_cost_mult|COST|10|
+}
+
+num_species_traits_of_cost_mult = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_species_traits
+		parameters = {
+			cost = $COST$
+		}
+		mode = add
+		mult = $COST$
+	}
+}
+
+num_negative_species_traits_of_cost_mult = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_species_traits
+		parameters = {
+			cost = -$COST$
+		}
+		mode = subtract
+		mult = $COST$
+	}
+}
+
+genetic_memory_mult = {
+	base = 0
+	modifier = {
+		is_homeworld_or_lost_colony = no
+		add = trigger:colony_age_years
+	}
+	modifier = {
+		is_homeworld_or_lost_colony = yes
+		add = 200
+	}
+	max = 50
+}
+
+hollow_bones_mult = {
+	base = 2
+	mult = planet.trigger:planet_size
+	divide = 3
+}
+
+purity_perfection_posneg_value = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				species = {
+					OR = {
+						is_archetype = PRESAPIENT
+						is_archetype = BIOLOGICAL
+						is_archetype = LITHOID
+					}
+				}
+				num_$POSNEG$_traits = 1
+			}
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				species = {
+					OR = {
+						is_archetype = PRESAPIENT
+						is_archetype = BIOLOGICAL
+						is_archetype = LITHOID
+					}
+				}
+				num_$POSNEG$_traits = 2
+			}
+		}
+		mode = add
+		mult = 2
+	}
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				species = {
+					OR = {
+						is_archetype = PRESAPIENT
+						is_archetype = BIOLOGICAL
+						is_archetype = LITHOID
+					}
+				}
+				num_$POSNEG$_traits = 3
+			}
+		}
+		mode = add
+		mult = 3
+	}
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				species = {
+					OR = {
+						is_archetype = PRESAPIENT
+						is_archetype = BIOLOGICAL
+						is_archetype = LITHOID
+					}
+				}
+				num_$POSNEG$_traits = 4
+			}
+		}
+		mode = add
+		mult = 4
+	}
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				species = {
+					OR = {
+						is_archetype = PRESAPIENT
+						is_archetype = BIOLOGICAL
+						is_archetype = LITHOID
+					}
+				}
+				num_$POSNEG$_traits = 5
+			}
+		}
+		mode = add
+		mult = 5
+	}
+	divide = 100
+}
+
+species_purity_times_ten = {
+	base = 0
+	add = species_traits_purity_count
+	mult = 10
+}
+
+species_traits_evopred_count_value = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_traits
+		trigger_scope = species
+		mode = add
+	}
+}
+
+skywatcher_dsc_mult = {
+	base = 1
+	modifier = {
+		any_ship_in_system = {
+			OR = {
+				is_ship_size = starbase_deep_space_citadel_2
+				is_ship_size = starbase_deep_space_citadel_3
+			}
+		}
+		add = 1
+	}
+	modifier = {
+		any_ship_in_system = {
+			is_ship_size = starbase_deep_space_citadel_3
+		}
+		add = 1
+	}
+}
+
+starlit_links_count = {
+	base = 1
+
+	modifier = {
+		add = event_target:global_event_country.ariphaos_patch_systems_hundreds
+		always = yes
+	}
+
+	complex_trigger_modifier = {
+		trigger = count_playable_country
+		parameters = {
+			limit = {
+				has_origin = origin_starlit_citadel
+			}
+		}
+		mode = subtract
+	}
+
+	min = 1
+	max = 20
+}
+
+hatchery_fleet_mauler_count = {
+	base = 0
+	add = hatchery_fleet_visits
+	mult = 2
+}
+
+hatchery_fleet_weaver_count = {
+	base = 0
+	add = value:hatchery_fleet_mauler_count
+	divide = 3
+	ceiling = yes
+}
+
+growth_factor = {
+	base = 0
+	add = owner.growth_factor_variable
+	mult = 0.005
+	add = owner.value:transferred_pops_district_scale_half_percent
+	add = 1
+
+	min = 0
+	max = 6.55
+}
+
+growth_factor_display = { #Need a nice number to show in loc
+	base = 1
+	mult = value:growth_factor
+	add = -1
+	mult = 10000
+	round = yes
+	divide = 100
+}
+
+sqrt_growth_factor = {
+	base = 1
+	mult = value:growth_factor
+	square_root = yes
+}
+
+growth_factor_divisor = {
+	base = 0.5
+	add = value:growth_factor
+	mult = value:sqrt_growth_factor
+}
+
+growth_factor_from_ships = { # 24x/(√x(0.5+x)) * ship_size_factor/10(to bring it back as%)
+	base = 1
+	mult = value:growth_factor
+	mult = 24
+	divide = value:growth_factor_divisor
+	mult = owner.growth_factor_ship_size_variable
+	divide = 10
+}
+
+weaver_confuser_chance = {
+	base = 1
+	add = $TIER$
+	mult = 15
+	subtract = value:confuser_chance_size_factor
+	max = 100
+	min = 0
+}
+
+confuser_chance_size_factor = {
+	base = 10
+	# Corvettes (and equivalent) do not have their chance reduced due to ship size
+	modifier = {
+		mult = 1
+		ship_size_multiplier >= 2
+		ship_size_multiplier < 4
+	}
+	modifier = {
+		mult = 2
+		ship_size_multiplier >= 4
+		ship_size_multiplier < 8
+	}
+	modifier = {
+		mult = 3
+		ship_size_multiplier >= 8
+		ship_size_multiplier < 16
+	}
+	modifier = {
+		mult = 4
+		ship_size_multiplier >= 16
+		ship_size_multiplier < 32
+	}
+	modifier = {
+		mult = 5
+		ship_size_multiplier >= 32
+		ship_size_multiplier < 64
+	}
+	modifier = {
+		mult = 6
+		ship_size_multiplier >= 64
+		ship_size_multiplier < 128
+	}
+	modifier = {
+		mult = 7
+		ship_size_multiplier >= 128
+		ship_size_multiplier < 256
+	}
+	modifier = {
+		mult = 8
+		ship_size_multiplier > 256
+	}
+}
+
+transferred_pops_district_scale = {
+	base = 1
+	mult = pops_transferred
+}
+
+transferred_pops_district_percent = {
+	base = 1
+	mult = pops_transferred
+	divide = 100
+}
+
+transferred_pops_district_scale_half_percent = {
+	base = 1
+	mult = pops_transferred
+	divide = 20000
+	min = 0
+}
+
+num_behemoths = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_owned_ship
+		#trigger_scope = country
+		mode = add
+		parameters = {
+			limit = {
+				OR = {
+					is_ship_size = behemoth_01
+					is_ship_size = behemoth_02
+					is_ship_size = behemoth_03
+					is_ship_size = behemoth_04
+				}
+			}
+		}
+	}
+}
+
+num_telepaths_and_transference = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = num_country_pops_with_job_tag
+		parameters = {
+			tags = { telepath }
+		}
+		mode = add
+	}
+	divide = 100
+}
+
+num_behemoth_empires = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_country
+		mode = add
+		parameters = {
+			limit = {
+				has_crisis_perk = menp_behemoth_mind_meld
+			}
+		}
+	}
+	add = -1 #don't count the player empire
+}
+
+# Bodysnatchers
+
+available_pops_for_bodysnatcher = {
+	base = 0
+
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				from.target = {
+					any_owned_species = {
+						is_same_species = prevprev.species
+						is_organic_species = yes
+					}
+				}
+			}
+		}
+		mode = add
+	}
+}
+
+five_percent_systems = {
+	complex_trigger_modifier = {
+		trigger = count_system_within_border
+		parameters = {
+			limit = {
+				exists = starbase
+				starbase.owner = {
+					is_same_value = prevprev
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 0.05
+	floor = yes
+	min = 1
+}
+
+ten_percent_systems = {
+	complex_trigger_modifier = {
+		trigger = count_system_within_border
+		parameters = {
+			limit = {
+				exists = starbase
+				starbase.owner = {
+					is_same_value = prevprev
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 0.10
+	floor = yes
+	min = 1
+}
+
+fifteen_percent_systems = {
+	complex_trigger_modifier = {
+		trigger = count_system_within_border
+		parameters = {
+			limit = {
+				exists = starbase
+				starbase.owner = {
+					is_same_value = prevprev
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 0.10
+	floor = yes
+	min = 1
+}
+
+twenty_percent_systems = {
+	complex_trigger_modifier = {
+		trigger = count_system_within_border
+		parameters = {
+			limit = {
+				exists = starbase
+				starbase.owner = {
+					is_same_value = prevprev
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 0.20
+	floor = yes
+	min = 1
+}
+
+twentyfive_percent_systems = {
+	complex_trigger_modifier = {
+		trigger = count_system_within_border
+		parameters = {
+			limit = {
+				exists = starbase
+				starbase.owner = {
+					is_same_value = prevprev
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 0.25
+	floor = yes
+	min = 1
+}
+
+fifty_percent_systems = {
+	complex_trigger_modifier = {
+		trigger = count_system_within_border
+		parameters = {
+			limit = {
+				exists = starbase
+				starbase.owner = {
+					is_same_value = prevprev
+				}
+			}
+		}
+		mode = add
+	}
+	mult = 0.50
+	floor = yes
+	min = 1
+}
+
+clone_pops_value = {
+	complex_trigger_modifier = {
+		trigger_scope = planet
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				OR = {
+					has_trait = trait_clone_soldier_infertile
+					has_trait = trait_clone_soldier_infertile_full_potential
+				}
+			}
+		}
+		mode = add
+	}
+}
+
+bio_ship_naval_cap_usage = {
+	complex_trigger_modifier = {
+		trigger = count_used_naval_cap
+		parameters = {
+			limit = { is_ship_category = bio_ship }
+		}
+		mode = add
+	}
+}
+
+war_experimental_ship_scaling = {
+	base = 1
+	add = war_experimental_count
+}

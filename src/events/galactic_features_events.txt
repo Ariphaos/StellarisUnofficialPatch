@@ -130,9 +130,9 @@ ship_event = {
 			sapient = no
 		}
 		FROM = {
-			create_pop = { species = last_created_species }
-			create_pop = { species = last_created_species }
-			create_pop = { species = last_created_species }
+			create_pop_group = { species = last_created_species }
+			create_pop_group = { species = last_created_species }
+			create_pop_group = { species = last_created_species }
 		}
 		owner = { set_country_flag = found_presapients }
 	}
@@ -191,7 +191,7 @@ ship_event = {
 	id = galactic_features.300
 	title = "galactic_features.300"
 	desc = "galactic_features.300.desc"
-	picture = GFX_evt_ship_in_orbit
+	picture = GFX_evt_shielded_planet
 	location = FROM
 	trackable = yes
 
@@ -389,12 +389,24 @@ ship_event = {
 						save_event_target_as = tuborek_leader
 						set_leader_flag = renowned_leader
 						set_leader_flag = is_in_recruit_window
-						add_trait = subclass_commander_admiral
-						add_trait = leader_trait_master_gunner
-						add_trait = leader_trait_aggressive_2
-						add_trait = leader_trait_wrecker_3
-						add_trait = leader_trait_commanding_presence_3
-						add_trait = leader_trait_resilient_2
+						add_trait = {
+							trait = subclass_commander_admiral
+						}
+						add_trait = {
+							trait = leader_trait_master_gunner
+						}
+						add_trait = {
+							trait = leader_trait_aggressive
+						}
+						add_trait = {
+							trait = leader_trait_wrecker_2
+						}
+						add_trait = {
+							trait = leader_trait_commanding_presence_2
+						}
+						add_trait = {
+							trait = leader_trait_resilient
+						}
 					}
 				}
 			}
@@ -440,6 +452,15 @@ country_event = {
 		tag = hire_leader
 		name = "galactic_features.304.c"
 		hidden_effect = {
+			if = {
+				limit = {
+					is_variable_set = paragon_memory_vault
+				}
+				change_variable = {
+					which = paragon_memory_vault
+					value = 1
+				}
+			}
 			hire_event_leader_effect = {
 				LEADER = tuborek_leader
 			}
@@ -458,11 +479,11 @@ ship_event = {
 	id = galactic_features.305
 	title = "galactic_features.305"
 	desc = {
-		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		trigger = { owner = { is_machine_empire = no } }
 		text = "galactic_features.305.desc"
 	}
 	desc = {
-		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		trigger = { owner = { is_machine_empire = yes } }
 		text = galactic_features.305.desc.mech
 	}
 	picture = GFX_evt_alien_planet
@@ -884,7 +905,7 @@ country_event = {
 					has_ethic = ethic_fanatic_xenophile
 					has_ethic = ethic_fanatic_spiritualist
 					has_ethic = ethic_fanatic_materialist
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 				}
 			}
 		}
@@ -916,7 +937,7 @@ country_event = {
 			OR = {
 				has_ethic = ethic_fanatic_materialist
 				AND = {
-					has_authority = auth_machine_intelligence
+					is_machine_empire = yes
 					NOT = { has_civic = civic_machine_terminator }
 				}
 			}
@@ -2787,51 +2808,7 @@ event = {
 		exists = event_target:tiyanki_spawn_system
 		any_country = {
 			is_tiyanki_country_type = yes
-			OR = {
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_0
-					num_fleets < 1
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_2
-					num_fleets < 2
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_4
-					num_fleets < 4
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_6
-					num_fleets < 6
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_8
-					num_fleets < 8
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_10
-					num_fleets < 10
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_12
-					num_fleets < 12
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_14
-					num_fleets < 14
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_16
-					num_fleets < 16
-				}
-				AND = {
-					has_global_flag = ariphaos_patch_galaxy_size_18
-					num_fleets < 18
-				}
-				AND = {
-					num_fleets < 20
-				}
-			}
+			num_fleets < event_target:global_event_country.ariphaos_patch_systems_critters
 		}
 	}
 
@@ -3385,6 +3362,7 @@ country_event = {
 			is_tiyanki_country_type = yes
 		}
 		NOT = {
+			# Ariphaos TODO: Captures shouldn't count as kills, but if they just end up getting culled, they should be.
 			fromfrom = {
 				any_combatant_fleet = {
 					NOT = { is_same_value = fromfromfrom }
@@ -3813,8 +3791,8 @@ planet_event = {
 		else = {
 			random = {
 				chance = 20
-				random_owned_pop = {
-					kill_pop = yes
+				random_owned_pop_group = {
+					kill_single_pop = yes
 
 					# Next the storm spawning here so we only spawn a storm if a random pop exists.
 					prev = {

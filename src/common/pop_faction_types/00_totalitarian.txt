@@ -13,15 +13,57 @@ totalitarian = {
 	resources = {
 		category = pop_factions
 		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
 			unity = @faction_base_output
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			society_research = @faction_major_output
+			engineering_research = @faction_minor_output
+			mult = @crowdsourcing_multiplier
 		}
 	}
 
 	extortion_resource = {
 		category = pop_factions
 		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
 			engineering_research = @faction_base_output
 			mult = @faction_extortion_research_ratio
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			society_research = @faction_major_output
+			engineering_research = @faction_minor_output
+			mult = @faction_extortion_crowdsourcing_ratio
 		}
 	}
 
@@ -352,6 +394,35 @@ totalitarian = {
 		}
 	}
 
+	demand = { # Unplugged: Status Quo
+		title = TOTALITARIAN_UNPLUGGED_STATUS_QUO
+		unfulfilled_title = TOTALITARIAN_UNPLUGGED_NOT_STATUS_QUO
+		desc = TOTALITARIAN_UNPLUGGED_STATUS_QUO_DESC
+
+		unfulfilled_effect = -20
+		fulfilled_effect = 0.001
+
+		potential = {
+			exists = owner
+			owner = {
+				has_origin = origin_unplugged
+				any_situation = {
+					is_situation_type = situation_unplugged_identity
+				}
+			}
+		}
+
+		trigger = {
+			owner = {
+				any_situation = {
+					is_situation_type = situation_unplugged_identity
+					current_stage = stage_2
+					current_situation_approach = situation_unplugged_identity_discourage_change
+				}
+			}
+		}
+	}
+
 	# Faction Demands for Ruler and Council positions.
 	inline_script = {
 		script = "paragon/global_faction_demands"
@@ -361,7 +432,7 @@ totalitarian = {
 	} 
 
 	on_create = {
-		pop_faction_event = { id = factions.1 }
+		pop_faction_event = { id = factions.0 }
 	}
 
 	on_destroy = {
@@ -413,6 +484,7 @@ totalitarian = {
 
 			effect = {
 				add_modifier = { modifier = embraced_faction days = 3600 }
+				owner = { set_country_flag = has_embraced_faction }
 				parameter:empire = {
 					shift_ethic = ethic_authoritarian
 					hidden_effect = {
@@ -481,6 +553,7 @@ totalitarian = {
 			}
 
 			effect = {
+				owner = { set_country_flag = has_promoted_faction }
 				parameter:empire = {
 					add_modifier = { modifier = promoted_authoritarian days = -1 }
 				}
@@ -594,6 +667,10 @@ totalitarian = {
 				owner = {
 					is_oligarchic_authority = yes
 					has_country_flag = cyber_collectivist
+					NOR = {
+						has_valid_civic = civic_crowdsourcing
+						has_valid_civic = civic_corporate_crowdsourcing
+					}
 				}
 				is_faction_extorted = no
 			}
@@ -601,6 +678,33 @@ totalitarian = {
 			effect = {
 				set_faction_extorted = yes
 				custom_tooltip = engineering_research_extortion_tt
+				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
+			}
+
+			ai_weight = {
+				base = 0
+			}
+		}
+		extort_faction_crowdsourcing = { #Crowdsourcing version
+			title = "EXTORT_FACTION"
+			description = "EXTORT_FACTION_DESC"
+
+			potential = {
+				exists = owner
+				owner = {
+					is_oligarchic_authority = yes
+					has_country_flag = cyber_collectivist
+					OR = {
+						has_valid_civic = civic_crowdsourcing
+						has_valid_civic = civic_corporate_crowdsourcing
+					}
+				}
+				is_faction_extorted = no
+			}
+
+			effect = {
+				set_faction_extorted = yes
+				custom_tooltip = crowdsourced_extortion_tt
 				custom_tooltip = ONLY_ONE_EXTORTED_FACTION_TT
 			}
 

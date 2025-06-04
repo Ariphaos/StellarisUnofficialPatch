@@ -35,15 +35,22 @@ Generally these are done by contributors rather than myself, but I sometimes do 
 Sometimes Paradox has fixed something or something should not normally occur. I leave these in either as an assurance against regressions and sometimes as a modding aid. They do not meaningfully impact performance.
 
 * Check for trait existence before removing.
-* Ghost pop removal on colony destruction.
 * Legendary Leaders specifically excluded from death events.
 * Moving is_ai pretrigger to triggers.
 
-# Individual Changes
+# Fixes As Events
+
+## Soldier Counting
+
+These events track soldier counts for limited types - Azizians, Imperial Legion, and Titanic Life. They allow you to purchase new ones if one dies, and occasional recounts track things there is no current trigger for.
+
+Additionally, the mod now supports titanic life being recruited from multiple planets, as was desired by the devs when they first wrote it but 'it was not possible with scripting' at the time.
+
+# Individual File Changes
 
 ## advisor_events.txt
 
-General fixes (Astral Scar exclusions)
+General fixes (Astral Scar exclusions). Not likely to happen, but some mod may add one or something.
 
 ## an4_events.txt
 
@@ -64,11 +71,12 @@ General fixes (Astral Scar exclusions)
 
 * Generate systems a bit closer, for denser galaxies.
 
-## ancient_relics_arcsite_events_1.txt
+## ancient_relics_arcsite_events_2.txt
 
 ### Bugfixes
 
 * Homicidals don't get Zarqlan. (Balance? Seems out of order.)
+* Make sure Wilderness empires have an option for the First League.
 
 ### Mod Support
 
@@ -99,7 +107,7 @@ General fixes (Astral Scar exclusions)
 
 * Make sure Diamond in the Rough gets their traits.
 * Start special projects in country scope.
-* Don't let the rampaging general murder a councilor.
+* Don't let the rampaging general murder a councilor. Especially not your ruler.
 
 ### Restorations
 
@@ -111,9 +119,7 @@ General fixes (Astral Scar exclusions)
 
 * Fix Tollok Rong (Baldarak) for multiplayer.
 * Prevent them from clobbering resources.
-* Flipped Cascading Catastrophe check for unfriendlies so homicidals won't take. (Not certain what was intended here so picked a middle ground.)
-* Allow a conquerer to get the Nanite Swarm project.
-* Handled a bit of irony.
+* Flipped Cascading Catastrophe check for unfriendlies so homicidals won't take. (Not certain what was intended here, so picked a middle ground.)
 
 ## anomaly_events_AI.txt
 
@@ -130,8 +136,7 @@ General fixes (Astral Scar exclusions)
 
 ### Bugfixes
 
-* Block all psionic traits and synthetics from getting psionic from lootboxes.
-* Make sure partygoer event targets exist before enacting.
+* Block psionic traits and synthetics/machines from getting psionic from lootboxes.
 
 ## colony_events_1.txt
 
@@ -146,18 +151,25 @@ General fixes (Astral Scar exclusions)
 
 ### Bugfixes
 
+* General pretrigger fixes.
 * Don't let relic/city worlds get the odd factory.
 * "What separates us" should not target presapients.
 
 ## colony_events_3.txt
 
+### AI
+
+* Allow AI to recruit titanic life.
+
 ### Bugfixes
 
+* Titanic life can now grant up to 3 troops per planet.
 * Copy `original_owner` out of pretriggers.
 * Move other things as pretriggers where needed.
 * Corrupted Knight fix.
 * Some further restrictions to Feral Overload to prevent issues.
 * Don't let Negative Mass hit a ruler.
+* Remove the Payback debris field from the B planet if it has it.
 
 ### Mod Support
 
@@ -189,9 +201,8 @@ General fixes (Astral Scar exclusions)
 
 ### Bugfixes
 
-* Count telepaths and overseers as enforcers. (Paradox seems to have seen and left this, but the former is what they do and the situation can be intractable without the latter.)
+* Count overseers as enforcers.
 * Legendary/chosen block remains on the governor killing event in case the governor gets swapped out in that time.
-* Doing something about the pop murder events. (Move to balance patch.)
 
 ## crisis_events_1.txt
 
@@ -247,6 +258,7 @@ General fixes (Astral Scar exclusions)
 * Bubbles shouldn't deny its new friends the secrets of pacification just because they've already met amoebas.
 * Big friendly warform belongs to the nice faction.
 * Homicidals not exactly keen on attaching other thinking beings to their brainstems.
+* Machines should lack the ability.
 * Allow AH4B and Big Friendly Warform to join fleets.
 * Ketlings can't live on shattered worlds.
 * Workaround if creation of mining stations would fail for Ketlings.
@@ -275,12 +287,13 @@ General Fixes (Astral Scar exclusion, ship checks to fleet checks, scope existen
 * Start projects in country rather than location scope.
 * A number of enigmatic cache fixes.
 * Invisible Death won't spawn in systems owned by other empires. (Paradox specifically didn't incorporate this, leaving it for now because it can otherwise spawn in Marauder systems.)
-* Stranded Scientist no longer global.
 * Prevent wormhole generator from connecting to problematic systems.
+* Set starting ethos for our favorite murder lizards so they don't decide they love people.
 
 ### Flavor
 
 * Give the Ketlings and Prikki an origin.
+* Stranded Scientist no longer global.
 
 ### Performance
 
@@ -324,7 +337,7 @@ General scope check fixes.
 
 ### Bugfixes
 
-* FE won't give machine empires 'selected lineages' as a reward.
+* FE won't give machine/synthetic empires 'selected lineages' as a reward.
 * The Materialist FE can ask AI for scientists.
 * Block them from asking for rulers or renowned/legendary leaders.
 * Block death events for them as they aren't getting killed.
@@ -347,13 +360,13 @@ General scope check fixes.
 ### Bugfixes
 
 * Make sure options for Shallash are always available.
-* Dancing plague cannot spawn on relic worlds.
+* Dancing plague cannot spawn on relic worlds. (Leads to other issues.)
 
 ## first_contact_dlc_events.txt
 
 ### Mod Support
 
-* Flag block for spawning the Chosen.
+* Flag block to make sure Chosen only spawn once.
 
 ## first_contact_NPC_country_types_events.txt
 
@@ -374,6 +387,7 @@ General scope check fixes.
 ### Bugfix
 
 * General scope check for VLUUR
+* Superlight event can no longer terraform nanite worlds into deserts.
 
 ### Mod Support
 
@@ -387,12 +401,18 @@ General scope check fixes.
 
 ### Flavor
 
-* Let Amoebas fight Tiyanki.
+* Let Amoebae fight Tiyanki.
 
 ### Mod Support
 
 * Run trait checks on starting leaders.
 * Move wormhole multiplier into a variable.
+
+## grand_archive_events.txt
+
+### Mod Support
+
+* Support different galaxy sizes for Voidworm and Cutholoid spawning.
 
 ## gray_goo_events.txt
 
@@ -414,6 +434,7 @@ General scope check fixes.
 * General fixes (scope checking, astral scar exclusions, pretriggers)
 * Start special projects in country rather than capital scope.
 * Ensure Syzygy commander is of same species.
+* Destroy buildings/districts on temporal reversion.
 * Don't reroll currently inhabited planets on embracing the worm.
 * ...but do reroll the new black holes.
 
@@ -431,6 +452,7 @@ General scope check fixes.
 
 * Move dragon incubation from capital to country scope.
 * Fix for dragon vengeance mission scopes.
+* Homicidals don't get to ask the Curators about their Collection.
 
 ### Feature
 
@@ -442,7 +464,18 @@ General scope check fixes.
 
 * Block enigmatic fortress event spam.
 * Block hivers from triggering again.
+* Don't let empires off the hook just because they weren't the ones to build on the hivers
 * General scope fixes.
+
+### Performance
+
+* Move hiver mtth event to a yearly pulse event.
+
+## machine_age_crisis_events.txt
+
+### Mod Support
+
+* Support non-standard galaxy sizes, for Cosmogenesis and the Queen.
 
 ## marauder_events.txt
 
@@ -450,7 +483,7 @@ General scope check fixes.
 
 * Fixed marauder mercenary vengeance.
 * Raiders won't target occupied worlds. (Wierd things happen.)
-* Khan generation fix. (Also I believe fixed by Paradox, however I liked my version better so I kept it. It does make the Khan slightly stronger.)
+* Khan generation fix. (Also fixed by Paradox. However, I liked my version better, so I kept it. It does make the Khan slightly stronger.)
 * Give Marauders 8 constructors. (What the AI can handle.)
 * More generous with army generation.
 * Marauders account for difficulty when checking to build new fleets.
@@ -476,9 +509,17 @@ General scope check fixes.
 
 * Replicate conquest events for AI.
 
+## nemesis_crisis_events.txt
+
+### Mod Support
+
+* Support nonstantard galaxy sizes.
+
 ## nemesis_espionage_events.txt
 
-General scope check fix.
+### Bugfix
+
+* Make sure a living envoy is available before triggering events for them (VFix)
 
 ## nomad_events.txt
 
@@ -493,7 +534,13 @@ General scope check fix.
 ### Bugfixes
 
 * Don't let FotD primitives nuke themselves.
-* Only let Rogue Scientist chain fire once. (I have a lot planned for this but will probably move a lot of this over to my balance mod.)
+* Only let Rogue Scientist chain fire once. It can get quite annoying after happening a dozen times.
+* Don't let the Fear of the Dark kill themselves in their terror.
+* There are some further fixes here that I could do to tie the chain together.
+* Properly clear event blocker flag in obervation.1202, and unlock the outpost.
+
+### AI
+* Added some AI personality tweaks for when they demand their savior back.
 
 ## on_action_events_1.txt
 
@@ -509,7 +556,6 @@ General scope check fix.
 * Alien pets and titanic life don't survive machine world terraforming.
 * Don't kill robotic armies on only outlawing ai.
 * Remmove all districts on bombing a planet into a tomb world.
-* vol can make tomb worlds 
 * Patch fallback for if tomb world is not properly triggered for some reason.
 
 ### Feature
@@ -521,8 +567,6 @@ General scope check fix.
 ### Bugfixes
 
 * Correct invalid flag: pirate_relation -> scientist_pirate_relation
-* Taking Dormant Marauder systems doesn't autosurvey them. (An old fix, left in as an alternative to using cloaked ships to survey them.)
-* Turn off error log on improper contact event. (VFix)
 
 ## origin_events_3.txt
 
@@ -535,6 +579,7 @@ General scope check fix.
 ### Bugfixes
 
 * Declining healthcare should be a lot more persistent as it is supposed to be removed later on.
+* Stage 3 clinic should also block the above event.
 
 ## origin_events_astral_planes.txt
 
@@ -547,7 +592,6 @@ General scope check fix.
 ### Bugfixes
 
 * No cooldown for forced authority change.
-* General fixes (Astral Scar, scope)
 
 ## overlord_enclaves_events.txt
 
@@ -556,7 +600,6 @@ General scope check fix.
 * Make sure the leader exists before trying to fire them.
 * Fix 'All Too Lucid' to only fire on original owner worlds.
 * Allow Shroud Fragment to join fleets.
-* Ersatz brain slugs require a habitable world.
 * Dimensional Portal divination shouldn't block itself.
 * Shroud tunnels shouldn't affect Chosen.
 * Homicidals don't just let mutated leaders live.
@@ -597,9 +640,11 @@ General fixes (astral scar exclusion).
 
 ## planet_destruction_events.txt
 
-The changes in this file are now obsolete and only exist as regression safeguards.
+No longer relevant as of 4.0.
 
 ## pop_events.txt
+
+This entire file has been nuked as of 4.0.
 
 ### Bugfixes
 
@@ -617,7 +662,7 @@ The changes in this file are now obsolete and only exist as regression safeguard
 
 ### Balance
 
-* Upped unity reward limit from 9,999 to 99,999 (May no longer be necessary.)
+* Moved unity reward limit to a variable, so a balance patch or other mod can adjust if desired.
 
 ### Mod Support
 
@@ -625,13 +670,9 @@ The changes in this file are now obsolete and only exist as regression safeguard
 
 ## progress_events.txt
 
-### Bugfix
-
-* Missing = sign in event #2. (17blue17)
-
 ### Flavor
 
-* First Colony text for non-standard worlds (Gaia, Tomb, Relic, Ring)
+* First Colony text for non-standard worlds (Gaia, Tomb, Relic, Ring, and modded). This 'fix' inspired the mod, and was my (Ariphaos') first change.
 
 ## story_events.txt
 
@@ -643,6 +684,7 @@ The changes in this file are now obsolete and only exist as regression safeguard
 
 * Fix invalid flag: pirate_relation -> scientist_pirate_relation
 * Surveyor won't clobber existing resources.
+* Fix for spiritualist crystal research description.
 
 ## synthetic_dawn_events.txt
 

@@ -6,6 +6,7 @@ recruitment_office = {
 	construction_days = 720
 
 	potential = {
+		is_space_citadel = no
 		exists = owner
 		owner = {
 			has_technology = "tech_xeno_linguistics"
@@ -90,6 +91,7 @@ hydroponics_bay = {
 	potential = {
 		exists = owner
 		owner = { has_technology = "tech_hydroponics" }
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -117,8 +119,6 @@ hydroponics_bay = {
 
 	show_in_tech = "tech_hydroponics"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -129,6 +129,7 @@ resource_silo = {
 	construction_days = 180
 
 	potential = {
+		is_space_citadel = no
 	}
 
 	resources = {
@@ -158,8 +159,6 @@ resource_silo = {
 		country_resource_max_add = 10000
 	}
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -172,6 +171,7 @@ nebula_refinery = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_space_mining_1 }
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -213,8 +213,6 @@ nebula_refinery = {
 
 	show_in_tech = "tech_space_mining_1"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -240,6 +238,7 @@ listening_post = {
 		owner = { has_technology = tech_sensors_2 }
 		OR = {
 			is_normal_starbase = yes
+			is_space_citadel = yes
 		}
 	}
 
@@ -296,7 +295,7 @@ listening_post = {
 				has_first_contact_dlc = yes
 			}
 		}
-	
+
 		ship_cloaking_detection_add = 1
 	}
 
@@ -318,6 +317,7 @@ offworld_trading_company = {
 			is_gestalt = no
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -339,22 +339,19 @@ offworld_trading_company = {
 		cost = {
 			alloys = 100
 		}
-	}
-
-	triggered_station_modifier = {
-		potential = {
-			hidden_trigger = { exists = this }
-			has_starbase_module = trading_hub
+		produces = {
+			trigger = {
+				hidden_trigger = { exists = this }
+				has_starbase_module = trading_hub
+			}
+			trade = 2
+			mult = value:num_starbase_modules_of_type|TYPE|trading_hub|
 		}
-		trade_value_add = 2
-		mult = value:num_starbase_modules_of_type|TYPE|trading_hub|
 	}
 
 	custom_tooltip = sm_offworld_trading_company_desc_modifier
 
 	show_in_tech = "tech_space_trading"
-
-	
 
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
@@ -377,6 +374,7 @@ fleet_academy = {
 		owner = { has_technology = tech_interstellar_fleet_traditions }
 
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -406,8 +404,6 @@ fleet_academy = {
 
 	show_in_tech = "tech_interstellar_fleet_traditions"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 		modifier = {
@@ -427,6 +423,7 @@ naval_logistics_office = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_interstellar_fleet_traditions }
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -461,8 +458,6 @@ naval_logistics_office = {
 	custom_tooltip = sm_naval_logistics_office_desc_modifier
 	show_in_tech = "tech_interstellar_fleet_traditions"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 		modifier = {
@@ -488,6 +483,7 @@ titan_yards = {
 			}
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -529,11 +525,35 @@ titan_yards = {
 			}
 		}
 		modifier = {
-			factor = 0.1
+			factor = 0
+			# Break these buildings up.
+			has_starbase_building = colossus_yards
+		}
+		modifier = {
+			factor = 0
+			owner = {
+				controlled_systems < 60
+				any_owned_starbase = {
+					NOT = { is_same_value = root }
+					has_starbase_building = titan_yards
+				}
+			}
+		}
+		modifier = {
+			factor = 0.2
 			owner = {
 				any_owned_starbase = {
 					NOT = { is_same_value = root }
 					has_starbase_building = titan_yards
+				}
+			}
+		}
+		modifier = {
+			factor = 0
+			owner = {
+				count_owned_starbase = {
+					count > 1
+					limit = { has_starbase_building = titan_yards }
 				}
 			}
 		}
@@ -554,6 +574,7 @@ colossus_yards = {
 			}
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -585,8 +606,6 @@ colossus_yards = {
 	show_in_tech = "tech_colossus"
 	show_in_tech = "tech_juggernaut"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 		modifier = {
@@ -595,6 +614,11 @@ colossus_yards = {
 				type = shipyard
 				count < 2
 			}
+		}
+		modifier = {
+			factor = 0
+			# Break these buildings up.
+			has_starbase_building = titan_yards
 		}
 		modifier = {
 			factor = 0
@@ -627,6 +651,7 @@ black_hole_observatory = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_sensors_3 }
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -682,8 +707,6 @@ black_hole_observatory = {
 
 	show_in_tech = "tech_sensors_3"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -703,6 +726,7 @@ target_uplink_computer = {
 			OR = {
 				has_starbase_size >= starbase_starport
 				is_orbital_ring = yes
+				is_space_citadel = yes
 			}
 		}
 	}
@@ -726,8 +750,6 @@ target_uplink_computer = {
 		ship_weapon_range_mult = 0.50
 	}
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -748,6 +770,7 @@ defense_grid = {
 			OR = {
 				has_starbase_size >= starbase_starport
 				is_orbital_ring = yes
+				is_space_citadel = yes
 			}
 		}
 	}
@@ -769,8 +792,6 @@ defense_grid = {
 
 	show_in_tech = "tech_synchronized_defences"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -786,13 +807,19 @@ deep_space_black_site = {
 			has_technology = tech_living_state
 			NOT = { has_ethic = ethic_gestalt_consciousness }
 		}
-		is_normal_starbase = yes
+		OR = {
+			is_normal_starbase = yes
+			is_space_citadel = yes
+		}
 	}
 
 	possible = {
 		custom_tooltip = {
 			fail_text = "requires_starport"
-			has_starbase_size >= starbase_starport
+			OR = {
+				has_starbase_size >= starbase_starport
+				is_space_citadel = yes
+			}
 		}
 		custom_tooltip = {
 			fail_text = "requires_colonized_planet"
@@ -826,8 +853,6 @@ deep_space_black_site = {
 
 	show_in_tech = "tech_living_state"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -844,6 +869,7 @@ curator_think_tank = {
 			has_country_flag = curator_intro
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -912,8 +938,6 @@ curator_think_tank = {
 		}
 	}
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -930,6 +954,7 @@ art_college = {
 			has_country_flag = enclave_artist_encountered
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -994,8 +1019,6 @@ art_college = {
 		}
 	}
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -1011,13 +1034,19 @@ salvager_workshop = {
 			is_homicidal = no
 			has_country_flag = salvager_enclave_diplomacy_engaged
 		}
-		is_normal_starbase = yes
+		OR = {
+			is_normal_starbase = yes
+			is_space_citadel = yes
+		}
 	}
 
 	possible = {
 		custom_tooltip = {
 			fail_text = "requires_starport"
-			has_starbase_size >= starbase_starport
+			OR = {
+				has_starbase_size >= starbase_starport
+				is_space_citadel = yes
+			}
 		}
 		custom_tooltip = {
 			fail_text = "requires_salvager_enclave"
@@ -1077,8 +1106,6 @@ salvager_workshop = {
 		ship_repair_armor_mult = 0.3
 	}
 
-	
-
 	ai_weight = {
 		weight = 150
 	}
@@ -1096,6 +1123,7 @@ shroud_beacon = {
 			has_country_flag = shroudwalker_enclave_bought_shroud_beacon
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -1170,8 +1198,6 @@ shroud_beacon = {
 		}
 	}
 
-	
-
 	ai_weight = {
 		weight = 50
 		#Don't build nextdoor to the Shroudwalkers
@@ -1209,6 +1235,7 @@ shroud_beacon = {
 		fleet.owner = {
 			country_event = { id = enclave.4200 }
 			country_event = { id = origin.5625 }
+			country_event = { id = timeline.60	 } # Origin Event Shroud Tunnel Built
 		}
 	}
 
@@ -1227,6 +1254,7 @@ cybrex_mining_hub = {
 		exists = owner
 		owner = { has_technology = tech_secrets_cybrex }
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	resources = {
@@ -1275,6 +1303,7 @@ irassian_naval_yards = {
 		exists = owner
 		owner = { has_technology = tech_secrets_irassian }
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -1340,7 +1369,10 @@ yuht_detection_array = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_secrets_yuht }
-		is_normal_starbase = yes
+		OR = {
+			is_normal_starbase = yes
+			is_space_citadel = yes
+		}
 	}
 
 	resources = {
@@ -1438,7 +1470,10 @@ archaeo_overcharger = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_archaeo_overcharger }
-		is_normal_starbase = yes
+		OR = {
+			is_normal_starbase = yes
+			is_space_citadel = yes
+		}
 	}
 
 	triggered_station_modifier = {
@@ -1494,7 +1529,7 @@ feeder = {
 	construction_days = 180
 
 	potential = {
-		is_orbital_ring = no
+		is_normal_starbase = yes
 		exists = owner
 		owner = { has_technology = tech_critter_feeder }
 	}
@@ -1532,6 +1567,7 @@ astromining_hub = {
 	construction_days = 360
 
 	potential = {
+		is_normal_starbase = yes
 		exists = owner
 		owner = {
 			has_civic = civic_machine_astromining_drones
@@ -1539,13 +1575,16 @@ astromining_hub = {
 	}
 
 	possible = {
-		custom_tooltip = {
-			fail_text = "requires_astromining_bay"
-			OR = {
-				has_starbase_module = astromining_bay
-				starbase_buildable_is_in_queue_before = {
-					first = astromining_bay
-					second = astromining_hub
+		OR = {
+			is_scope_valid = no
+			custom_tooltip = {
+				fail_text = "requires_astromining_bay"
+				OR = {
+					has_starbase_module = astromining_bay
+					starbase_buildable_is_in_queue_before = {
+						first = astromining_bay
+						second = astromining_hub
+					}
 				}
 			}
 		}
@@ -1629,14 +1668,13 @@ nanite_harvester = {
 	}
 }
 
-
-#################
-# AURA BUILDINGS
-#################
-
 communications_jammer = {
 	icon = "GFX_starbase_communication_jammer"
 	construction_days = 180
+
+	potential = {
+		is_space_citadel = no
+	}
 
 	possible = {
 		custom_tooltip = {
@@ -1678,8 +1716,6 @@ communications_jammer = {
 
 	equipped_component = "STARBASE_AURA_COMMUNICATIONS_JAMMER"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -1688,6 +1724,10 @@ communications_jammer = {
 disruption_field = {
 	icon = "GFX_spaceport_module_orbital_mind_control_lazer"
 	construction_days = 180
+
+	potential = {
+		is_space_citadel = no
+	}
 
 	possible = {
 		custom_tooltip = {
@@ -1738,8 +1778,6 @@ disruption_field = {
 
 	equipped_component = "STARBASE_AURA_DISRUPTION_FIELD"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 		modifier = {
@@ -1775,14 +1813,15 @@ warp_fluctuator = {
 		cost = {
 			alloys = 100
 		}
-
+		produces = {
+			trade = 2
+		}
 		upkeep = {
 			energy = 2
 		}
 	}
 
 	station_modifier = {
-		starbase_trade_collection_range_add = 1
 	}
 	triggered_system_modifier = {
 		# Gives some Stability per "Hyperspace Specialty" Councilor level.
@@ -1798,8 +1837,6 @@ warp_fluctuator = {
 
 	show_in_tech = "tech_interstellar_economics"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -1814,6 +1851,7 @@ transit_hub = {
 		owner = {
 			has_technology = tech_hyper_drive_2
 		}
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -1863,15 +1901,13 @@ transit_hub = {
 	}
 
 	system_modifier = {
-		planet_resettlement_unemployed_mult = 1.00
+		planet_resettlement_unemployed_mult = 2.00
 
 		show_only_custom_tooltip = no
 		custom_tooltip = "sm_transit_hub_migrate_effect_desc"
 	}
 
 	show_in_tech = "tech_hyper_drive_2"
-
-	
 
 	ai_weight = {
 		weight = 100
@@ -1882,11 +1918,6 @@ transit_hub = {
 					any_system_colony = {
 						exists = owner
 						owner = { is_country_type = default }
-						OR = {
-							free_jobs <= 0
-							free_housing <= 0
-							num_unemployed > 0
-						}
 					}
 				}
 			}
@@ -1901,6 +1932,7 @@ command_center = {
 	potential = {
 		exists = owner
 		owner = { has_technology = tech_command_matrix }
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -1944,8 +1976,6 @@ command_center = {
 	equipped_component = "STARBASE_AURA_COMMAND_CENTER"
 	show_in_tech = "tech_command_matrix"
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 	}
@@ -1968,6 +1998,7 @@ trader_proxy_office = {
 			}
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -2004,6 +2035,9 @@ trader_proxy_office = {
 		cost = {
 			alloys = 100
 		}
+		produces = {
+			trade = 5
+		}
 	}
 
 	country_modifier = {
@@ -2024,11 +2058,7 @@ trader_proxy_office = {
 				is_active_resolution = "resolution_galacticstudies_extradimensional_experimentation"
 			}
 		}
-
-		trade_value_add = 5
 	}
-
-	
 
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
@@ -2056,6 +2086,7 @@ dragon_hatchery = {
 		owner = {
 			is_dragon_breeder_country = yes
 		}
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -2086,8 +2117,6 @@ dragon_hatchery = {
 
 	custom_tooltip = dragon_hatchery_tooltip
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 		modifier = {
@@ -2113,6 +2142,7 @@ ice_mining_station = {
 		owner = {
 			has_ascension_perk = ap_hydrocentric
 		}
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -2148,8 +2178,6 @@ ice_mining_station = {
 		station_gatherers_produces_mult = 0.15
 	}
 
-	
-
 	ai_weight = {
 		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
 		modifier = {
@@ -2175,6 +2203,7 @@ offspring_outlook = {
 		owner = {
 			has_origin = origin_progenitor_hive
 		}
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -2196,8 +2225,6 @@ offspring_outlook = {
 	}
 	equipped_component = "STARBASE_OFFSPRING_OUTLOOK"
 
-	
-
 	ai_weight = {
 		weight = 10
 	}
@@ -2214,6 +2241,7 @@ mercenary_garrison = {
 			has_country_flag = mercenary_enclave_diplomacy_engaged
 		}
 		is_normal_starbase = yes
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -2277,8 +2305,6 @@ mercenary_garrison = {
 		}
 	}
 
-	
-
 	ai_weight = {
 		weight = 50
 	}
@@ -2291,6 +2317,7 @@ cordyceptic_reanimation_facility = {
 	potential = {
 		exists = owner
 		owner = { has_valid_civic = civic_hive_cordyceptic_drones }
+		is_space_citadel = no
 	}
 
 	possible = {
@@ -2413,7 +2440,10 @@ dark_matter_listening_post = {
 	potential = {
 		exists = owner
 		owner = { is_fallen_empire = yes }
-		is_normal_starbase = yes
+		OR = {
+			is_normal_starbase = yes
+			is_space_citadel = yes
+		}
 	}
 
 	possible = {
@@ -2461,10 +2491,7 @@ dimensional_shrine = {
 	potential = {
 		exists = owner
 		owner = {
-			OR = {
-				has_valid_civic = civic_dimensional_worship
-				has_valid_civic = civic_corporate_dimensional_worship
-			}
+			is_dimensional_worship_empire = yes
 		}
 	}
 
@@ -2472,8 +2499,10 @@ dimensional_shrine = {
 		custom_tooltip = {
 			fail_text = "requires_starport_or_ring"
 			OR = {
+				is_scope_valid = no
 				has_starbase_size >= starbase_starport
 				is_orbital_ring = yes
+				is_space_citadel = yes
 			}
 		}
 		custom_tooltip = {
@@ -2533,6 +2562,7 @@ reloading_bay = {
 			OR = {
 				has_starbase_size >= starbase_starport
 				is_orbital_ring = yes
+				is_space_citadel = yes
 			}
 		}
 	}
@@ -2557,10 +2587,63 @@ reloading_bay = {
 	}
 }
 
+growth_chamber = {
+	icon = "GFX_spaceport_module_growth_chamber"
+	construction_days = 360
 
-##########################
-# Cosmic storm buildings #
-##########################
+	potential = {
+		exists = owner
+		owner = { has_technology = tech_growth_chamber_1 }
+		is_normal_starbase = yes
+		is_space_citadel = no
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_shipyard"
+			OR = {
+				has_starbase_module = shipyard
+				starbase_buildable_is_in_queue_before = {
+					first = shipyard
+					second = growth_chamber
+				}
+			}
+		}
+	}
+
+	orbit_modifier = {
+		bioship_growth_progress_add = 2
+		ship_orbit_upkeep_mult = 1.00
+	}
+
+	triggered_station_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				has_technology = tech_growth_chamber_2
+			}
+		}
+		starbase_shipyard_capacity_add = 2
+	}
+
+	resources = {
+		category = starbase_buildings
+		cost = {
+			alloys = 100
+			exotic_gases = 50
+		}
+		upkeep = {
+			food = 10
+			exotic_gases = 2
+		}
+	}
+
+	show_in_tech = "tech_growth_chamber_1"
+
+	ai_weight = {
+		weight = 100 #use same weight here - ai weighting is done in starbase_types.txt
+	}
+}
 
 storm_attraction_computer = {
 	icon = "GFX_starbase_cosmic_storm_attraction_computer"

@@ -190,6 +190,46 @@ event = {
 	}
 }
 
+# Clear flags and give conquering players a chance to tame titans.
+planet_event = {
+	id = ariphaos_patch.101
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_modifier = "titanic_life"
+	}
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_planet_flag = titanic_life_can_build }
+				exists = owner
+				owner = { is_country_type = default }
+			}
+			if = {
+				limit = {
+					has_planet_flag = titanic_life_colony_flag
+				}
+				remove_planet_flag = titanic_life_colony_flag
+			}
+			if = {
+				limit = {
+					owner = { has_origin = origin_primal_calling }
+				}
+				planet_event = { id = grand_archive.1010 days = 390 random = 90 }
+			}
+			else_if = {
+				limit = {
+					NOT = { owner = { has_ethic = ethic_gestalt_consciousness } }
+				}
+				planet_event = { id = colony_mod.2 days = 390 random = 90 }
+			}
+		}
+	}
+	after = {
+		ariphaos_patch_count_armies = yes
+	}
+}
+
 # De-increment variable for counting Azizian armies
 country_event = {
 	id = ariphaos_patch.450
@@ -285,63 +325,20 @@ event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		every_playable_country = {
-			set_variable = {
-				which = titanic_life_soldier_count
-				value = 0
-			}
-			set_variable = {
-				which = titanic_azizian_soldier_count
-				value = 0
-			}
-			set_variable = {
-				which = imperial_legion_soldier_count
-				value = 0
-			}
-			every_owned_army = {
-				limit = {
-					OR = {
-						army_type = titanic_assault_army
-						army_type = titanic_azizian_assault_army
-						army_type = imperial_legion
-					}
-				}
-				switch = {
-					trigger = army_type
-					titanic_assault_army = { PREV = {
-						change_variable = {
-							which = titanic_life_soldier_count
-							value = 1
-						}
-					} }
-					titanic_azizian_assault_army = { PREV = {
-						change_variable = {
-							which = titanic_azizian_soldier_count
-							value = 1
-						}
-					} }
-					imperial_legion = { PREV = {
-						change_variable = {
-							which = imperial_legion_soldier_count
-							value = 1
-						}
-					} }
-				}
-			}
-#			set_variable = {
-#				which = titanic_life_soldier_maximum
-#				value = 0
-#			}
-#			every_owned_planet = {
-#				limit = { has_planet_flag = titanic_life_can_build }
-#				PREV = {
-#					change_variable = {
-#						which = titanic_life_soldier_maximum
-#						value = @titanic_life_soldier_per_planet_maximum
-#					}
-#				}
-#			}
-		}
+		ariphaos_patch_count_armies = yes
+	}
+}
+
+planet_event = {
+	id = ariphaos_patch.1330
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_modifier = artistic_boom
+		from = { is_gestalt = yes }
+	}
+	immediate = {
+		remove_modifier = artistic_boom
 	}
 }
 
@@ -353,12 +350,12 @@ country_event = {
 
 	immediate = {
 		from = { 
-			add_leader_traits_after_modification = yes
-			remove_leader_traits_after_modification = yes
+			ariphaos_patch_leader_change_traits = yes
 		}
 	}
 
 }
+
 event = {
 	id = ariphaos_patch.3101
 	hide_window = yes
@@ -399,200 +396,3 @@ country_event = {
 	}
 }
 
-# Some
-event = {
-	id = ariphaos_patch.7200
-	hide_window = yes
-	is_triggered_only = yes
-	
-	trigger = {
-		any_galaxy_planet = {
-			has_planet_flag = star_seddom
-			solar_system = {
-				any_system_planet = {
-					has_planet_flag = planet_Ariph
-					is_planet_class = pc_molten
-				}
-				any_system_planet = {
-					has_planet_flag = planet_Frince
-					is_planet_class = pc_shrouded
-				}
-			}
-		}
-	}
-	
-	immediate = {
-		random_galaxy_planet = {
-			limit = { has_planet_flag = star_seddom }
-			solar_system = {
-				every_system_planet = {
-					switch = {
-						trigger = has_planet_flag
-						planet_Glavi = {
-							change_pc = pc_gas_giant
-							clear_deposits = yes
-							add_deposit = d_exotic_gases_1
-						}
-						planet_Salvold = {
-							change_pc = pc_barren_cold
-							clear_deposits = yes
-							add_deposit = d_minerals_2
-						}
-						planet_Frince = {
-							change_pc = pc_frozen
-							clear_deposits = yes
-							add_deposit = d_minerals_2
-						}
-						planet_Echo = {
-							change_pc = pc_barren
-							clear_deposits = yes
-							add_deposit = d_energy_2
-						}
-					}
-				}
-			}
-		}
-		every_playable_country = {
-			limit = { is_ai = no }
-			country_event = { id = ariphaos_patch.7201 days = 2 }
-		}
-	}
-}
-
-country_event = {
-	id = ariphaos_patch.7201
-	title = ariphaos_patch.7201.name
-	desc = ariphaos_patch.7201.desc
-	picture = GFX_evt_shrouded_planet
-	show_sound = event_mystic_reveal
-	location = this
-	
-	is_triggered_only = yes
-	
-	trigger = {
-		is_ai = no
-	}
-	
-	option = {
-		name = "ariphaos_patch.7201.option"
-	}
-}
-
-country_event = {
-	id = ariphaos_patch.9998
-	hide_window = yes
-	is_triggered_only = yes
-
-	trigger = {
-		is_regular_empire = yes
-		is_country_type = default
-	}
-
-	immediate = {
-		add_modifier = {
-			modifier = ariphaos_patch_political_restructuring
-			days = 720
-		}
-		every_owned_pop = {
-			limit = {
-				is_same_species = ROOT
-			}
-			random_list = {
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_homicidal = yes }
-					}
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_xenophobe = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_xenophobe }
-					}
-					pop_change_ethic = ethic_xenophobe
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_xenophile = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_xenophile }
-					}
-					pop_change_ethic = ethic_xenophile
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_militarist = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_militarist }
-					}
-					pop_change_ethic = ethic_militarist
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_pacifist = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_pacifist }
-					}
-					pop_change_ethic = ethic_pacifist
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_materialist = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_materialist }
-					}
-					pop_change_ethic = ethic_materialist
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_spiritualist = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_spiritualist }
-					}
-					pop_change_ethic = ethic_spiritualist
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_egalitarian = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_egalitarian }
-					}
-					pop_change_ethic = ethic_egalitarian
-				}
-				25 = {
-					modifier = {
-						factor = 0
-						ROOT = { is_authoritarian = no }
-					}
-					modifier = {
-						factor = 2
-						ROOT = { has_ethic = ethic_fanatic_authoritarian }
-					}
-					pop_change_ethic = ethic_authoritarian
-				}
-			}
-		}
-	}
-}

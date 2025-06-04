@@ -1,0 +1,2045 @@
+######################
+# Empire Focus Events
+######################
+
+# These are support events for Empire Focus Tasks.
+# They usually set a country flag from an on_action when a task is completed.
+# That way tasks can be completed before they are drawn.
+
+namespace = focus
+
+# Fired from on_game_start_country
+# Scope = Country
+country_event = {
+	id = focus.5
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					country_uses_bio_ships = no
+					has_civic = civic_beastmasters
+				}
+			}
+			set_variable = {
+				which = focus_built_corvettes
+				value = 0
+			}
+		}
+		if = {
+			limit = {
+				country_uses_bio_ships = yes
+			}
+			set_variable = {
+				which = focus_produced_maulers
+				value = 0
+			}
+		}
+		set_variable = {
+			which = focus_agendas_completed
+			value = 0
+		}
+		set_variable = {
+			which = focus_conquered_worlds
+			value = 0
+		}
+		set_variable = {
+			which = focus_terraformed_worlds
+			value = 0
+		}
+		set_variable = {
+			which = focus_built_platforms
+			value = 0
+		}
+		if = {
+			limit = {
+				country_uses_bio_ships = no
+			}
+			set_variable = {
+				which = focus_built_destroyers
+				value = 0
+			}
+		}
+		if = {
+			limit = {
+				country_uses_bio_ships = yes
+			}
+			set_variable = {
+				which = focus_produced_weavers
+				value = 0
+			}
+		}
+		set_variable = {
+			which = focus_built_armies
+			value = 0
+		}
+		set_variable = {
+			which = level_5_scientist
+			value = 0
+		}
+		set_variable = {
+			which = level_5_commander
+			value = 0
+		}
+		set_variable = {
+			which = level_5_official
+			value = 0
+		}
+		set_variable = {
+			which = conquest_subjects
+			value = 0
+		}
+		if = {
+			limit = {
+				is_megacorp = yes
+			}
+			set_variable = {
+				which = branch_offices_established
+				value = 0
+			}
+		}
+		# Requires on_action code support TODO AUG-50161
+#		set_variable = {
+#			which = focus_goal_favors
+#			value = 0
+#		}
+	}
+}
+
+# Fired from on_colonized
+# Scope = Planet
+planet_event = {
+	id = focus.10
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			NOT = { has_country_flag = first_colony_finished }
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = first_colony_finished }
+	}
+}
+
+# Fired from on_ship_built
+# Root = Ship
+# From = Planet
+ship_event = {
+	id = focus.15
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			AND = {
+				is_ship_size = corvette
+				owner = {
+					NOT = { has_civic = civic_beastmasters }
+				}
+			}
+			AND = {
+				is_ship_size = space_amoeba
+				owner = {
+					has_civic = civic_beastmasters
+				}
+			}
+		}
+		exists = owner
+		owner = {
+			is_country_type = default
+			check_variable = {
+				which = focus_built_corvettes
+				value < @focus_goal_built_corvettes
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_built_corvettes
+				value = 1
+			}
+		}
+	}
+}
+
+# Produce 5 Maulers
+# Fired from on_ship_built
+# Root = Ship
+ship_event = {
+	id = focus.16
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		ship_uses_mauler_components = yes
+		exists = owner
+		owner = {
+			is_country_type = default
+			check_variable = {
+				which = focus_produced_maulers
+				value < @focus_goal_produced_maulers
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_produced_maulers
+				value = 1
+			}
+		}
+	}
+}
+
+# Fired from anomaly_success
+# this = ship
+# from = planet
+ship_event = {
+	id = focus.20
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			NOT = { has_country_flag = first_anomaly_finished }
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = first_anomaly_finished }
+	}
+}
+
+# Fired from on_system_survey_ship
+# A ship is done surveying the last unsurveyed planet in a system
+# Scope = ship
+# From = system
+ship_event = {
+	id = focus.25
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			NOT = { has_country_flag = first_system_survey_finished }
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = first_system_survey_finished }
+	}
+}
+
+# Fired from special_project_success
+# Fired when a ship completes a special project.
+# this = country
+# fromfromfrom = ship
+country_event = {
+	id = focus.30
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = first_special_project_finished }
+	}
+
+	immediate = {
+		set_country_flag = first_special_project_finished
+	}
+}
+
+# Fired from on_arch_site_finished
+fleet_event = {
+	id = focus.35
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			NOT = { has_country_flag = first_archaeology_site_finished }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = first_archaeology_site_finished
+		}
+	}
+}
+
+# Fired from on_megastructure_built and on_megastructure_upgraded
+# A Megastructure has been built or upgraded
+# Root = Country
+# From = Megastructure
+# FromFrom = System
+country_event = {
+	id = focus.40
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = swarm_30_research }
+		exists = FROMFROM
+		FROMFROM = {
+			system_has_dyson_swarm = yes
+			any_system_planet = {
+				is_star = yes
+				OR = {
+					has_resource = {
+						type = physics_research
+						amount >= 30
+					}
+					has_resource = {
+						type = society_research
+						amount >= 30
+					}
+					has_resource = {
+						type = engineering_research
+						amount >= 30
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = swarm_30_research
+	}
+}
+
+# Fired from on_leader_level_up
+# A leader leveled up.
+# Scope = Country
+# From = Leader
+country_event = {
+	id = focus.45
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NAND = {
+			has_country_flag = scientist_level_up
+			has_country_flag = scientist_level_4
+			has_country_flag = commander_level_up
+			has_country_flag = commander_level_4
+			has_country_flag = official_level_up
+			has_country_flag = official_level_4
+		}
+	}
+
+	immediate = {
+		# First Scientist level up
+		if = {
+			limit = {
+				NOT = { has_country_flag = scientist_level_up }
+				any_owned_leader = {
+					leader_class = scientist
+					has_base_skill > 1
+				}
+			}
+			set_country_flag = scientist_level_up
+		}
+
+		# First Scientist level 4
+		if = {
+			limit = {
+				NOT = { has_country_flag = scientist_level_4 }
+				any_owned_leader = {
+					leader_class = scientist
+					has_base_skill >= 4
+				}
+			}
+			set_country_flag = scientist_level_4
+		}
+
+		# First Commander level up
+		if = {
+			limit = {
+				NOT = { has_country_flag = commander_level_up }
+				any_owned_leader = {
+					leader_class = commander
+					has_base_skill > 1
+				}
+			}
+			set_country_flag = commander_level_up
+		}
+
+		# First Commander level 4
+		if = {
+			limit = {
+				NOT = { has_country_flag = commander_level_4 }
+				any_owned_leader = {
+					leader_class = commander
+					has_base_skill >= 4
+				}
+			}
+			set_country_flag = commander_level_4
+		}
+
+		# First Official level up
+		if = {
+			limit = {
+				NOT = { has_country_flag = official_level_up }
+				any_owned_leader = {
+					leader_class = official
+					has_base_skill > 1
+				}
+			}
+			set_country_flag = official_level_up
+		}
+
+		# First Official level 4
+		if = {
+			limit = {
+				NOT = { has_country_flag = official_level_4 }
+				any_owned_leader = {
+					leader_class = official
+					has_base_skill >= 4
+				}
+			}
+			set_country_flag = official_level_4
+		}
+	}
+}
+
+# Fire by on_leader_hired
+# Executed as a leader is hired
+# This = Leader
+leader_event = {
+	id = focus.46
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = {	has_country_flag = scientist_level_4 }
+		}
+	}
+
+	immediate = {
+		owner = {
+			if = {
+				limit = {
+					NOT = { has_country_flag = scientist_level_4 }
+					any_owned_leader = {
+						leader_class = scientist
+						has_base_skill >= 4
+					}
+				}
+				set_country_flag = scientist_level_4
+			}
+		}
+	}
+}
+
+# Fired from on_leader_assigned
+# Scope: Leader (after assignment)
+leader_event = {
+	id = focus.50
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = scientist_governor_assigned }
+		}
+		leader_class = scientist
+		exists = planet # This means that they are a planet or sector governor
+		days_passed > 0
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = scientist_governor_assigned
+		}
+	}
+}
+
+# Fired from on_astral_rift_exploration_complete
+# Executed when the exploration of an astral rift ends
+# THIS = Country: Explorer country
+# FROM = AstralRift: Explored astral rift
+# FROMFROM = Exploring Fleet
+country_event = {
+	id = focus.55
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = first_astral_rift_finished }
+	}
+
+	immediate = {
+		set_country_flag = first_astral_rift_finished
+	}
+}
+
+# Fired from on_debris_researched
+# Fired when a science ship succesfully analyzed or scavenged debris
+# this = country
+# from = debris
+# fromfrom = controller of destroyed ship
+# fromfromfrom = science ship
+country_event = {
+	id = focus.60
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NAND = {
+			has_country_flag = fallen_empire_debris_researched
+			has_country_flag = crisis_debris_researched
+		}
+		exists = fromfrom
+		fromfrom = {
+			OR = {
+				is_fallen_empire = yes
+				is_crisis_faction = yes
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = { fromfrom = { is_fallen_empire = yes } }
+			set_country_flag = fallen_empire_debris_researched
+		}
+		else_if = {
+			limit = { fromfrom = { is_crisis_faction = yes } }
+			set_country_flag = crisis_debris_researched
+		}
+	}
+}
+
+# Fired from on_planet_transfer
+# Fired whenever a new owner is set for a planet, following a war or through trade
+# This = Planet scope
+# From = Country scope (new owner)
+# FromFrom = Country scope (previous owner, if any)
+planet_event = {
+	id = focus.65
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_planet_flag = fallen_empire_world
+		from = {
+			NOT = { has_country_flag = conquered_fallen_empire_world }
+		}
+	}
+
+	immediate = {
+		from = { set_country_flag = conquered_fallen_empire_world }
+	}
+}
+
+# Fired from on_research_option_added
+# Triggers when a Country gets a new always available tech as a research option.
+# This = Country
+country_event = {
+	id = focus.70
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = research_option_added }
+		days_passed > 1
+	}
+
+	immediate = {
+		set_country_flag = research_option_added
+	}
+}
+
+# Fired from on_monthly_pulse_country
+# this = country
+country_event = {
+	id = focus.80
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_active_focus = exploration_focus_505
+		NOT = { has_country_flag = research_income_1000 }
+	}
+
+	immediate = {
+		clear_variable = focus_physics_research
+		clear_variable = focus_society_research
+		clear_variable = focus_engineering_research
+		export_resource_income_to_variable = {
+			resource = physics_research
+			variable = focus_physics_research
+		}
+		export_resource_income_to_variable = {
+			resource = society_research
+			variable = focus_society_research
+		}
+		export_resource_income_to_variable = {
+			resource = engineering_research
+			variable = focus_engineering_research
+		}
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = focus_physics_research
+					add = focus_society_research
+					add = focus_engineering_research
+					value >= 1000
+				}
+			}
+			set_country_flag = research_income_1000
+		}
+	}
+}
+
+# Fired from on_building_mining_station
+# This = construction ship
+# From = planet OR Astral Rift it is built on
+# Fires when construction is complete,
+# immediately before station is created
+ship_event = {
+	id = focus.85
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = mining_station_built }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = mining_station_built
+		}
+	}
+}
+
+# Fired from on_building_complete
+#A building construction has been completed.
+# This = Planet
+planet_event = {
+	id = focus.90
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = planet_building_built }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = planet_building_built
+		}
+	}
+}
+
+# Fired from on_monthly_pulse_country
+# this = country
+country_event = {
+	id = focus.95
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = default
+		NAND = {
+			has_country_flag = energy_storage_1000
+			has_country_flag = mineral_storage_1000
+			has_country_flag = food_storage_1000
+			has_country_flag = alloys_storage_1000
+		}
+		if = {
+			limit = {
+				country_uses_consumer_goods = yes
+			}
+			NOT = { has_country_flag = consumer_goods_storage_1000 }
+		}
+	}
+
+	immediate = {
+		if = { # Energy Credits
+			limit = {
+				NOT = { has_country_flag = energy_storage_1000 }
+				resource_stockpile_compare = {
+					resource = energy
+					value >= 1000
+				}
+			}
+			set_country_flag = energy_storage_1000
+		}
+		if = { # Minerals
+			limit = {
+				NOT = { has_country_flag = mineral_storage_1000 }
+				resource_stockpile_compare = {
+					resource = minerals
+					value >= 1000
+				}
+			}
+			set_country_flag = mineral_storage_1000
+		}
+		if = { # Food
+			limit = {
+				NOT = { has_country_flag = food_storage_1000 }
+				resource_stockpile_compare = {
+					resource = food
+					value >= 1000
+				}
+			}
+			set_country_flag = food_storage_1000
+		}
+		if = { # Consumer Goods
+			limit = {
+				NOT = { has_country_flag = consumer_goods_storage_1000 }
+				resource_stockpile_compare = {
+					resource = consumer_goods
+					value >= 1000
+				}
+			}
+			set_country_flag = consumer_goods_storage_1000
+		}
+		if = { # Alloys
+			limit = {
+				NOT = { has_country_flag = alloys_storage_1000 }
+				resource_stockpile_compare = {
+					resource = alloys
+					value >= 1000
+				}
+			}
+			set_country_flag = alloys_storage_1000
+		}
+	}
+}
+
+# Fired from on_district_complete
+# This = Planet
+planet_event = {
+	id = focus.100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			if = {
+				limit = {
+					is_gestalt = no
+				}
+				NAND = {
+					has_country_flag = built_city_district
+					has_country_flag = built_generator_district
+					has_country_flag = built_mining_district
+					has_country_flag = built_farming_district
+				}
+			}
+			else_if = {
+				limit = {
+					is_machine_empire = yes
+				}
+				NAND = {
+					has_country_flag = built_nexus_district
+					has_country_flag = built_generator_district
+					has_country_flag = built_mining_district
+					has_country_flag = built_farming_district
+				}
+			}
+			else_if = {
+				limit = {
+					is_hive_empire = yes
+					is_wilderness_empire = no
+				}
+				NAND = {
+					has_country_flag = built_hive_district
+					has_country_flag = built_generator_district
+					has_country_flag = built_mining_district
+					has_country_flag = built_farming_district
+				}
+			}
+			else_if = {
+				limit = {
+					is_wilderness_empire = yes
+				}
+				NAND = {
+					has_country_flag = built_district_craglands
+					has_country_flag = built_district_photosynthesis_fields
+					has_country_flag = built_district_hollow_mountains
+					has_country_flag = built_district_orchard_forests
+				}
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			if = { # City District
+				limit = {
+					NOT = { has_country_flag = built_city_district }
+					prev = { last_district_changed = district_city }
+				}
+				set_country_flag = built_city_district
+			}
+			if = { # Hive District - City variant for Hive
+				limit = {
+					NOT = { has_country_flag = built_hive_district }
+					prev = { last_district_changed = district_hive }
+				}
+				set_country_flag = built_hive_district
+			}
+			if = { # Nexus District - City variant for Machine
+				limit = {
+					NOT = { has_country_flag = built_nexus_district }
+					prev = { last_district_changed = district_nexus }
+				}
+				set_country_flag = built_nexus_district
+			}
+			if = { # Generator District
+				limit = {
+					NOT = { has_country_flag = built_generator_district }
+					prev = { last_district_changed = district_generator }
+				}
+				set_country_flag = built_generator_district
+			}
+			if = { # Habitat Energy District - Energy variant for Habitats
+				limit = {
+					NOT = { has_country_flag = built_generator_district }
+					prev = { last_district_changed = district_hab_energy }
+				}
+				set_country_flag = built_generator_district
+			}
+			if = { # Generator District - Uncapped
+				limit = {
+					NOT = { has_country_flag = built_generator_district }
+					prev = { last_district_changed = district_generator_uncapped }
+				}
+				set_country_flag = built_generator_district
+			}
+			if = { # Generator District - Ring World
+				limit = {
+					NOT = { has_country_flag = built_generator_district }
+					prev = { last_district_changed = district_rw_generator }
+				}
+				set_country_flag = built_generator_district
+			}
+			if = { # Mining District
+				limit = {
+					NOT = { has_country_flag = built_mining_district }
+					prev = { last_district_changed = district_mining }
+				}
+				set_country_flag = built_mining_district
+			}
+			if = { # Mining District - Habitat Variant
+				limit = {
+					NOT = { has_country_flag = built_mining_district }
+					prev = { last_district_changed = district_hab_mining }
+				}
+				set_country_flag = built_mining_district
+			}
+			if = { # Mining District - Uncapped
+				limit = {
+					NOT = { has_country_flag = built_mining_district }
+					prev = { last_district_changed = district_mining_uncapped }
+				}
+				set_country_flag = built_mining_district
+			}
+			if = { # Agriculture District
+				limit = {
+					NOT = { has_country_flag = built_farming_district }
+					prev = { last_district_changed = district_farming }
+				}
+				set_country_flag = built_farming_district
+			}
+			if = { # Agriculture District - Ring World Variant
+				limit = {
+					NOT = { has_country_flag = built_farming_district }
+					prev = { last_district_changed = district_rw_farming }
+				}
+				set_country_flag = built_farming_district
+			}
+			if = { # Agriculture District - Uncapped
+				limit = {
+					NOT = { has_country_flag = built_farming_district }
+					prev = { last_district_changed = district_farming_uncapped }
+				}
+				set_country_flag = built_farming_district
+			}
+			if = { # Agriculture District - Habitat Variant
+				limit = {
+					NOT = { has_country_flag = built_farming_district }
+					prev = { last_district_changed = district_hab_housing }
+				}
+				set_country_flag = built_farming_district
+			}
+			if = { # Craglands District
+				limit = {
+					NOT = { has_country_flag = built_district_craglands }
+					prev = { last_district_changed = district_craglands }
+				}
+				set_country_flag = built_district_craglands
+			}
+			if = { # Photosynthesis Fields District
+				limit = {
+					NOT = { has_country_flag = built_district_photosynthesis_fields }
+					prev = { last_district_changed = district_photosynthesis_fields }
+				}
+				set_country_flag = built_district_photosynthesis_fields
+			}
+			if = { # Photosynthesis Fields District Uncapped
+				limit = {
+					NOT = { has_country_flag = built_district_photosynthesis_fields }
+					prev = { last_district_changed = district_photosynthesis_fields_uncapped }
+				}
+				set_country_flag = built_district_photosynthesis_fields
+			}
+			if = { # Hollow Mountains
+				limit = {
+					NOT = { has_country_flag = built_district_hollow_mountains }
+					prev = { last_district_changed = district_hollow_mountains }
+				}
+				set_country_flag = built_district_hollow_mountains
+			}
+			if = { # Hollow Mountains Uncapped
+				limit = {
+					NOT = { has_country_flag = built_district_hollow_mountains }
+					prev = { last_district_changed = district_hollow_mountains_uncapped }
+				}
+				set_country_flag = built_district_hollow_mountains
+			}
+			if = { # Orchard Forests
+				limit = {
+					NOT = { has_country_flag = built_district_orchard_forests }
+					prev = { last_district_changed = district_orchard_forests }
+				}
+				set_country_flag = built_district_orchard_forests
+			}
+			if = { # Hollow Mountains
+				limit = {
+					NOT = { has_country_flag = built_district_orchard_forests }
+					prev = { last_district_changed = district_orchard_forests_uncapped }
+				}
+				set_country_flag = built_district_orchard_forests
+			}
+		}
+	}
+}
+
+# Fired from on_agenda_finished
+# Executed when a country activates an agenda
+# THIS = country
+country_event = {
+	id = focus.105
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_country_type = default
+			check_variable = {
+				which = focus_agendas_completed
+				value < @focus_goal_agendas_completed
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_agendas_completed
+				value = 1
+			}
+		}
+	}
+}
+
+# Fired from on_decision_enacted
+# A planet decision is enacted.
+# Root = Planet
+# From = Planet Owner
+planet_event = {
+	id = focus.110
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		exists = owner
+		owner = {
+			NOT = { has_country_flag = planetary_decision_enacted }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = planetary_decision_enacted
+		}
+	}
+}
+
+# Fired from on_building_observation_station
+# This = construction ship
+# From = planet it is built on
+ship_event = {
+	id = focus.115
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = built_observation_station }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = built_observation_station
+		}
+	}
+}
+
+# Fired from on_entering_wormhole
+# THIS = Fleet
+# FROM = System jumping to
+# FROMFROM = System jumped from
+fleet_event = {
+	id = focus.120
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = entered_wormhole }
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = entered_wormhole
+		}
+	}
+}
+
+# Fired from on_sign_research_pact
+# This = Country who accepted the proposal
+# From = Country who proposed the research agreement
+country_event = {
+	id = focus.125
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		OR = {
+			NOT = { has_country_flag = has_research_pact }
+			from = { NOT = { has_country_flag = has_research_pact } }
+		}
+	}
+
+	immediate = {
+		set_country_flag = has_research_pact
+		from = { set_country_flag = has_research_pact }
+	}
+}
+
+# Fired from on_terraforming_complete
+# Planet has been terraformed
+# This = Planet
+# From = Terraforming country
+planet_event = {
+	id = focus.130
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			check_variable = {
+				which = focus_terraformed_worlds
+				value < @focus_goal_terraformed_worlds
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			change_variable = {
+				which = focus_terraformed_worlds
+				value = 1
+			}
+		}
+	}
+}
+
+# Fired from on_relic_activated
+# This = Country
+country_event = {
+	id = focus.135
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			check_variable = {
+				which = focus_activated_relics
+				value < @focus_goal_activated_relics
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_activated_relics
+				value = 1
+			}
+		}
+	}
+}
+
+# Fired from on_war_ended
+# A war has ended
+# Root = Loser
+# From = Main Winner
+country_event = {
+	id = focus.140
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			NOT = { has_country_flag = has_won_war }
+		}
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = has_won_war
+		}
+	}
+}
+
+# Fired from on_planet_bombarded
+# Planet has taken damage from orbital bombardment - Damage is applied daily
+# This = Planet
+# From = Bombarder
+planet_event = {
+	id = focus.145
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			NOT = { has_country_flag = has_forced_planet_surrender }
+		}
+		num_armies < 1
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = has_forced_planet_surrender
+		}
+	}
+}
+
+# Fired from on_planet_conquer
+# This = Planet scope
+# From = Country scope (new owner)
+# FromFrom = Former Owner
+planet_event = {
+	id = focus.150
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_homeworld = yes
+		from = {
+			NOT = { has_country_flag = has_conquered_homeworld }
+		}
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = has_conquered_homeworld
+		}
+	}
+}
+
+# Fired from on_favor_gained
+# This = Country that receives a favor
+# From = Country a favor is from
+country_event = {
+	id = focus.155
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			NOT = { has_country_flag = favor_gained }
+		}
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = favor_gained
+		}
+	}
+}
+
+# Fired from on_leader_assigned
+# Scope: Leader (after assignment)
+leader_event = {
+	id = focus.160
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = official_governor_assigned }
+		}
+		leader_class = official
+		exists = planet # This means that they are a planet or sector governor
+		days_passed > 0
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = official_governor_assigned
+		}
+	}
+}
+
+# Fired from on_edict_activated
+# Root = Country
+country_event = {
+	id = focus.165
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = has_activated_edict }
+	}
+
+	immediate = {
+		set_country_flag = has_activated_edict
+	}
+}
+
+# Fired from on_branch_office_established
+# THIS = Planet: Branch office planet
+# FROM = Country: Branch office owner
+planet_event = {
+	id = focus.175
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			check_variable = {
+				which = branch_offices_established
+				value < @focus_goal_branch_offices_established
+			}
+		}
+	}
+
+
+	immediate = {
+		from = {
+			change_variable = {
+				which = branch_offices_established
+				value = 1
+			}
+			if = {
+				limit = {
+					NOT = { has_country_flag = has_established_branch_office }
+				}
+				set_country_flag = has_established_branch_office
+			}
+		}
+	}
+}
+
+# Fired from on_branch_office_closed
+# THIS = Planet: Branch office planet
+# FROM = Country: Branch office owner
+planet_event = {
+	id = focus.180
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			check_variable = {
+				which = branch_offices_established
+				value > 0
+			}
+		}
+	}
+
+
+	immediate = {
+		from = {
+			change_variable = {
+				which = branch_offices_established
+				value = -1
+			}
+		}
+	}
+}
+
+first_contact_event = {
+	id = focus.500
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NAND = {
+			owner = {
+				has_country_flag = had_first_contact
+			}
+			from = {
+				has_country_flag = had_first_contact
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = had_first_contact
+		}
+		from = {
+			set_country_flag = had_first_contact
+		}
+	}
+}
+
+country_event = {
+	id = focus.505
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = agenda_build_relations_finish
+	}
+
+	immediate = {
+		set_country_flag = launched_diplomatic_agenda
+	}
+}
+
+leader_event = {
+	id = focus.510
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NAND = {
+				has_country_flag = hired_official
+				has_country_flag = hired_scientist
+				has_country_flag = hired_commander
+			}
+		}
+	}
+
+	immediate = {
+		switch = {
+			trigger = leader_class
+			official = {
+				owner = {
+					set_country_flag = hired_official
+				}
+			}
+			scientist = {
+				owner = {
+					set_country_flag = hired_scientist
+				}
+			}
+			commander = {
+				owner = {
+					set_country_flag = hired_commander
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = focus.515
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_country_flag = has_non_aggression_pact
+		}
+	}
+
+	immediate = {
+		set_country_flag = has_non_aggression_pact
+		from = {
+			set_country_flag = has_non_aggression_pact
+		}
+	}
+}
+
+country_event = {
+	id = focus.520
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_country_flag = has_defensive_pact
+		}
+	}
+
+	immediate = {
+		set_country_flag = has_defensive_pact
+		from = {
+			set_country_flag = has_defensive_pact
+		}
+	}
+}
+
+country_event = {
+	id = focus.530
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT ={
+			has_country_flag = swarm_80
+		}
+		FROMFROM = {
+			any_system_planet = {
+				is_star = yes
+				has_resource = {
+					type = energy
+					amount >= 80
+				}
+			}
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_country_flag = swarm_80
+		}
+	}
+}
+
+country_event = {
+	id = focus.535
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT ={
+			has_country_flag = furnace_15
+		}
+	}
+
+	immediate = {
+		change_variable = {
+			which = focus_goal_arc_furnace
+			value = FROMFROM.solar_system.value:num_arc_furnace_planets
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				check_variable = {
+					which = focus_goal_arc_furnace
+					value > 14
+				}
+			}
+			set_country_flag = furnace_15
+		}
+	}
+}
+
+#Requires on_action code support TODO AUG-50161
+#country_event = {
+#	id = focus.541
+#	hide_window = yes
+#
+#	trigger = {
+#		NOT = {
+#			has_country_flag = gained_favor_5
+#		}
+#	}
+#
+#	immediate = {
+#		change_variable = {
+#			which = focus_goal_favors
+#			value = 1
+#		}
+#		if = {
+#			change_variable = {
+#				which = focus_goal_favors
+#				value >= 5
+#			}
+#		set_country_flag = gained_favor
+#		}
+#	}
+#}
+
+country_event = {
+	id = focus.545
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT ={
+			has_country_flag = federation_formed
+		}
+	}
+
+	immediate = {
+		set_country_flag = federation_formed
+	}
+}
+
+country_event = {
+	id = focus.550
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT ={
+			has_country_flag = joined_council
+		}
+		is_part_of_galactic_council = yes
+	}
+
+	immediate = {
+		set_country_flag = joined_council
+	}
+}
+
+planet_event = {
+	id = focus.555
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT ={
+			FROM = { has_country_flag = has_ring_world }
+		}
+		is_planet_class = pc_ringworld_habitable
+	}
+
+	immediate = {
+		FROM = { set_country_flag = has_ring_world }
+	}
+}
+
+country_event = {
+	id = focus.560
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_active_focus = development_focus_510
+		NOT = { has_country_flag = has_excellent_relations }
+		count_relation = {
+			limit = {
+				opinion = { who = root value >= 200}
+			}
+			count >= 10
+		}
+	}
+
+	immediate = {
+		set_country_flag = has_excellent_relations
+	}
+}
+
+# Called from on_ship_built
+# Root = Ship
+# From = Planet
+ship_event = {
+	id = focus.605
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_ship_size = military_station_small
+		owner = {
+			check_variable = {
+				which = focus_built_platforms
+				value < @focus_goal_built_platforms
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_built_platforms
+				value = 1
+			}
+		}
+	}
+}
+# Win a Space Battle
+country_event = {
+	id = focus.610
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = has_won_space_battle }
+	}
+
+	immediate = {
+		set_country_flag = has_won_space_battle
+	}
+}
+# Research a weapon tech
+country_event = {
+	id = focus.615
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = new_weapon_1 }
+		weapon_tech_increased = yes
+	}
+
+	immediate = {
+		set_country_flag = new_weapon_1
+	}
+}
+
+# Build 20 Destroyers
+# Called from on_ship_built
+# Root = Ship
+# From = Planet
+ship_event = {
+	id = focus.625
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		is_ship_size = destroyer
+		owner = {
+			check_variable = {
+				which = focus_built_destroyers
+				value < @focus_goal_built_destroyers
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_built_destroyers
+				value = 1
+			}
+		}
+	}
+}
+
+# Produce 20 Weavers
+# Called from on_ship_built
+# Root = Ship
+ship_event = {
+	id = focus.626
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		ship_uses_weaver_components = yes
+		owner = {
+			check_variable = {
+				which = focus_produced_weavers
+				value < @focus_goal_produced_weavers
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_produced_weavers
+				value = 1
+			}
+		}
+	}
+}
+
+
+# Have a Level 4 Commander
+country_event = {
+	id = focus.630
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = veteran_commander }
+		any_owned_leader = {
+			leader_class = commander
+			has_base_skill >= 4
+		}
+	}
+
+	immediate = {
+		set_country_flag = veteran_commander
+	}
+}
+
+# Hire Mercenaries
+country_event = {
+	id = focus.635
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = hired_mercenaries }
+	}
+
+	immediate = {
+		set_country_flag = hired_mercenaries
+	}
+}
+
+#Counter for Build Armies
+planet_event = {
+	id = focus.645
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			check_variable = {
+				which = focus_built_armies
+				value < @focus_goal_built_armies
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			change_variable = {
+				which = focus_built_armies
+				value = 1
+			}
+		}
+	}
+}
+
+#Fought the Khan
+country_event = {
+	id = focus.650
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = fought_khan }
+		OR = {
+			is_country_type = awakened_marauders
+			FROM = { is_country_type = awakened_marauders }
+		}
+	}
+
+	immediate = {
+		set_country_flag = fought_khan
+		from = {
+			set_country_flag = fought_khan
+		}
+	}
+}
+
+#Fought the Tempest
+country_event = {
+	id = focus.655
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = fought_tempest }
+		OR = {
+			is_country_type = gray_goo
+			FROM = { is_country_type = gray_goo }
+		}
+	}
+
+	immediate = {
+		set_country_flag = fought_tempest
+		from = {
+			set_country_flag = fought_tempest
+		}
+	}
+}
+
+#Defeat Fallen Empire
+country_event = {
+	id = focus.660
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			from = {
+				has_country_flag = defeated_fallen_empire
+			}
+		}
+		OR = {
+			is_country_type = fallen_empire
+			is_country_type = awakened_fallen_empire
+		}
+	}
+
+	immediate = {
+		from = { set_country_flag = defeated_fallen_empire }
+	}
+}
+
+# Build a Mega Shipyard
+country_event = {
+	id = focus.665
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = build_mega_shipyard }
+	}
+
+	immediate = {
+		set_country_flag = build_mega_shipyard
+	}
+}
+
+# Conquered Worlds flags
+planet_event = {
+	id = focus.675
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			check_variable = {
+				which = focus_conquered_worlds
+				value < focus_goal_conquered_worlds
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			change_variable = {
+				which = focus_conquered_worlds
+				value = 1
+			}
+		}
+	}
+}
+
+# Commander Governor flag
+leader_event = {
+	id = focus.680
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = commander_governor_assigned
+			}
+		}
+		leader_class = commander
+		exists = planet
+		days_passed > 0
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = commander_governor_assigned
+		}
+	}
+}
+
+# Scientist Level 5 flag
+# Called from on_leader_level_up
+# A leader leveled up.
+# Scope = Country
+# From = Leader
+country_event = {
+	id = focus.685
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		check_variable = {
+			which = level_5_scientist
+			value < @focus_goal_scientists_level_5
+		}
+		from = {
+			leader_class = scientist
+			has_base_skill >= 5
+			NOT = { has_leader_flag = scientists_level_5 }
+		}
+	}
+
+	immediate = {
+		from = { set_leader_flag = scientists_level_5 }
+		change_variable = {
+			which = level_5_scientist
+			value = 1
+		}
+	}
+}
+
+# Commander Level 5 flag
+# Called from on_leader_level_up
+# A leader leveled up.
+# Scope = Country
+# From = Leader
+country_event = {
+	id = focus.690
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		check_variable = {
+			which = level_5_commander
+			value < @focus_goal_commanders_level_5
+		}
+		from = {
+			leader_class = commander
+			has_base_skill >= 5
+			NOT = { has_leader_flag = commander_level_5 }
+		}
+	}
+
+	immediate = {
+		from = { set_leader_flag = commander_level_5 }
+		change_variable = {
+			which = level_5_commander
+			value = 1
+		}
+	}
+}
+
+# Official Level 5 flag
+# Called from on_leader_level_up
+# A leader leveled up.
+# Scope = Country
+# From = Leader
+country_event = {
+	id = focus.695
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		check_variable = {
+			which = level_5_official
+			value < @focus_goal_officials_level_5
+		}
+		from = {
+			leader_class = official
+			has_base_skill >= 5
+			NOT = { has_leader_flag = official_level_5 }
+		}
+	}
+
+	immediate = {
+		from = { set_leader_flag = official_level_5 }
+		change_variable = {
+			which = level_5_official
+			value = 1
+		}
+	}
+}
+
+country_event = {
+	id = focus.700
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			check_variable = {
+				which = conquest_subjects
+				value < @focus_goal_subjects
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			change_variable = {
+				which = conquest_subjects
+				value = 1
+			}
+		}
+	}
+}

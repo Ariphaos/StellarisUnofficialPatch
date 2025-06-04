@@ -12,9 +12,7 @@ planet_event = {
 	title = crime.1.name
 	desc = {
 		trigger = {
-			owner = {
-				NOT = { has_ethic = ethic_gestalt_consciousness }
-			}
+			owner = { is_gestalt = no }
 		}
 		text = crime.1.desc
 	}
@@ -32,9 +30,7 @@ planet_event = {
 	}
 	picture = {
 		trigger = {
-			owner = {
-				NOT = { has_ethic = ethic_gestalt_consciousness }
-			}
+			owner = { is_gestalt = no }
 		}
 		picture = GFX_evt_dark_alley
 	}
@@ -61,9 +57,11 @@ planet_event = {
 	trigger = {
 		is_under_colonization = no
 		is_colony = yes
-		owner = { is_country_type = default }
-		num_pops > 3
-		num_unemployed > 3 #early out before the expensive count_owned_pop to come
+		owner = {
+			is_country_type = default
+		}
+		pop_amount > 300
+		num_unemployed > 300 #early out before the expensive count_owned_pop to come
 		NOR = {
 			has_planet_flag = criminal_underworld_disappeared # Cooldown
 			has_planet_flag = criminal_underworld_event_up
@@ -81,7 +79,7 @@ planet_event = {
 		OR = {
 			AND = {
 				owner = { is_gestalt = no }
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					limit = {
 						is_unemployed = yes
 						is_shackled_robot = no
@@ -92,17 +90,17 @@ planet_event = {
 							has_living_standard = { type = living_standard_worker_ownership }
 						}
 					}
-					count > 3
+					count > 300
 				}
 			}
 			AND = {
 				owner = { is_gestalt = yes }
-				count_owned_pop = {
+				count_owned_pop_amount = {
 					limit = {
 						is_unemployed = yes
 						NOT = { has_living_standard = { type = living_standard_organic_trophy } }
 					}
-					count > 10
+					count > 1000
 				}
 			}
 		}
@@ -116,31 +114,19 @@ planet_event = {
 		factor = 1
 		modifier = {
 			factor = 2.0
-			num_assigned_jobs = {
-				job = unemployed
-				value > 5
-			}
+			num_unemployed > 500
 		}
 		modifier = {
 			factor = 2.0
-			num_assigned_jobs = {
-				job = unemployed
-				value > 7
-			}
+			num_unemployed > 700
 		}
 		modifier = {
 			factor = 2.0
-			num_assigned_jobs = {
-				job = unemployed
-				value > 9
-			}
+			num_unemployed > 900
 		}
 		modifier = {
 			factor = 2.0
-			num_assigned_jobs = {
-				job = unemployed
-				value > 11
-			}
+			num_unemployed > 1100
 		}
 	}
 
@@ -585,7 +571,7 @@ planet_event = {
 	}
 
 	trigger = {
-		num_pops > 0
+		pop_amount > 0
 		owner = { is_country_type = default }
 		planet_crime >= 30
 		NOR = {
@@ -730,13 +716,20 @@ planet_event = {
 	show_sound = event_cityscape
 	location = root
 	is_triggered_only = yes
+	auto_opens = no
+	notification_event_icon = "GFX_message_low_crime" # TODO_CD replace with unique icon AUG-50247
 
 	pre_triggers = {
 		has_owner = yes
 	}
 
 	trigger = {
-		owner = { is_country_type = default }
+		owner = {
+			is_country_type = default
+			NOT = {
+				has_country_flag = order_restored
+			}
+		}
 		OR = {
 			has_modifier = criminal_underworld
 			has_modifier = drone_deviancy
@@ -746,7 +739,7 @@ planet_event = {
 			has_modifier = mob_rule
 		}
 		NOT = { has_planet_flag = criminal_underworld_appeared } # Cooldown
-		num_pops > 0
+		pop_amount > 0
 		planet_crime <= 10
 	}
 
@@ -754,83 +747,129 @@ planet_event = {
 		factor = 1
 		modifier = {
 			factor = 2.0
-			count_owned_pop = {
-				limit = {
-					OR = {
-						has_job = telepath
-						has_job = slave_overseer
-						has_job = enforcer
-						has_job = coordinator
-						has_job = synapse_drone
-						has_job = patrol_drone
+			exists = planet
+			planet = {
+				OR  ={
+					num_assigned_jobs = {
+						job = enforcer
+						value > 200
+					}
+					num_assigned_jobs = {
+						job = educator
+						value > 200
+					}
+					num_assigned_jobs = {
+						job = coordinator
+						value > 200
+					}
+					num_assigned_jobs = {
+						job = synapse_drone
+						value > 200
+					}
+					num_assigned_jobs = {
+						job = patrol_drone
+						value > 200
+					}
+					num_assigned_jobs = {
+						job = slave_overseer
+						value > 200
 					}
 				}
-				count > 2
 			}
 		}
 		modifier = {
 			factor = 2.0
-			count_owned_pop = {
-				limit = {
-					OR = {
-						has_job = telepath
-						has_job = slave_overseer
-						has_job = enforcer
-						has_job = coordinator
-						has_job = synapse_drone
-						has_job = patrol_drone
+			exists = planet
+			planet = {
+				OR  ={
+					num_assigned_jobs = {
+						job = enforcer
+						value > 300
+					}
+					num_assigned_jobs = {
+						job = educator
+						value > 300
+					}
+					num_assigned_jobs = {
+						job = coordinator
+						value > 300
+					}
+					num_assigned_jobs = {
+						job = synapse_drone
+						value > 300
+					}
+					num_assigned_jobs = {
+						job = patrol_drone
+						value > 300
+					}
+					num_assigned_jobs = {
+						job = slave_overseer
+						value > 300
 					}
 				}
-				count > 3
 			}
 		}
 		modifier = {
 			factor = 2.0
-			count_owned_pop = {
-				limit = {
-					OR = {
-						has_job = telepath
-						has_job = slave_overseer
-						has_job = enforcer
-						has_job = coordinator
-						has_job = synapse_drone
-						has_job = patrol_drone
+			exists = planet
+			planet = {
+				OR  ={
+					num_assigned_jobs = {
+						job = enforcer
+						value > 400
+					}
+					num_assigned_jobs = {
+						job = educator
+						value > 400
+					}
+					num_assigned_jobs = {
+						job = coordinator
+						value > 400
+					}
+					num_assigned_jobs = {
+						job = synapse_drone
+						value > 400
+					}
+					num_assigned_jobs = {
+						job = patrol_drone
+						value > 400
+					}
+					num_assigned_jobs = {
+						job = slave_overseer
+						value > 400
 					}
 				}
-				count > 4
 			}
 		}
 		modifier = {
 			factor = 2.0
-			count_owned_pop = {
-				limit = {
-					OR = {
-						has_job = telepath
-						has_job = slave_overseer
-						has_job = enforcer
-						has_job = coordinator
-						has_job = synapse_drone
-						has_job = patrol_drone
+			exists = planet
+			planet = {
+				OR  ={
+					num_assigned_jobs = {
+						job = telepath
+						value > 100
 					}
 				}
-				count > 5
 			}
 		}
 		modifier = {
 			factor = 2.0
-			count_owned_pop = {
-				limit = { 
-					OR = {
-						has_job = telepath
-						has_job = slave_overseer
-						has_job = enforcer
-						has_job = coordinator
-						has_job = synapse_drone
-						has_job = patrol_drone
+			exists = planet
+			planet = {
+				OR  ={
+					num_assigned_jobs = {
+						job = telepath
+						value > 200
 					}
 				}
-				count > 6
 			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = order_restored
 		}
 	}
 
@@ -904,6 +943,12 @@ planet_event = {
 		}
 		hidden_effect = {
 			set_timed_planet_flag = { flag = criminal_underworld_disappeared days = 3600 }
+		}
+	}
+
+	after = {
+		owner = {
+			remove_country_flag = order_restored
 		}
 	}
 }
@@ -1249,13 +1294,19 @@ planet_event = {
 
 	trigger = {
 		has_modifier = gang_wars
-		any_owned_pop = { has_job = enforcer }
+		any_owned_pop_job = {
+			has_job_type = enforcer
+		}
 	}
 
 	immediate = {
-		random_owned_pop = {
-			limit = { has_job = enforcer }
-			kill_pop = yes
+		random_owned_pop_job = {
+			limit = {
+				has_job_type = enforcer
+			}
+			kill_assigned_pop_amount = {
+				percentage = 1
+			}
 		}
 	}
 
@@ -1323,12 +1374,12 @@ planet_event = {
 		has_modifier = gang_wars
 	}
 
+# Ariphaos Balance TODO: Make this less punishing.
+
 	immediate = {
-		random_owned_pop = { kill_pop = yes }
-		# Ariphaos Balance TODO:
-		# Pop death is pretty brutal right now.
-		#random_owned_pop = { kill_pop = yes }
-		#random_owned_pop = { kill_pop = yes }
+		random_owned_pop_group = { kill_single_pop = yes }
+		random_owned_pop_group = { kill_single_pop = yes }
+		random_owned_pop_group = { kill_single_pop = yes }
 		add_planet_devastation = 15
 	}
 
@@ -1421,16 +1472,19 @@ planet_event = {
 
 	trigger = {
 		has_modifier = center_of_drug_trade
-		num_pops > 4
+		pop_amount > 400
 	}
+
+# Ariphaos Balance TODO: Make this less punishing.
 
 
 	immediate = {
-		random_owned_pop = { kill_pop = yes }
-		# Ariphaos Balance TODO:
-		#random_owned_pop = { kill_pop = yes }
-		#random_owned_pop = { kill_pop = yes }
-		#random_owned_pop = { kill_pop = yes }
+		while = {
+			count = 4
+			random_owned_pop_group = {
+				kill_single_pop = yes
+			}
+		}
 	}
 
 	option = {
@@ -1491,11 +1545,12 @@ planet_event = {
 		has_modifier = center_of_drug_trade
 	}
 
+# Ariphaos Balance TODO: Make this less punishing.
+
 	immediate = {
-		random_owned_pop = { kill_pop = yes }
-		# Ariphaos Balance TODO:
-		#random_owned_pop = { kill_pop = yes }
-		#random_owned_pop = { kill_pop = yes }
+		random_owned_pop_group = { kill_single_pop = yes }
+		random_owned_pop_group = { kill_single_pop = yes }
+		random_owned_pop_group = { kill_single_pop = yes }
 		add_planet_devastation = 15
 	}
 
@@ -1640,6 +1695,74 @@ planet_event = {
 		name = crime.302.a
 		tooltip = {
 			add_modifier = { modifier = "corrupt_administration" days = 3600 }
+		}
+	}
+
+	option = {
+		name = crime.302.b
+
+		hidden_effect = {
+			remove_modifier = corrupt_administration
+			remove_planet_flag = planet_crime_flag
+			add_modifier = { modifier = "corrupt_administration" days = 1800 }
+			set_timed_planet_flag = {
+				flag = planet_crime_flag
+				days = 1800
+			}
+		}
+
+		inline_script = {
+			script = events/dynamic_resource_cost
+			RESOURCE = unity
+			COST1 = 50
+			INCOME1 = 1
+			COST2 = 200
+			INCOME2 = 10
+			COST3 = 400
+			INCOME3 = 20
+			COST4 = 600
+			INCOME4 = 40
+			COST5 = 1200
+			INCOME5 = 100
+			OWNER_SCOPE = planet.owner
+		}
+
+		tooltip = {
+			add_modifier = { modifier = "corrupt_administration" days = 1800 }
+		}
+	}
+
+	option = {
+		name = crime.302.c
+		trigger = {
+			owner = {
+				has_ethic = ethic_pacifist
+			}
+		}
+
+		hidden_effect = {
+			remove_modifier = corrupt_administration
+			remove_planet_flag = planet_crime_flag
+		}
+
+		inline_script = {
+			script = events/dynamic_resource_cost
+			RESOURCE = energy
+			COST1 = 100
+			INCOME1 = 10
+			COST2 = 500
+			INCOME2 = 50
+			COST3 = 1000
+			INCOME3 = 100
+			COST4 = 2000
+			INCOME4 = 200
+			COST5 = 5000
+			INCOME5 = 500
+			OWNER_SCOPE = planet.owner
+		}
+
+		tooltip = {
+			add_modifier = { modifier = "corrupt_administration" days = 365 }
 		}
 	}
 }
@@ -1936,6 +2059,7 @@ event = {
 				has_branch_office = yes
 				branch_office_owner = {
 					is_criminal_syndicate = yes
+					NOT = { has_commercial_pact = prev.owner }
 					NOT = { has_country_flag = criminal_branch_closed_cooldown }
 				}
 				planet_crime < 1
@@ -1953,6 +2077,7 @@ event = {
 							has_branch_office = yes
 							branch_office_owner = {
 								is_criminal_syndicate = yes
+								NOT = { has_commercial_pact = prev.owner }
 								NOT = { has_country_flag = criminal_branch_closed_cooldown }
 							}
 							planet_crime < 1
@@ -1963,6 +2088,7 @@ event = {
 							has_branch_office = yes
 							branch_office_owner = {
 								is_criminal_syndicate = yes
+								NOT = { has_commercial_pact = prev.owner }
 								NOT = { has_country_flag = criminal_branch_closed_cooldown }
 							}
 							planet_crime < 1

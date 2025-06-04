@@ -160,6 +160,11 @@ action_build_spy_network = {
 						is_country_type = primitive
 						observation_owner_is_actor = yes
 					}
+					AND = {
+						is_galactic_emperor = yes
+						has_country_flag = fallen_empire_hive_control
+						root = { is_galactic_community_member = yes }
+					}
 				}
 				NOR = {
 					has_country_flag = fotd_seperatist_country
@@ -192,7 +197,16 @@ action_build_spy_network = {
 						is_primitive = no
 					}
 				}
-				from = { is_fallen_empire = no }
+				from = {
+					OR = {
+						is_fallen_empire = no
+						AND = {
+							is_galactic_emperor = yes
+							has_country_flag = fallen_empire_hive_control
+							root = { is_galactic_community_member = yes }
+						}
+					}
+				}
 			}
 		}
 	}
@@ -216,6 +230,11 @@ action_manage_spy_network = {
 					AND = {
 						is_country_type = primitive
 						observation_owner_is_actor = yes
+					}
+					AND = {
+						is_galactic_emperor = yes
+						has_country_flag = fallen_empire_hive_control
+						root = { is_galactic_community_member = yes }
 					}
 				}
 			}
@@ -242,7 +261,16 @@ action_manage_spy_network = {
 						is_primitive = no
 					}
 				}
-				from = { is_fallen_empire = no }
+				from = {
+					OR = {
+						is_fallen_empire = no
+						AND = {
+							is_galactic_emperor = yes
+							has_country_flag = fallen_empire_hive_control
+							root = { is_galactic_community_member = yes }
+						}
+					}
+				}
 			}
 		}
 	}
@@ -396,6 +424,12 @@ action_declare_war = {
 					}
 				}
 			}
+		}
+	}
+
+	on_accept = {
+		hidden_effect = {
+			set_country_flag = has_declared_war
 		}
 	}
 }
@@ -659,6 +693,7 @@ action_make_rival = {
 				target = from
 				type = cb_humiliation
 			}
+			set_country_flag = has_declared_rival
 		}
 	}
 }
@@ -828,6 +863,7 @@ action_form_defensive_pact = {
 		# - An Embassy OR the Diplomatic Networking tradition.
 		custom_tooltip = {
 			fail_text = requires_20_trust_or_good
+
 			OR = {
 				opinion_level = {
 					who = from
@@ -839,8 +875,18 @@ action_form_defensive_pact = {
 						value >= 20
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
+					}
+				}
 			}
 		}
+
 		custom_tooltip = {
 			fail_text = requires_embassy_or_diplomatic_networking
 			OR = {
@@ -964,6 +1010,15 @@ action_form_non_aggression_pact = {
 						value >= 10
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -1043,31 +1098,31 @@ action_form_commercial_pact = {
 			fail_text = "requires_recipient_not_gestalt_consciousness"
 			from = { is_gestalt = no }
 		}
-		custom_tooltip = {
-			fail_text = "requires_actor_not_criminal_heritage"
-			is_criminal_syndicate = no
-		}
-		if = {
-			limit = { from = { is_criminal_syndicate = yes } }
-			if = {
-				limit = {
-					has_intel = {
-						who = from
-						intel = civics
-					}
-				}
-				custom_tooltip = {
-					fail_text = requires_recipient_not_criminal_heritage
-					always = no
-				}
-			}
-			else = {
-				custom_tooltip = {
-					fail_text = diplo_action_no_low_intel
-					always = no
-				}
-			}
-		}
+		#custom_tooltip = {
+		#	fail_text = "requires_actor_not_criminal_heritage"
+		#	is_criminal_syndicate = no
+		#}
+		#if = {
+		#	limit = { from = { is_criminal_syndicate = yes } }
+		#	if = {
+		#		limit = {
+		#			has_intel = {
+		#				who = from
+		#				intel = civics
+		#			}
+		#		}
+		#		custom_tooltip = {
+		#			fail_text = requires_recipient_not_criminal_heritage
+		#			always = no
+		#		}
+		#	}
+		#	else = {
+		#		custom_tooltip = {
+		#			fail_text = diplo_action_no_low_intel
+		#			always = no
+		#		}
+		#	}
+		#}
 		custom_tooltip = {
 			fail_text = "federation_actor_no_separate_treaties"
 			NOT = {
@@ -1130,6 +1185,15 @@ action_form_commercial_pact = {
 					trust = {
 						who = root
 						value >= 20
+					}
+				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
 					}
 				}
 				# We don't take into consideration relations' status when dealing with the Mirror Empire
@@ -1340,6 +1404,15 @@ action_form_research_agreement = {
 						value >= 20
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -1537,6 +1610,15 @@ action_guarantee_independence = {
 						value >= 10
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 5
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -1668,6 +1750,15 @@ action_support_independence = {
 					trust = {
 						who = root
 						value >= 10
+					}
+				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 5
+						}
 					}
 				}
 			}
@@ -1887,6 +1978,15 @@ action_form_migration_pact = {
 						value >= 20
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -1991,6 +2091,15 @@ action_offer_federation_association_status = {
 					trust = {
 						who = root
 						value >= 20
+					}
+				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
 					}
 				}
 			}
@@ -2128,6 +2237,15 @@ action_ask_for_federation_association_status = {
 						value >= 20
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 10
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -2225,8 +2343,8 @@ action_invite_to_federation = {
 				is_country_type = default
 			}
 			custom_tooltip = {
-				fail_text = requires_tradition_the_federation
-				has_tradition = tr_diplomacy_the_federation
+				fail_text = requires_tech_federation_code
+				has_technology = tech_federation_code
 			}
 		}
 		custom_tooltip = {
@@ -2326,6 +2444,15 @@ action_invite_to_federation = {
 					trust = {
 						who = root
 						value >= 30
+					}
+				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 15
+						}
 					}
 				}
 			}
@@ -2587,6 +2714,15 @@ action_ask_to_join_federation = {
 						value >= 30
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 15
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -2798,6 +2934,18 @@ action_close_borders = {
 				}
 			}
 		}
+
+		if = {
+			limit = {
+				from = {
+					has_menace_perk = menp_behemoth_mind_meld
+				}
+			}
+			custom_tooltip = {
+				fail_text = behemoth_no_borders
+				always = no
+			}
+		}
 	}
 }
 
@@ -2949,6 +3097,15 @@ action_demand_subjugation = {
 						trust = {
 							who = root
 							value >= 50
+						}
+					}
+					AND = {
+						has_valid_civic = civic_hive_familiar_face
+						from = {
+							trust = {
+								who = root
+								value >= 25
+							}
 						}
 					}
 				}
@@ -3316,6 +3473,15 @@ action_ask_to_become_subjugated = {
 					trust = {
 						who = root
 						value >= 50
+					}
+				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 25
+						}
 					}
 				}
 			}
@@ -4036,6 +4202,15 @@ action_pledge_secret_fealty = {
 						value >= 50
 					}
 				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 25
+						}
+					}
+				}
 			}
 		}
 		custom_tooltip = {
@@ -4251,6 +4426,15 @@ action_propose_secret_fealty = {
 					trust = {
 						who = root
 						value >= 50
+					}
+				}
+				AND = {
+					has_valid_civic = civic_hive_familiar_face
+					from = {
+						trust = {
+							who = root
+							value >= 25
+						}
 					}
 				}
 			}

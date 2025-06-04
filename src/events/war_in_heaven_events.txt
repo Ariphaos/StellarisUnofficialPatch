@@ -25,23 +25,46 @@ country_event = {
 		random_country = {
 			limit = {
 				is_country_type = fallen_empire
-				NOT = { has_ethic = ethic_gestalt_consciousness }
+				NOT = { is_machine_empire = yes }
 			}
 
 			set_country_flag = sleepers_awake_first
 
-			country_event = { id = fallen_empires_awakening.3 }
+			if = {
+				limit = {
+					is_hive_empire = no
+				}
+				country_event = { id = fallen_empires_awakening.3 }
+			}
+			else = {
+				event_target:strongest_fragment = {
+					country_event = { id = fallen_empires_awakening.10 }
+				}
+			}
 		}
 
 		# War in Heaven
 		random_country = {
 			limit = {
 				is_country_type = fallen_empire
-				NOT = { has_ethic = ethic_gestalt_consciousness }
-				NOT = { has_country_flag = sleepers_awake_first }
+				NOR = {
+					is_machine_empire = yes
+					has_country_flag = sleepers_awake_first
+				}
 			}
-			set_country_flag = sleepers_awake_ancient_rival
-			set_timed_country_flag = { flag = timed_ancient_rival days = 3600 }
+			if = {
+				limit = {
+					is_hive_empire = no
+				}
+				set_country_flag = sleepers_awake_ancient_rival
+				set_timed_country_flag = { flag = timed_ancient_rival days = 3600 }
+			}
+			else = {
+				event_target:strongest_fragment = {
+					set_country_flag = sleepers_awake_ancient_rival
+					set_timed_country_flag = { flag = timed_ancient_rival days = 3600 }
+				}
+			}
 		}
 	}
 }
@@ -95,26 +118,92 @@ country_event = {
 		set_timed_country_flag = { flag = war_in_heaven_timer_2 days = 3600 }
 		set_global_flag = sleepers_awake_rival_waking
 		set_country_type = awakened_fallen_empire
-		change_government = {
-			civics = {
-				civic = civic_revanchist_fervor
-				civic = civic_ancient_caches_of_technology
-			}
-		}
 		if = {
 			limit = {
-				has_paragon_dlc = yes
+				is_hive_empire = no
 			}
-			unlock_council_slots = 2
-			while = {
-				count = 2
-				create_leader = {
-					class = scientist
-					species = owner_main_species
-					name = random
-					skill = 10
-					leader_age_min = 25
-					leader_age_max = 45
+			change_government = {
+				civics = {
+					civic = civic_revanchist_fervor
+					civic = civic_ancient_caches_of_technology
+				}
+			}
+			if = {
+				limit = {
+					has_paragon_dlc = yes
+				}
+				unlock_council_slots = 2
+				while = {
+					count = 2
+					create_leader = {
+						class = scientist
+						species = owner_main_species
+						name = random
+						skill = 10
+						leader_age_min = 25
+						leader_age_max = 45
+					}
+				}
+			}
+		}
+		else = {
+			switch = {
+				trigger = has_country_flag
+				fallen_empire_hive_war = {
+					change_government = {
+						civics = {
+							civic = civic_restored_mind
+							civic = civic_ancient_memories_of_war
+						}
+					}
+				}
+				fallen_empire_hive_growth = {
+					change_government = {
+						civics = {
+							civic = civic_restored_mind
+							civic = civic_ancient_memories_of_growth
+						}
+					}
+				}
+				fallen_empire_hive_control = {
+					change_government = {
+						civics = {
+							civic = civic_restored_mind
+							civic = civic_ancient_memories_of_control
+						}
+					}
+					add_to_galactic_community = yes
+					set_global_flag = control_awoke
+					every_playable_country = {
+						limit = {
+							is_ai = no
+						}
+						country_event = { id = bio.3400 days = 1 }
+					}
+				}
+			}
+			change_country_flag = {
+				icon = {
+					category = "special"
+					file = "hive_fe_flag_restored.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "flag_BG_39.dds"
+				}
+				colors = {
+					"light_orange"
+					"dark_orange"
+					"black"
+					"null"
+				}
+			}
+			every_country = {
+				limit = {
+					has_ai_personality = fallen_empire_hive_mind
+				}
+				integrate_country_effect = {
+					OWNER = root
 				}
 			}
 		}
@@ -146,7 +235,23 @@ country_event = {
 	id = war_in_heaven.2
 	title = war_in_heaven.2.name
 	desc = war_in_heaven.2.desc
-	picture = GFX_evt_fallen_empire
+	picture = {
+		trigger = {
+			from = {
+				is_hive_empire = no
+			}
+		}
+		picture = GFX_evt_fallen_empire
+	}
+
+	picture = {
+		trigger = {
+			from = {
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -184,7 +289,6 @@ country_event = {
 		}
 	}
 
-
 	mean_time_to_happen = {
 		years = 1
 		modifier = {
@@ -213,7 +317,17 @@ country_event = {
 			attacker_war_goal = "wg_war_in_heaven"
 		}
 		if = {
-			limit = { has_galactic_emperor = no }
+			limit = {
+				OR = {
+					has_galactic_emperor = no
+					AND = {#The galcom wont go to war if the control fragment is emperor
+						has_galactic_emperor = yes
+						event_target:gal_emperor = {
+							is_country_type = awakened_fallen_empire
+						}
+					}
+				}
+			}
 			every_playable_country = {
 				country_event = { id = war_in_heaven.4 }
 			}
@@ -240,7 +354,28 @@ country_event = {
 	id = war_in_heaven.4
 	title = war_in_heaven.4.name
 	desc = war_in_heaven.4.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
+
 	show_sound = event_alien_signal
 	location = from
 
@@ -266,7 +401,30 @@ country_event = {
 				factor = 0
 				OR = {
 					is_homicidal = yes
-					has_ascension_perk = ap_become_the_crisis
+					is_level_4_player_crisis = yes
+					is_level_5_player_crisis = yes
+				}
+			}
+			modifier = {
+				factor = 5
+				any_neighbor_country = {
+					is_same_empire = event_target:FirstSleeper
+				}
+			}
+			modifier = {
+				factor = 2
+				NOT = {
+					any_neighbor_country = {
+						is_same_empire = from
+					}
+				}
+				any_system_within_border = {
+					distance_to_empire = {
+						who = from
+						distance <= 2
+						use_bypasses = no
+						type = hyperlane
+					}
 				}
 			}
 			modifier = {
@@ -315,6 +473,18 @@ country_event = {
 								has_ethic = ethic_xenophile
 								has_ethic = ethic_fanatic_xenophile
 							}
+						}
+					}
+					event_target:FirstSleeper = {
+						is_hive_empire = yes
+						root = {
+							is_hive_empire = no
+						}
+					}
+					event_target:FirstSleeper = {
+						has_country_flag = fallen_empire_hive_war
+						root = {
+							is_pacifist = yes
 						}
 					}
 				}
@@ -428,6 +598,34 @@ country_event = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				event_target:FirstSleeper = {
+					has_country_flag = fallen_empire_hive_control
+				}
+			}
+			custom_tooltip = war_in_heaven.4.a.political_client.tt
+			hidden_effect = {
+				set_subject_of = {
+					who = event_target:FirstSleeper
+					preset = preset_political_client
+				}
+			}
+		}
+		if = {
+			limit = {
+				event_target:FirstSleeper = {
+					has_country_flag = fallen_empire_hive_war
+				}
+			}
+			custom_tooltip = war_in_heaven.4.a.herald.tt
+			hidden_effect = {
+				set_subject_of = {
+					who = event_target:FirstSleeper
+					preset = preset_herald
+				}
+			}
+		}
 		hidden_effect = {
 			hidden_effect = { add_opinion_modifier = { who = event_target:FirstSleeper modifier = opinion_war_in_heaven_ally } }
 			event_target:FirstSleeper = { add_opinion_modifier = { who = root modifier = opinion_war_in_heaven_ally } }
@@ -456,7 +654,30 @@ country_event = {
 				factor = 0
 				OR = {
 					is_homicidal = yes
-					has_ascension_perk = ap_become_the_crisis
+					is_level_4_player_crisis = yes
+					is_level_5_player_crisis = yes
+				}
+			}
+			modifier = {
+				factor = 5
+				any_neighbor_country = {
+					is_same_empire = from
+				}
+			}
+			modifier = {
+				factor = 2
+				NOT = {
+					any_neighbor_country = {
+						is_same_empire = from
+					}
+				}
+				any_system_within_border = {
+					distance_to_empire = {
+						who = from
+						distance <= 2
+						use_bypasses = no
+						type = hyperlane
+					}
 				}
 			}
 			modifier = {
@@ -505,6 +726,18 @@ country_event = {
 								has_ethic = ethic_xenophile
 								has_ethic = ethic_fanatic_xenophile
 							}
+						}
+					}
+					from = {
+						is_hive_empire = yes
+						root = {
+							is_hive_empire = no
+						}
+					}
+					from = {
+						has_country_flag = fallen_empire_hive_war
+						root = {
+							is_pacifist = yes
 						}
 					}
 				}
@@ -618,6 +851,34 @@ country_event = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				from = {
+					has_country_flag = fallen_empire_hive_control
+				}
+			}
+			custom_tooltip = war_in_heaven.4.b.political_client.tt
+			hidden_effect = {
+				set_subject_of = {
+					who = from
+					preset = preset_political_client
+				}
+			}
+		}
+		if = {
+			limit = {
+				from = {
+					has_country_flag = fallen_empire_hive_war
+				}
+			}
+			custom_tooltip = war_in_heaven.4.b.herald.tt
+			hidden_effect = {
+				set_subject_of = {
+					who = from
+					preset = preset_herald
+				}
+			}
+		}
 		hidden_effect = {
 			hidden_effect = { add_opinion_modifier = { who = from modifier = opinion_war_in_heaven_ally } }
 			from = { add_opinion_modifier = { who = root modifier = opinion_war_in_heaven_ally } }
@@ -655,7 +916,7 @@ country_event = {
 				fleet_power > 125000
 			}
 			modifier = {
-				factor = 5
+				factor = 2
 				has_federation = yes
 			}
 			modifier = {
@@ -666,7 +927,7 @@ country_event = {
 				}
 			}
 			modifier = {
-				factor = 2
+				factor = 5
 				any_playable_country = {
 					is_ai = no
 					is_in_federation_with = root
@@ -704,6 +965,9 @@ country_event = {
 			}
 		}
 	}
+	after = {
+		country_event = { id = timeline.76 } # Timeline War in Heaven
+	}
 }
 
 # Victory for one side
@@ -711,7 +975,27 @@ country_event = {
 	id = war_in_heaven.5
 	title = war_in_heaven.5.name
 	desc = war_in_heaven.5.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -731,7 +1015,27 @@ country_event = {
 	id = war_in_heaven.6
 	title = war_in_heaven.6.name
 	desc = war_in_heaven.6.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -747,17 +1051,33 @@ country_event = {
 	id = war_in_heaven.7
 	title = war_in_heaven.4.name
 	desc = war_in_heaven.7.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
 	is_triggered_only = yes
 
 	immediate = {
-		random_playable_country = {
-			limit = { is_galactic_emperor = yes }
-			save_event_target_as = gal_emperor
-		}
 		# End existing wars
 		if = {
 			limit = { is_at_war = yes }
@@ -805,7 +1125,7 @@ country_event = {
 	}
 }
 
-# War in Heaven combatant defeated by nonaligned league
+# War in Heaven combatant defeated by any source
 #This = destroyed country
 #From = optional, destroyer (country)
 country_event = {
@@ -818,34 +1138,34 @@ country_event = {
 		is_country_type = awakened_fallen_empire
 		any_war = {
 			any_war_participant = {
-				prev = {
+				prev = { #The War
 					using_war_goal = {
 						type = wg_war_in_heaven
-						owner = prev
+						owner = prev #The War participant
 					}
 				}
 			}
 			any_war_participant = {
 				is_country_type = awakened_fallen_empire
-				prev = {
+				prev = { #The War
 					OR = {
 						AND = {
 							is_war_participant = {
-								who = prev
+								who = prev #The opposing Awakened Empire
 								side = attackers
 							}
 							is_war_participant = {
-								who = root
+								who = root #The dead Awakened Empire
 								side = defenders
 							}
 						}
 						AND = {
 							is_war_participant = {
-								who = prev
+								who = prev #The opposing Awakened EMpire
 								side = defenders
 							}
 							is_war_participant = {
-								who = root
+								who = root #The dead Awakened Empire
 								side = attackers
 							}
 						}
@@ -871,10 +1191,10 @@ country_event = {
 				NOT = { is_same_value = root }
 				any_war = {
 					any_war_participant = {
-						prev = {
+						prev = { #The War
 							using_war_goal = {
 								type = wg_war_in_heaven
-								owner = prev
+								owner = prev #The Participant
 							}
 						}
 					}
@@ -886,10 +1206,10 @@ country_event = {
 		every_war = { #End War in Heaven
 			limit = {
 				any_war_participant = {
-					prev = {
+					prev = { #The war we are iterating through
 						using_war_goal = {
 							type = wg_war_in_heaven
-							owner = prev
+							owner = prev #The participant
 						}
 					}
 				}
@@ -930,7 +1250,27 @@ country_event = {
 	id = war_in_heaven.11
 	title = war_in_heaven.11.name
 	desc = war_in_heaven.11.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -970,7 +1310,8 @@ country_event = {
 						is_at_war_with = prev
 					}
 					is_homicidal = yes
-					has_ascension_perk = ap_become_the_crisis
+					is_level_4_player_crisis = yes
+					is_level_5_player_crisis = yes
 					has_country_flag = war_in_heaven_league_leader_declined
 					is_same_value = prev
 				}
@@ -1017,56 +1358,15 @@ country_event = {
 		# First federation leaders are asked, then simply the strongest country
 		else_if = {
 			limit = {
-				# NOT = { has_global_flag = war_in_heaven_seeking_league_leader }
 				any_federation = {
-					any_member = {
-						is_federation_leader = yes
-						is_homicidal = no
-						NOT = { has_ascension_perk = ap_become_the_crisis }
-						NOR = {
-							has_country_flag = war_in_heaven_league_leader_declined
-							any_country = {
-								is_country_type = awakened_fallen_empire
-								is_at_war_with = prev
-							}
-						}
-					}
-					NOT = {
-						any_federation = {
-							NOT = { is_same_value = prev }
-							relative_power = {
-								who = prev
-								value > equivalent
-								category = fleet
-							}
-							any_member = {
-								is_federation_leader = yes
-								is_homicidal = no
-								NOR = { 
-									has_country_flag = war_in_heaven_league_leader_declined
-									has_ascension_perk = ap_become_the_crisis
-								}
-								NOT = {
-									any_country = {
-										is_country_type = awakened_fallen_empire
-										is_at_war_with = prev
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			random_federation = {
-				limit = {
+					NOT = { has_federation_flag = hive_fe_federation }
 					any_member = {
 						is_federation_leader = yes
 						is_homicidal = no
 						NOR = {
 							has_country_flag = war_in_heaven_league_leader_declined
-							has_ascension_perk = ap_become_the_crisis
-						}
-						NOT = {
+							is_level_4_player_crisis = yes
+							is_level_5_player_crisis = yes
 							any_country = {
 								is_country_type = awakened_fallen_empire
 								is_at_war_with = prev
@@ -1087,8 +1387,46 @@ country_event = {
 								NOR = {
 									has_country_flag = war_in_heaven_league_leader_declined
 									has_ascension_perk = ap_become_the_crisis
+									any_country = {
+										is_country_type = awakened_fallen_empire
+										is_at_war_with = prev
+									}
 								}
-								NOT = {
+							}
+						}
+					}
+				}
+			}
+			random_federation = {
+				limit = {
+					NOT = { has_federation_flag = hive_fe_federation }
+					any_member = {
+						is_federation_leader = yes
+						is_homicidal = no
+						NOR = {
+							has_country_flag = war_in_heaven_league_leader_declined
+							is_level_4_player_crisis = yes
+							is_level_5_player_crisis = yes
+							any_country = {
+								is_country_type = awakened_fallen_empire
+								is_at_war_with = prev
+							}
+						}
+					}
+					NOT = {
+						any_federation = {
+							NOT = { is_same_value = prev }
+							relative_power = {
+								who = prev
+								value > equivalent
+								category = fleet
+							}
+							any_member = {
+								is_federation_leader = yes
+								is_homicidal = no
+								NOR = {
+									has_country_flag = war_in_heaven_league_leader_declined
+									has_ascension_perk = ap_become_the_crisis
 									any_country = {
 										is_country_type = awakened_fallen_empire
 										is_at_war_with = prev
@@ -1104,9 +1442,8 @@ country_event = {
 						is_homicidal = no
 						NOR = {
 							has_country_flag = war_in_heaven_league_leader_declined
-							has_ascension_perk = ap_become_the_crisis
-						}
-						NOT = {
+							is_level_4_player_crisis = yes
+							is_level_5_player_crisis = yes
 							any_country = {
 								is_country_type = awakened_fallen_empire
 								is_at_war_with = prev
@@ -1125,9 +1462,9 @@ country_event = {
 					# is_country_type = default
 					is_subject = no
 					is_homicidal = no
-					NOT = { has_ascension_perk = ap_become_the_crisis }
 					NOR = {
-						# has_global_flag = war_in_heaven_seeking_league_leader
+						is_level_4_player_crisis = yes
+						is_level_5_player_crisis = yes
 						has_country_flag = war_in_heaven_league_leader_declined
 						any_country = {
 							is_country_type = awakened_fallen_empire
@@ -1147,6 +1484,10 @@ country_event = {
 									is_country_type = awakened_fallen_empire
 									is_at_war_with = prev
 								}
+								is_homicidal = yes
+								is_level_4_player_crisis = yes
+								is_level_5_player_crisis = yes
+								has_country_flag = war_in_heaven_league_leader_declined
 							}
 						}
 					}
@@ -1183,7 +1524,27 @@ country_event = {
 		text = war_in_heaven.13.desc3
 		trigger = { is_galactic_custodian = yes }
 	}
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = root
 
@@ -1248,13 +1609,15 @@ country_event = {
 				limit = {
 					is_ai = no
 					is_homicidal = no
-					NOT = { has_ascension_perk = ap_become_the_crisis }
 					OR = {
 						is_subject = no
 						is_in_federation_with = root
 					}
 					NOR = {
-						is_same_empire = root
+						is_same_value = root
+						is_level_4_player_crisis = yes
+						is_level_5_player_crisis = yes
+						has_ascension_perk = ap_become_the_crisis
 						has_country_flag = war_in_heaven_nonaligned_league_check
 					}
 				}
@@ -1310,7 +1673,11 @@ country_event = {
 			}
 		}
 		is_homicidal = no
-		NOT = { has_ascension_perk = ap_become_the_crisis }
+		NOR = {
+			has_ascension_perk = ap_become_the_crisis
+			is_level_4_player_crisis = yes
+			is_level_5_player_crisis = yes
+		}
 		is_ai = yes
 		any_playable_country = {
 			has_country_flag = war_in_heaven_league_leader
@@ -1345,7 +1712,27 @@ country_event = {
 	id = war_in_heaven.15
 	title = war_in_heaven.15.name
 	desc = war_in_heaven.15.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -1553,7 +1940,27 @@ country_event = {
 	id = war_in_heaven.16
 	title = war_in_heaven.16.name
 	desc = war_in_heaven.16.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = root
 
@@ -1672,6 +2079,10 @@ country_event = {
 				limit = {
 					has_federation_flag = non_aligned_league
 				}
+				add_modifier = {
+					modifier = war_in_heaven_is_over
+					days = -1
+				}
 				random_member = {
 					limit = {
 						is_federation_leader = yes
@@ -1692,7 +2103,27 @@ country_event = {
 	id = war_in_heaven.18
 	title = war_in_heaven.18.name
 	desc = war_in_heaven.18.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -1725,7 +2156,27 @@ country_event = {
 			is_in_federation_with = from
 		}
 	}
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -1784,7 +2235,27 @@ country_event = {
 	id = war_in_heaven.20
 	title = war_in_heaven.20.name
 	desc = war_in_heaven.20.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -1799,7 +2270,27 @@ country_event = {
 	id = war_in_heaven.21
 	title = war_in_heaven.21.name
 	desc = war_in_heaven.21.desc
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 
@@ -1825,7 +2316,27 @@ country_event = {
 			from = { has_federation = yes }
 		}
 	}
-	picture = GFX_evt_fallen_empire_awakes
+	picture = {
+		trigger = {
+			NOT = {
+				any_country = {
+					is_country_type = awakened_fallen_empire
+					is_hive_empire = yes
+				}
+			}
+		}
+		picture = GFX_evt_fallen_empire_awakes
+	}
+
+	picture = {
+		trigger = {
+			any_country = {
+				is_country_type = awakened_fallen_empire
+				is_hive_empire = yes
+			}
+		}
+		picture = GFX_evt_hive_mind_fallen_empire
+	}
 	show_sound = event_alien_signal
 	location = from
 

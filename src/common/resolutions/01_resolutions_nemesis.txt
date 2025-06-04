@@ -616,10 +616,6 @@ resolution_repeal_crisis_empire = {
 		hidden_effect = {
 			remove_country_flag = declared_crisis
 			save_event_target_as = former_crisis
-			random_playable_country = {
-				limit = { is_galactic_emperor = yes }
-				save_event_target_as = gal_emperor
-			}
 			random_war = {
 				limit = {
 					using_war_goal = {
@@ -731,8 +727,7 @@ resolution_galacticreforms_nominate_custodian = {
 		custom_tooltip = {
 			fail_text = "nominate_other_custodian_not_crisis"
 			NOR = {
-				has_ascension_perk = ap_become_the_crisis
-				has_ascension_perk = ap_cosmogenesis
+				is_player_crisis = yes
 				has_valid_civic = civic_pompous_purists
 			}
 		}
@@ -887,6 +882,12 @@ resolution_galacticreforms_nominate_custodian = {
 			factor = 20
 			has_global_flag = war_in_heaven_ongoing
 			desc = gal_com_ongoing_war_in_heaven
+		}
+
+		modifier = {
+			factor = 0
+			has_country_flag = fallen_empire_hive_control
+			desc = gal_com_is_awakened_empire
 		}
 	}
 }
@@ -1214,6 +1215,158 @@ resolution_custodian_form_empire = {
 		modifier = {
 			factor = 10
 			any_country = { is_country_type = awakened_fallen_empire }
+			desc = gal_com_exists_awakened_fallen_empire
+		}
+	}
+}
+
+# Form the Awakaned Galactic Empire
+resolution_awakened_galactic_empire = {
+	icon = "GFX_resolution_form_galactic_empire"
+
+	resources = {
+		category = resolutions
+		cost = {
+			influence = @resolution_cost_t3
+		}
+	}
+	target = no
+
+	modifier = {
+	}
+
+	effect = {
+		custom_tooltip = resolution_form_awakened_galactic_empire
+		hidden_effect = {
+			country_event = { id = emperor.1 }
+		}
+	}
+
+	fail_effects = {
+	}
+
+	potential = {
+		has_country_flag = fallen_empire_hive_control
+		has_galactic_emperor = no
+	}
+
+	active = {
+		exists = event_target:fallen_empire_hive_control
+	}
+
+	ai_weight = {
+		base = @resolution_weight_hated
+
+		modifier = {
+			factor = 10
+			any_neighbor_country = { is_crisis_faction = yes }
+			desc = gal_com_neighboring_crisis_empire
+		}
+
+		modifier = {
+			factor = 4
+			has_crisis_stage_1 = yes
+			desc = gal_com_crisis_stage_1
+		}
+
+		modifier = {
+			factor = 6
+			has_crisis_stage_2 = yes
+			desc = gal_com_crisis_stage_2
+		}
+
+		modifier = {
+			factor = 8
+			has_crisis_stage_3 = yes
+			desc = gal_com_crisis_stage_3
+		}
+
+		modifier = {
+			factor = 20
+			has_crisis_stage_4 = yes
+			desc = gal_com_crisis_stage_4
+		}
+
+		modifier = {
+			factor = 20
+			any_playable_country = { has_country_flag = crisis_sphere_revealed }
+			desc = gal_com_crisis_sphere_revealed
+		}
+
+		modifier = {
+			factor = 4
+			is_galactic_custodian = yes
+			desc = gal_com_is_the_custodian
+		}
+
+		modifier = {
+			factor = 8
+			any_playable_country = { has_been_declared_crisis = yes }
+			desc = gal_com_someone_declared_crisis
+		}
+
+		modifier = {
+			factor = 8
+			has_global_flag = gray_goo_crisis_active
+			desc = gal_com_someone_is_revealed_crisis
+		}
+
+		modifier = {
+			factor = 8
+			has_global_flag = marauder_crisis_ongoing
+			desc = gal_com_someone_is_revealed_crisis
+		}
+
+		modifier = {
+			factor = 0
+			is_egalitarian = yes
+			desc = ethic_egalitarian
+		}
+
+		modifier = {
+			factor = 0.5
+			has_ai_personality = xenophobic_isolationists
+			desc = personality_xenophobic_isolationists
+		}
+
+		modifier = {
+			factor = 0
+			OR = {
+				has_ascension_perk = ap_become_the_crisis
+				has_ascension_perk = ap_cosmogenesis
+			}
+			desc = gal_com_we_have_crisis_perk
+		}
+
+		modifier = {
+			factor = 0
+			is_subject = yes
+			overlord = {
+				OR = {
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire
+				}
+				NOT = { is_same_value = event_target:fallen_empire_hive_control }
+			}
+			desc = gal_com_subject_of_fallen_empire
+		}
+
+		modifier = {
+			factor = 10
+			is_subject = yes
+			overlord = {
+				OR = {
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire
+				}
+				is_same_value = event_target:fallen_empire_hive_control
+			}
+			desc = gal_com_subject_of_fallen_empire
+		}
+
+		modifier = {
+			add = 2000
+			has_country_flag = fallen_empire_hive_control
 			desc = gal_com_exists_awakened_fallen_empire
 		}
 	}
@@ -1647,7 +1800,6 @@ resolution_custodian_anti_piracy = {
 
 	modifier = {
 		description = resolution_custodian_anti_piracy_modifier_desc
-		local_trade_protection_add = 5
 		damage_vs_country_type_pirate_mult = 0.2
 		damage_vs_country_type_dormant_marauders_mult = 0.2
 		damage_vs_country_type_awakened_marauders_mult = 0.2
@@ -3370,7 +3522,7 @@ resolution_emperor_united_front = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		any_country = { is_crisis_faction = yes }
 	}
@@ -3539,7 +3691,7 @@ resolution_emperor_imperial_armada = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -3669,6 +3821,12 @@ resolution_emperor_imperial_armada = {
 			has_global_flag = war_in_heaven_ongoing
 			desc = gal_com_ongoing_war_in_heaven
 		}
+		modifier = {
+			factor = 0
+			is_galactic_emperor = yes
+			is_country_type = awakened_fallen_empire
+			desc = gal_com_arrogance
+		}
 	}
 }
 
@@ -3703,7 +3861,7 @@ resolution_emperor_expand_ia = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_active_resolution = "resolution_emperor_imperial_armada"
 	}
@@ -3848,8 +4006,7 @@ resolution_emperor_imperial_legions = {
 	}
 
 	effect = {
-		random_playable_country = {
-			limit = { is_galactic_emperor = yes }
+		event_target:gal_emperor = {
 			custom_tooltip = resolution_emperor_imperial_legions_tooltip
 		}
 		hidden_effect = {
@@ -3864,7 +4021,7 @@ resolution_emperor_imperial_legions = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -4015,7 +4172,7 @@ resolution_emperor_ina = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -4087,7 +4244,7 @@ resolution_emperor_disband_ina = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_active_resolution = "resolution_emperor_ina"
 	}
@@ -4154,7 +4311,7 @@ resolution_emperor_gto = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -4236,7 +4393,7 @@ resolution_emperor_disband_gto = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_active_resolution = "resolution_emperor_gto"
 	}
@@ -4313,8 +4470,7 @@ resolution_emperor_isd = {
 	}
 
 	effect = {
-		random_playable_country = {
-			limit = { is_galactic_emperor = yes }
+		event_target:gal_emperor = {
 			add_modifier = { modifier = "imperial_security_directorate" }
 		}
 		hidden_effect = {
@@ -4329,7 +4485,7 @@ resolution_emperor_isd = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -4419,8 +4575,7 @@ resolution_emperor_imperial_charter = {
 		hidden_effect = {
 			set_global_flag = imperial_charter_granted
 			add_modifier = { modifier = imperial_charter }
-			random_playable_country = {
-				limit = { is_galactic_emperor = yes }
+			event_target:gal_emperor = {
 				set_variable = {
 					which = "imp_concession_ports"
 					value = 0
@@ -4442,7 +4597,7 @@ resolution_emperor_imperial_charter = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		NOR = {
 			has_civic = civic_galactic_sovereign_megacorp # Megacorp Emperors build their own concession ports
@@ -4526,8 +4681,7 @@ resolution_emperor_revoke_imperial_charter = {
 				}
 				remove_planet_flag = imp_concession_port
 			}
-			random_playable_country = {
-				limit = { is_galactic_emperor = yes }
+			event_target:gal_emperor = {
 				set_variable = {
 					which = "imp_concession_ports"
 					value = 0
@@ -4541,7 +4695,7 @@ resolution_emperor_revoke_imperial_charter = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		has_global_flag = imperial_charter_granted
 	}
@@ -4612,7 +4766,7 @@ resolution_emperor_abolish_council = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 	}
@@ -4649,7 +4803,7 @@ resolution_emperor_restore_council = {
 	icon = "GFX_resolution_imperial_council"
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = no
 	}
@@ -4785,7 +4939,7 @@ resolution_emperor_council_size_1 = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		num_council_positions = 2
@@ -4869,7 +5023,7 @@ resolution_emperor_council_size_2 = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		OR = {
@@ -5027,7 +5181,7 @@ resolution_emperor_council_size_3 = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		OR = {
@@ -5186,7 +5340,7 @@ resolution_emperor_council_size_4 = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		OR = {
@@ -5345,7 +5499,7 @@ resolution_emperor_council_size_5 = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		num_council_positions = 4
@@ -5420,7 +5574,7 @@ resolution_emperor_permanent_seat = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		NOR = {
@@ -5483,7 +5637,7 @@ resolution_emperor_revoke_permanent_seat = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_galactic_council_established = yes
 		NOR = {
@@ -5555,7 +5709,7 @@ resolution_emperor_trial_of_advancement = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -5671,7 +5825,7 @@ resolution_emperor_by_appointment = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -5734,7 +5888,7 @@ resolution_emperor_by_election = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -5851,7 +6005,7 @@ resolution_emperor_pax_galactica = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 	}
 
@@ -5982,7 +6136,7 @@ resolution_emperor_repeal_pax_galactica = {
 	}
 
 	potential = {
-		has_nemesis = yes
+		has_nemesis_or_control_fragment = yes
 		is_galactic_emperor = yes
 		is_active_resolution = "resolution_emperor_pax_galactica"
 	}

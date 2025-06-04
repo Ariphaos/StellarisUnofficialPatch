@@ -349,8 +349,8 @@ first_contact_event = {
 		owner = {
 			add_modifier = {
 				modifier = voidworms_hunting_buff
-				days = -1
 			}
+			custom_tooltip = grand_archive.2005.a.voidwormhunt
 			increase_hunted_fauna_count = yes
 		}
 	}
@@ -419,8 +419,8 @@ country_event = {
 		name = story.101.aa
 		add_modifier = {
 			modifier = voidworms_hunting_buff
-			days = -1
 		}
+		custom_tooltip = grand_archive.2005.a.voidwormhunt
 		increase_hunted_fauna_count = yes
 	}
 
@@ -792,63 +792,7 @@ country_event = {
 			which = value:voidworm_nest_owned
 			value > 0
 		}
-		OR = {
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_0
-				num_ships < 2
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_2
-				num_ships < 3
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_4
-				num_ships < 6
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_6
-				num_ships < 9
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_8
-				num_ships < 12
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_10
-				num_ships < 15
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_12
-				num_ships < 18
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_14
-				num_ships < 21
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_16
-				num_ships < 24
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_18
-				num_ships < 27
-			}
-			AND = {
-				NOR = {
-					has_global_flag = ariphaos_patch_galaxy_size_0
-					has_global_flag = ariphaos_patch_galaxy_size_2
-					has_global_flag = ariphaos_patch_galaxy_size_4
-					has_global_flag = ariphaos_patch_galaxy_size_6
-					has_global_flag = ariphaos_patch_galaxy_size_8
-					has_global_flag = ariphaos_patch_galaxy_size_10
-					has_global_flag = ariphaos_patch_galaxy_size_12
-					has_global_flag = ariphaos_patch_galaxy_size_14
-					has_global_flag = ariphaos_patch_galaxy_size_16
-					has_global_flag = ariphaos_patch_galaxy_size_18
-				}
-				num_ships < 30
-			}
-		}
+		num_ships < event_target:global_event_country.ariphaos_patch_systems_critters
 	}
 
 	immediate = {
@@ -1269,6 +1213,7 @@ planet_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		exists = from
 		from = {
 			is_voidworms_hostile_country_type = yes
 		}
@@ -1514,7 +1459,7 @@ planet_event = {
 		fromfrom = {
 			change_variable = {
 				which = voidworm_killed_population_count
-				value = 1
+				value = local_kill_pop_amount
 			}
 		}
 		if = {
@@ -1624,6 +1569,11 @@ country_event = {
 		}
 
 		country_event = { id = grand_archive.2305 days = 360 }
+	}
+	after = {
+		every_playable_country = {
+			country_event = { id = timeline.66 } # Timeline Voidworm Plague Crisis
+		}
 	}
 }
 
@@ -1826,7 +1776,12 @@ country_event = {
 	id = grand_archive.2400
 	title = grand_archive.2400.name
 	desc = grand_archive.2400.desc
-	picture = GFX_evt_hangar_bay
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_hangar_bay
+		BIOSHIP_PICTURE = GFX_evt_bioship_hangar
+	}
 	show_sound = event_construction
 
 	is_triggered_only = yes
@@ -1844,7 +1799,12 @@ country_event = {
 	option = {
 		name = grand_archive.2400.b
 		if = {
-			limit = { has_valid_civic = civic_beastmasters }
+			limit = {
+				OR = {
+					has_valid_civic = civic_beastmasters
+					country_uses_bio_ships = yes
+				}
+			}
 			add_monthly_resource_mult = {
 				resource = food
 				value = @tier3materialreward
@@ -1929,7 +1889,12 @@ country_event = {
 		trigger = { is_gestalt = yes }
 		text = grand_archive.2410.desc.gestalt
 	}
-	picture = GFX_evt_hangar_bay
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_hangar_bay
+		BIOSHIP_PICTURE = GFX_evt_bioship_hangar
+	}
 	show_sound = event_machinery
 
 	is_triggered_only = yes
@@ -2269,7 +2234,9 @@ country_event = {
 				}
 				1 = {
 					event_target:infected_leader = {
-						add_trait = leader_trait_maimed
+						add_trait = {
+							trait = leader_trait_maimed
+						}
 					}
 					add_monthly_resource_mult = {
 						resource = unity
@@ -2339,7 +2306,7 @@ country_event = {
 				has_planet_flag = infected_by_voidworms
 			}
 			save_event_target_as = infected_planet
-			random_owned_pop = {
+			weighted_random_owned_pop_group = {
 				limit = { is_organic_species = yes }
 				save_event_target_as = infected_planet_pop
 			}
@@ -2364,14 +2331,14 @@ country_event = {
 				limit = {
 					is_colony = yes
 					is_under_colonization = no
-					count_owned_pop = {
+					count_owned_pop_amount = {
 						limit = { is_organic_species = yes }
 						count > 0
 					}
 				}
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = { is_organic_species = yes }
-					kill_pop = yes
+					kill_single_pop = yes
 				}
 			}
 		}
@@ -2794,6 +2761,7 @@ country_event = {
 		add_modifier = {
 			modifier = cutholoids_hunting_buff
 		}
+		custom_tooltip = grand_archive.2900.b.cutholoidhunt
 		increase_hunted_fauna_count = yes
 	}
 }
@@ -2855,6 +2823,7 @@ first_contact_event = {
 			add_modifier = {
 				modifier = cutholoids_hunting_buff
 			}
+			custom_tooltip = grand_archive.2900.b.cutholoidhunt
 			increase_hunted_fauna_count = yes
 		}
 	}
@@ -3022,110 +2991,10 @@ event = {
 		any_country = {
 			has_established_contact = event_target:cutholoids_country
 		}
-		OR = {
-			AND = {
-				OR = {
-					has_global_flag = ariphaos_patch_galaxy_size_0
-					has_global_flag = ariphaos_patch_galaxy_size_2
-				}
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 1
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_4
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 2
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_6
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 3
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_8
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 4
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_10
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 5
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_12
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 6
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_14
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 7
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_16
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 8
-					}
-				}
-			}
-			AND = {
-				has_global_flag = ariphaos_patch_galaxy_size_18
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 9
-					}
-				}
-			}
-			AND = {
-				NOR = {
-					has_global_flag = ariphaos_patch_galaxy_size_0
-					has_global_flag = ariphaos_patch_galaxy_size_2
-					has_global_flag = ariphaos_patch_galaxy_size_4
-					has_global_flag = ariphaos_patch_galaxy_size_6
-					has_global_flag = ariphaos_patch_galaxy_size_8
-					has_global_flag = ariphaos_patch_galaxy_size_10
-					has_global_flag = ariphaos_patch_galaxy_size_12
-					has_global_flag = ariphaos_patch_galaxy_size_14
-					has_global_flag = ariphaos_patch_galaxy_size_16
-					has_global_flag = ariphaos_patch_galaxy_size_18
-				}
-				event_target:cutholoids_country = {
-					check_variable = {
-						which = alive_cutholoids
-						value < 10
-					}
-				}
+		event_target:cutholoids_country = {
+			check_variable = {
+				which = alive_cutholoids
+				value < event_target:global_event_country.ariphaos_patch_systems_cutholoids
 			}
 		}
 	}
@@ -3462,7 +3331,11 @@ fleet_event = {
 			limit = {
 				controller = { has_country_flag = leader_digested_by_cutholoid }
 			}
-			leader = { add_trait = leader_trait_cutholoid_victim }
+			leader = {
+				add_trait = {
+					trait = leader_trait_cutholoid_victim
+				}
+			}
 			controller = { remove_country_flag = leader_digested_by_cutholoid }
 		}
 	}
@@ -3473,7 +3346,9 @@ fleet_event = {
 			if = {
 				limit = { has_trait = leader_trait_cutholoid_victim }
 				tooltip = {
-					add_trait = leader_trait_cutholoid_victim
+					add_trait = {
+						trait = leader_trait_cutholoid_victim
+					}
 				}
 			}
 		}
@@ -6059,11 +5934,11 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		while = {
-			count = value:twenty_percent_organics_pop
-			random_owned_pop = {
-				limit = { is_robot_pop = no }
-				kill_pop = yes
+		every_owned_pop_group = {
+			limit = { is_robot_pop_group = no }
+			kill_pop_group = {
+				pop_group = this
+				amount = 20%
 			}
 		}
 	}
@@ -7050,13 +6925,13 @@ country_event = {
 			resource_stockpile_compare = {
 				resource = energy
 				value >=  100
-				mult = fromfrom.trigger:trading_value
+				# mult = fromfrom.trigger:trading_value
 			}
 		}
 		custom_tooltip = grand_archive.9005.a.tt
 		add_resource = {
 			energy = -100
-			mult = fromfrom.trigger:trading_value
+			# mult = fromfrom.trigger:trading_value
 		}
 		hidden_effect = {
 			clone_leader = {
@@ -7070,7 +6945,7 @@ country_event = {
 			from = {
 				add_resource = {
 					energy = 100
-					mult = root.fromfrom.trigger:trading_value
+					#mult = root.fromfrom.trigger:trading_value #TODO Figure out how we deleted this and get it back
 				}
 				create_message = {
 					type = MESSAGE_LEADER_RANSOM_PAID
@@ -7229,20 +7104,49 @@ ship_event = {
 	immediate = {
 		switch = {
 			trigger = is_ship_size
+			# Space Amoebas
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_amoeba SHIP_CATEGORY = space_amoeba EVENT_ID = grand_archive.10005 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_amoeba_mother SHIP_CATEGORY = space_amoeba EVENT_ID = grand_archive.10005 }
+			# Tiyankis
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_1 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_2 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_3 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_4 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = space_whale_5 SHIP_CATEGORY = tiyanki EVENT_ID = grand_archive.10006 }
+			# Voidworms
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_small SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_medium SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_large SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = voidworms_titan SHIP_CATEGORY = voidworm EVENT_ID = grand_archive.10007 }
+			# Cutholoids
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = cutholoids_hatchling SHIP_CATEGORY = cutholoid EVENT_ID = grand_archive.10008 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = cutholoids_juvenile SHIP_CATEGORY = cutholoid EVENT_ID = grand_archive.10008 }
 			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = cutholoids SHIP_CATEGORY = cutholoid EVENT_ID = grand_archive.10008 }
+			# Crystalline entities
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_blue SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_blue SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_blue SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_green SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_green SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_green SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_yellow SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_yellow SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_yellow SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_red SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_red SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_red SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_blue_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_blue_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_blue_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_green_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_green_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_green_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_yellow_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_yellow_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_yellow_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_small_red_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_medium_red_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
+			inline_script = { script = grand_archive/mutations/unique_mutation_trigger_check_case SHIP_SIZE = crystal_ship_large_red_elite SHIP_CATEGORY = crystalline_entity EVENT_ID = grand_archive.10009 }
 		}
 	}
 }
@@ -7314,6 +7218,24 @@ country_event = {
 		name = EXCELLENT
 		enable_special_project = {
 			name = "cutholoid_UNIQUE_MUTATION_PROJECT"
+			owner = root
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.10009
+	title = grand_archive.10009.name
+	desc = grand_archive.10009.desc
+	show_sound = event_space_crystals
+	picture = GFX_evt_space_crystals
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		enable_special_project = {
+			name = "crystalline_entity_UNIQUE_MUTATION_PROJECT"
 			owner = root
 		}
 	}
@@ -7581,7 +7503,7 @@ ship_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		design = {
+		ship_growth_stage = {
 			has_berserker_glands_mutation = yes
 		}
 	}
@@ -7661,44 +7583,61 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 
+	trigger = {
+		last_increased_tech = tech_controlled_mutations
+	}
+
 	immediate = {
 		if = {
 			limit = {
-				last_increased_tech = tech_controlled_mutations
+				has_technology = tech_thrusters_2
+				NOT = { has_technology = tech_thrusters_bio_integration }
 			}
-			if = {
-				limit = {
-					has_technology = tech_thrusters_2
-					NOT = { has_technology = tech_thrusters_bio_integration }
-				}
-				add_research_option = tech_thrusters_bio_integration
-			}
-			if = {
-				limit = {
-					has_technology = tech_hyper_drive_2
-					NOT = { has_technology = tech_hyper_drive_bio_integration }
-				}
-				add_research_option = tech_hyper_drive_bio_integration
-			}
-			if = {
-				limit = {
-					has_technology = tech_sensors_2
-					NOT = { has_technology = tech_sensors_bio_integration }
-				}
-				add_research_option = tech_sensors_bio_integration
-			}
-			if = {
-				limit = {
-					has_technology = tech_combat_computers_2
-					NOT = { has_technology = tech_combat_computers_bio_integration }
-				}
-				add_research_option = tech_combat_computers_bio_integration
-			}
+			add_research_option = tech_thrusters_bio_integration
 		}
-		else_if = {
+		if = {
+			limit = {
+				has_technology = tech_hyper_drive_2
+				NOT = { has_technology = tech_hyper_drive_bio_integration }
+			}
+			add_research_option = tech_hyper_drive_bio_integration
+		}
+		if = {
+			limit = {
+				has_technology = tech_sensors_2
+				NOT = { has_technology = tech_sensors_bio_integration }
+			}
+			add_research_option = tech_sensors_bio_integration
+		}
+		if = {
+			limit = {
+				has_technology = tech_combat_computers_2
+				NOT = { has_technology = tech_combat_computers_bio_integration }
+			}
+			add_research_option = tech_combat_computers_bio_integration
+		}
+	}
+}
+
+country_event = {
+	id = grand_archive.7401
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_technology = tech_controlled_mutations
+		OR = {
+			last_increased_tech = tech_thrusters_2
+			last_increased_tech = tech_hyper_drive_2
+			last_increased_tech = tech_sensors_2
+			last_increased_tech = tech_combat_computers_2
+		}
+	}
+
+	immediate = {
+		if = {
 			limit = {
 				last_increased_tech = tech_thrusters_2
-				has_technology = tech_controlled_mutations
 				NOT = { has_technology = tech_thrusters_bio_integration }
 			}
 			add_research_option = tech_thrusters_bio_integration
@@ -7706,7 +7645,6 @@ country_event = {
 		else_if = {
 			limit = {
 				last_increased_tech = tech_hyper_drive_2
-				has_technology = tech_controlled_mutations
 				NOT = { has_technology = tech_hyper_drive_bio_integration }
 			}
 			add_research_option = tech_hyper_drive_bio_integration
@@ -7714,7 +7652,6 @@ country_event = {
 		else_if = {
 			limit = {
 				last_increased_tech = tech_sensors_2
-				has_technology = tech_controlled_mutations
 				NOT = { has_technology = tech_sensors_bio_integration }
 			}
 			add_research_option = tech_sensors_bio_integration
@@ -7722,7 +7659,6 @@ country_event = {
 		else_if = {
 			limit = {
 				last_increased_tech = tech_combat_computers_2
-				has_technology = tech_controlled_mutations
 				NOT = { has_technology = tech_combat_computers_bio_integration }
 			}
 			add_research_option = tech_combat_computers_bio_integration

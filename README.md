@@ -38,8 +38,19 @@ Older legacy versions can be found in [releases](https://github.com/Ariphaos/Ste
 
 For chronological changelogs:
 
+* [ChangeLog-2025.md](https://github.com/Ariphaos/StellarisUnofficialPatch/blob/master/ChangeLog-2024.md) for 2025
 * [ChangeLog-2024.md](https://github.com/Ariphaos/StellarisUnofficialPatch/blob/master/ChangeLog-2024.md) for 2024
 * [ChangeLog-2023.md](https://github.com/Ariphaos/StellarisUnofficialPatch/blob/master/ChangeLog-2023.md) for 2023 and earlier.
+
+## When Paradox Fixes the same Thing
+
+When Paradox addresses the same bug I do, and hasn't copied my fix or whatever, I usually just overwrite my fix completely and that is the end of it. There are as of my last review, three exceptions to this:
+
+* The Pulsating Stars anomaly, where the fallback is to create an entirely new star system. My original fix is retained for performance reasons.
+
+* The Khan lost all of their traits with the leader rework. My original fix gave the Khan different traits depending on the type of marauders that got awakened. I kept my fix because it is somewhat more flavorful.
+
+* There was a division by zero error when calculating the fleet power for rebellions. Paradox gave a base of 1, I set the minimum to 100. I kept my fix because the result gets cubed, and you can get weights in the septillions with it. Which I worry is a bit much.
 
 # Usage
 

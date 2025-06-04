@@ -29,6 +29,33 @@
 # ship_roles = { name1 name2 } # Show up as selectable roles in the ship designer
 # never_lost = <yes/no> # Removes the chance for the ship size to instantly get killed by emergency ftl. It can still be killed by the random Emergency FTL damage effect.
 # triggered_ship_roles = { { name = test1 trigger = {} } { name = test1 trigger = {} } } # List of triggered ship roles, show up in the ship designer when the trigger is true, executes on country scope
+# evaluation_resource = food # strategic resource to evaluate the cost of a ship design associated with this size
+							 # default is energy
+							 # this is used to determine if a ship design is more advanced than another:
+							 #  the one that costs more is considered an upgrade compared to the cheaper one
+#
+# is_bio_ship = yes					# this indicates that this ship uses bioship mechanic
+# upgrades_to = mauler_stage_2		# the next stage of the bioship growth
+#
+# bioship_growth_progress_required  = 150	# for bioships: growth threshold at which the ship will grow into its next stage
+#                                 			# for hero ships that are NOT bioships: if > 0 this activates the manual growth interface. threshold at which the manual growth is enabled
+#
+# is_hero_ship = yes		 # If yes, ship can't be merged or disbanded, and has a special UI that splits its potential orders into two bars
+#							 # If its combat computer allows it to unlock from combat, it also exposes its actions during combat in the combat view
+#							 # default: no
+#
+# hero_ship_fleet_background = "GFX_fleet_view_behemoth_stage_4"	# Name of sprite to use as a background for Fleet UI for single-ship hero-ship fleets.
+#																	# default: empty (uses default background)
+#
+# custom_state_loc_prefix = "STATUS_LOC_KEY_PREFIX" # for single-ship fleets with a single hero ship, if not empty this activates the status bar on the fleet UI
+#													# the status bar consists of two scripted localization driven strings (scope: selected fleet)
+#													# the localization keys for those two strings result from appending to this prefix "_title" or "_value"
+#													# (in this example, "STATUS_LOC_KEY_PREFIX_title" and "STATUS_LOC_KEY_PREFIX_value")
+#
+# on_click_sound = "sound_clip_name"	# Sound clip to play when selecting a single fleet that contains exclusively a single ship of this size
+# family_name = "bioship_family"		# root for the name used to described the whole set (so "mauler" for bantam mauler, absolute mauler, etc). This is also used to localize the variant (ie mauler_cap, mauler_pluralized, etc) through localization
+# growth_stage_descriptor = "ship_growth_stage_1"	# localization for the growth stage of the current ship size (so "bantam", "absolute", etc.)
+
 
 ####################
 
@@ -45,7 +72,7 @@ corvette = {
 	max_hitpoints = @corvette_hp
 	modifier = {
 		ship_evasion_add = @corvette_evasion
-		ship_piracy_suppression_add = 10
+		#ship_piracy_suppression_add = 10
 	}
 	size_multiplier = 1
 	fleet_slot_size = 1
@@ -58,7 +85,7 @@ corvette = {
 	enable_default_design = yes	#if yes, countries will have an auto-generated design at start
 	enable_3dview_in_ship_browser = yes #if yes, ship design will have a 3d view in the ship browser
 
-	default_behavior = swarm
+	role_background = "GFX_role_selection_corvette"
 	ship_roles = { screen gunship artillery brawler }
 	triggered_ship_roles = {
 		{
@@ -66,6 +93,8 @@ corvette = {
 			trigger = { has_technology = tech_cloaking_1 }
 		}
 	}
+
+	default_behavior = swarm
 
 	prerequisites = { "tech_corvettes" }
 
@@ -100,6 +129,9 @@ corvette = {
 		upkeep = {
 			energy = @corvette_upkeep_energy
 			alloys = @corvette_upkeep_alloys
+		}
+		logistics = {
+			trade = @corvette_logistic_upkeep_trade
 		}
 	}
 
@@ -149,7 +181,7 @@ frigate = {
 	max_hitpoints = @frigate_hp
 	modifier = {
 		ship_evasion_add = @frigate_evasion
-		ship_piracy_suppression_add = 10
+		#ship_piracy_suppression_add = 10
 	}
 	size_multiplier = 1
 	hull_scale = 1.25
@@ -165,6 +197,8 @@ frigate = {
 	use_shipnames_from = corvette
 
 	default_behavior = torpedo
+
+	role_background = "GFX_role_selection_frigate"
 	ship_roles = { explosive }
 	triggered_ship_roles = {
 		{
@@ -210,6 +244,10 @@ frigate = {
 			energy = @corvette_upkeep_energy
 			alloys = @corvette_upkeep_alloys
 		}
+
+		logistics = {
+			trade = @frigate_logistic_upkeep_trade
+		}
 	}
 
 	min_upgrade_cost = {
@@ -244,7 +282,7 @@ destroyer = {
 	max_hitpoints = @destroyer_hp
 	modifier = {
 		ship_evasion_add = @destroyer_evasion
-		ship_piracy_suppression_add = 8
+		#ship_piracy_suppression_add = 8
 	}
 	size_multiplier = 2
 	fleet_slot_size = 2
@@ -258,6 +296,8 @@ destroyer = {
 	enable_3dview_in_ship_browser = yes #if yes, ship design will have a 3d view in the ship browser
 
 	default_behavior = picket
+
+	role_background = "GFX_role_selection_destroyer"
 	ship_roles = { screen gunship artillery brawler }
 	triggered_ship_roles = {
 		{
@@ -298,6 +338,9 @@ destroyer = {
 		upkeep = {
 			energy = @destroyer_upkeep_energy
 			alloys = @destroyer_upkeep_alloys
+		}
+		logistics = {
+			trade = @destroyer_logistic_upkeep_trade
 		}
 	}
 	min_upgrade_cost = {
@@ -342,7 +385,7 @@ cruiser = {
 	max_hitpoints = @cruiser_hp
 	modifier = {
 		ship_evasion_add = @cruiser_evasion
-		ship_piracy_suppression_add = 6
+		#ship_piracy_suppression_add = 6
 	}
 	size_multiplier = 4
 	fleet_slot_size = 3
@@ -356,6 +399,8 @@ cruiser = {
 	enable_3dview_in_ship_browser = yes #if yes, ship design will have a 3d view in the ship browser
 
 	default_behavior = line
+
+	role_background = "GFX_role_selection_cruiser"
 	ship_roles = { gunship artillery carrier }
 	triggered_ship_roles = {
 		{
@@ -418,6 +463,9 @@ cruiser = {
 			energy = @cruiser_upkeep_energy
 			alloys = @cruiser_upkeep_alloys
 		}
+		logistics = {
+			trade = @cruiser_logistic_upkeep_trade
+		}
 	}
 
 	min_upgrade_cost = {
@@ -457,7 +505,7 @@ battleship = {
 	max_hitpoints = @battleship_hp
 	modifier = {
 		ship_evasion_add = @battleship_evasion
-		ship_piracy_suppression_add = 4
+		#ship_piracy_suppression_add = 4
 	}
 	size_multiplier = 8
 	fleet_slot_size = 4
@@ -471,6 +519,8 @@ battleship = {
 	enable_3dview_in_ship_browser = yes #if yes, ship design will have a 3d view in the ship browser
 
 	default_behavior = artillery
+
+	role_background = "GFX_role_selection_battleship"
 	ship_roles = { artillery carrier gunship }
 
 	prerequisites = { "tech_battleships" }
@@ -506,6 +556,9 @@ battleship = {
 		upkeep = {
 			energy = @battleship_upkeep_energy
 			alloys = @battleship_upkeep_alloys
+		}
+		logistics = {
+			trade = @battleship_logistic_upkeep_trade
 		}
 	}
 
@@ -569,6 +622,8 @@ titan = {
 	selectable = { host_has_dlc = "Apocalypse" }
 
 	default_behavior = artillery
+
+	role_background = "GFX_role_selection_titan"
 	ship_roles = { artillery gunship }
 
 	prerequisites = { "tech_titans" }
@@ -642,6 +697,9 @@ titan = {
 			energy = @titan_upkeep_energy
 			alloys = @titan_upkeep_alloys
 		}
+		logistics = {
+			trade = @titan_logistic_upkeep_trade
+		}
 	}
 
 	min_upgrade_cost = {
@@ -691,7 +749,30 @@ constructor = {
 	resources = {
 		category = ships
 		cost = {
-			alloys = 100
+			trigger = {
+				from = {
+					country_uses_bio_ships = no
+				}
+			}
+			alloys = @construction_ship_cost
+		}
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			alloys = @construction_ship_cost
+			mult = 0.5
+		}
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @construction_ship_cost
+			mult = @halved_alloy_to_food_cost_ratio
 		}
 
 		upkeep = {
@@ -709,6 +790,8 @@ constructor = {
 			has_technology = tech_psi_jump_drive_1
 		}
 	}
+
+	available_to_everyone = yes
 
 	ai_ship_data = {
 		min = value:desired_constructors_min
@@ -765,6 +848,7 @@ colonizer = {
 			trigger = {
 				from = {
 					is_virtual_empire = no
+					country_uses_bio_ships = no
 				}
 			}
 			alloys = @colony_cost_base
@@ -774,9 +858,31 @@ colonizer = {
 			trigger = {
 				from = {
 					is_virtual_empire = yes
+					country_uses_bio_ships = no
 				}
 			}
 			alloys = @colony_cost_low
+		}
+		# Halved if you use biological ships
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = no
+					country_uses_bio_ships = yes
+				}
+			}
+			alloys = @colony_cost_base
+			mult = 0.5
+		}
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = yes
+					country_uses_bio_ships = yes
+				}
+			}
+			alloys = @colony_cost_low
+			mult = 0.5
 		}
 
 		# Consumer goods for non-gestalt empires
@@ -826,6 +932,29 @@ colonizer = {
 			}
 			food = @colony_cost_high
 		}
+
+		# Additional food to replace alloys if you use biological ships
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = no
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @colony_cost_base
+			mult = @halved_alloy_to_food_cost_ratio
+		}
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = yes
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @colony_cost_low
+			mult = @halved_alloy_to_food_cost_ratio
+		}
+
 		# Minerals for lithoids
 		# 200 normally
 		cost = {
@@ -913,8 +1042,11 @@ colonizer = {
 		}
 	}
 
+	available_to_everyone = yes
+
 	potential_country = {
 		is_guided_sapience_empire = no
+		is_wilderness_empire = no
 		OR = {
 			has_technology = tech_hyper_drive_1
 			has_technology = tech_hyper_drive_2
@@ -996,6 +1128,8 @@ sponsored_colonizer = {
 		}
 	}
 
+	available_to_everyone = yes
+
 	ai_ship_data = {
 		min = value:desired_colonizers_base
 	}
@@ -1062,6 +1196,8 @@ lithoid_colonizer = {
 		}
 	}
 
+	available_to_everyone = yes
+
 	ai_ship_data = {
 		min = value:desired_colonizers_base
 	}
@@ -1119,6 +1255,8 @@ guided_sapience_colonizer = {
 		}
 	}
 
+	available_to_everyone = yes
+
 	ai_ship_data = {
 		min = value:desired_colonizers_base
 	}
@@ -1131,6 +1269,7 @@ guided_sapience_colonizer = {
 			trigger = {
 				from = {
 					is_virtual_empire = no
+					country_uses_bio_ships = no
 				}
 			}
 			alloys = @colony_cost_mid
@@ -1140,9 +1279,31 @@ guided_sapience_colonizer = {
 			trigger = {
 				from = {
 					is_virtual_empire = yes
+					country_uses_bio_ships = no
 				}
 			}
 			alloys = @colony_cost_base
+		}
+		# Halved if you use biological ships
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = no
+					country_uses_bio_ships = yes
+				}
+			}
+			alloys = @colony_cost_mid
+			mult = 0.5
+		}
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = yes
+					country_uses_bio_ships = yes
+				}
+			}
+			alloys = @colony_cost_base
+			mult = 0.5
 		}
 
 		# Consumer goods for non-gestalt empires
@@ -1192,6 +1353,29 @@ guided_sapience_colonizer = {
 			}
 			food = @colony_cost_high
 		}
+
+		# Additional food to replace alloys if you use biological ships
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = no
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @colony_cost_mid
+			mult = @halved_alloy_to_food_cost_ratio
+		}
+		cost = {
+			trigger = {
+				from = {
+					is_virtual_empire = yes
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @colony_cost_base
+			mult = @halved_alloy_to_food_cost_ratio
+		}
+
 		# Minerals for lithoids
 		# 200 normally
 		cost = {
@@ -1320,7 +1504,30 @@ science = {
 	resources = {
 		category = ships
 		cost = {
-			alloys = 100
+			trigger = {
+				from = {
+					country_uses_bio_ships = no
+				}
+			}
+			alloys = @science_ship_cost
+		}
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			alloys = @science_ship_cost
+			mult = 0.5
+		}
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @science_ship_cost
+			mult = @halved_alloy_to_food_cost_ratio
 		}
 		upkeep = {
 			energy = @science_upkeep_energy
@@ -1340,6 +1547,8 @@ science = {
 			has_technology = tech_psi_jump_drive_1
 		}
 	}
+
+	available_to_everyone = yes
 
 	ai_ship_data = {
 		min = value:desired_science_ships
@@ -1364,6 +1573,8 @@ transport = {
 	is_space_station = no
 	icon = ship_size_transport
 
+	available_to_everyone = yes
+
 	combat_disengage_chance = 1.5
 
 	enable_default_design = yes	#if yes, countries will have an auto-generated design at start
@@ -1374,6 +1585,7 @@ transport = {
 	required_component_set = "ftl_components"
 	required_component_set = "thruster_components"
 	required_component_set = "sensor_components"
+	required_component_set = "science_cloaking_components"
 	auto_upgrade = yes
 }
 
@@ -1389,7 +1601,7 @@ military_station_small = {
 	modifier = {
 		ship_evasion_mult = -1
 		ships_upkeep_mult = -0.25
-		ship_piracy_suppression_add = 2
+		#ship_piracy_suppression_add = 2
 	}
 	ship_modifier = {
 		ship_weapon_range_mult = 0.30
@@ -1408,6 +1620,7 @@ military_station_small = {
 	is_space_station = yes
 	base_buildtime = @corvette_build_time
 
+	role_background = "GFX_role_selection_defense_platform"
 	ship_roles = { gunship screen artillery carrier energy_torpedoes }
 
 	enable_default_design = yes	#if yes, countries will have an auto-generated design at start
@@ -1426,12 +1639,15 @@ military_station_small = {
 		OR = {
 			has_starbase_size >= starbase_outpost
 			has_starbase_size >= orbital_ring_tier_1
+			has_starbase_size >= starbase_deep_space_citadel_1
 		}
 	}
 
 	resources = {
 		category = ships
 	}
+
+	available_to_everyone = yes
 }
 
 military_station_medium = {
@@ -1475,6 +1691,8 @@ military_station_medium = {
 	resources = {
 		category = ships
 	}
+
+	available_to_everyone = yes
 }
 
 military_station_large = {
@@ -1517,6 +1735,8 @@ military_station_large = {
 	resources = {
 		category = ships
 	}
+
+	available_to_everyone = yes
 }
 
 ################
@@ -1551,7 +1771,21 @@ mining_station = {
 	resources = {
 		category = station_gatherers
 		cost = {
-			minerals = 100
+			trigger = {
+				from = {
+					country_uses_bio_ships = no
+				}
+			}
+			minerals = @civilian_station_cost
+		}
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @civilian_station_cost
+			mult = @mineral_to_food_cost_ratio
 		}
 		cost = {
 			trigger = {
@@ -1565,6 +1799,8 @@ mining_station = {
 			energy = 1
 		}
 	}
+
+	available_to_everyone = yes
 }
 
 research_station = {
@@ -1595,7 +1831,21 @@ research_station = {
 	resources = {
 		category = station_researchers
 		cost = {
-			minerals = 100
+			trigger = {
+				from = {
+					country_uses_bio_ships = no
+				}
+			}
+			minerals = @civilian_station_cost
+		}
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @civilian_station_cost
+			mult = @mineral_to_food_cost_ratio
 		}
 		cost = {
 			trigger = {
@@ -1610,6 +1860,8 @@ research_station = {
 			energy = 1
 		}
 	}
+
+	available_to_everyone = yes
 }
 
 observation_station = {
@@ -1639,11 +1891,26 @@ observation_station = {
 	resources = {
 		category = station_observers
 		cost = {
-			minerals = 100
+			trigger = {
+				from = {
+					country_uses_bio_ships = no
+				}
+			}
+			minerals = @civilian_station_cost
 		}
-
+		cost = {
+			trigger = {
+				from = {
+					country_uses_bio_ships = yes
+				}
+			}
+			food = @civilian_station_cost
+			mult = @mineral_to_food_cost_ratio
+		}
 		upkeep = {
 			energy = 1
 		}
 	}
+
+	available_to_everyone = yes
 }

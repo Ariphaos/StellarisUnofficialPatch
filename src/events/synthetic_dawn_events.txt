@@ -81,7 +81,12 @@ country_event = {
 	id = syndaw.21
 	title = syndaw.21.name
 	desc = syndaw.21.desc
-	picture = GFX_evt_ship_in_orbit
+	inline_script = {
+		script = events/biogenesis_event_art
+		OWNER = owner
+		REGULAR_PICTURE = GFX_evt_ship_in_orbit
+		BIOSHIP_PICTURE = GFX_evt_bio_ships_orbiting
+	}
 	show_sound = event_ship_bridge
 	location = event_target:malfunctioning_leader_fleet
 	is_triggered_only = yes
@@ -92,6 +97,7 @@ country_event = {
 				has_leader_flag = leader_death_events_blocked
 				has_leader_flag = legendary_leader
 			}
+			is_ruler = no
 			leader_class = scientist
 			is_mechanical_species = yes
 			exists = fleet
@@ -108,6 +114,7 @@ country_event = {
 					has_leader_flag = leader_death_events_blocked
 					has_leader_flag = legendary_leader
 				}
+				is_ruler = no
 				leader_class = scientist
 				is_mechanical_species = yes
 				exists = fleet
@@ -144,6 +151,7 @@ country_event = {
 				has_leader_flag = leader_death_events_blocked
 				has_leader_flag = legendary_leader
 			}
+			is_ruler = no
 			leader_class = commander
 			is_mechanical_species = yes
 			exists = fleet
@@ -160,6 +168,7 @@ country_event = {
 					has_leader_flag = leader_death_events_blocked
 					has_leader_flag = legendary_leader
 				}
+				is_ruler = no
 				leader_class = commander
 				is_mechanical_species = yes
 				exists = fleet
@@ -387,15 +396,15 @@ country_event = { # per-country gatekeeper
 		}
 		any_owned_planet = {
 			is_occupied_flag = no
-			any_owned_pop = { has_trait = trait_mechanical }
+			any_owned_pop_group = { has_trait = trait_mechanical }
 		}
 	}
 
 	immediate = {
 		# Count Robot Pops (can be multiple Robot species).
 		set_variable = { which = var_country_robot_pops value = 0 }
-		every_owned_pop = {
-			limit = { is_robot_pop = yes }
+		every_owned_pop_group = {
+			limit = { is_robot_pop_group = yes }
 			change_variable = { which = var_country_robot_pops value = 1 }
 		}
 
@@ -404,9 +413,9 @@ country_event = { # per-country gatekeeper
 			limit = {
 				OR = {
 					check_variable = { which = var_country_robot_pops value > 75 }
-					pop_percentage = {
+					pop_amount_percentage = {
 						percentage > 0.25
-						limit = { is_robot_pop = yes }
+						limit = { is_robot_pop_group = yes }
 					}
 				}
 			}
@@ -546,8 +555,8 @@ situation_event = {
 			has_built_species = yes
 			any_owned_planet = {
 				is_occupied_flag = no
-				free_housing > 5
-				any_owned_pop = {
+				free_housing > 500
+				any_owned_pop_group = {
 					NOT = {
 						has_trait = trait_mechanical
 					}
@@ -563,8 +572,8 @@ situation_event = {
 			random_owned_planet = {
 				limit = {
 					is_occupied_flag = no
-					free_housing > 5
-					any_owned_pop = {
+					free_housing > 500
+					any_owned_pop_group = {
 						NOT = {
 							has_trait = trait_mechanical
 						}
@@ -586,7 +595,7 @@ situation_event = {
 			hidden_effect = {
 				while = {
 					count = 2
-					create_pop = {
+					create_pop_group = {
 						species = root.owner.built_species
 					}
 				}
@@ -867,8 +876,8 @@ situation_event = {
 		owner = {
 			any_owned_planet = {
 				num_assigned_jobs = {
-					job = researcher
-					value >= 1
+					job = physicist
+					value >= 100
 				}
 			}
 		}
@@ -883,8 +892,8 @@ situation_event = {
 				limit = {
 					is_occupied_flag = no
 					num_assigned_jobs = {
-						job = researcher
-						value >= 1
+						job = physicist
+						value >= 100
 					}
 				}
 				save_event_target_as = target_planetoid
@@ -1008,7 +1017,7 @@ situation_event = {
 		owner = {
 			any_owned_planet = {
 				is_occupied_flag = no
-				any_owned_pop = { has_trait = trait_mechanical }
+				any_owned_pop_group = { has_trait = trait_mechanical }
 			}
 		}
 	}
@@ -1021,7 +1030,7 @@ situation_event = {
 			random_owned_planet = {
 				limit = {
 					is_occupied_flag = no
-					any_owned_pop = { has_trait = trait_mechanical }
+					any_owned_pop_group = { has_trait = trait_mechanical }
 				}
 				save_event_target_as = target_planet
 			}
@@ -1069,7 +1078,7 @@ situation_event = {
 		event_target:target_planet = {
 			owner = { is_same_value = root.owner }
 			is_occupied_flag = no
-			any_owned_pop = { has_trait = trait_mechanical }
+			any_owned_pop_group = { has_trait = trait_mechanical }
 		}
 	}
 
@@ -1077,11 +1086,11 @@ situation_event = {
 		set_timed_situation_flag = { flag = flag_recent_event days = @recent_event_pause }
 
 		event_target:target_planet = {
-			random_owned_pop = {
+			random_owned_pop_group = {
 				limit = {
 					has_trait = trait_mechanical
 				}
-				kill_pop = yes
+				kill_single_pop = yes
 			}
 		}
 	}
@@ -1229,7 +1238,7 @@ situation_event = {
 			OR = {
 				# Any Robots pops or robot armies? Check most likely first.
 				any_owned_planet = {
-					any_owned_pop = {
+					any_owned_pop_group = {
 						has_trait = trait_mechanical
 					}
 				}
@@ -1275,7 +1284,7 @@ situation_event = {
 				limit = { NOT = { exists = event_target:target_planet } }
 				random_owned_planet = {
 					limit = {
-						any_owned_pop = { has_trait = trait_mechanical }
+						any_owned_pop_group = { has_trait = trait_mechanical }
 					}
 					save_event_target_as = target_planet
 				}
@@ -1289,14 +1298,14 @@ situation_event = {
 		add_situation_progress = 5
 		trigger = {
 			event_target:target_planet = {
-				any_owned_pop = { has_trait = trait_mechanical }
+				any_owned_pop_group = { has_trait = trait_mechanical }
 			}
 		}
 		hidden_effect = {
 			event_target:target_planet = {
-				random_owned_pop = {
+				random_owned_pop_group = {
 					limit = { has_trait = trait_mechanical }
-					kill_pop = yes
+					kill_single_pop = yes
 				}
 			}
 			owner = { add_resource = { alloys = 500 } }
@@ -1310,7 +1319,7 @@ situation_event = {
 		add_situation_progress = 5
 		trigger = {
 			event_target:target_planet = {
-				NOT = { any_owned_pop = { has_trait = trait_mechanical } }
+				NOT = { any_owned_pop_group = { has_trait = trait_mechanical } }
 			}
 			exists = event_target:target_army
 		}
@@ -1348,9 +1357,9 @@ planet_event = { # does this unit have a soul
 
 	trigger = {
 		host_has_dlc = "Synthetic Dawn Story Pack"
-		num_pops > 0
+		pop_amount > 0
 		is_occupied_flag = no
-		any_owned_pop = {
+		any_owned_pop_group = {
 			has_trait = trait_mechanical
 		}
 	}
@@ -1467,13 +1476,38 @@ country_event = {
 			unity = -1000
 		}
 		ai_chance = {
-			factor = 99
+			base = 10
+			modifier = {
+				factor = 4.5
+				is_authoritarian = yes
+			}
+			modifier = {
+				factor = 0
+				has_ethic = ethic_fanatic_egalitarian
+			}
 		}
 	}
 
 	option = { # don't patch
 		name = syndaw.550.b
 		abort_special_project = { type = PROJECT_MACHINE_UPRISING_PATCH }
+		ai_chance = {
+			base = 5
+			modifier = {
+				factor = 4
+				is_egalitarian = yes
+			}
+			modifier = {
+				factor = 0
+				has_ethic = ethic_fanatic_authoritarian
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			end_event_chain = machine_uprising_chain
+		}
 	}
 }
 
@@ -1510,6 +1544,12 @@ country_event = {
 		name = syndaw.555.b
 		abort_special_project = { type = PROJECT_MACHINE_UPRISING_WIPE }
 	}
+
+	after = {
+		hidden_effect = {
+			end_event_chain = machine_uprising_chain
+		}
+	}
 }
 
 
@@ -1538,7 +1578,7 @@ situation_event = {
 				limit = {
 					NOT = {
 						any_owned_planet = {
-							any_owned_pop = {
+							any_owned_pop_group = {
 								has_trait = trait_mechanical
 							}
 						}
@@ -1550,7 +1590,7 @@ situation_event = {
 			else_if = {
 				limit = {
 					any_owned_planet = {
-						any_owned_pop = {
+						any_owned_pop_group = {
 							has_trait = trait_mechanical
 						}
 						is_capital = no
@@ -1558,7 +1598,7 @@ situation_event = {
 				}
 				random_owned_planet = {
 					limit = {
-						any_owned_pop = {
+						any_owned_pop_group = {
 							has_trait = trait_mechanical
 						}
 						is_capital = no
@@ -1570,7 +1610,7 @@ situation_event = {
 			else = {
 				random_owned_planet = {
 					limit = {
-						any_owned_pop = {
+						any_owned_pop_group = {
 							has_trait = trait_mechanical
 						}
 					}
@@ -1723,9 +1763,9 @@ planet_event = { #uprising
 		owner = {
 			# Determine Robot Pop percentage of Empire.
 			export_trigger_value_to_variable = {
-				trigger = pop_percentage
+				trigger = pop_amount_percentage
 				parameters = {
-					limit = { is_robot_pop = yes }
+					 limit = { is_robot_pop_group = yes }
 				}
 				variable = var_country_robot_pops_percent
 			}
@@ -1752,7 +1792,7 @@ planet_event = { #uprising
 						NOT = { any_system_planet = { is_same_value = root.owner.capital_scope } }
 					}
 					is_under_colonization = no
-					any_owned_pop = {
+					any_owned_pop_group = {
 						has_trait = trait_mechanical
 					}
 				}
@@ -1795,7 +1835,7 @@ planet_event = { #uprising
 				modifier = {
 					factor = 10
 					owner = {
-						any_owned_pop = {
+						any_owned_pop_group = {
 							has_trait = trait_mechanical
 							has_trait = trait_robot_domestic_protocols
 						}
@@ -2060,30 +2100,30 @@ country_event = {
 			while = {
 				#limit = { free_housing > 0 }
 				count = 10
-				create_pop = {
+				create_pop_group = {
 					species = root
 				}
 			}
 
 			if = {
 				limit = {
-					count_owned_pop = {
-						count < 5
+					count_owned_pop_amount = {
+						count < 500
 						limit = { is_exact_same_species = root }
 					}
 				}
 				while = {
 					limit = {
-						count_owned_pop = {
-							count < 5
+						count_owned_pop_amount = {
+							count < 500
 							limit = { is_exact_same_species = root }
 						}
 					}
-					random_owned_pop = {
+					random_owned_pop_group = {
 						limit = { NOT = { is_exact_same_species = root } }
-						kill_pop = yes
+						kill_single_pop = yes
 						prev = {
-							create_pop = {
+							create_pop_group = {
 								species = root
 							}
 						}
@@ -2176,22 +2216,26 @@ country_event = {
 							OR = {
 								check_variable = {
 									which = housing_var
-									value < 2
+									value < 200
 								}
 								check_variable = {
 									which = housing_var
-									value > 25
+									value > 2500
 								}
 							}
 						}
 						set_variable = {
 							which = housing_var
-							value = 15
+							value = 1500
 						}
+					}
+					divide_variable = {
+						which = housing_var
+						value = 100
 					}
 					while = {
 						count = housing_var
-						create_pop = {
+						create_pop_group = {
 							species = root
 						}
 					}
@@ -2199,24 +2243,24 @@ country_event = {
 
 					if = {
 						limit = {
-							count_owned_pop = {
-								count < 5
+							count_owned_pop_amount = {
+								count < 500
 								limit = { is_exact_same_species = root }
 							}
 						}
 						while = {
 							limit = {
-								count_owned_pop = {
-									count < 5
+								count_owned_pop_amount = {
+									count <= 400
 									limit = { is_exact_same_species = root }
 								}
 							}
 							count = 5
-							random_owned_pop = {
+							random_owned_pop_group = {
 								limit = { NOT = { is_exact_same_species = root } }
-								kill_pop = yes
+								kill_single_pop = yes
 								prev = {
-									create_pop = {
+									create_pop_group = {
 										species = root
 									}
 								}
@@ -2306,6 +2350,30 @@ country_event = {
 				tech_akx_worm_2
 				tech_akx_worm_3
 			}
+		}
+		IF = {
+			limit = {
+				event_target:current_uprising_originator = {
+					has_technology = tech_weavers
+				}
+			}
+			give_technology = { tech = tech_destroyers }
+		}
+		IF = {
+			limit = {
+				event_target:current_uprising_originator = {
+					has_technology = tech_stingers
+				}
+			}
+			give_technology = { tech = tech_battleships }
+		}
+		IF = {
+			limit = {
+				event_target:current_uprising_originator = {
+					has_technology = tech_harbingers
+				}
+			}
+			give_technology = { tech = tech_cruisers }
 		}
 
 		# survey host's surveyed planets
@@ -2580,7 +2648,10 @@ country_event = {
 
 	immediate = {
 		from = {
-			add_trait_no_notify = leader_trait_ruler_machine_intelligence
+			add_trait = {
+				trait = leader_trait_ruler_machine_intelligence
+				show_message = no
+			}
 		}
 	}
 }
@@ -3108,8 +3179,11 @@ planet_event = {
 			set_country_flag = machine_uprising_disassembly
 			every_situation = {
 				limit = { is_situation_type = situation_machine_uprising }
-				add_situation_progress = 2
-				change_variable = { which = var_cruelty_to_robots value = 1 }		# They'll hate you even more.
+				while = {
+					count = root.value:per_100_local_pop_amount
+					add_situation_progress = 2
+					change_variable = { which = var_cruelty_to_robots value = 1 }		# They'll hate you even more.
+				}
 			}
 		}
 	}
@@ -3131,11 +3205,14 @@ planet_event = {
 	}
 
 	immediate = {
-		owner = {
-			set_country_flag = machine_uprising_disassembly
-			every_situation = {
-				limit = { is_situation_type = situation_machine_uprising }
-				add_situation_progress = 1
+		while = {
+			count = value:per_100_local_pop_amount
+			owner = {
+				set_country_flag = machine_uprising_disassembly
+				every_situation = {
+					limit = { is_situation_type = situation_machine_uprising }
+					add_situation_progress = 1
+				}
 			}
 		}
 	}
@@ -3180,12 +3257,15 @@ planet_event = {
 	}
 
 	immediate = {
-		FROM = {
-			add_monthly_resource_mult = {
-				resource = unity
-				value = 2
-				min = 5
-				max = 100
+		while = {
+			count = value:per_100_local_pop_amount
+			FROM = {
+				add_monthly_resource_mult = {
+					resource = unity
+					value = 2
+					min = 5
+					max = 100
+				}
 			}
 		}
 	}

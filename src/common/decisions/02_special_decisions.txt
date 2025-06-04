@@ -53,7 +53,7 @@
 #		weight = 1
 #		modifier = {
 #			factor = 0
-#			num_pops < 20
+#			pop_amount < 2000
 #		}
 #	}
 #}
@@ -225,14 +225,13 @@ decision_slave_colony = {
 	allow = {
 		custom_tooltip = {
 			fail_text = decision_slave_colony_must_have_slave
-			any_owned_pop = {
+			any_owned_pop_group = {
 				has_citizenship_type = { type = citizenship_slavery country = owner }
 			}
 		}
 		custom_tooltip = {
 			fail_text = decision_resort_colony_no_districts
-			num_districts = { type = district_city value < 1 }
-			num_districts = { type = district_industrial value < 1 }
+			num_districts = { type = any value < 2 }
 			num_buildings = { type = any value < 2 }
 		}
 	}
@@ -307,9 +306,6 @@ decision_resort_colony = {
 							has_trait = trait_survivor
 							has_trait = trait_pc_nuked_preference
 							has_trait = trait_plantoid_radiotrophic
-							has_trait = trait_advanced_radiotrophic
-							has_trait = trait_harvested_radiotrophic
-							has_trait = trait_lithoid_radiotrophic
 						}
 					}
 				}
@@ -329,8 +325,12 @@ decision_resort_colony = {
 	allow = {
 		custom_tooltip = {
 			fail_text = decision_resort_colony_no_districts
-			num_districts = { type = any value < 1 }
-			num_buildings = { type = any value < 2 }
+			num_districts = { type = district_farming value < 1 }
+			num_districts = { type = district_mining value < 1 }
+			num_districts = { type = district_generator value < 1 }
+			num_districts = { type = district_farming_uncapped value < 1 }
+			num_districts = { type = district_mining_uncapped value < 1 }
+			num_districts = { type = district_generator_uncapped value < 1 }
 		}
 		custom_tooltip = {
 			fail_text = decision_resort_colony_only_one
@@ -505,7 +505,7 @@ decision_mastery_of_nature = {
 		modifier = {
 			factor = 0
 			free_district_slots > 0
-			num_pops < 50 #carrying capacity bonus always good at that stage
+			pop_amount < 5000 #carrying capacity bonus always good at that stage
 		}
 	}
 }
@@ -1221,7 +1221,7 @@ decision_arcology_project = {
 			factor = 100
 			exists = owner
 			OR = {
-				num_pops >= 70
+				pop_amount >= 7000
 				is_capital = yes
 			}
 		}
@@ -1317,6 +1317,10 @@ decision_arcology_project_relic = {
 
 	ai_weight = {
 		weight = 100
+		modifier = {
+			factor = 0
+			has_building = building_archaeostudies_faculty
+		}
 	}
 }
 
@@ -1353,7 +1357,7 @@ decision_market_nomination = {
 	}
 
 	allow = {
-		num_pops > 20
+		from = { pop_amount > 2000 }
 		custom_tooltip = {
 			fail_text = already_market_nominated
 			from = {
@@ -1399,15 +1403,27 @@ decision_market_nomination = {
 					}
 					modifier = {
 						factor = 0.5
-						solar_system = { has_system_trade_value >= 120 }
+						planet_resource_compare = {
+							resource = trade
+							value >= 120
+							type = produces
+						}
 					}
 					modifier = {
 						factor = 0.5
-						solar_system = { has_system_trade_value >= 80 }
+						planet_resource_compare = {
+							resource = trade
+							value >= 80
+							type = produces
+						}
 					}
 					modifier = {
 						factor = 2
-						solar_system = { has_system_trade_value < 50 }
+						planet_resource_compare = {
+							resource = trade
+							value < 50
+							type = produces
+						}
 					}
 					modifier = {
 						factor = 1.5
@@ -1437,15 +1453,27 @@ decision_market_nomination = {
 					}
 					modifier = {
 						factor = 2
-						solar_system = { has_system_trade_value >= 120 }
+						planet_resource_compare = {
+							resource = trade
+							value >= 120
+							type = produces
+						}
 					}
 					modifier = {
 						factor = 1.5
-						solar_system = { has_system_trade_value >= 80 }
+						planet_resource_compare = {
+							resource = trade
+							value >= 80
+							type = produces
+						}
 					}
 					modifier = {
 						factor = 0.5
-						solar_system = { has_system_trade_value < 50 }
+						planet_resource_compare = {
+							resource = trade
+							value < 50
+							type = produces
+						}
 					}
 					modifier = {
 						factor = 0.5
@@ -1470,7 +1498,7 @@ decision_market_nomination = {
 		weight = 10
 		modifier = {
 			factor = 0
-			num_pops < 20
+			pop_amount < 2000
 		}
 		modifier = {
 			factor = 1.5
@@ -1494,21 +1522,27 @@ decision_market_nomination = {
 			from = { is_megacorp = yes }
 		}
 		modifier = {
-			factor = 1.5
-			solar_system = {
-				has_system_trade_value > 150
+			factor = 2
+			planet_resource_compare = {
+				resource = trade
+				value >= 120
+				type = produces
 			}
 		}
 		modifier = {
-			factor = 2
-			solar_system = {
-				has_system_trade_value > 80
+			factor = 1.5
+			planet_resource_compare = {
+				resource = trade
+				value >= 80
+				type = produces
 			}
 		}
 		modifier = {
 			factor = 0.5
-			solar_system = {
-				has_system_trade_value < 30
+			planet_resource_compare = {
+				resource = trade
+				value < 50
+				type = produces
 			}
 		}
 	}
@@ -1604,7 +1638,7 @@ decision_boost_market_nomination = {
 		weight = 10
 		modifier = {
 			factor = 0
-			num_pops < 20
+			pop_amount < 2000
 		}
 		modifier = {
 			factor = 1.5
@@ -1874,8 +1908,7 @@ decision_lithoid_swarm_consume_world = {
 
 	potential = {
 		owner = {
-			is_lithoid_empire = yes
-			has_valid_civic = civic_hive_devouring_swarm
+			is_lithoid_devouring_swarm = yes
 		}
 		can_have_habitable_deposits = yes
 		is_capital = no
@@ -1990,7 +2023,7 @@ decision_project_cornucopia = {
 		weight = 1
 		modifier = {
 			factor = 0
-			num_pops < 20
+			pop_amount < 2000
 		}
 	}
 }
@@ -2028,11 +2061,9 @@ decision_crystalline_refugees = {
 	effect = {
 		custom_tooltip = decision_crystalling_refugees_effect_tt
 		hidden_effect = {
-			while = {
-				count = 5
-				create_pop = {
-					species = event_target:crystalline_empire_species
-				}
+			create_pop_group = {
+				size = 500
+				species = event_target:crystalline_empire_species
 			}
 			owner = {
 				remove_country_flag = crystalline_refugees_flag
@@ -2544,11 +2575,11 @@ decision_expand_planetary_sea = {
 		weight = 1
 		modifier = {
 			factor = 2
-			num_pops > 25
+			pop_amount > 2500
 		}
 		modifier = {
 			factor = 3
-			num_pops > 50
+			pop_amount > 5000
 		}
 		modifier = {
 			factor = 5
@@ -2910,8 +2941,20 @@ decision_consecrate_habitat_knights = {
 	}
 
 	effect = {
-		add_building = building_order_castle
+		hidden_effect = {
+			add_zone = {
+				district = district_hab_housing
+				zone = zone_habitat_knights
+				zone_slot = 1
+				replace = yes
+			}
+			add_building = {
+				zone = zone_habitat_knights
+				building = building_order_castle
+			}
+		}
 		custom_tooltip = decision_consecrate_habitat_knights_effect
+		set_colony_type = col_habitat_fortress
 	}
 }
 
