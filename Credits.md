@@ -3,7 +3,7 @@ Credits
 
 * [Risa's Unofficial Patch](https://steamcommunity.com/sharedfiles/filedetails/?id=803752381) is the original mod this one was based off of. Between removing 'balance' fixes, and things Paradox or I have made irrelevant in the interim, there are still a couple dozen fixes Risa still has credit for, depending on how you count them.
 
-* [Bug Fixes by alexrider903](https://steamcommunity.com/sharedfiles/filedetails/?id=1911222615) Along with Risa's fixes and my own, these made up the original patch.
+* [Bug Fixes by alexrider803](https://steamcommunity.com/sharedfiles/filedetails/?id=1911222615) Along with Risa's fixes and my own, these made up the original patch.
 
 * [Bugfixes by ECHO](https://steamcommunity.com/sharedfiles/filedetails/?id=785269836) covered a few mod-compatibility issues Risa did not.
 
