@@ -21,6 +21,27 @@ building_commercial_zone = {
 			has_modifier = penal_colony
 		}
 		NOT = { has_building = building_low_tech_capital }
+		OR = {
+			has_planet_flag = ignore_ai_building_limitations
+			owner = {
+				is_ai = no					
+			}
+			
+			# AI is allowed to build one of these unless they're a megacorp or this is a trade planet
+			owner = {
+				is_megacorp = yes	
+			}
+			has_any_trade_zone = yes
+			NOR = {
+				has_building = building_commercial_zone
+				has_building = building_commercial_megaplex
+			}
+			is_market_nominee_planet = yes
+			AND = {
+				has_global_flag = galactic_market_founded
+				is_same_value = event_target:market_founder_planet
+			}
+		}	
 	}
 
 	destroy_trigger = {
@@ -34,20 +55,6 @@ building_commercial_zone = {
 
 	allow = {
 		is_occupied_flag = no
-		exists = owner
-		or = {
-			owner = {
-				is_ai = no
-			}
-			not = {
-				has_building = building_commercial_zone
-			}
-			is_market_nominee_planet = yes
-			AND = {
-				has_global_flag = galactic_market_founded
-				is_same_value = event_target:market_founder_planet
-			}
-		}
 	}
 
 	convert_to = {
@@ -216,26 +223,8 @@ building_galactic_stock_exchange = {
 		"tech_galactic_markets"
 	}
 
-	triggered_desc = {
-		text = job_merchant_effect_desc
-	}
-
 	ai_resource_production = {
-		energy = 5
-		trigger = {
-			solar_system = {
-				#has_system_trade_value >= 50
-			}
-		}
-	}
-
-	ai_resource_production = {
-		energy = 3
-		trigger = {
-			solar_system = {
-				#has_system_trade_value >= 80
-			}
-		}
+		trade = 10
 	}
 }
 
@@ -250,26 +239,29 @@ building_maintenance_depot = {
 	}
 
 	potential = {
+		exists = owner
 		owner = { is_gestalt = yes }
 		owner = { is_wilderness_empire = no }
-	}
-
-	allow = {
-		is_occupied_flag = no
-		exists = owner
-		or = {
+		
+		OR = {
+			has_planet_flag = ignore_ai_building_limitations
 			owner = {
-				is_ai = no
+				is_ai = no					
 			}
-			not = {
-				has_building = building_maintenance_depot
-			}
+			
+			# AI is allowed to build one of these unless this is a trade planet
+			has_any_trade_zone = yes
+			NOT = {	has_building = building_maintenance_depot }
 			is_market_nominee_planet = yes
 			AND = {
 				has_global_flag = galactic_market_founded
 				is_same_value = event_target:market_founder_planet
 			}
-		}
+		}	
+	}
+
+	allow = {
+		is_occupied_flag = no
 	}
 
 	destroy_trigger = {

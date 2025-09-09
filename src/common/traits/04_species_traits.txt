@@ -828,7 +828,7 @@ trait_charismatic = {
 	}
 	tags = { organic positive pop_output amenities }
 	modifier = {
-		entertainer_jobs_bonus_workforce_mult = 0.20
+		influential_jobs_bonus_workforce_mult = 0.20
 	}
 	slave_cost = {
 		energy = 500
@@ -846,7 +846,7 @@ trait_repugnant = {
 	allowed_archetypes = { BIOLOGICAL LITHOID }
 	tags = { organic negative pop_output amenities }
 	modifier = {
-		entertainer_jobs_bonus_workforce_mult = -0.20
+		influential_jobs_bonus_workforce_mult = -0.20
 	}
 
 	ai_weight = {
@@ -2155,7 +2155,49 @@ trait_plantoid_radiotrophic = {
 	}
 	tags = { organic positive plantoid fungoid lithoid upkeep species }
 	custom_tooltip = TRAIT_PLANTOID_RADIOTROPHIC_EFFECT
-	inline_script = "traits/radiotrophic_effects"
+
+	modifier = {
+		pc_nuked_habitability = 0.1
+	}
+	triggered_planet_growth_habitability_modifier = {
+		potential = {
+			exists = planet
+			planet = { has_deposit = d_lithoid_crater }
+		}
+		pc_nuked_habitability = 0.05
+	}
+	triggered_planet_growth_habitability_modifier = {
+		potential = {
+			exists = planet
+			planet = { is_planet_class = pc_nuked }
+		}
+		logistic_growth_mult = 0.1
+		mult = value:lithoid_trait_mult
+	}
+	triggered_pop_group_modifier = {
+		potential = {
+			exists = planet
+			planet = { has_modifier = wasteland_radiation }
+		}
+		pop_happiness = 0.1
+		mult = value:lithoid_trait_mult
+	}
+	slave_cost = {
+		energy = 1500
+	}
+	assembly_score = {
+		modifier = {
+			add = 1
+			from = { is_planet_class = pc_nuked }
+		}
+		modifier = {
+			add = 0.05
+			from = {
+				is_planet_class = pc_nuked
+				has_deposit = d_lithoid_crater
+			}
+		}
+	}
 }
 
 trait_plantoid_budding = {
@@ -2196,6 +2238,7 @@ trait_plantoid_budding = {
 		potential = {
 			has_budding_trait = yes
 		}
+		divide_over_pop_groups = no
 		bonus_pop_growth = @plantoid_budding_rate
 	}
 
@@ -2292,9 +2335,21 @@ trait_lithoid_budding = {
 	triggered_planet_pop_group_modifier_for_species = {
 		potential = {
 			has_budding_trait = yes
+			exists = planet
+			NOT = { planet = { has_deposit = d_lithoid_crater } }
 		}
+		divide_over_pop_groups = no
 		bonus_pop_growth = @plantoid_budding_rate
 	}
+	triggered_planet_pop_group_modifier_for_species = {
+		potential = {
+			has_budding_trait = yes
+			exists = planet
+			planet = { has_deposit = d_lithoid_crater }
+		}
+		bonus_pop_growth = @lithoid_crater_budding_rate
+	}
+
 
 	slave_cost = {
 		energy = 2000
@@ -2322,6 +2377,7 @@ trait_zombie = {
 	tags = { organic negative upkeep pop_output blocks_leaders }
 	modifier = {
 		pop_bonus_workforce_mult = -0.25
+		civilian_and_maintenance_drone_cat_bonus_workforce_mult = -0.50
 		planet_pops_upkeep_mult = -1
 	}
 

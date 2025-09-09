@@ -7,6 +7,14 @@ civilian = {
 	is_capped_by_modifier = no
 	count_as_available_for_ai = yes
 
+	possible_pre_triggers = {
+		has_owner = yes
+		is_enslaved = no
+		is_being_purged = no
+		is_being_assimilated = no
+		is_sapient = yes
+	}
+
 	possible = {
 		hidden_trigger = { exists = owner }
 		owner = {
@@ -20,28 +28,24 @@ civilian = {
 			}
 			has_virtual_species_trait = no
 		}
+		planet = { NOT = { is_planet_class = pc_cosmogenesis_world }  }
 	}
 
-	demotion = {
-        time = 0
-        effect = {
-            hidden_effect = {
-                if = {
-                    limit = {
-                        planet = { has_designation = col_cosmogenesis_world }
-                    }
-                    pop_amount_change_category = {
-                        CATEGORY = chip_slave
-                        AMOUNT = local_pop_amount
-                    }
-                }
-            }
-        }
-    }
-   
 	swappable_data = {
 		default = {
 			building_icon = building_residence
+		}
+		# Tourists
+		swap_type = {
+			trigger = {
+				exists = owner
+				has_modifier = resort_colony
+			}
+			name = tourist
+			desc = tourist_desc
+			icon = trader
+			building_icon = building_amusement_megaplex
+			weight = 6
 		}
 		# Hedonists
 		swap_type = {
@@ -62,6 +66,13 @@ civilian = {
 	resources = {
 		category = planet_civilians
 		produces = {
+			trade = 1
+		}
+		produces = {
+			trigger = {
+				exists = owner
+				has_modifier = resort_colony
+			}
 			trade = 1
 		}
 		inline_script = "jobs/ethic_job_resources"
@@ -137,7 +148,7 @@ civilian = {
 }
 
 slave_processing = {
-	category = slave
+	category = slave_unemployment
 	first_come_first_served = yes
 	is_capped_by_modifier = no
 
@@ -148,28 +159,34 @@ slave_processing = {
 		}
 	}
 
-	demotion = {
+	promotion = {
 		time = 0
 		effect = {
 			pop_amount_change_category = {
-				CATEGORY = slave
+				CATEGORY = slave_unemployment
 				AMOUNT = local_pop_amount
-			}
+			}	
 		}
 	}
 
 	possible_pre_triggers = {
 		has_owner = yes
-		is_enslaved = yes
 		is_being_purged = no
 		is_being_assimilated = no
 	}
 
 	possible = {
-		is_enslaved = no
-		NOT = {
+		NOR = {
 			is_pop_category = chip_slave
+			is_pop_category = slave
+			is_pop_category = slave_unemployment
 		}
+		hidden_trigger = { exists = owner }
+		has_citizenship_type = { type = citizenship_slavery country = owner }
+	}
+	
+	weight = {
+		weight = 9999
 	}
 }
 
@@ -232,13 +249,13 @@ slave_unprocessing = {
 
 	possible_pre_triggers = {
 		has_owner = yes
-		is_enslaved = no
 		is_being_purged = no
 		is_being_assimilated = no
 	}
 
 	possible = {
 		is_enslaved = yes
+		NOT = { has_citizenship_type = { type = citizenship_slavery country = owner } }
 	}
 }
 
@@ -420,6 +437,7 @@ organic_battery = {
 
 livestock = {
 	category = worker
+	first_come_first_served = yes
 	is_capped_by_modifier = no
 
 	tags = { food }
@@ -624,6 +642,7 @@ bio_trophy = {
 			is_pop_category = bio_trophy
 			is_pop_category = bio_trophy_unemployment
 		}
+		planet = { NOT = { is_planet_class = pc_cosmogenesis_world } }
 	}
 
 	promotion = {
@@ -650,6 +669,8 @@ bio_trophy = {
 	weight = {
 		weight = @special_job_weight
 	}
+
+	inline_script = "jobs/automodding_priority_charisma"
 }
 
 bio_trophy_processing = {
@@ -665,6 +686,20 @@ bio_trophy_processing = {
 	}
 
 	promotion = {
+		# Only fires if the pop group has a different stratum/category to that which is required by the job.
+		# Obeys `can_change_category = no` rules of the pop group's current stratum.
+		time = 0
+		effect = {
+			pop_amount_change_category = {
+				CATEGORY = bio_trophy
+				AMOUNT = local_pop_amount
+			}
+		}
+	}
+
+	demotion = {
+		# Should always fire, regardless of pop group's current statum/category.
+		# Ignores `can_change_category = no` rules of the pop group's current stratum.
 		time = 0
 		effect = {
 			pop_amount_change_category = {
@@ -689,6 +724,7 @@ bio_trophy_processing = {
 		owner = {
 			has_valid_civic = civic_machine_servitor
 		}
+		planet = { NOT = { is_planet_class = pc_cosmogenesis_world } }
 	}
 }
 
@@ -730,6 +766,7 @@ bio_trophy_unprocessing = {
 				has_valid_civic = civic_machine_servitor
 			}
 		}
+		planet = { NOT = { is_planet_class = pc_cosmogenesis_world } }
 	}
 }
 
@@ -756,7 +793,6 @@ purge = {
 		has_owner = yes
 		is_being_purged = yes
 		is_robotic = no
-		is_being_purged = yes
 	}
 
 	possible = {
@@ -1002,6 +1038,10 @@ criminal = {
 		}
 	}
 
+	resources = {
+		category = planet_criminals
+	}
+
 	planet_modifier = {
 		branch_office_criminal_syndicate_value_add = 7.5
 	}
@@ -1179,6 +1219,7 @@ organic_exhibit = {
 
 livestock_lithoid = {
 	category = worker
+	first_come_first_served = yes
 	is_capped_by_modifier = no
 
 	possible_pre_triggers = {
@@ -1365,6 +1406,11 @@ purge_lithoid = {
 			has_citizenship_type = { type = citizenship_purge country = owner }
 			has_pop_group_flag = event_purge
 		}
+		NOR = {
+			has_purge_type = { type = purge_processing country = owner }
+			has_purge_type = { type = purge_labor_camps country = owner }
+			has_purge_type = { type = purge_matrix country = owner }
+		}
 		is_lithoid = yes
 	}
 
@@ -1451,6 +1497,11 @@ purge_robot = {
 			has_citizenship_type = { type = citizenship_purge_machine country = owner }
 			has_citizenship_type = { type = citizenship_purge country = owner }
 			has_pop_group_flag = event_purge
+		}
+		NOR = {
+			has_purge_type = { type = purge_processing country = owner }
+			has_purge_type = { type = purge_labor_camps country = owner }
+			has_purge_type = { type = purge_matrix country = owner }
 		}
 	}
 
@@ -1906,7 +1957,7 @@ purge_processing_robot = {
 			has_purge_type = { type = purge_processing country = owner }
 			has_pop_group_flag = event_purge
 		}
-		is_lithoid = no
+		is_robotic_species = yes
 	}
 
 	resources = {
@@ -2142,7 +2193,6 @@ purge_matrix = {
 			has_purge_type = { type = purge_matrix country = owner }
 			has_pop_group_flag = event_purge
 		}
-		is_lithoid = no
 	}
 
 	resources = {

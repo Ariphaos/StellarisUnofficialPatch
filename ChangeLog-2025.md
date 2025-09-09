@@ -1,5 +1,56 @@
 # Change Log - 2025
 
+## September 9th
+
+4.0.23 Update, apologies for delay
+
+* Some logic to let AI clear up housing buildings if they have the excess amenities and housing.
+* Moved galactic nominee/market building checks into potential rather than allow code for AI, which seems to be the new Paradox method.
+* Fix for Chimeral Consciousness empire size reduction not being applied to Gestalts (SpenceZILLA)
+
+Patch bugs fixed:
+
+* A fix for utopian abundance and being displayed to machine empires ended up blocking it - and other living standards - for individualistic machines.
+
+Patch fixes applied by Paradox:
+
+* All changes in 00_scripted_loc were applied by Paradox.
+* Fixed improper scope for robotic species in good living standards.
+
+## June 17th
+
+4.0.21 Update
+
+* Non-sentient robots should no longer be getting social welfare.
+
+## June 14th
+
+4.0.20 Update
+
+Just a version merge, no further changes.
+
+## June 11th
+
+4.0.17 Update
+
+* Don't allow building multiple orbital rings on the same planet. Did you know orbital rings and habitats don't necessarily count as megastructures? Well now you do.
+* Match exclusions between environmental architects and environmentalist civics. The AI could spawn with both and generate no-name, no-ethic empires. (MrFunEGUY)
+
+* As mentioned, Paradox fixed the Lathe bug in 4.0.17.
+
+## June 6th
+
+* Forwarded a crisis flag fix from the 4.0.17 beta. This isn't fully compatible with the beta - it will clobber your fancy bio-cosmogenesis FE ships. If you're not going into cosmogenesis with a biological shipset, however, you won't notice everything.
+* I had to revert part of the lathe fix because slaves were going weird everywhere else, they don't tolerate civilian demotion at all. : /
+* Upgraded drone storage buildings should function properly, apologies.
+
+## June 5th
+
+4.0.16 update.
+
+* Took flag for Juggernaut policy, should make it play nicely with Ancient Juggernaut origin.
+* Added some logic for submod support. Focused on my biopsi mod for now, enabling support for combining biological ascension with anything else.
+
 ## June 4th, part 2
 
 /u/Little_Elia on Reddit made a [comprehensive fix](https://www.reddit.com/r/Stellaris/comments/1l2hckv/guide_how_to_fix_the_synaptic_lathe_in_40/) for the Lathe being bugged, and this has been applied:

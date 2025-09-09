@@ -269,6 +269,7 @@ This doesn't do everything it did in previous versions just yet. I am moving to 
 # Governments
 
 * A couple of empty origins for the Ketlings and Prikki-Ti.
+* Match exclusions between environmentalist and environmental architects civics.
 
 # Inline Scripts
 
@@ -276,6 +277,7 @@ This doesn't do everything it did in previous versions just yet. I am moving to 
 * Edit pleased faction entry so the faction is actually pleased with you.
 * Set a 'default' species sound for modded species. Should probably make something, for now set to Fungoid.
 * General missing context switch checks.
+* Fix for Chimeral Consciousness empire size reduction not being applied to Gestalts.
 
 # Megastructures
 
@@ -283,12 +285,14 @@ This doesn't do everything it did in previous versions just yet. I am moving to 
 
 * Give proper refund for dismantling megastructures.
 * You can't build a ringworld out of an astral rift. Don't remove them, either.
+* Don't allow building infinite orbital rings on the same planet.
 
 ## AI
 
 * Somewhat restrict where the AI may build hyper relays. (Have more work to do on this.)
 * AI won't build more habitats if one is already uncolonized.
 * AI won't build habitat/orbital structures over planets that could potentially become colonies (and thus build orbital rings instead).
+* Don't limit void dweller habitat count.
 * AI won't build quantum catapults as they do not know how to use them.
 
 # Opinion Modifiers
@@ -399,7 +403,6 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Don't let drones take normal gas extractor or mote harvester jobs.
 * Applied some weights for ethics and robots to initiates.
 * Economic category fix for some fallen empire jobs.
-* Immediately allow civilians and maintenance drones to demote in a lathe.
 
 # Random Names
 
@@ -419,8 +422,6 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Base Cosmic Storm size off of star count rather than hardcoded size strings. (Mod Support)
 * Voidworm spawning based on star count instead of size strings. (Mod Support)
 * Starlit Citadel, same reason.
-* Properly count the number of neural chips in the lathe.
-* Divide lathe purge rate by number of pop groups.
 
 # Scripted Effects
 
@@ -444,12 +445,9 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Use star count for the imperial fiefdom origin.
 * Refugee fix. I'm not sure if 100% is actually what is desired, but that seemed to be what the intent was?
 
-# Scripted Loc
-
-* Standard owner scope checks
-
 # Scripted Triggers
 
+* Some fixes for shackled robot detection.
 * Make sure military leaders can think.
 * Displacement purging still counts as allowing purging. (May not be the best fix for what this addresses.)
 * Fix is_oligarchy trigger.

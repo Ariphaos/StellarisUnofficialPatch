@@ -3962,3 +3962,48 @@ country_event = {
 		}
 	}
 }
+
+# Swarm gains control of a planet, starts purging it
+# A planets controller becomes a country not the same as the owner.
+# Root = Planet
+# From = Planet Owner
+# FromFrom = Planet Controller (the one occupying)
+planet_event = {
+	id = crisis.300
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		FromFrom = { is_country_type = swarm }
+	}
+
+	immediate = {
+		set_planet_purge_type = purge_normal
+	}
+}
+
+# Swarm loses control of a planet, stops purging it
+# A planets controller becomes the owner of the planet.
+# Root = Planet
+# From = Planet Owner
+# FromFrom = Previous Planet Controller (the one who was occupying)
+planet_event = {
+	id = crisis.301
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		FromFrom = { is_country_type = swarm }
+	}
+
+	immediate = {
+		# this may clear the purge type on planets that should have one, hence the if
+		if = {
+			limit = { is_planet_class = pc_cosmogenesis_world }
+			set_planet_purge_type = purge_cosmogenesis
+		}
+		else = {
+			clear_planet_purge_type = yes
+		}
+	}
+}

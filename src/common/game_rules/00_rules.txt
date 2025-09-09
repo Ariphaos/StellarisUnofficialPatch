@@ -306,11 +306,19 @@ species_can_live_on_planet = {
 #Root = planet
 #This = species
 species_has_uncapped_habitability_on_planet = {
-	has_trait = trait_auto_hab_preference
-	root = {
-		exists = owner
-		owner = {
-			has_mutation_environmental_integration_tradition = yes
+	exists = root.owner
+	OR = {
+		AND = {
+			is_robotic = no
+			root.owner = {
+				is_mutation_authority = yes
+			}
+		}
+		AND = {
+			has_trait = trait_auto_hab_preference
+			root.owner = {
+				has_mutation_environmental_integration_tradition = yes
+			}
 		}
 	}
 }
@@ -1109,19 +1117,6 @@ can_species_procreate = {
 		root = { has_modifier = slave_colony }
 		NOT = { has_citizenship_type = { type = citizenship_slavery country = root.owner } }
 	}
-	if = {
-		limit = {
-			has_trait = trait_necrophage
-		}
-		NOT = {
-			root = {
-				any_owned_species = {
-					has_population_control = { country = root.owner type = no }
-					species_can_be_necrophaged = yes
-				}
-			}
-		}
-	}
 	NOR = {
 		has_citizenship_type = {
 			type = citizenship_protected_drone
@@ -1188,6 +1183,7 @@ can_species_be_assembled = {
 # Root = Planet
 species_uses_bonus_growth = {
 	is_sapient = yes
+	is_robotic_species = no
 	has_population_control = {
 		type = no
 		country = root.owner
@@ -1195,19 +1191,6 @@ species_uses_bonus_growth = {
 	NAND = {
 		root = { has_modifier = slave_colony }
 		NOT = { has_citizenship_type = { type = citizenship_slavery country = root.owner } }
-	}
-	if = {
-		limit = {
-			has_trait = trait_necrophage
-		}
-		NOT = {
-			root = {
-				any_owned_species = {
-					has_population_control = { country = root.owner type = no }
-					species_can_be_necrophaged = yes
-				}
-			}
-		}
 	}
 	NOR = {
 		has_citizenship_type = {
@@ -2117,6 +2100,10 @@ can_support_branch_offices = {
 	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_REGULAR_EMPIRE
 		is_gestalt = no
+		OR = {
+			is_country_type = default
+			is_country_type = primitive
+		}
 	}
 	custom_tooltip = {
 		fail_text = BRANCH_OFFICE_NOT_ADVANCED_PRE_FTL
@@ -2545,6 +2532,7 @@ can_pop_group_auto_migrate = {
 			is_unemployed = yes
 			is_pop_category = civilian
 			is_pop_category = maintenance_drone
+			is_shackled_robot = yes
 		}
 	}
 	custom_tooltip = {
@@ -2566,40 +2554,6 @@ can_pop_group_auto_migrate = {
 					OR = {
 						is_individual_machine = no
 						is_machine_empire = no
-					}
-				}
-			}
-		}
-	}
-	if = {
-		limit = {
-			OR = {
-				is_shackled_robot = yes
-				is_enslaved = yes
-			}
-		}
-		custom_tooltip = {
-			fail_text = AUTO_MIGRATE_SLAVE_PROCESSING
-			OR = {
-				planet = {
-					OR = {
-						has_building = building_slave_processing
-						AND = {
-							exists = orbital_defence
-							orbital_defence = {
-								exists = starbase
-								starbase = {
-									has_starbase_building = ring_slave_processing_facility
-								}
-							}
-						}
-					}
-				}
-				solar_system = {
-					count_starbase_buildings = {
-						type = transit_hub
-						count >= 1
-						include_being_constructed = no
 					}
 				}
 			}
@@ -2935,6 +2889,7 @@ can_fill_ruler_job = {
 			is_enslaved = no
 			is_being_purged = no
 			is_being_assimilated = no
+			NOT = { has_trait = trait_syncretic_proles }
 			# Rule out Traits for servitude & lack of free will
 			can_think = yes
 			# Rule out Disconnected Drones
@@ -2985,6 +2940,7 @@ is_unemployment_job = {
 		has_job_category = simple_drone_unemployment
 		has_job_category = complex_drone_unemployment
 		has_job_category = bio_trophy_unemployment
+		has_job_category = slave_unemployment
 	}
 }
 
@@ -3189,7 +3145,10 @@ will_leader_survive = {
 		# Spare Organs trait
 		AND = {
 			species = { has_trait = trait_spare_organs }
-			NOT = { has_trait = trait_leader_second_chanced }
+			NOR = {
+				has_trait = trait_leader_second_chanced
+				leader_class = envoy
+			}
 		}
 		leader_backup_clone_can_activate = yes
 	}
@@ -3392,25 +3351,6 @@ building_automation_unemployment_threshold = {
 # this = planet scope
 building_automation_civilians_threshold = {
 	base = 0
-
-	modifier = {
-		is_colony = yes
-		has_upgraded_capital = yes
-		add = 100
-	}
-
-	modifier = {
-		is_colony = yes
-		has_major_upgraded_capital = yes
-		add = 200
-	}
-
-	modifier = {
-		is_colony = yes
-		has_fully_upgraded_capital = yes
-		add = 300
-	}
-
 }
 
 # this = leader scope

@@ -8,6 +8,10 @@
 @crime_floor_from_legal_crime = 5
 @trade_value_from_jobs = 0.01
 
+@high_trade_from_jobs = 1
+@med_trade_from_jobs = 0.5
+@low_trade_from_jobs = 0.25
+
 ## REGULAR MEGACORP ##
 building_private_mining_consortium = {
 	base_buildtime = @b1_time
@@ -34,29 +38,28 @@ building_private_mining_consortium = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
-		job_miner_add = 200
+	inline_script = {
+		script = jobs/miners_add
+		AMOUNT = @building_static_jobs
 	}
 
-	custom_tooltip = trade_value_from_miners
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|minerals|
+		planet_miners_trade_produces_add = @med_trade_from_jobs
 	}
 
-	#Trade value from civics
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_privatized_exploration
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|minerals|
+		planet_miners_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -65,8 +68,7 @@ building_private_mining_consortium = {
 				has_valid_civic = civic_private_prospectors
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|minerals|
+		planet_miners_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -160,14 +162,21 @@ building_food_conglomerate = {
 		is_occupied_flag = no
 	}
 
+	inline_script = {
+		script = jobs/farmers_add
+		AMOUNT = @building_static_jobs
+	}
+
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
@@ -177,8 +186,7 @@ building_food_conglomerate = {
 				}
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -187,8 +195,7 @@ building_food_conglomerate = {
 				has_valid_civic = civic_permanent_employment
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -197,8 +204,7 @@ building_food_conglomerate = {
 				has_valid_civic = civic_corporate_beastmasters
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -241,39 +247,6 @@ building_food_conglomerate = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				OR = {
-					is_anglers_empire = no
-					AND = {
-						is_anglers_empire = yes
-						PREV = { planet = { is_wet = no } }
-					}
-				}
-			}
-		}
-		modifier = {
-			job_farmer_add = 200
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_anglers_empire = yes
-				PREV = { planet = { is_wet = yes } }
-			}
-		}
-		modifier = {
-			job_farmer_add = 200
-		}
-	}
-
-	custom_tooltip = trade_value_from_farmers
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -336,12 +309,13 @@ building_virtual_entertainment_studios = {
 		AMOUNT = @b1_jobs
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|consumer_goods|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -350,8 +324,7 @@ building_virtual_entertainment_studios = {
 				has_valid_civic = civic_corporate_crafters
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|consumer_goods|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -360,8 +333,7 @@ building_virtual_entertainment_studios = {
 				has_valid_civic = civic_media_conglomerate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|consumer_goods|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -392,8 +364,6 @@ building_virtual_entertainment_studios = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_artisans
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -474,22 +444,23 @@ building_private_shipyards = {
 		AMOUNT = @b1_jobs
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|alloys|
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_naval_contractors
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|alloys|
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -498,8 +469,7 @@ building_private_shipyards = {
 				has_valid_civic = civic_corporate_catalytic_processing
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|alloys|
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -530,8 +500,6 @@ building_private_shipyards = {
 		}
 		planet_crime_floor_add = @crime_floor_from_legal_crime
 	}
-
-	custom_tooltip = trade_value_from_metallurgists
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -589,6 +557,13 @@ building_military_contractors = {
 		is_occupied_flag = no
 	}
 
+	inline_script = {
+		script = jobs/soldiers_add
+		AMOUNT = @building_static_jobs
+	}
+
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_country_modifier = {
 		potential = {
 			always = yes
@@ -597,27 +572,22 @@ building_military_contractors = {
 		mult = value:branch_office_value_for_buildings
 	}
 
-	planet_modifier = {
-		job_soldier_add = 200
-		army_starting_experience_add = 100
-	}
-
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|soldier|
+		army_starting_experience_add = 100
+		planet_soldiers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_private_military_companies
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|soldier|
+		planet_soldiers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -626,10 +596,44 @@ building_military_contractors = {
 				has_valid_civic = civic_crusader_spirit_corporate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|soldier|
+		planet_soldiers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_active_building = building_order_keep
+				has_active_building = building_order_castle
+			}
+		}
+		planet_knights_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_active_building = building_order_keep
+				has_active_building = building_order_castle
+			}
+			branch_office_owner = {
+				has_valid_civic = civic_private_military_companies
+			}
+		}
+		planet_knights_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_active_building = building_order_keep
+				has_active_building = building_order_castle
+			}
+			branch_office_owner = {
+				has_valid_civic = civic_crusader_spirit_corporate
+			}
+		}
+		planet_knights_trade_produces_add = @med_trade_from_jobs
+	}
 
 	#Crims cause crime even with deal
 	triggered_planet_modifier = {
@@ -659,8 +663,6 @@ building_military_contractors = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_soldiers
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -731,22 +733,25 @@ building_industrial_subsidiary = {
 		AMOUNT = 100
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_jobs_with_tag|TAG|industry|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_corporate_scavengers
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_jobs_with_tag|TAG|industry|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -755,8 +760,8 @@ building_industrial_subsidiary = {
 				has_valid_civic = civic_corporate_relentless_industrialists
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_jobs_with_tag|TAG|industry|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -787,9 +792,6 @@ building_industrial_subsidiary = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_industry
-
 	resources = {
 		category = planet_branch_office_buildings
 		cost = {
@@ -838,54 +840,20 @@ building_public_relations_office = {
 		is_occupied_flag = no
 	}
 
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_regular_empire = yes
-				is_spiritualist = no
-				has_make_spiritualist_perk = no
-			}
-		}
-		job_bureaucrat_add = @b1_jobs
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_megacorp = yes
-				is_worker_coop_empire = no
-			}
-		}
-		modifier = {
-			job_manager_add = @b1_jobs
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_worker_coop_empire = yes
-			}
-		}
-		modifier = {
-			job_steward_add = @b1_jobs
-		}
-	}
+	
 
 	inline_script = {
-		script = jobs/priests_add
-		AMOUNT = @b1_jobs
+		script = jobs/unity_jobs_add
+		AMOUNT = @building_static_jobs
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -894,8 +862,7 @@ building_public_relations_office = {
 				has_valid_civic = civic_corporate_ascensionists
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -904,8 +871,7 @@ building_public_relations_office = {
 				has_valid_civic = civic_public_relations_specialists
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -914,8 +880,7 @@ building_public_relations_office = {
 				has_valid_civic = civic_corporate_galactic_curators
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -955,8 +920,6 @@ building_public_relations_office = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_bureaucrats
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -1019,22 +982,24 @@ building_private_research_initiative = {
 		AMOUNT = @building_static_jobs_3
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_planet_modifier = {
-		potential = {
-			always = yes
-		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_corporate_dark_consortium
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1043,8 +1008,9 @@ building_private_research_initiative = {
 				has_valid_civic = civic_corporate_crowdsourcing
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1053,8 +1019,9 @@ building_private_research_initiative = {
 				has_valid_civic = civic_astrometeorology_megacorp
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -1094,8 +1061,6 @@ building_private_research_initiative = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_researchers
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -1156,26 +1121,28 @@ building_amusement_megaplex = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
-		job_entertainer_add = 200
+	inline_script = {
+		script = jobs/entertainers_add
+		AMOUNT = @building_static_jobs
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_corporate_hedonism
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1184,8 +1151,7 @@ building_amusement_megaplex = {
 				has_valid_civic = civic_corporate_hyperspace_specialty
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1194,8 +1160,7 @@ building_amusement_megaplex = {
 				has_valid_civic = civic_storm_callers_megacorp
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -1235,8 +1200,6 @@ building_amusement_megaplex = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_workers
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -1301,26 +1264,26 @@ building_commercial_forum = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
-		job_trader_add = 200
+	inline_script = {
+		script = jobs/trader_add
+		AMOUNT = @building_static_jobs
 	}
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_trading_posts
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1329,8 +1292,7 @@ building_commercial_forum = {
 				has_valid_civic = civic_franchising
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1339,8 +1301,7 @@ building_commercial_forum = {
 				has_valid_civic = civic_memory_vault_corporate
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -1380,8 +1341,6 @@ building_commercial_forum = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_traders
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -1449,31 +1408,26 @@ building_corporate_embassy = {
 		diplo_weight_economy_mult = 0.05
 	}
 
-	planet_modifier = {
-		job_clerk_add = 200
-	}
-
 	inline_script = {
 		script = "jobs/politician_add"
-		AMOUNT = 100
+		AMOUNT = @building_static_jobs_low
 	}
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_brand_loyalty
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1482,8 +1436,16 @@ building_corporate_embassy = {
 				has_valid_civic = civic_corporate_guided_sapience
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			branch_office_owner = {
+				has_civic = civic_worker_coop
+			}
+		}
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -1500,6 +1462,15 @@ building_corporate_embassy = {
 	triggered_country_modifier = {
 		potential = {
 			branch_office_owner = {
+				has_valid_civic = civic_worker_coop
+			}
+		}
+		job_capital_trader_add = @traders_from_civic
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			branch_office_owner = {
 				has_valid_civic = civic_brand_loyalty
 			}
 		}
@@ -1514,8 +1485,6 @@ building_corporate_embassy = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_traders
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -1591,22 +1560,40 @@ building_private_security = {
 		#mult = branch_office_owner.value:scripted_modifier_mult|MODIFIER|branch_office_holding_crime_mult| let's not mult criminal jobs.
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
+
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|crime| #benefits from enforcers, criminals, slaves, livestock and purged pops
+		planet_enforcers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	triggered_planet_modifier = {
+		potential = {
+			branch_office_owner = { is_illegal_criminal = yes }
+		}
+		planet_criminals_trade_produces_add = @med_trade_from_jobs
+	}
+
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_indentured_assets
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|crime| #benefits from enforcers, criminals, slaves, livestock and purged pops
+		planet_enforcers_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			branch_office_owner = {
+				has_valid_civic = civic_indentured_assets
+				is_illegal_criminal = yes
+			}
+		}
+		planet_criminals_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1615,8 +1602,17 @@ building_private_security = {
 				has_valid_civic = civic_corporate_genetic_identification
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|crime| #benefits from enforcers, criminals, slaves, livestock and purged pops
+		planet_enforcers_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			branch_office_owner = {
+				has_valid_civic = civic_corporate_genetic_identification
+				is_illegal_criminal = yes
+			}
+		}
+		planet_criminals_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -1648,8 +1644,6 @@ building_private_security = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_enforcers_and_criminals
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -1702,7 +1696,10 @@ building_wildcat_miners = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_miner_add = 100
 		job_criminal_add = 100
 	}
@@ -1712,14 +1709,13 @@ building_wildcat_miners = {
 		mult = branch_office_owner.value:scripted_modifier_mult|MODIFIER|branch_office_holding_crime_mult|
 	}
 
-	custom_tooltip = trade_value_from_miners
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|minerals|
+		planet_miners_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trade value from civics
@@ -1729,8 +1725,7 @@ building_wildcat_miners = {
 				has_valid_civic = civic_privatized_exploration
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|minerals|
+		planet_miners_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1739,8 +1734,7 @@ building_wildcat_miners = {
 				has_valid_civic = civic_private_prospectors
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|minerals|
+		planet_miners_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -1825,7 +1819,10 @@ building_bio_reprocessing_facilities = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_farmer_add = 100
 		job_criminal_add = 100
 	}
@@ -1835,14 +1832,13 @@ building_bio_reprocessing_facilities = {
 		mult = branch_office_owner.value:scripted_modifier_mult|MODIFIER|branch_office_holding_crime_mult|
 	}
 
-	custom_tooltip = trade_value_from_farmers
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1851,8 +1847,7 @@ building_bio_reprocessing_facilities = {
 				is_anglers_empire = yes
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1861,8 +1856,7 @@ building_bio_reprocessing_facilities = {
 				has_valid_civic = civic_permanent_employment
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|food|
+		planet_farmers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -1947,7 +1941,10 @@ building_underground_chemists = {
 		AMOUNT = 100
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_criminal_add = 100
 	}
 
@@ -1960,8 +1957,7 @@ building_underground_chemists = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|consumer_goods|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1970,8 +1966,7 @@ building_underground_chemists = {
 				has_valid_civic = civic_corporate_crafters
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|consumer_goods|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -1980,8 +1975,7 @@ building_underground_chemists = {
 				has_valid_civic = civic_media_conglomerate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|consumer_goods|
+		planet_artisans_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2003,7 +1997,7 @@ building_underground_chemists = {
 		job_capital_trader_add = @traders_from_civic
 	}
 
-	custom_tooltip = trade_value_from_artisans
+	custom_tooltip = branch_office_building_trade_bonus
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2086,7 +2080,10 @@ building_wrecking_yards = {
 		AMOUNT = 100
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_criminal_add = 100
 	}
 
@@ -2099,8 +2096,7 @@ building_wrecking_yards = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|alloys|
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2109,8 +2105,7 @@ building_wrecking_yards = {
 				has_valid_civic = civic_naval_contractors
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|alloys|
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2119,8 +2114,7 @@ building_wrecking_yards = {
 				has_valid_civic = civic_corporate_catalytic_processing
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|alloys|
+		planet_metallurgists_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2142,7 +2136,7 @@ building_wrecking_yards = {
 		job_capital_trader_add = @traders_from_civic
 	}
 
-	custom_tooltip = trade_value_from_metallurgists
+	custom_tooltip = branch_office_building_trade_bonus
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2210,7 +2204,10 @@ building_pirate_haven = {
 		mult = value:branch_office_value_for_buildings
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_soldier_add = 100
 		job_criminal_add = 100
 		army_starting_experience_add = 100
@@ -2225,8 +2222,7 @@ building_pirate_haven = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|soldier|
+		planet_soldiers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2235,8 +2231,7 @@ building_pirate_haven = {
 				has_valid_civic = civic_private_military_companies
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|soldier|
+		planet_soldiers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2245,8 +2240,43 @@ building_pirate_haven = {
 				has_valid_civic = civic_crusader_spirit_corporate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|soldier|
+		planet_soldiers_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_active_building = building_order_keep
+				has_active_building = building_order_castle
+			}
+		}
+		planet_knights_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_active_building = building_order_keep
+				has_active_building = building_order_castle
+			}
+			branch_office_owner = {
+				has_valid_civic = civic_private_military_companies
+			}
+		}
+		planet_knights_trade_produces_add = @med_trade_from_jobs
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			OR = {
+				has_active_building = building_order_keep
+				has_active_building = building_order_castle
+			}
+			branch_office_owner = {
+				has_valid_civic = civic_crusader_spirit_corporate
+			}
+		}
+		planet_knights_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2268,7 +2298,7 @@ building_pirate_haven = {
 		job_capital_trader_add = @traders_from_civic
 	}
 
-	custom_tooltip = trade_value_from_soldiers
+	custom_tooltip = branch_office_building_trade_bonus
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2326,7 +2356,10 @@ building_underground_clubs = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_entertainer_add = 100
 		job_criminal_add = 100
 	}
@@ -2340,8 +2373,7 @@ building_underground_clubs = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2350,8 +2382,7 @@ building_underground_clubs = {
 				has_valid_civic = civic_corporate_hedonism
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2360,8 +2391,7 @@ building_underground_clubs = {
 				has_valid_civic = civic_corporate_hyperspace_specialty
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2383,7 +2413,7 @@ building_underground_clubs = {
 		job_capital_trader_add = @traders_from_civic
 	}
 
-	custom_tooltip = trade_value_from_workers
+	custom_tooltip = branch_office_building_trade_bonus
 
 
 	resources = {
@@ -2461,49 +2491,15 @@ building_syndicate_outreach_office = {
 		is_occupied_flag = no
 	}
 
-		triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_megacorp = no
-				is_spiritualist = no
-				has_make_spiritualist_perk = no
-			}
-		}
-		job_bureaucrat_add = 100
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_megacorp = yes
-				is_worker_coop_empire = no
-			}
-		}
-		modifier = {
-			job_manager_add = 100
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_worker_coop_empire = yes
-			}
-		}
-		modifier = {
-			job_steward_add = 100
-		}
-	}
-
 	inline_script = {
-		script = jobs/priests_add
-		AMOUNT = 100
+		script = jobs/unity_jobs_add
+		AMOUNT = @building_static_jobs_low
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_criminal_add = 100
 	}
 
@@ -2516,8 +2512,7 @@ building_syndicate_outreach_office = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2526,8 +2521,7 @@ building_syndicate_outreach_office = {
 				has_valid_civic = civic_corporate_ascensionists
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2536,8 +2530,7 @@ building_syndicate_outreach_office = {
 				has_valid_civic = civic_public_relations_specialists
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|unity|
+		planet_bureaucrats_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2559,7 +2552,7 @@ building_syndicate_outreach_office = {
 		job_capital_trader_add = @traders_from_civic
 	}
 
-	custom_tooltip = trade_value_from_bureaucrats
+	custom_tooltip = branch_office_building_trade_bonus
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2624,7 +2617,10 @@ building_illicit_research_labs = {
 		AMOUNT = @scaling_district_3_jobs
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_criminal_add = 100
 	}
 
@@ -2637,8 +2633,9 @@ building_illicit_research_labs = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2647,8 +2644,9 @@ building_illicit_research_labs = {
 				has_valid_civic = civic_corporate_dark_consortium
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2657,8 +2655,9 @@ building_illicit_research_labs = {
 				has_valid_civic = civic_memory_vault_corporate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|research|
+		planet_physicists_trade_produces_add = @med_trade_from_jobs
+		planet_biologists_trade_produces_add = @med_trade_from_jobs
+		planet_engineers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2680,7 +2679,7 @@ building_illicit_research_labs = {
 		job_capital_trader_add = @traders_from_civic
 	}
 
-	custom_tooltip = trade_value_from_researchers
+	custom_tooltip = branch_office_building_trade_bonus
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2743,7 +2742,10 @@ building_smuggling_rings = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_trader_add = 100
 		job_criminal_add = 100
 	}
@@ -2757,8 +2759,7 @@ building_smuggling_rings = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2767,8 +2768,7 @@ building_smuggling_rings = {
 				has_valid_civic = civic_trading_posts
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2777,8 +2777,7 @@ building_smuggling_rings = {
 				has_valid_civic = civic_franchising
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_traders_trade_produces_add = @low_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2799,8 +2798,6 @@ building_smuggling_rings = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_traders
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2870,7 +2867,10 @@ building_disinformation_center = {
 		spy_network_levels_add = 5
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		pop_government_ethic_attraction = -0.25
 	}
 
@@ -2888,8 +2888,7 @@ building_disinformation_center = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2898,8 +2897,7 @@ building_disinformation_center = {
 				has_valid_civic = civic_brand_loyalty
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -2908,8 +2906,7 @@ building_disinformation_center = {
 				has_valid_civic = civic_corporate_guided_sapience
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.02
-		mult = value:num_jobs_with_tag|TAG|trade|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -2930,8 +2927,6 @@ building_disinformation_center = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_traders
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -2987,10 +2982,15 @@ building_subversive_shrine = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_bureaucrat_add = 200
 		pop_ethic_spiritualist_attraction_mult = 0.25
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		planet_crime_add = 25
@@ -3020,6 +3020,10 @@ building_subversive_shrine = {
 				}
 			}
 			influence = 30
+		}
+		produces = {
+			unity = 6
+			mult = value:branch_office_value_for_buildings
 		}
 		upkeep = {
 			energy = 2
@@ -3052,10 +3056,15 @@ building_temple_of_prosperity = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_bureaucrat_add = 200
 		pop_ethic_spiritualist_attraction_mult = 0.5
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
@@ -3123,26 +3132,26 @@ building_executive_retreat = {
 		planet_amenities_mult = 0.1
 	}
 
-	planet_modifier = {
-		job_entertainer_add = 200
+	inline_script = {
+		script = jobs/entertainers_add
+		AMOUNT = @building_static_jobs
 	}
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|amenities|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
+	# Trade from civics
 	triggered_planet_modifier = {
 		potential = {
 			branch_office_owner = {
 				has_valid_civic = civic_ruthless_competition
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|amenities|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3151,8 +3160,7 @@ building_executive_retreat = {
 				has_valid_civic = civic_task_delegation_corporate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|amenities|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3161,8 +3169,7 @@ building_executive_retreat = {
 				has_valid_civic = civic_environmental_architects_megacorp
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_jobs_with_tag|TAG|amenities|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -3202,8 +3209,6 @@ building_executive_retreat = {
 		}
 		job_capital_trader_add = @traders_from_civic
 	}
-
-	custom_tooltip = trade_value_from_entertainers
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -3257,26 +3262,16 @@ building_xeno_tourism_agency = {
 		planet_resettlement_unemployed_destination_mult = 0.25
 	}
 
-	planet_modifier = {
-		job_entertainer_add = 100
+	inline_script = {
+		script = jobs/entertainers_add
+		AMOUNT = @building_static_jobs_low
 	}
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_pops_in_strata|STRATA|worker|
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			branch_office_owner = {
-				has_civic = civic_worker_coop
-			}
-		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3285,8 +3280,7 @@ building_xeno_tourism_agency = {
 				has_civic = civic_corporate_dimensional_worship
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3295,8 +3289,7 @@ building_xeno_tourism_agency = {
 				has_civic = civic_death_cult_corporate
 			}
 		}
-		planet_jobs_trade_produces_mult = @trade_value_from_jobs
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -3310,15 +3303,6 @@ building_xeno_tourism_agency = {
 	}
 
 	#Trader Jobs from civics
-	triggered_country_modifier = {
-		potential = {
-			branch_office_owner = {
-				has_valid_civic = civic_worker_coop
-			}
-		}
-		job_capital_trader_add = @traders_from_civic
-	}
-
 	triggered_country_modifier = {
 		potential = {
 			branch_office_owner = {
@@ -3400,8 +3384,7 @@ building_imperial_concession_port = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.05
-		mult = value:num_pops_in_strata|STRATA|ruler|
+		planet_politicians_trade_produces_add = @high_trade_from_jobs
 	}
 
 	#Crims cause crime even with deal
@@ -3413,8 +3396,6 @@ building_imperial_concession_port = {
 		}
 		planet_crime_floor_add = @crime_floor_from_legal_crime
 	}
-
-	custom_tooltip = trade_value_from_rulers
 
 	resources = {
 		category = planet_branch_office_buildings
@@ -3467,16 +3448,18 @@ building_knightly_theme_park = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
-		job_entertainer_add = 200
+	inline_script = {
+		script = jobs/entertainers_add
+		AMOUNT = @building_static_jobs
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3485,8 +3468,7 @@ building_knightly_theme_park = {
 				has_civic = civic_corporate_hedonism
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3495,8 +3477,7 @@ building_knightly_theme_park = {
 				has_civic = civic_corporate_hyperspace_specialty
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|worker|
+		planet_entertainers_trade_produces_add = @med_trade_from_jobs
 	}
 
 	triggered_planet_modifier = {
@@ -3614,9 +3595,12 @@ building_corporate_clinics = {
 		planet_crime_floor_add = @crime_floor_from_legal_crime
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
 
-
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_healthcare_add = 100
 		job_healthcare_amenities_add = 100	# see output/healthcare_triggered_modifiers
 		planet_doctors_trade_produces_add = 2
@@ -3647,13 +3631,6 @@ building_corporate_clinics = {
 		job_criminal_add = 100
 	}
 
-	triggered_planet_modifier = {
-		potential = {
-			always = yes
-		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|specialist|
-	}
 
 	triggered_planet_modifier = {
 		potential = {
@@ -3667,8 +3644,7 @@ building_corporate_clinics = {
 				}
 			}
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|specialist|
+		planet_doctors_trade_produces_add = @high_trade_from_jobs
 	}
 
 	#Trader Jobs from civics
@@ -3726,9 +3702,6 @@ building_corporate_clinics = {
 		text = building_corporate_clinics_effect
 	}
 
-	triggered_desc = {
-		text = job_healthcare_effect_desc
-	}
 	ai_weight = {
 		weight = 120
 	}
@@ -3763,6 +3736,7 @@ building_augmentation_bazaars_branch = {
 		}
 	}
 
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		planet_jobs_trade_produces_mult = 0.10
@@ -3820,8 +3794,7 @@ building_augmentation_bazaars_branch = {
 		potential = {
 			always = yes
 		}
-		planet_jobs_trade_produces_mult = 0.005
-		mult = value:num_pops_in_strata|STRATA|specialist|
+		planet_augmentors_trade_produces_add = @high_trade_from_jobs
 	}
 
 	custom_tooltip = trade_value_from_specialists
@@ -3865,33 +3838,6 @@ building_augmentation_bazaars_branch = {
 	}
 
 	prerequisites = {}
-
-	triggered_desc = {
-		trigger = {
-			exists = owner
-			owner = {
-				is_gestalt = no
-			}
-			is_cyborg_empire = yes
-		}
-		text = job_augmentor_growth_effect_desc
-	}
-
-	triggered_desc = {
-		trigger = {
-			OR = {
-				is_scope_valid = no
-				AND = {
-					exists = owner
-					owner = {
-						is_gestalt = no
-					}
-					is_cyborg_empire = no
-				}
-			}
-		}
-		text = job_augmentor_research_effect_desc
-	}
 
 	ai_resource_production = {
 		energy = 5
@@ -3953,10 +3899,15 @@ building_ai_emporium = {
 		is_occupied_flag = no
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		job_roboticist_branch_office_value_mult = 0.10
 		job_roboticist_add = 100
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	triggered_planet_modifier = {
 		potential = {
@@ -4048,11 +3999,16 @@ building_clear_thought_clinic = {
 		planet_crime_floor_add = @crime_floor_from_legal_crime
 	}
 
-	planet_modifier = {
+	triggered_planet_modifier = {
+		potential = {
+			always = yes
+		}
 		planet_jobs_trade_produces_mult = 0.10
 		pop_happiness = -0.05
 		job_trader_add = 200
 	}
+
+	custom_tooltip = branch_office_building_trade_bonus
 
 	resources = {
 		category = planet_branch_office_buildings

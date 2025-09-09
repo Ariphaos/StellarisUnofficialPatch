@@ -214,8 +214,8 @@ spawning_drone = {
 		potential = {
 			spawning_drone_is_bath_attendant_hive_trigger = yes
 		}
-		bonus_pop_growth_mult = 0.02
-		pop_environment_tolerance = -0.0075
+		bonus_pop_growth_mult = 0.01
+		pop_environment_tolerance = -0.015
 		mult = planet.value:toxic_attendant_growth
 	}
 
@@ -232,6 +232,13 @@ spawning_drone = {
 	weight = {
 		weight = @spawner_drone_job_weight
 		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_amenities_mult|
+		modifier = {
+			add = 20
+			exists = owner
+			owner = {
+				has_origin = origin_progenitor_hive
+			}
+		}
 		modifier = {
 			factor = 0.5 # job is less useful if pop control is active, but still gives amenities
 			planet = {
@@ -250,8 +257,6 @@ spawning_drone = {
 			}
 		}
 	}
-
-	inline_script = "jobs/automodding_priority_amenities"
 
 	promotion = {
 		time = @standard_promotion_time
@@ -333,8 +338,8 @@ replicator = {
 		potential = {
 			replicator_is_bath_attendant_machine = yes
 		}
-		planet_pop_assembly_mult = 0.015
-		pop_amenities_usage_mult = 0.015
+		planet_pop_assembly_mult = 0.0075
+		pop_amenities_usage_mult = 0.03
 		mult = planet.value:toxic_attendant_growth
 	}
 
@@ -469,8 +474,6 @@ gestation_drone = {
 		}
 	}
 
-	inline_script = "jobs/automodding_priority_amenities"
-
 	promotion = {
 		time = @standard_promotion_time
 		effect = {
@@ -482,7 +485,7 @@ gestation_drone = {
 	}
 }
 
-##CW for Machines - Unused as of 4.0
+## Special job for Gestalts
 evaluator = {
 	category = complex_drone
 
@@ -490,6 +493,17 @@ evaluator = {
 		default = {
 			condition_string = DRONE_JOB_TRIGGER
 			building_icon = building_simulation_1
+		}
+		# Curator Drone
+		swap_type = {
+			trigger = {
+				entertainer_is_curator_trigger = yes
+			}
+			name = curator_drone
+			desc = curator_drone
+			icon = historical_curator
+			building_icon = aesthetic_wonders_holomuseum
+			weight = 10
 		}
 	}
 
@@ -514,18 +528,6 @@ evaluator = {
 		}
 		upkeep = {
 			energy = 2
-		}
-	}
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				has_active_tradition = tr_synchronicity_integrated_preservation
-			}
-		}
-		modifier = {
-			planet_crime_no_happiness_add = -3
 		}
 	}
 
@@ -783,6 +785,7 @@ calculator_physicist = {
 		default = {
 			condition_string = DRONE_JOB_TRIGGER
 			building_icon = building_research_lab_1
+			icon = physicist
 		}
 		# Machine Astrometeorologists
 		swap_type = {
@@ -829,6 +832,15 @@ calculator_physicist = {
 			icon = astrometeorologist_hive
 			building_icon = building_astrometeorology_observation_center
 			weight = 55
+		}
+		# Dimension Portal Researcher
+		swap_type = {
+			trigger = {
+				physicist_is_dimensional_portal_researcher_trigger = yes
+			}
+			name = dimensional_portal_researcher_gestalt
+			desc = dimensional_portal_researcher_gestalt
+			weight = 60
 		}
 		swap_type = {
 			trigger = {
@@ -1039,6 +1051,7 @@ calculator_biologist = {
 		default = {
 			condition_string = DRONE_JOB_TRIGGER
 			building_icon = building_research_lab_1
+			icon = biologist
 		}
 		#Brain Drone Biologist - auth_hive
 		swap_type = {
@@ -1270,6 +1283,7 @@ calculator_engineer = {
 		default = {
 			condition_string = DRONE_JOB_TRIGGER
 			building_icon = building_research_lab_1
+			icon = engineer
 		}
 		#Brain Drone Engineer - auth_hive
 		swap_type = {
@@ -1301,6 +1315,16 @@ calculator_engineer = {
 			condition_string = DRONE_JOB_TRIGGER
 			weight = 10
 		}
+		# Nanotech Researcher
+		swap_type = {
+			trigger = {
+				engineer_is_nanotech_researcher_trigger = yes
+			}
+			name = nanotech_research_unit
+			desc = nanotech_research_unit
+			building_icon = building_nanolab_1
+			weight = 15
+		}
 	}
 
 	possible_pre_triggers = {
@@ -1319,6 +1343,12 @@ calculator_engineer = {
 		category = planet_engineers
 		produces = {
 			engineering_research = 6
+		}
+		produces = {
+			trigger = {
+				engineer_is_nanotech_researcher_trigger = yes
+			}
+			engineering_research = 2
 		}
 		upkeep = {
 			trigger = {
@@ -1361,6 +1391,12 @@ calculator_engineer = {
 				}
 			}
 			minerals = 1.5
+		}
+		upkeep = {
+			trigger = {
+				engineer_is_nanotech_researcher_trigger = yes
+			}
+			nanites = 1
 		}
 	}
 
@@ -1447,7 +1483,17 @@ artisan_drone = {
 		}
 
 		upkeep = {
+			trigger = {
+				industrial_jobs_are_catalytic_trigger = no
+			}
 			minerals = 10
+		}
+
+		upkeep = {
+			trigger = {
+				industrial_jobs_are_catalytic_trigger = yes
+			}
+			food = 15
 		}
 
 		produces = {
@@ -2134,9 +2180,9 @@ patrol_drone = {
 					is_wilderness_empire = yes
 				}
 			}
-			name = tamersymbiont
-			desc = tamersymbiont
-			building_icon = planetary_carapace_1
+			name = immunosymbiont
+			desc = immunosymbiont
+			building_icon = capital_wilderness_3
 			condition_string = DRONE_JOB_TRIGGER
 			weight = 10
 		}
@@ -2471,7 +2517,25 @@ logistics_drone = {
 	resources = {
 		category = planet_traders
 		produces = {
-			trade = 4
+			trade = 6
+		}
+		upkeep = {
+			trigger = {
+				exists = owner
+				owner = {
+					is_machine_empire = yes
+				}
+			}
+			energy = 2
+		}
+		upkeep = {
+			trigger = {
+				exists = owner
+				owner = {
+					is_hive_empire = yes
+				}
+			}
+			minerals = 2
 		}
 	}
 
@@ -2479,7 +2543,7 @@ logistics_drone = {
 		potential = {
 			always = yes
 		}
-		planet_amenities_no_happiness_add = 250
+		planet_amenities_no_happiness_add = 500
 		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
 	}
 
@@ -2503,8 +2567,15 @@ logistics_drone = {
 	}
 
 	weight = {
-		weight = @simple_drone_job_weight
+		weight = @complex_drone_job_weight
 		mult = value:job_weights_modifier|JOB|logistics_drone|RESOURCE|trade|
+		modifier = {
+			factor = 10
+			planet = {
+				free_amenities < 0
+				has_available_jobs = logistics_drone
+			}
+		}
 	}
 
 	inline_script = "jobs/automodding_priority_trade"
@@ -2543,6 +2614,16 @@ mining_drone = {
 			building_icon = building_mineral_purification_plant
 			condition_string = DRONE_JOB_TRIGGER
 			weight = 2
+		}
+		swap_type = {
+			trigger = {
+				miner_is_crystal_miner_trigger = yes
+			}
+			icon = crystal_mining_drone
+			name = crystal_mining_drone
+			desc = crystal_mining_drone
+			building_icon = building_crystal_mines
+			weight = 5
 		}
 		swap_type = {
 			trigger = {
@@ -2725,6 +2806,16 @@ agri_drone = {
 		}
 		swap_type = {
 			trigger = {
+				farmer_is_gas_extractor_trigger = yes
+			}
+			name = gas_extraction_drone
+			desc = gas_extraction_drone
+			icon = gas_extraction_drone
+			building_icon = building_gas_extractors
+			weight = 20
+		}
+		swap_type = {
+			trigger = {
 				exists = owner
 				owner = {
 					is_wilderness_empire = yes
@@ -2857,6 +2948,16 @@ technician_drone = {
 		default = {
 			condition_string = DRONE_JOB_TRIGGER
 			building_icon = building_energy_grid
+		}
+		swap_type = {
+			trigger = {
+				technician_is_mote_harvester_trigger = yes
+			}
+			icon = mote_harvesting_drone
+			name = mote_harvesting_drone
+			desc = mote_harvesting_drone
+			building_icon = building_mote_harvesting_traps
+			weight = 5
 		}
 		swap_type = {
 			trigger = {
@@ -3100,7 +3201,7 @@ maintenance_drone = {
 		}
 	}
 
-	inline_script = "jobs/automodding_priority_amenities"
+	inline_script = "jobs/automodding_priority_charisma"
 }
 
 wilderness_maintenance_drone = {

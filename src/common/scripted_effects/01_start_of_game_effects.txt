@@ -1326,7 +1326,10 @@ generate_earth_deposits_and_blockers = {
 
 generate_start_buildings_and_districts = {
 	optimize_memory
-
+	set_timed_planet_flag = {
+		flag = ignore_ai_building_limitations
+		days = 1
+	}
 	inline_script = "game_start/rural_districts_initializer"
 
 	inline_script = "game_start/authority_regular"
@@ -1472,25 +1475,13 @@ generate_start_pops = {
 					}
 				}
 				create_pop_group = {
-					size = 600
-					species = last_created_species
-				}
-			}
-			else_if = {
-				limit = {
-					owner = {
-						has_origin = origin_necrophage
-						is_gestalt = yes
-					}
-				}
-				create_pop_group = {
-					size = 900
+					size = 1200
 					species = last_created_species
 				}
 			}
 			else = {
 				create_pop_group = {
-					size = 1200
+					size = 2400
 					species = last_created_species
 				}
 			}
@@ -1624,18 +1615,6 @@ generate_start_pops = {
 		}
 	}
 	if = {
-		limit = { #homicidal necrophages lose 1/4 of their necrophytes to fleeing
-			owner = {
-				has_origin = origin_necrophage
-				is_homicidal = yes
-			}
-		}
-		create_pop_group = {
-			size = 200
-			species = owner_main_species
-		}
-	}
-	if = {
 		limit = {
 			owner = { has_origin = origin_default }
 		}
@@ -1706,9 +1685,22 @@ generate_start_pops = {
 		}
 		while = {
 			count = @civilians_counter
-			create_pop_group = {
-				size = @civilians_gamestart
-				species = owner_main_species
+			if = {
+				limit = {
+					owner = { is_gestalt = no }
+				}
+				create_pop_group = {
+					size = @civilians_gamestart
+					species = owner_main_species
+					category = civilian
+				}
+			}
+			else = {
+				create_pop_group = {
+					size = @civilians_gamestart
+					species = owner_main_species
+					category = maintenance_drone
+				}
 			}
 		}
 	}
@@ -1722,6 +1714,52 @@ generate_start_pops = {
 			limit = { pop_amount < 2000 }
 			create_pop_group = {
 				species = owner_main_species
+			}
+		}
+	}
+
+	# Augmentation Bazaars: add 1 of 3 cyborg trait to species
+	if = {
+		limit = {
+			owner = {
+				has_valid_civic = civic_augmentation_bazaars
+			}
+		}
+		owner = {
+			random_list = {
+				30 = {
+					every_owned_species = {
+						limit = {
+							is_robotic = no
+						}
+						change_species_characteristics = {
+							add_trait = trait_cyborg_power_drills
+						}
+					}
+					set_country_flag = augmentation_bazaars_power_drills
+				}
+				30 = {
+					every_owned_species = {
+						limit = {
+							is_robotic = no
+						}
+						change_species_characteristics = {
+							add_trait = trait_cyborg_harvesters
+						}
+					}
+					set_country_flag = augmentation_bazaars_harvesters
+				}
+				30 = {
+					every_owned_species = {
+						limit = {
+							is_robotic = no
+						}
+						change_species_characteristics = {
+							add_trait = trait_cyborg_superconductive
+						}
+					}
+					set_country_flag = augmentation_bazaars_superconductive
+				}
 			}
 		}
 	}
@@ -2196,6 +2234,10 @@ generate_home_planet_final_pass = {
 void_dweller_home_planet_setup = {
 	optimize_memory
 	set_planet_flag = habitat_level_2
+	set_timed_planet_flag = {
+		flag = ignore_ai_building_limitations
+		days = 1
+	}
 	owner = {
 		save_event_target_as = void_dweller_owner
 		give_technology = {
@@ -2489,7 +2531,7 @@ void_dweller_home_planet_setup = {
 		add_zone = {
 			district = district_hab_housing
 			zone = zone_industrial
-			zone_slot = 1
+			zone_slot = 2
 		}
 		add_building = {
 			building = building_factory_1
@@ -2500,7 +2542,7 @@ void_dweller_home_planet_setup = {
 		add_zone = {
 			district = district_hab_housing
 			zone = zone_foundry
-			zone_slot = 1
+			zone_slot = 2
 		}
 	}
 
@@ -2510,9 +2552,9 @@ void_dweller_home_planet_setup = {
 	}
 
 	add_zone = {
-		district = district_hab_science
+		district = district_hab_housing
 		zone = zone_habitat_research_unity
-		zone_slot = 0
+		zone_slot = 1
 	}
 
 	# Shipsets

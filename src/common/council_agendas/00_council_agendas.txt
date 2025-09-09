@@ -1,0 +1,223 @@
+@base_agenda_cost = 7000
+# Remember to update initial progress for "agenda_infinite_opportunities" in game_start.60 if above is changed.
+agenda_infinite_opportunities = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		is_gestalt = no
+	}
+	allow = {
+		always = yes
+	}
+	modifier = {
+		pop_citizen_happiness = 0.04
+	}
+	finish_modifier = agenda_infinite_opportunities_finish
+}
+
+agenda_infinite_opportunities_gestalt = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		is_gestalt = yes
+	}
+	allow = {
+		always = yes
+	}
+	modifier = {
+		planet_amenities_no_happiness_add = 400
+	}
+	finish_modifier = agenda_infinite_opportunities_gestalt_finish
+}
+
+agenda_unlock_slot = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		is_gestalt = no
+		has_paragon_dlc = yes
+		OR = {
+			has_unlocked_council_positions < 4
+			AND = {
+				has_unlocked_council_positions < 5
+				civics_count >= 3
+			}
+		}
+	}
+	allow = {
+		always = yes
+	}
+	effect = {
+		unlock_council_slots = 1
+		hidden_effect = {
+			country_event = {
+				id = timeline.47 # Timeline Council Max Expansion
+			}
+		}
+	}
+	ai_weight = {
+		base = 9999
+	}
+}
+
+agenda_reorganize_council = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		is_gestalt = no
+		has_paragon_dlc = yes
+	}
+	allow = {
+		always = yes
+	}
+	effect = {
+		hidden_effect = {
+			if = {
+				limit = {
+					has_origin = origin_evolutionary_predators
+					is_mutation_authority = yes
+					is_oligarchic_authority = yes
+				}
+				every_owned_leader = {
+					limit = {
+						has_leader_flag = evopred_oligarch_immortal
+						is_ruler = no
+					}
+					set_immortal = no
+					remove_leader_flag = evopred_oligarch_immortal
+				}
+			}
+		}
+		unlock_council_selection = yes
+	}
+	ai_weight = {
+		base = 0
+	}
+}
+
+agenda_gestalt_purge_traits = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		is_gestalt = yes
+	}
+	allow = {
+		always = yes
+	}
+	finish_modifier = agenda_gestalt_purge_traits_finish
+	effect = {
+		custom_tooltip = council_agenda_agenda_gestalt_purge_traits_effect_desc
+		every_owned_leader = {
+			if = {
+				# Remove Exp per Trait being removed.
+				limit = {
+					is_councilor = yes
+					num_leader_traits = {
+						value > 0
+						negative = yes						# Tiers don't matter in this check.
+					}
+				}
+				hidden_effect = {
+					add_experience = value:purge_traits_exp_change_total					# -300 per trait, not counting tiers.
+					# Restore pending traits and tiers, so they'll come back eventually. But a 10% chance to reduce their numbers.
+					change_variable = {
+						which = leader_pending_negative_traits_unmodified
+						value = value:leader_num_negative_leader_trait_tiers
+					}
+					random = {
+						chance = 10
+						subtract_variable = {
+							which = leader_pending_negative_traits_unmodified
+							value = 1
+						}
+					}
+				}
+				remove_trait = all_negative
+			}
+		}
+	}
+}
+
+origin_delusional_tyrant = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		any_situation = {
+			is_situation_type = paragon_origin_reformists_struggle
+		}
+	}
+	allow = {
+		any_situation = {
+			is_situation_type = paragon_origin_reformists_struggle
+			current_situation_approach = situation_paragon_origin_reformists_struggle_harsh
+		}
+	}
+	modifier = {
+		pop_citizen_happiness = -0.05
+		pop_ethic_egalitarian_attraction_mult = -0.1
+	}
+	effect = {
+		custom_tooltip = council_agenda_origin_delusional_tyrant_effect
+		country_event = {
+			id = paragon.5095
+		}
+	}
+}
+
+origin_legendary_leader = {
+	agenda_cost = @base_agenda_cost
+	potential = {
+		any_situation = {
+			is_situation_type = paragon_origin_promise
+		}
+	}
+	allow = {
+		any_situation = {
+			is_situation_type = paragon_origin_promise
+		}
+	}
+	modifier = {
+		pop_citizen_happiness = 0.05
+		council_agenda_progress_speed = 0.2
+	}
+	effect = {
+		set_country_flag = origin_upgrade_agendas_situation
+		custom_tooltip = council_agenda_origin_legendary_leader_effect
+		hidden_effect = {
+			random_list = {
+				1 = {
+					country_event = {
+						id = paragon.5325
+					}
+				}
+				1 = {
+					country_event = {
+						id = paragon.5330
+					}
+				}
+				1 = {
+					country_event = {
+						id = paragon.5335
+					}
+				}
+				1 = {
+					country_event = {
+						id = paragon.5360
+					}
+				}
+			}
+		}
+	}
+}
+
+agenda_augmentation_product_launch = {
+	agenda_cost = 3800 #Shorter completion time to keep the production penalty less intimidating
+	allow = {
+		is_megacorp = yes
+		has_country_flag = cyber_collectivist
+	}
+	potential = {
+		is_megacorp = yes
+		has_country_flag = cyber_collectivist
+	}
+
+	modifier = {
+		planet_jobs_productive_produces_mult = -0.05
+		planet_pops_consumer_goods_upkeep_mult = 0.1
+	}
+	finish_modifier = agenda_augmentation_product_launch_finish
+}

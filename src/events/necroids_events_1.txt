@@ -502,6 +502,10 @@ planet_event = {
 		}
 		if = {
 			limit = {
+				owner = {
+					has_technology = tech_glandular_acclimation
+					NOT = { ideal_planet_class = root }
+				}
 				event_target:last_created_pop_group = {
 					NOT = { ideal_planet_class = root }
 				}
@@ -514,10 +518,6 @@ planet_event = {
 					is_planet_class = pc_gaia
 					is_planet_class = pc_relic
 				}
-				owner = {
-					has_technology = tech_glandular_acclimation
-					NOT = { ideal_planet_class = root }
-				}
 			}
 			event_target:last_created_pop_group = {
 				modify_species = {
@@ -526,7 +526,9 @@ planet_event = {
 			}
 		}
 		event_target:last_created_pop_group = {
-			add_pop_amount = local_pop_amount
+			add_pop_amount = {
+				amount = root.local_pop_amount
+			}
 		}
 		while = {
 			count = value:per_100_local_pop_amount
@@ -572,7 +574,7 @@ planet_event = {
 				}
 			}
 			while = {
-				count = local_pop_amount
+				count = root.local_pop_amount
 				add_opinion_modifier = { who = FROM modifier = opinion_necrophage }
 			}
 		}
@@ -588,7 +590,7 @@ planet_event = {
 				}
 			}
 			while = {
-				count = local_pop_amount
+				count = root.local_pop_amount
 				add_opinion_modifier = { who = FROM modifier = opinion_necrophage_our_species }
 			}
 		}
@@ -828,28 +830,31 @@ planet_event = {
 			66 = { }
 			# 33% Chance to create a cyber-zombie per pop.
 			33 = {
-				create_pop_group = {
+				modify_species = {
 					species = fromfrom.species
+					add_trait = trait_cybernetic
+					add_trait = trait_zombie
+					add_traits_at_start_of_list = yes
+					remove_trait = trait_self_modified
+					remove_trait = trait_latent_psionic
+					remove_trait = trait_psionic
+					change_scoped_species = no
+					effect = {
+						save_event_target_as = zombie_species
+					}
+				}
+				create_pop_group = {
+					pop_group = fromfrom
+					species = event_target:zombie_species
 					size = local_pop_amount
 					effect = {
-						save_event_target_as = last_created_pop_group
+						set_citizenship_type = {
+							country = root.owner
+							type = citizenship_full_machine
+						}
 					}
 				}
-				event_target:last_created_pop_group = {
-					modify_species = {
-						species = this
-						add_trait = trait_cybernetic
-						add_trait = trait_zombie
-						add_traits_at_start_of_list = yes
-						remove_trait = trait_self_modified
-						remove_trait = trait_latent_psionic
-						remove_trait = trait_psionic
-					}
-					set_citizenship_type = {
-						country = root.owner
-						type = citizenship_full_machine
-					}
-				}
+
 				if = { # assimilator empire
 					limit = {
 						root.owner = {
