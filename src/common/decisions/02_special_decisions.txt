@@ -161,6 +161,19 @@ decision_penal_colony = {
 			modifier = penal_colony
 			days = -1
 		}
+		owner = {
+			if = {
+				limit = {
+					is_twisted_experimenters_empire = yes
+					NOT = { has_modifier = penal_experimental_sentencing }
+				}
+				add_modifier = {
+					modifier = penal_experimental_sentencing
+					days = -1
+				}
+			}
+		}
+
 		hidden_effect = { validate_planet_buildings_and_districts = yes }
 	}
 
@@ -186,6 +199,10 @@ decision_abolish_penal_colony = {
 
 	effect = {
 		remove_modifier = penal_colony
+		owner = {
+			try_remove_penal_experimental_mod = yes
+		}
+
 		hidden_effect = { validate_planet_buildings_and_districts = yes }
 	}
 
@@ -971,6 +988,7 @@ decision_consecrated_worlds = {
 			# recalculate modifier
 			from = {
 				recalculate_consecrated_world_modifier = yes
+				country_event = { id = shroud.10850 } # Patron Objective Counter: po_consecrate_planet
 			}
 		}
 	}
@@ -1111,6 +1129,7 @@ decision_unconsecrated_worlds = {
 			from = {
 				recalculate_consecrated_world_modifier = yes
 				custom_tooltip = recalculates_consecrated_modifier
+				country_event = { id = shroud.10855 } # Patron Objective Counter: po_consecrate_planet
 			}
 		}
 	}
@@ -2344,6 +2363,14 @@ decision_expand_planetary_sea = {
 
 	enactment_time = @expand_planetary_sea_length
 
+	custom_tooltip = {
+		success_text = requires_max_3_times_ice_dumping
+		check_variable = {
+			which = ice_dumping_happened
+			value < 3
+		}
+	}
+
 	potential = {
 		is_planet_class = pc_ocean
 		exists = owner
@@ -2371,7 +2398,6 @@ decision_expand_planetary_sea = {
 			}
 			custom_tooltip = {
 				fail_text = requires_max_3_times_fail_simple
-				success_text = requires_max_3_times_ice_dumping
 				check_variable = {
 					which = ice_dumping_happened
 					value < 3
@@ -2826,6 +2852,195 @@ incinerate_the_flagella = {
 	}
 }
 
+# Shroud-Forged
+decision_open_shroud_rift = {
+	owned_planets_only = yes
+	icon = decision_surreal_visions
+
+	enactment_time = 720
+	resources = {
+		category = decisions
+		cost = {
+			sr_zro = 25
+			mult = value:decision_open_shroud_rift_cost_mult
+		}
+	}
+
+	custom_tooltip = {
+		success_text = decision_open_shroud_rift_max_uses
+		count_deposits = {
+			type = d_shroud_rift_deposit
+			count < @max_open_shroud_rift_uses
+		}
+	}
+
+	potential = {
+		exists = owner
+		is_artificial = no
+		owner = { 
+			has_origin = origin_shroud_forged 
+			NOT = { has_country_flag = finish_shroud_forged_control_flag }
+		}
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = decision_open_shroud_rift_condition_tt
+			any_deposit = {
+				is_blocker = no
+				NOT = { is_deposit_type = d_shroud_rift_deposit }
+			}
+		}
+		custom_tooltip = {
+			fail_text = decision_open_shroud_rift_max_uses_fail
+			count_deposits = {
+				type = d_shroud_rift_deposit
+				count < @max_open_shroud_rift_uses
+			}
+		}
+	}
+
+	effect = {
+		if = {
+			limit = {
+				has_deposit = d_shroud_rift_deposit
+			}
+			random_list = {
+				0 = {
+					modifier = {
+						add = value:get_shroud_rift_decision_uses
+					}
+					tooltip = {
+						change_pc = pc_shrouded
+					}
+					hidden_effect = {
+						planet_event = {
+							id = shroud_forged.160
+							scopes = {
+								from = owner
+							}
+						}
+						add_deposit = d_shroud_rift_deposit
+						kill_all_pop = yes
+						remove_all_buildings = yes
+						destroy_colony = yes
+						close_shroud_rift_effect = yes
+						change_pc = pc_shrouded
+					}
+				}
+				10 = {
+					modifier = {
+						subtract = value:get_shroud_rift_decision_uses
+					}
+					decision_shroud_region_effect = yes
+				}
+			}
+		}
+		else = {
+			decision_shroud_region_effect = yes
+		}
+	}
+
+	on_queued = {
+		open_shroud_rift_effect = yes
+	}
+
+	on_unqueued = {
+		close_shroud_rift_effect = yes
+	}
+
+	ai_weight = {
+		weight = 50
+	}
+}
+
+decision_entrap_shroud_entity = {
+	owned_planets_only = yes
+	icon = decision_planet_beam
+
+	enactment_time = 720
+	resources = {
+		category = decisions
+		cost = {
+			sr_zro = 100
+		}
+	}
+
+	potential = {
+		exists = owner
+		is_artificial = no
+		has_planet_flag = zroni_legacy_flag
+		owner = { 
+			has_origin = origin_shroud_forged 
+			has_country_flag = shroud_forged_traitor
+			NOR = {
+				has_modifier = shroud_forged_trapped_entity
+				has_modifier = shroud_forged_trapped_lesser_entity
+				has_country_flag = entrapping_shroud_entity
+			}
+		}
+	}
+
+	allow = {
+		custom_tooltip = {
+			fail_text = missing_zroni_gateways_tt
+			owner = {
+				count_owned_planet = {
+					count >= 3
+					limit = {
+						has_building = building_zroni_equilibrator
+						is_controlled_by = root.owner
+					}
+				}
+			}
+		}
+	}
+
+	effect = {
+		owner = {
+			random_list = {
+				10 = {
+					custom_tooltip = shroud_invasion_tt
+					hidden_effect = {
+						country_event = { id = shroud_forged.330 }
+					}
+				}
+				10 = {
+					add_modifier = {
+						modifier = shroud_forged_trapped_entity
+					}
+				}
+				55 = {
+					add_modifier = {
+						modifier = shroud_forged_trapped_lesser_entity
+						years = 20
+					}
+				}
+				25 = {
+					# Nothing
+				}
+			}
+		}
+		hidden_effect = {
+			owner = {
+				remove_country_flag = entrapping_shroud_entity
+			}
+		}
+	}
+
+	on_queued = {
+		owner = {
+			set_country_flag = entrapping_shroud_entity
+		}
+	}
+
+	on_unqueued = {
+		owner = {
+			remove_country_flag = entrapping_shroud_entity
+		}
+	}
+}
+
 decision_activate_dimensional_manipulation_device = {
 	owned_planets_only = yes
 	icon = decision_engineering_research
@@ -2906,6 +3121,8 @@ decision_consecrate_habitat_knights = {
 	}
 
 	effect = {
+		add_building = building_order_castle
+		custom_tooltip = decision_consecrate_habitat_knights_effect
 		hidden_effect = {
 			add_zone = {
 				district = district_hab_housing
@@ -2918,7 +3135,6 @@ decision_consecrate_habitat_knights = {
 				building = building_order_castle
 			}
 		}
-		custom_tooltip = decision_consecrate_habitat_knights_effect
 		set_colony_type = col_habitat_fortress
 	}
 }

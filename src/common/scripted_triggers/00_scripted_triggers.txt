@@ -139,6 +139,12 @@ is_non_sapient_robot = { # The pop is a non-sapient robot
 			NOT = { has_policy_flag = ai_outlawed }
 		}
 	}
+	AND = {
+		exists = owner
+		owner = {
+			is_machine_empire = no
+		}
+	}
 }
 
 is_non_menial_laborer = {
@@ -513,6 +519,25 @@ has_biogenesis_dlc = {
 	host_has_dlc = "BioGenesis"
 }
 
+has_shroud_dlc = {
+	optimize_memory
+	host_has_dlc = "Shadows of the Shroud"
+}
+
+has_shroud_dlc_not_machine_age = {
+	optimize_memory
+	host_has_dlc = "Shadows of the Shroud"
+	NOT = {
+		host_has_dlc = "The Machine Age"
+	}
+}
+
+has_shroud_dlc_and_machine_age = {
+	optimize_memory
+	host_has_dlc = "Shadows of the Shroud"
+	host_has_dlc = "The Machine Age"
+}
+
 uninhabitable_regular_planet = {
 	OR = {
 		is_planet_class = pc_molten
@@ -768,6 +793,7 @@ can_be_military_leader = {
 can_be_soldier = {
 	is_sapient = yes
 	exists = prev.owner
+	NOT = { has_trait = trait_tankbound }
 	OR = {
 		has_military_service_type = { type = military_service_full country = prev.owner }
 		has_military_service_type = { type = military_service_limited country = prev.owner }
@@ -910,6 +936,8 @@ has_advanced_government = {
 	OR = {
 		has_cyber_government = yes
 		has_synth_government = yes
+		has_transcendent_government = yes
+		has_corporeal_government = yes
 	}
 }
 
@@ -941,6 +969,30 @@ has_synth_government = {
 		has_government = gov_synth_imperial_virtual
 		has_government = gov_synth_corporate_physical
 		has_government = gov_synth_corporate_virtual
+	}
+}
+
+has_transcendent_government = {
+	OR = {
+		has_government = gov_shroud_transcendent_democracy
+		has_government = gov_shroud_transcendent_oligarchy
+		has_government = gov_shroud_transcendent_dictatorial
+		has_government = gov_shroud_transcendent_imperial
+		has_government = gov_shroud_transcendent_corporate
+		has_government = gov_shroud_transcendent_hive
+		has_government = gov_shroud_transcendent_machine
+	}
+}
+
+has_corporeal_government = {
+	OR = {
+		has_government = gov_shroud_corporeal_democracy
+		has_government = gov_shroud_corporeal_oligarchy
+		has_government = gov_shroud_corporeal_dictatorial
+		has_government = gov_shroud_corporeal_imperial
+		has_government = gov_shroud_corporeal_corporate
+		has_government = gov_shroud_corporeal_hive
+		has_government = gov_shroud_corporeal_machine
 	}
 }
 
@@ -1582,6 +1634,7 @@ is_regular_empire = {
 		is_country_type = awakened_marauders
 		is_country_type = fallen_empire
 		is_country_type = awakened_fallen_empire
+		is_country_type = exiled
 	}
 	NOT = { has_ethic = ethic_gestalt_consciousness	}
 }
@@ -1866,6 +1919,13 @@ has_total_war_cb = {
 					has_menace_perk = menp_behemoth_ever_hungry
 				}
 			}
+		}
+		# EotC Total War
+		has_country_flag = reached_eotc_situation_stage2
+		# Total War against EotC
+		AND = {
+			has_country_flag = can_declare_total_war_to_eotc
+			from = { has_covenant_with_end_of_the_cycle = yes }
 		}
 	}
 }
@@ -2599,6 +2659,13 @@ clinic_upkeep_affordable = {
 }
 
 ministry_production_upkeep_affordable = {
+	has_monthly_income = {
+		resource = energy
+		value > 5
+	}
+}
+
+psi_corps_upkeep_affordable = {
 	has_monthly_income = {
 		resource = energy
 		value > 5
@@ -3965,7 +4032,8 @@ uses_standard_ship_sizes = {
 	OR = {
 		is_country_type = default
 		is_country_type = gdf
-		is_country_type = enclave_mercenary
+		is_mercenary = yes
+		is_country_type = exiled
 		has_country_flag = use_default_ships #for modders: apply this in on_country_created for new country types that you want to use corvettes etc
 	}
 	is_beastmasters_empire = no
@@ -4090,7 +4158,7 @@ has_any_industry_zone = {
 	}
 }
 
-has_any_farming_district_or_buildings = {
+has_any_farming_district_or_building = {
 	OR = {
 		has_district = district_farming
 		has_district = district_farming_uncapped
@@ -4281,6 +4349,7 @@ has_special_star_flag_trigger = {
 		has_star_flag = guardian
 		has_star_flag = sealed_system
 		has_star_flag = starlit_sealed_system
+		has_star_flag = exiled_system
 		# Megastructures
 		has_star_flag = abandoned_gateway
 		has_star_flag = ruined_mega_shipyard_system
@@ -4313,6 +4382,16 @@ can_think = {
 		has_trait = trait_nerve_stapled
 		has_trait = trait_zombie
 		has_trait = trait_robot_suppressed
+	}
+}
+
+has_zroni_equilibrators = {
+	count_owned_planet = {
+		count >= 3
+		limit = {
+			has_building = building_zroni_equilibrator
+			is_controlled_by = root
+		}
 	}
 }
 
@@ -4747,6 +4826,10 @@ has_mind_over_matter_synergy = {
 
 has_mind_over_matter_anti_synergy = {
 	is_spiritualist = no
+	if = {
+		limit = { has_shroud_dlc = yes }
+		is_gestalt = no
+	}
 }
 
 has_synthetic_age_anti_synergy = {
@@ -5148,7 +5231,7 @@ has_natural_blocker = { # planet scope | see also 'add_random_natural_blocker_an
 
 can_talk_to_prethoryn = {
 	OR = {
-		owner_species = { has_trait = trait_psionic }
+		owner_species = { is_psionic_species = yes }
 		owner_species = { has_trait = trait_hive_mind }
 		has_menace_perk = menp_behemoth_mind_meld
 	}

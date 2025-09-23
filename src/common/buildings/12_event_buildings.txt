@@ -377,6 +377,124 @@ building_crystal_plant_2 = {
 	}
 }
 
+building_zroni_equilibrator = {
+	base_buildtime = 1080
+	can_demolish = yes
+	base_cap_amount = 1
+
+	category = government
+	building_sets = {
+		government
+	}
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			sr_zro = 250
+		}
+		upkeep = {
+			energy = 10
+		}
+		produces = {
+			sr_zro = 4
+		}
+	}
+
+	potential = {
+		owner = { has_country_flag = zroni_legacy }
+		has_planet_flag = zroni_legacy_flag
+	}
+
+	allow = {
+		is_occupied_flag = no
+	}
+
+	destroy_trigger = {
+		OR = {
+			NOT = { exists = owner }
+			owner = {
+				NOT = { has_country_flag = zroni_legacy }
+			}
+		}
+	}
+
+	planet_modifier = {
+		job_evaluator_add = 300
+		job_calculator_physicist_add = 300
+		job_calculator_biologist_add = 300
+		job_calculator_engineer_add = 300
+		job_observator_drone_add = 200
+		job_maintenance_drone_add = 200
+	}
+
+	on_built = {
+		if = {
+			limit = {
+				exists = owner
+				owner = {
+					has_country_flag = zroni_legacy
+				}
+			}
+			owner = {
+				if = {
+					limit = {
+						has_event_chain = shroud_forged_chain
+					}
+					add_event_chain_counter = {
+						event_chain = shroud_forged_chain
+						counter = shroud_forged_zroni_portal
+						amount = 1
+					}
+					if = {
+						limit = {
+							has_completed_event_chain_counter = {
+								event_chain = shroud_forged_chain
+								counter = shroud_forged_zroni_planet
+							}
+							has_completed_event_chain_counter = {
+								event_chain = shroud_forged_chain
+								counter = shroud_forged_zroni_portal
+							}
+						}
+						country_event = { id = shroud_forged.308 }
+					}
+				}
+			}
+		}
+	}
+
+	on_destroy = {
+		if = {
+			limit = {
+				exists = owner
+				owner = {
+					has_country_flag = zroni_legacy
+				}
+			}
+			owner = {
+				if = {
+					limit = {
+						has_event_chain = shroud_forged_chain
+					}
+					add_event_chain_counter = {
+						event_chain = shroud_forged_chain
+						counter = shroud_forged_zroni_portal
+						amount = -1
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = shroud_forged_trapped_entity
+					}
+					remove_modifier = shroud_forged_trapped_entity
+					country_event = { id = shroud_forged.320 }
+				}
+			}
+		}
+	}
+}
+
+
 building_composer_sanctum = {
 	base_buildtime = @b3_time
 
@@ -392,12 +510,20 @@ building_composer_sanctum = {
 	}
 
 	potential = {
-		host_has_dlc = "Utopia"
-		owner = {
-			has_country_flag = composer_covenant_rank_1
+		exists = owner
+		OR = {
+			AND = {
+				host_has_dlc = "Utopia"
+				has_shroud_dlc = no
+				owner = { has_country_flag = composer_covenant_rank_1 }
+			}
+			AND = {
+				has_shroud_dlc = yes
+				owner = { has_country_flag = fertility_accord }
+			}
 		}
 		NOR = {
-			has_modifier = resort_colony
+			has_designation = col_resort
 			has_modifier = slave_colony
 		}
 	}
@@ -409,29 +535,56 @@ building_composer_sanctum = {
 
 	destroy_trigger = {
 		exists = owner
-		NOT = {
-			owner = { has_country_flag = composer_covenant_rank_1 }
+		owner = {
+			OR = {
+				AND = {
+					has_shroud_dlc = no
+					NOT = {
+						has_country_flag = composer_covenant_rank_1
+					}
+				}
+				AND = {
+					has_shroud_dlc = yes
+					NOT = {
+						has_country_flag = fertility_accord
+					}
+				}
+			}
 		}
 	}
 
-	planet_modifier = {
-		job_telepath_add = 300
+	inline_script = {
+		script = jobs/telepaths_add
+		AMOUNT = 300
 	}
 
 	country_modifier = {
 		pop_environment_tolerance = 0.10
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			has_shroud_dlc = no
+		}
 		planet_jobs_produces_mult = 0.05
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			has_shroud_dlc = yes
+		}
+		leader_lifespan_add = 20
 	}
 
 	resources = {
 		category = planet_buildings
 		cost = {
 			minerals = @b3_minerals
-			exotic_gases = @b3_rare_cost
+			sr_zro = @b2_rare_cost
 		}
 		upkeep = {
 			energy = @b3_upkeep
-			exotic_gases = @b3_rare_upkeep
+			sr_zro = @b2_rare_upkeep
 		}
 	}
 }
@@ -451,12 +604,20 @@ building_eater_sanctum = {
 	}
 
 	potential = {
-		host_has_dlc = "Utopia"
-		owner = {
-			has_country_flag = eater_covenant_rank_1
+		exists = owner
+		OR = {
+			AND = {
+				host_has_dlc = "Utopia"
+				has_shroud_dlc = no
+				owner = { has_country_flag = eater_covenant_rank_1 }
+			}
+			AND = {
+				has_shroud_dlc = yes
+				owner = { has_country_flag = hunger_accord }
+			}
 		}
 		NOR = {
-			has_modifier = resort_colony
+			has_designation = col_resort
 			has_modifier = slave_colony
 		}
 	}
@@ -468,13 +629,27 @@ building_eater_sanctum = {
 
 	destroy_trigger = {
 		exists = owner
-		NOT = {
-			owner = { has_country_flag = eater_covenant_rank_1 }
+		owner = {
+			OR = {
+				AND = {
+					has_shroud_dlc = no
+					NOT = {
+						has_country_flag = eater_covenant_rank_1
+					}
+				}
+				AND = {
+					has_shroud_dlc = yes
+					NOT = {
+						has_country_flag = hunger_accord
+					}
+				}
+			}
 		}
 	}
 
-	planet_modifier = {
-		job_telepath_add = 300
+	inline_script = {
+		script = jobs/telepaths_add
+		AMOUNT = 300
 	}
 
 	country_modifier = {
@@ -486,11 +661,11 @@ building_eater_sanctum = {
 		category = planet_buildings
 		cost = {
 			minerals = @b3_minerals
-			exotic_gases = @b3_rare_cost
+			sr_zro = @b2_rare_cost
 		}
 		upkeep = {
 			energy = @b3_upkeep
-			exotic_gases = @b3_rare_upkeep
+			sr_zro = @b2_rare_upkeep
 		}
 	}
 }
@@ -510,12 +685,20 @@ building_instrument_sanctum = {
 	}
 
 	potential = {
-		host_has_dlc = "Utopia"
-		owner = {
-			has_country_flag = instrument_covenant_rank_1
+		exists = owner
+		OR = {
+			AND = {
+				host_has_dlc = "Utopia"
+				has_shroud_dlc = no
+				owner = { has_country_flag = instrument_covenant_rank_1 }
+			}
+			AND = {
+				has_shroud_dlc = yes
+				owner = { has_country_flag = bliss_accord }
+			}
 		}
 		NOR = {
-			has_modifier = resort_colony
+			has_designation = col_resort
 			has_modifier = slave_colony
 		}
 	}
@@ -527,17 +710,48 @@ building_instrument_sanctum = {
 
 	destroy_trigger = {
 		exists = owner
-		NOT = {
-			owner = { has_country_flag = instrument_covenant_rank_1 }
+		owner = {
+			OR = {
+				AND = {
+					has_shroud_dlc = no
+					NOT = {
+						has_country_flag = instrument_covenant_rank_1
+					}
+				}
+				AND = {
+					has_shroud_dlc = yes
+					NOT = {
+						has_country_flag = bliss_accord
+					}
+				}
+			}
 		}
 	}
 
-	planet_modifier = {
-		job_telepath_add = 300
+	inline_script = {
+		script = jobs/telepaths_add
+		AMOUNT = 300
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			owner = {
+				is_gestalt = yes
+			}
+		}
+		planet_amenities_mult = 0.1
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			owner = {
+				is_gestalt = no
+			}
+		}
+		pop_happiness = 0.05
 	}
 
 	country_modifier = {
-		pop_happiness = 0.05
 		planet_jobs_trade_produces_mult = 0.1
 	}
 
@@ -545,11 +759,11 @@ building_instrument_sanctum = {
 		category = planet_buildings
 		cost = {
 			minerals = @b3_minerals
-			exotic_gases = @b3_rare_cost
+			sr_zro = @b2_rare_cost
 		}
 		upkeep = {
 			energy = @b3_upkeep
-			exotic_gases = @b3_rare_upkeep
+			sr_zro = @b2_rare_upkeep
 		}
 	}
 }
@@ -569,12 +783,19 @@ building_whisperers_sanctum = {
 	}
 
 	potential = {
-		host_has_dlc = "Utopia"
-		owner = {
-			has_country_flag = whisperers_covenant_rank_1
+		OR = {
+			AND = {
+				host_has_dlc = "Utopia"
+				has_shroud_dlc = no
+				owner = { has_country_flag = whisperers_covenant_rank_1 }
+			}
+			AND = {
+				has_shroud_dlc = yes
+				owner = { has_country_flag = wisdom_accord }
+			}
 		}
 		NOR = {
-			has_modifier = resort_colony
+			has_designation = col_resort
 			has_modifier = slave_colony
 		}
 	}
@@ -585,14 +806,16 @@ building_whisperers_sanctum = {
 	}
 
 	destroy_trigger = {
+		has_shroud_dlc = no
 		exists = owner
 		NOT = {
 			owner = { has_country_flag = whisperers_covenant_rank_1 }
 		}
 	}
 
-	planet_modifier = {
-		job_telepath_add = 300
+	inline_script = {
+		script = jobs/telepaths_add
+		AMOUNT = 300
 	}
 
 	country_modifier = {
@@ -648,11 +871,11 @@ building_whisperers_sanctum = {
 		category = planet_buildings
 		cost = {
 			minerals = @b3_minerals
-			exotic_gases = @b3_rare_cost
+			sr_zro = @b2_rare_cost
 		}
 		upkeep = {
 			energy = @b3_upkeep
-			exotic_gases = @b3_rare_upkeep
+			sr_zro = @b2_rare_upkeep
 		}
 	}
 }

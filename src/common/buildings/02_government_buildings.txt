@@ -647,14 +647,20 @@ building_psi_corps = {
 	planet_limit = 1
 
 	potential = {
-		host_has_dlc = "Utopia"
-		owner = { has_tradition = tr_psionics_psi_corps }
-		NOT = { has_modifier = resort_colony }
-		NOT = { has_modifier = slave_colony }
+		owner = {
+			OR = {
+				has_tradition = tr_psionics_psi_corps
+				has_tradition = tr_psionics_shroud_psi_corps
+			}
+			NOT = { has_origin = origin_endbringers }
+		}
+		NOR = {
+			has_designation = col_resort
+			has_modifier = slave_colony
+		}
 	}
 
 	allow = {
-		has_major_upgraded_capital = yes
 		if = {
 			limit = {
 				exists = orbital_defence
@@ -674,19 +680,46 @@ building_psi_corps = {
 
 	destroy_trigger = {
 		exists = owner
-		NOT = {
-			owner = { has_tradition = tr_psionics_psi_corps }
+		owner = {
+			NOR = {
+				has_tradition = tr_psionics_psi_corps
+				has_tradition = tr_psionics_shroud_psi_corps
+			}
 		}
 	}
 
+	inline_script = {
+		script = jobs/telepaths_add
+		AMOUNT = 200
+	}
 	planet_modifier = {
-		job_telepath_add = 200
 		planet_stability_add = 5
 	}
 
 	triggered_planet_modifier = {
+		potential = {
+			planet = {
+				num_assigned_jobs = {
+					job = telepath
+					value > 0
+				}
+			}
+		}
 		psionic_pop_bonus_workforce_mult = 1
 		mult = value:psionic_workforce_from_telepaths
+		# This is on the building instead of the jobs to prevent an infinite workforce loop
+	}
+	triggered_planet_modifier = {
+		potential = {
+			planet = {
+				num_assigned_jobs = {
+					job = telepath_drone
+					value > 0
+				}
+			}
+		}
+		psionic_pop_bonus_workforce_mult = 1
+		mult = value:psionic_workforce_from_telepath_drones
 		# This is on the building instead of the jobs to prevent an infinite workforce loop
 	}
 
@@ -701,8 +734,19 @@ building_psi_corps = {
 	}
 
 	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				OR = {
+					is_imperial_authority = no
+					is_corporeal_authority = no
+				}
+			}
+		}
 		text = psionic_bonus_workforce_from_telepaths_tt
 	}
+
+	is_essential = yes
 }
 
 building_embassy = {

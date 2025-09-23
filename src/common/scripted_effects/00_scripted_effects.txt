@@ -2135,10 +2135,7 @@ remove_muutagan_trades = {
 update_leader_after_modification = {
 	if = {
 		limit = {
-			NOR = {
-				has_leader_flag = renowned_leader
-				has_leader_flag = legendary_leader
-			}
+			is_leader_tier = leader_tier_default
 		}
 
 		ariphaos_patch_leader_change_traits = yes
@@ -4252,7 +4249,11 @@ destroy_star_system = {
 				change_pc = pc_ringworld_habitable_damaged
 			}
 			else = {
-				change_pc = pc_shattered
+				if = {
+					limit = { solar_system = { has_star_flag = destroyed_by_end_of_the_cycle } }
+					change_pc = pc_shrouded
+				}
+				else = { change_pc = pc_shattered }
 			}
 		}
 		else_if = {
@@ -4271,7 +4272,11 @@ destroy_star_system = {
 			change_pc = pc_ringworld_seam_damaged
 		}
 		else = {
-			change_pc = pc_shattered
+			if = {
+				limit = { solar_system = { has_star_flag = destroyed_by_end_of_the_cycle } }
+				change_pc = pc_shrouded
+			}
+			else = { change_pc = pc_shattered }
 		}
 	}
 	every_system_planet = {
@@ -4846,7 +4851,7 @@ death_cult_sacrifice_effect = {
 		limit = {
 			has_job_type = mortal_initiate
 		}
-		kill_assigned_pop_amount = {
+		sacrifice_assigned_pop_amount = {
 			percentage = 1
 		}
 	}
@@ -6742,6 +6747,64 @@ clean_up_voidspawn_situation = {
 	remove_modifier = voidspawn_contaminant
 }
 
+decision_shroud_region_effect = {
+	custom_tooltip = decision_open_shroud_rift_effect_tt
+	hidden_effect = {
+		random_deposit = {
+			limit = { 
+				is_blocker = no 
+				NOT = { is_deposit_type = d_shroud_rift_deposit }
+			}
+			remove_deposit = yes
+		}
+	}
+	add_deposit = d_shroud_rift_deposit
+
+	close_shroud_rift_effect = yes
+}
+
+open_shroud_rift_effect = {
+	hidden_effect = {
+		if = {
+			limit = {
+				NOT = { has_planet_flag = origin_shroud_forged_capital_flag }
+			}
+			hidden_effect = {
+				create_ambient_object = {
+					type = shroud_rift_object
+					scale = 0.2
+					entity_offset_height = -17
+					location = this
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+					}
+					set_ambient_object_flag = shroud_rift@root
+				}
+			}
+		}
+	}
+}
+
+close_shroud_rift_effect = {
+	hidden_effect = {
+		if = {
+			limit = {
+				NOT = { has_planet_flag = origin_shroud_forged_capital_flag }
+			}
+			solar_system = {
+				every_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = shroud_rift@root
+					}
+					destroy_ambient_object = this
+				}
+			}
+		}
+	}
+}
+
 remove_system_terraforming_candidates = {
 	every_system_planet = {
 		limit = {
@@ -7010,14 +7073,492 @@ detox_hangover = {
 	}
 }
 
+zroni_legacy_planet_check_effect = {
+	if = {
+		limit = {
+			has_planet_flag = $FLAG$
+		}
+		if = {
+			limit = {
+				exists = event_target:$GLOBAL_TARGET$
+			}
+			event_target:$GLOBAL_TARGET$ = {
+				if = {
+					limit = {
+						has_event_chain = shroud_forged_chain
+					}
+					add_event_chain_counter = {
+						event_chain = shroud_forged_chain
+						counter = shroud_forged_zroni_planet
+						amount = -1
+					}
+					if = {
+						limit = {
+							prev = { has_building = building_zroni_equilibrator }
+						}
+						add_event_chain_counter = {
+							event_chain = shroud_forged_chain
+							counter = shroud_forged_zroni_portal
+							amount = -1
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = shroud_forged_trapped_entity
+					}
+					remove_modifier = shroud_forged_trapped_entity
+					country_event = { id = shroud_forged.320 }
+				}
+			}
+			clear_global_event_target = $GLOBAL_TARGET$
+		}
+		if = {
+			limit = {
+				exists = from
+				is_owned_by = from
+			}
+			from = {
+				save_global_event_target_as = $GLOBAL_TARGET$
+				if = {
+					limit = {
+						has_event_chain = shroud_forged_chain
+					}
+					add_event_chain_counter = {
+						event_chain = shroud_forged_chain
+						counter = shroud_forged_zroni_planet
+						amount = 1
+					}
+					if = {
+						limit = {
+							root = { has_building = building_zroni_equilibrator }
+						}
+						add_event_chain_counter = {
+							event_chain = shroud_forged_chain
+							counter = shroud_forged_zroni_portal
+							amount = 1
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+zroni_planets_spawn_effect = {
+	set_spawn_system_batch = begin
+	random_system_within_border = {
+		limit = {
+			is_on_border = yes
+		}
+		weights = {
+			base = 100
+			modifier = {
+				factor = 0.01
+				has_star_flag = empire_cluster
+			}
+			modifier = {
+				factor = 0.1
+				any_neighbor_system = {
+					has_star_flag = empire_cluster
+				}
+			}
+		}
+		spawn_system = {
+			min_distance >= 25
+			max_distance <= 50
+			direction = rimwards
+			min_orientation_angle = 330
+			max_orientation_angle = 120
+			initializer = zroni_legacy_initializer_01
+			hyperlane = yes
+			effect = {
+				save_global_event_target_as = zroni_system_01
+				spawn_natural_wormhole = {
+					bypass_type = wormhole
+					random_pos = no
+					orbit_angle = 360
+				}
+			}
+		}
+		reroll_random = yes
+		spawn_system = {
+			min_distance >= 25
+			max_distance <= 50
+			direction = rimwards
+			min_orientation_angle = 330
+			max_orientation_angle = 120
+			initializer = zroni_legacy_initializer_02
+			hyperlane = yes
+			effect = {
+				save_global_event_target_as = zroni_system_02
+			}
+		}
+		reroll_random = yes
+		spawn_system = {
+			min_distance >= 25
+			max_distance <= 50
+			direction = rimwards
+			min_orientation_angle = 330
+			max_orientation_angle = 120
+			initializer = zroni_legacy_initializer_03
+			hyperlane = yes
+			effect = {
+				save_global_event_target_as = zroni_system_03
+			}
+		}
+	}
+	set_spawn_system_batch = end
+	random_system = {
+		limit = {
+			is_rim_system = no
+			has_natural_wormhole = no
+		}
+		spawn_natural_wormhole = {
+			bypass_type = wormhole
+			random_pos = no
+			orbit_angle = 360
+		}
+		event_target:zroni_system_01 = {
+			link_wormholes = prev
+		}
+	}
+}
+
+zroni_legacy_poi_effect = {
+	if = {
+		limit = {
+			NOT = {
+				has_point_of_interest = { poi = zroni_legacy_poi_$NUMBER$ }
+			}
+		}
+		set_visited = event_target:zroni_system_$NUMBER$
+		create_point_of_interest = {
+			id = zroni_legacy_poi_$NUMBER$
+			name = zroni_legacy_poi_$NUMBER$_title
+			desc = zroni_legacy_poi_$NUMBER$_desc
+			event_chain = shroud_forged_chain
+			location = event_target:zroni_legacy_planet_$NUMBER$
+		}
+	}
+}
+
+zroni_digsite_spawn_effect = {
+	closest_system = {
+		limit = {
+			has_access_fleet = root.owner
+			is_capital_system = no
+			NOR = {
+				is_same_value = root.solar_system
+				has_star_flag = first_zroni_site@root.owner
+				is_same_value = root.owner.capital_scope.solar_system
+				has_star_flag = hostile_system
+			}
+			is_fe_cluster = no
+			OR = {
+				has_owner = no
+				owner = { is_same_value = root.owner }
+			}
+			any_system_planet = {
+				habitable_planet = yes
+				OR = {
+					is_colony = no
+					sapient_pop_amount < 1000
+				}
+				has_anomaly = no
+				NOR = {
+					exists = archaeological_site
+					has_planet_flag = hatchling_egg
+					has_planet_flag = suppress_archaeological_sites #for modders
+					has_planet_flag = colony_event
+				}
+			}
+			root.owner = {
+				any_controlled_fleet = {
+					is_ship_class = shipclass_science_ship
+					can_access_system = prevprev
+				}
+			}
+		}
+		min_steps = 3
+		max_steps = 15
+		root.owner = { set_visited = prev }
+		random_system_planet = {
+			limit = {
+				habitable_planet = yes
+				has_anomaly = no
+				OR = {
+					is_colony = no
+					sapient_pop_amount < 1000
+				}
+				NOR = {
+					exists = archaeological_site
+					has_planet_flag = hatchling_egg
+					has_planet_flag = suppress_archaeological_sites
+					has_planet_flag = colony_event
+				}
+			}
+			create_archaeological_site = $DIGSITE$
+			root.owner = {
+				set_country_flag = zroni_arc_chain_@prev
+			}
+			add_deposit = $DEPOSIT$
+			save_event_target_as = new_zroni_digsite
+		}
+	}
+	if = {
+		limit = {
+			NOT = { exists = event_target:new_zroni_digsite }
+		}
+		closest_system = {
+			limit = {
+				has_access_fleet = root.owner
+				is_capital_system = no
+				NOR = {
+					is_same_value = root.solar_system
+					has_star_flag = first_zroni_site@root.owner
+					is_same_value = root.owner.capital_scope.solar_system
+					has_star_flag = hostile_system
+				}
+				is_fe_cluster = no
+				OR = {
+					has_owner = no
+					owner = { is_same_value = root.owner }
+				}
+				any_system_planet = {
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+					}
+					has_anomaly = no
+					NOR = {
+						exists = archaeological_site
+						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
+					}
+				}
+			}
+			min_steps = 1
+			root.owner = { set_visited = prev }
+			random_system_planet = {
+				limit = {
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+					}
+					has_anomaly = no
+					NOR = {
+						exists = archaeological_site
+						has_planet_flag = hatchling_egg
+						has_planet_flag = suppress_archaeological_sites
+					}
+				}
+				create_archaeological_site = $DIGSITE$
+				root.owner = {
+					set_country_flag = zroni_arc_chain_@prev
+				}
+				add_deposit = $DEPOSIT$
+				save_event_target_as = new_zroni_digsite
+			}
+		}
+	}
+}
+
+create_shroud_creatures = {
+	if = {
+		limit = {
+			NOT = { exists = event_target:shroud_creatures }
+		}
+		create_country = {
+			name = "NAME_Shroud_Creatures"
+			type = guardian
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_5.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "flag_BG_12.dds"
+				}
+				colors={
+					"purple"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				every_playable_country = {
+					establish_communications_no_message = prev
+				}
+				save_global_event_target_as = shroud_creatures
+			}
+		}
+	}
+}
+
+shroud_creatures_army_spawn = {
+	create_shroud_creatures = yes
+	create_army = {
+		name = "NAME_Shroud_Creatures"
+		owner = event_target:shroud_creatures
+		type = shroud_monstrosities
+	}
+}
+
+shroud_creatures_system_spawn = {
+	create_shroud_creatures = yes
+	if = {
+		limit = {
+			end_game_years_passed >= 1
+		}
+		while = {
+			count = 3
+			shroud_creatures_avatar_spawn = yes
+		}
+	}
+	else_if = {
+		limit = {
+			mid_game_years_passed >= 1
+		}
+		while = {
+			count = 2
+			shroud_creatures_avatar_spawn = yes
+		}
+	}
+	else = {
+		shroud_creatures_avatar_spawn = yes
+	}
+}
+
+shroud_creatures_avatar_spawn = {
+	event_target:shroud_creatures = {
+		create_fleet = {
+			name = "NAME_Psionic_Avatar"
+			settings = {
+				can_upgrade = no
+				can_change_composition = no
+				can_change_leader = no
+				uses_naval_capacity = no
+				spawn_debris = no
+				is_boss = yes
+			}
+			effect = {
+				set_owner = PREV
+				set_fleet_flag = avatar_fleet
+				create_ship = {
+					name = "NAME_Avatar"
+					design = "NAME_Shroud_Avatar"
+					prefix = no
+					upgradable = no
+				}
+				set_location = prevprev.system_star
+			}
+		}
+		last_created_fleet = {
+			clear_fleet_actions = this
+			queue_actions = {
+				repeat = { #repeating it creates a visual effect of swooping around the planet
+					find_random_planet = {
+						found_planet = {
+							move_to = this
+							orbit_planet = THIS
+						}
+					}
+					wait = {
+						duration = 15
+					}
+				}
+			}
+		}
+	}
+}
+
+shroud_major_invasion_effect = {
+	capital_scope = {
+		if = {
+			limit = {
+				has_deposit = d_shroud_rift_deposit
+				is_controlled_by = root
+			}
+			shroud_creatures_army_spawn = yes
+		}
+		solar_system = {
+			shroud_creatures_system_spawn = yes
+		}
+	}
+	shroud_invasion_effect = yes
+}
+
+shroud_invasion_effect = {
+	every_owned_planet = {
+		if = {
+			limit = {
+				is_capital = no
+				has_deposit = d_shroud_rift_deposit
+				is_controlled_by = root
+				NOT = { has_planet_flag = zroni_legacy_flag }
+			}
+			random = {
+				chance = 10
+				planet_event = {
+					id = shroud_forged.321
+					days = 5
+					random = 25
+				}
+			}
+			random = {
+				chance = 1
+				solar_system = {
+					shroud_creatures_system_spawn = yes
+				}
+			}
+		}
+	}
+	every_owned_planet = {
+		limit = {
+			has_planet_flag = zroni_legacy_flag
+			is_controlled_by = root
+		}
+		planet_event = {
+			id = shroud_forged.321
+			days = 5
+			random = 25
+		}
+		solar_system = {
+			shroud_creatures_system_spawn = yes
+		}
+	}
+}
+
+shroud_forged_animator_of_clay_cooldown = {
+	set_timed_country_flag = { flag = animator_of_clay_cooldown days = $VALUE$ }
+	set_saved_date = {
+		key = animator_of_clay_cooldown_timer
+		days_from_present = $VALUE$
+		expires = $VALUE$
+	}
+}
+
+shroud_forged_animator_of_clay_event = {
+	hidden_effect = {
+		country_event = {
+			id = $EVENT$
+			days = 30
+			random = 330
+		}
+	}
+}
+
 machine_synthetic_leader_effect = {
 	every_owned_leader = {
 		limit = {
 			species = { has_trait = trait_machine_unit }
+			is_leader_tier = leader_tier_default
 			NOR = {
 				has_trait = leader_trait_synthetic
-				has_leader_flag = renowned_leader
-				has_leader_flag = legendary_leader
 			}
 		}
 		add_trait = {
@@ -8037,6 +8578,13 @@ kill_all_pop = {
 	}
 }
 
+sacrifice_single_pop = {
+	sacrifice_pop_group = {
+		pop_group = this
+		amount = 100
+	}
+}
+
 # Transfers an AMOUNT or PERCENTAGE of pops from the calling pop group into the provided ETHOS.
 # If POP_GROUP is set, it's used as the source pop group, otherwise a random group is selected
 # If POP_GROUP_FLAG is set, it's set on the target pop group
@@ -8296,4 +8844,114 @@ add_blue_solution = {
 		}
 	}
 	set_country_flag = modification_blue
+}
+
+declare_malevolent_aura_focus = {
+	event_target:malevolent_aura_empire = {
+		if = {
+			limit = { is_galactic_community_member = yes }
+			remove_from_galactic_community = yes
+		}
+		if = {
+			limit = {
+				is_galactic_council_established = yes
+				is_part_of_galactic_council = yes
+			}
+			remove_from_galactic_council = yes
+		}
+		every_subject = {
+			if = {
+				limit = { is_galactic_community_member = yes }
+				remove_from_galactic_community = yes
+			}
+			if = {
+				limit = {
+					is_galactic_council_established = yes
+					is_part_of_galactic_council = yes
+				}
+				remove_from_galactic_council = yes
+			}
+		}
+	}
+
+	every_playable_country = {
+		limit = {
+			is_galactic_community_member = yes
+			NOR = {
+				has_country_flag = malevolent_aura_empire
+				is_same_value = event_target:malevolent_aura_empire
+				is_in_federation_with = event_target:malevolent_aura_empire
+			}
+		}
+		if = {
+			limit = { 
+				NOT = { has_technology = tech_psionic_suppression } 
+				can_research_technology = tech_psionic_suppression
+			}
+			add_tech_progress = {
+				tech = tech_psionic_suppression
+				progress = 0.25
+			}
+		}
+		if = {
+			limit = {
+				any_war = {
+					any_war_participant = {
+						is_same_value = event_target:malevolent_aura_empire
+					}
+				}
+			}
+			every_war = {
+				limit = {
+					any_war_participant = {
+						is_same_value = event_target:malevolent_aura_empire
+					}
+				}
+				remove_war_participant = event_target:malevolent_aura_empire
+			}
+		}
+		every_playable_country = {
+			limit = {
+				is_galactic_community_member = yes
+				NOR = {
+					is_same_value = prev
+					# has_country_flag = declared_crisis
+					is_same_value = event_target:malevolent_aura_empire
+					is_in_federation_with = event_target:malevolent_aura_empire
+				}
+			}
+			set_closed_borders = {
+				who = prev
+				status = no
+			}
+		}
+	}
+	event_target:community_war_leader = {
+		if = {
+			limit = { exists = event_target:malevolent_aura_empire }
+			declare_war = {
+				target = event_target:malevolent_aura_empire
+				name = {
+					key = "NAME_Declared_Aura_War"
+					variable_string = "\\[This.MainDefender.GetAdj\\]"
+				}
+				attacker_war_goal = "wg_declared_crisis"
+				effect = { save_event_target_as = malevolent_aura_war }
+			}
+		}
+	}
+	every_playable_country = {
+		limit = {
+			exists = event_target:malevolent_aura_empire
+			is_galactic_community_member = yes
+			NOR = {
+				is_same_value = event_target:community_war_leader
+				is_in_federation_with = event_target:malevolent_aura_empire
+			}
+		}
+		join_war_on_side = {
+			war = event_target:malevolent_aura_war
+			side = event_target:community_war_leader
+		}
+	}
 }

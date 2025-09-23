@@ -695,7 +695,7 @@ trait_weak = {
 	species_potential_add = {
 		can_add_negative_organic_traits = yes
 	}
-	opposites = { "trait_strong" "trait_very_strong" }
+	opposites = { "trait_strong" "trait_very_strong" "trait_tankbound" }
 	allowed_archetypes = { BIOLOGICAL LITHOID }
 	tags = { organic negative pop_output army }
 	modifier = {
@@ -1235,30 +1235,9 @@ trait_latent_psionic = {
 		always = no
 	}
 	allowed_archetypes = { BIOLOGICAL LITHOID }
-	tags = { organic positive pop_output research unity psionic }
+	tags = { organic positive pop_output research unity psionic special }
 
-	modifier = {
-		researcher_jobs_bonus_workforce_mult = 0.10
-		bureaucrat_jobs_bonus_workforce_mult = 0.05
-		enforcer_jobs_bonus_workforce_mult = 0.05
-	}
-	slave_cost = {
-		energy = 1500
-	}
-	assembly_score = {
-		modifier = {
-			add = 0.5
-			from = { has_research_designation = yes }
-		}
-		modifier = {
-			add = 0.5
-			from = { has_unity_designation = yes }
-		}
-		modifier = {
-			add = 0.5
-			from = { has_building = building_order_keep }
-		}
-	}
+	inline_script = "traits/latent_psionic_effects"
 }
 
 trait_psionic = {
@@ -1281,157 +1260,9 @@ trait_psionic = {
 	}
 
 	allowed_archetypes = { BIOLOGICAL LITHOID }
-	tags = { organic positive pop_output research unity happiness psionic }
+	tags = { organic positive pop_output research unity happiness psionic special }
 
-	modifier = {
-		researcher_jobs_bonus_workforce_mult = 0.10
-		bureaucrat_jobs_bonus_workforce_mult = 0.10
-		enforcer_jobs_bonus_workforce_mult = 0.10
-		pop_happiness = 0.05
-	}
-
-	triggered_pop_group_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				OR = {
-					has_modifier = agenda_psionic_supremacy_finish_composer
-					has_modifier = agenda_psionic_supremacy_finish_eater
-					has_modifier = agenda_psionic_supremacy_finish_instrument
-					has_modifier = agenda_psionic_supremacy_finish_whisperers
-					has_modifier = agenda_psionic_supremacy_finish_no_covenant
-				}
-			}
-		}
-		pop_bonus_workforce_mult = 0.2
-	}
-	slave_cost = {
-		energy = 1500
-	}
-
-	resources = {
-		category = planet_pops
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_consumer_goods
-				}
-			}
-			consumer_goods = @instrument_upkeep_common
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_alloys
-				}
-			}
-			alloys = @instrument_upkeep_rare
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_unity
-				}
-			}
-			unity = @instrument_upkeep_rare
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_gas
-				}
-			}
-			exotic_gases = @instrument_upkeep_very_rare
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_crystal
-				}
-			}
-			rare_crystals = @instrument_upkeep_very_rare
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_motes
-				}
-			}
-			volatile_motes = @instrument_upkeep_very_rare
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_zro
-				}
-			}
-			sr_zro = @instrument_upkeep_legendary
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_dark_matter
-				}
-			}
-			sr_dark_matter = @instrument_upkeep_legendary
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_living_metal
-				}
-			}
-			sr_living_metal = @instrument_upkeep_epic
-		}
-
-		upkeep = {
-			trigger = {
-				exists = owner
-				owner = {
-					has_country_flag = instrument_craving_nanites
-				}
-			}
-			nanites = @instrument_upkeep_epic
-		}
-	}
-
-	assembly_score = {
-		base = 0.5
-		modifier = {
-			add = 0.5
-			from = { has_research_designation = yes }
-		}
-		modifier = {
-			add = 0.5
-			from = { has_unity_designation = yes }
-		}
-		modifier = {
-			add = 0.5
-			from = { has_building = building_order_keep }
-		}
-		modifier = {
-			subtract = 1.5
-			exists = from.owner
-			from.owner = { has_ascension_perk = ap_the_flesh_is_weak }
-		}
-	}
+	inline_script = "traits/psionic_effects"
 }
 
 trait_self_modified = {
@@ -2113,6 +1944,15 @@ trait_plantoid_phototrophic = {
 	sorting_priority = 30
 	custom_tooltip = TRAIT_PLANTOID_PHOTOTROPHIC_EFFECT
 
+	resources = {
+		category = planet_pops
+		# Energy Upkeep
+		upkeep = {
+			trigger = { is_being_purged = no }
+			energy = @living_standard_phototrophic_normal
+		}
+	}
+
 	slave_cost = {
 		energy = 1000
 	}
@@ -2251,7 +2091,8 @@ trait_invasive = {
 	icon = "gfx/interface/icons/traits/trait_plantoid_invasive_species.dds"
 	cost = 2
 	opposites = { "trait_agrarian" "trait_ingenious" "trait_industrious" "trait_intelligent" "trait_thrifty" "trait_natural_engineers" "trait_natural_physicists" "trait_natural_sociologists" "trait_extremely_adaptive" "trait_adaptive" "trait_rapid_breeders" "trait_talented" "trait_quick_learners" "trait_traditional" "trait_docile" "trait_very_strong" "trait_strong" "trait_nomadic" "trait_communal" "trait_charismatic" "trait_conformists" "trait_venerable" "trait_enduring"
-	"trait_resilient" "trait_conservational" "trait_noxious" "trait_inorganic_breath" "trait_humanoid_existential_iteroparity" "trait_incubator" "trait_delicious" "trait_nerve_stapled" "trait_fertile" "trait_robust" "trait_erudite" "trait_vat_grown" "trait_felsic" "trait_natural_machinist" "trait_drake_scaled" "trait_voidling" "trait_tiyanki" "trait_exotic_metabolism" "trait_egg_laying" "trait_chromalogs" "trait_camouflage" "trait_shelled" }
+	"trait_resilient" "trait_conservational" "trait_noxious" "trait_inorganic_breath" "trait_humanoid_existential_iteroparity" "trait_incubator" "trait_delicious" "trait_nerve_stapled" "trait_fertile" "trait_robust" "trait_erudite" "trait_vat_grown" "trait_felsic" "trait_natural_machinist" "trait_drake_scaled" "trait_voidling" "trait_tiyanki" "trait_exotic_metabolism" "trait_egg_laying" "trait_chromalogs" "trait_camouflage" "trait_shelled" "trait_uncanny_intuition"
+	"trait_cranial_hypertrophy" "trait_cranial_megatrophy" }
 	host_has_dlc = "Plantoids Species Pack"
 	sorting_priority = 30
 

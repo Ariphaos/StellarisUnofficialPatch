@@ -362,6 +362,10 @@ desired_science_ships = {
 		set = 1
 		is_country_type = awakened_fallen_empire
 	}
+	modifier = {
+		factor = 0
+		is_country_type = exiled # they don't need it no matter what
+	}
 }
 
 desired_science_ships_system_mult = { #this is mainly to allow for assisting research and the like. And also so they can scramble stuff if they have need and are a large empire. The early game rush is handled in desired_science_ships
@@ -1141,7 +1145,7 @@ capital_empire_ratio = {
 	divide = capital_scope.trigger:pop_amount
 }
 
-created_merc_number = {
+created_enclave_number = {
 	base = 1
 	complex_trigger_modifier = {
 		trigger = count_country
@@ -1221,6 +1225,12 @@ scripted_modifier_mult = {
 	min = 0
 }
 
+scripted_modifier_mult_capped = {
+	base = 1
+	add = modifier:$MODIFIER$
+	min = $CAP$
+}
+
 scripted_modifier_add = {
 	base = 0
 	add = modifier:$MODIFIER$
@@ -1273,6 +1283,253 @@ bailout_scaling_factor = {
 	floor = yes
 	add = 1
 	max = 15
+}
+
+scripted_job_weight_shroud_forged_mult = {
+	base = 1
+	modifier = {
+		factor = 5
+		exists = planet
+		exists = planet.owner
+		has_citizenship_type = { country = planet.owner type = citizenship_shroud_touched }
+	}
+}
+
+situation_shroud_forged_machine_pops_modifier = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				has_trait = trait_machine_unit
+			}
+		}
+		mode = subtract
+		multiplier = 0.0015
+	}
+
+	modifier = {
+		factor = 0.8
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress <= 300
+		}
+	}
+
+	modifier = {
+		factor = 0.9
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress <= 900
+			situation_progress > 300
+		}
+	}
+
+	modifier = {
+		factor = 1.1
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress >= 2100
+			situation_progress < 2700
+		}
+	}
+
+	modifier = {
+		factor = 1.2
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			current_stage = stage_shroud_forged_free
+			situation_progress >= 2700
+		}
+	}
+}
+
+situation_shroud_forged_mechanical_pops_modifier = {
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				has_trait = trait_shroud_forged
+			}
+		}
+		mode = add
+		multiplier = 0.004
+	}
+
+	modifier = {
+		factor = 1.2
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress <= 300
+		}
+	}
+
+	modifier = {
+		factor = 1.1
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress <= 900
+			situation_progress > 300
+		}
+	}
+
+	modifier = {
+		factor = 0.9
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress >= 2100
+			situation_progress < 2700
+		}
+	}
+
+	modifier = {
+		factor = 0.8
+		any_situation = {
+			is_situation_type = situation_shroud_forged
+			situation_progress >= 2700
+		}
+	}
+}
+
+situation_shroud_forged_shroud_planets_modifier = {
+	complex_trigger_modifier = {
+		trigger = count_owned_planet
+		parameters = {
+			limit = {
+				has_deposit = d_shroud_rift_deposit
+			}
+		}
+		mode = add
+	}
+}
+
+situation_shroud_forged_regular_planets_modifier = {
+	complex_trigger_modifier = {
+		trigger = count_owned_planet
+		parameters = {
+			limit = {
+				NOT = { has_deposit = d_shroud_rift_deposit }
+			}
+		}
+		mode = subtract
+	}
+}
+
+situation_shroud_forged_shroud_buildings_modifier = {
+	complex_trigger_modifier = {
+		trigger = num_buildings
+		parameters = {
+			type = building_shroud_observatory_1
+			disabled = no
+		}
+		mode = add
+	}
+	complex_trigger_modifier = {
+		trigger = num_buildings
+		parameters = {
+			type = building_shroud_observatory_2
+			disabled = no
+		}
+		mode = add
+		mult = 2
+	}
+	complex_trigger_modifier = {
+		trigger = num_buildings
+		parameters = {
+			type = building_shroud_observatory_3
+			disabled = no
+		}
+		mode = add
+		mult = 3
+	}
+}
+
+decision_open_shroud_rift_cost_mult = {
+	base = 1
+	complex_trigger_modifier = {
+		trigger = count_deposit
+		parameters = {
+			limit = {
+				is_deposit_type = d_shroud_rift_deposit
+			}
+		}
+		mode = add
+	}
+}
+
+shroud_forged_event_controlling_the_situation_mult = {
+	base = 1
+	complex_trigger_modifier = {
+		trigger = count_owned_pop_amount
+		parameters = {
+			limit = {
+				has_trait = trait_shroud_forged
+			}
+		}
+		mode = add
+	}
+	max = 3
+}
+
+shroud_forged_drone_conversion_quantity = {
+	base = 0.04
+	mult = trigger:pop_amount
+}
+
+shroud_forged_drone_conversion_situation_quantity = {
+	base = 0
+	modifier = {
+		current_stage = stage_shroud_forged_control
+		add = 2
+	}
+	modifier = {
+		current_stage = stage_shroud_forged_balanced
+		add = 4
+	}
+	modifier = {
+		current_stage = stage_shroud_forged_unrestricted
+		add = 10
+	}
+	modifier = {
+		current_stage = stage_shroud_forged_free
+		add = 25
+	}
+	modifier = {
+		current_situation_approach = approach_shroud_forged_suppress
+		mult = 0.5
+	}
+	modifier = {
+		current_situation_approach = approach_shroud_forged_support
+		mult = 2
+	}
+}
+
+shroud_forged_drone_conversion_situation_random = {
+	base = 0
+	modifier = {
+		current_stage = stage_shroud_forged_control
+		add = 0.5
+	}
+	modifier = {
+		current_stage = stage_shroud_forged_balanced
+		add = 2
+	}
+	modifier = {
+		current_stage = stage_shroud_forged_unrestricted
+		add = 5
+	}
+	modifier = {
+		current_stage = stage_shroud_forged_free
+		add = 10
+	}
+	modifier = {
+		current_situation_approach = approach_shroud_forged_suppress
+		mult = 0.5
+	}
+	modifier = {
+		current_situation_approach = approach_shroud_forged_support
+		mult = 2
+	}
+	round = yes
 }
 
 zro_crystal_leaders = {
@@ -1794,6 +2051,14 @@ zoo_keeper_amenity_output = {
 			job = xeno_zoo_beast
 			job = livestock_zoo_animal
 			job = livestock_zoo_beast
+			job = xeno_zoo_animal_lithoid
+			job = xeno_zoo_beast_lithoid
+			job = livestock_zoo_animal_lithoid
+			job = livestock_zoo_beast_lithoid
+			job = xeno_zoo_animal_nascent
+			job = xeno_zoo_beast_nascent
+			job = xeno_zoo_animal_lithoid_nascent
+			job = xeno_zoo_beast_lithoid_nascent
 		}
 		mode = add
 		mult = 2
@@ -2845,7 +3110,6 @@ negative_empire_size_percent = {
 	min = 0.1
 	max = 1
 }
-
 habitat_districts_from_major = {
 	base = 0
 	add = solar_system.value:num_major_celestial_objects
@@ -2886,6 +3150,12 @@ max_habitat_districts_value = {
 	}
 	add = value:habitat_districts_from_other
 	floor = yes
+}
+
+num_galaxy_systems_percent = {
+	base = 0
+	add = $NUM_SYSTEMS$
+	divide = trigger:num_galaxy_systems
 }
 
 count_any_building = {
@@ -2997,11 +3267,13 @@ city_districts_value = {
 	}
 }
 
-psionic_workforce_from_telepaths = {
+psionic_workforce_basic_value = {
 	base = 5			# 5% Base
 	modifier = {
 		exists = owner
-		owner = { has_tradition = tr_psionics_breach_shroud }
+		owner = {
+			has_tradition = tr_psionics_breach_shroud
+		}
 		add = 5			# +5% from tradition
 	}
 	modifier = {		# +1% per Councilor level from Psionic Sovereign
@@ -3009,12 +3281,28 @@ psionic_workforce_from_telepaths = {
 		add = value:councilor_level|TYPE|councilor_psionic_sovereign|
 	}
 	divide = 100		# Normalise to percentages
+}
+
+psionic_workforce_from_telepaths = {
+	set = value:psionic_workforce_basic_value
 	complex_trigger_modifier = {
 		trigger = num_assigned_jobs
 		parameters = {
 			job = telepath
 		}
 		mode = mult		# Scale with Telepath jobs
+	}
+	divide = 100		# Renormalise to "per 100 jobs"
+}
+
+psionic_workforce_from_telepath_drones = {
+	set = value:psionic_workforce_basic_value
+	complex_trigger_modifier = {
+		trigger = num_assigned_jobs
+		parameters = {
+			job = telepath_drone
+		}
+		mode = mult		# Scale with Telepath drone jobs as well
 	}
 	divide = 100		# Renormalise to "per 100 jobs"
 }

@@ -22,6 +22,7 @@ This is far from finished.
 * AIANOM_MININGDEPO_CAT - Don't let them put mineral deposits on stars, don't put them on colonizable worlds.
 * AIANOM_RESEARCHDEPO_CAT - Not for colonizable worlds.
 * AIANOM_LUMP_CAT - Make energy/minerals more likely than science.
+* GASEOUS_METALS_CAT - Fix improper scope
 
 # AI Budget
 
@@ -455,6 +456,7 @@ Some of these are AI weight tweaks or mod support. Things I consider to be bona-
 * Add additional modifiers to the districts_good_* triggers.
 * Astral Scars are not valid for the scholarium sensors or research candidates.
 * Add Fallen Hive to FE Cluster trigger
+* Handle when is_enslaved is called with invalid root scope.
 
 # Scripted Variables
 

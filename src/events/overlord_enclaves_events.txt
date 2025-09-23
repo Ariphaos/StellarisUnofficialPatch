@@ -131,6 +131,7 @@ fleet_event = {
 		hidden_effect = {
 			owner = {
 				set_country_flag = tutorial_met_mercenary_enclave
+				set_country_flag = formed_mercenaries
 			}
 			fleet_event = { id = enclave.21 }
 		}
@@ -188,6 +189,12 @@ fleet_event = {
 		}
 	}
 
+	abort_trigger = {
+		owner = {
+			has_origin = origin_mindwardens
+		}
+	}
+
 	after = {
 		hidden_effect = {
 			set_event_locked = no
@@ -201,152 +208,11 @@ fleet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		#Save creator empire as event target
-		owner = {
-			save_event_target_as = mercenary_enclave_creator
+		create_enclave_with_country = {
+			PREFIX = mercenary
+			EFFECT = create_mercenary_enclave_country
+			TRUST = 30
 		}
-		#Set up the ruler and species
-		leader = {
-			species = {
-				save_event_target_as = mercenary_enclave_species
-			}
-			exile_leader_as = mercenary_enclave_leader
-			save_event_target_as = mercenary_enclave_leader
-		}
-		#Set up the enclave starbase
-		solar_system = {
-			set_star_flag = enclave
-			set_star_flag = mercenary_enclave_system
-			#Set up on a moon only if an asteroid isn't available
-			if = {
-				limit = {
-					count_system_planet = {
-						limit = { is_asteroid = yes }
-						count < 1
-					}
-				}
-				random_system_planet = {
-					limit = { is_moon = yes }
-					save_event_target_as = mercenary_enclave_planet
-					set_planet_flag = mercenary_enclave_planet
-				}
-			}
-			else = {
-				random_system_planet = {
-					limit = { is_asteroid = yes }
-					save_event_target_as = mercenary_enclave_planet
-					set_planet_flag = mercenary_enclave_planet
-				}
-			}
-		}
-		#Create the Mercenary country, and assign a flavour ethic. Note that these are applied in priority order, so a patron who is Xenophilic, Authoritarian *and* Materialistic will found an enclave which is Fanatic Militarist and Materialist, as Materialism is listed first.
-		if = {
-			limit = {
-				owner = { is_materialist = yes }
-			}
-			create_mercenary_enclave_country = { INHERITED_ETHIC = ethic_materialist }
-		}
-		else_if = {
-			limit = {
-				owner = { is_xenophobe = yes }
-			}
-			create_mercenary_enclave_country = { INHERITED_ETHIC = ethic_xenophobe }
-		}
-		else_if = {
-			limit = {
-				owner = { is_authoritarian = yes }
-			}
-			create_mercenary_enclave_country = { INHERITED_ETHIC = ethic_authoritarian }
-		}
-		else_if = {
-			limit = {
-				owner = { is_egalitarian = yes }
-			}
-			create_mercenary_enclave_country = { INHERITED_ETHIC = ethic_egalitarian }
-		}
-		else = {
-			create_mercenary_enclave_country = { INHERITED_ETHIC = ethic_xenophile }
-		}
-
-
-		#Give enclave creator's tech, start situation, and set creator flag
-		event_target:mercenary_enclave_country = {
-			if = {
-				limit = {
-					event_target:mercenary_enclave_creator = {
-						country_uses_bio_ships = yes
-					}
-				}
-				give_technology = { tech = tech_maulers message = no }
-			}
-			copy_techs_from = { target = event_target:mercenary_enclave_creator }
-			start_situation = {
-				type = mercenary_dividends
-				target = root
-			}
-			set_country_flag = created_by@event_target:mercenary_enclave_creator
-			add_trust = {
-				who =  event_target:mercenary_enclave_creator
-				amount = 30
-			}
-			#Check for active resolutions and give associated modifiers to enclave
-			if = {
-				limit = {
-					is_active_resolution = resolution_defenseprivatization_defense_contracts
-				}
-				add_modifier = {
-					modifier = resolution_defenseprivatization_defense_contracts_merc_naval_cap
-				}
-			}
-			if = {
-				limit = {
-					is_active_resolution = resolution_defenseprivatization_private_support_troops
-				}
-				add_modifier = {
-					modifier = resolution_defenseprivatization_private_support_troops_merc_naval_cap
-				}
-			}
-			if = {
-				limit = {
-					is_active_resolution = resolution_defenseprivatization_condottieri
-				}
-				add_modifier = {
-					modifier = resolution_defenseprivatization_condottieri_merc_naval_cap
-				}
-			}
-			if = {
-				limit = {
-					is_active_resolution = resolution_defenseprivatization_security_business
-				}
-				add_modifier = {
-					modifier = resolution_defenseprivatization_security_business_merc_naval_cap
-				}
-			}
-			if = {
-				limit = {
-					is_active_resolution = resolution_defenseprivatization_corporate_warlords
-				}
-				add_modifier = {
-					modifier = resolution_defenseprivatization_corporate_warlords_merc_naval_cap
-				}
-			}
-
-			#Set a flag to prevent the AI from instantly hiring them
-			set_timed_country_flag = {
-				flag = merc_ai_delay
-				years = 1
-			}
-		}
-
-		owner = {
-			add_modifier = {
-				modifier = country_enclave_capacity_decrease_modifier
-				multiplier = value:created_merc_number
-			}
-		}
-
-		#Transfer ownership of the fleet
-		set_owner = event_target:mercenary_enclave_country
 	}
 
 	after = {
@@ -425,7 +291,7 @@ country_event = { #After enclave destruction, give back enclave cap
 	after = {
 		add_modifier = {
 			modifier = country_enclave_capacity_decrease_modifier
-			multiplier = value:created_merc_number
+			multiplier = value:created_enclave_number
 		}
 	}
 }
@@ -467,7 +333,7 @@ country_event = { #Merc Destroyed
 	immediate = {
 		add_modifier = {
 			modifier = country_enclave_capacity_decrease_modifier
-			multiplier = value:created_merc_number
+			multiplier = value:created_enclave_number
 		}
 	}
 
@@ -492,10 +358,10 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		is_country_type = enclave_mercenary
+		is_mercenary = yes
 		OR = {
-			FromFrom = { is_ship_size = enclave_mercenary_station }
-			FromFromFrom = { is_ship_size = enclave_mercenary_station }
+			FromFrom = { is_mercenary_station = yes }
+			FromFromFrom = { is_mercenary_station = yes }
 		}
 	}
 
@@ -503,7 +369,7 @@ country_event = {
 		save_event_target_as = mercenary_enclave_country
 		random_owned_fleet = {
 			limit = {
-				is_ship_size = enclave_mercenary_station
+				is_mercenary_station = yes
 			}
 			solar_system = {
 				save_event_target_as = mercenary_home_system
@@ -525,7 +391,7 @@ country_event = {
 							}
 						}
 					}
-					country_event = { id = enclave.29 days = 7 }
+					country_event = { id = enclave.29 days = 1 }
 				}
 			}
 		}
@@ -562,10 +428,54 @@ country_event = {
 country_event = {
 	id = enclave.29
 	title = "enclave.27"
-	desc = "enclave.27.desc"
-	picture = GFX_evt_mercenary_fleet
+	desc = {
+		trigger = {
+			if = {
+				limit = {
+					event_target:mercenary_enclave_country = {
+						is_mercenary_mindwarden_enclave = yes
+					}
+				}
+				text = enclave.27.desc.mindwarden
+			}
+			else = {
+				text = enclave.27.desc
+			}
+		}
+	}
+	picture = {
+		trigger = {
+			event_target:mercenary_enclave_country = {
+				is_mercenary_mindwarden_enclave = yes
+			}
+		}
+		picture = GFX_evt_mindwardens
+	}
+	picture = {
+		trigger = {
+			event_target:mercenary_enclave_country = {
+				is_mercenary_mindwarden_enclave = no
+			}
+		}
+		picture = GFX_evt_mercenary_fleet
+	}
 	location = event_target:merc_system
-	show_sound = evn_ove_mercenary_fleet
+	show_sound = {
+		trigger = {
+			event_target:mercenary_enclave_country = {
+				is_mercenary_mindwarden_enclave = yes
+			}
+		}
+		sound = event_mindwarden_enclave
+	}
+	show_sound = {
+		trigger = {
+			event_target:mercenary_enclave_country = {
+				is_mercenary_mindwarden_enclave = no
+			}
+		}
+		sound = evn_ove_mercenary_fleet
+	}
 
 	is_triggered_only = yes
 
@@ -590,104 +500,40 @@ country_event = {
 	}
 
 	option = { #Refund money good luck
-		name = enclave.27.a
-		if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_5
+		name = {
+			trigger = {
+				if = {
+					limit = {
+						event_target:mercenary_enclave_country = {
+							is_mercenary_mindwarden_enclave = yes
+						}
+					}
+					text = enclave.27.a.mindwarden
+				}
+				else = {
+					text = enclave.27.a
 				}
 			}
-			add_resource = { energy = 44000 }
 		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_4
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_5 }
-				}
-			}
-			add_resource = { energy = 30000 }
-		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_3
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_4 }
-				}
-			}
-			add_resource = { energy = 20000 }
-		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_2
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_3 }
-				}
-			}
-			add_resource = { energy = 12000 }
-		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_1
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_2 }
-				}
-			}
-			add_resource = { energy = 6000 }
-		}
-		else = {
-			add_resource = { energy = 3000 }
-		}
+		mercenary_refund_fleet = yes
 	}
 	option = { #Refund money be grumpy
-		name = enclave.27.b
-		if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_5
+		name = {
+			trigger = {
+				if = {
+					limit = {
+						event_target:mercenary_enclave_country = {
+							is_mercenary_mindwarden_enclave = yes
+						}
+					}
+					text = enclave.27.b.mindwarden
+				}
+				else = {
+					text = enclave.27.b
 				}
 			}
-			add_resource = { energy = 44000 }
 		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_4
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_5 }
-				}
-			}
-			add_resource = { energy = 30000 }
-		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_3
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_4 }
-				}
-			}
-			add_resource = { energy = 20000 }
-		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_2
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_3 }
-				}
-			}
-			add_resource = { energy = 12000 }
-		}
-		else_if = {
-			limit = {
-				event_target:mercenary_enclave_country = {
-					has_modifier = mercenary_fleet_size_upgrade_1
-					NOT = { has_modifier = mercenary_fleet_size_upgrade_2 }
-				}
-			}
-			add_resource = { energy = 6000 }
-		}
-		else = {
-			add_resource = { energy = 3000 }
-		}
+		mercenary_refund_fleet = yes
 	}
 }
 
@@ -1266,7 +1112,7 @@ country_event = {
 					skill = 3
 					traits = {
 						trait = leader_trait_mercenary_warrior
-						trait = leader_trait_aggressive
+						1 = leader_trait_aggressive
 					}
 				}
 			}
@@ -1323,11 +1169,14 @@ country_event = {
 						is_offer_terms_actual = { target = event_target:mercenary_enclave_country }
 					}
 					make_special_trade = { target = event_target:mercenary_enclave_country }
-					set_country_flag = mercenary_enclave_rented_fleet #for tracking returning customers
-					event_target:mercenary_enclave_country = {
-						add_trust = {
-							who = root
-							amount = 15
+					custom_tooltip = opinion15
+					hidden_effect = {
+						set_country_flag = mercenary_enclave_rented_fleet #for tracking returning customers
+						event_target:mercenary_enclave_country = {
+							add_trust = {
+								who = root
+								amount = 15
+							}
 						}
 					}
 				}
@@ -1336,7 +1185,6 @@ country_event = {
 				can_afford_special_offer = { target = event_target:mercenary_enclave_country }
 			}
 		}
-		custom_tooltip = opinion15
 		hidden_effect = {
 			country_event = { id = enclave.211 }
 		}
@@ -1401,10 +1249,14 @@ country_event = {
 						is_offer_terms_actual = { target = event_target:mercenary_enclave_country }
 					}
 					make_special_trade = { target = event_target:mercenary_enclave_country }
-					event_target:mercenary_enclave_country = {
-						add_trust = {
-							who = root
-							amount = 5
+					custom_tooltip = opinion5
+					hidden_effect = {
+						set_country_flag = mercenary_enclave_rented_fleet #for tracking returning customers
+						event_target:mercenary_enclave_country = {
+							add_trust = {
+								who = root
+								amount = 5
+							}
 						}
 					}
 				}
@@ -1413,7 +1265,6 @@ country_event = {
 				can_afford_special_offer = { target = event_target:mercenary_enclave_country }
 			}
 		}
-		custom_tooltip = opinion5
 		hidden_effect = {
 			country_event = { id = enclave.205 }
 		}
@@ -1610,7 +1461,9 @@ country_event = {
 					modifier = mercenary_fleet_size_upgrade_1
 					days = -1
 				}
-				upgrade_mercenary_starbase = {
+				upgrade_enclave_starbase = {
+					PREFIX = mercenary
+					DESIGN = NAME_Mercenary_Enclave_Station
 					TIER = 1
 				}
 			}
@@ -1663,7 +1516,9 @@ country_event = {
 					modifier = mercenary_fleet_size_upgrade_2
 					days = -1
 				}
-				upgrade_mercenary_starbase = {
+				upgrade_enclave_starbase = {
+					PREFIX = mercenary
+					DESIGN = NAME_Mercenary_Enclave_Station
 					TIER = 2
 				}
 			}
@@ -1716,7 +1571,9 @@ country_event = {
 					modifier = mercenary_fleet_size_upgrade_3
 					days = -1
 				}
-				upgrade_mercenary_starbase = {
+				upgrade_enclave_starbase = {
+					PREFIX = mercenary
+					DESIGN = NAME_Mercenary_Enclave_Station
 					TIER = 3
 				}
 			}
@@ -1769,7 +1626,9 @@ country_event = {
 					modifier = mercenary_fleet_size_upgrade_4
 					days = -1
 				}
-				upgrade_mercenary_starbase = {
+				upgrade_enclave_starbase = {
+					PREFIX = mercenary
+					DESIGN = NAME_Mercenary_Enclave_Station
 					TIER = 4
 				}
 			}
@@ -1822,7 +1681,9 @@ country_event = {
 					modifier = mercenary_fleet_size_upgrade_5
 					days = -1
 				}
-				upgrade_mercenary_starbase = {
+				upgrade_enclave_starbase = {
+					PREFIX = mercenary
+					DESIGN = NAME_Mercenary_Enclave_Station
 					TIER = 5
 				}
 				set_country_flag = maximally_effective_achievement
@@ -2826,7 +2687,7 @@ country_event = {
 					skill = 3
 					traits = {
 						trait = leader_trait_mercenary_warrior
-						trait = leader_trait_aggressive
+						1 = leader_trait_aggressive
 					}
 				}
 			}
@@ -4386,7 +4247,7 @@ fleet_event = {
 
 	trigger = {
 		fromfrom = {
-			has_civic = civic_mercenary_enclave
+			is_mercenary = yes
 			NOT = {
 				has_country_flag = merc_ai_delay
 			}
@@ -4414,7 +4275,7 @@ fleet_event = {
 			is_ai = no
 		}
 		fromfrom = {
-			has_civic = civic_mercenary_enclave
+			is_mercenary = yes
 		}
 	}
 
@@ -4425,7 +4286,23 @@ fleet_event = {
 			remove_loaning_fleet_flag = yes
 		}
 		from = {
-			country_event = { id = enclave.2060 }
+			if = {
+				limit = {
+					fromfrom = {
+						is_mercenary_mindwarden_enclave = yes
+					}
+				}
+				fromfrom = {
+					save_event_target_as = mindwarden_enclave_country
+				}
+				country_event = { id = shroud.6878 }
+			}
+			else = {
+				fromfrom = {
+					save_event_target_as = mercenary_enclave_country
+				}
+				country_event = { id = enclave.2060 }
+			}
 		}
 	}
 }
@@ -4458,7 +4335,7 @@ event = {
 
 	trigger = {
 		any_country = {
-			is_country_type = enclave_mercenary
+			is_mercenary = yes
 			any_owned_fleet = {
 				NOT = { is_leased = yes }
 			}
@@ -4468,7 +4345,7 @@ event = {
 	immediate = {
 		random_country = {
 			limit = {
-				is_country_type = enclave_mercenary
+				is_mercenary = yes
 				any_owned_fleet = {
 					NOT = { is_leased = yes }
 				}
@@ -4490,7 +4367,7 @@ country_event = {
 			solar_system = {
 				NOT = {
 					any_ship_in_system = {
-						is_ship_size = enclave_mercenary_station
+						is_mercenary_station = yes
 					}
 				}
 			}
@@ -4500,7 +4377,7 @@ country_event = {
 	immediate = {
 		random_owned_fleet = {
 			limit = {
-				is_ship_size = enclave_mercenary_station
+				is_mercenary_station = yes
 			}
 			save_event_target_as = mercenary_enclave_station
 		}
@@ -4524,7 +4401,7 @@ country_event = { # Assign an admiral to hired merc fleet if they lose theirs
 	is_triggered_only = yes
 
 	trigger = {
-		has_civic = civic_mercenary_enclave
+		is_mercenary = yes
 		any_owned_fleet = {
 			is_leased = yes
 			NOT = {
@@ -4534,14 +4411,22 @@ country_event = { # Assign an admiral to hired merc fleet if they lose theirs
 	}
 
 	immediate = {
-		create_leader = {
-			class = commander
-			species = event_target:mercenary_enclave_species
-			event_leader = yes
-			name = random
-			skill = 3
-			traits = {
-				trait = leader_trait_mercenary_warrior
+		if = {
+			limit = {
+				is_mercenary_mindwarden_enclave = yes
+			}
+			create_mindwarden_fleet_leader = yes
+		}
+		else = {
+			create_leader = {
+				class = commander
+				species = event_target:mercenary_enclave_species
+				event_leader = yes
+				name = random
+				skill = 3
+				traits = {
+					trait = leader_trait_mercenary_warrior
+				}
 			}
 		}
 		random_owned_fleet = {
@@ -4568,7 +4453,7 @@ fleet_event = {
 	trigger = {
 		exists = leader # vfix
 		fromfrom = {
-			has_civic = civic_mercenary_enclave
+			is_mercenary = yes
 		}
 	}
 
@@ -4596,7 +4481,7 @@ fleet_event = {
 	trigger = {
 		exists = leader # vfix
 		fromfrom = {
-			has_civic = civic_mercenary_enclave
+			is_mercenary = yes
 		}
 	}
 
@@ -7255,39 +7140,32 @@ country_event = {
 	id = enclave.405
 	title = enclave.405.name
 	location = event_target:shroudwalker_enclave_system
-	#First-time greetings
+
+	# First-time greetings
 	desc = {
 		trigger = {
+			shroudwalker_no_dialog = no
 			NOR = {
 				has_country_flag = shroudwalker_enclave_diplomacy_engaged
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
-				has_ascension_perk = ap_mind_over_matter
-				has_origin = origin_shroudwalker_apprentice
+				has_psionic_ascension = yes
 			}
 		}
 		text = enclave.405.generic.a.desc
 	}
 	desc = {
 		trigger = {
+			shroudwalker_no_dialog = no
 			NOT = { has_country_flag = shroudwalker_enclave_diplomacy_engaged }
-			OR = {
-				has_ascension_perk = ap_mind_over_matter #and by extension, psionic ascension.
-				has_origin = origin_shroudwalker_apprentice
-			}
+			has_psionic_ascension = yes
 		}
 		text = enclave.405.psionic.a.desc
 	}
-	#Return visit greetings
+	# Return visit greetings
 	desc = {
 		trigger = {
+			shroudwalker_no_dialog = no
 			has_country_flag = shroudwalker_enclave_diplomacy_engaged
-			NOR = {
-				is_homicidal = yes
-				is_hostile = event_target:shroudwalker_enclave_country
-				has_ascension_perk = ap_mind_over_matter
-				has_origin = origin_shroudwalker_apprentice
-			}
+			has_psionic_ascension = no
 		}
 		text = enclave.405.generic.n.desc
 		text = enclave.405.generic.o.desc
@@ -7295,16 +7173,14 @@ country_event = {
 	}
 	desc = {
 		trigger = {
+			shroudwalker_no_dialog = no
 			has_country_flag = shroudwalker_enclave_diplomacy_engaged
-			OR = {
-				has_ascension_perk = ap_mind_over_matter #and by extension, psionic ascension.
-				has_origin = origin_shroudwalker_apprentice
-			}
+			has_psionic_ascension = yes
 		}
 		text = enclave.405.psionic.n.desc
 		text = enclave.405.psionic.o.desc
 	}
-	#Hostile greeting
+	# Hostile greeting
 	desc = {
 		trigger = {
 			OR = {
@@ -7314,8 +7190,50 @@ country_event = {
 		}
 		text = enclave.405.hostile.a.desc
 	}
-	is_triggered_only = yes
+	# Mindwardens greeting
+	desc = {
+		trigger = {
+			has_origin = origin_mindwardens
+			NOR = {
+				is_homicidal = yes
+				is_hostile = event_target:shroudwalker_enclave_country
+				has_covenant_with_end_of_the_cycle = yes
+			}
+		}
+		text = enclave.405.desc.mindwardens
+	}
+	# Trusted by Mindwardens greeting
+	desc = {
+		trigger = {
+			exists = event_target:mindwarden_enclave_country
+			event_target:mindwarden_enclave_country = {
+				trust = {
+					who = prev
+					value >= 100
+				}
+			}
+			NOR = {
+				is_homicidal = yes
+				is_hostile = event_target:shroudwalker_enclave_country
+				has_origin = origin_mindwardens
+				has_covenant_with_end_of_the_cycle = yes
+			}
+		}
+		text = enclave.405.desc.mindwardens_trust
+	}
+	# EotC greeting
+	desc = {
+		trigger = {
+			has_covenant_with_end_of_the_cycle = yes
+			NOR = {
+				is_homicidal = yes
+				is_hostile = event_target:shroudwalker_enclave_country
+			}
+		}
+		text = enclave.405.desc.end_of_the_cycle
+	}
 
+	is_triggered_only = yes
 	diplomatic = yes
 	custom_gui = "enclave_artist_window"
 	custom_gui_option = "enclave_artist_option"
@@ -7341,14 +7259,27 @@ country_event = {
 		}
 	}
 
-	#Purchase Divination
+	# Mastery of the Shroud - SotS
+	option = {
+		name = enclave.405.i
+		trigger = {
+			shroudwalker_no_dialog = no
+			has_shroud_dlc = yes
+			has_country_flag = breached_shroud
+			has_patron_relation = {
+				patron = any
+				contact = completed
+			}
+		}
+		hidden_effect = {
+			country_event = { id = shroud.5300 }
+		}
+	}
+	# Purchase Divination
 	option = {
 		name = enclave.405.a
 		trigger = {
-			NOR = {
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
-			}
+			shroudwalker_no_dialog = no
 		}
 		allow = {
 			custom_tooltip = {
@@ -7370,10 +7301,7 @@ country_event = {
 	option = {
 		name = enclave.405.b
 		trigger = {
-			NOR = {
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
-			}
+			shroudwalker_no_dialog = no
 		}
 		allow = {
 			custom_tooltip = {
@@ -7388,6 +7316,14 @@ country_event = {
 					}
 				}
 			}
+			custom_tooltip = {
+				fail_text = shroudwalker_teacher_conflicted_leader
+				NOT = {
+					any_owned_leader = {
+						has_leader_flag = mindwarden_commander
+					}
+				}
+			}
 		}
 		hidden_effect = {
 			country_event = { id = enclave.7100 }
@@ -7397,11 +7333,8 @@ country_event = {
 	option = {
 		name = enclave.405.c
 		trigger = {
+			shroudwalker_no_dialog = no
 			has_nemesis = yes
-			NOR = {
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
-			}
 			event_target:shroudwalker_enclave_country = {
 				trust = {
 					who = root
@@ -7436,14 +7369,13 @@ country_event = {
 			country_event = { id = enclave.7050 }
 		}
 	}
-	#Purchase Shroud Beacon
+	# Purchase Shroud Beacon
 	option = {
 		name = enclave.405.d
 		trigger = {
-			NOR = {
+			shroudwalker_no_dialog = no
+			NOT = {
 				has_country_flag = shroudwalker_enclave_bought_shroud_beacon
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
 			}
 		}
 		allow = {
@@ -7465,9 +7397,8 @@ country_event = {
 	option = {
 		name = enclave.405.e
 		trigger = {
+			shroudwalker_no_dialog = no
 			NOR = {
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
 				has_technology = tech_mine_zro
 				has_country_flag = purchased_zro_tech
 			}
@@ -7493,9 +7424,88 @@ country_event = {
 			country_event = { id = enclave.7250 }
 		}
 	}
-	#Ask about the Many-Striped Guest (Jaunted Traveler event chain)
+	# Open an Astral Rift - SotS
 	option = {
-		name = enclave.405.e
+		name = enclave.405.g
+		trigger = {
+			shroudwalker_no_dialog = no
+			NOT = {
+				has_country_flag = psionic_rift_help_received
+			}
+			has_shroud_dlc = yes
+			has_astral_planes_dlc = yes
+			has_technology = tech_rift_sphere
+			event_target:shroudwalker_enclave_country = {
+				trust = {
+					who = root
+					value >= 30
+				}
+			}
+		}
+		allow = {
+			custom_tooltip = {
+				fail_text = enclave.405.g.tt
+				event_target:shroudwalker_enclave_country = {
+					trust = {
+						who = root
+						value >= 50
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = shroud.5355 }
+		}
+	}
+	# Psionic Theory - SotS
+	option = {
+		name = enclave.405.h
+		trigger = {
+			shroudwalker_no_dialog = no
+			NOR = {
+				has_country_flag = psionic_theory_help_received
+				has_technology = tech_psionic_theory
+			}
+			has_cybernetic_ascension = no
+			has_genetic_ascension = no
+			has_synthetic_ascension = no
+			has_shroud_dlc = yes
+			event_target:shroudwalker_enclave_country = {
+				trust = {
+					who = root
+					value >= 60
+				}
+			}
+		}
+		allow = {
+			if = {
+				limit = {
+					has_technology = tech_psionic_theory
+				}
+				custom_tooltip = {
+					always = no
+					fail_text = shroud.5350.trigger_failed
+				}
+			}
+			else = {
+				custom_tooltip = {
+					fail_text = enclave.405.h.tt
+					event_target:shroudwalker_enclave_country = {
+						trust = {
+							who = root
+							value >= 90
+						}
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = shroud.5350 }
+		}
+	}
+	# Ask about the Many-Striped Guest (Jaunted Traveler event chain)
+	option = {
+		name = enclave.405.f
 		trigger = {
 			has_country_flag = knows_jaunting_traveler_story
 			NOT = { has_country_flag = jaunted_traveler_secret_revealed }
@@ -7504,24 +7514,20 @@ country_event = {
 			country_event = { id = enclave.7110 }
 		}
 	}
-	#Cease dialog
+	# Cease dialog
 	option = {
 		name = GOODBYE
 		trigger = {
-			NOR = {
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
-			}
+			shroudwalker_no_dialog = no
 		}
 		default_hide_option = yes
 	}
-
+	# No dialog
 	option = {
 		name = DOTDOTDOT
 		trigger = {
-			OR = {
-				is_hostile = event_target:shroudwalker_enclave_country
-				is_homicidal = yes
+			hidden_trigger = {
+				shroudwalker_no_dialog = yes
 			}
 		}
 	}
@@ -9362,7 +9368,7 @@ planet_event = {
 					species = event_target:shroudwalker_enclave_country.species
 					skill = 4
 					traits = {
-						trait = leader_trait_expertise_psionics
+						1 = leader_trait_expertise_psionics
 					}
 				}
 			}
@@ -9397,7 +9403,7 @@ planet_event = {
 	custom_gui_option = "enclave_artist_option"
 	picture_event_data = {
 		portrait = event_target:reformers_of_the_shroud
-		room = FROM.ruler
+		room = shroudwalkers_room
 	}
 	is_triggered_only = yes
 
@@ -9588,7 +9594,6 @@ planet_event = {
 		}
 	}
 }
-
 
 #Floating Parts - Divination Event
 situation_event = {
@@ -12238,11 +12243,8 @@ fleet_event = {
 		NOT = { has_fleet_flag = strange_manifestations }
 		exists = leader
 		leader = {
-			NOR = {
-				has_leader_flag = renowned_leader
-				has_leader_flag = legendary_leader
-			}
-			has_chosen_one_leader_trait = no
+			is_leader_tier = leader_tier_default
+			has_any_chosen_one_leader_trait = no
 		}
 		owner = {
 			NOR = {

@@ -1,5 +1,19 @@
 # Change Log - 2025
 
+## September 22nd
+
+4.1 Update
+
+* Account for any type of chosen in federation elections.
+* Some forgiveness for when is_enslaved is called from with an invalid root scope. (Fireprince)
+* Fix improper scope for GASEOUS_METALS_CAT
+* Accommodate nonstandard galaxy sizes for EotC aura calculations.
+
+Patch fixes applied by Paradox:
+
+* Zro crystal now applies to all chosen one event failure chances.
+* Some other sanity checks regarding the chosen one event.
+
 ## September 9th
 
 4.0.23 Update, apologies for delay

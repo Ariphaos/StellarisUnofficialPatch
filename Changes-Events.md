@@ -351,9 +351,10 @@ General scope check fixes.
 
 ## federations_election_events.txt
 
-### Bugfix
+### Bugfixes
 
 * Removed doubled entry for mercenary warrior.
+* Account for any type of chosen one.
 
 ## federations_events_2.txt
 

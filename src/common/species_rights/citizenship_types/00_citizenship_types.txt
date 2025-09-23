@@ -133,6 +133,10 @@ citizenship_full_machine = {
 		}
 		exists = from
 		from = { is_machine_empire = yes }
+		OR = {
+			NOT = { from = { has_origin = origin_shroud_forged } }
+			NOT = { has_trait = trait_shroud_forged }
+		}
 	}
 
 	allow = {
@@ -181,6 +185,7 @@ citizenship_assimilation = {
 			has_utopia = yes
 			has_machine_age_dlc = yes
 			has_biogenesis_dlc = yes
+			has_shroud_dlc = yes
 		}
 		exists = from
 		from = {
@@ -247,7 +252,16 @@ citizenship_assimilation = {
 					has_country_flag = synth_assimilation # synth assimilation
 					is_machine_empire = no
 				}
-				has_active_tradition = tr_psionics_psionic_assimilation # psionic assimilation
+				AND = {
+					OR = {
+						has_active_tradition = tr_psionics_psionic_assimilation # psionic assimilation
+						has_active_tradition = tr_psionics_shroud_great_awakening # psionic assimilation (shroud)
+					}
+					OR = {
+						is_machine_empire = no
+						ROOT = { is_robotic_species = yes }
+					}
+				}
 				AND = {
 					is_individual_machine = yes
 					ROOT = { is_robotic_species = yes }
@@ -285,6 +299,10 @@ citizenship_assimilation = {
 					}
 				}
 			}
+		}
+		custom_tooltip = {
+			fail_text = "assimilate_shroud_forged_tt"
+			NOT = { has_trait = trait_shroud_forged }
 		}
 		custom_tooltip = {
 			fail_text = "disconnected_machine_pops_collapse_citizenship"
@@ -405,7 +423,7 @@ citizenship_assimilation = {
 			}
 			custom_tooltip = { # species already has psionic trait
 				fail_text = TRANSCENDING_SPECIES_IS_ALREADY_PSIONIC
-				NOT = { has_trait = trait_psionic }
+				is_psionic_species = no
 			}
 			custom_tooltip = { # transcending species cannot be gestalt consciousness
 				fail_text = TRANSCENDING_SPECIES_CANT_BE_HIVE
@@ -414,6 +432,16 @@ citizenship_assimilation = {
 			custom_tooltip = { # species must be able to think.
 				fail_text = ARIPHAOS_PATCH_REQUIRES_THINKING
 				can_think = yes
+			}
+		}
+		else_if = {
+			limit = {
+				from = { has_active_tradition = tr_psionics_shroud_great_awakening }
+			}
+			# non organic and gestalt species are allowed in Shroud
+			custom_tooltip = { # species already has psionic trait
+				fail_text = TRANSCENDING_SPECIES_IS_ALREADY_PSIONIC
+				is_psionic_species = no
 			}
 		}
 		else_if = {
@@ -457,6 +485,25 @@ citizenship_assimilation = {
 				is_individual_machine = yes
 			}
 		}
+	}
+}
+
+citizenship_shroud_touched = {
+	potential = {
+		exists = from
+		from = {
+			has_authority = auth_machine_intelligence
+			has_origin = origin_shroud_forged
+		}
+		exists = this
+		has_trait = trait_shroud_forged
+	}
+
+	allow = {
+
+	}
+	ai_will_do = {
+		factor = 100
 	}
 }
 
@@ -640,6 +687,20 @@ citizenship_slavery = {
 		{
 			key = resolution_greatergood_universal_prosperity_mandate
 		}
+	}
+
+	# This is a hack so the civic tooltip works.
+	triggered_pop_group_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				OR = {
+					has_valid_civic = civic_slaver_guilds
+					has_valid_civic = civic_indentured_assets
+				}
+			}
+		}
+		pop_bonus_workforce_mult = 0.15
 	}
 
 	potential = {

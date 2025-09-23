@@ -453,6 +453,7 @@ can_release_vassal_from_species = {
 # This = country
 can_generate_army_from_species = {
 	root = {
+		NOT = { has_trait = trait_tankbound }
 		OR = {
 			has_military_service_type = { type = military_service_full country = prev }
 			has_military_service_type = { type = military_service_limited country = prev }
@@ -876,6 +877,19 @@ can_colonize_planet = {
 	}
 
 	custom_tooltip = {
+		fail_text = "BLANK_STRING"
+		if = {
+			limit = {
+				exists = root
+				root = {
+					is_country_type = swarm
+				}
+			}
+			is_artificial = no
+		}
+	}
+
+	custom_tooltip = {
 		fail_text = "COLONIZATION_IMPOSSIBLE_DEFENDED_PLANET"
 		NOT = { has_planet_flag = planet_defended_forbid_colonization }
 	}
@@ -1074,32 +1088,6 @@ species_has_happiness = {
 				}
 			}
 		}
-	}
-}
-
-#Root = country, us
-#This = country, them
-#This rule is a condition for determining if a country is hostile towards another. not to be confused with can_take_hostile_action
-can_be_hostile_towards = {
-	if = {
-		limit = { is_primitive = yes }
-		ROOT = {
-			NOR = {
-				has_policy_flag = interference_not_allowed
-				has_policy_flag = interference_subtle
-			}
-		}
-	}
-	else_if = {
-		limit = { ROOT = { is_primitive = yes } }
-		NOR = {
-			has_policy_flag = interference_not_allowed
-			has_policy_flag = interference_subtle
-		}
-	}
-	else_if = {
-		limit = { is_country_type = ratlings }
-		always = yes
 	}
 }
 
@@ -1334,6 +1322,7 @@ can_orbital_bombard = {
 						is_ship_size = voidworms_titan
 					}
 				}
+				has_country_flag = revengeful_patron
 			}
 		}
 		AND = {
@@ -1499,7 +1488,10 @@ can_orbitable_repair_ships = {
 # this = ship
 # root = country that kills ship
 can_spawn_debris = {
-	root = { is_country_type = default }
+	root = {
+		is_country_type = default
+		NOT = { has_policy_flag = debris_destruction }
+	}
 	exists = owner
 	owner = { NOT = { has_ascension_perk = ap_enigmatic_engineering } }
 }
@@ -2421,13 +2413,17 @@ can_be_part_of_galactic_community = {
 	custom_tooltip = {
 		fail_text = "community_declared_crisis_failtext"
 		has_been_declared_crisis = no
+		NOT = { has_country_flag = malevolent_aura_empire }
 	}
 	custom_tooltip = {
 		fail_text = "community_declared_crisis_failtext"
 		#fail_text = "community_overlord_declared_crisis_failtext"
 		OR = {
 			NOT = { exists = overlord }
-			overlord = { has_been_declared_crisis = no }
+			overlord = { 
+				has_been_declared_crisis = no 
+				NOT = { has_country_flag = malevolent_aura_empire }
+			}
 		}
 	}
 }
@@ -2674,6 +2670,41 @@ can_modify_organic_portraits = {
 	}
 }
 
+# This = Country establishing contact | From = Target country
+# Should the contact logic happen?
+can_have_contact = {
+	if = {
+		limit = {
+			NOT = { has_global_flag = game_started }
+			OR = {
+				has_origin = origin_mindwardens
+				from = { has_origin = origin_mindwardens }
+			}
+		}
+		always = no
+	}
+	else_if = {
+		limit = {
+			from = { is_country_type = exiled }
+			has_origin = origin_mindwardens
+			is_same_value = event_target:mindwarden_country@from
+		}
+		has_country_flag = can_contact_exiled
+		NOT = { has_country_flag = exiled_contact }
+	}
+	else_if = {
+		limit = {
+			is_country_type = exiled
+			from = { has_origin = origin_mindwardens }
+			is_same_value = event_target:exiled_country@from
+		}
+		always = no
+	}
+	else = {
+		always = yes
+	}
+}
+
 # This = country establishing contact | From = target country
 # Final check for whether there should be a first contact site spawned. Main check is via country type 'contact_rule', in code. See also: error-logging/fixing event 'action.240', which duplicates this trigger.
 can_have_first_contact = {
@@ -2828,6 +2859,7 @@ can_fill_worker_job = {
 		}
 		else = {
 			NOT = { has_ethic = ethic_gestalt_consciousness }
+			NOT = { pop_group_has_trait = trait_tankbound }
 			exists = owner
 			is_being_purged = no
 			is_being_assimilated = no
@@ -3043,7 +3075,7 @@ should_count_towards_leader_cap = {
 		leader_class = envoy
 		is_hidden = yes
 		has_leader_flag = hired_admiral_merc_leader
-		has_leader_flag = legendary_leader
+		is_leader_tier = leader_tier_legendary
 		has_trait = leader_trait_rift_warped
 		AND = {
 			has_trait = leader_trait_eager
@@ -3319,6 +3351,16 @@ can_leader_be_councilor = {
 	is_exploring_astral_rift = no
 }
 
+# this = country
+is_country_psionic = {
+	is_psionic = yes
+}
+
+# this = species
+is_psionic_species = {
+	has_psionic_species_trait = yes
+}
+
 chance_for_external_leader_pool = {
 	base = 10
 	modifier = {
@@ -3351,6 +3393,23 @@ building_automation_unemployment_threshold = {
 # this = planet scope
 building_automation_civilians_threshold = {
 	base = 0
+}
+
+shroud_delve_cooldown_days = {
+	base = @breach_cooldown_days
+	mult = value:scripted_modifier_mult_capped|MODIFIER|shroud_delve_cooldown|CAP|0.1|
+	min = 1
+}
+
+count_shroud_worlds_to_display = {
+	base = 0
+	modifier = {
+		exists = from
+		from = {
+			has_country_flag = has_activated_the_lost_patron
+		}
+		add = value:count_planet_type_in_system|TYPE|pc_shrouded|VALUE|1|
+	}
 }
 
 # this = leader scope
@@ -4185,6 +4244,15 @@ is_organic_pop_group = {
 	is_organic_species = yes
 }
 
+# this = country with whom to communicate
+empire_diplomacy_leads_to_shroud = {
+	has_shroud_dlc = yes
+	is_country_type = shroud
+	NOT = {
+		has_country_flag = animator_of_clay_country_flag
+	}
+}
+
 # this = destroyed ship
 # from = attacker (ship)
 can_capture_ship = {
@@ -4270,6 +4338,14 @@ can_capture_ship = {
 }
 
 # this = country
+is_planetary_ascension_free = {
+	custom_tooltip = {
+		success_text = "ascension_accord_free"
+		has_country_flag = free_planetary_ascension
+	}
+}
+
+# this = country
 # all countries which pass this rule only add 1 to num_fallen_empires
 count_as_split_fallen_empire = {
 	OR = {
@@ -4291,6 +4367,91 @@ should_colonize_use_terraform = {
 	exists = this
 	is_wilderness_empire = yes
 	# in case this is true for empires that can build Ring Worlds/Habitats, this should be false for these specific planet classes
+}
+
+# this = country
+are_all_leaders_forced_immortal = {
+	OR = {
+		has_edict = energy_drain
+		has_relic = r_eternal_throne
+	}
+}
+
+# this = country using proxy war
+# from = country to be sent to war
+# root = victim country
+can_be_sent_to_war = {
+	OR = {
+		from = {
+			trust = {
+				who = prev
+				value >= @proxy_war_min_trust
+			}
+		}
+		any_spynetwork = {
+			is_spynetwork_level >= @proxy_war_min_infiltration
+			target = {
+				is_same_value = from
+			}
+		}
+	}
+}
+
+# This = Country
+can_open_shroud_tab = {
+	has_shroud_dlc = yes
+	OR = {
+		can_access_shroud = yes
+		has_breached_shroud = yes
+	}
+}
+
+# This = Country
+can_unlock_accords = {
+	OR = {
+		has_breached_shroud = yes
+		is_chosen_empire = yes
+	}
+}
+
+# This = Country
+can_delve = {
+	custom_tooltip = {
+		fail_text = "REQUIRES_BREACHED_SHROUD"
+		has_breached_shroud = yes
+	}
+}
+
+# Will set the Delve blocked plane icon instead of the disabled one
+# This = Country
+is_delve_blocked = {
+	custom_tooltip = {
+		success_text = "contacting_great_patron"
+		has_country_flag = contacting_great_patron
+	}
+}
+
+# from = psionic aura (system)
+# This = Country
+can_see_aura_intensity = {
+	exists = from
+	OR = {
+		has_technology = tech_psionic_aura
+		has_technology = tech_aura_intensification
+		has_technology = tech_psionic_suppression
+		AND = {
+			has_origin = origin_mindwardens
+			from = { has_psionic_aura = exiled_aura }
+		}
+	}
+}
+
+# from = psionic aura owner
+# This = country
+is_hostile_to_aura_owner = {
+	is_hostile_towards_aura = {
+		PSIONIC_OWNER = from
+	}
 }
 
 # this = pop_group
@@ -4315,4 +4476,78 @@ should_hide_planet_sector_pop_amount = {
 # this = leader
 should_leader_gain_trait_every_level = {
 	has_trait = "leader_trait_legendary_leader"
+}
+
+# this = country scope
+unbidden_additional_conquer_desire = {
+	base = 0
+	modifier = {
+		add = 50
+		exists = ruler
+		ruler = {
+			has_any_chosen_one_leader_trait = yes
+		}
+	}
+	modifier = {
+		add = 20
+		has_psionic_species_trait = yes
+	}
+}
+
+# This = Country
+is_mercenary = {
+	is_mercenary = yes
+}
+
+# this = country
+# from = contact country
+is_mindwarden_exiled_first_contact = {
+	exists = this
+	exists = from
+	this = {
+		has_origin = origin_mindwardens
+		has_country_flag = exiled_partial_contact
+	}
+	from = {
+		is_country_type = exiled
+	}
+}
+
+has_shroud_insights = {
+	has_shroud_dlc = yes
+	OR = {
+		has_country_flag = breached_shroud
+		AND = {
+			can_access_shroud = yes
+			is_chosen_empire = yes
+		}
+	}
+}
+
+needs_psionic_aura_insights = {
+	NOT = {
+		has_origin = origin_endbringers
+	}
+}
+
+# This = Country
+is_ending_cycle = {
+	has_patron_relation = {
+		patron = end_of_the_cycle
+		contact = completed
+	}
+}
+
+# This rule is called if country THIS has custom_diplomacy = yes in its country type
+# This = Country tested
+# From = Target country trying to access diplomacy
+has_custom_diplomacy = {
+	if = { # Exiled countries behave as default empires with empires other than the Mindwardens who summoned them
+		limit = { is_country_type = exiled }
+		exists = event_target:exiled_country@from
+		is_same_value = event_target:exiled_country@from
+	}
+	else = {
+		always = yes
+	}
 }

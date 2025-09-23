@@ -27,7 +27,10 @@ ship_event = {
 		host_has_dlc = "Ancient Relics Story Pack"
 		owner = {
 			is_ai = no
-			is_gestalt = no
+			OR = {
+				is_gestalt = no
+				has_shroud_dlc = yes
+			}
 			has_precursor_intro = no
 		}
 		solar_system = { has_star_flag = precursor_zroni_1 }
@@ -142,145 +145,33 @@ fleet_event = {
 	specimen = fragmented_zroni_archive
 
 	immediate = {
-		closest_system = {
-			limit = {
-				is_within_borders_of = root.owner
-				is_capital_system = no
-				NOR = {
-					is_same_value = root.solar_system
-					has_star_flag = first_zroni_site@root.owner
-					is_same_value = root.owner.capital_scope.solar_system
-					has_star_flag = hostile_system
-				}
-				is_fe_cluster = no
-				OR = {
-					has_owner = no
-					owner = { is_same_value = root.owner }
-				}
-				any_system_planet = {
-					habitable_planet = yes
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					has_anomaly = no
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites #for modders
-						has_planet_flag = colony_event
-					}
-				}
-				root.owner = {
-					any_controlled_fleet = {
-						is_ship_class = shipclass_science_ship
-						can_access_system = prevprev
-					}
-				}
-			}
-			min_steps = 2
-			max_steps = 15
-			root.owner = { set_visited = prev }
-			random_system_planet = {
-				limit = {
-					habitable_planet = yes
-					has_anomaly = no
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				create_archaeological_site = zroni_digsite_2
-				root.owner = {
-					set_country_flag = zroni_arc_chain_@prev
-				}
-				add_deposit = d_zro_deposit_3
-				save_event_target_as = new_zroni_digsite
-			}
+		zroni_digsite_spawn_effect = {
+			DIGSITE = zroni_digsite_2
+			DEPOSIT = d_zro_deposit_3
 		}
-		if = {
-			limit = {
-				NOT = { exists = event_target:new_zroni_digsite }
-			}
-			closest_system = {
-				limit = {
-					has_access_fleet = root.owner
-					is_capital_system = no
-					NOR = {
-						is_same_value = root.solar_system
-						has_star_flag = first_zroni_site@root.owner
-						is_same_value = root.owner.capital_scope.solar_system
-						has_star_flag = hostile_system
-					}
-					is_fe_cluster = no
-					OR = {
-						has_owner = no
-						owner = { is_same_value = root.owner }
-					}
-					any_system_planet = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-				}
-				min_steps = 1
-				root.owner = { set_visited = prev }
-				random_system_planet = {
-					limit = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-					create_archaeological_site = zroni_digsite_2
-					root.owner = {
-						set_country_flag = zroni_arc_chain_@prev
-					}
-					add_deposit = d_zro_deposit_3
-					save_event_target_as = new_zroni_digsite
-				}
-			}
-		}
+
+		owner = { set_country_flag = has_met_zroni }
 	}
 
 	option = {
 		name = OK
 		small_artifact_reward = yes
 		owner = {
-			IF = {
-				limit = {
-					is_regular_empire = yes
-					NOR = {
-						has_technology = tech_psionic_theory
-						has_tech_option = tech_psionic_theory
-					}
+			if = {
+				limit = { 
+					NOT = { has_technology = tech_psionic_theory }
+					can_research_technology = tech_psionic_theory
 				}
-				add_research_option = tech_psionic_theory
+				if = {
+					limit = { NOT = { has_tech_option = tech_psionic_theory } }
+					add_research_option = tech_psionic_theory
+				}
 				add_tech_progress = {
 					tech = tech_psionic_theory
 					progress = 0.25
 				}
 			}
-			ELSE = {
+			else = {
 				add_monthly_resource_mult = {
 					resource = society_research
 					value = @tier4researchreward
@@ -331,123 +222,9 @@ fleet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		closest_system = {
-			limit = {
-				is_within_borders_of = root.owner
-				is_capital_system = no
-				NOR = {
-					is_same_value = root.solar_system
-					has_star_flag = first_zroni_site@root.owner
-					is_same_value = root.owner.capital_scope.solar_system
-					has_star_flag = hostile_system
-				}
-				is_fe_cluster = no
-				OR = {
-					has_owner = no
-					owner = { is_same_value = root.owner }
-				}
-				any_system_planet = {
-					habitable_planet = yes
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					has_anomaly = no
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				root.owner = {
-					any_controlled_fleet = {
-						is_ship_class = shipclass_science_ship
-						can_access_system = prevprev
-					}
-				}
-			}
-			min_steps = 2
-			max_steps = 15
-			root.owner = { set_visited = prev }
-			random_system_planet = {
-				limit = {
-					habitable_planet = yes
-					has_anomaly = no
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				create_archaeological_site = zroni_digsite_3
-				root.owner = {
-					set_country_flag = zroni_arc_chain_@prev
-				}
-				add_deposit = d_zro_deposit_3
-				save_event_target_as = new_zroni_digsite
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = event_target:new_zroni_digsite }
-			}
-			closest_system = {
-				limit = {
-					has_access_fleet = root.owner
-					is_capital_system = no
-					NOR = {
-						is_same_value = root.solar_system
-						has_star_flag = first_zroni_site@root.owner
-						is_same_value = root.owner.capital_scope.solar_system
-						has_star_flag = hostile_system
-					}
-					is_fe_cluster = no
-					OR = {
-						has_owner = no
-						owner = { is_same_value = root.owner }
-					}
-					any_system_planet = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-				}
-				min_steps = 1
-				root.owner = { set_visited = prev }
-				random_system_planet = {
-					limit = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-					create_archaeological_site = zroni_digsite_3
-					root.owner = {
-						set_country_flag = zroni_arc_chain_@prev
-					}
-					add_deposit = d_zro_deposit_3
-					save_event_target_as = new_zroni_digsite
-				}
-			}
+		zroni_digsite_spawn_effect = { 
+			DIGSITE = zroni_digsite_3
+			DEPOSIT = d_zro_deposit_3
 		}
 	}
 
@@ -490,123 +267,9 @@ fleet_event = {
 	specimen = zroni_war_banners
 
 	immediate = {
-		closest_system = {
-			limit = {
-				is_within_borders_of = root.owner
-				is_capital_system = no
-				NOR = {
-					is_same_value = root.solar_system
-					has_star_flag = first_zroni_site@root.owner
-					is_same_value = root.owner.capital_scope.solar_system
-					has_star_flag = hostile_system
-				}
-				is_fe_cluster = no
-				OR = {
-					has_owner = no
-					owner = { is_same_value = root.owner }
-				}
-				any_system_planet = {
-					habitable_planet = yes
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					has_anomaly = no
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				root.owner = {
-					any_controlled_fleet = {
-						is_ship_class = shipclass_science_ship
-						can_access_system = prevprev
-					}
-				}
-			}
-			min_steps = 2
-			max_steps = 15
-			root.owner = { set_visited = prev }
-			random_system_planet = {
-				limit = {
-					habitable_planet = yes
-					has_anomaly = no
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				create_archaeological_site = zroni_digsite_4
-				root.owner = {
-					set_country_flag = zroni_arc_chain_@prev
-				}
-				add_deposit = d_zro_deposit_3
-				save_event_target_as = new_zroni_digsite
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = event_target:new_zroni_digsite }
-			}
-			closest_system = {
-				limit = {
-					has_access_fleet = root.owner
-					is_capital_system = no
-					NOR = {
-						is_same_value = root.solar_system
-						has_star_flag = first_zroni_site@root.owner
-						is_same_value = root.owner.capital_scope.solar_system
-						has_star_flag = hostile_system
-					}
-					is_fe_cluster = no
-					OR = {
-						has_owner = no
-						owner = { is_same_value = root.owner }
-					}
-					any_system_planet = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-				}
-				min_steps = 1
-				root.owner = { set_visited = prev }
-				random_system_planet = {
-					limit = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-					create_archaeological_site = zroni_digsite_4
-					root.owner = {
-						set_country_flag = zroni_arc_chain_@prev
-					}
-					add_deposit = d_zro_deposit_3
-					save_event_target_as = new_zroni_digsite
-				}
-			}
+		zroni_digsite_spawn_effect = { 
+			DIGSITE = zroni_digsite_4
+			DEPOSIT = d_zro_deposit_3
 		}
 	}
 
@@ -654,123 +317,9 @@ fleet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		closest_system = {
-			limit = {
-				is_within_borders_of = root.owner
-				is_capital_system = no
-				NOR = {
-					is_same_value = root.solar_system
-					has_star_flag = first_zroni_site@root.owner
-					is_same_value = root.owner.capital_scope.solar_system
-					has_star_flag = hostile_system
-				}
-				is_fe_cluster = no
-				OR = {
-					has_owner = no
-					owner = { is_same_value = root.owner }
-				}
-				any_system_planet = {
-					habitable_planet = yes
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					has_anomaly = no
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				root.owner = {
-					any_controlled_fleet = {
-						is_ship_class = shipclass_science_ship
-						can_access_system = prevprev
-					}
-				}
-			}
-			min_steps = 2
-			max_steps = 15
-			root.owner = { set_visited = prev }
-			random_system_planet = {
-				limit = {
-					habitable_planet = yes
-					has_anomaly = no
-					OR = {
-						is_colony = no
-						sapient_pop_amount < 1000
-					}
-					NOR = {
-						exists = archaeological_site
-						has_planet_flag = hatchling_egg
-						has_planet_flag = suppress_archaeological_sites
-						has_planet_flag = colony_event
-					}
-				}
-				create_archaeological_site = zroni_digsite_5
-				root.owner = {
-					set_country_flag = zroni_arc_chain_@prev
-				}
-				add_deposit = d_zro_deposit_4
-				save_event_target_as = new_zroni_digsite
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = event_target:new_zroni_digsite }
-			}
-			closest_system = {
-				limit = {
-					has_access_fleet = root.owner
-					is_capital_system = no
-					NOR = {
-						is_same_value = root.solar_system
-						has_star_flag = first_zroni_site@root.owner
-						is_same_value = root.owner.capital_scope.solar_system
-						has_star_flag = hostile_system
-					}
-					is_fe_cluster = no
-					OR = {
-						has_owner = no
-						owner = { is_same_value = root.owner }
-					}
-					any_system_planet = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-				}
-				min_steps = 1
-				root.owner = { set_visited = prev }
-				random_system_planet = {
-					limit = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-						}
-						has_anomaly = no
-						NOR = {
-							exists = archaeological_site
-							has_planet_flag = hatchling_egg
-							has_planet_flag = suppress_archaeological_sites
-						}
-					}
-					create_archaeological_site = zroni_digsite_5
-					root.owner = {
-						set_country_flag = zroni_arc_chain_@prev
-					}
-					add_deposit = d_zro_deposit_4
-					save_event_target_as = new_zroni_digsite
-				}
-			}
+		zroni_digsite_spawn_effect = {
+			DIGSITE = zroni_digsite_5
+			DEPOSIT = d_zro_deposit_4
 		}
 	}
 
@@ -5445,6 +4994,7 @@ country_event = {
 			SPECIES_CLASS = ART
 			LEADER_PORTRAIT = cpl_01
 			CLASS = official
+			TIER = leader_tier_renowned
 			NAME = NAME_Oracle
 			LEVEL = 5
 			GENDER = female
@@ -5456,18 +5006,23 @@ country_event = {
 		last_created_leader = {
 			add_trait = {
 				trait = leader_trait_governor_oracle
+				consume_selection = yes
 			}
 			add_trait = {
 				trait = subclass_official_governor
+				consume_selection = yes
 			}
 			add_trait = {
 				trait = leader_trait_principled_2
+				consume_selection = yes
 			}
 			add_trait = {
 				trait = leader_trait_urbanist
+				consume_selection = yes
 			}
 			add_trait = {
 				trait = leader_trait_architectural_interest
+				consume_selection = yes
 			}
 			save_global_event_target_as = oracle_leader
 			set_age = 5973
@@ -7224,7 +6779,14 @@ country_event = {
 	title = "ancrel.7006.name"
 	diplomatic_title = BLANK_STRING
 	picture = GFX_evt_psionics
-	show_sound = event_psionic
+	show_sound = {
+		trigger = { is_robot_empire = yes }
+		sound = event_psionic_robot
+	}
+	show_sound = {
+		trigger = { is_robot_empire = no }
+		sound = event_psionic
+	}
 	trackable = yes
 
 	desc = {

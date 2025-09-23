@@ -49,6 +49,7 @@ action_improve_relation = {
 						current_awareness_level = full
 						observation_owner_is_actor = yes
 					}
+					is_country_type = exiled
 				}
 			}
 		}
@@ -165,6 +166,7 @@ action_build_spy_network = {
 						has_country_flag = fallen_empire_hive_control
 						root = { is_galactic_community_member = yes }
 					}
+					is_country_type = exiled
 				}
 				NOR = {
 					has_country_flag = fotd_seperatist_country
@@ -182,6 +184,7 @@ action_build_spy_network = {
 			fail_text = "diplomacy_wrong_interference_policy"
 			OR = {
 				from = { is_country_type = default }
+				from = { is_country_type = exiled }
 				from = { is_fallen_empire = yes }
 				AND = {
 					from = { is_country_type = primitive }
@@ -236,6 +239,7 @@ action_manage_spy_network = {
 						has_country_flag = fallen_empire_hive_control
 						root = { is_galactic_community_member = yes }
 					}
+					is_country_type = exiled
 				}
 			}
 		}
@@ -300,6 +304,7 @@ action_harm_relation = {
 						current_awareness_level = full
 						observation_owner_is_actor = yes
 					}
+					is_country_type = exiled
 				}
 			}
 		}
@@ -430,6 +435,41 @@ action_declare_war = {
 	on_accept = {
 		hidden_effect = {
 			set_country_flag = has_declared_war
+			country_event = { # Patron Objective Counter: po_declare_war
+				id = shroud.10440
+			}
+		}
+	}
+}
+
+# Start a proxy war, usable by regular, fallen & awakened empires
+action_start_proxy_war = {
+	icon = "GFX_diplomacy_status_war"
+	requires_actor_independence = no
+	requires_recipient_independence = no
+	auto_accepted = yes
+	action_type = neutral
+
+	potential = {
+		hidden_trigger = {
+			has_shroud_dlc = yes
+			OR = {
+				has_tradition = tr_subterfuge_finish
+				is_secret_societies_empire = yes
+			}
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "NO_RELATION_CAN_DECLARE_WAR"
+			any_relation = {
+				has_communications = from
+			}
+		}
+		custom_tooltip = {
+			fail_text = "PROXY_WAR_ON_COOLDOWN"
+			NOT = { has_country_flag = proxy_war_cooldown }
 		}
 	}
 }
@@ -444,6 +484,19 @@ action_offer_peace = {
 	should_show_accept_message = no
 	should_remove_response_message_when_not_possible = yes
 	action_type = positive
+
+	potential = {
+		hidden_trigger = {
+			NAND = {
+				has_origin = origin_mindwardens
+				exists = event_target:exiled_country@this
+				from = {
+					is_country_type = exiled
+					is_same_value = event_target:exiled_country@root
+				}
+			}
+		}
+	}
 }
 
 # Dummy action for opening the war overview from the diplomacy view
@@ -1245,7 +1298,12 @@ action_form_research_agreement = {
 	potential = {
 		hidden_trigger = {
 			is_country_type = default
-			from = { is_country_type = default }
+			from = {
+				OR = {
+					is_country_type = default
+					is_country_type = exiled
+				}
+			}
 		}
 	}
 
@@ -1629,6 +1687,17 @@ action_guarantee_independence = {
 			}
 		}
 	}
+
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10420
+				scopes = {
+					from = from
+				}
+			}
+		}
+	}
 }
 
 # Break an existing guarantee, harms relations and sets a 10 year truce.
@@ -1768,6 +1837,17 @@ action_support_independence = {
 			OR = {
 				is_improving_relations_with = from
 				has_embassy = from
+			}
+		}
+	}
+
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10425
+				scopes = {
+					from = from
+				}
 			}
 		}
 	}
@@ -2145,6 +2225,16 @@ action_offer_federation_association_status = {
 			}
 		}
 	}
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10415
+				scopes = {
+					from = from
+				}
+			}
+		}
+	}
 }
 
 # Break an existing association status from the side of the federation. Requires majority vote from the federation.
@@ -2267,6 +2357,16 @@ action_ask_for_federation_association_status = {
 			}
 		}
 	}
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10410
+				scopes = {
+					from = from
+				}
+			}
+		}
+	}
 }
 
 # Break an existing association status from the side of the associate. No vote required.
@@ -2310,6 +2410,11 @@ action_invite_to_federation = {
 				}
 				has_federation = yes
 				is_overlord_to = FROM
+			}
+		}
+		hidden_trigger = {
+			NOT = {
+				has_origin = origin_endbringers
 			}
 		}
 	}
@@ -2501,6 +2606,17 @@ action_invite_to_federation = {
 			}
 		}
 	}
+
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10400
+				scopes = {
+					from = from
+				}
+			}
+		}
+	}
 }
 
 # Vote for federation law
@@ -2599,6 +2715,11 @@ action_ask_to_join_federation = {
 		hidden_trigger = {
 			is_fallen_empire_machine = no
 			from = { is_fallen_empire_machine = no }
+		}
+		hidden_trigger = {
+			NOT = {
+				has_origin = origin_endbringers
+			}
 		}
 	}
 
@@ -2742,6 +2863,17 @@ action_ask_to_join_federation = {
 						}
 					}
 					is_federation_leader = yes
+				}
+			}
+		}
+	}
+
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10405
+				scopes = {
+					from = from
 				}
 			}
 		}
@@ -3803,6 +3935,17 @@ action_integrate_subject = {
 	requires_recipient_independence = no
 	should_notify_all_communications = yes
 	action_type = neutral
+
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10390
+				scopes = {
+					from = from
+				}
+			}
+		}
+	}
 }
 
 # Cancel an ongoing integration.
@@ -3957,6 +4100,17 @@ action_embassy = {
 				custom_tooltip = {
 					fail_text = diplo_action_no_low_intel
 					always = no
+				}
+			}
+		}
+	}
+
+	on_accept = {
+		hidden_effect = {
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10395
+				scopes = {
+					from = from
 				}
 			}
 		}
@@ -4794,9 +4948,14 @@ action_societal_enlightenment = {
 					set_event_locked = yes
 				}
 			}
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10430
+				scopes = {
+					from = from
+				}
+			}
 		}
 	}
-
 
 	should_ai_propose = {
 		weight = 0
@@ -5028,6 +5187,12 @@ action_open_technological_enlightenment = {
 				}
 				capital_scope.observation_outpost = {
 					set_event_locked = yes
+				}
+			}
+			country_event = { # Patron Objective Counter: po_establish_diplomatic_pact
+				id = shroud.10435
+				scopes = {
+					from = from
 				}
 			}
 		}
@@ -5287,6 +5452,12 @@ action_pre_ftl_trade = {
 				}
 				capital_scope.observation_outpost = {
 					set_event_locked = yes
+				}
+			}
+			country_event = { # Patron Objective Counter: po_establish_trade_agreement / po_establish_diplomatic_pact
+				id = shroud.10360
+				scopes = {
+					from = from
 				}
 			}
 		}
